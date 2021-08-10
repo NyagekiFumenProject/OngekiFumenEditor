@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\empty_ogkr_template.ogkr" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj" />
+    <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj" />
+  </ItemGroup>
+
+</Project>
