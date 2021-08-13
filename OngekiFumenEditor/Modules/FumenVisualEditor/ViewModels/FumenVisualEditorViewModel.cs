@@ -1,5 +1,8 @@
+using Caliburn.Micro;
 using Gemini.Framework;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ToolboxItems;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Utils;
 using System;
@@ -9,58 +12,54 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     [Export(typeof(FumenVisualEditorViewModel))]
     public class FumenVisualEditorViewModel : PersistedDocument
     {
-        private FumenVisualEditorView view;
-
-        private ObservableCollection<ElementViewModel> elements = new ObservableCollection<ElementViewModel>();
-        public ObservableCollection<ElementViewModel> Elements
-        {
-            get
-            {
-                return elements;
-            }
-            set
-            {
-                elements = value;
-                NotifyOfPropertyChange(() => Elements);
-            }
-        }
+        public FumenVisualEditorView View { get; private set; }
+        public Panel VisualDisplayer => View?.VisualDisplayer;
 
         protected override void OnViewLoaded(object v)
         {
             base.OnViewLoaded(v);
             var view = v as FumenVisualEditorView;
 
-            this.view = view;
+            View = view;
         }
 
-        private void InitalizeVisualData()
+        private async Task InitalizeVisualData()
         {
-            Elements.Clear();
-            Elements = new ObservableCollection<ElementViewModel>();
+
         }
 
         protected override async Task DoLoad(string filePath)
         {
             Log.LogInfo($"FumenVisualEditorViewModel DoLoad()");
-            InitalizeVisualData();
+            await InitalizeVisualData();
         }
 
         protected override async Task DoNew()
         {
             Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
-            InitalizeVisualData();
+            await InitalizeVisualData();
         }
 
         protected override async Task DoSave(string filePath)
         {
             Log.LogInfo($"FumenVisualEditorViewModel DoSave()");
-            InitalizeVisualData();
+            await InitalizeVisualData();
+        }
+
+        public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
+        {
+            var view = ViewCreateHelper.CreateView(viewModel);
+
+            Log.LogInfo($"create new display object: {viewModel.ObjectType}");
+            VisualDisplayer.Children.Add(view);
         }
     }
 }

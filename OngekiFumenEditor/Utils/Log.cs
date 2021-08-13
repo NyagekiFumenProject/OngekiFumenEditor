@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Utils
 
         public void WriteLog(string content)
         {
-            Output?.AppendLine(content);
+            Output?.Append(content);
         }
     }
 

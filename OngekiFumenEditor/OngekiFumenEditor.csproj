@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <None Remove="Resources\empty_ogkr_template.ogkr" />
   </ItemGroup>
 
@@ -17,6 +18,10 @@
   <ItemGroup>
     <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj" />
     <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
   </ItemGroup>
 
 </Project>

@@ -1,3 +1,9 @@
+using Gemini.Modules.Toolbox;
+using Gemini.Modules.Toolbox.Models;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +29,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public FumenVisualEditorView()
         {
             InitializeComponent();
+        }
+
+        private FumenVisualEditorViewModel ViewModel => DataContext as FumenVisualEditorViewModel;
+
+        private void Grid_DragEnter(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+                e.Effects = DragDropEffects.None;
+        }
+
+        private void Grid_Drop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+                return;
+
+            var mousePosition = e.GetPosition(VisualDisplayer);
+            var toolboxItem = (ToolboxItem)e.Data.GetData(ToolboxDragDrop.DataFormat);
+            var displayObject = Activator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
+
+            displayObject.X = mousePosition.X;
+            displayObject.Y = mousePosition.Y;
+
+            ViewModel.OnNewObjectAdd(displayObject);
         }
     }
 }

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
+             xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views" xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -12,6 +12,7 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Canvas Name="VisualDisplayer"></Canvas>
+        <Canvas AllowDrop="True" Background="LightGreen" DragEnter="Grid_DragEnter" Drop="Grid_Drop" Name="VisualDisplayer">
+        </Canvas>
     </Grid>
 </UserControl>
