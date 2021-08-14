@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
-    public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IViewAware
+    public abstract class OngekiObjectViewModelBase : PropertyChangedBase, IViewAware
     {
         protected IOngekiObject referenceOngekiObject;
 
@@ -51,7 +51,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         }
 
         public object View { get; private set; }
+
         public object Context { get; private set; }
+
+        /// <summary>
+        /// 表示此物件是否能设置水平位置(即此物件是否支持XGrid)
+        /// </summary>
+        public bool CanMoveX => ReferenceOngekiObject is IHorizonPositionObject;
+
+        /// <summary>
+        /// 表示此物件是否能设置时间轴位置(即此物件是否支持TGrid)
+        /// </summary>
+        public bool IsTimelineObject => ReferenceOngekiObject is ITimelineObject;
 
         protected virtual void OnAttachedView(object view)
         {
@@ -73,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         public object GetView(object context = null) => View;
     }
 
-    public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : IOngekiObject, new()
+    public abstract class DisplayObjectViewModelBase<T> : OngekiObjectViewModelBase where T : IOngekiObject, new()
     {
         public override IOngekiObject ReferenceOngekiObject
         {

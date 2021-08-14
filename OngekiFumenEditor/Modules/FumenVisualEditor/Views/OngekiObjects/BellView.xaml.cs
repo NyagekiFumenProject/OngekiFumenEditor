@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects
     /// </summary>
     /// 
 
-    public partial class BellView : DisplayObjectViewBase
+    public partial class BellView : OngekiObjectViewBase
     {
         public BellView()
         {

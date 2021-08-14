@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 {
-    public class DisplayObjectViewBase : UserControl
+    public class OngekiObjectViewBase : UserControl
     {
-        public DisplayObjectViewModelBase ViewModel => DataContext as DisplayObjectViewModelBase;
+        public OngekiObjectViewModelBase ViewModel => DataContext as OngekiObjectViewModelBase;
 
         public bool IsDragging
         {
@@ -24,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects
 
         // Using a DependencyProperty as the backing store for IsDragging.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsDraggingProperty =
-            DependencyProperty.Register("IsDragging", typeof(bool), typeof(DisplayObjectViewBase), new PropertyMetadata(false));
+            DependencyProperty.Register("IsDragging", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
 
         public bool IsMouseDown
         {
@@ -34,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects
 
         // Using a DependencyProperty as the backing store for IsMouseDown.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsMouseDownProperty =
-            DependencyProperty.Register("IsMouseDown", typeof(bool), typeof(DisplayObjectViewBase), new PropertyMetadata(false));
+            DependencyProperty.Register("IsMouseDown", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
 
         protected virtual void OnDragStart()
         {

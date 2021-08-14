@@ -1,5 +1,6 @@
 ﻿using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

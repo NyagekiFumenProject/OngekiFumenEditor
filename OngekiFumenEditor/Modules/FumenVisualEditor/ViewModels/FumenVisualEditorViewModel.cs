@@ -54,7 +54,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             await InitalizeVisualData();
         }
 
-        public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
+        public void OnNewObjectAdd(OngekiObjectViewModelBase viewModel)
         {
             var view = ViewCreateHelper.CreateView(viewModel);
             VisualDisplayer.Children.Add(view);

@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
             var mousePosition = e.GetPosition(VisualDisplayer);
             var toolboxItem = (ToolboxItem)e.Data.GetData(ToolboxDragDrop.DataFormat);
-            var displayObject = Activator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
+            var displayObject = Activator.CreateInstance(toolboxItem.ItemType) as OngekiObjectViewModelBase;
 
             displayObject.X = mousePosition.X;
             displayObject.Y = mousePosition.Y;

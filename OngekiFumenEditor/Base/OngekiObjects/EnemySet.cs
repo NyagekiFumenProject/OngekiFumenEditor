@@ -10,17 +10,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     {
         public class WaveChangeConst : FadeStringEnum
         {
-            /// <summary>
-            /// 从玩家头顶位置
-            /// </summary>
             public readonly static WaveChangeConst Wave1 = new WaveChangeConst("WAVE1");
-            /// <summary>
-            /// 从敌人位置
-            /// </summary>
+            
             public readonly static WaveChangeConst Wave2 = new WaveChangeConst("WAVE2");
-            /// <summary>
-            /// 谱面中心(?)
-            /// </summary>
+          
             public readonly static WaveChangeConst Boss = new WaveChangeConst("BOSS");
 
             public WaveChangeConst(string value) : base(value)
