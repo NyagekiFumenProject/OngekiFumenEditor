@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IViewAware
     {
+        protected IOngekiObject referenceOngekiObject;
+
+        public virtual IOngekiObject ReferenceOngekiObject
+        {
+            get { return referenceOngekiObject; }
+            set
+            {
+                referenceOngekiObject = value;
+                NotifyOfPropertyChange(() => ReferenceOngekiObject);
+            }
+        }
+
         private double x;
 
         public double X
@@ -37,8 +50,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
             }
         }
 
-        public abstract string ObjectType { get; }
-
         public object View { get; private set; }
         public object Context { get; private set; }
 
@@ -59,9 +70,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
             OnAttachedView(View);
         }
 
-        public object GetView(object context = null)
+        public object GetView(object context = null) => View;
+    }
+
+    public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : IOngekiObject, new()
+    {
+        public override IOngekiObject ReferenceOngekiObject
         {
-            return View;
+            get
+            {
+                if (referenceOngekiObject is null)
+                {
+                    ReferenceOngekiObject = new T();
+                }
+                return base.ReferenceOngekiObject;
+            }
+            set
+            {
+                base.ReferenceOngekiObject = value;
+            }
         }
     }
 }

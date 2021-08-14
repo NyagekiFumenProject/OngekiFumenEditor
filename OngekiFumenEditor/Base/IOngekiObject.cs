@@ -1,3 +1,4 @@
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public interface IOgenkiObject
+    public interface IOngekiObject
     {
         public string Group { get; }
+        public string IDShortName { get; }
         public string Name { get; }
     }
 }

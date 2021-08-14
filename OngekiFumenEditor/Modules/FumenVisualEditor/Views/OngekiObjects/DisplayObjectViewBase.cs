@@ -36,14 +36,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects
         public static readonly DependencyProperty IsMouseDownProperty =
             DependencyProperty.Register("IsMouseDown", typeof(bool), typeof(DisplayObjectViewBase), new PropertyMetadata(false));
 
-        protected virtual void OnDragging(Point relativePoint)
+        protected virtual void OnDragStart()
+        {
+
+        }
+
+        protected virtual void OnDragMove(Point relativePoint)
         {
             ViewModel.X = relativePoint.X;
             ViewModel.Y = relativePoint.Y;
         }
 
+        protected virtual void OnDragEnd()
+        {
+
+        }
+
         protected virtual void OnMouseClick()
         {
+
         }
 
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
@@ -58,19 +69,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects
             if (!(IsMouseDown && Parent is IInputElement parent))
                 return;
             e.Handled = true;
+            Action<Point> dragCall = IsDragging ? OnDragMove : _ => OnDragStart();
             IsDragging = true;
 
             var pos = e.GetPosition(parent);
-            if(parent is Visual uiElement)
+            if (parent is Visual uiElement)
             {
                 if (VisualTreeHelper.GetContentBounds(uiElement).Contains(pos))
                 {
-                    OnDragging(pos);
+                    dragCall(pos);
                 }
             }
             else
             {
-                OnDragging(pos);
+                dragCall(pos);
             }
         }
 
@@ -85,6 +97,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects
 
         private void UserControl_MouseLeave(object sender, MouseEventArgs e)
         {
+            if (IsMouseDown && !IsDragging)
+                OnDragEnd();
             IsMouseDown = false;
             IsDragging = false;
             e.Handled = true;

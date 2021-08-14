@@ -31,9 +31,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             View = view;
         }
 
-        private async Task InitalizeVisualData()
+        private Task InitalizeVisualData()
         {
-
+            return Task.CompletedTask;
         }
 
         protected override async Task DoLoad(string filePath)
@@ -57,9 +57,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
         {
             var view = ViewCreateHelper.CreateView(viewModel);
-
-            Log.LogInfo($"create new display object: {viewModel.ObjectType}");
             VisualDisplayer.Children.Add(view);
+
+            Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.Name}");
         }
     }
 }
