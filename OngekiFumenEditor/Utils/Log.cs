@@ -20,11 +20,11 @@ namespace OngekiFumenEditor.Utils
     public class GeminiLogOutput : ILogOutput
     {
         [Import(typeof(IOutput))]
-        public IOutput Output { get; private set; }
+        private IOutput output;
 
         public void WriteLog(string content)
         {
-            Output?.Append(content);
+            output.Append(content);
         }
     }
 

@@ -23,6 +23,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public FumenVisualEditorView View { get; private set; }
         public Panel VisualDisplayer => View?.VisualDisplayer;
 
+        public override string DisplayName
+        {
+            get { return base.DisplayName; }
+            set
+            {
+                base.DisplayName = value;
+                IoC.Get<WindowTitleHelper>().TitleContent = base.DisplayName;
+            }
+        }
+
         protected override void OnViewLoaded(object v)
         {
             base.OnViewLoaded(v);

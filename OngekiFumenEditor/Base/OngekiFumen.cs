@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public class OgenkiFumen
+    public class OngekiFumen
     {
         public List<Bell> Bells { get; set; } = new List<Bell>();
     }

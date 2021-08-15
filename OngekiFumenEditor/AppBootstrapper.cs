@@ -18,7 +18,9 @@ namespace OngekiFumenEditor
             base.OnStartup(sender, e);
 
             IoC.Get<IShell>().ToolBars.Visible = true;
-            Log.LogInfo("Application is Ready.");
+            IoC.Get<WindowTitleHelper>().TitleContent = "";
+
+            Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
         }
     }
 }

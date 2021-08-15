@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using static OngekiFumenEditor.Utils.StatusNotifyHelper;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 {
@@ -23,7 +24,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             set { SetValue(IsDraggingProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for IsDragging.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsDraggingProperty =
             DependencyProperty.Register("IsDragging", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
 
@@ -33,24 +33,55 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             set { SetValue(IsMouseDownProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for IsMouseDown.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsMouseDownProperty =
             DependencyProperty.Register("IsMouseDown", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
 
+        public bool IsPreventXAutoClose
+        {
+            get { return (bool)GetValue(IsPreventXAutoCloseProperty); }
+            set { SetValue(IsPreventXAutoCloseProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsPreventXAutoCloseProperty =
+            DependencyProperty.Register("IsPreventXAutoClose", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
+
+        public bool IsPreventTimelineAutoClose
+        {
+            get { return (bool)GetValue(IsPreventTimelineAutoCloseProperty); }
+            set { SetValue(IsPreventTimelineAutoCloseProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsPreventTimelineAutoCloseProperty =
+            DependencyProperty.Register("IsPreventTimelineAutoClose", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
+
+        public OngekiObjectViewBase()
+        {
+            MouseDown += OnMouseDown;
+            MouseMove += OnMouseMove;
+            MouseUp += OnMouseUp;
+            MouseLeave += OnMouseLeave;
+        }
+
+        Notify notify;
+
         protected virtual void OnDragStart()
         {
-
+            notify = StatusNotifyHelper.BeginStatus("Hehehe");
         }
 
         protected virtual void OnDragMove(Point relativePoint)
         {
-            ViewModel.X = relativePoint.X;
             ViewModel.Y = relativePoint.Y;
+
+            if (ViewModel.CanMoveX)
+            {
+                ViewModel.X = relativePoint.X;
+            }
         }
 
         protected virtual void OnDragEnd()
         {
-
+            notify?.Dispose();
         }
 
         protected virtual void OnMouseClick()
@@ -58,14 +89,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         }
 
-        private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
+        private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             IsMouseDown = true;
             IsDragging = false;
             e.Handled = true;
         }
 
-        private void UserControl_MouseMove(object sender, MouseEventArgs e)
+        private void OnMouseMove(object sender, MouseEventArgs e)
         {
             if (!(IsMouseDown && Parent is IInputElement parent))
                 return;
@@ -87,7 +118,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             }
         }
 
-        private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
+        private void OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (IsMouseDown && !IsDragging)
                 OnMouseClick();
@@ -96,7 +127,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             e.Handled = true;
         }
 
-        private void UserControl_MouseLeave(object sender, MouseEventArgs e)
+        private void OnMouseLeave(object sender, MouseEventArgs e)
         {
             if (IsMouseDown && !IsDragging)
                 OnDragEnd();

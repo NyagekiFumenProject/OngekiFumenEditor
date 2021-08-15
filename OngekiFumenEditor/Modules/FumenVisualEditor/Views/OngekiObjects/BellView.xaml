@@ -3,10 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             MouseDown="UserControl_MouseDown"
-             MouseMove="UserControl_MouseMove"
-             MouseUp="UserControl_MouseUp"
-             MouseLeave="UserControl_MouseLeave"
              mc:Ignorable="d">
     <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/bell.png">
         <Image.RenderTransform>

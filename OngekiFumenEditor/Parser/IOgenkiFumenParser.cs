@@ -10,6 +10,6 @@ namespace OngekiFumenEditor.Parser
 {
     public interface IOgenkiFumenParser
     {
-        public Task<OgenkiFumen> ParseAsync(Stream stream);
+        public Task<OngekiFumen> ParseAsync(Stream stream);
     }
 }
