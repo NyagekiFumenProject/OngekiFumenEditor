@@ -121,6 +121,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var view = v as FumenVisualEditorView;
 
             View = view;
+            RedrawUnitCloseXLines();
         }
 
         private Task InitalizeVisualData()

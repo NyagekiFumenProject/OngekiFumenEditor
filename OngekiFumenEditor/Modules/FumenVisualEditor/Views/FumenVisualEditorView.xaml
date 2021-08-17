@@ -43,7 +43,7 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="10,5,10,5">
                     <CheckBox Margin="0,2,0,2" IsChecked="{Binding IsPreventTimelineAutoClose}" Content="IsPreventTimelineAutoClose"></CheckBox>
-                    <CheckBox Margin="0,2,0,2" IsChecked="{Binding IsPreventXAutoCloseProperty}" Content="IsPreventXAutoClose"></CheckBox>
+                    <CheckBox Margin="0,2,0,2" IsChecked="{Binding IsPreventXAutoClose}" Content="IsPreventXAutoClose"></CheckBox>
                     <StackPanel Margin="0,2,0,2" Orientation="Horizontal">
                         <TextBlock VerticalAlignment="Center" Margin="0,0,10,0">UnitCloseSize</TextBlock>
                         <ComboBox Width="80" SelectedIndex="3" SelectedValue="{Binding UnitCloseSize,Mode=OneWayToSource,Converter={StaticResource UnitCloseSizeConverter}}">

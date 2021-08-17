@@ -66,10 +66,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public double CheckAndAdjustX(double x)
         {
             //todo 基于二分法查询最近
-            var mid = ViewModel?.EditorViewModel?.XGridUnitLineLocations?.Select(z => new {
+            var editorViewModel = ViewModel?.EditorViewModel;
+            var enableMagneticAdjust = !(editorViewModel?.IsPreventXAutoClose ?? false);
+            var mid = enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z => new {
                 distance = Math.Abs(z.X - x),
                 x = z.X
-            })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList();
+            })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList() : default;
             var nearestUnitLine = mid?.FirstOrDefault();
             //Log.LogInfo($"nearestUnitLine in:{x:F2} distance:{nearestUnitLine?.distance:F2} x:{nearestUnitLine?.x:F2}");
             return nearestUnitLine != null ? nearestUnitLine.x : x;
