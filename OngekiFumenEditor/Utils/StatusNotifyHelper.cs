@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Utils
 
             public void Dispose()
             {
-
+                EndStatus(this);
             }
         }
 

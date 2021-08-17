@@ -64,6 +64,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /// </summary>
         public bool IsTimelineObject => ReferenceOngekiObject is ITimelineObject;
 
+        public FumenVisualEditorViewModel EditorViewModel { get; set; }
+
         protected virtual void OnAttachedView(object view)
         {
             var element = view as FrameworkElement;

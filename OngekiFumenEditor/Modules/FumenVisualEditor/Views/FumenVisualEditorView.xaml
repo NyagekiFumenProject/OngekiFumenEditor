@@ -3,16 +3,62 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views" xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects"
+             xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter"></converters:UnitCloseSizeConverter>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <Canvas AllowDrop="True" Background="LightGreen" DragEnter="Grid_DragEnter" Drop="Grid_Drop" Name="VisualDisplayer">
+            <ItemsControl ItemsSource="{Binding XGridUnitLineLocations}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid></Grid>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Line X1="{Binding X}" Y1="0" X2="{Binding X}" Stroke="#20000000" Y2="{Binding ElementName=VisualDisplayer,Path=ActualHeight}" StrokeThickness="1">
+                            <Line.Style>
+                                <Style TargetType="Line">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
+                                            <Setter Property="Stroke" Value="#A0000000"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Line.Style>
+                        </Line>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Canvas>
+        <Grid Grid.Column="1" Background="White">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="10,5,10,5">
+                    <CheckBox Margin="0,2,0,2" IsChecked="{Binding IsPreventTimelineAutoClose}" Content="IsPreventTimelineAutoClose"></CheckBox>
+                    <CheckBox Margin="0,2,0,2" IsChecked="{Binding IsPreventXAutoCloseProperty}" Content="IsPreventXAutoClose"></CheckBox>
+                    <StackPanel Margin="0,2,0,2" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Margin="0,0,10,0">UnitCloseSize</TextBlock>
+                        <ComboBox Width="80" SelectedIndex="3" SelectedValue="{Binding UnitCloseSize,Mode=OneWayToSource,Converter={StaticResource UnitCloseSizeConverter}}">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="4"/>
+                            <ComboBoxItem Content="8"/>
+                            <ComboBoxItem Content="12"/>
+                            <ComboBoxItem Content="16"/>
+                            <ComboBoxItem Content="20"/>
+                            <ComboBoxItem Content="24"/>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </UserControl>

@@ -36,23 +36,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public static readonly DependencyProperty IsMouseDownProperty =
             DependencyProperty.Register("IsMouseDown", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
 
-        public bool IsPreventXAutoClose
-        {
-            get { return (bool)GetValue(IsPreventXAutoCloseProperty); }
-            set { SetValue(IsPreventXAutoCloseProperty, value); }
-        }
+        public bool IsPreventXAutoClose => ViewModel?.EditorViewModel?.IsPreventXAutoClose ?? false;
 
-        public static readonly DependencyProperty IsPreventXAutoCloseProperty =
-            DependencyProperty.Register("IsPreventXAutoClose", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
-
-        public bool IsPreventTimelineAutoClose
-        {
-            get { return (bool)GetValue(IsPreventTimelineAutoCloseProperty); }
-            set { SetValue(IsPreventTimelineAutoCloseProperty, value); }
-        }
-
-        public static readonly DependencyProperty IsPreventTimelineAutoCloseProperty =
-            DependencyProperty.Register("IsPreventTimelineAutoClose", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
+        public bool IsPreventTimelineAutoClose => ViewModel?.EditorViewModel?.IsPreventTimelineAutoClose ?? false;
 
         public OngekiObjectViewBase()
         {
@@ -62,11 +48,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             MouseLeave += OnMouseLeave;
         }
 
-        Notify notify;
-
         protected virtual void OnDragStart()
         {
-            notify = StatusNotifyHelper.BeginStatus("Hehehe");
+
         }
 
         protected virtual void OnDragMove(Point relativePoint)
@@ -75,13 +59,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
             if (ViewModel.CanMoveX)
             {
-                ViewModel.X = relativePoint.X;
+                ViewModel.X = CheckAndAdjustX(relativePoint.X);
             }
+        }
+
+        public double CheckAndAdjustX(double x)
+        {
+            //todo 基于二分法查询最近
+            var mid = ViewModel?.EditorViewModel?.XGridUnitLineLocations?.Select(z => new {
+                distance = Math.Abs(z.X - x),
+                x = z.X
+            })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList();
+            var nearestUnitLine = mid?.FirstOrDefault();
+            //Log.LogInfo($"nearestUnitLine in:{x:F2} distance:{nearestUnitLine?.distance:F2} x:{nearestUnitLine?.x:F2}");
+            return nearestUnitLine != null ? nearestUnitLine.x : x;
         }
 
         protected virtual void OnDragEnd()
         {
-            notify?.Dispose();
+
         }
 
         protected virtual void OnMouseClick()
@@ -120,8 +116,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (IsMouseDown && !IsDragging)
+            if (IsDragging)
+                OnDragEnd();
+            else if (IsMouseDown)
                 OnMouseClick();
+
             IsMouseDown = false;
             IsDragging = false;
             e.Handled = true;
@@ -129,8 +128,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
-            if (IsMouseDown && !IsDragging)
-                OnDragEnd();
             IsMouseDown = false;
             IsDragging = false;
             e.Handled = true;
