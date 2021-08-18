@@ -10,13 +10,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using static OngekiFumenEditor.Utils.StatusNotifyHelper;
+using System.Windows.Media.Effects;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 {
     public class OngekiObjectViewBase : UserControl
     {
         public OngekiObjectViewModelBase ViewModel => DataContext as OngekiObjectViewModelBase;
+        private static DropShadowEffect SelectEffect = new DropShadowEffect() { ShadowDepth = 0, Color = Colors.Yellow, BlurRadius = 25 };
 
         public bool IsDragging
         {
@@ -31,6 +32,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         {
             get { return (bool)GetValue(IsMouseDownProperty); }
             set { SetValue(IsMouseDownProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsSelectedProperty =
+            DependencyProperty.Register("IsSelected", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
+
+        public bool IsSelected
+        {
+            get { return (bool)GetValue(IsSelectedProperty); }
+            set
+            {
+                SetValue(IsSelectedProperty, value);
+                Effect = value ? SelectEffect : null;
+            }
         }
 
         public static readonly DependencyProperty IsMouseDownProperty =
@@ -68,7 +82,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             //todo 基于二分法查询最近
             var editorViewModel = ViewModel?.EditorViewModel;
             var enableMagneticAdjust = !(editorViewModel?.IsPreventXAutoClose ?? false);
-            var mid = enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z => new {
+            var mid = enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z => new
+            {
                 distance = Math.Abs(z.X - x),
                 x = z.X
             })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList() : default;
@@ -84,14 +99,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         protected virtual void OnMouseClick()
         {
-
+            IsSelected = !IsSelected;
         }
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            IsMouseDown = true;
-            IsDragging = false;
-            e.Handled = true;
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                IsMouseDown = true;
+                IsDragging = false;
+                e.Handled = true;
+            }
         }
 
         private void OnMouseMove(object sender, MouseEventArgs e)

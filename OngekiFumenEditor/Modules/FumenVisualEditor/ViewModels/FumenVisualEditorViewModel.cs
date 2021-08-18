@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -137,7 +138,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task DoLoad(string filePath)
         {
-            Log.LogInfo($"FumenVisualEditorViewModel DoLoad()");
+            Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
             await InitalizeVisualData();
         }
 
@@ -149,7 +150,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task DoSave(string filePath)
         {
-            Log.LogInfo($"FumenVisualEditorViewModel DoSave()");
+            Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
             await InitalizeVisualData();
         }
 
@@ -160,6 +161,35 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             viewModel.EditorViewModel = this;
 
             Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.Name}");
+        }
+
+        public void DeleteSelectedObjects()
+        {
+            var selectedObject = VisualDisplayer.Children.OfType<OngekiObjectViewBase>().Where(x => x.IsSelected).ToArray();
+            foreach (var obj in selectedObject)
+                VisualDisplayer.Children.Remove(obj);
+            Log.LogInfo($"deleted {selectedObject.Length} objects.");
+        }
+
+        public void CopySelectedObjects()
+        {
+
+        }
+
+        public void PasteCopiesObjects()
+        {
+
+        }
+
+        public void OnKeyDown(ActionExecutionContext e)
+        {
+            if (e.EventArgs is KeyEventArgs arg)
+            {
+                if (arg.Key == Key.Delete)
+                {
+                    DeleteSelectedObjects();
+                }
+            }
         }
     }
 }
