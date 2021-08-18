@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 x = value;
+                NotifyUpdateXToXGrid(x);
                 NotifyOfPropertyChange(() => X);
+            }
+        }
+
+        private void NotifyUpdateXToXGrid(double x)
+        {
+            if (EditorViewModel is null || !(ReferenceOngekiObject is IHorizonPositionObject posObj))
+                return;
+
+            OnUpdateXGrid(x, EditorViewModel.CanvasWidth);
+        }
+
+        protected virtual void OnUpdateXGrid(double x, double canvasWidth)
+        {
+            if (ReferenceOngekiObject is IHorizonPositionObject posObj)
+            {
+                var xgridValue = (x - canvasWidth / 2) / (EditorViewModel.XUnitSize / EditorViewModel.UnitCloseSize);
+                Log.LogInfo($"xgridValue : {xgridValue:F4}");
             }
         }
 

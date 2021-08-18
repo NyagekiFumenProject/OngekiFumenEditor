@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
         {
             if (value is ComboBoxItem item)
             {
-                return int.Parse(item.Content.ToString());
+                return double.Parse(item.Content.ToString());
             }
 
             return 4;

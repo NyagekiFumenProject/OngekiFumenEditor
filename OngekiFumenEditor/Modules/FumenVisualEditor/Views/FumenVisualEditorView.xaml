@@ -46,15 +46,13 @@
                     <CheckBox Margin="0,2,0,2" IsChecked="{Binding IsPreventXAutoClose}" Content="IsPreventXAutoClose"></CheckBox>
                     <StackPanel Margin="0,2,0,2" Orientation="Horizontal">
                         <TextBlock VerticalAlignment="Center" Margin="0,0,10,0">UnitCloseSize</TextBlock>
-                        <ComboBox Width="80" SelectedIndex="3" SelectedValue="{Binding UnitCloseSize,Mode=OneWayToSource,Converter={StaticResource UnitCloseSizeConverter}}">
+                        <ComboBox Width="80" SelectedIndex="4" SelectedValue="{Binding UnitCloseSize,Mode=OneWayToSource,Converter={StaticResource UnitCloseSizeConverter}}">
                             <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="1.5"/>
                             <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
                             <ComboBoxItem Content="4"/>
-                            <ComboBoxItem Content="8"/>
-                            <ComboBoxItem Content="12"/>
-                            <ComboBoxItem Content="16"/>
-                            <ComboBoxItem Content="20"/>
-                            <ComboBoxItem Content="24"/>
+                            <ComboBoxItem Content="4.5"/>
                         </ComboBox>
                     </StackPanel>
                 </StackPanel>

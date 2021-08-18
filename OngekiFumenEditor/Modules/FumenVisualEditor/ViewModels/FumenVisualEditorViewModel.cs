@@ -8,6 +8,7 @@ using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
@@ -37,7 +38,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 base.DisplayName = value;
-                IoC.Get<WindowTitleHelper>().TitleContent = base.DisplayName;
+                if(IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
+                {
+                    title.TitleContent = base.DisplayName;
+                }
             }
         }
 
@@ -71,8 +75,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public double CanvasWidth => VisualDisplayer?.ActualWidth ?? 0;
 
-        private int unitCloseSize = 4;
-        public int UnitCloseSize
+        private double unitCloseSize = 4;
+        public double UnitCloseSize
         {
             get
             {
@@ -86,6 +90,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public double XUnitSize => CanvasWidth / (24 * 2) * UnitCloseSize;
+
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new ObservableCollection<XGridUnitLineViewModel>();
 
         private void RedrawUnitCloseXLines()
@@ -93,9 +99,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             XGridUnitLineLocations.Clear();
 
             var width = CanvasWidth;
-            var unit = width / (2 * UnitCloseSize);
+            var unit = XUnitSize;
 
-            for (double totalLength = width / 2; totalLength < width; totalLength += unit)
+            for (double totalLength = width / 2 + unit; totalLength < width; totalLength += unit)
             {
                 XGridUnitLineLocations.Add(new XGridUnitLineViewModel()
                 {
