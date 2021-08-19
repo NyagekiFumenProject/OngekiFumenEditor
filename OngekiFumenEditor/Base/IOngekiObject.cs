@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public interface IOngekiObject
+    public interface IOngekiObject : ISerializable
     {
         public string Group { get; }
         public string IDShortName { get; }

@@ -10,5 +10,10 @@ namespace OngekiFumenEditor.Base
     {
         public const uint DEFAULT_RES_T = 1920;
         public uint ResT { get; set; } = DEFAULT_RES_T;
+
+        public override string Serialize(OngekiFumen fumenData)
+        {
+            return $"{Unit} {Grid}";
+        }
     }
 }

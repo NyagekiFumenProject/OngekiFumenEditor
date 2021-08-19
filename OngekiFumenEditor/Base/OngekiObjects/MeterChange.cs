@@ -15,5 +15,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public string Group => "COMPOSITION";
         public string IDShortName => "MET";
         public string Name => "MeterChange";
+
+        public string Serialize(OngekiFumen fumenData)
+        {
+            return $"{IDShortName} {TGrid.Serialize(fumenData)} {BunShi} {Bunbo}";
+        }
     }
 }

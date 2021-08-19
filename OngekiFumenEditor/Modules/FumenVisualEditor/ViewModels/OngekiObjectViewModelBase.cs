@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -87,6 +88,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected virtual void OnAttachedView(object view)
         {
+            OngekiFumen f = new OngekiFumen();
+            f.AddObject(new Bell());
+
             var element = view as FrameworkElement;
             element.SetBinding(Canvas.LeftProperty, "X");
             element.SetBinding(Canvas.TopProperty, "Y");

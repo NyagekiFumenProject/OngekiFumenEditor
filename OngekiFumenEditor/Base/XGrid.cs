@@ -10,5 +10,10 @@ namespace OngekiFumenEditor.Base
     {
         public const uint DEFAULT_RES_X = 4096;
         public uint ResX { get; set; } = DEFAULT_RES_X;
+
+        public override string Serialize(OngekiFumen fumenData)
+        {
+            return Unit.ToString();
+        }
     }
 }

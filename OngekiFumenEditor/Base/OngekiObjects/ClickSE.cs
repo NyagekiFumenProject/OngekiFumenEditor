@@ -15,5 +15,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public string IDShortName => "CLK";
 
         public string Name => "ClickSE";
+
+        public string Serialize(OngekiFumen fumenData)
+        {
+            return $"{IDShortName} {TGrid.Serialize(fumenData)}";
+        }
     }
 }

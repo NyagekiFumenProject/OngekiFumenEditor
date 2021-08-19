@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public abstract class GridBase : IComparable<GridBase>
+    public abstract class GridBase : IComparable<GridBase> , ISerializable
     {
         public int Grid { get; set; } //grid
         public int Unit { get; set; } //unit
@@ -30,5 +30,7 @@ namespace OngekiFumenEditor.Base
 
             return 0;
         }
+
+        public abstract string Serialize(OngekiFumen fumenData);
     }
 }

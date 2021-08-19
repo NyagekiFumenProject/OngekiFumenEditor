@@ -30,5 +30,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public string IDShortName => "EST";
 
         public string Name => "EnemySoundSet";
+
+        public string Serialize(OngekiFumen fumenData)
+        {
+            return $"{IDShortName} {TGrid.Serialize(fumenData)} {tagTblValue}";
+        }
     }
 }

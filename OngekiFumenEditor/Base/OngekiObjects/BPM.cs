@@ -14,5 +14,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public string Group => "COMPOSITION";
         public string IDShortName => "BPM";
         public string Name => "BPM";
+
+        public string Serialize(OngekiFumen fumenData)
+        {
+            return $"{IDShortName} {TGrid.Serialize(fumenData)} {Value}";
+        }
     }
 }

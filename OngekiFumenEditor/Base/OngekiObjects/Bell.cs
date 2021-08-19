@@ -17,5 +17,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public string Name => "Bell";
 
         public string IDShortName => "BEL";
+
+        public string Serialize(OngekiFumen fumenData)
+        {
+            return $"{IDShortName} {TGrid.Serialize(fumenData)} {XGrid.Serialize(fumenData)}";
+        }
     }
 }

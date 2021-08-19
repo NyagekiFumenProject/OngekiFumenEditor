@@ -88,5 +88,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public string Group => "B_PALETTE";
         public string IDShortName => "BPL";
         public string Name => "BulletPalleteList";
+
+        public string Serialize(OngekiFumen fumenData)
+        {
+            return $"{IDShortName} {StrID} {ShooterValue} {placeOffset} {TargetValue} {Speed} {BulletTypeValue}";
+        }
     }
 }

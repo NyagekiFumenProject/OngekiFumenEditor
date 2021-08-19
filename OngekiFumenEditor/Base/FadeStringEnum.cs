@@ -15,5 +15,10 @@ namespace OngekiFumenEditor.Base
         {
             return s.Value;
         }
+
+        public override string ToString()
+        {
+            return Value;
+        }
     }
 }
