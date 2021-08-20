@@ -12,7 +12,7 @@ using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
-    public abstract class OngekiObjectViewModelBase : PropertyChangedBase, IViewAware
+    public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IViewAware
     {
         protected IOngekiObject referenceOngekiObject;
 
@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (ReferenceOngekiObject is IHorizonPositionObject posObj)
             {
                 var xgridValue = (x - canvasWidth / 2) / (EditorViewModel.XUnitSize / EditorViewModel.UnitCloseSize);
-                Log.LogInfo($"xgridValue : {xgridValue:F4}");
+                posObj.XGrid.Unit = (int)xgridValue;
             }
         }
 
@@ -88,9 +88,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected virtual void OnAttachedView(object view)
         {
-            OngekiFumen f = new OngekiFumen();
-            f.AddObject(new Bell());
-
             var element = view as FrameworkElement;
             element.SetBinding(Canvas.LeftProperty, "X");
             element.SetBinding(Canvas.TopProperty, "Y");
@@ -109,7 +106,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public object GetView(object context = null) => View;
     }
 
-    public abstract class DisplayObjectViewModelBase<T> : OngekiObjectViewModelBase where T : IOngekiObject, new()
+    public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : IOngekiObject, new()
     {
         public override IOngekiObject ReferenceOngekiObject
         {

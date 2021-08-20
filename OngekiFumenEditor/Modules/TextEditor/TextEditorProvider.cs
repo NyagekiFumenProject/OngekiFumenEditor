@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.TextEditor
 
         public IDocument Create() => new TextEditorViewModel();
 
-        public bool Handles(string path) => Path.GetExtension(path).Contains(".ogkr");
+        public bool Handles(string path) => Path.GetExtension(path).Equals(".ogkr",StringComparison.OrdinalIgnoreCase);
 
         public Task New(IDocument document, string name) => ((TextEditorViewModel) document).New(name);
         public Task Open(IDocument document, string path) =>((TextEditorViewModel)document).Load(path);

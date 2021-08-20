@@ -22,8 +22,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public TGrid TGrid { get; set; }
-        public WaveChangeConst tagTblValue { get; set; }
+        public TGrid TGrid { get; set; } = new TGrid();
+        public WaveChangeConst tagTblValue { get; set; } = WaveChangeConst.Boss;
 
         public string Group => "COMPOSITION";
 

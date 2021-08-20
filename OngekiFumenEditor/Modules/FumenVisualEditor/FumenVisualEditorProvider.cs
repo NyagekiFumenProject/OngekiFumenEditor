@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
         public IDocument Create() => new FumenVisualEditorViewModel();
 
-        public bool Handles(string path) => Path.GetExtension(path)?.Contains(".ogkr_fve") ?? false;
+        public bool Handles(string path) => Path.GetExtension(path).Equals(".ogkr_fve",StringComparison.OrdinalIgnoreCase);
 
         public async Task New(IDocument document, string name) => await (document as FumenVisualEditorViewModel)?.New(name);
 

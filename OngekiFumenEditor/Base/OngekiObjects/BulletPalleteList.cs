@@ -78,12 +78,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             public readonly static BulletType Danger = new BulletType("DNG");
         }
 
-        public string StrID { get; set; }
-        public Shooter ShooterValue { get; set; }
+        public string StrID { get; set; } = "";
+        public Shooter ShooterValue { get; set; } = Shooter.Center;
         public int placeOffset { get; set; }
-        public Target TargetValue { get; set; }
+        public Target TargetValue { get; set; } = Target.FixField;
         public float Speed { get; set; }
-        public BulletType BulletTypeValue { get; set; }
+        public BulletType BulletTypeValue { get; set; } = BulletType.Danger;
 
         public string Group => "B_PALETTE";
         public string IDShortName => "BPL";

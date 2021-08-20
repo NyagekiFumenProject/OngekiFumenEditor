@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 {
     public class OngekiObjectViewBase : UserControl
     {
-        public OngekiObjectViewModelBase ViewModel => DataContext as OngekiObjectViewModelBase;
+        public DisplayObjectViewModelBase ViewModel => DataContext as DisplayObjectViewModelBase;
         private static DropShadowEffect SelectEffect = new DropShadowEffect() { ShadowDepth = 0, Color = Colors.Yellow, BlurRadius = 25 };
 
         public bool IsDragging

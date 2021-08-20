@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class BPM : IOngekiObject, ITimelineObject
     {
-        public TGrid TGrid { get; set; }
+        public TGrid TGrid { get; set; } = new TGrid();
         public float Value { get; set; }
 
         public string Group => "COMPOSITION";
@@ -19,5 +19,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)} {Value}";
         }
+
+        public override string ToString() => Serialize(default);
     }
 }

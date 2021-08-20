@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Base
 {
     public class OngekiFumen
     {
-        public FumenMetaInfo MetaInfo { get; set; }
+        public FumenMetaInfo MetaInfo { get; set; } = new FumenMetaInfo();
         public List<BulletPalleteList> BulletPalleteList { get; set; } = new List<BulletPalleteList>();
         public List<Bell> Bells { get; set; } = new List<Bell>();
         public List<BPM> BPMs { get; set; } = new List<BPM>();
@@ -68,6 +68,11 @@ namespace OngekiFumenEditor.Base
             {
                 RemoveObject(item);
             }
+        }
+
+        public IEnumerable<IDisplayableObject> GetAllDisplayableObjects()
+        {
+            return Bells.OfType<IDisplayableObject>();
         }
 
         public string Serialize()

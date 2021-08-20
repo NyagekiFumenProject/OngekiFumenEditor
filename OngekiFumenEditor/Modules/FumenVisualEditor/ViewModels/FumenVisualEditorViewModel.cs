@@ -1,15 +1,20 @@
 using Caliburn.Micro;
 using Gemini.Framework;
+using Gemini.Modules.Toolbox.Services;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +34,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             public override string ToString() => $"{X:F4} {(IsCenterLine ? "Center" : string.Empty)}";
         }
+
+        private OngekiFumen fumen;
 
         public FumenVisualEditorView View { get; private set; }
         public Panel VisualDisplayer => View?.VisualDisplayer;
@@ -133,31 +140,47 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private Task InitalizeVisualData()
         {
+            var displayableObjects = fumen.GetAllDisplayableObjects();
+            //add all displayable object.
+            foreach (var obj in displayableObjects)
+            {
+                var displayObject = Activator.CreateInstance(obj.ModelViewType) as DisplayObjectViewModelBase;
+                if (ViewCreateHelper.CreateView(displayObject) is OngekiObjectViewBase view && obj is IOngekiObject o)
+                {
+                    view.ViewModel.ReferenceOngekiObject = o;
+                    VisualDisplayer.Children.Add(view);
+                }
+            }
             return Task.CompletedTask;
         }
 
         protected override async Task DoLoad(string filePath)
         {
+            using var _ = StatusNotifyHelper.BeginStatus("Fumen loading : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
+            fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(File.OpenRead(filePath));
             await InitalizeVisualData();
         }
 
         protected override async Task DoNew()
         {
-            Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
+            fumen = new OngekiFumen();
             await InitalizeVisualData();
+            Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
         }
 
         protected override async Task DoSave(string filePath)
         {
+            using var _ = StatusNotifyHelper.BeginStatus("Fumen saving : " + filePath);
+            await File.WriteAllTextAsync(filePath, fumen.Serialize());
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
-            await InitalizeVisualData();
         }
 
-        public void OnNewObjectAdd(OngekiObjectViewModelBase viewModel)
+        public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
         {
             var view = ViewCreateHelper.CreateView(viewModel);
             VisualDisplayer.Children.Add(view);
+            fumen.AddObject(viewModel.ReferenceOngekiObject);
             viewModel.EditorViewModel = this;
 
             Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.Name}");
@@ -167,7 +190,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var selectedObject = VisualDisplayer.Children.OfType<OngekiObjectViewBase>().Where(x => x.IsSelected).ToArray();
             foreach (var obj in selectedObject)
+            {
                 VisualDisplayer.Children.Remove(obj);
+                fumen.AddObject(obj.ViewModel?.ReferenceOngekiObject);
+            }
             Log.LogInfo($"deleted {selectedObject.Length} objects.");
         }
 

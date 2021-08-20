@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class ClickSE : IOngekiObject, ITimelineObject
     {
-        public TGrid TGrid { get; set; }
+        public TGrid TGrid { get; set; } = new TGrid();
 
         public string Group => "COMPOSITION";
 

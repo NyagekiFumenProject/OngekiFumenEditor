@@ -4,6 +4,7 @@ using Gemini.Framework.Services;
 using Gemini.Framework.Threading;
 using Gemini.Properties;
 using OngekiFumenEditor.Modules.TextEditor.Views;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,7 @@ namespace OngekiFumenEditor.Modules.TextEditor.ViewModels
         {
             Log.LogInfo($"TextEditorViewModel DoLoad() filePath : {filePath}");
             content = await File.ReadAllTextAsync(filePath);
+            var fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(File.OpenRead(filePath));
             ApplyTextAndUpdate();
         }
 

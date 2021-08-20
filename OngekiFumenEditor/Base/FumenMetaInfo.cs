@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Base
         /// <summary>
         /// 版本号
         /// </summary>
-        public Version Version { get; set; }
+        public Version Version { get; set; } = new Version(1, 0, 0);
 
         /// <summary>
         /// 谱面作者

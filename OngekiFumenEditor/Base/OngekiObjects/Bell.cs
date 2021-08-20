@@ -8,15 +8,17 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Bell : IOngekiObject, ITimelineObject, IHorizonPositionObject
+    public class Bell : IOngekiObject, ITimelineObject, IHorizonPositionObject , IDisplayableObject
     {
-        public TGrid TGrid { get; set; }
-        public XGrid XGrid { get; set; }
+        public TGrid TGrid { get; set; } = new TGrid();
+        public XGrid XGrid { get; set; } = new XGrid();
 
         public string Group => "BELL";
         public string Name => "Bell";
 
         public string IDShortName => "BEL";
+
+        public Type ModelViewType => typeof(BellViewModel);
 
         public string Serialize(OngekiFumen fumenData)
         {

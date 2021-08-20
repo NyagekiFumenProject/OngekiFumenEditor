@@ -15,5 +15,6 @@ namespace OngekiFumenEditor.Base
         {
             return $"{Unit} {Grid}";
         }
+        public override string ToString() => Serialize(default);
     }
 }

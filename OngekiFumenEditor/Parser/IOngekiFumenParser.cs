@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser
 {
-    public interface IOgenkiFumenParser
+    public interface IOngekiFumenParser
     {
         public Task<OngekiFumen> ParseAsync(Stream stream);
     }

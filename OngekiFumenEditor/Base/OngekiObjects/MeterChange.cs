@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class MeterChange : IOngekiObject, ITimelineObject
     {
-        public TGrid TGrid { get; set; }
+        public TGrid TGrid { get; set; } = new TGrid();
         public int BunShi { get; set; }
         public int Bunbo { get; set; }
 
