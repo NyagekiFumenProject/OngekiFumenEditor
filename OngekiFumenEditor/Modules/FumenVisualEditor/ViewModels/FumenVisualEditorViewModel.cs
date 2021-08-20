@@ -36,8 +36,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private OngekiFumen fumen;
-
+        public double XUnitSize => CanvasWidth / (24 * 2) * UnitCloseSize;
+        public double CanvasWidth => VisualDisplayer?.ActualWidth ?? 0;
         public FumenVisualEditorView View { get; private set; }
+        public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new ObservableCollection<XGridUnitLineViewModel>();
         public Panel VisualDisplayer => View?.VisualDisplayer;
 
         public override string DisplayName
@@ -81,8 +83,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public double CanvasWidth => VisualDisplayer?.ActualWidth ?? 0;
-
         private double unitCloseSize = 4;
         public double UnitCloseSize
         {
@@ -97,10 +97,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 NotifyOfPropertyChange(() => UnitCloseSize);
             }
         }
-
-        public double XUnitSize => CanvasWidth / (24 * 2) * UnitCloseSize;
-
-        public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new ObservableCollection<XGridUnitLineViewModel>();
 
         private void RedrawUnitCloseXLines()
         {
@@ -148,6 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (ViewCreateHelper.CreateView(displayObject) is OngekiObjectViewBase view && obj is IOngekiObject o)
                 {
                     view.ViewModel.ReferenceOngekiObject = o;
+                    view.ViewModel.EditorViewModel = this;
                     VisualDisplayer.Children.Add(view);
                 }
             }
@@ -158,7 +155,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             using var _ = StatusNotifyHelper.BeginStatus("Fumen loading : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
-            fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(File.OpenRead(filePath));
+            using var fileStream = File.OpenRead(filePath);
+            fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fileStream);
             await InitalizeVisualData();
         }
 
@@ -179,8 +177,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
         {
             var view = ViewCreateHelper.CreateView(viewModel);
-            VisualDisplayer.Children.Add(view);
             fumen.AddObject(viewModel.ReferenceOngekiObject);
+
+            VisualDisplayer.Children.Add(view);
             viewModel.EditorViewModel = this;
 
             Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.Name}");

@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private double x;
+        private double x = -1;
 
         public double X
         {
@@ -52,7 +52,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (ReferenceOngekiObject is IHorizonPositionObject posObj)
             {
                 var xgridValue = (x - canvasWidth / 2) / (EditorViewModel.XUnitSize / EditorViewModel.UnitCloseSize);
-                posObj.XGrid.Unit = (int)xgridValue;
+                var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
+                posObj.XGrid.Unit =  Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (int)xgridValue;
+                Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
             }
         }
 
@@ -84,7 +86,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /// </summary>
         public bool IsTimelineObject => ReferenceOngekiObject is ITimelineObject;
 
-        public FumenVisualEditorViewModel EditorViewModel { get; set; }
+        private FumenVisualEditorViewModel editorViewModel;
+        public FumenVisualEditorViewModel EditorViewModel
+        {
+            get
+            {
+                return editorViewModel;
+            }
+            set
+            {
+                editorViewModel = value;
+                OnEditorViewModelChanged();
+            }
+        }
+
+        private void OnEditorViewModelChanged()
+        {
+            if (EditorViewModel is null)
+                return;
+
+            if (ReferenceOngekiObject is IHorizonPositionObject posObj && x < 0)
+            {
+                x = posObj.XGrid.Unit * (EditorViewModel.XUnitSize / EditorViewModel.UnitCloseSize) + EditorViewModel.CanvasWidth / 2;
+                NotifyOfPropertyChange(() => X);
+            }
+        }
 
         protected virtual void OnAttachedView(object view)
         {
