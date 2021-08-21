@@ -1,15 +1,42 @@
+using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public abstract class GridBase : IComparable<GridBase> , ISerializable
+    public abstract class GridBase : PropertyChangedBase, IComparable<GridBase>, ISerializable
     {
-        public int Grid { get; set; } //grid
-        public int Unit { get; set; } //unit
+        private int grid; //grid
+        private float unit; //unit
+
+        public int Grid
+        {
+            get
+            {
+                return grid;
+            }
+            set
+            {
+                grid = value;
+                NotifyOfPropertyChange(() => Grid);
+            }
+        }
+        public float Unit
+        {
+            get
+            {
+                return unit;
+            }
+            set
+            {
+                unit = value;
+                NotifyOfPropertyChange(() => Unit);
+            }
+        }
 
         public int Compare(GridBase x, GridBase y)
         {
@@ -18,9 +45,9 @@ namespace OngekiFumenEditor.Base
 
         public int CompareTo(GridBase other)
         {
-            if(other.Unit != Unit)
+            if (other.Unit != Unit)
             {
-                return Unit - other.Unit;
+                return Math.Sign(Unit - other.Unit);
             }
 
             if (other.Grid != Grid)

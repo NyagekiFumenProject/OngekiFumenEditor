@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
@@ -68,35 +69,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         }
 
-        protected virtual void OnDragMove(Point relativePoint)
-        {
-            ViewModel.Y = relativePoint.Y;
-
-            if (ViewModel.CanMoveX)
-            {
-                ViewModel.X = CheckAndAdjustX(relativePoint.X);
-            }
-        }
-
-        public double CheckAndAdjustX(double x)
-        {
-            //todo 基于二分法查询最近
-            var editorViewModel = ViewModel?.EditorViewModel;
-            var enableMagneticAdjust = !(editorViewModel?.IsPreventXAutoClose ?? false);
-            var mid = enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z => new
-            {
-                distance = Math.Abs(z.X - x),
-                x = z.X
-            })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList() : default;
-            var nearestUnitLine = mid?.FirstOrDefault();
-            //Log.LogInfo($"nearestUnitLine in:{x:F2} distance:{nearestUnitLine?.distance:F2} x:{nearestUnitLine?.x:F2}");
-            return nearestUnitLine != null ? nearestUnitLine.x : x;
-        }
-
         protected virtual void OnDragEnd()
         {
 
         }
+
+        protected virtual void OnDragEnd(Point p) => ViewModel.MoveCanvas(p);
 
         protected virtual void OnMouseClick()
         {
@@ -118,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             if (!(IsMouseDown && Parent is IInputElement parent))
                 return;
             e.Handled = true;
-            Action<Point> dragCall = IsDragging ? OnDragMove : _ => OnDragStart();
+            Action<Point> dragCall = IsDragging ? OnDragEnd : _ => OnDragStart();
             IsDragging = true;
 
             var pos = e.GetPosition(parent);

@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Converters;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -23,38 +25,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 referenceOngekiObject = value;
                 NotifyOfPropertyChange(() => ReferenceOngekiObject);
-            }
-        }
-
-        private double x = -1;
-
-        public double X
-        {
-            get { return x; }
-            set
-            {
-                x = value;
-                NotifyUpdateXToXGrid(x);
-                NotifyOfPropertyChange(() => X);
-            }
-        }
-
-        private void NotifyUpdateXToXGrid(double x)
-        {
-            if (EditorViewModel is null || !(ReferenceOngekiObject is IHorizonPositionObject posObj))
-                return;
-
-            OnUpdateXGrid(x, EditorViewModel.CanvasWidth);
-        }
-
-        protected virtual void OnUpdateXGrid(double x, double canvasWidth)
-        {
-            if (ReferenceOngekiObject is IHorizonPositionObject posObj)
-            {
-                var xgridValue = (x - canvasWidth / 2) / (EditorViewModel.XUnitSize / EditorViewModel.UnitCloseSize);
-                var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
-                posObj.XGrid.Unit =  Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (int)xgridValue;
-                Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
             }
         }
 
@@ -96,26 +66,59 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 editorViewModel = value;
-                OnEditorViewModelChanged();
+                NotifyOfPropertyChange(() => EditorViewModel);
+                //OnEditorViewModelChanged();
             }
         }
 
-        private void OnEditorViewModelChanged()
+        public virtual void MoveCanvas(Point relativePoint)
         {
-            if (EditorViewModel is null)
-                return;
+            Y = relativePoint.Y;
 
-            if (ReferenceOngekiObject is IHorizonPositionObject posObj && x < 0)
+            if (ReferenceOngekiObject is IHorizonPositionObject posObj && EditorViewModel is FumenVisualEditorViewModel hostModelView)
             {
-                x = posObj.XGrid.Unit * (EditorViewModel.XUnitSize / EditorViewModel.UnitCloseSize) + EditorViewModel.CanvasWidth / 2;
-                NotifyOfPropertyChange(() => X);
+                var x = CheckAndAdjustX(relativePoint.X);
+                var xgridValue = (x - hostModelView.CanvasWidth / 2) / (hostModelView.XUnitSize / hostModelView.UnitCloseSize);
+                var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
+                posObj.XGrid.Unit = Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (float)xgridValue;
+                //Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
             }
+            else
+            {
+                Log.LogInfo("Can't move object in canvas because it's not ready.");
+            }
+        }
+
+        public double CheckAndAdjustX(double x)
+        {
+            //todo 基于二分法查询最近
+            var editorViewModel = EditorViewModel;
+            var enableMagneticAdjust = !(editorViewModel?.IsPreventXAutoClose ?? false);
+            var mid = enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z => new
+            {
+                distance = Math.Abs(z.X - x),
+                x = z.X
+            })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList() : default;
+            var nearestUnitLine = mid?.FirstOrDefault();
+            //Log.LogInfo($"nearestUnitLine in:{x:F2} distance:{nearestUnitLine?.distance:F2} x:{nearestUnitLine?.x:F2}");
+            return nearestUnitLine != null ? nearestUnitLine.x : x;
         }
 
         protected virtual void OnAttachedView(object view)
         {
             var element = view as FrameworkElement;
-            element.SetBinding(Canvas.LeftProperty, "X");
+
+            if (ReferenceOngekiObject is IHorizonPositionObject)
+            {
+                var xBinding = new MultiBinding()
+                {
+                    Converter = new XGridCanvasConverter(),
+                };
+                xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.XGrid.Unit"));
+                xBinding.Bindings.Add(new Binding("EditorViewModel"));
+                element.SetBinding(Canvas.LeftProperty, xBinding);
+            }
+            
             element.SetBinding(Canvas.TopProperty, "Y");
 
             Refresh();
