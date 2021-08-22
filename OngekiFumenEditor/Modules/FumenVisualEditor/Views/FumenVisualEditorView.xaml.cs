@@ -48,8 +48,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             var toolboxItem = (ToolboxItem)e.Data.GetData(ToolboxDragDrop.DataFormat);
             var displayObject = Activator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
 
-            displayObject.MoveCanvas(mousePosition);
             ViewModel.OnNewObjectAdd(displayObject);
+            displayObject.MoveCanvas(mousePosition);
         }
     }
 }

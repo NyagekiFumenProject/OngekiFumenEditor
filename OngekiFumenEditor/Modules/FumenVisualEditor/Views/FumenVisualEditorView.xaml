@@ -10,6 +10,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter"></converters:UnitCloseSizeConverter>
+        <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter"></converters:IsStringEmptyConverter>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -22,8 +23,8 @@
                 <ContextMenu>
                     <MenuItem Header="Selected Object...">
                         <MenuItem Header="Delete" cal:Message.Attach="DeleteSelectedObjects()"></MenuItem>
-                        <MenuItem Header="Copy"></MenuItem>
-                        <MenuItem Header="Paste"></MenuItem>
+                        <MenuItem Header="Copy"  cal:Message.Attach="CopySelectedObjects()"></MenuItem>
+                        <MenuItem Header="Paste"  cal:Message.Attach="PasteCopiesObjects()"></MenuItem>
                     </MenuItem>
                 </ContextMenu>
             </Canvas.ContextMenu>
@@ -35,17 +36,39 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Line X1="{Binding X}" Y1="0" X2="{Binding X}" Stroke="#20000000" Y2="{Binding ElementName=VisualDisplayer,Path=ActualHeight}" StrokeThickness="1">
-                            <Line.Style>
-                                <Style TargetType="Line">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                            <Setter Property="Stroke" Value="#A0000000"></Setter>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Line.Style>
-                        </Line>
+                        <Grid>
+                            <Line X1="{Binding X}" Y1="0" X2="{Binding X}" Y2="{Binding ElementName=VisualDisplayer,Path=ActualHeight}">
+                                <Line.Style>
+                                    <Style TargetType="Line">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
+                                                <Setter Property="Stroke" Value="#90000000"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsCenterLine}" Value="False">
+                                                <Setter Property="Stroke" Value="#40000000"></Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Line.Style>
+                            </Line>
+                            <TextBlock Opacity="0.35" FontSize="10" Text="{Binding Unit}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
+                                                <Setter Property="Visibility" Value="Hidden"></Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                                <TextBlock.RenderTransformOrigin>
+                                    <Point X="1"></Point>
+                                </TextBlock.RenderTransformOrigin>
+                                <TextBlock.RenderTransform>
+                                    <TranslateTransform X="{Binding X}"></TranslateTransform>
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                        </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -72,6 +95,27 @@
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
+        </Grid>
+
+        <Grid d:Visibility="Hidden" Grid.ColumnSpan="2">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ErrorMessage,Mode=OneWay,Converter={StaticResource IsStringEmptyConverter}}" Value="True">
+                            <Setter Property="Visibility" Value="Hidden"></Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ErrorMessage,Mode=OneWay,Converter={StaticResource IsStringEmptyConverter}}" Value="False">
+                            <Setter Property="Visibility" Value="Visible"></Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Border Background="IndianRed" Opacity="0.75">
+            </Border>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" >
+                <TextBlock FontSize="30" Foreground="Wheat">Error:</TextBlock>
+                <TextBlock FontSize="20" Foreground="White" Text="{Binding ErrorMessage,Mode=OneWay}"></TextBlock>
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

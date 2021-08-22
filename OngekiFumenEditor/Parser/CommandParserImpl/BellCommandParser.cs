@@ -16,11 +16,11 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
 
         public IOngekiObject Parse(string line, OngekiFumen fumen)
         {
-            var dataArr = ParserUtils.SplitData<int>(line);
+            var dataArr = ParserUtils.SplitData<float>(line);
             var bell = new Bell();
 
             bell.TGrid.Unit = dataArr[0];
-            bell.TGrid.Grid = dataArr[1];
+            bell.TGrid.Grid = (int)dataArr[1];
             bell.XGrid.Unit = dataArr[2];
 
             return bell;

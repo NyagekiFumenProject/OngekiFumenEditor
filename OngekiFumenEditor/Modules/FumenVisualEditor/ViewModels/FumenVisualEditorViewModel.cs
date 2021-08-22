@@ -27,20 +27,54 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [Export(typeof(FumenVisualEditorViewModel))]
     public class FumenVisualEditorViewModel : PersistedDocument
     {
-        public struct XGridUnitLineViewModel
+        public struct XGridUnitLineViewModel : INotifyPropertyChanged
         {
             public double X { get; set; }
+            public double Unit { get; set; }
             public bool IsCenterLine { get; set; }
 
-            public override string ToString() => $"{X:F4} {(IsCenterLine ? "Center" : string.Empty)}";
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public override string ToString() => $"{X:F4} {Unit} {(IsCenterLine ? "Center" : string.Empty)}";
         }
 
         private OngekiFumen fumen;
         public double XUnitSize => CanvasWidth / (24 * 2) * UnitCloseSize;
         public double CanvasWidth => VisualDisplayer?.ActualWidth ?? 0;
+        public double CanvasHeight => VisualDisplayer?.ActualHeight ?? 0;
         public FumenVisualEditorView View { get; private set; }
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new ObservableCollection<XGridUnitLineViewModel>();
         public Panel VisualDisplayer => View?.VisualDisplayer;
+
+        private string errorMessage;
+        public string ErrorMessage
+        {
+            get
+            {
+                return errorMessage;
+            }
+            set
+            {
+                errorMessage = value;
+                if (!string.IsNullOrWhiteSpace(value))
+                    Log.LogError("Current error message : " + value);
+                NotifyOfPropertyChange(() => ErrorMessage);
+            }
+        }
+
+        private TGrid currentDisplayTimePosition;
+        public TGrid CurrentDisplayTimePosition
+        {
+            get
+            {
+                return currentDisplayTimePosition;
+            }
+            set
+            {
+                currentDisplayTimePosition = value;
+                NotifyOfPropertyChange(() => CurrentDisplayTimePosition);
+            }
+        }
 
         public override string DisplayName
         {
@@ -103,18 +137,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             XGridUnitLineLocations.Clear();
 
             var width = CanvasWidth;
-            var unit = XUnitSize;
+            var unitSize = XUnitSize;
+            var totalUnitValue = 0d;
 
-            for (double totalLength = width / 2 + unit; totalLength < width; totalLength += unit)
+            for (double totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
             {
+                totalUnitValue += UnitCloseSize;
+
                 XGridUnitLineLocations.Add(new XGridUnitLineViewModel()
                 {
                     X = totalLength,
+                    Unit = totalUnitValue,
                     IsCenterLine = false
                 });
                 XGridUnitLineLocations.Add(new XGridUnitLineViewModel()
                 {
                     X = (width / 2) - (totalLength - (width / 2)),
+                    Unit = -totalUnitValue,
                     IsCenterLine = false
                 });
             }

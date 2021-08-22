@@ -67,7 +67,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 editorViewModel = value;
                 NotifyOfPropertyChange(() => EditorViewModel);
-                //OnEditorViewModelChanged();
             }
         }
 
@@ -118,8 +117,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 xBinding.Bindings.Add(new Binding("EditorViewModel"));
                 element.SetBinding(Canvas.LeftProperty, xBinding);
             }
-            
-            element.SetBinding(Canvas.TopProperty, "Y");
+
+            if (ReferenceOngekiObject is ITimelineObject)
+            {
+                var tBinding = new MultiBinding()
+                {
+                    Converter = new TGridCanvasConverter(),
+                };
+                tBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Unit"));
+                tBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Grid"));
+                tBinding.Bindings.Add(new Binding("EditorViewModel"));
+                element.SetBinding(Canvas.TopProperty, tBinding);
+            }
 
             Refresh();
         }

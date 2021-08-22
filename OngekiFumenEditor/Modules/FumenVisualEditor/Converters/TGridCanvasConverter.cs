@@ -10,16 +10,15 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
 {
-    public class XGridCanvasConverter : IMultiValueConverter
+    public class TGridCanvasConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.ElementAtOrDefault(0) is float xgridUnit
-                &&
-                values.ElementAtOrDefault(1) is FumenVisualEditorViewModel modelView)
+            if (values.ElementAtOrDefault(0) is float unit 
+                && values.ElementAtOrDefault(1) is int grid 
+                && values.ElementAtOrDefault(2) is FumenVisualEditorViewModel modelView)
             {
-                var x = xgridUnit * (modelView.XUnitSize / modelView.UnitCloseSize) + modelView.CanvasWidth / 2;
-                return x;
+                return 0;
             }
 
             return 0;

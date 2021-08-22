@@ -10,8 +10,8 @@ namespace OngekiFumenEditor.Base
 {
     public abstract class GridBase : PropertyChangedBase, IComparable<GridBase>, ISerializable
     {
-        private int grid; //grid
-        private float unit; //unit
+        private int grid = 0; //grid
+        private float unit = 0; //unit
 
         public int Grid
         {
