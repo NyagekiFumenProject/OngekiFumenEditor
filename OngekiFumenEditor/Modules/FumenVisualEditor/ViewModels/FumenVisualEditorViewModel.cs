@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Gemini.Modules.Toolbox.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
@@ -17,6 +18,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -39,6 +41,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private OngekiFumen fumen;
+        public OngekiFumen Fumen
+        {
+            get
+            {
+                return fumen;
+            }
+            set
+            {
+                fumen = value;
+                OnFumenObjectLoaded();
+                NotifyOfPropertyChange(() => Fumen);
+            }
+        }
+
         public double XUnitSize => CanvasWidth / (24 * 2) * UnitCloseSize;
         public double CanvasWidth => VisualDisplayer?.ActualWidth ?? 0;
         public double CanvasHeight => VisualDisplayer?.ActualHeight ?? 0;
@@ -82,7 +98,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 base.DisplayName = value;
-                if(IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
+                if (IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
                 {
                     title.TitleContent = base.DisplayName;
                 }
@@ -195,13 +211,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             using var _ = StatusNotifyHelper.BeginStatus("Fumen loading : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
             using var fileStream = File.OpenRead(filePath);
-            fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fileStream);
+            Fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fileStream);
             await InitalizeVisualData();
+            IsDirty = true;
+        }
+
+        private void OnFumenObjectLoaded()
+        {
+            IoC.Get<IFumenMetaInfoBrowser>().Fumen = Fumen;   
         }
 
         protected override async Task DoNew()
         {
-            fumen = new OngekiFumen();
+            Fumen = new OngekiFumen();
             await InitalizeVisualData();
             Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
         }

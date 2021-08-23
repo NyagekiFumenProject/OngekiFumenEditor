@@ -8,18 +8,18 @@ namespace OngekiFumenEditor.Base
 {
     public class FumenMetaInfo : ISerializable
     {
-        public struct BpmDef
+        public class BpmDef
         {
-            public double First { get; set; }
-            public double Common { get; set; }
-            public double Minimum { get; set; }
-            public double Maximum { get; set; }
+            public double First { get; set; } = 240;
+            public double Common { get; set; } = 240;
+            public double Minimum { get; set; } = 240;
+            public double Maximum { get; set; } = 240;
         }
 
-        public struct MetDef
+        public class MetDef
         {
-            public int Bunbo { get; set; }
-            public int Bunshi { get; set; }
+            public int Bunbo { get; set; } = 4;
+            public int Bunshi { get; set; } = 4;
         }
 
         /// <summary>
@@ -30,17 +30,17 @@ namespace OngekiFumenEditor.Base
         /// <summary>
         /// 谱面作者
         /// </summary>
-        public string Creator { get; set; }
+        public string Creator { get; set; } = "";
 
         /// <summary>
         /// BPM定义信息
         /// </summary>
-        public BpmDef BpmDefinition { get; set; }
+        public BpmDef BpmDefinition { get; set; } = new BpmDef();
 
         /// <summary>
         /// 节拍信息
         /// </summary>
-        public MetDef MeterDefinition { get; set; }
+        public MetDef MeterDefinition { get; set; } = new MetDef();
 
         /// <summary>
         /// 物件时间轴长度基准值，用来参与物件的下落速度和物件之间的垂直距离计算
@@ -85,7 +85,7 @@ namespace OngekiFumenEditor.Base
         /// <summary>
         /// (?)Hold用到，貌似用来做判定
         /// </summary>
-        public int ProgJudgeBpm { get; set; } = 240;
+        public float ProgJudgeBpm { get; set; } = 240;
 
         public string Serialize(OngekiFumen fumenData)
         {
