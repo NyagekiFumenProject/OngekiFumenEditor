@@ -10,20 +10,20 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class BellCommandParser : ICommandParser
+    public class BpmCommandParser : ICommandParser
     {
-        public string CommandLineHeader => "BEL";
+        public string CommandLineHeader => "BPM";
 
         public IOngekiObject Parse(string line, OngekiFumen fumen)
         {
             var dataArr = ParserUtils.GetDataArray<float>(line);
-            var bell = new Bell();
+            var bpm = new BPM();
 
-            bell.TGrid.Unit = dataArr[0];
-            bell.TGrid.Grid = (int)dataArr[1];
-            bell.XGrid.Unit = dataArr[2];
+            bpm.TGrid.Unit = dataArr[0];
+            bpm.TGrid.Grid = (int)dataArr[1];
+            bpm.Value = dataArr[2];
 
-            return bell;
+            return bpm;
         }
     }
 }

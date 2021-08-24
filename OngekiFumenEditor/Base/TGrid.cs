@@ -16,5 +16,22 @@ namespace OngekiFumenEditor.Base
             return $"{Unit} {Grid}";
         }
         public override string ToString() => Serialize(default);
+
+        public static bool operator <(TGrid l, TGrid r)
+        {
+            return l.Grid + l.Unit * l.ResT < r.Grid + r.Unit * r.ResT;
+        }
+        public static bool operator >(TGrid l, TGrid r)
+        {
+            return l.Grid + l.Unit * l.ResT > r.Grid + r.Unit * r.ResT;
+        }
+        public static bool operator <=(TGrid l, TGrid r)
+        {
+            return !(l > r);
+        }
+        public static bool operator >=(TGrid l, TGrid r)
+        {
+            return !(l < r);
+        }
     }
 }

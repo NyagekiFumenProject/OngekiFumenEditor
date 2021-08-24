@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OngekiFumenEditor.Base.OngekiObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,6 +37,7 @@ namespace OngekiFumenEditor.Base
         /// BPM定义信息
         /// </summary>
         public BpmDef BpmDefinition { get; set; } = new BpmDef();
+        public BPM FirstBpm { get; set; } = new BPM();
 
         /// <summary>
         /// 节拍信息
@@ -65,22 +67,22 @@ namespace OngekiFumenEditor.Base
         /// <summary>
         /// (?)伤害
         /// </summary>
-        public int BulletDamage { get; set; } = 1;
+        public double BulletDamage { get; set; } = 1;
 
         /// <summary>
         /// (?)伤害
         /// </summary>
-        public int HardBulletDamage { get; set; } = 2;
+        public double HardBulletDamage { get; set; } = 2;
 
         /// <summary>
         /// (?)伤害
         /// </summary>
-        public int DangerBulletDamage { get; set; } = 4;
+        public double DangerBulletDamage { get; set; } = 4;
 
         /// <summary>
         /// (?)伤害
         /// </summary>
-        public int BeamDamage { get; set; } = 2;
+        public double BeamDamage { get; set; } = 2;
 
         /// <summary>
         /// (?)Hold用到，貌似用来做判定
@@ -91,7 +93,7 @@ namespace OngekiFumenEditor.Base
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"VERSION {Version.Major} {Version.Minor} {Version.Revision}");
+            sb.AppendLine($"VERSION {Version.Major} {Version.Minor} {Version.Build}");
             sb.AppendLine($"CREATOR {Creator}");
             sb.AppendLine($"BPM_DEF {BpmDefinition.First} {BpmDefinition.Common} {BpmDefinition.Maximum} {BpmDefinition.Minimum}");
             sb.AppendLine($"MET_DEF {MeterDefinition.Bunshi} {MeterDefinition.Bunbo}");

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public interface ITimelineObject
+    public interface ITimelineObject : IComparable
     {
         public TGrid TGrid { get; set; }
     }

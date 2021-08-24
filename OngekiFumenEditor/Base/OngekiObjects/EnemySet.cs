@@ -22,6 +22,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        public int CompareTo(object obj)
+        {
+            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
+        }
+
         public TGrid TGrid { get; set; } = new TGrid();
         public WaveChangeConst tagTblValue { get; set; } = WaveChangeConst.Boss;
 

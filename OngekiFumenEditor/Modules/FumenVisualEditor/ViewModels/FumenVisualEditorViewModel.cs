@@ -213,7 +213,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             using var fileStream = File.OpenRead(filePath);
             Fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fileStream);
             await InitalizeVisualData();
-            IsDirty = true;
         }
 
         private void OnFumenObjectLoaded()

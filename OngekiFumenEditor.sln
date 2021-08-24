@@ -6,8 +6,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditor", "Ongeki
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini", "gemini\src\Gemini\Gemini.csproj", "{A005356B-D652-418D-A970-77E7B704F5F7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini.Demo", "gemini\src\Gemini.Demo\Gemini.Demo.csproj", "{031CE562-6268-410A-A086-FA75EDC953AC}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini.Modules.Output", "gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj", "{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}"
 EndProject
 Global
@@ -24,10 +22,6 @@ Global
 		{A005356B-D652-418D-A970-77E7B704F5F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A005356B-D652-418D-A970-77E7B704F5F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A005356B-D652-418D-A970-77E7B704F5F7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{031CE562-6268-410A-A086-FA75EDC953AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{031CE562-6268-410A-A086-FA75EDC953AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{031CE562-6268-410A-A086-FA75EDC953AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{031CE562-6268-410A-A086-FA75EDC953AC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -9,11 +9,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     public class BPM : IOngekiObject, ITimelineObject
     {
         public TGrid TGrid { get; set; } = new TGrid();
-        public float Value { get; set; }
+        public double Value { get; set; }
 
         public string Group => "COMPOSITION";
         public string IDShortName => "BPM";
         public string Name => "BPM";
+
+        public int CompareTo(object obj)
+        {
+            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
+        }
 
         public string Serialize(OngekiFumen fumenData)
         {

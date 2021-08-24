@@ -18,22 +18,7 @@ namespace OngekiFumenEditor.Base
         public List<MeterChange> MeterChanges { get; set; } = new List<MeterChange>();
         public List<EnemySet> EnemySets { get; set; } = new List<EnemySet>();
 
-        public void AddObject(IOngekiObject obj)
-        {
-            if (obj is Bell bell)
-            {
-                Bells.Add(bell);
-            }
-            else if(obj is BPM bpm){
-                BPMs.Add(bpm);
-            }
-            else
-            {
-                Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.Name}");
-                return;
-            }
-        }
-
+        #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddObjects(params IOngekiObject[] objs) => AddObjects(objs);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -44,7 +29,53 @@ namespace OngekiFumenEditor.Base
                 AddObject(item);
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveObjects(params IOngekiObject[] objs) => RemoveObjects(objs);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveObjects(IEnumerable<IOngekiObject> objs)
+        {
+            foreach (var item in objs)
+            {
+                RemoveObject(item);
+            }
+        }
+        #endregion
 
+        public void Setup()
+        {
+            Bells.Sort();
+            BPMs.Sort();
+            MeterChanges.Sort();
+            EnemySets.Sort();
+        }
+
+        public void AddObject(IOngekiObject obj)
+        {
+            if (obj is Bell bel)
+            {
+                Bells.Add(bel);
+            }
+            else if(obj is BPM bpm){
+                BPMs.Add(bpm);
+            }
+            else if (obj is MeterChange met)
+            {
+                MeterChanges.Add(met);
+            }
+            else if (obj is EnemySet est)
+            {
+                EnemySets.Add(est);
+            }
+            else if (obj is BulletPalleteList bpl)
+            {
+                BulletPalleteList.Add(bpl);
+            }
+            else
+            {
+                Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.Name}");
+                return;
+            }
+        }
 
         public void RemoveObject(IOngekiObject obj)
         {
@@ -59,20 +90,24 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveObjects(params IOngekiObject[] objs) => RemoveObjects(objs);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveObjects(IEnumerable<IOngekiObject> objs)
-        {
-            foreach (var item in objs)
-            {
-                RemoveObject(item);
-            }
-        }
-
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects()
         {
             return Bells.OfType<IDisplayableObject>();
+        }
+
+        public IEnumerable<BPM> GetAllBpmList()
+        {
+            yield return MetaInfo.FirstBpm;
+
+            foreach (var bpm in BPMs)
+            {
+                yield return bpm;
+            }
+        }
+
+        public BPM GetBpm(TGrid time)
+        {
+            return GetAllBpmList().LastOrDefault(bpm => bpm.TGrid < time);
         }
 
         public string Serialize()

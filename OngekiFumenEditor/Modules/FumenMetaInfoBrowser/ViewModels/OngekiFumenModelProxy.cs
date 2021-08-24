@@ -202,7 +202,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             }
         }
 
-        public int BulletDamage
+        public double BulletDamage
         {
             get
             {
@@ -215,7 +215,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             }
         }
 
-        public int HardBulletDamage
+        public double HardBulletDamage
         {
             get
             {
@@ -228,7 +228,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             }
         }
 
-        public int DangerBulletDamage
+        public double DangerBulletDamage
         {
             get
             {
@@ -241,7 +241,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             }
         }
 
-        public int BeamDamage
+        public double BeamDamage
         {
             get
             {

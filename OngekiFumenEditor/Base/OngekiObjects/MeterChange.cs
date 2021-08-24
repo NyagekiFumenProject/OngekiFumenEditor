@@ -16,6 +16,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public string IDShortName => "MET";
         public string Name => "MeterChange";
 
+        public int CompareTo(object obj)
+        {
+            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
+        }
+
         public string Serialize(OngekiFumen fumenData)
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)} {BunShi} {Bunbo}";

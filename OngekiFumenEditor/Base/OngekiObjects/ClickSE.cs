@@ -16,6 +16,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public string Name => "ClickSE";
 
+        public int CompareTo(object obj)
+        {
+            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
+        }
+
+
         public string Serialize(OngekiFumen fumenData)
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)}";

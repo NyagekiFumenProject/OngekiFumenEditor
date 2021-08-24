@@ -28,15 +28,10 @@ namespace OngekiFumenEditor.Parser
 
                 if (CommandParsers.FirstOrDefault(x=> line.StartsWith(x.CommandLineHeader,StringComparison.OrdinalIgnoreCase)) is ICommandParser parser)
                 {
-                    var obj = parser.Parse(line,fumen);
-                    if (obj!=null)
+                    if (parser.Parse(line, fumen) is IOngekiObject obj)
                     {
                         genObjList.Add((obj,parser));
                         fumen.AddObject(obj);
-                    }
-                    else
-                    {
-                        Log.LogWarn($"Can't parse line into object:\"{line}\"");
                     }
                 }
             }
@@ -45,6 +40,8 @@ namespace OngekiFumenEditor.Parser
             {
                 pair.parser.AfterParse(pair.obj, fumen);
             }
+
+            fumen.Setup();
 
             return fumen;
         }

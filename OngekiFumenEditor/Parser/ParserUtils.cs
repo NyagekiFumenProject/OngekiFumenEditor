@@ -10,7 +10,11 @@ namespace OngekiFumenEditor.Parser
     public static class ParserUtils
     {
         public static readonly char[] SplitEmptyCharArray = new[] { ' ', '\t' };
-        public static string[] SplitEmptyChar(string line) => line.Trim().Split(SplitEmptyCharArray, StringSplitOptions.RemoveEmptyEntries);
-        public static T[] SplitData<T>(string line) => line.Trim().Split(SplitEmptyCharArray, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(x => (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(x)).ToArray();
+        public static string[] SplitEmptyChar(string line) => line.Trim().Split(SplitEmptyCharArray, StringSplitOptions.RemoveEmptyEntries).ToArray();
+        public static T[] GetDataArray<T>(string line)
+        {
+            var converter = TypeDescriptor.GetConverter(typeof(T));
+            return SplitEmptyChar(line).Skip(1).Select(x => converter.ConvertFromString(x)).OfType<T>().ToArray();
+        }
     }
 }

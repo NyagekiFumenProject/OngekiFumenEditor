@@ -20,6 +20,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public Type ModelViewType => typeof(BellViewModel);
 
+        public int CompareTo(object obj)
+        {
+            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
+        }
+
         public string Serialize(OngekiFumen fumenData)
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)} {XGrid.Serialize(fumenData)}";
