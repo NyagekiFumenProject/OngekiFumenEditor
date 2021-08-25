@@ -6,22 +6,15 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class MeterChange : IOngekiObject, ITimelineObject
+    public class MeterChange : OngekiTimelineObjectBase
     {
-        public TGrid TGrid { get; set; } = new TGrid();
         public int BunShi { get; set; }
         public int Bunbo { get; set; }
 
-        public string Group => "COMPOSITION";
-        public string IDShortName => "MET";
-        public string Name => "MeterChange";
+        public static string CommandName => "MET";
+        public override string IDShortName => CommandName;
 
-        public int CompareTo(object obj)
-        {
-            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
-        }
-
-        public string Serialize(OngekiFumen fumenData)
+        public override string Serialize(OngekiFumen fumenData)
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)} {BunShi} {Bunbo}";
         }

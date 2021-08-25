@@ -12,16 +12,16 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
     [Export(typeof(ICommandParser))]
     public class BellCommandParser : ICommandParser
     {
-        public string CommandLineHeader => "BEL";
+        public string CommandLineHeader => Bell.CommandName;
 
-        public IOngekiObject Parse(string line, OngekiFumen fumen)
+        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
-            var dataArr = ParserUtils.GetDataArray<float>(line);
+            var dataArr = args.GetDataArray<float>();
             var bell = new Bell();
 
-            bell.TGrid.Unit = dataArr[0];
-            bell.TGrid.Grid = (int)dataArr[1];
-            bell.XGrid.Unit = dataArr[2];
+            bell.TGrid.Unit = dataArr[1];
+            bell.TGrid.Grid = (int)dataArr[2];
+            bell.XGrid.Unit = dataArr[3];
 
             return bell;
         }

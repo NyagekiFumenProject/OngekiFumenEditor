@@ -14,7 +14,11 @@ namespace OngekiFumenEditor.Parser
         public static T[] GetDataArray<T>(string line)
         {
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            return SplitEmptyChar(line).Skip(1).Select(x => converter.ConvertFromString(x)).OfType<T>().ToArray();
+            return SplitEmptyChar(line).Skip(1).Select(x => {
+                if (converter.IsValid(x))
+                    return (T)converter.ConvertFromString(x);
+                return default;
+            }).ToArray();
         }
     }
 }

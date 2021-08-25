@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Utils
     public class GeminiLogOutput : ILogOutput
     {
         [Import(typeof(IOutput))]
-        private IOutput output;
+        private IOutput output = default;
 
         public void WriteLog(string content)
         {

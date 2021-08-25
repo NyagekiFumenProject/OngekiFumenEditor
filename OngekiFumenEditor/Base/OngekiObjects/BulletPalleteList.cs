@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class BulletPalleteList : IOngekiObject
+    public class BulletPalleteList : OngekiObjectBase
     {
         public class Shooter : FadeStringEnum
         {
@@ -80,18 +80,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public string StrID { get; set; } = "";
         public Shooter ShooterValue { get; set; } = Shooter.Center;
-        public int placeOffset { get; set; }
+        public int PlaceOffset { get; set; }
         public Target TargetValue { get; set; } = Target.FixField;
         public float Speed { get; set; }
         public BulletType BulletTypeValue { get; set; } = BulletType.Danger;
 
-        public string Group => "B_PALETTE";
-        public string IDShortName => "BPL";
-        public string Name => "BulletPalleteList";
+        public static string CommandName => "BPL";
+        public override string IDShortName => CommandName;
 
-        public string Serialize(OngekiFumen fumenData)
+        public override string Serialize(OngekiFumen fumenData)
         {
-            return $"{IDShortName} {StrID} {ShooterValue} {placeOffset} {TargetValue} {Speed} {BulletTypeValue}";
+            return $"{IDShortName} {StrID} {ShooterValue} {PlaceOffset} {TargetValue} {Speed} {BulletTypeValue}";
         }
     }
 }

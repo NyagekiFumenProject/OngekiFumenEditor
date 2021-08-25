@@ -20,9 +20,9 @@ namespace OngekiFumenEditor.Base
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddObjects(params IOngekiObject[] objs) => AddObjects(objs);
+        public void AddObjects(params OngekiObjectBase[] objs) => AddObjects(objs);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddObjects(IEnumerable<IOngekiObject> objs)
+        public void AddObjects(IEnumerable<OngekiObjectBase> objs)
         {
             foreach (var item in objs)
             {
@@ -30,9 +30,9 @@ namespace OngekiFumenEditor.Base
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveObjects(params IOngekiObject[] objs) => RemoveObjects(objs);
+        public void RemoveObjects(params OngekiObjectBase[] objs) => RemoveObjects(objs);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RemoveObjects(IEnumerable<IOngekiObject> objs)
+        public void RemoveObjects(IEnumerable<OngekiObjectBase> objs)
         {
             foreach (var item in objs)
             {
@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Base
             EnemySets.Sort();
         }
 
-        public void AddObject(IOngekiObject obj)
+        public void AddObject(OngekiObjectBase obj)
         {
             if (obj is Bell bel)
             {
@@ -77,7 +77,7 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-        public void RemoveObject(IOngekiObject obj)
+        public void RemoveObject(OngekiObjectBase obj)
         {
             if (obj is Bell bell)
             {

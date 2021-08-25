@@ -16,9 +16,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IViewAware
     {
-        protected IOngekiObject referenceOngekiObject;
+        protected OngekiObjectBase referenceOngekiObject;
 
-        public virtual IOngekiObject ReferenceOngekiObject
+        public virtual OngekiObjectBase ReferenceOngekiObject
         {
             get { return referenceOngekiObject; }
             set
@@ -144,9 +144,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public object GetView(object context = null) => View;
     }
 
-    public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : IOngekiObject, new()
+    public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, new()
     {
-        public override IOngekiObject ReferenceOngekiObject
+        public override OngekiObjectBase ReferenceOngekiObject
         {
             get
             {

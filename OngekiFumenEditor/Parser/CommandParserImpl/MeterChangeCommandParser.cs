@@ -10,20 +10,21 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class BpmCommandParser : ICommandParser
+    public class MeterChangeCommandParser : ICommandParser
     {
-        public string CommandLineHeader => BPM.CommandName;
+        public string CommandLineHeader => MeterChange.CommandName;
 
         public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
-            var bpm = new BPM();
+            var met = new MeterChange();
 
-            bpm.TGrid.Unit = dataArr[1];
-            bpm.TGrid.Grid = (int)dataArr[2];
-            bpm.Value = dataArr[3];
+            met.TGrid.Unit = dataArr[1];
+            met.TGrid.Grid = (int)dataArr[2];
+            met.BunShi = (int)dataArr[3];
+            met.Bunbo = (int)dataArr[4];
 
-            return bpm;
+            return met;
         }
     }
 }

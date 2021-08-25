@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class EnemySet : IOngekiObject, ITimelineObject
+    public class EnemySet : OngekiTimelineObjectBase
     {
         public class WaveChangeConst : FadeStringEnum
         {
@@ -22,23 +22,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public int CompareTo(object obj)
+        public WaveChangeConst TagTblValue { get; set; } = WaveChangeConst.Boss;
+
+        public static string CommandName => "EST";
+        public override string IDShortName => CommandName;
+
+        public override string Serialize(OngekiFumen fumenData)
         {
-            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
-        }
-
-        public TGrid TGrid { get; set; } = new TGrid();
-        public WaveChangeConst tagTblValue { get; set; } = WaveChangeConst.Boss;
-
-        public string Group => "COMPOSITION";
-
-        public string IDShortName => "EST";
-
-        public string Name => "EnemySoundSet";
-
-        public string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {TGrid.Serialize(fumenData)} {tagTblValue}";
+            return $"{IDShortName} {TGrid.Serialize(fumenData)} {TagTblValue}";
         }
     }
 }

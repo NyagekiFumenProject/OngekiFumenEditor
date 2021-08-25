@@ -13,10 +13,9 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "TRESOLUTION";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            var dataArr = ParserUtils.GetDataArray<int>(line);
-            fumen.MetaInfo.TRESOLUTION = dataArr.ElementAtOrDefault(0);
+            fumen.MetaInfo.TRESOLUTION = args.GetData<int>(1);
         }
     }
 }

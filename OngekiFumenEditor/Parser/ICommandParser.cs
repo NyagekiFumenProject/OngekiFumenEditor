@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Parser
     public interface ICommandParser
     {
         public string CommandLineHeader { get; }
-        public IOngekiObject Parse(string line,OngekiFumen fumen);
-        public void AfterParse(IOngekiObject obj, OngekiFumen fumen) { }
+        public OngekiObjectBase Parse(CommandArgs args,OngekiFumen fumen);
+        public void AfterParse(OngekiObjectBase obj, OngekiFumen fumen) { }
     }
 }

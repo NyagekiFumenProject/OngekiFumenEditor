@@ -13,9 +13,9 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "BEAM_DAMAGE";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            fumen.MetaInfo.ProgJudgeBpm = ParserUtils.GetDataArray<float>(line).ElementAtOrDefault(0);
+            fumen.MetaInfo.ProgJudgeBpm = args.GetData<float>(1);
         }
     }
 }

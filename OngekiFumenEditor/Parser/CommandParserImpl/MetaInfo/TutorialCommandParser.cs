@@ -13,9 +13,9 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "TUTORIAL";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            fumen.MetaInfo.Tutorial = ParserUtils.GetDataArray<int>(line).ElementAtOrDefault(0) == 1;
+            fumen.MetaInfo.Tutorial = args.GetData<int>(1) == 1;
         }
     }
 }

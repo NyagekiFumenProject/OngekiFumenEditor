@@ -13,10 +13,9 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "XRESOLUTION";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            var dataArr = ParserUtils.GetDataArray<int>(line);
-            fumen.MetaInfo.XRESOLUTION = dataArr.ElementAtOrDefault(0);
+            fumen.MetaInfo.XRESOLUTION = args.GetData<int>(1);
         }
     }
 }

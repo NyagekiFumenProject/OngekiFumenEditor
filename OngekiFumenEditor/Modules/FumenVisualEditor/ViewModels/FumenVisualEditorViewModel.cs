@@ -29,14 +29,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [Export(typeof(FumenVisualEditorViewModel))]
     public class FumenVisualEditorViewModel : PersistedDocument
     {
-        public struct XGridUnitLineViewModel : INotifyPropertyChanged
+        public struct XGridUnitLineViewModel
         {
             public double X { get; set; }
             public double Unit { get; set; }
             public bool IsCenterLine { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-
             public override string ToString() => $"{X:F4} {Unit} {(IsCenterLine ? "Center" : string.Empty)}";
         }
 
@@ -196,7 +193,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var obj in displayableObjects)
             {
                 var displayObject = Activator.CreateInstance(obj.ModelViewType) as DisplayObjectViewModelBase;
-                if (ViewCreateHelper.CreateView(displayObject) is OngekiObjectViewBase view && obj is IOngekiObject o)
+                if (ViewCreateHelper.CreateView(displayObject) is OngekiObjectViewBase view && obj is OngekiObjectBase o)
                 {
                     view.ViewModel.ReferenceOngekiObject = o;
                     view.ViewModel.EditorViewModel = this;
@@ -242,7 +239,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             VisualDisplayer.Children.Add(view);
             viewModel.EditorViewModel = this;
 
-            Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.Name}");
+            Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
         }
 
         public void DeleteSelectedObjects()

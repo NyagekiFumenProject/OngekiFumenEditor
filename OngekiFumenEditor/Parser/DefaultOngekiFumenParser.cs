@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base;
+﻿using Microsoft.Extensions.ObjectPool;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -19,22 +20,29 @@ namespace OngekiFumenEditor.Parser
         public async Task<OngekiFumen> ParseAsync(Stream stream)
         {
             var reader = new StreamReader(stream);
-            var genObjList = new List<(IOngekiObject obj,ICommandParser parser)>();
+            var genObjList = new List<(OngekiObjectBase obj,ICommandParser parser)>();
             var fumen = new OngekiFumen();
+
+            var pool = ObjectPool.Create<CommandArgs>();
+            var commandArg = pool.Get();
 
             while (!reader.EndOfStream)
             {
                 var line = await reader.ReadLineAsync();
+                commandArg.Line = line;
 
-                if (CommandParsers.FirstOrDefault(x=> line.StartsWith(x.CommandLineHeader,StringComparison.OrdinalIgnoreCase)) is ICommandParser parser)
+                var cmdName = commandArg.GetData<string>(0)?.Trim();
+                if (cmdName != null && CommandParsers.FirstOrDefault(x=> cmdName.Equals(x.CommandLineHeader,StringComparison.OrdinalIgnoreCase)) is ICommandParser parser)
                 {
-                    if (parser.Parse(line, fumen) is IOngekiObject obj)
+                    if (parser.Parse(line, fumen) is OngekiObjectBase obj)
                     {
                         genObjList.Add((obj,parser));
                         fumen.AddObject(obj);
                     }
                 }
             }
+
+            pool.Return(commandArg);
 
             foreach (var pair in genObjList)
             {

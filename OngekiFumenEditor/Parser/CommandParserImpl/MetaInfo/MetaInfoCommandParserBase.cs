@@ -11,11 +11,11 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public abstract string CommandLineHeader { get; }
 
-        public abstract void ParseMetaInfo(string line, OngekiFumen fumen);
+        public abstract void ParseMetaInfo(CommandArgs args, OngekiFumen fumen);
 
-        public IOngekiObject Parse(string line, OngekiFumen fumen)
+        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
-            ParseMetaInfo(line, fumen);
+            ParseMetaInfo(args, fumen);
             return null;
         }
     }

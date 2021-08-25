@@ -13,14 +13,14 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "MET_DEF";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            var dataArr = ParserUtils.GetDataArray<int>(line);
+            var dataArr = args.GetDataArray<int>();
 
             fumen.MetaInfo.MeterDefinition = new FumenMetaInfo.MetDef()
             {
-                Bunshi = dataArr.ElementAtOrDefault(0),
-                Bunbo = dataArr.ElementAtOrDefault(1),
+                Bunshi = dataArr.ElementAtOrDefault(1),
+                Bunbo = dataArr.ElementAtOrDefault(2),
             };
         }
     }

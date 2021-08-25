@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public interface IOngekiObject : ISerializable
+    public abstract class OngekiObjectBase : ISerializable
     {
-        public string Group { get; }
-        public string IDShortName { get; }
-        public string Name { get; }
+        public abstract string IDShortName { get; }
+        public abstract string Serialize(OngekiFumen fumenData);
+
+
     }
 }

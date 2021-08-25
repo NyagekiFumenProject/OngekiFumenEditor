@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="5.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj" />
     <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj" />
   </ItemGroup>

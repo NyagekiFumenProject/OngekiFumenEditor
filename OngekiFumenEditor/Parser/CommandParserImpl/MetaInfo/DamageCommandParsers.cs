@@ -13,9 +13,9 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "BULLET_DAMAGE";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            fumen.MetaInfo.BulletDamage = ParserUtils.GetDataArray<double>(line).ElementAtOrDefault(0);
+            fumen.MetaInfo.BulletDamage = args.GetData<double>(1);
         }
     }
 }

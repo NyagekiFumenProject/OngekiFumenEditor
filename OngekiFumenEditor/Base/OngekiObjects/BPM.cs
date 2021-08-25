@@ -6,21 +6,14 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class BPM : IOngekiObject, ITimelineObject
+    public class BPM : OngekiTimelineObjectBase
     {
-        public TGrid TGrid { get; set; } = new TGrid();
         public double Value { get; set; }
 
-        public string Group => "COMPOSITION";
-        public string IDShortName => "BPM";
-        public string Name => "BPM";
+        public static string CommandName => "BPM";
+        public override string IDShortName => CommandName;
 
-        public int CompareTo(object obj)
-        {
-            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
-        }
-
-        public string Serialize(OngekiFumen fumenData)
+        public override string Serialize(OngekiFumen fumenData)
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)} {Value}";
         }

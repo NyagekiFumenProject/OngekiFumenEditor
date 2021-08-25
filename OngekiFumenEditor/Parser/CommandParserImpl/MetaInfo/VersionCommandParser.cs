@@ -13,10 +13,10 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "VERSION";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            var dataArr = ParserUtils.GetDataArray<int>(line);
-            fumen.MetaInfo.Version = new Version(dataArr.ElementAtOrDefault(0), dataArr.ElementAtOrDefault(1), dataArr.ElementAtOrDefault(2));
+            var dataArr = args.GetDataArray<int>();
+            fumen.MetaInfo.Version = new Version(dataArr.ElementAtOrDefault(1), dataArr.ElementAtOrDefault(2), dataArr.ElementAtOrDefault(3));
         }
     }
 }

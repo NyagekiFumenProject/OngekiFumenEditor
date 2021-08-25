@@ -13,10 +13,9 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "CREATOR";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            var dataArr = ParserUtils.GetDataArray<string>(line);
-            fumen.MetaInfo.Creator = dataArr.ElementAtOrDefault(0) ?? "";
+            fumen.MetaInfo.Creator = args.GetData<string>(1) ?? "";
         }
     }
 }

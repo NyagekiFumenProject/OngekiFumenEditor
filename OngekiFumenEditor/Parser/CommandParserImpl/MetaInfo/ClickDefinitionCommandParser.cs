@@ -13,10 +13,9 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
     {
         public override string CommandLineHeader => "CLK_DEF";
 
-        public override void ParseMetaInfo(string line, OngekiFumen fumen)
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            var dataArr = ParserUtils.GetDataArray<int>(line);
-            fumen.MetaInfo.ClickDefinition = dataArr.ElementAtOrDefault(0);
+            fumen.MetaInfo.ClickDefinition = args.GetData<int>(1);
         }
     }
 }
