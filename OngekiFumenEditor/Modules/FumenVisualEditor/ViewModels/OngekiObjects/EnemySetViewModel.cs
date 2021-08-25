@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "EnemySet", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Enemy Set", "Ongeki Objects")]
     public class EnemySetViewModel : DisplayTextLineObjectViewModelBase<EnemySet>
     {
         public override Brush DisplayBrush => Brushes.Yellow;

@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "BPMChange", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "BPM Change", "Ongeki Objects")]
     public class BPMChangeViewModel : DisplayTextLineObjectViewModelBase<BPMChange>
     {
         public override Brush DisplayBrush => Brushes.Pink;
