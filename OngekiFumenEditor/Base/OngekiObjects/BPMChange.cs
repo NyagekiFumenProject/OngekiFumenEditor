@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class BPM : OngekiTimelineObjectBase
+    public class BPMChange : OngekiTimelineObjectBase
     {
         public double Value { get; set; }
 

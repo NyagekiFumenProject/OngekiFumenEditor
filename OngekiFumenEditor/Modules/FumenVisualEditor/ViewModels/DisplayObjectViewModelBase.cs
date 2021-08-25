@@ -2,15 +2,16 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Converters;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.Attributes;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -74,17 +75,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             Y = relativePoint.Y;
 
-            if (ReferenceOngekiObject is IHorizonPositionObject posObj && EditorViewModel is FumenVisualEditorViewModel hostModelView)
+            if (ReferenceOngekiObject is IHorizonPositionObject posObj)
             {
-                var x = CheckAndAdjustX(relativePoint.X);
-                var xgridValue = (x - hostModelView.CanvasWidth / 2) / (hostModelView.XUnitSize / hostModelView.UnitCloseSize);
-                var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
-                posObj.XGrid.Unit = Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (float)xgridValue;
-                //Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
-            }
-            else
-            {
-                Log.LogInfo("Can't move object in canvas because it's not ready.");
+                if (EditorViewModel is FumenVisualEditorViewModel hostModelView)
+                {
+                    var x = CheckAndAdjustX(relativePoint.X);
+                    var xgridValue = (x - hostModelView.CanvasWidth / 2) / (hostModelView.XUnitSize / hostModelView.UnitCloseSize);
+                    var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
+                    posObj.XGrid.Unit = Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (float)xgridValue;
+                    //Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
+                }
+                else
+                {
+                    Log.LogInfo("Can't move object in canvas because it's not ready.");
+                }
             }
         }
 
@@ -161,5 +165,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 base.ReferenceOngekiObject = value;
             }
         }
+    }
+
+    [MapToView(ViewType = typeof(DisplayTextLineObjectViewBase))]
+    public abstract class DisplayTextLineObjectViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase , new()
+    {
+        public new T ReferenceOngekiObject => base.ReferenceOngekiObject as T;
+        public abstract Brush DisplayBrush { get; }
+        public virtual string DisplayName => ReferenceOngekiObject.IDShortName;
+        public abstract object DisplayValue { get; }
     }
 }

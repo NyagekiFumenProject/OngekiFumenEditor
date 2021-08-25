@@ -12,12 +12,12 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
     [Export(typeof(ICommandParser))]
     public class BpmCommandParser : ICommandParser
     {
-        public string CommandLineHeader => BPM.CommandName;
+        public string CommandLineHeader => BPMChange.CommandName;
 
         public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
-            var bpm = new BPM();
+            var bpm = new BPMChange();
 
             bpm.TGrid.Unit = dataArr[1];
             bpm.TGrid.Grid = (int)dataArr[2];

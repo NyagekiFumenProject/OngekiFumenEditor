@@ -18,7 +18,7 @@
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Canvas AllowDrop="True" Background="LightGreen" DragEnter="Grid_DragEnter" Drop="Grid_Drop" Name="VisualDisplayer">
+        <Canvas Visibility="Visible" AllowDrop="True" Background="Black" DragEnter="Grid_DragEnter" Drop="Grid_Drop" Name="VisualDisplayer">
             <Canvas.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Selected Object...">
@@ -42,16 +42,16 @@
                                     <Style TargetType="Line">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                                <Setter Property="Stroke" Value="#90000000"></Setter>
+                                                <Setter Property="Stroke" Value="#90FFFFFF"></Setter>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsCenterLine}" Value="False">
-                                                <Setter Property="Stroke" Value="#40000000"></Setter>
+                                                <Setter Property="Stroke" Value="#40FFFFFF"></Setter>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Line.Style>
                             </Line>
-                            <TextBlock Opacity="0.35" FontSize="10" Text="{Binding Unit}">
+                            <TextBlock Opacity="0.35" Foreground="White" FontSize="10" Text="{Binding Unit}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Style.Triggers>

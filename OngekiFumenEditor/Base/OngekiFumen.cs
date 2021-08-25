@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Base
         public FumenMetaInfo MetaInfo { get; set; } = new FumenMetaInfo();
         public List<BulletPalleteList> BulletPalleteList { get; set; } = new List<BulletPalleteList>();
         public List<Bell> Bells { get; set; } = new List<Bell>();
-        public List<BPM> BPMs { get; set; } = new List<BPM>();
+        public List<BPMChange> BPMs { get; set; } = new List<BPMChange>();
         public List<MeterChange> MeterChanges { get; set; } = new List<MeterChange>();
         public List<EnemySet> EnemySets { get; set; } = new List<EnemySet>();
 
@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Base
             {
                 Bells.Add(bel);
             }
-            else if(obj is BPM bpm){
+            else if(obj is BPMChange bpm){
                 BPMs.Add(bpm);
             }
             else if (obj is MeterChange met)
@@ -95,7 +95,7 @@ namespace OngekiFumenEditor.Base
             return Bells.OfType<IDisplayableObject>();
         }
 
-        public IEnumerable<BPM> GetAllBpmList()
+        public IEnumerable<BPMChange> GetAllBpmList()
         {
             yield return MetaInfo.FirstBpm;
 
@@ -105,7 +105,7 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-        public BPM GetBpm(TGrid time)
+        public BPMChange GetBpm(TGrid time)
         {
             return GetAllBpmList().LastOrDefault(bpm => bpm.TGrid < time);
         }

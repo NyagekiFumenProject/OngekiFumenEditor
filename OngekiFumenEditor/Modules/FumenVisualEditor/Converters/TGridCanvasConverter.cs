@@ -18,10 +18,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
                 && values.ElementAtOrDefault(1) is int grid 
                 && values.ElementAtOrDefault(2) is FumenVisualEditorViewModel modelView)
             {
-                return 0;
+                return 0d;
             }
 
-            return 0;
+            return 0d;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

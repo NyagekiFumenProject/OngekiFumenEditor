@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Parser
                 var cmdName = commandArg.GetData<string>(0)?.Trim();
                 if (cmdName != null && CommandParsers.FirstOrDefault(x=> cmdName.Equals(x.CommandLineHeader,StringComparison.OrdinalIgnoreCase)) is ICommandParser parser)
                 {
-                    if (parser.Parse(line, fumen) is OngekiObjectBase obj)
+                    if (parser.Parse(commandArg, fumen) is OngekiObjectBase obj)
                     {
                         genObjList.Add((obj,parser));
                         fumen.AddObject(obj);

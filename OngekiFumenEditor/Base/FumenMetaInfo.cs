@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Base
         /// BPM定义信息
         /// </summary>
         public BpmDef BpmDefinition { get; set; } = new BpmDef();
-        public BPM FirstBpm { get; set; } = new BPM();
+        public BPMChange FirstBpm { get; set; } = new BPMChange();
 
         /// <summary>
         /// 节拍信息

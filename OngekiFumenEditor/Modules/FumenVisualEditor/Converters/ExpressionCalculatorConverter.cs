@@ -1,5 +1,4 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+﻿using ExtrameFunctionCalculator;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,19 +9,23 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
 {
-    public class XGridCanvasConverter : IMultiValueConverter
+    class ExpressionCalculatorConverter : IMultiValueConverter
     {
+        public Calculator calculator = new Calculator();
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.ElementAtOrDefault(0) is float xgridUnit
-                &&
-                values.ElementAtOrDefault(1) is FumenVisualEditorViewModel modelView)
+            for (int i = 0; i < values.Length; i++)
             {
-                var x = xgridUnit * (modelView.XUnitSize / modelView.UnitCloseSize) + modelView.CanvasWidth / 2;
-                return x;
+                calculator.SetExpressionVariable($"x{(i == 0 ? "":i.ToString())}={values[i]}");
             }
 
-            return 0d;
+            if (parameter is string exprStr && !string.IsNullOrWhiteSpace(exprStr))
+            {
+                return calculator.Solve(exprStr);
+            }
+
+            return default;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
