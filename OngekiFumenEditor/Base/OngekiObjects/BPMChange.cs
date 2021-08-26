@@ -8,14 +8,23 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class BPMChange : OngekiTimelineObjectBase
     {
-        public double Value { get; set; }
+        private double bpm = default;
+        public double BPM
+        {
+            get { return bpm; }
+            set
+            {
+                bpm = value;
+                NotifyOfPropertyChange(() => BPM);
+            }
+        }
 
         public static string CommandName => "BPM";
         public override string IDShortName => CommandName;
 
         public override string Serialize(OngekiFumen fumenData)
         {
-            return $"{IDShortName} {TGrid.Serialize(fumenData)} {Value}";
+            return $"{IDShortName} {TGrid.Serialize(fumenData)} {BPM}";
         }
 
         public override string ToString() => Serialize(default);

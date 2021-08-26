@@ -22,7 +22,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public WaveChangeConst TagTblValue { get; set; } = WaveChangeConst.Boss;
+        private WaveChangeConst tagTblValue = WaveChangeConst.Boss;
+        public WaveChangeConst TagTblValue
+        {
+            get { return tagTblValue; }
+            set
+            {
+                tagTblValue = value;
+                NotifyOfPropertyChange(() => TagTblValue);
+            }
+        }
 
         public static string CommandName => "EST";
         public override string IDShortName => CommandName;

@@ -1,6 +1,9 @@
 ﻿using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
+using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
@@ -9,6 +12,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     public class BPMChangeViewModel : DisplayTextLineObjectViewModelBase<BPMChange>
     {
         public override Brush DisplayBrush => Brushes.Pink;
-        public override object DisplayValue => ReferenceOngekiObject?.Value;
+        private static BindingBase SharedDisplayValueBinding = new Binding("ReferenceOngekiObject.BPM");
+        public override BindingBase DisplayValueBinding => SharedDisplayValueBinding;
+
+        public BPMChangeViewModel()
+        {
+            Task.Delay(2000).ContinueWith((a) =>
+            {
+                OnUIThread(() =>
+                {
+                    ReferenceOngekiObject.BPM = 500;
+                    Log.LogInfo("GUGU");
+                });
+            });
+        }
     }
 }

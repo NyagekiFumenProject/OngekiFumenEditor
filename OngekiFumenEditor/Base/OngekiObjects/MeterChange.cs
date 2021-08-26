@@ -8,8 +8,27 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class MeterChange : OngekiTimelineObjectBase
     {
-        public int BunShi { get; set; }
-        public int Bunbo { get; set; }
+        private int bunShi = default;
+        public int BunShi
+        {
+            get { return bunShi; }
+            set
+            {
+                bunShi = value;
+                NotifyOfPropertyChange(() => BunShi);
+            }
+        }
+
+        private int bunbo = default;
+        public int Bunbo
+        {
+            get { return bunbo; }
+            set
+            {
+                bunbo = value;
+                NotifyOfPropertyChange(() => Bunbo);
+            }
+        }
 
         public static string CommandName => "MET";
         public override string IDShortName => CommandName;

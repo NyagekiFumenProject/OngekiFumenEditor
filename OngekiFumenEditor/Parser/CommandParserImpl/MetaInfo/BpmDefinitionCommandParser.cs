@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
                     Grid = 0,
                     Unit = 0
                 },
-                Value = fumen.MetaInfo.BpmDefinition.First,
+                BPM = fumen.MetaInfo.BpmDefinition.First,
             };
         }
     }

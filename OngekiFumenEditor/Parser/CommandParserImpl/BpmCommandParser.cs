@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
 
             bpm.TGrid.Unit = dataArr[1];
             bpm.TGrid.Grid = (int)dataArr[2];
-            bpm.Value = dataArr[3];
+            bpm.BPM = dataArr[3];
 
             return bpm;
         }

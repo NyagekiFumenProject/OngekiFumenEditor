@@ -26,6 +26,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 referenceOngekiObject = value;
                 NotifyOfPropertyChange(() => ReferenceOngekiObject);
+                NotifyOfPropertyChange(() => CanMoveX);
+                NotifyOfPropertyChange(() => IsTimelineObject);
             }
         }
 
@@ -95,7 +97,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public double CheckAndAdjustX(double x)
         {
             //todo 基于二分法查询最近
-            var editorViewModel = EditorViewModel;
             var enableMagneticAdjust = !(editorViewModel?.IsPreventXAutoClose ?? false);
             var mid = enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z => new
             {
@@ -170,9 +171,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [MapToView(ViewType = typeof(DisplayTextLineObjectViewBase))]
     public abstract class DisplayTextLineObjectViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase , new()
     {
-        public new T ReferenceOngekiObject => base.ReferenceOngekiObject as T;
+        public new T ReferenceOngekiObject {
+            get
+            {
+                return base.ReferenceOngekiObject as T;
+            }
+            set
+            {
+                base.ReferenceOngekiObject = value;
+            }
+        }
+
         public abstract Brush DisplayBrush { get; }
         public virtual string DisplayName => ReferenceOngekiObject.IDShortName;
-        public abstract object DisplayValue { get; }
+        public abstract BindingBase DisplayValueBinding { get; }
+
+        protected override void OnAttachedView(object v)
+        {
+            base.OnAttachedView(v);
+
+            if (v is DisplayTextLineObjectViewBase view)
+            {
+                view.displayValueTextBlock.SetBinding(TextBlock.TextProperty, DisplayValueBinding);
+            }
+        }
     }
 }

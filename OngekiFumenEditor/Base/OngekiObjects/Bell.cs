@@ -10,7 +10,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class Bell : OngekiTimelineObjectBase, IHorizonPositionObject , IDisplayableObject
     {
-        public XGrid XGrid { get; set; } = new XGrid();
+        private XGrid xGrid = new XGrid();
+        public XGrid XGrid
+        {
+            get { return xGrid; }
+            set
+            {
+                xGrid = value;
+                NotifyOfPropertyChange(() => XGrid);
+            }
+        }
 
         public static string CommandName => "BEL";
         public override string IDShortName => CommandName;

@@ -78,12 +78,71 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             public readonly static BulletType Danger = new BulletType("DNG");
         }
 
-        public string StrID { get; set; } = "";
-        public Shooter ShooterValue { get; set; } = Shooter.Center;
-        public int PlaceOffset { get; set; }
-        public Target TargetValue { get; set; } = Target.FixField;
-        public float Speed { get; set; }
-        public BulletType BulletTypeValue { get; set; } = BulletType.Danger;
+        private string strID = string.Empty;
+        public string StrID
+        {
+            get { return strID; }
+            set
+            {
+                strID = value;
+                NotifyOfPropertyChange(() => StrID);
+            }
+        }
+
+        private Shooter shooterValue = Shooter.Center;
+        public Shooter ShooterValue
+        {
+            get { return shooterValue; }
+            set
+            {
+                shooterValue = value;
+                NotifyOfPropertyChange(() => ShooterValue);
+            }
+        }
+
+        private int placeOffset = default;
+        public int PlaceOffset
+        {
+            get { return placeOffset; }
+            set
+            {
+                placeOffset = value;
+                NotifyOfPropertyChange(() => PlaceOffset);
+            }
+        }
+
+        private Target targetValue = Target.FixField;
+        public Target TargetValue
+        {
+            get { return targetValue; }
+            set
+            {
+                targetValue = value;
+                NotifyOfPropertyChange(() => TargetValue);
+            }
+        }
+
+        private float speed = default;
+        public float Speed
+        {
+            get { return speed; }
+            set
+            {
+                speed = value;
+                NotifyOfPropertyChange(() => Speed);
+            }
+        }
+
+        private BulletType bulletTypeValue = BulletType.Normal;
+        public BulletType BulletTypeValue
+        {
+            get { return bulletTypeValue; }
+            set
+            {
+                bulletTypeValue = value;
+                NotifyOfPropertyChange(() => BulletTypeValue);
+            }
+        }
 
         public static string CommandName => "BPL";
         public override string IDShortName => CommandName;

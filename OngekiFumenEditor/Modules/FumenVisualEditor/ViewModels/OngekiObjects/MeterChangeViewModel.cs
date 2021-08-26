@@ -1,6 +1,11 @@
 ﻿using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Utils;
+using System;
 using System.ComponentModel.Composition;
+using System.Globalization;
+using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
@@ -9,6 +14,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     public class MeterChangeViewModel : DisplayTextLineObjectViewModelBase<MeterChange>
     {
         public override Brush DisplayBrush => Brushes.LightGreen;
-        public override object DisplayValue => $"{ReferenceOngekiObject.Bunbo} {ReferenceOngekiObject.BunShi}";
+
+        private static MultiBinding ShareBinding = new MultiBinding()
+        {
+            StringFormat = "{0} {1}"
+        };
+
+        static MeterChangeViewModel()
+        {
+            ShareBinding.Bindings.Add(new Binding("ReferenceOngekiObject.BunShi"));
+            ShareBinding.Bindings.Add(new Binding("ReferenceOngekiObject.Bunbo"));
+        }
+
+        public override BindingBase DisplayValueBinding => ShareBinding;
+
+        public MeterChangeViewModel()
+        {
+            Task.Delay(2000).ContinueWith((a) =>
+            {
+                OnUIThread(() =>
+                {
+                    ReferenceOngekiObject.Bunbo = 500;
+                    Log.LogInfo("GUGU");
+                });
+            });
+        }
     }
 }
