@@ -14,17 +14,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         public override Brush DisplayBrush => Brushes.Pink;
         private static BindingBase SharedDisplayValueBinding = new Binding("ReferenceOngekiObject.BPM");
         public override BindingBase DisplayValueBinding => SharedDisplayValueBinding;
-
-        public BPMChangeViewModel()
-        {
-            Task.Delay(2000).ContinueWith((a) =>
-            {
-                OnUIThread(() =>
-                {
-                    ReferenceOngekiObject.BPM = 500;
-                    Log.LogInfo("GUGU");
-                });
-            });
-        }
     }
 }

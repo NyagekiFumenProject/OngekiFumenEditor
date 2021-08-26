@@ -27,17 +27,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         }
 
         public override BindingBase DisplayValueBinding => ShareBinding;
-
-        public MeterChangeViewModel()
-        {
-            Task.Delay(2000).ContinueWith((a) =>
-            {
-                OnUIThread(() =>
-                {
-                    ReferenceOngekiObject.Bunbo = 500;
-                    Log.LogInfo("GUGU");
-                });
-            });
-        }
     }
 }
