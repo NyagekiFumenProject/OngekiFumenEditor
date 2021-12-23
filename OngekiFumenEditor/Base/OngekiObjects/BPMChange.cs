@@ -28,5 +28,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         public override string ToString() => Serialize(default);
+
+        public GridOffset LengthConvertToOffset(double len, int timeGridSize)
+        {
+            var size = this.BPM / 240 * timeGridSize;
+            var unit = (int)(len / size);
+            var grid = (int)(len % size / size * TGrid.ResT);
+
+            return new GridOffset(unit, grid);
+        }
     }
 }
