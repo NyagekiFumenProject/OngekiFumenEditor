@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base;
+﻿using Gemini.Framework;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
@@ -100,9 +101,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             IsDragging = true;
 
             var pos = e.GetPosition(parent);
-            if (parent is Visual uiElement)
+            if (VisualTreeUtility.FindParent<Visual>(this) is FrameworkElement uiElement)
             {
-                if (VisualTreeHelper.GetContentBounds(uiElement).Contains(pos))
+                var bound = new Rect(0, 0, uiElement.ActualWidth, uiElement.ActualHeight);
+                if (bound.Contains(pos))
                 {
                     dragCall(pos);
                 }
@@ -130,6 +132,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             IsMouseDown = false;
             IsDragging = false;
             e.Handled = true;
+        }
+
+        public void RecalcCanvasXY()
+        {
+            ViewModel.NotifyOfPropertyChange(nameof(ViewModel.EditorViewModel));
         }
     }
 }
