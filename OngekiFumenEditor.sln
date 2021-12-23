@@ -8,6 +8,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini", "gemini\src\Gemini
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini.Modules.Output", "gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj", "{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{C6C1204B-1881-4B1E-9726-770A7591DDAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
