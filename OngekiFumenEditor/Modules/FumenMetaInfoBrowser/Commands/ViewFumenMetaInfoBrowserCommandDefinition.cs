@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Commands
 
         public override string Text
         {
-            get { return "Fumen metainfo browser"; }
+            get { return "谱面文件信息"; }
         }
 
         public override string ToolTip
