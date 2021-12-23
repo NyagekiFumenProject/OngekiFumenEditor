@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public virtual void MoveCanvas(Point relativePoint)
         {
-            Y = relativePoint.Y;
+            Y = CheckAndAdjustY(relativePoint.Y);
 
             if (ReferenceOngekiObject is IHorizonPositionObject posObj)
             {
@@ -92,6 +92,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     Log.LogInfo("Can't move object in canvas because it's not ready.");
                 }
             }
+        }
+
+        public double CheckAndAdjustY(double y)
+        {
+            y = EditorViewModel.CanvasHeight - y;
+
+            var bpmList = EditorViewModel.Fumen.BpmList;
+            var currentTGrid = EditorViewModel.CurrentDisplayTimePosition;
+            var displayBaseBpm = bpmList.GetBpm(currentTGrid);
+            var timeGridSize = EditorViewModel.TimeGridSize;
+
+            //get reference target bpm
+
+
+            Log.LogInfo(y.ToString());
+            return y;
         }
 
         public double CheckAndAdjustX(double x)
