@@ -6,6 +6,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -35,5 +36,16 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
+        public ImageSource Icon
+        {
+            get
+            {
+                return window.Icon;
+            }
+            set
+            {
+                window.Icon = value;
+            }
+        }
     }
 }
