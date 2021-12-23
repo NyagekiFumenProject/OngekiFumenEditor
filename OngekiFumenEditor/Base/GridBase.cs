@@ -58,6 +58,16 @@ namespace OngekiFumenEditor.Base
             return 0;
         }
 
+        public static bool operator ==(GridBase l, GridBase r)
+        {
+            return l.CompareTo(r) == 0;
+        }
+
+        public static bool operator !=(GridBase l, GridBase r)
+        {
+            return !(l == r);
+        }
+
         public abstract string Serialize(OngekiFumen fumenData);
     }
 }
