@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class BPMChange : OngekiTimelineObjectBase
     {
-        private double bpm = default;
+        private double bpm = 240;
         public double BPM
         {
             get { return bpm; }
