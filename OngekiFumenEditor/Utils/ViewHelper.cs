@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Gemini.Framework;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
 using System.Collections.Generic;
@@ -7,10 +8,11 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Utils
 {
-    public static class ViewCreateHelper
+    public static class ViewHelper
     {
         public static UIElement CreateViewByViewModelType<T>() where T : new() => CreateViewByViewModelType(() => new T());
 
