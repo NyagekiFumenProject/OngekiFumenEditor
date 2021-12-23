@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Base
         public FumenMetaInfo MetaInfo { get; set; } = new FumenMetaInfo();
         public List<BulletPalleteList> BulletPalleteList { get; set; } = new List<BulletPalleteList>();
         public List<Bell> Bells { get; set; } = new List<Bell>();
-        public List<BPMChange> BPMs { get; set; } = new List<BPMChange>();
+        public BpmList BpmList { get; set; } = new BpmList();
         public List<MeterChange> MeterChanges { get; set; } = new List<MeterChange>();
         public List<EnemySet> EnemySets { get; set; } = new List<EnemySet>();
 
@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Base
         public void Setup()
         {
             Bells.Sort();
-            BPMs.Sort();
+            BpmList.Sort();
             MeterChanges.Sort();
             EnemySets.Sort();
         }
@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Base
                 Bells.Add(bel);
             }
             else if(obj is BPMChange bpm){
-                BPMs.Add(bpm);
+                BpmList.Add(bpm);
             }
             else if (obj is MeterChange met)
             {
@@ -97,17 +97,7 @@ namespace OngekiFumenEditor.Base
 
         public IEnumerable<BPMChange> GetAllBpmList()
         {
-            yield return MetaInfo.FirstBpm;
-
-            foreach (var bpm in BPMs)
-            {
-                yield return bpm;
-            }
-        }
-
-        public BPMChange GetBpm(TGrid time)
-        {
-            return GetAllBpmList().LastOrDefault(bpm => bpm.TGrid < time);
+            return BpmList;
         }
 
         public string Serialize()
@@ -131,7 +121,7 @@ namespace OngekiFumenEditor.Base
             sb.AppendLine();
             sb.AppendLine("[COMPOSITION]");
 
-            foreach (var o in BPMs.OrderBy(x => x.TGrid))
+            foreach (var o in BpmList.OrderBy(x => x.TGrid))
                 sb.AppendLine(o.Serialize(this));
             sb.AppendLine();
             foreach (var o in MeterChanges.OrderBy(x => x.TGrid))
