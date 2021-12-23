@@ -11,6 +11,8 @@ namespace OngekiFumenEditor.Base
         public const uint DEFAULT_RES_T = 1920;
         public uint ResT { get; set; } = DEFAULT_RES_T;
 
+        public TGrid(float unit = default, int grid = default, uint resT = DEFAULT_RES_T) : base(unit, grid) => ResT = resT;
+
         public override string Serialize(OngekiFumen fumenData)
         {
             return $"{Unit} {Grid}";
@@ -36,6 +38,17 @@ namespace OngekiFumenEditor.Base
         public static bool operator >=(TGrid l, TGrid r)
         {
             return !(l < r);
+        }
+
+        public static TGrid operator +(TGrid l, GridOffset r)
+        {
+            var unit = l.Unit + r.Unit;
+            var grid = r.Grid + l.Grid;
+
+            unit += grid / l.ResT;
+            grid = (int)(grid % l.ResT);
+
+            return new TGrid(unit, grid);
         }
     }
 }

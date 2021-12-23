@@ -13,6 +13,12 @@ namespace OngekiFumenEditor.Base
         private int grid = 0; //grid
         private float unit = 0; //unit
 
+        public GridBase(float unit = default, int grid = default)
+        {
+            this.grid = grid;
+            this.unit = unit;
+        }
+
         public int Grid
         {
             get
@@ -66,6 +72,11 @@ namespace OngekiFumenEditor.Base
         public static bool operator !=(GridBase l, GridBase r)
         {
             return !(l == r);
+        }
+
+        public static GridOffset operator -(GridBase l, GridBase r)
+        {
+            return new GridOffset(l.Unit - r.Unit, l.Grid - r.Grid);
         }
 
         public abstract string Serialize(OngekiFumen fumenData);
