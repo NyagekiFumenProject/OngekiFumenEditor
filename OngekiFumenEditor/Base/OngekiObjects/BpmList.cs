@@ -12,6 +12,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         private BPMChange firstBpm = new BPMChange();
         private List<BPMChange> changedBpmList = new List<BPMChange>();
 
+        public BPMChange FirstBpm => firstBpm;
+        public IEnumerable<BPMChange> BpmChanges => changedBpmList;
+
         public IEnumerator<BPMChange> GetEnumerator()
         {
             yield return firstBpm;
@@ -21,10 +24,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public void Sort()
-        {
-            changedBpmList.Sort();
-        }
+        public void Sort() => changedBpmList.Sort();
 
         public void Add(BPMChange bpm)
         {
@@ -38,7 +38,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public BPMChange GetBpm(TGrid time)
         {
-            return this.LastOrDefault(bpm => bpm.TGrid >= time);
+            return this.LastOrDefault(bpm => bpm.TGrid <= time);
+        }
+
+        public BPMChange GetPrevBpm(BPMChange time) => GetPrevBpm(time.TGrid);
+
+        public BPMChange GetPrevBpm(TGrid time)
+        {
+            return this.LastOrDefault(bpm => bpm.TGrid < time);
         }
 
         public BPMChange GetNextBpm(BPMChange bpm) => GetNextBpm(bpm.TGrid);
