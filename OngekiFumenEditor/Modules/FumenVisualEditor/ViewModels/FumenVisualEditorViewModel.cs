@@ -37,6 +37,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             public override string ToString() => $"{X:F4} {Unit} {(IsCenterLine ? "Center" : string.Empty)}";
         }
 
+        public struct TGridUnitLineViewModel
+        {
+            public double Y { get; set; }
+            public TGrid TGrid { get; set; }
+            public bool IsBaseLine { get; set; }
+            public override string ToString() => $"{Y:F4} {TGrid} {(IsBaseLine ? "BaseLine" : string.Empty)}";
+        }
+
         private OngekiFumen fumen;
         public OngekiFumen Fumen
         {
@@ -48,6 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 fumen = value;
                 OnFumenObjectLoaded();
+                RedrawTimeline();
                 NotifyOfPropertyChange(() => Fumen);
             }
         }
@@ -56,7 +65,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public double CanvasWidth => VisualDisplayer?.ActualWidth ?? 0;
         public double CanvasHeight => VisualDisplayer?.ActualHeight ?? 0;
         public FumenVisualEditorView View { get; private set; }
-        public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new ObservableCollection<XGridUnitLineViewModel>();
+        public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
+        public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
         public Panel VisualDisplayer => View?.VisualDisplayer;
         public ItemCollection DisplayObjectList => View?.DisplayObjectList.Items;
 
@@ -149,18 +159,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private double timeGridSize = 240;
-        public double TimeGridSize
+        private int baseLineY = 50;
+        public int BaseLineY
         {
             get
             {
-                return timeGridSize;
+                return baseLineY;
             }
             set
             {
-                timeGridSize = value;
-                UpdateTimeline();
-                NotifyOfPropertyChange(() => TimeGridSize);
+                baseLineY = value;
+                RedrawTimeline();
+                NotifyOfPropertyChange(() => BaseLineY);
+            }
+        }
+
+        private int beatSplit = 4;
+        public int BeatSplit
+        {
+            get
+            {
+                return beatSplit;
+            }
+            set
+            {
+                beatSplit = value;
+                RedrawTimeline();
+                NotifyOfPropertyChange(() => BeatSplit);
             }
         }
 
@@ -236,9 +261,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IoC.Get<IFumenMetaInfoBrowser>().Fumen = Fumen;
         }
 
-        private void UpdateTimeline()
+        private void RedrawTimeline()
         {
-
+            TGridUnitLineLocations.Clear();
+            foreach ((_, var bpm) in TGridCalculator.GetVisibleBpmList(this))
+            {
+                var nextBpm = Fumen.BpmList.GetNextBpm(bpm);
+                var per = bpm.TGrid.ResT / BeatSplit;
+                var i = 0;
+                while (true)
+                {
+                    var tGrid = bpm.TGrid + new GridOffset(0, (int)(per * i));
+                    if (nextBpm is not null && tGrid >= nextBpm.TGrid)
+                        break;
+                    if (TGridCalculator.ConvertTGridToY(tGrid, this) is double y)
+                    {
+                        if (y > CanvasHeight)
+                            break;
+                        var line = new TGridUnitLineViewModel()
+                        {
+                            TGrid = tGrid,
+                            IsBaseLine = tGrid == this.CurrentDisplayTimePosition,
+                            Y = CanvasHeight - y
+                        };
+                        TGridUnitLineLocations.Add(line);
+                    }
+                    i++;
+                }
+            }
         }
 
         protected override async Task DoNew()
@@ -302,6 +352,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //redraw visual editor and ongeki objects.
             RedrawUnitCloseXLines();
+            RedrawTimeline();
             foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>())
                 obj.RecalcCanvasXY();
         }

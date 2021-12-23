@@ -75,38 +75,38 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public virtual void MoveCanvas(Point relativePoint)
         {
-            Y = CheckAndAdjustY(relativePoint.Y);
-
-            if (ReferenceOngekiObject is IHorizonPositionObject posObj)
+            if (EditorViewModel is FumenVisualEditorViewModel hostModelView)
             {
-                if (EditorViewModel is FumenVisualEditorViewModel hostModelView)
+                if (ReferenceOngekiObject is ITimelineObject timeObj)
+                {
+                    var ry = CheckAndAdjustY(Y);
+                    Y = relativePoint.Y;
+                    if (TGridCalculator.ConvertYToTGrid(ry, hostModelView) is TGrid tGrid)
+                    {
+                        timeObj.TGrid = tGrid;
+                        Log.LogInfo($"Y: {ry} , TGrid: {tGrid}");
+                    }
+                }
+
+                if (ReferenceOngekiObject is IHorizonPositionObject posObj)
                 {
                     var x = CheckAndAdjustX(relativePoint.X);
                     var xgridValue = (x - hostModelView.CanvasWidth / 2) / (hostModelView.XUnitSize / hostModelView.UnitCloseSize);
                     var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
                     posObj.XGrid.Unit = Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (float)xgridValue;
                     //Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
+
                 }
-                else
-                {
-                    Log.LogInfo("Can't move object in canvas because it's not ready.");
-                }
+            }
+            else
+            {
+                Log.LogInfo("Can't move object in canvas because it's not ready.");
             }
         }
 
         public double CheckAndAdjustY(double y)
         {
             y = EditorViewModel.CanvasHeight - y;
-
-            var bpmList = EditorViewModel.Fumen.BpmList;
-            var currentTGrid = EditorViewModel.CurrentDisplayTimePosition;
-            var displayBaseBpm = bpmList.GetBpm(currentTGrid);
-            var timeGridSize = EditorViewModel.TimeGridSize;
-
-            //get reference target bpm
-
-
-            Log.LogInfo(y.ToString());
             return y;
         }
 
@@ -141,14 +141,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (ReferenceOngekiObject is ITimelineObject)
             {
-                var tBinding = new MultiBinding()
-                {
-                    Converter = new TGridCanvasConverter(),
-                };
-                tBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Unit"));
-                tBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Grid"));
-                tBinding.Bindings.Add(new Binding("EditorViewModel"));
-                element.SetBinding(Canvas.TopProperty, tBinding);
+                element.SetBinding(Canvas.TopProperty, new Binding("Y"));
             }
 
             Refresh();
@@ -185,9 +178,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     }
 
     [MapToView(ViewType = typeof(DisplayTextLineObjectViewBase))]
-    public abstract class DisplayTextLineObjectViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase , new()
+    public abstract class DisplayTextLineObjectViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase, new()
     {
-        public new T ReferenceOngekiObject {
+        public new T ReferenceOngekiObject
+        {
             get
             {
                 return base.ReferenceOngekiObject as T;
