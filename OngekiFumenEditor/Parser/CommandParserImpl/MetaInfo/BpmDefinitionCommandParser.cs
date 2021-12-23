@@ -34,6 +34,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
                 },
                 BPM = fumen.MetaInfo.BpmDefinition.First,
             };
+            fumen.BpmList.SetFirstBpm(fumen.MetaInfo.FirstBpm);
         }
     }
 }

@@ -1,11 +1,16 @@
-﻿<views:OngekiObjectViewBase  xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views" 
+﻿<views:OngekiObjectViewBase 
+    xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views" 
                              x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.DisplayTextLineObjectViewBase"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:cal="http://caliburnmicro.com" 
+    cal:Bind.AtDesignTime="True"
+    d:DataContext="{d:DesignInstance Type=vm:EnemySetViewModel, IsDesignTimeCreatable=True}"
              mc:Ignorable="d">
-    <Grid Opacity="1" Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Canvas},Mode=FindAncestor,AncestorLevel=1},Path=ActualWidth}">
+    <Grid Opacity="1" d:Width="500" Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Canvas},Mode=FindAncestor,AncestorLevel=1},Path=ActualWidth}">
         <Grid.RenderTransform>
             <TranslateTransform Y="-7.62"></TranslateTransform>
         </Grid.RenderTransform>
@@ -15,7 +20,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel Margin="0,0,5,0" Orientation="Horizontal">
             <TextBlock Foreground="{Binding DisplayBrush}" Text="{Binding DisplayName}"></TextBlock>
-            <TextBlock Foreground="{Binding DisplayBrush}" Margin="5,0,0,0" Name="displayValueTextBlock"></TextBlock>
+            <TextBlock d:Text="{Binding ReferenceOngekiObject.TagTblValue.Value}" Foreground="{Binding DisplayBrush}" Margin="5,0,0,0" Name="displayValueTextBlock"></TextBlock>
         </StackPanel>
         <Rectangle Grid.Column="1" Height="2" Stroke="{Binding DisplayBrush}"></Rectangle>
     </Grid>
