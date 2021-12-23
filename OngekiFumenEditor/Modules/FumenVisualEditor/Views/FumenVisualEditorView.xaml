@@ -1,120 +1,201 @@
-<UserControl x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.FumenVisualEditorView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:cal="http://caliburnmicro.com"
-             xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
-             mc:Ignorable="d" 
-             cal:Message.Attach="[Event KeyDown] = [Action OnKeyDown($executionContext)]"
-             d:DesignHeight="450" d:DesignWidth="800">
+<UserControl
+    x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.FumenVisualEditorView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    cal:Message.Attach="[Event KeyDown] = [Action OnKeyDown($executionContext)]"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
     <UserControl.Resources>
-        <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter"></converters:UnitCloseSizeConverter>
-        <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter"></converters:IsStringEmptyConverter>
+        <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter">
+        </converters:UnitCloseSizeConverter>
+        <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter">
+        </converters:IsStringEmptyConverter>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*">
+            </ColumnDefinition>
+            <ColumnDefinition Width="Auto">
+            </ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <Canvas Visibility="Visible" AllowDrop="True" Background="Black" DragEnter="Grid_DragEnter" Drop="Grid_Drop" Name="VisualDisplayer">
+        <Canvas
+            Name="VisualDisplayer"
+            cal:Message.Attach="[Event SizeChanged] = [Action OnSizeChanged($executionContext)]"
+            AllowDrop="True"
+            Background="Black"
+            DragEnter="Grid_DragEnter"
+            Drop="Grid_Drop"
+            Visibility="Visible">
             <Canvas.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Selected Object...">
-                        <MenuItem Header="Delete" cal:Message.Attach="DeleteSelectedObjects()"></MenuItem>
-                        <MenuItem Header="Copy"  cal:Message.Attach="CopySelectedObjects()"></MenuItem>
-                        <MenuItem Header="Paste"  cal:Message.Attach="PasteCopiesObjects()"></MenuItem>
+                        <MenuItem cal:Message.Attach="DeleteSelectedObjects()" Header="Delete">
+                        </MenuItem>
+                        <MenuItem cal:Message.Attach="CopySelectedObjects()" Header="Copy">
+                        </MenuItem>
+                        <MenuItem cal:Message.Attach="PasteCopiesObjects()" Header="Paste">
+                        </MenuItem>
                     </MenuItem>
                 </ContextMenu>
             </Canvas.ContextMenu>
             <ItemsControl ItemsSource="{Binding XGridUnitLineLocations}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <Grid></Grid>
+                        <Canvas>
+                        </Canvas>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
-                            <Line X1="{Binding X}" Y1="0" X2="{Binding X}" Y2="{Binding ElementName=VisualDisplayer,Path=ActualHeight}">
+                            <Line
+                                X1="{Binding X}"
+                                X2="{Binding X}"
+                                Y1="0"
+                                Y2="{Binding ElementName=VisualDisplayer, Path=ActualHeight}">
                                 <Line.Style>
                                     <Style TargetType="Line">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                                <Setter Property="Stroke" Value="#90FFFFFF"></Setter>
+                                                <Setter Property="Stroke" Value="#90FFFFFF">
+                                                </Setter>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsCenterLine}" Value="False">
-                                                <Setter Property="Stroke" Value="#40FFFFFF"></Setter>
+                                                <Setter Property="Stroke" Value="#40FFFFFF">
+                                                </Setter>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Line.Style>
                             </Line>
-                            <TextBlock Opacity="0.35" Foreground="White" FontSize="10" Text="{Binding Unit}">
+                            <TextBlock
+                                FontSize="10"
+                                Foreground="White"
+                                Opacity="0.35"
+                                Text="{Binding Unit}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                                <Setter Property="Visibility" Value="Hidden"></Setter>
+                                                <Setter Property="Visibility" Value="Hidden">
+                                                </Setter>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
                                 <TextBlock.RenderTransformOrigin>
-                                    <Point X="1"></Point>
+                                    <Point X="1">
+                                    </Point>
                                 </TextBlock.RenderTransformOrigin>
                                 <TextBlock.RenderTransform>
-                                    <TranslateTransform X="{Binding X}"></TranslateTransform>
+                                    <TranslateTransform X="{Binding X}">
+                                    </TranslateTransform>
                                 </TextBlock.RenderTransform>
                             </TextBlock>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <ItemsControl
+                x:Name="DisplayObjectList"
+                Width="{Binding ElementName=VisualDisplayer, Path=ActualWidth}"
+                Height="{Binding ElementName=VisualDisplayer, Path=ActualHeight}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas>
+                        </Canvas>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
         </Canvas>
         <Grid Grid.Column="1" Background="White">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="10,5,10,5">
-                    <CheckBox Margin="0,2,0,2" IsChecked="{Binding IsPreventTimelineAutoClose}" Content="IsPreventTimelineAutoClose"></CheckBox>
-                    <CheckBox Margin="0,2,0,2" IsChecked="{Binding IsPreventXAutoClose}" Content="IsPreventXAutoClose"></CheckBox>
-                    <StackPanel Margin="0,2,0,2" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Margin="0,0,10,0">UnitCloseSize</TextBlock>
-                        <ComboBox Width="80" SelectedIndex="4" SelectedValue="{Binding UnitCloseSize,Mode=OneWayToSource,Converter={StaticResource UnitCloseSizeConverter}}">
-                            <ComboBoxItem Content="1"/>
-                            <ComboBoxItem Content="1.5"/>
-                            <ComboBoxItem Content="2"/>
-                            <ComboBoxItem Content="3"/>
-                            <ComboBoxItem Content="4"/>
-                            <ComboBoxItem Content="4.5"/>
-                            <ComboBoxItem Content="6"/>
-                            <ComboBoxItem Content="8"/>
-                            <ComboBoxItem Content="9"/>
-                            <ComboBoxItem Content="12"/>
+                    <CheckBox
+                        Margin="0,2,0,2"
+                        Content="IsPreventTimelineAutoClose"
+                        IsChecked="{Binding IsPreventTimelineAutoClose}">
+                    </CheckBox>
+                    <CheckBox
+                        Margin="0,2,0,2"
+                        Content="IsPreventXAutoClose"
+                        IsChecked="{Binding IsPreventXAutoClose}">
+                    </CheckBox>
+                    <Grid Margin="0,2,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition>
+                            </RowDefinition>
+                            <RowDefinition>
+                            </RowDefinition>
+                        </Grid.RowDefinitions>
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">UnitCloseSize</TextBlock>
+                        <ComboBox
+                            Grid.Column="1"
+                            SelectedIndex="4"
+                            SelectedValue="{Binding UnitCloseSize, Mode=OneWayToSource, Converter={StaticResource UnitCloseSizeConverter}}">
+                            <ComboBoxItem Content="1" />
+                            <ComboBoxItem Content="1.5" />
+                            <ComboBoxItem Content="2" />
+                            <ComboBoxItem Content="3" />
+                            <ComboBoxItem Content="4" />
+                            <ComboBoxItem Content="4.5" />
+                            <ComboBoxItem Content="6" />
+                            <ComboBoxItem Content="8" />
+                            <ComboBoxItem Content="9" />
+                            <ComboBoxItem Content="12" />
                         </ComboBox>
-                    </StackPanel>
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="0,5,0,5"
+                            VerticalAlignment="Center"
+                            ToolTip="The vertical base length within standard bpm 240">
+                            TimeGridSize *
+                        </TextBlock>
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="0,5,0,5"
+                            Text="{Binding TimeGridSize}">
+                        </TextBox>
+                    </Grid>
                 </StackPanel>
             </ScrollViewer>
         </Grid>
 
-        <Grid d:Visibility="Hidden" Grid.ColumnSpan="2">
+        <Grid Grid.ColumnSpan="2" d:Visibility="Hidden">
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ErrorMessage,Mode=OneWay,Converter={StaticResource IsStringEmptyConverter}}" Value="True">
-                            <Setter Property="Visibility" Value="Hidden"></Setter>
+                        <DataTrigger Binding="{Binding ErrorMessage, Mode=OneWay, Converter={StaticResource IsStringEmptyConverter}}" Value="True">
+                            <Setter Property="Visibility" Value="Hidden">
+                            </Setter>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding ErrorMessage,Mode=OneWay,Converter={StaticResource IsStringEmptyConverter}}" Value="False">
-                            <Setter Property="Visibility" Value="Visible"></Setter>
+                        <DataTrigger Binding="{Binding ErrorMessage, Mode=OneWay, Converter={StaticResource IsStringEmptyConverter}}" Value="False">
+                            <Setter Property="Visibility" Value="Visible">
+                            </Setter>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
             <Border Background="IndianRed" Opacity="0.75">
             </Border>
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" >
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock FontSize="30" Foreground="Wheat">Error:</TextBlock>
-                <TextBlock FontSize="20" Foreground="White" Text="{Binding ErrorMessage,Mode=OneWay}"></TextBlock>
+                <TextBlock
+                    FontSize="20"
+                    Foreground="White"
+                    Text="{Binding ErrorMessage, Mode=OneWay}">
+                </TextBlock>
             </StackPanel>
         </Grid>
     </Grid>

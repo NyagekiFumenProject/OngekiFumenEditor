@@ -58,6 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public FumenVisualEditorView View { get; private set; }
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new ObservableCollection<XGridUnitLineViewModel>();
         public Panel VisualDisplayer => View?.VisualDisplayer;
+        public ItemCollection DisplayObjectList => View?.DisplayObjectList.Items;
 
         private string errorMessage;
         public string ErrorMessage
@@ -75,7 +76,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private TGrid currentDisplayTimePosition;
+        private TGrid currentDisplayTimePosition = new TGrid();
+        /// <summary>
+        /// 表示当前显示物件的时间
+        /// </summary>
         public TGrid CurrentDisplayTimePosition
         {
             get
@@ -145,6 +149,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        private double timeGridSize = 240;
+        public double TimeGridSize
+        {
+            get
+            {
+                return timeGridSize;
+            }
+            set
+            {
+                timeGridSize = value;
+                UpdateTimeline();
+                NotifyOfPropertyChange(() => TimeGridSize);
+            }
+        }
+
         private void RedrawUnitCloseXLines()
         {
             XGridUnitLineLocations.Clear();
@@ -193,11 +212,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var obj in displayableObjects)
             {
                 var displayObject = Activator.CreateInstance(obj.ModelViewType) as DisplayObjectViewModelBase;
-                if (ViewCreateHelper.CreateView(displayObject) is OngekiObjectViewBase view && obj is OngekiObjectBase o)
+                if (ViewHelper.CreateView(displayObject) is OngekiObjectViewBase view && obj is OngekiObjectBase o)
                 {
                     view.ViewModel.ReferenceOngekiObject = o;
                     view.ViewModel.EditorViewModel = this;
-                    VisualDisplayer.Children.Add(view);
+                    DisplayObjectList.Add(view);
                 }
             }
             return Task.CompletedTask;
@@ -214,7 +233,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnFumenObjectLoaded()
         {
-            IoC.Get<IFumenMetaInfoBrowser>().Fumen = Fumen;   
+            IoC.Get<IFumenMetaInfoBrowser>().Fumen = Fumen;
+        }
+
+        private void UpdateTimeline()
+        {
+
         }
 
         protected override async Task DoNew()
@@ -233,10 +257,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
         {
-            var view = ViewCreateHelper.CreateView(viewModel);
+            var view = ViewHelper.CreateView(viewModel);
             fumen.AddObject(viewModel.ReferenceOngekiObject);
 
-            VisualDisplayer.Children.Add(view);
+            DisplayObjectList.Add(view);
             viewModel.EditorViewModel = this;
 
             Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
@@ -244,10 +268,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void DeleteSelectedObjects()
         {
-            var selectedObject = VisualDisplayer.Children.OfType<OngekiObjectViewBase>().Where(x => x.IsSelected).ToArray();
+            var selectedObject = DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x => x.IsSelected).ToArray();
             foreach (var obj in selectedObject)
             {
-                VisualDisplayer.Children.Remove(obj);
+                DisplayObjectList.Remove(obj);
                 fumen.AddObject(obj.ViewModel?.ReferenceOngekiObject);
             }
             Log.LogInfo($"deleted {selectedObject.Length} objects.");
@@ -272,6 +296,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     DeleteSelectedObjects();
                 }
             }
+        }
+
+        public void OnSizeChanged(ActionExecutionContext e)
+        {
+            //redraw visual editor and ongeki objects.
+            RedrawUnitCloseXLines();
+            foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>())
+                obj.RecalcCanvasXY();
         }
     }
 }
