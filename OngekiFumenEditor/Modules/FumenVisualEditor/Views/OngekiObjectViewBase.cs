@@ -1,5 +1,7 @@
-﻿using Gemini.Framework;
+﻿using Caliburn.Micro;
+using Gemini.Framework;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
@@ -47,6 +49,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             {
                 SetValue(IsSelectedProperty, value);
                 Effect = value ? SelectEffect : null;
+
+                if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
+                    propertyBrowser.OngekiObject = value ? ViewModel?.ReferenceOngekiObject : default;
             }
         }
 

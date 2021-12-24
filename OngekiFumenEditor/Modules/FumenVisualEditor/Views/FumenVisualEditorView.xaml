@@ -138,7 +138,7 @@
                                 Opacity="0.35"
                                 Text="{Binding TGrid}">
                                 <TextBlock.RenderTransformOrigin>
-                                    <Point X="1">
+                                    <Point Y="0.5">
                                     </Point>
                                 </TextBlock.RenderTransformOrigin>
                                 <TextBlock.RenderTransform>

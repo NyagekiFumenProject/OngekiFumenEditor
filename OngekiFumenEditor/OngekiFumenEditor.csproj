@@ -31,4 +31,17 @@
     <Resource Include="Resources\logo.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
 </Project>
