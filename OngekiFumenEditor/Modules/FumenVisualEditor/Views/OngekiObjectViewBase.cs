@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.UI.ValueConverters;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
@@ -13,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
@@ -23,121 +25,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
     {
         public DisplayObjectViewModelBase ViewModel => DataContext as DisplayObjectViewModelBase;
         private static DropShadowEffect SelectEffect = new DropShadowEffect() { ShadowDepth = 0, Color = Colors.Yellow, BlurRadius = 25 };
+        private readonly static LambdaConverter<bool, Effect> isSelectConverter = new(
+            o => o ? SelectEffect : default
+            );
 
-        public bool IsDragging
+        private bool mouseMove = false;
+
+        public OngekiObjectViewBase()
         {
-            get { return (bool)GetValue(IsDraggingProperty); }
-            set { SetValue(IsDraggingProperty, value); }
-        }
-
-        public static readonly DependencyProperty IsDraggingProperty =
-            DependencyProperty.Register("IsDragging", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
-
-        public bool IsMouseDown
-        {
-            get { return (bool)GetValue(IsMouseDownProperty); }
-            set { SetValue(IsMouseDownProperty, value); }
-        }
-
-        public static readonly DependencyProperty IsSelectedProperty =
-            DependencyProperty.Register("IsSelected", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
-
-        public bool IsSelected
-        {
-            get { return (bool)GetValue(IsSelectedProperty); }
-            set
+            SetBinding(EffectProperty, new Binding("IsSelected")
             {
-                SetValue(IsSelectedProperty, value);
-                Effect = value ? SelectEffect : null;
+                Converter = isSelectConverter
+            });
 
-                if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
-                    propertyBrowser.OngekiObject = value ? ViewModel?.ReferenceOngekiObject : default;
-            }
+            MouseDown += (_,_)=> {
+                mouseMove = false;
+            };
+            MouseMove += (_, _) => {
+                mouseMove = true;
+            };
+            MouseUp += (_, _) => {
+                if (!mouseMove)
+                    ViewModel.OnMouseClick(default);
+            };
         }
-
-        public static readonly DependencyProperty IsMouseDownProperty =
-            DependencyProperty.Register("IsMouseDown", typeof(bool), typeof(OngekiObjectViewBase), new PropertyMetadata(false));
 
         public bool IsPreventXAutoClose => ViewModel?.EditorViewModel?.IsPreventXAutoClose ?? false;
 
         public bool IsPreventTimelineAutoClose => ViewModel?.EditorViewModel?.IsPreventTimelineAutoClose ?? false;
-
-        public OngekiObjectViewBase()
-        {
-            MouseDown += OnMouseDown;
-            MouseMove += OnMouseMove;
-            MouseUp += OnMouseUp;
-            MouseLeave += OnMouseLeave;
-        }
-
-        protected virtual void OnDragStart()
-        {
-
-        }
-
-        protected virtual void OnDragEnd()
-        {
-
-        }
-
-        protected virtual void OnDragEnd(Point p) => ViewModel.MoveCanvas(p);
-
-        protected virtual void OnMouseClick()
-        {
-            IsSelected = !IsSelected;
-        }
-
-        private void OnMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                IsMouseDown = true;
-                IsDragging = false;
-                e.Handled = true;
-            }
-        }
-
-        private void OnMouseMove(object sender, MouseEventArgs e)
-        {
-            if (!(IsMouseDown && Parent is IInputElement parent))
-                return;
-            e.Handled = true;
-            Action<Point> dragCall = IsDragging ? OnDragEnd : _ => OnDragStart();
-            IsDragging = true;
-
-            var pos = e.GetPosition(parent);
-            if (VisualTreeUtility.FindParent<Visual>(this) is FrameworkElement uiElement)
-            {
-                var bound = new Rect(0, 0, uiElement.ActualWidth, uiElement.ActualHeight);
-                if (bound.Contains(pos))
-                {
-                    dragCall(pos);
-                }
-            }
-            else
-            {
-                dragCall(pos);
-            }
-        }
-
-        private void OnMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (IsDragging)
-                OnDragEnd();
-            else if (IsMouseDown)
-                OnMouseClick();
-
-            IsMouseDown = false;
-            IsDragging = false;
-            e.Handled = true;
-        }
-
-        private void OnMouseLeave(object sender, MouseEventArgs e)
-        {
-            IsMouseDown = false;
-            IsDragging = false;
-            e.Handled = true;
-        }
 
         public void RecalcCanvasXY()
         {

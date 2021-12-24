@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Converters;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Utils;
@@ -15,8 +16,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IViewAware
     {
-        protected OngekiObjectBase referenceOngekiObject;
+        private bool isSelected;
+        public bool IsSelected
+        {
+            get
+            {
+                return isSelected;
+            }
+            set
+            {
+                isSelected = value;
+                NotifyOfPropertyChange(() => IsSelected);
 
+                if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
+                    propertyBrowser.OngekiObject = value ? ReferenceOngekiObject : default;
+            }
+        }
+
+        protected OngekiObjectBase referenceOngekiObject;
         public virtual OngekiObjectBase ReferenceOngekiObject
         {
             get { return referenceOngekiObject; }
@@ -57,6 +74,46 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 editorViewModel = value;
                 NotifyOfPropertyChange(() => EditorViewModel);
             }
+        }
+
+        public void OnDragEnd(Point pos)
+        {
+            if (View is not FrameworkElement v)
+                return;
+
+            var movePoint = new Point(
+                dragViewStartPoint.X + (pos.X - dragStartPoint.X),
+                dragViewStartPoint.Y + (pos.Y - dragStartPoint.Y)
+                );
+
+            //这里限制一下
+            movePoint.X = Math.Max(0, Math.Min(EditorViewModel.CanvasWidth, movePoint.X));
+            movePoint.Y = Math.Max(0, Math.Min(EditorViewModel.CanvasHeight, movePoint.Y));
+
+            MoveCanvas(movePoint);
+
+            //Log.LogInfo($"movePoint: {movePoint}");
+        }
+
+        Point dragViewStartPoint = default;
+        Point dragStartPoint = default;
+
+        public void OnDragStart(Point pos)
+        {
+            if (View is not FrameworkElement v)
+                return;
+
+            var x = (double)v.GetValue(Canvas.LeftProperty);
+            var y = (double)v.GetValue(Canvas.TopProperty);
+            dragViewStartPoint = new Point(x, y);
+            dragStartPoint = pos;
+
+            //Log.LogInfo($"dragViewStartPoint: {dragViewStartPoint}, dragStartPoint: {dragStartPoint}");
+        }
+
+        public void OnMouseClick(Point pos)
+        {
+            IsSelected = !IsSelected;
         }
 
         public virtual void MoveCanvas(Point relativePoint)

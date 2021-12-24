@@ -337,7 +337,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void DeleteSelectedObjects()
         {
-            var selectedObject = DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x => x.IsSelected).ToArray();
+            var selectedObject = DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x => x.ViewModel.IsSelected).ToArray();
             foreach (var obj in selectedObject)
             {
                 DisplayObjectList.Remove(obj);

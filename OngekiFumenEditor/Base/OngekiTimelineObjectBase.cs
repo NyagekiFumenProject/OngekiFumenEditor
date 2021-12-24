@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OngekiFumenEditor.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace OngekiFumenEditor.Base
             get { return tGrid; }
             set
             {
+                this.RegisterOrUnregisterPropertyChangeEvent(tGrid, value);
                 tGrid = value;
                 NotifyOfPropertyChange(() => TGrid);
             }
