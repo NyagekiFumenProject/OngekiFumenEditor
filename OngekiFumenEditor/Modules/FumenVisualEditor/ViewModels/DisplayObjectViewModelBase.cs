@@ -1,9 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Converters;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
@@ -31,19 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private double y;
-
         public event EventHandler<ViewAttachedEventArgs> ViewAttached;
-
-        public double Y
-        {
-            get { return y; }
-            set
-            {
-                y = value;
-                NotifyOfPropertyChange(() => Y);
-            }
-        }
 
         public object View { get; private set; }
 
@@ -80,11 +66,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (ReferenceOngekiObject is ITimelineObject timeObj)
                 {
                     var ry = CheckAndAdjustY(relativePoint.Y);
-                    Y = EditorViewModel.CanvasHeight - ry;
                     if (TGridCalculator.ConvertYToTGrid(ry, hostModelView) is TGrid tGrid)
                     {
-                        timeObj.TGrid = tGrid;
-                        Log.LogInfo($"Y: {ry} , TGrid: {tGrid}");
+                        timeObj.TGrid = (tGrid);
+                        Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
                     }
                 }
 
@@ -95,7 +80,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
                     posObj.XGrid.Unit = Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (float)xgridValue;
                     //Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
-
                 }
             }
             else
@@ -113,7 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 distance = Math.Abs(z.Y - s),
                 y = z.Y
-            })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList() : default;
+            })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : default;
             var nearestUnitLine = mid?.FirstOrDefault();
             var fin = nearestUnitLine != null ? (EditorViewModel.CanvasHeight - nearestUnitLine.y) : y;
             Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.y:F2}) ,fin:{fin:F2}");
@@ -128,7 +112,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 distance = Math.Abs(z.X - x),
                 x = z.X
-            })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList() : default;
+            })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : default;
             var nearestUnitLine = mid?.FirstOrDefault();
             //Log.LogInfo($"nearestUnitLine in:{x:F2} distance:{nearestUnitLine?.distance:F2} x:{nearestUnitLine?.x:F2}");
             return nearestUnitLine != null ? nearestUnitLine.x : x;
@@ -151,7 +135,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (ReferenceOngekiObject is ITimelineObject)
             {
-                element.SetBinding(Canvas.TopProperty, new Binding("Y"));
+                var xBinding = new MultiBinding()
+                {
+                    Converter = new TGridCanvasConverter(),
+                };
+                xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Grid"));
+                xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Unit"));
+                xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid"));
+                xBinding.Bindings.Add(new Binding("EditorViewModel"));
+                element.SetBinding(Canvas.TopProperty, xBinding);
             }
 
             Refresh();
