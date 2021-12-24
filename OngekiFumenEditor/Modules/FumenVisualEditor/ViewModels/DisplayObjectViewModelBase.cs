@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (TGridCalculator.ConvertYToTGrid(ry, hostModelView) is TGrid tGrid)
                     {
                         timeObj.TGrid = (tGrid);
-                        Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
+                        //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
                     }
                 }
 
@@ -100,7 +100,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : default;
             var nearestUnitLine = mid?.FirstOrDefault();
             var fin = nearestUnitLine != null ? (EditorViewModel.CanvasHeight - nearestUnitLine.y) : y;
-            Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.y:F2}) ,fin:{fin:F2}");
+            //Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.y:F2}) ,fin:{fin:F2}");
             return fin;
         }
 
