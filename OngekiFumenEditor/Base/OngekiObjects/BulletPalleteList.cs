@@ -18,15 +18,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             /// <summary>
             /// 从玩家头顶位置
             /// </summary>
-            public readonly static Shooter TargetHead = new Shooter("UPS");
+            public static Shooter TargetHead { get; } = new Shooter("UPS");
             /// <summary>
             /// 从敌人位置
             /// </summary>
-            public readonly static Shooter Enemy = new Shooter("ENE");
+            public static Shooter Enemy { get; } = new Shooter("ENE");
             /// <summary>
             /// 谱面中心(?)
             /// </summary>
-            public readonly static Shooter Center = new Shooter("CEN");
+            public static Shooter Center { get; } = new Shooter("CEN");
 
             public Shooter(string value) : base(value)
             {
@@ -46,11 +46,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             /// <summary>
             /// 射向玩家位置
             /// </summary>
-            public readonly static Target Player = new Target("PLR");
+            public static Target Player { get; } = new Target("PLR");
             /// <summary>
             /// 射向对应位置，具体看使用的BLT指令的xUnit值
             /// </summary>
-            public readonly static Target FixField = new Target("FIX");
+            public static Target FixField { get; } = new Target("FIX");
         }
 
         public class BulletType : FadeStringEnum
@@ -67,15 +67,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             /// <summary>
             /// 将使用BULLET_DAMAGE伤害
             /// </summary>
-            public readonly static BulletType Normal = new BulletType("NML");
+            public static BulletType Normal { get; } = new BulletType("NML");
             /// <summary>
             /// 将使用HARDBULLET_DAMAGE伤害
             /// </summary>
-            public readonly static BulletType Hard = new BulletType("STR");
+            public static BulletType Hard { get; } = new BulletType("STR");
             /// <summary>
             /// 将使用DANGERBULLET_DAMAGE伤害
             /// </summary>
-            public readonly static BulletType Danger = new BulletType("DNG");
+            public static BulletType Danger { get; } = new BulletType("DNG");
         }
 
         private string strID = string.Empty;
