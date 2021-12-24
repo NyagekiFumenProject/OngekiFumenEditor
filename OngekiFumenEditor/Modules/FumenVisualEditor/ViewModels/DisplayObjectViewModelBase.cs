@@ -79,8 +79,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 if (ReferenceOngekiObject is ITimelineObject timeObj)
                 {
-                    var ry = CheckAndAdjustY(Y);
-                    Y = relativePoint.Y;
+                    var ry = CheckAndAdjustY(relativePoint.Y);
+                    Y = EditorViewModel.CanvasHeight - ry;
                     if (TGridCalculator.ConvertYToTGrid(ry, hostModelView) is TGrid tGrid)
                     {
                         timeObj.TGrid = tGrid;
@@ -106,8 +106,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public double CheckAndAdjustY(double y)
         {
+            var s = y;
             y = EditorViewModel.CanvasHeight - y;
-            return y;
+            var enableMagneticAdjust = !(editorViewModel?.IsPreventTimelineAutoClose ?? false);
+            var mid = enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z => new
+            {
+                distance = Math.Abs(z.Y - s),
+                y = z.Y
+            })?.Where(z => z.distance < 10)?.OrderBy(x => x.distance)?.ToList() : default;
+            var nearestUnitLine = mid?.FirstOrDefault();
+            var fin = nearestUnitLine != null ? (EditorViewModel.CanvasHeight - nearestUnitLine.y) : y;
+            Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.y:F2}) ,fin:{fin:F2}");
+            return fin;
         }
 
         public double CheckAndAdjustX(double x)
