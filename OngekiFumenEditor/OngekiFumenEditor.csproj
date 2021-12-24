@@ -32,6 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\BaseValueTypeUIView - 复制 - 复制.xaml.cs">
       <SubType>Code</SubType>
       <DependentUpon>BaseValueTypeUIView.xaml.cs</DependentUpon>
@@ -49,6 +52,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\FadeStringEnumTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

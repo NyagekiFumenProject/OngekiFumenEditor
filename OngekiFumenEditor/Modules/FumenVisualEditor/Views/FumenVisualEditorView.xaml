@@ -17,13 +17,6 @@
         </converters:IsStringEmptyConverter>
     </UserControl.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*">
-            </ColumnDefinition>
-            <ColumnDefinition Width="Auto">
-            </ColumnDefinition>
-        </Grid.ColumnDefinitions>
-
         <Canvas
             Name="VisualDisplayer"
             cal:Message.Attach="[Event SizeChanged] = [Action OnSizeChanged($executionContext)]"
@@ -162,79 +155,7 @@
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
         </Canvas>
-        <Grid Grid.Column="1" Background="White">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="10,5,10,5">
-                    <CheckBox
-                        Margin="0,2,0,2"
-                        Content="IsPreventTimelineAutoClose"
-                        IsChecked="{Binding IsPreventTimelineAutoClose}">
-                    </CheckBox>
-                    <CheckBox
-                        Margin="0,2,0,2"
-                        Content="IsPreventXAutoClose"
-                        IsChecked="{Binding IsPreventXAutoClose}">
-                    </CheckBox>
-                    <Grid Margin="0,2,0,2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition>
-                            </RowDefinition>
-                            <RowDefinition>
-                            </RowDefinition>
-                            <RowDefinition>
-                            </RowDefinition>
-                        </Grid.RowDefinitions>
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">UnitCloseSize</TextBlock>
-                        <ComboBox
-                            Grid.Column="1"
-                            SelectedIndex="4"
-                            SelectedValue="{Binding UnitCloseSize, Mode=OneWayToSource, Converter={StaticResource UnitCloseSizeConverter}}">
-                            <ComboBoxItem Content="1" />
-                            <ComboBoxItem Content="1.5" />
-                            <ComboBoxItem Content="2" />
-                            <ComboBoxItem Content="3" />
-                            <ComboBoxItem Content="4" />
-                            <ComboBoxItem Content="4.5" />
-                            <ComboBoxItem Content="6" />
-                            <ComboBoxItem Content="8" />
-                            <ComboBoxItem Content="9" />
-                            <ComboBoxItem Content="12" />
-                        </ComboBox>
-                        <TextBlock
-                            Grid.Row="1"
-                            Margin="0,5,0,5"
-                            VerticalAlignment="Center"
-                            ToolTip="The vertical base length within standard bpm 240">
-                            TimeGridSize *
-                        </TextBlock>
-                        <TextBox
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Margin="0,5,0,5"
-                            Text="{Binding BaseLineY}">
-                        </TextBox>
-                        <TextBlock
-                            Grid.Row="2"
-                            Margin="0,0,0,5"
-                            VerticalAlignment="Center">
-                            BeatSplit
-                        </TextBlock>
-                        <TextBox
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Margin="0,0,0,5"
-                            Text="{Binding BeatSplit}">
-                        </TextBox>
-                    </Grid>
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>
-
-        <Grid Grid.ColumnSpan="2" d:Visibility="Hidden">
+        <Grid d:Visibility="Hidden">
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Style.Triggers>

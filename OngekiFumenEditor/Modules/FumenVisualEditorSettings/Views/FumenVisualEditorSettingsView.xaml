@@ -1,0 +1,81 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Modules.FumenVisualEditorSettings.Views.FumenVisualEditorSettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:Background="White"
+    d:DesignHeight="800"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter">
+        </converters:UnitCloseSizeConverter>
+        <converters1:NullToVisibilityConverter x:Key="NullToVisibilityConverter">
+        </converters1:NullToVisibilityConverter>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="10,5,10,5" Visibility="{Binding EditorViewModel, Converter={StaticResource NullToVisibilityConverter}}">
+            <CheckBox
+                Margin="0,2,0,2"
+                Content="IsPreventTimelineAutoClose"
+                IsChecked="{Binding EditorViewModel.IsPreventTimelineAutoClose}">
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                Content="IsPreventXAutoClose"
+                IsChecked="{Binding EditorViewModel.IsPreventXAutoClose}">
+            </CheckBox>
+            <Grid Margin="0,2,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition>
+                    </RowDefinition>
+                    <RowDefinition>
+                    </RowDefinition>
+                    <RowDefinition>
+                    </RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">UnitCloseSize</TextBlock>
+                <ComboBox
+                    Grid.Column="1"
+                    ItemsSource="{Binding UnitCloseSizeValues}"
+                    SelectedIndex="4"
+                    SelectedValue="{Binding EditorViewModel.UnitCloseSize}">
+                </ComboBox>
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="0,5,0,5"
+                    VerticalAlignment="Center"
+                    ToolTip="The vertical base length within standard bpm 240">
+                    TimeGridSize *
+                </TextBlock>
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,5,0,5"
+                    Text="{Binding EditorViewModel.BaseLineY}">
+                </TextBox>
+                <TextBlock
+                    Grid.Row="2"
+                    Margin="0,0,0,5"
+                    VerticalAlignment="Center">
+                    BeatSplit
+                </TextBlock>
+                <TextBox
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="0,0,0,5"
+                    Text="{Binding EditorViewModel.BeatSplit}">
+                </TextBox>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -8,6 +8,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
+using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
 using System;
@@ -174,7 +175,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private int beatSplit = 4;
+        private int beatSplit = 1;
         public int BeatSplit
         {
             get
@@ -314,6 +315,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             viewModel.EditorViewModel = this;
 
             Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
+        }
+
+        protected override Task OnActivateAsync(CancellationToken cancellationToken)
+        {
+            if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings)
+                editorSettings.EditorViewModel = this;
+            return base.OnActivateAsync(cancellationToken);
+        }
+
+        protected override Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
+        {
+            if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings && editorSettings.EditorViewModel == this)
+                editorSettings.EditorViewModel = default;
+            return base.OnDeactivateAsync(close, cancellationToken);
         }
 
         public void DeleteSelectedObjects()
