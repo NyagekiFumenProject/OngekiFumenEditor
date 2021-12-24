@@ -28,15 +28,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.TypeI
             typeof(double),
         };
 
-        public UIElement Generate(PropertyInfo property, object instance)
-        {
-            var view = ViewHelper.CreateViewByViewModelType(() => new BaseValueTypeUIViewModel(new()
-            {
-                OwnerObject = instance,
-                PropertyInfo = property,
-            }));
-
-            return view;
-        }
+        public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new BaseValueTypeUIViewModel(wrapper));
     }
 }

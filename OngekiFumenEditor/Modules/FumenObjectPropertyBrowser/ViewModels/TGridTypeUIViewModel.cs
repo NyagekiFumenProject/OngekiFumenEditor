@@ -9,9 +9,9 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-    public class BaseValueTypeUIViewModel : CommonUIViewModelBase
+    public class TGridTypeUIViewModel : CommonUIViewModelBase
     {
-        public BaseValueTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        public TGridTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
         {
         }
     }

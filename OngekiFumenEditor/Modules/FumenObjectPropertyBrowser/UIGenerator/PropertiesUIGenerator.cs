@@ -11,22 +11,26 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 {
     public class PropertiesUIGenerator
     {
-        public static UIElement GenerateUI(PropertyInfo property, object instance)
+        public static UIElement GenerateUI(PropertyInfoWrapper wrapper)
         {
             var typeGenerators = IoC.GetAll<ITypeUIGenerator>();
             return typeGenerators
-                .Where(x => x.SupportTypes.Contains(property.PropertyType))
-                .Select(x=> {
-                try
+                .Where(x =>
+                    x.SupportTypes.Contains(wrapper.PropertyInfo.PropertyType) ||
+                    x.SupportTypes.Any(x => wrapper.PropertyInfo.PropertyType.IsSubclassOf(x))
+                    )
+                .Select(x =>
                 {
-                    return x.Generate(property, instance);
-                }
-                catch (Exception e)
-                {
-                    //todo
-                    throw;
-                }
-            }).OfType<UIElement>().FirstOrDefault();
+                    try
+                    {
+                        return x.Generate(wrapper);
+                    }
+                    catch (Exception e)
+                    {
+                        //todo
+                        throw;
+                    }
+                }).OfType<UIElement>().FirstOrDefault();
         }
     }
 }
