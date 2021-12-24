@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
             1.5,
             2,
             3,
+            4,
             4.5,
             6,
             8,
