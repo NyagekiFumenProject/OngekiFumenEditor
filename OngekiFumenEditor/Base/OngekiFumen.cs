@@ -11,12 +11,12 @@ namespace OngekiFumenEditor.Base
 {
     public class OngekiFumen
     {
-        public FumenMetaInfo MetaInfo { get; set; } = new FumenMetaInfo();
-        public List<BulletPalleteList> BulletPalleteList { get; set; } = new List<BulletPalleteList>();
-        public List<Bell> Bells { get; set; } = new List<Bell>();
-        public BpmList BpmList { get; set; } = new BpmList();
-        public List<MeterChange> MeterChanges { get; set; } = new List<MeterChange>();
-        public List<EnemySet> EnemySets { get; set; } = new List<EnemySet>();
+        public FumenMetaInfo MetaInfo { get; } = new FumenMetaInfo();
+        public List<BulletPalleteList> BulletPalleteList { get; } = new List<BulletPalleteList>();
+        public List<Bell> Bells { get; } = new List<Bell>();
+        public BpmList BpmList { get; } = new BpmList();
+        public List<MeterChange> MeterChanges { get; } = new List<MeterChange>();
+        public List<EnemySet> EnemySets { get; } = new List<EnemySet>();
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -55,7 +55,8 @@ namespace OngekiFumenEditor.Base
             {
                 Bells.Add(bel);
             }
-            else if(obj is BPMChange bpm){
+            else if (obj is BPMChange bpm)
+            {
                 BpmList.Add(bpm);
             }
             else if (obj is MeterChange met)
@@ -79,13 +80,29 @@ namespace OngekiFumenEditor.Base
 
         public void RemoveObject(OngekiObjectBase obj)
         {
-            if (obj is Bell bell)
+            if (obj is Bell bel)
             {
-                Bells.Remove(bell);
+                Bells.Remove(bel);
+            }
+            else if (obj is BPMChange bpm)
+            {
+                BpmList.Remove(bpm);
+            }
+            else if (obj is MeterChange met)
+            {
+                MeterChanges.Remove(met);
+            }
+            else if (obj is EnemySet est)
+            {
+                EnemySets.Remove(est);
+            }
+            else if (obj is BulletPalleteList bpl)
+            {
+                BulletPalleteList.Remove(bpl);
             }
             else
             {
-                Log.LogWarn($"remove list target not found, object type : {obj?.GetType()?.Name}");
+                Log.LogWarn($"delete list target not found, object type : {obj?.GetType()?.Name}");
                 return;
             }
         }
@@ -93,11 +110,6 @@ namespace OngekiFumenEditor.Base
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects()
         {
             return Bells.OfType<IDisplayableObject>();
-        }
-
-        public IEnumerable<BPMChange> GetAllBpmList()
-        {
-            return BpmList;
         }
 
         public string Serialize()
@@ -113,7 +125,7 @@ namespace OngekiFumenEditor.Base
             sb.AppendLine();
             sb.AppendLine("[B_PALETTE]");
 
-            foreach (var bpl in BulletPalleteList.OrderBy(x=>x.StrID))
+            foreach (var bpl in BulletPalleteList.OrderBy(x => x.StrID))
                 sb.AppendLine(bpl.Serialize(this));
             #endregion
 

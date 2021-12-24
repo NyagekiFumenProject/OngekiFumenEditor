@@ -55,6 +55,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             set
             {
+                if (fumen is not null)
+                    fumen.BpmList.OnChangedEvent -= OnBPMListChanged;
+                if (value is not null)
+                    value.BpmList.OnChangedEvent += OnBPMListChanged;
                 fumen = value;
                 OnFumenObjectLoaded();
                 RedrawTimeline();
@@ -306,17 +310,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
         }
 
-        public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
-        {
-            var view = ViewHelper.CreateView(viewModel);
-            fumen.AddObject(viewModel.ReferenceOngekiObject);
-
-            DisplayObjectList.Add(view);
-            viewModel.EditorViewModel = this;
-
-            Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
-        }
-
         protected override Task OnActivateAsync(CancellationToken cancellationToken)
         {
             if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings)
@@ -331,13 +324,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return base.OnDeactivateAsync(close, cancellationToken);
         }
 
+        public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
+        {
+            var view = ViewHelper.CreateView(viewModel);
+            fumen.AddObject(viewModel.ReferenceOngekiObject);
+
+            DisplayObjectList.Add(view);
+            viewModel.EditorViewModel = this;
+
+            Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
+        }
+
         public void DeleteSelectedObjects()
         {
             var selectedObject = DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x => x.IsSelected).ToArray();
             foreach (var obj in selectedObject)
             {
                 DisplayObjectList.Remove(obj);
-                fumen.AddObject(obj.ViewModel?.ReferenceOngekiObject);
+                fumen.RemoveObject(obj.ViewModel?.ReferenceOngekiObject);
             }
             Log.LogInfo($"deleted {selectedObject.Length} objects.");
         }
@@ -361,6 +365,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     DeleteSelectedObjects();
                 }
             }
+        }
+
+        public void OnBPMListChanged()
+        {
+            RedrawTimeline();
         }
 
         public void OnSizeChanged(ActionExecutionContext e)
