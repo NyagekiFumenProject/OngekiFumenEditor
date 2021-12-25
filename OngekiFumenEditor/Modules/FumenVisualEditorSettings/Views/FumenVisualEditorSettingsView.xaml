@@ -36,12 +36,10 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition>
-                    </RowDefinition>
-                    <RowDefinition>
-                    </RowDefinition>
-                    <RowDefinition>
-                    </RowDefinition>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">UnitCloseSize</TextBlock>
                 <ComboBox
@@ -74,6 +72,21 @@
                     Grid.Column="1"
                     Margin="0,0,0,5"
                     Text="{Binding Setting.BeatSplit}">
+                </TextBox>
+                <TextBlock
+                    Grid.Row="3"
+                    Margin="0,0,0,5"
+                    VerticalAlignment="Center"
+                    TextWrapping="Wrap">
+                    MouseWheelTimelineSpeed
+                </TextBlock>
+                <TextBox
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Margin="0,0,0,5"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Text="{Binding Setting.MouseWheelTimelineSpeed}">
                 </TextBox>
             </Grid>
         </StackPanel>

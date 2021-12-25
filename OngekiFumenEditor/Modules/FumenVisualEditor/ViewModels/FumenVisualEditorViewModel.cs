@@ -32,20 +32,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [Export(typeof(FumenVisualEditorViewModel))]
     public class FumenVisualEditorViewModel : PersistedDocument
     {
-        public class XGridUnitLineViewModel
+        [Flags]
+        public enum RedrawTarget
         {
-            public double X { get; set; }
-            public double Unit { get; set; }
-            public bool IsCenterLine { get; set; }
-            public override string ToString() => $"{X:F4} {Unit} {(IsCenterLine ? "Center" : string.Empty)}";
-        }
+            OngekiObjects = 1,
+            TGridUnitLines = 2,
+            XGridUnitLines = 4,
 
-        public class TGridUnitLineViewModel
-        {
-            public double Y { get; set; }
-            public TGrid TGrid { get; set; }
-            public bool IsBaseLine { get; set; }
-            public override string ToString() => $"{Y:F4} {TGrid} {(IsBaseLine ? "BaseLine" : string.Empty)}";
+            All = OngekiObjects | TGridUnitLines | XGridUnitLines,
+            UnitLines = TGridUnitLines | XGridUnitLines,
         }
 
         private OngekiFumen fumen;
@@ -63,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     value.BpmList.OnChangedEvent += OnBPMListChanged;
                 fumen = value;
                 OnFumenObjectLoaded();
-                RedrawTimeline();
+                Redraw(RedrawTarget.All);
                 NotifyOfPropertyChange(() => Fumen);
             }
         }
@@ -117,11 +112,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             switch (e.PropertyName)
             {
                 case nameof(EditorSetting.UnitCloseSize):
-                    RedrawUnitCloseXLines();
+                    Redraw(RedrawTarget.XGridUnitLines);
+                    break;
+                case nameof(EditorSetting.CurrentDisplayTimePosition):
+                    Redraw(RedrawTarget.TGridUnitLines | RedrawTarget.OngekiObjects);
                     break;
                 case nameof(EditorSetting.BeatSplit):
                 case nameof(EditorSetting.BaseLineY):
-                    RedrawTimeline();
+                    Redraw(RedrawTarget.TGridUnitLines);
                     break;
                 case nameof(EditorSetting.EditorDisplayName):
                     if (IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
@@ -130,40 +128,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 default:
                     break;
             }
-        }
-
-        private void RedrawUnitCloseXLines()
-        {
-            foreach (var item in XGridUnitLineLocations)
-                ObjectPool<XGridUnitLineViewModel>.Return(item);
-            XGridUnitLineLocations.Clear();
-
-            var width = CanvasWidth;
-            var unitSize = XUnitSize;
-            var totalUnitValue = 0d;
-            var line = default(XGridUnitLineViewModel);
-
-            for (double totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
-            {
-                totalUnitValue += Setting.UnitCloseSize;
-
-                line = ObjectPool<XGridUnitLineViewModel>.Get();
-                line.X = totalLength;
-                line.Unit = totalUnitValue;
-                line.IsCenterLine = false;
-                XGridUnitLineLocations.Add(line);
-
-                line = ObjectPool<XGridUnitLineViewModel>.Get();
-                line.X = (width / 2) - (totalLength - (width / 2));
-                line.Unit = -totalUnitValue;
-                line.IsCenterLine = false;
-                XGridUnitLineLocations.Add(line);
-            }
-
-            line = ObjectPool<XGridUnitLineViewModel>.Get();
-            line.X = width / 2;
-            line.IsCenterLine = true;
-            XGridUnitLineLocations.Add(line);
         }
 
         protected override void OnViewLoaded(object v)
@@ -254,6 +218,40 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     TGridUnitLineLocations.Add(line);
                 }
             }
+        }
+
+        private void RedrawUnitCloseXLines()
+        {
+            foreach (var item in XGridUnitLineLocations)
+                ObjectPool<XGridUnitLineViewModel>.Return(item);
+            XGridUnitLineLocations.Clear();
+
+            var width = CanvasWidth;
+            var unitSize = XUnitSize;
+            var totalUnitValue = 0d;
+            var line = default(XGridUnitLineViewModel);
+
+            for (double totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
+            {
+                totalUnitValue += Setting.UnitCloseSize;
+
+                line = ObjectPool<XGridUnitLineViewModel>.Get();
+                line.X = totalLength;
+                line.Unit = totalUnitValue;
+                line.IsCenterLine = false;
+                XGridUnitLineLocations.Add(line);
+
+                line = ObjectPool<XGridUnitLineViewModel>.Get();
+                line.X = (width / 2) - (totalLength - (width / 2));
+                line.Unit = -totalUnitValue;
+                line.IsCenterLine = false;
+                XGridUnitLineLocations.Add(line);
+            }
+
+            line = ObjectPool<XGridUnitLineViewModel>.Get();
+            line.X = width / 2;
+            line.IsCenterLine = true;
+            XGridUnitLineLocations.Add(line);
         }
 
         protected override async Task DoNew()
@@ -350,21 +348,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             RedrawTimeline();
         }
 
+        public void Redraw(RedrawTarget target)
+        {
+            if (target.HasFlag(RedrawTarget.OngekiObjects))
+                foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>())
+                    obj.RecalcCanvasXY();
+            if (target.HasFlag(RedrawTarget.TGridUnitLines))
+                RedrawTimeline();
+            if (target.HasFlag(RedrawTarget.XGridUnitLines))
+                RedrawUnitCloseXLines();
+        }
+
         public void OnSizeChanged(ActionExecutionContext e)
         {
-            //redraw visual editor and ongeki objects.
-            RedrawUnitCloseXLines();
-            RedrawTimeline();
-            foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>())
-                obj.RecalcCanvasXY();
+            Redraw(RedrawTarget.UnitLines);
         }
 
         public void OnMouseWheel(ActionExecutionContext e)
         {
-            if (true)
-            {
-
-            }
+            var arg = e.EventArgs as MouseWheelEventArgs;
+            var scrollDelta = (int)(arg.Delta * Setting.MouseWheelTimelineSpeed);
+            var tGrid = Setting.CurrentDisplayTimePosition + new GridOffset(0, scrollDelta);
+            Setting.CurrentDisplayTimePosition = tGrid;
         }
     }
 }

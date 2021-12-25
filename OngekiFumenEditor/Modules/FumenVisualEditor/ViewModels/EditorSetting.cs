@@ -43,6 +43,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private bool isPreventXAutoClose;
+        /// <summary>
+        /// 表示物件或者其他在X轴上移动时，是否可以自动吸附到最近的单位线上
+        /// </summary>
         public bool IsPreventXAutoClose
         {
             get
@@ -57,6 +60,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private bool isPreventTimelineAutoClose;
+        /// <summary>
+        /// 表示物件或者其他在时间轴上移动时，是否可以自动吸附到最近的单位线上
+        /// </summary>
         public bool IsPreventTimelineAutoClose
         {
             get
@@ -71,6 +77,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private double unitCloseSize = 4;
+        /// <summary>
+        /// X轴上单位线间距大小
+        /// </summary>
         public double UnitCloseSize
         {
             get
@@ -85,6 +94,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private int baseLineY = 50;
+        /// <summary>
+        /// 时间轴上单位线间距大小
+        /// </summary>
         public int BaseLineY
         {
             get
@@ -99,6 +111,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private int beatSplit = 1;
+        /// <summary>
+        /// 时间轴上单位线划分密度
+        /// </summary>
         public int BeatSplit
         {
             get
@@ -109,6 +124,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 beatSplit = value;
                 NotifyOfPropertyChange(() => BeatSplit);
+            }
+        }
+
+        private float mouseWheelTimelineSpeed = 1f;
+        /// <summary>
+        /// 鼠标滚轮移动时间轴速度倍率
+        /// </summary>
+        public float MouseWheelTimelineSpeed
+        {
+            get
+            {
+                return mouseWheelTimelineSpeed;
+            }
+            set
+            {
+                mouseWheelTimelineSpeed = value;
+                NotifyOfPropertyChange(() => MouseWheelTimelineSpeed);
             }
         }
     }
