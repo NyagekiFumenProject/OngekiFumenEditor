@@ -9,7 +9,17 @@ namespace OngekiFumenEditor.Base
     public class XGrid : GridBase
     {
         public const uint DEFAULT_RES_X = 4096;
-        public uint ResX { get; set; } = DEFAULT_RES_X;
+        public uint ResX
+        {
+            get
+            {
+                return gridBaseRadix;
+            }
+            set
+            {
+                gridBaseRadix = value;
+            }
+        }
 
         public XGrid(float unit = default, int grid = default, uint resX = DEFAULT_RES_X) : base(unit, grid) => ResX = resX;
 

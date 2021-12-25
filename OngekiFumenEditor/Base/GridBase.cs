@@ -13,6 +13,8 @@ namespace OngekiFumenEditor.Base
         private int grid = 0; //grid
         private float unit = 0; //unit
 
+        protected uint gridBaseRadix = 2857;
+
         public GridBase(float unit = default, int grid = default)
         {
             this.grid = grid;
@@ -76,7 +78,16 @@ namespace OngekiFumenEditor.Base
 
         public static GridOffset operator -(GridBase l, GridBase r)
         {
-            return new GridOffset(l.Unit - r.Unit, l.Grid - r.Grid);
+            var unitDiff = l.Unit - r.Unit;
+            long gridDiff = l.Grid - r.Grid;
+
+            while (gridDiff < 0)
+            {
+                unitDiff = unitDiff - 1;
+                gridDiff = gridDiff + l.gridBaseRadix;
+            }
+
+            return new GridOffset(unitDiff, (int)gridDiff);
         }
 
         public abstract string Serialize(OngekiFumen fumenData);

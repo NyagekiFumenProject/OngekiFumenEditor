@@ -9,7 +9,17 @@ namespace OngekiFumenEditor.Base
     public class TGrid : GridBase
     {
         public const uint DEFAULT_RES_T = 1920;
-        public uint ResT { get; set; } = DEFAULT_RES_T;
+        public uint ResT
+        {
+            get
+            {
+                return gridBaseRadix;
+            }
+            set
+            {
+                gridBaseRadix = value;
+            }
+        }
 
         public TGrid(float unit = default, int grid = default, uint resT = DEFAULT_RES_T) : base(unit, grid) => ResT = resT;
 
