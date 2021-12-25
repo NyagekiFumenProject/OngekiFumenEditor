@@ -1,0 +1,96 @@
+﻿using Caliburn.Micro;
+using OngekiFumenEditor.Utils;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace OngekiFumenEditor.Kernel.Scheduler
+{
+    [Export(typeof(ISchedulerManager))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    internal class SchedulerManager : ISchedulerManager
+    {
+        private AbortableThread runThread;
+
+        private List<ISchedulable> schedulers { get; } = new List<ISchedulable>();
+
+        private Dictionary<ISchedulable, DateTime> schedulersCallTime { get; } = new();
+
+        public IEnumerable<ISchedulable> Schedulers => schedulers;
+
+        public Task Init()
+        {
+            foreach (var s in IoC.GetAll<ISchedulable>())
+                AddScheduler(s);
+
+            runThread = new AbortableThread(Run);
+            runThread.Name = "SchedulerManager::Run()";
+            runThread.Start();
+
+            return Task.CompletedTask;
+        }
+
+        public Task AddScheduler(ISchedulable s)
+        {
+            if (s is null || schedulers.FirstOrDefault(x => x.SchedulerName.Equals(s.SchedulerName)) != null)
+            {
+                Log.LogWarn($"Can't add scheduler : {s?.SchedulerName} is null/exist.");
+                return Task.CompletedTask;
+            }
+
+            schedulers.Add(s);
+            schedulersCallTime[s] = DateTime.MinValue;
+            Log.LogInfo("Added new scheduler: " + s.SchedulerName);
+
+            return Task.CompletedTask;
+        }
+
+        private async void Run(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var schedulers = Schedulers
+                    .Where(x => DateTime.Now - schedulersCallTime[x] >= x.ScheduleCallLoopInterval)
+                    .Select(x => x.OnScheduleCall(cancellationToken).ContinueWith(_ => schedulersCallTime[x] = DateTime.Now))
+                    .ToArray();
+                await Task.WhenAll(schedulers);
+                await Task.Yield();
+            }
+        }
+
+        public Task OnExit()
+        {
+            try
+            {
+                runThread.Abort();
+            }
+            catch { }
+
+            foreach (var scheduler in Schedulers)
+            {
+                Log.LogInfo("Call OnSchedulerTerm() :" + scheduler.SchedulerName);
+                scheduler.OnSchedulerTerm();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveScheduler(ISchedulable s)
+        {
+            if (s is null || schedulers.FirstOrDefault(x => x.SchedulerName.Equals(s.SchedulerName)) is null)
+            {
+                Log.LogWarn($"Can't remove scheduler : {s?.SchedulerName} is null or not exist.");
+                return Task.CompletedTask;
+            }
+
+            schedulers.Remove(s);
+            Log.LogInfo("Remove scheduler: " + s.SchedulerName);
+
+            return Task.CompletedTask;
+        }
+    }
+}
