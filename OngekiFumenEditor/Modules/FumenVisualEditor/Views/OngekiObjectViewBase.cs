@@ -38,21 +38,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
                 Converter = isSelectConverter
             });
 
-            MouseDown += (_,_)=> {
+            MouseLeftButtonDown += (_, _) =>
+            {
+                //Log.LogInfo("OngekiObjectViewBase.MouseDown");
                 mouseMove = false;
             };
-            MouseMove += (_, _) => {
+            MouseMove += (_, e) =>
+            {
+                //Log.LogInfo("OngekiObjectViewBase.MouseMove");
                 mouseMove = true;
             };
-            MouseUp += (_, _) => {
+            MouseLeftButtonUp += (_, e) =>
+            {
+                //Log.LogInfo("OngekiObjectViewBase.MouseUp");
                 if (!mouseMove)
                     ViewModel.OnMouseClick(default);
             };
         }
-
-        public bool IsPreventXAutoClose => ViewModel?.EditorViewModel?.IsPreventXAutoClose ?? false;
-
-        public bool IsPreventTimelineAutoClose => ViewModel?.EditorViewModel?.IsPreventTimelineAutoClose ?? false;
 
         public void RecalcCanvasXY()
         {

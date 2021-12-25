@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.ObjectPool;
+﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -23,8 +24,7 @@ namespace OngekiFumenEditor.Parser
             var genObjList = new List<(OngekiObjectBase obj,ICommandParser parser)>();
             var fumen = new OngekiFumen();
 
-            var pool = ObjectPool.Create<CommandArgs>();
-            var commandArg = pool.Get();
+            var commandArg = ObjectPool<CommandArgs>.Get();
 
             while (!reader.EndOfStream)
             {
@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Parser
                 }
             }
 
-            pool.Return(commandArg);
+            ObjectPool<CommandArgs>.Return(commandArg);
 
             foreach (var pair in genObjList)
             {

@@ -1,9 +1,12 @@
 using Caliburn.Micro;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
+using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -17,7 +20,12 @@ namespace OngekiFumenEditor
 {
     public class AppBootstrapper : Gemini.AppBootstrapper
     {
-        protected override void OnStartup(object sender, StartupEventArgs e)
+        protected async Task InitKernels()
+        {
+            await IoC.Get<ISchedulerManager>().Init();
+        }
+
+        protected async override void OnStartup(object sender, StartupEventArgs e)
         {
             base.OnStartup(sender, e);
 
@@ -29,6 +37,8 @@ namespace OngekiFumenEditor
             logo.UriSource = new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/logo.png");
             logo.EndInit();
             IoC.Get<WindowTitleHelper>().Icon = logo;
+
+            await InitKernels();
 
             Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
         }

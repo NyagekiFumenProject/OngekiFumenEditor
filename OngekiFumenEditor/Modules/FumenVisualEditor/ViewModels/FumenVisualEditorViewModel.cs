@@ -11,6 +11,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,13 +25,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     [Export(typeof(FumenVisualEditorViewModel))]
     public class FumenVisualEditorViewModel : PersistedDocument
     {
-        public struct XGridUnitLineViewModel
+        public class XGridUnitLineViewModel
         {
             public double X { get; set; }
             public double Unit { get; set; }
@@ -38,7 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             public override string ToString() => $"{X:F4} {Unit} {(IsCenterLine ? "Center" : string.Empty)}";
         }
 
-        public struct TGridUnitLineViewModel
+        public class TGridUnitLineViewModel
         {
             public double Y { get; set; }
             public TGrid TGrid { get; set; }
@@ -67,12 +69,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         public double XUnitSize => CanvasWidth / (24 * 2) * UnitCloseSize;
-        public double CanvasWidth => VisualDisplayer?.ActualWidth ?? 0;
-        public double CanvasHeight => VisualDisplayer?.ActualHeight ?? 0;
+        public double CanvasWidth => View?.VisualDisplayer?.ActualWidth ?? 0;
+        public double CanvasHeight => View?.VisualDisplayer?.ActualHeight ?? 0;
         public FumenVisualEditorView View { get; private set; }
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
-        public Panel VisualDisplayer => View?.VisualDisplayer;
         public ItemCollection DisplayObjectList => View?.DisplayObjectList.Items;
 
         private string errorMessage;
@@ -268,7 +269,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RedrawTimeline()
         {
+            foreach (var item in TGridUnitLineLocations)
+                ObjectPool<TGridUnitLineViewModel>.Return(item);
             TGridUnitLineLocations.Clear();
+
             foreach ((_, var bpm) in TGridCalculator.GetVisibleBpmList(this))
             {
                 var nextBpm = Fumen.BpmList.GetNextBpm(bpm);
@@ -283,12 +287,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     {
                         if (y > CanvasHeight)
                             break;
-                        var line = new TGridUnitLineViewModel()
-                        {
-                            TGrid = tGrid,
-                            IsBaseLine = tGrid == this.CurrentDisplayTimePosition,
-                            Y = CanvasHeight - y
-                        };
+                        var line = ObjectPool<TGridUnitLineViewModel>.Get();
+                        line.TGrid = tGrid;
+                        line.IsBaseLine = tGrid == CurrentDisplayTimePosition;
+                        line.Y = CanvasHeight - y;
+
                         TGridUnitLineLocations.Add(line);
                     }
                     i++;
@@ -360,11 +363,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (e.EventArgs is KeyEventArgs arg)
             {
+                Log.LogInfo(arg.Key.ToString());
                 if (arg.Key == Key.Delete)
                 {
                     DeleteSelectedObjects();
                 }
             }
+        }
+        public void OnKeyUp(ActionExecutionContext e)
+        {
+            if (e.EventArgs is KeyEventArgs arg)
+            {
+                Log.LogInfo(arg.Key.ToString());
+                if (arg.Key == Key.Delete)
+                {
+                    DeleteSelectedObjects();
+                }
+            }
+        }
+
+        public void OnFocusableChanged(ActionExecutionContext e)
+        {
+
         }
 
         public void OnBPMListChanged()

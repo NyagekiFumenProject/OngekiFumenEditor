@@ -1,3 +1,4 @@
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
@@ -30,7 +31,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public bool IsDragging
         {
             get { return (bool)GetValue(IsDraggingProperty); }
-            set { SetValue(IsDraggingProperty, value); }
+            set { 
+                SetValue(IsDraggingProperty, value);
+                //Log.LogInfo("IsDragging = " + IsDragging);
+            }
         }
 
         public static readonly DependencyProperty IsDraggingProperty =
@@ -49,21 +53,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         {
             InitializeComponent();
 
-            MouseDown += OnMouseDown;
+            MouseLeftButtonDown += OnMouseDown;
             MouseMove += OnMouseMove;
-            MouseUp += OnMouseUp;
+            MouseLeftButtonUp += OnMouseUp;
+            
             MouseLeave += OnMouseLeave;
         }
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
+            Log.LogInfo("OnMouseLeave");
+            if (!(IsMouseDown && Parent is IInputElement parent))
+                return;
             IsMouseDown = false;
             IsDragging = false;
-            e.Handled = true;
+            var pos = e.GetPosition(parent);
+            var selectObjectViewModels = ViewModel.DisplayObjectList
+                .OfType<OngekiObjectViewBase>()
+                .Select(x => x.ViewModel)
+                .Where(x => x.IsSelected)
+                .ToArray();
+            selectObjectViewModels.ForEach(x => x.OnDragEnd(pos));
+            //e.Handled = true;
         }
 
         private void OnMouseUp(object sender, MouseButtonEventArgs e)
         {
+            Log.LogInfo("OnMouseUp");
             if (!(IsMouseDown && Parent is IInputElement parent))
                 return;
             var selectObjectViewModels = ViewModel.DisplayObjectList
@@ -78,14 +94,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
             IsMouseDown = false;
             IsDragging = false;
-            e.Handled = true;
+            //e.Handled = true;
         }
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
+            //Log.LogInfo("OnMouseMove");
             if (!(IsMouseDown && Parent is IInputElement parent))
                 return;
-            e.Handled = true;
+            //e.Handled = true;
             var r = IsDragging;
             Action<DisplayObjectViewModelBase,Point> dragCall = (vm,pos) =>
             {
@@ -118,12 +135,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            Log.LogInfo("OnMouseDown");
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 IsMouseDown = true;
                 IsDragging = false;
-                e.Handled = true;
+                //e.Handled = true;
             }
+            Focus();
         }
 
         private FumenVisualEditorViewModel ViewModel => DataContext as FumenVisualEditorViewModel;
