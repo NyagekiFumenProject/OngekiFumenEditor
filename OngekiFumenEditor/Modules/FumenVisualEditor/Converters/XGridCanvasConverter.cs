@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
                 &&
                 values.ElementAtOrDefault(1) is FumenVisualEditorViewModel modelView)
             {
-                var x = xgridUnit * (modelView.XUnitSize / modelView.UnitCloseSize) + modelView.CanvasWidth / 2;
+                var x = xgridUnit * (modelView.XUnitSize / modelView.Setting.UnitCloseSize) + modelView.CanvasWidth / 2;
                 return x;
             }
 

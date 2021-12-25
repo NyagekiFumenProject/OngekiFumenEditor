@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public double XUnitSize => CanvasWidth / (24 * 2) * UnitCloseSize;
+        public double XUnitSize => CanvasWidth / (24 * 2) * Setting.UnitCloseSize;
         public double CanvasWidth => View?.VisualDisplayer?.ActualWidth ?? 0;
         public double CanvasHeight => View?.VisualDisplayer?.ActualHeight ?? 0;
         public FumenVisualEditorView View { get; private set; }
@@ -92,106 +92,43 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private TGrid currentDisplayTimePosition = new TGrid(4, 500);
-        /// <summary>
-        /// 表示当前显示物件的时间
-        /// </summary>
-        public TGrid CurrentDisplayTimePosition
+        private EditorSetting setting;
+        public EditorSetting Setting
         {
             get
             {
-                return currentDisplayTimePosition;
+                return setting;
             }
             set
             {
-                currentDisplayTimePosition = value;
-                NotifyOfPropertyChange(() => CurrentDisplayTimePosition);
+                this.RegisterOrUnregisterPropertyChangeEvent(setting, value, OnSettingPropertyChanged);
+                setting = value;
+                NotifyOfPropertyChange(() => Setting);
             }
         }
 
-        public override string DisplayName
+        public FumenVisualEditorViewModel()
         {
-            get { return base.DisplayName; }
-            set
-            {
-                base.DisplayName = value;
-                if (IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
-                {
-                    title.TitleContent = base.DisplayName;
-                }
-            }
+            Setting = new EditorSetting();
         }
 
-        private bool isPreventXAutoClose;
-        public bool IsPreventXAutoClose
+        private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            get
+            switch (e.PropertyName)
             {
-                return isPreventXAutoClose;
-            }
-            set
-            {
-                isPreventXAutoClose = value;
-                NotifyOfPropertyChange(() => IsPreventTimelineAutoClose);
-            }
-        }
-
-        private bool isPreventTimelineAutoClose;
-        public bool IsPreventTimelineAutoClose
-        {
-            get
-            {
-                return isPreventTimelineAutoClose;
-            }
-            set
-            {
-                isPreventTimelineAutoClose = value;
-                NotifyOfPropertyChange(() => IsPreventTimelineAutoClose);
-            }
-        }
-
-        private double unitCloseSize = 4;
-        public double UnitCloseSize
-        {
-            get
-            {
-                return unitCloseSize;
-            }
-            set
-            {
-                unitCloseSize = value;
-                RedrawUnitCloseXLines();
-                NotifyOfPropertyChange(() => UnitCloseSize);
-            }
-        }
-
-        private int baseLineY = 50;
-        public int BaseLineY
-        {
-            get
-            {
-                return baseLineY;
-            }
-            set
-            {
-                baseLineY = value;
-                RedrawTimeline();
-                NotifyOfPropertyChange(() => BaseLineY);
-            }
-        }
-
-        private int beatSplit = 1;
-        public int BeatSplit
-        {
-            get
-            {
-                return beatSplit;
-            }
-            set
-            {
-                beatSplit = value;
-                RedrawTimeline();
-                NotifyOfPropertyChange(() => BeatSplit);
+                case nameof(EditorSetting.UnitCloseSize):
+                    RedrawUnitCloseXLines();
+                    break;
+                case nameof(EditorSetting.BeatSplit):
+                case nameof(EditorSetting.BaseLineY):
+                    RedrawTimeline();
+                    break;
+                case nameof(EditorSetting.EditorDisplayName):
+                    if (IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
+                        title.TitleContent = base.DisplayName;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -208,7 +145,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             for (double totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
             {
-                totalUnitValue += UnitCloseSize;
+                totalUnitValue += Setting.UnitCloseSize;
 
                 line = ObjectPool<XGridUnitLineViewModel>.Get();
                 line.X = totalLength;
@@ -279,7 +216,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach ((_, var bpm) in TGridCalculator.GetVisibleBpmList(this))
             {
                 var nextBpm = Fumen.BpmList.GetNextBpm(bpm);
-                var per = bpm.TGrid.ResT / BeatSplit;
+                var per = bpm.TGrid.ResT / Setting.BeatSplit;
                 var i = 0;
                 while (true)
                 {
@@ -292,7 +229,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             break;
                         var line = ObjectPool<TGridUnitLineViewModel>.Get();
                         line.TGrid = tGrid;
-                        line.IsBaseLine = tGrid == CurrentDisplayTimePosition;
+                        line.IsBaseLine = tGrid == Setting.CurrentDisplayTimePosition;
                         line.Y = CanvasHeight - y;
 
                         baseLineAdded = baseLineAdded || line.IsBaseLine;
@@ -306,11 +243,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!baseLineAdded)
             {
                 //添加一个基线表示当前时间轴
-                if (TGridCalculator.ConvertTGridToY(CurrentDisplayTimePosition, this) is double y)
+                if (TGridCalculator.ConvertTGridToY(Setting.CurrentDisplayTimePosition, this) is double y)
                 {
                     var line = ObjectPool<TGridUnitLineViewModel>.Get();
 
-                    line.TGrid = CurrentDisplayTimePosition;
+                    line.TGrid = Setting.CurrentDisplayTimePosition;
                     line.IsBaseLine = true;
                     line.Y = CanvasHeight - y;
 
@@ -336,14 +273,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         protected override Task OnActivateAsync(CancellationToken cancellationToken)
         {
             if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings)
-                editorSettings.EditorViewModel = this;
+                editorSettings.Setting = Setting;
             return base.OnActivateAsync(cancellationToken);
         }
 
         protected override Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
-            if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings && editorSettings.EditorViewModel == this)
-                editorSettings.EditorViewModel = default;
+            if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings && editorSettings.Setting == Setting)
+                editorSettings.Setting = default;
             return base.OnDeactivateAsync(close, cancellationToken);
         }
 
@@ -390,6 +327,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             }
         }
+
         public void OnKeyUp(ActionExecutionContext e)
         {
             if (e.EventArgs is KeyEventArgs arg)
@@ -419,6 +357,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             RedrawTimeline();
             foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>())
                 obj.RecalcCanvasXY();
+        }
+
+        public void OnMouseWheel(ActionExecutionContext e)
+        {
+            if (true)
+            {
+
+            }
         }
     }
 }

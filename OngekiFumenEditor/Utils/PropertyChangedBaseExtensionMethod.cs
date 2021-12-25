@@ -11,7 +11,15 @@ namespace OngekiFumenEditor.Utils
 {
     public static class PropertyChangedBaseExtensionMethod
     {
-        static Dictionary<int, WeakReference<PropertyChangedEventHandler>> savedMethod = new ();
+        static Dictionary<int, WeakReference<PropertyChangedEventHandler>> savedMethod = new();
+
+        public static void RegisterOrUnregisterPropertyChangeEvent<T>(this PropertyChangedBase t, T oldValue, T newValue, PropertyChangedEventHandler handler) where T : INotifyPropertyChanged
+        {
+            if (oldValue is not null)
+                oldValue.PropertyChanged -= handler;
+            if (newValue is not null)
+                newValue.PropertyChanged += handler;
+        }
 
         public static void RegisterOrUnregisterPropertyChangeEvent<T>(this PropertyChangedBase t, T oldValue, T newValue) where T : INotifyPropertyChanged
         {

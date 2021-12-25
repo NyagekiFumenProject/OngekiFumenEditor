@@ -133,7 +133,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (ReferenceOngekiObject is IHorizonPositionObject posObj)
                 {
                     var x = CheckAndAdjustX(relativePoint.X);
-                    var xgridValue = (x - hostModelView.CanvasWidth / 2) / (hostModelView.XUnitSize / hostModelView.UnitCloseSize);
+                    var xgridValue = (x - hostModelView.CanvasWidth / 2) / (hostModelView.XUnitSize / hostModelView.Setting.UnitCloseSize);
                     var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
                     posObj.XGrid.Unit = Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (float)xgridValue;
                     //Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
@@ -149,7 +149,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var s = y;
             y = EditorViewModel.CanvasHeight - y;
-            var enableMagneticAdjust = !(editorViewModel?.IsPreventTimelineAutoClose ?? false);
+            var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventTimelineAutoClose ?? false);
             var mid = enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z => new
             {
                 distance = Math.Abs(z.Y - s),
@@ -164,7 +164,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public double CheckAndAdjustX(double x)
         {
             //todo 基于二分法查询最近
-            var enableMagneticAdjust = !(editorViewModel?.IsPreventXAutoClose ?? false);
+            var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventXAutoClose ?? false);
             var mid = enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z => new
             {
                 distance = Math.Abs(z.X - x),
@@ -186,7 +186,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     Converter = new XGridCanvasConverter(),
                 };
                 xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.XGrid.Unit"));
-                xBinding.Bindings.Add(new Binding("EditorViewModel"));
+                xBinding.Bindings.Add(new Binding("EditorViewModel.Setting"));
                 element.SetBinding(Canvas.LeftProperty, xBinding);
             }
 

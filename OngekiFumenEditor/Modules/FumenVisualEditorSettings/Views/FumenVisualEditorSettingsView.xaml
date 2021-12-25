@@ -19,16 +19,16 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="10,5,10,5" Visibility="{Binding EditorViewModel, Converter={StaticResource NullToVisibilityConverter}}">
+        <StackPanel Margin="10,5,10,5" Visibility="{Binding Setting, Converter={StaticResource NullToVisibilityConverter}}">
             <CheckBox
                 Margin="0,2,0,2"
                 Content="IsPreventTimelineAutoClose"
-                IsChecked="{Binding EditorViewModel.IsPreventTimelineAutoClose}">
+                IsChecked="{Binding Setting.IsPreventTimelineAutoClose}">
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 Content="IsPreventXAutoClose"
-                IsChecked="{Binding EditorViewModel.IsPreventXAutoClose}">
+                IsChecked="{Binding Setting.IsPreventXAutoClose}">
             </CheckBox>
             <Grid Margin="0,2,0,2">
                 <Grid.ColumnDefinitions>
@@ -48,7 +48,7 @@
                     Grid.Column="1"
                     ItemsSource="{Binding UnitCloseSizeValues}"
                     SelectedIndex="4"
-                    SelectedValue="{Binding EditorViewModel.UnitCloseSize}">
+                    SelectedValue="{Binding Setting.UnitCloseSize}">
                 </ComboBox>
                 <TextBlock
                     Grid.Row="1"
@@ -61,7 +61,7 @@
                     Grid.Row="1"
                     Grid.Column="1"
                     Margin="0,5,0,5"
-                    Text="{Binding EditorViewModel.BaseLineY}">
+                    Text="{Binding Setting.BaseLineY}">
                 </TextBox>
                 <TextBlock
                     Grid.Row="2"
@@ -73,7 +73,7 @@
                     Grid.Row="2"
                     Grid.Column="1"
                     Margin="0,0,0,5"
-                    Text="{Binding EditorViewModel.BeatSplit}">
+                    Text="{Binding Setting.BeatSplit}">
                 </TextBox>
             </Grid>
         </StackPanel>

@@ -31,23 +31,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
 
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
-        private FumenVisualEditorViewModel editorViewModel = default;
-        public FumenVisualEditorViewModel EditorViewModel
+        private EditorSetting setting = default;
+        public EditorSetting Setting
         {
             get
             {
-                return editorViewModel;
+                return setting;
             }
             set
             {
-                var prev = editorViewModel;
-                editorViewModel = value;
-                NotifyOfPropertyChange(() => EditorViewModel);
+                var prev = setting;
+                setting = value;
+                NotifyOfPropertyChange(() => Setting);
 
                 if (value is null)
                     DisplayName = "编辑器设置";
                 else
-                    DisplayName = "编辑器设置 - " + value.DisplayName;
+                    DisplayName = "编辑器设置 - " + value.EditorDisplayName;
             }
         }
     }
