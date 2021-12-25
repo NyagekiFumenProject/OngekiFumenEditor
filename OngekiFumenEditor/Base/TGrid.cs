@@ -21,6 +21,8 @@ namespace OngekiFumenEditor.Base
             }
         }
 
+        public static TGrid ZeroDefault { get; } = new TGrid();
+
         public TGrid(float unit = default, int grid = default, uint resT = DEFAULT_RES_T) : base(unit, grid) => ResT = resT;
 
         public override string Serialize(OngekiFumen fumenData)
@@ -54,6 +56,12 @@ namespace OngekiFumenEditor.Base
         {
             var unit = l.Unit + r.Unit;
             var grid = r.Grid + l.Grid;
+
+            while (grid < 0)
+            {
+                unit = unit - 1;
+                grid = (int)(grid + l.ResT);
+            }
 
             unit += grid / l.ResT;
             grid = (int)(grid % l.ResT);

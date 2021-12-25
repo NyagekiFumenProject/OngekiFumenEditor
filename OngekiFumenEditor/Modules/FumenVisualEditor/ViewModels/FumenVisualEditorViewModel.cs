@@ -139,30 +139,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             RedrawUnitCloseXLines();
         }
 
-        private Task InitalizeVisualData()
-        {
-            var displayableObjects = fumen.GetAllDisplayableObjects();
-            //add all displayable object.
-            foreach (var obj in displayableObjects)
-            {
-                var displayObject = Activator.CreateInstance(obj.ModelViewType) as DisplayObjectViewModelBase;
-                if (ViewHelper.CreateView(displayObject) is OngekiObjectViewBase view && obj is OngekiObjectBase o)
-                {
-                    view.ViewModel.ReferenceOngekiObject = o;
-                    view.ViewModel.EditorViewModel = this;
-                    DisplayObjectList.Add(view);
-                }
-            }
-            return Task.CompletedTask;
-        }
-
         protected override async Task DoLoad(string filePath)
         {
             using var _ = StatusNotifyHelper.BeginStatus("Fumen loading : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
             using var fileStream = File.OpenRead(filePath);
             Fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fileStream);
-            await InitalizeVisualData();
+            Redraw(RedrawTarget.All);
         }
 
         private void OnFumenObjectLoaded()
@@ -220,6 +203,48 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        private void RedrawOngekiObjects()
+        {
+            var begin = TGridCalculator.ConvertYToTGrid(0, this) ?? new TGrid(0, 0);
+            var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
+
+            Log.LogDebug($"begin:({begin})  end:({end})");
+
+            foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x =>
+            {
+                if (x.ViewModel.ReferenceOngekiObject is ITimelineObject timeline)
+                    return !(begin <= timeline.TGrid && timeline.TGrid <= end);
+                return false;
+            }).ToArray())
+            {
+
+                DisplayObjectList.Remove(obj);
+            }
+            var remainObj = DisplayObjectList.OfType<OngekiObjectViewBase>().ToArray();
+            foreach (var item in remainObj)
+            {
+                //recalc xy for remain objs.
+                item.RecalcCanvasXY();
+            }
+            var list = Fumen.GetAllDisplayableObjects()
+                .OfType<ITimelineObject>()
+                .Where(x => begin <= x.TGrid && x.TGrid <= end)
+                .Where(x => !remainObj.Select(r => r.ViewModel.ReferenceOngekiObject as ITimelineObject).Contains(x))
+                .OfType<IDisplayableObject>()
+                .ToArray();
+            foreach (var item in list)
+            {
+                if (OngekiObjectViewModelHelper.CreateViewModel(item) is DisplayObjectViewModelBase viewModel &&
+                     ViewHelper.CreateView(viewModel) is UIElement view &&
+                     item is OngekiObjectBase o)
+                {
+                    viewModel.ReferenceOngekiObject = o;
+                    viewModel.EditorViewModel = this;
+                    DisplayObjectList.Add(view);
+                }
+            }
+        }
+
         private void RedrawUnitCloseXLines()
         {
             foreach (var item in XGridUnitLineLocations)
@@ -257,7 +282,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         protected override async Task DoNew()
         {
             Fumen = new OngekiFumen();
-            await InitalizeVisualData();
+            Redraw(RedrawTarget.All);
             Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
         }
 
@@ -351,8 +376,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void Redraw(RedrawTarget target)
         {
             if (target.HasFlag(RedrawTarget.OngekiObjects))
-                foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>())
-                    obj.RecalcCanvasXY();
+                RedrawOngekiObjects();
             if (target.HasFlag(RedrawTarget.TGridUnitLines))
                 RedrawTimeline();
             if (target.HasFlag(RedrawTarget.XGridUnitLines))
@@ -369,6 +393,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as MouseWheelEventArgs;
             var scrollDelta = (int)(arg.Delta * Setting.MouseWheelTimelineSpeed);
             var tGrid = Setting.CurrentDisplayTimePosition + new GridOffset(0, scrollDelta);
+
+            if (tGrid < TGrid.ZeroDefault)
+                tGrid = TGrid.ZeroDefault;
+
             Setting.CurrentDisplayTimePosition = tGrid;
         }
     }
