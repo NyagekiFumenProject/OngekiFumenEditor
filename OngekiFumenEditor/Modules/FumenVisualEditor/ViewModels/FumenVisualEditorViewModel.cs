@@ -92,7 +92,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private TGrid currentDisplayTimePosition = new TGrid();
+        private TGrid currentDisplayTimePosition = new TGrid(4, 500);
         /// <summary>
         /// 表示当前显示物件的时间
         /// </summary>
@@ -197,34 +197,36 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RedrawUnitCloseXLines()
         {
+            foreach (var item in XGridUnitLineLocations)
+                ObjectPool<XGridUnitLineViewModel>.Return(item);
             XGridUnitLineLocations.Clear();
 
             var width = CanvasWidth;
             var unitSize = XUnitSize;
             var totalUnitValue = 0d;
+            var line = default(XGridUnitLineViewModel);
 
             for (double totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
             {
                 totalUnitValue += UnitCloseSize;
 
-                XGridUnitLineLocations.Add(new XGridUnitLineViewModel()
-                {
-                    X = totalLength,
-                    Unit = totalUnitValue,
-                    IsCenterLine = false
-                });
-                XGridUnitLineLocations.Add(new XGridUnitLineViewModel()
-                {
-                    X = (width / 2) - (totalLength - (width / 2)),
-                    Unit = -totalUnitValue,
-                    IsCenterLine = false
-                });
+                line = ObjectPool<XGridUnitLineViewModel>.Get();
+                line.X = totalLength;
+                line.Unit = totalUnitValue;
+                line.IsCenterLine = false;
+                XGridUnitLineLocations.Add(line);
+
+                line = ObjectPool<XGridUnitLineViewModel>.Get();
+                line.X = (width / 2) - (totalLength - (width / 2));
+                line.Unit = -totalUnitValue;
+                line.IsCenterLine = false;
+                XGridUnitLineLocations.Add(line);
             }
-            XGridUnitLineLocations.Add(new XGridUnitLineViewModel()
-            {
-                X = width / 2,
-                IsCenterLine = true
-            });
+
+            line = ObjectPool<XGridUnitLineViewModel>.Get();
+            line.X = width / 2;
+            line.IsCenterLine = true;
+            XGridUnitLineLocations.Add(line);
         }
 
         protected override void OnViewLoaded(object v)
@@ -272,6 +274,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var item in TGridUnitLineLocations)
                 ObjectPool<TGridUnitLineViewModel>.Return(item);
             TGridUnitLineLocations.Clear();
+            var baseLineAdded = false;
 
             foreach ((_, var bpm) in TGridCalculator.GetVisibleBpmList(this))
             {
@@ -292,9 +295,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         line.IsBaseLine = tGrid == CurrentDisplayTimePosition;
                         line.Y = CanvasHeight - y;
 
+                        baseLineAdded = baseLineAdded || line.IsBaseLine;
+
                         TGridUnitLineLocations.Add(line);
                     }
                     i++;
+                }
+            }
+
+            if (!baseLineAdded)
+            {
+                //添加一个基线表示当前时间轴
+                if (TGridCalculator.ConvertTGridToY(CurrentDisplayTimePosition, this) is double y)
+                {
+                    var line = ObjectPool<TGridUnitLineViewModel>.Get();
+
+                    line.TGrid = CurrentDisplayTimePosition;
+                    line.IsBaseLine = true;
+                    line.Y = CanvasHeight - y;
+
+                    TGridUnitLineLocations.Add(line);
                 }
             }
         }
