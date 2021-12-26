@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
     <None Remove="Resources\empty_ogkr_template.ogkr" />
     <None Remove="Resources\Images\logo.png" />
   </ItemGroup>
@@ -27,6 +28,7 @@
 
   <ItemGroup>
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
     <Resource Include="Resources\logo.png" />
   </ItemGroup>
 
@@ -70,6 +72,9 @@
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\FlickView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
   </ItemGroup>
 

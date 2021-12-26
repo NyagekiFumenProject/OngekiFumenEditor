@@ -186,7 +186,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     Converter = new XGridCanvasConverter(),
                 };
                 xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.XGrid.Unit"));
-                xBinding.Bindings.Add(new Binding("EditorViewModel.Setting"));
+                xBinding.Bindings.Add(new Binding("EditorViewModel"));
                 element.SetBinding(Canvas.LeftProperty, xBinding);
             }
 
