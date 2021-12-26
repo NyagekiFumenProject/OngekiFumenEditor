@@ -340,7 +340,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnFocusableChanged(ActionExecutionContext e)
         {
-
+            Log.LogInfo($"OnFocusableChanged {e.EventArgs}");
         }
 
         public void OnBPMListChanged()
