@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
-            Log.LogInfo("OnMouseLeave");
+            //Log.LogInfo("OnMouseLeave");
             if (!(IsMouseDown && Parent is IInputElement parent))
                 return;
             IsMouseDown = false;
@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            Log.LogInfo("OnMouseUp");
+            //Log.LogInfo("OnMouseUp");
             if (!(IsMouseDown && Parent is IInputElement parent))
                 return;
             var selectObjectViewModels = ViewModel.DisplayObjectList
@@ -135,7 +135,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            Log.LogInfo("OnMouseDown");
+            //Log.LogInfo("OnMouseDown");
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 IsMouseDown = true;

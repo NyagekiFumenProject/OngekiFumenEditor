@@ -364,7 +364,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnFocusableChanged(ActionExecutionContext e)
         {
-
+            Log.LogInfo($"OnFocusableChanged {e.EventArgs}");
         }
 
         public void OnBPMListChanged()
@@ -384,7 +384,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnSizeChanged(ActionExecutionContext e)
         {
-            Redraw(RedrawTarget.UnitLines);
+            Redraw(RedrawTarget.All);
         }
 
         public void OnMouseWheel(ActionExecutionContext e)

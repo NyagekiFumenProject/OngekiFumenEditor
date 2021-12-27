@@ -11,12 +11,13 @@ namespace OngekiFumenEditor.Base
 {
     public class OngekiFumen
     {
-        public FumenMetaInfo MetaInfo { get; } = new FumenMetaInfo();
-        public List<BulletPalleteList> BulletPalleteList { get; } = new List<BulletPalleteList>();
-        public List<Bell> Bells { get; } = new List<Bell>();
-        public BpmList BpmList { get; } = new BpmList();
-        public List<MeterChange> MeterChanges { get; } = new List<MeterChange>();
-        public List<EnemySet> EnemySets { get; } = new List<EnemySet>();
+        public FumenMetaInfo MetaInfo { get; } = new ();
+        public List<BulletPalleteList> BulletPalleteList { get; } = new ();
+        public List<Bell> Bells { get; } = new ();
+        public List<Flick> Flicks { get; } = new ();
+        public BpmList BpmList { get; } = new ();
+        public List<MeterChange> MeterChanges { get; } = new ();
+        public List<EnemySet> EnemySets { get; } = new ();
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,6 +72,10 @@ namespace OngekiFumenEditor.Base
             {
                 BulletPalleteList.Add(bpl);
             }
+            else if (obj is Flick flick)
+            {
+                Flicks.Add(flick);
+            }
             else
             {
                 Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.Name}");
@@ -99,6 +104,10 @@ namespace OngekiFumenEditor.Base
             else if (obj is BulletPalleteList bpl)
             {
                 BulletPalleteList.Remove(bpl);
+            }
+            else if (obj is Flick flick)
+            {
+                Flicks.Remove(flick);
             }
             else
             {
@@ -147,6 +156,14 @@ namespace OngekiFumenEditor.Base
             sb.AppendLine("[BELL]");
 
             foreach (var u in Bells.OrderBy(x => x.TGrid))
+                sb.AppendLine(u.Serialize(this));
+            #endregion
+
+            #region FLICK
+            sb.AppendLine();
+            sb.AppendLine("[FLICK]");
+
+            foreach (var u in Flicks.OrderBy(x => x.TGrid))
                 sb.AppendLine(u.Serialize(this));
             #endregion
 

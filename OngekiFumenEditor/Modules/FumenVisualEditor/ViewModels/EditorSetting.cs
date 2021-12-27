@@ -127,7 +127,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private float mouseWheelTimelineSpeed = 1f;
+        private float mouseWheelTimelineSpeed = 4f;
         /// <summary>
         /// 鼠标滚轮移动时间轴速度倍率
         /// </summary>
