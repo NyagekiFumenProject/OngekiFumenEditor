@@ -212,8 +212,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x =>
             {
-                if (x.ViewModel.ReferenceOngekiObject is ITimelineObject timeline)
-                    return !(begin <= timeline.TGrid && timeline.TGrid <= end);
+                if (x.ViewModel.ReferenceOngekiObject is OngekiTimelineObjectBase timeline)
+                    return !timeline.CheckVisiable(begin, end);
                 return false;
             }).ToArray())
             {
@@ -226,8 +226,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 item.RecalcCanvasXY();
             }
             var list = Fumen.GetAllDisplayableObjects()
-                .OfType<ITimelineObject>()
-                .Where(x => begin <= x.TGrid && x.TGrid <= end)
+                .OfType<OngekiTimelineObjectBase>()
+                .Where(x => x.CheckVisiable(begin, end))
                 .Where(x => !remainObj.Select(r => r.ViewModel.ReferenceOngekiObject as ITimelineObject).Contains(x))
                 .OfType<IDisplayableObject>()
                 .ToArray();

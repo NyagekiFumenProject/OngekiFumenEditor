@@ -21,6 +21,11 @@ namespace OngekiFumenEditor.Base
             }
         }
 
+        public virtual bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
+        {
+            return minVisibleTGrid <= TGrid && TGrid <= maxVisibleTGrid;
+        }
+
         public int CompareTo(object obj)
         {
             return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);

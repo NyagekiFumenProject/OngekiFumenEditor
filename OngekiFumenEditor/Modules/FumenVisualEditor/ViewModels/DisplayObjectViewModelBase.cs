@@ -174,33 +174,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return nearestUnitLine != null ? nearestUnitLine.x : x;
         }
 
+        private static BindingBase XGridMapToXBinding { get; }
+        private static BindingBase TGridMapToYBinding { get; }
+
+        static DisplayObjectViewModelBase()
+        {
+            var XGridMapToXBinding = new MultiBinding()
+            {
+                Converter = new XGridCanvasConverter(),
+            };
+            XGridMapToXBinding.Bindings.Add(new Binding("ReferenceOngekiObject.XGrid.Unit"));
+            XGridMapToXBinding.Bindings.Add(new Binding("EditorViewModel"));
+            XGridMapToXBinding.Bindings.Add(new Binding("EditorViewModel.Setting"));
+
+            var TGridMapToYBinding = new MultiBinding()
+            {
+                Converter = new TGridCanvasConverter(),
+            };
+            TGridMapToYBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Grid"));
+            TGridMapToYBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Unit"));
+            TGridMapToYBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid"));
+            TGridMapToYBinding.Bindings.Add(new Binding("EditorViewModel"));
+        }
+
         protected virtual void OnAttachedView(object view)
         {
             var element = view as FrameworkElement;
 
             if (ReferenceOngekiObject is IHorizonPositionObject)
             {
-                var xBinding = new MultiBinding()
-                {
-                    Converter = new XGridCanvasConverter(),
-                };
-                xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.XGrid.Unit"));
-                xBinding.Bindings.Add(new Binding("EditorViewModel"));
-                xBinding.Bindings.Add(new Binding("EditorViewModel.Setting"));
-                element.SetBinding(Canvas.LeftProperty, xBinding);
+                element.SetBinding(Canvas.LeftProperty, XGridMapToXBinding);
             }
 
             if (ReferenceOngekiObject is ITimelineObject)
             {
-                var xBinding = new MultiBinding()
-                {
-                    Converter = new TGridCanvasConverter(),
-                };
-                xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Grid"));
-                xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Unit"));
-                xBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid"));
-                xBinding.Bindings.Add(new Binding("EditorViewModel"));
-                element.SetBinding(Canvas.TopProperty, xBinding);
+                element.SetBinding(Canvas.TopProperty, TGridMapToYBinding);
             }
 
             Refresh();
