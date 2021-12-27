@@ -125,7 +125,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var ry = CheckAndAdjustY(relativePoint.Y);
                     if (TGridCalculator.ConvertYToTGrid(ry, hostModelView) is TGrid tGrid)
                     {
-                        timeObj.TGrid = (tGrid);
+                        timeObj.TGrid = tGrid;
                         //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
                     }
                 }
@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     var x = CheckAndAdjustX(relativePoint.X);
                     var xGrid = XGridCalculator.ConvertXToXGrid(x, hostModelView);
-                    posObj.XGrid.Unit = xGrid.Unit;
+                    posObj.XGrid = xGrid;
                     Log.LogInfo($"x : {x:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, hostModelView)}");
                 }
             }

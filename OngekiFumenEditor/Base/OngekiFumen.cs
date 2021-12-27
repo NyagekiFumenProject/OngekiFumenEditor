@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace OngekiFumenEditor.Base
         public BpmList BpmList { get; } = new ();
         public List<MeterChange> MeterChanges { get; } = new ();
         public List<EnemySet> EnemySets { get; } = new ();
-        public Dictionary<int,Beam> Beams { get; } = new();
+        public Dictionary<int,BeamStart> Beams { get; } = new();
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,7 +78,7 @@ namespace OngekiFumenEditor.Base
             {
                 Flicks.Add(flick);
             }
-            else if (obj is Beam beam)
+            else if (obj is BeamStart beam)
             {
                 Beams[beam.RecordId] = beam;
             }
@@ -114,7 +115,7 @@ namespace OngekiFumenEditor.Base
             {
                 Flicks.Remove(flick);
             }
-            else if (obj is Beam beam)
+            else if (obj is BeamStart beam)
             {
                 Beams.Remove(beam.RecordId);
             }

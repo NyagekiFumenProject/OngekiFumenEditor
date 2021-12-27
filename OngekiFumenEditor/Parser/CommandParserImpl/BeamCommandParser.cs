@@ -1,13 +1,13 @@
 ﻿using ExtrameFunctionCalculator;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static OngekiFumenEditor.Base.OngekiObjects.Beam;
 
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
@@ -15,19 +15,14 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
     {
         public abstract string CommandLineHeader { get; }
 
-        public void CommonParse(Beam beam, CommandArgs args, OngekiFumen fumen)
+        public void CommonParse(BeamBase beam, CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
 
             //todo add BeamTrack
-            var track = new BeamTrack()
-            {
-                TGrid = new TGrid(dataArr[2], (int)dataArr[3]),
-                XGrid = new XGrid(dataArr[4]),
-                WidthId = (int)dataArr[5],
-            };
-
-            beam.Tracks.Add(track.TGrid, track);
+            beam.TGrid = new TGrid(dataArr[2], (int)dataArr[3]);
+            beam.XGrid = new XGrid(dataArr[4]);
+            beam.WidthId = (int)dataArr[5];
         }
 
         public abstract OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen);
@@ -41,7 +36,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            var beam = new Beam()
+            var beam = new BeamStart()
             {
                 RecordId = beamRecordId
             };
@@ -61,15 +56,16 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            if (!fumen.Beams.TryGetValue(beamRecordId ,out var beam))
+            if (!fumen.Beams.TryGetValue(beamRecordId ,out var beamStart))
             {
                 Log.Error($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;
             }
 
+            var beam = new BeamNext();
             CommonParse(beam, args, fumen);
-
-            return default;
+            beamStart.AddChildBeamObject(beam);
+            return beam;
         }
     }
 
@@ -81,15 +77,16 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            if (!fumen.Beams.TryGetValue(beamRecordId, out var beam))
+            if (!fumen.Beams.TryGetValue(beamRecordId, out var beamStart))
             {
                 Log.Error($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;
             }
 
+            var beam = new BeamEnd();
             CommonParse(beam, args, fumen);
-
-            return default;
+            beamStart.AddChildBeamObject(beam);
+            return beam;
         }
     }
 }

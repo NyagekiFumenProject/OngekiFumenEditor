@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Base
     public abstract class OngekiTimelineObjectBase : OngekiObjectBase, ITimelineObject
     {
         private TGrid tGrid = new TGrid();
-        public TGrid TGrid
+        public virtual TGrid TGrid
         {
             get { return tGrid; }
             set
