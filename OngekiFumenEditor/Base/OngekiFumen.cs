@@ -18,6 +18,7 @@ namespace OngekiFumenEditor.Base
         public BpmList BpmList { get; } = new ();
         public List<MeterChange> MeterChanges { get; } = new ();
         public List<EnemySet> EnemySets { get; } = new ();
+        public Dictionary<int,Beam> Beams { get; } = new();
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,6 +77,10 @@ namespace OngekiFumenEditor.Base
             {
                 Flicks.Add(flick);
             }
+            else if (obj is Beam beam)
+            {
+                Beams[beam.RecordId] = beam;
+            }
             else
             {
                 Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.Name}");
@@ -108,6 +113,10 @@ namespace OngekiFumenEditor.Base
             else if (obj is Flick flick)
             {
                 Flicks.Remove(flick);
+            }
+            else if (obj is Beam beam)
+            {
+                Beams.Remove(beam.RecordId);
             }
             else
             {
@@ -149,6 +158,13 @@ namespace OngekiFumenEditor.Base
                 sb.AppendLine(o.Serialize(this));
             foreach (var o in EnemySets.OrderBy(x => x.TGrid))
                 sb.AppendLine(o.Serialize(this));
+            #endregion
+
+            #region BEAM
+            sb.AppendLine();
+            sb.AppendLine("[BEAM]");
+            foreach (var u in Beams.OrderBy(x => x.Key))
+                sb.AppendLine(u.Value.Serialize(this));
             #endregion
 
             #region BELL

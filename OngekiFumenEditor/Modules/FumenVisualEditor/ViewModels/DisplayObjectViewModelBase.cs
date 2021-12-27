@@ -133,10 +133,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (ReferenceOngekiObject is IHorizonPositionObject posObj)
                 {
                     var x = CheckAndAdjustX(relativePoint.X);
-                    var xgridValue = (x - hostModelView.CanvasWidth / 2) / (hostModelView.XUnitSize / hostModelView.Setting.UnitCloseSize);
-                    var near = xgridValue > 0 ? Math.Floor(xgridValue + 0.5) : Math.Ceiling(xgridValue - 0.5);
-                    posObj.XGrid.Unit = Math.Abs(xgridValue - near) < 0.00001 ? (int)near : (float)xgridValue;
-                    //Log.LogInfo($"xgridValue : {xgridValue:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit}");
+                    var xGrid = XGridCalculator.ConvertXToXGrid(x, hostModelView);
+                    posObj.XGrid.Unit = xGrid.Unit;
+                    Log.LogInfo($"x : {x:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, hostModelView)}");
                 }
             }
             else
