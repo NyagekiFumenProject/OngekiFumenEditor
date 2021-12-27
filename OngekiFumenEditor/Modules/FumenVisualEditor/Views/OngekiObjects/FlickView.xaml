@@ -10,7 +10,7 @@
     mc:Ignorable="d">
     <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/flick.png">
         <Image.RenderTransform>
-            <TranslateTransform X="-20" Y="-56">
+            <TranslateTransform X="-52" Y="-56">
             </TranslateTransform>
         </Image.RenderTransform>
     </Image>
