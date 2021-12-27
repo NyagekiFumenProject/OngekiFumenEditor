@@ -361,7 +361,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnSizeChanged(ActionExecutionContext e)
         {
-            Redraw(RedrawTarget.UnitLines);
+            Redraw(RedrawTarget.All);
         }
 
         public void OnMouseWheel(ActionExecutionContext e)
