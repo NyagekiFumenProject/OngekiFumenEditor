@@ -260,7 +260,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             base.OnAttachedView(v);
 
-            if (v is DisplayTextLineObjectViewBase view)
+            if (v is DisplayTextLineObjectViewBase view && DisplayValueBinding is not null)
                 view.displayValueTextBlock.SetBinding(TextBlock.TextProperty, DisplayValueBinding);
         }
     }

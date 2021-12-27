@@ -131,6 +131,20 @@
                                 Foreground="White"
                                 Opacity="0.35"
                                 Text="{Binding TGrid}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsBaseLine}" Value="True">
+                                                <Setter Property="HorizontalAlignment" Value="Right">
+                                                </Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsBaseLine}" Value="False">
+                                                <Setter Property="HorizontalAlignment" Value="Left">
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
                                 <TextBlock.RenderTransformOrigin>
                                     <Point Y="0.5">
                                     </Point>

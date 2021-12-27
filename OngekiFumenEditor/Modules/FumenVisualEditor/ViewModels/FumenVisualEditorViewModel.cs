@@ -217,7 +217,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return false;
             }).ToArray())
             {
-
                 DisplayObjectList.Remove(obj);
             }
             var remainObj = DisplayObjectList.OfType<OngekiObjectViewBase>().ToArray();
