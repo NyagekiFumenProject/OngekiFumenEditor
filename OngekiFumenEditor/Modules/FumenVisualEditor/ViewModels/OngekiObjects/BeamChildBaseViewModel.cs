@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         {
             y = base.CheckAndAdjustY(y);
 
-            if (ReferenceOngekiObject is BeamChildBase childBase && childBase.PrevBeam is BeamChildBase prevBeam)
+            if (ReferenceOngekiObject is BeamChildBase childBase && childBase.PrevBeam is BeamBase prevBeam)
             {
                 var prevY = TGridCalculator.ConvertTGridToY(prevBeam.TGrid, EditorViewModel) ?? y;
                 if (prevY > y)

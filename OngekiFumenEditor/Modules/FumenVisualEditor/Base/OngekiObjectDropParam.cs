@@ -9,6 +9,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public class OngekiObjectDropParam
     {
-        public DisplayObjectViewModelBase OngekiObject { get; set; }
+        public DisplayObjectViewModelBase OngekiObjectViewModel { get; set; }
     }
 }

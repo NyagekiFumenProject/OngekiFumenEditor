@@ -25,9 +25,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views
     /// <summary>
     /// BeamStartOperationView.xaml 的交互逻辑
     /// </summary>
-    public partial class BeamStartOperationView : UserControl
+    public partial class BeamOperationView : UserControl
     {
-        public BeamStartOperationView()
+        public BeamOperationView()
         {
             InitializeComponent();
         }

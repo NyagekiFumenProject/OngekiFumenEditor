@@ -15,7 +15,7 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "BeamNext", "Ongeki Objects")]
+    //[ToolboxItem(typeof(FumenVisualEditorViewModel), "BeamNext", "Ongeki Objects")]
     public class BeamNextViewModel : BeamChildBaseViewModel<BeamNext>
     {
 

@@ -3,6 +3,7 @@ using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using System;
 using System.Collections.Generic;
@@ -14,39 +15,43 @@ using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-    public class BeamStartOperationViewModel : PropertyChangedBase
+    public class BeamOperationViewModel : PropertyChangedBase
     {
         private bool _draggingItem;
         private Point _mouseStartPosition;
 
-        private BeamStart beamStart;
+        private BeamBase beam;
 
-        public BeamStart BeamStart
+        public BeamBase Beam
         {
             get
             {
-                return beamStart;
+                return beam;
             }
             set
             {
-                beamStart = value;
-                NotifyOfPropertyChange(() => BeamStart);
+                beam = value;
+                NotifyOfPropertyChange(() => Beam);
             }
         }
 
-        public BeamStartOperationViewModel(BeamStart obj)
+        public BeamOperationViewModel(BeamBase obj)
         {
-            BeamStart = obj;
+            Beam = obj;
         }
 
         public void Border_MouseMove(ActionExecutionContext e)
+        {
+            ProcessDragStart(e, true);
+        }
+
+        private void ProcessDragStart(ActionExecutionContext e, bool isBeamNext)
         {
             if (!_draggingItem)
                 return;
 
             var arg = e.EventArgs as MouseEventArgs;
 
-            // Get the current mouse position
             Point mousePosition = arg.GetPosition(null);
             Vector diff = _mouseStartPosition - mousePosition;
 
@@ -54,20 +59,31 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
-                var obj = e.Source as FrameworkElement;
-                var beamNext = new BeamNext();
-                BeamStart?.AddChildBeamObject(beamNext);
+                BeamChildBase genBeamChild = isBeamNext ? new BeamNext() : new BeamEnd();
+                DisplayObjectViewModelBase genViewModel = isBeamNext ? new BeamNextViewModel() : new BeamEndViewModel();
+                genViewModel.ReferenceOngekiObject = genBeamChild;
+
+                if (Beam is BeamStart beamStart)
+                {
+                    beamStart.AddChildBeamObject(genBeamChild);
+                }
+                else if (Beam is BeamNext { ReferenceBeam: { } } beamNext1)
+                {
+                    beamNext1.ReferenceBeam.AddChildBeamObject(genBeamChild);
+                }
 
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam()
                 {
-                    OngekiObject = new BeamNextViewModel()
-                    {
-                        ReferenceOngekiObject = beamNext
-                    }
+                    OngekiObjectViewModel = genViewModel
                 });
-                DragDrop.DoDragDrop(obj, dragData, DragDropEffects.Move);
+                DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
                 _draggingItem = false;
             }
+        }
+
+        public void Border_MouseMove2(ActionExecutionContext e)
+        {
+            ProcessDragStart(e, false);
         }
 
         public void Border_MouseLeftButtonDown(ActionExecutionContext e)
