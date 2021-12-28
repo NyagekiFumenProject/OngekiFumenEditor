@@ -1,5 +1,5 @@
 ﻿<ongekiobjects:OngekiObjectViewBase
-    x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects.BeamStartView"
+    x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects.BeamEndView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -22,7 +22,7 @@
             FontSize="10"
             FontWeight="Bold"
             Foreground="White">
-            S
+            E
         </TextBlock>
     </Grid>
 </ongekiobjects:OngekiObjectViewBase>

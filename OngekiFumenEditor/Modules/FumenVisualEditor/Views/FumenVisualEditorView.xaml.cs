@@ -2,6 +2,7 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
@@ -31,7 +32,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public bool IsDragging
         {
             get { return (bool)GetValue(IsDraggingProperty); }
-            set { 
+            set
+            {
                 SetValue(IsDraggingProperty, value);
                 //Log.LogInfo("IsDragging = " + IsDragging);
             }
@@ -56,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             MouseLeftButtonDown += OnMouseDown;
             MouseMove += OnMouseMove;
             MouseLeftButtonUp += OnMouseUp;
-            
+
             MouseLeave += OnMouseLeave;
         }
 
@@ -84,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
                 return;
             var selectObjectViewModels = ViewModel.DisplayObjectList
                 .OfType<OngekiObjectViewBase>()
-                .Select(x=>x.ViewModel)
+                .Select(x => x.ViewModel)
                 .Where(x => x.IsSelected)
                 .ToArray();
 
@@ -104,13 +106,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
                 return;
             //e.Handled = true;
             var r = IsDragging;
-            Action<DisplayObjectViewModelBase,Point> dragCall = (vm,pos) =>
-            {
-                if (r)
-                    vm.OnDragEnd(pos);
-                else
-                    vm.OnDragStart(pos);
-            };
+            Action<DisplayObjectViewModelBase, Point> dragCall = (vm, pos) =>
+             {
+                 if (r)
+                     vm.OnDragEnd(pos);
+                 else
+                     vm.OnDragStart(pos);
+             };
             IsDragging = true;
 
             var pos = e.GetPosition(parent);
@@ -124,7 +126,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
                 var bound = new Rect(0, 0, uiElement.ActualWidth, uiElement.ActualHeight);
                 if (bound.Contains(pos))
                 {
-                    selectObjectViewModels.ForEach(x=>dragCall(x,pos));
+                    selectObjectViewModels.ForEach(x => dragCall(x, pos));
                 }
             }
             else
@@ -159,8 +161,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
                 return;
 
             var mousePosition = e.GetPosition(VisualDisplayer);
-            var toolboxItem = (ToolboxItem)e.Data.GetData(ToolboxDragDrop.DataFormat);
-            var displayObject = Activator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
+            var displayObject = default(DisplayObjectViewModelBase);
+
+            switch (e.Data.GetData(ToolboxDragDrop.DataFormat))
+            {
+                case ToolboxItem toolboxItem:
+                    displayObject = Activator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
+                    break;
+                case OngekiObjectDropParam dropParam:
+                    displayObject = dropParam.OngekiObject;
+                    break;
+            }
 
             ViewModel.OnNewObjectAdd(displayObject);
             displayObject.MoveCanvas(mousePosition);

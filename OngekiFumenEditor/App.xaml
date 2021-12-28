@@ -1,8 +1,9 @@
-<Application x:Class="OngekiFumenEditor.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:OngekiFumenEditor" 
-             xmlns:gemini="http://schemas.timjones.io/gemini">
+<Application
+    x:Class="OngekiFumenEditor.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:gemini="http://schemas.timjones.io/gemini"
+    xmlns:local="clr-namespace:OngekiFumenEditor">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

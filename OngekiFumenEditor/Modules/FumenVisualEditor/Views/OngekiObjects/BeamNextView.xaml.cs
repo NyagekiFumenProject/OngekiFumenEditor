@@ -20,9 +20,9 @@ using System.Windows.Shapes;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects
 {
-    public partial class BeamStartView : OngekiObjectViewBase
+    public partial class BeamNextView : OngekiObjectViewBase
     {
-        public BeamStartView()
+        public BeamNextView()
         {
             InitializeComponent();
         }

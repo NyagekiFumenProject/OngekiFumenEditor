@@ -11,6 +11,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         public override Type ModelViewType => throw new NotImplementedException();
 
         public override string IDShortName => "BME";
-
     }
 }

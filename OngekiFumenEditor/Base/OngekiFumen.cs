@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -12,14 +13,14 @@ namespace OngekiFumenEditor.Base
 {
     public class OngekiFumen
     {
-        public FumenMetaInfo MetaInfo { get; } = new ();
-        public List<BulletPalleteList> BulletPalleteList { get; } = new ();
-        public List<Bell> Bells { get; } = new ();
-        public List<Flick> Flicks { get; } = new ();
-        public BpmList BpmList { get; } = new ();
-        public List<MeterChange> MeterChanges { get; } = new ();
-        public List<EnemySet> EnemySets { get; } = new ();
-        public Dictionary<int,BeamStart> Beams { get; } = new();
+        public FumenMetaInfo MetaInfo { get; } = new();
+        public List<BulletPalleteList> BulletPalleteList { get; } = new();
+        public List<Bell> Bells { get; } = new();
+        public List<Flick> Flicks { get; } = new();
+        public BpmList BpmList { get; } = new();
+        public List<MeterChange> MeterChanges { get; } = new();
+        public List<EnemySet> EnemySets { get; } = new();
+        public Dictionary<int, BeamStart> Beams { get; } = new();
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -80,7 +81,14 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is BeamStart beam)
             {
+                beam.PropertyChanged += OnBeamStartPropertyChanged;
                 Beams[beam.RecordId] = beam;
+            }
+            else if (obj is BeamChildBase beamChild)
+            {
+                beamChild.PropertyChanged += OnBeamChildPropertyChanged;
+                if (Beams.TryGetValue(beamChild.RecordId, out var beamStart))
+                    beamStart.AddChildBeamObject(beamChild);
             }
             else
             {
@@ -117,7 +125,14 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is BeamStart beam)
             {
+                beam.PropertyChanged -= OnBeamStartPropertyChanged;
                 Beams.Remove(beam.RecordId);
+            }
+            else if (obj is BeamChildBase beamChild)
+            {
+                beamChild.PropertyChanged -= OnBeamChildPropertyChanged;
+                if (Beams.TryGetValue(beamChild.RecordId, out var beamStart))
+                    beamStart.RemoveChildBeamObject(beamChild);
             }
             else
             {
@@ -128,7 +143,10 @@ namespace OngekiFumenEditor.Base
 
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects()
         {
-            return Bells.OfType<IDisplayableObject>();
+            return Enumerable.Empty<IDisplayableObject>()
+                .Concat(Bells)
+                .Concat(Flicks)
+                .Concat(Beams.Values.SelectMany(x => x.Children.AsEnumerable<IDisplayableObject>().Prepend(x)));
         }
 
         public string Serialize()
@@ -186,5 +204,42 @@ namespace OngekiFumenEditor.Base
 
             return sb.ToString();
         }
+
+        #region Dirty Watching
+
+        private void OnBeamChildPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(BeamBase.RecordId) || sender is not BeamChildBase beamChild)
+                return;
+
+            if (Beams.TryGetValue(beamChild.RecordId,out var newRefBeam))
+            {
+                beamChild.ReferenceBeam?.RemoveChildBeamObject(beamChild);
+                newRefBeam.AddChildBeamObject(beamChild);
+                Log.LogDebug($"Changed child recId {beamChild.ReferenceBeam?.RecordId} -> {beamChild.RecordId}");
+            }
+            else
+            {
+                if (beamChild.ReferenceBeam is BeamStart prevRefBeam)
+                    beamChild.RecordId = prevRefBeam.RecordId;//set failed and roll back
+                Log.LogDebug($"Can't change child recId {beamChild.ReferenceBeam?.RecordId} -> {beamChild.RecordId}");
+            }
+        }
+
+        private void OnBeamStartPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(BeamBase.RecordId) || sender is not BeamStart beamStart)
+                return;
+
+            if (Beams.FirstOrDefault(x => x.Value == beamStart) is KeyValuePair<int, BeamStart> pair && pair.Value is not null)
+            {
+                Beams.Remove(pair.Key);
+                Log.LogDebug($"migrate recId {pair.Key} -> {beamStart.RecordId}");
+            }
+
+            Beams[beamStart.RecordId] = beamStart;
+        }
+
+        #endregion
     }
 }

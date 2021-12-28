@@ -144,7 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public double CheckAndAdjustY(double y)
+        public virtual double CheckAndAdjustY(double y)
         {
             var s = y;
             y = EditorViewModel.CanvasHeight - y;
@@ -160,7 +160,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return fin;
         }
 
-        public double CheckAndAdjustX(double x)
+        public virtual double CheckAndAdjustX(double x)
         {
             //todo 基于二分法查询最近
             var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventXAutoClose ?? false);
@@ -179,22 +179,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         static DisplayObjectViewModelBase()
         {
-            var XGridMapToXBinding = new MultiBinding()
+            var xb = new MultiBinding()
             {
                 Converter = new XGridCanvasConverter(),
             };
-            XGridMapToXBinding.Bindings.Add(new Binding("ReferenceOngekiObject.XGrid.Unit"));
-            XGridMapToXBinding.Bindings.Add(new Binding("EditorViewModel"));
-            XGridMapToXBinding.Bindings.Add(new Binding("EditorViewModel.Setting"));
+            xb.Bindings.Add(new Binding("ReferenceOngekiObject.XGrid.Unit"));
+            xb.Bindings.Add(new Binding("EditorViewModel"));
+            xb.Bindings.Add(new Binding("EditorViewModel.Setting"));
 
-            var TGridMapToYBinding = new MultiBinding()
+            XGridMapToXBinding = xb;
+
+            var tb = new MultiBinding()
             {
                 Converter = new TGridCanvasConverter(),
             };
-            TGridMapToYBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Grid"));
-            TGridMapToYBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Unit"));
-            TGridMapToYBinding.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid"));
-            TGridMapToYBinding.Bindings.Add(new Binding("EditorViewModel"));
+            tb.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Grid"));
+            tb.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Unit"));
+            tb.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid"));
+            tb.Bindings.Add(new Binding("EditorViewModel"));
+
+            TGridMapToYBinding = tb;
         }
 
         protected virtual void OnAttachedView(object view)

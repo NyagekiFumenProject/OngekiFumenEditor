@@ -13,18 +13,24 @@
     <UserControl.Resources>
         <converters1:PropertyGeneratorConverter x:Key="PropertyGeneratorConverter">
         </converters1:PropertyGeneratorConverter>
+        <converters1:ObjectOperationGeneratorConverter x:Key="ObjectOperationGeneratorConverter">
+        </converters1:ObjectOperationGeneratorConverter>
     </UserControl.Resources>
     <ScrollViewer
         Name="HostContent"
         Background="White"
         VerticalScrollBarVisibility="Auto">
-        <ItemsControl ItemsSource="{Binding PropertyInfoWrappers}">
-            <ItemsControl.ItemTemplate>
-                <ItemContainerTemplate>
-                    <ContentPresenter Margin="0,0,0,5" Content="{Binding ., Converter={StaticResource PropertyGeneratorConverter}}">
-                    </ContentPresenter>
-                </ItemContainerTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <StackPanel>
+            <ItemsControl ItemsSource="{Binding PropertyInfoWrappers}">
+                <ItemsControl.ItemTemplate>
+                    <ItemContainerTemplate>
+                        <ContentPresenter Margin="0,0,0,5" Content="{Binding ., Converter={StaticResource PropertyGeneratorConverter}}">
+                        </ContentPresenter>
+                    </ItemContainerTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ContentPresenter Content="{Binding OngekiObject, Converter={StaticResource ObjectOperationGeneratorConverter}}">
+            </ContentPresenter>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

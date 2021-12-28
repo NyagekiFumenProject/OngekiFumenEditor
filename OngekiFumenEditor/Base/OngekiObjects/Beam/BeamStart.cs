@@ -9,24 +9,26 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
     public class BeamStart : BeamBase
     {
         private List<BeamChildBase> children = new();
-        private IEnumerable<BeamChildBase> Children => children;
+        public IEnumerable<BeamChildBase> Children => children;
 
         public override Type ModelViewType => typeof(BeamStartViewModel);
 
         public override string IDShortName => "BMS";
 
-        public int RecordId { get; set; }
-
         public void AddChildBeamObject(BeamChildBase child)
         {
             if (!children.Contains(child))
+            {
+                child.PrevBeam = children.LastOrDefault() ?? this as BeamBase;
                 children.Add(child);
+            }
             child.ReferenceBeam = this;
         }
 
         public void RemoveChildBeamObject(BeamChildBase child)
         {
             children.Remove(child);
+            child.PrevBeam = default;
             child.ReferenceBeam = default;
         }
     }
