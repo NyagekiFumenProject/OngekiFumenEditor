@@ -25,10 +25,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
                     {
                         return x.Generate(wrapper);
                     }
-                    catch (Exception e)
+                    catch
                     {
-                        //todo
-                        throw;
+                        return default;
                     }
                 }).OfType<UIElement>().FirstOrDefault();
         }

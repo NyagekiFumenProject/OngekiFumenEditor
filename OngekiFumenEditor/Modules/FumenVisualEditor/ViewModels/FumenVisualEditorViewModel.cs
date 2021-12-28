@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using Gemini.Framework;
+using Gemini.Framework.Threading;
 using Gemini.Modules.Toolbox.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -278,11 +279,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             XGridUnitLineLocations.Add(line);
         }
 
-        protected override async Task DoNew()
+        protected override Task DoNew()
         {
             Fumen = new OngekiFumen();
             Redraw(RedrawTarget.All);
             Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
+            return TaskUtility.Completed;
         }
 
         protected override async Task DoSave(string filePath)

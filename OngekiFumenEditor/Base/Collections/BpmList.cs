@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Base.OngekiObjects.Collections
 {
     public class BpmList : IEnumerable<BPMChange>
     {
@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             OnChangedEvent?.Invoke();
         }
         
-        private void OnBpmPropChanged(object? sender, PropertyChangedEventArgs e)
+        private void OnBpmPropChanged(object sender, PropertyChangedEventArgs e)
         {
             OnChangedEvent?.Invoke();
         }
