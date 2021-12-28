@@ -234,7 +234,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 .ToArray();
             foreach (var item in list)
             {
-                if (OngekiObjectViewModelHelper.CreateViewModel(item) is DisplayObjectViewModelBase viewModel &&
+                if (Activator.CreateInstance(item.ModelViewType) is DisplayObjectViewModelBase viewModel &&
                      ViewHelper.CreateView(viewModel) is UIElement view &&
                      item is OngekiObjectBase o)
                 {

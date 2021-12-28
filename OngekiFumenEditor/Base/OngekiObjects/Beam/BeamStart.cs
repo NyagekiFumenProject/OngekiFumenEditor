@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
             {
                 child.PrevBeam = children.LastOrDefault() ?? this as BeamBase;
                 children.Add(child);
+                NotifyOfPropertyChange(() => Children);
             }
             child.ReferenceBeam = this;
         }
@@ -30,6 +31,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
             children.Remove(child);
             child.PrevBeam = default;
             child.ReferenceBeam = default;
+            NotifyOfPropertyChange(() => Children);
         }
     }
 }

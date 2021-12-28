@@ -135,7 +135,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var x = CheckAndAdjustX(relativePoint.X);
                     var xGrid = XGridCalculator.ConvertXToXGrid(x, hostModelView);
                     posObj.XGrid = xGrid;
-                    Log.LogInfo($"x : {x:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, hostModelView)}");
+                    //Log.LogInfo($"x : {x:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, hostModelView)}");
                 }
             }
             else

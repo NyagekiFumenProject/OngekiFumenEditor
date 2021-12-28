@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Base
             return Enumerable.Empty<IDisplayableObject>()
                 .Concat(Bells)
                 .Concat(Flicks)
-                .Concat(Beams.Values.SelectMany(x => x.Children.AsEnumerable<IDisplayableObject>().Prepend(x)));
+                .Concat(Beams.SelectMany(x => x.Children.AsEnumerable<IDisplayableObject>().Prepend(x)));
         }
 
         public string Serialize()
