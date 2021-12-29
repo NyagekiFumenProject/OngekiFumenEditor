@@ -30,9 +30,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 NotifyOfPropertyChange(() => IsSelected);
 
                 EditorViewModel?.OnSelectPropertyChanged(this,value);
-
-                if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
-                    propertyBrowser.OngekiObject = value ? ReferenceOngekiObject : default;
             }
         }
 

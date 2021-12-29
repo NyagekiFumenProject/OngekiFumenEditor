@@ -5,6 +5,7 @@ using Gemini.Modules.Toolbox.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
@@ -91,6 +92,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private EditorSetting setting;
+        private bool shiftKeyDown;
+
         public EditorSetting Setting
         {
             get
@@ -323,11 +326,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void DeleteSelectedObjects()
         {
-            var selectedObject = DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x => x.ViewModel.IsSelected).ToArray();
+            var selectedObject = SelectObjects.ToArray();
             foreach (var obj in selectedObject)
             {
                 DisplayObjectList.Remove(obj);
-                fumen.RemoveObject(obj.ViewModel?.ReferenceOngekiObject);
+                fumen.RemoveObject(obj.ReferenceOngekiObject);
+                SelectObjects.Remove(obj);
             }
             Log.LogInfo($"deleted {selectedObject.Length} objects.");
         }
@@ -351,6 +355,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     DeleteSelectedObjects();
                 }
+                if (arg.Key == Key.LeftShift)
+                {
+                    shiftKeyDown = true;
+                }
             }
         }
 
@@ -362,6 +370,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (arg.Key == Key.Delete)
                 {
                     DeleteSelectedObjects();
+                }
+                if (arg.Key == Key.LeftShift)
+                {
+                    shiftKeyDown = false;
                 }
             }
         }
@@ -407,11 +419,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (value)
             {
+                if (!shiftKeyDown)
+                {
+                    foreach (var o in SelectObjects)
+                        o.IsSelected = false;
+                    SelectObjects.Clear();
+                }
                 SelectObjects.Add(obj);
+                if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
+                    propertyBrowser.OngekiObject = SelectObjects.Count == 1 ? SelectObjects.First().ReferenceOngekiObject : default;
             }
             else
             {
                 SelectObjects.Remove(obj);
+                if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
+                    propertyBrowser.OngekiObject = default;
             }
         }
     }
