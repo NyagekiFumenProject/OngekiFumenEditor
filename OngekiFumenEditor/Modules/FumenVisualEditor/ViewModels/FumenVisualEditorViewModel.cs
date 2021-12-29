@@ -33,6 +33,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [Export(typeof(FumenVisualEditorViewModel))]
     public class FumenVisualEditorViewModel : PersistedDocument
     {
+        public HashSet<DisplayObjectViewModelBase> SelectObjects { get; } = new();
+
         [Flags]
         public enum RedrawTarget
         {
@@ -209,7 +211,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var begin = TGridCalculator.ConvertYToTGrid(0, this) ?? new TGrid(0, 0);
             var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
 
-            Log.LogDebug($"begin:({begin})  end:({end})");
+            //Log.LogDebug($"begin:({begin})  end:({end})");
 
             foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x =>
             {
@@ -399,6 +401,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 tGrid = TGrid.ZeroDefault;
 
             Setting.CurrentDisplayTimePosition = tGrid;
+        }
+
+        internal void OnSelectPropertyChanged(DisplayObjectViewModelBase obj, bool value)
+        {
+            if (value)
+            {
+                SelectObjects.Add(obj);
+            }
+            else
+            {
+                SelectObjects.Remove(obj);
+            }
         }
     }
 }

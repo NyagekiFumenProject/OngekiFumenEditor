@@ -129,12 +129,15 @@ namespace OngekiFumenEditor.Base
             }
         }
 
+
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects()
         {
-            return Enumerable.Empty<IDisplayableObject>()
+            var first = Enumerable.Empty<IDisplayableObject>()
                 .Concat(Bells)
                 .Concat(Flicks)
-                .Concat(Beams.SelectMany(x => x.Children.AsEnumerable<IDisplayableObject>().Prepend(x)));
+                .Concat(Beams);
+
+            return first.SelectMany(x => x.GetDisplayableObjects());
         }
 
         public string Serialize()

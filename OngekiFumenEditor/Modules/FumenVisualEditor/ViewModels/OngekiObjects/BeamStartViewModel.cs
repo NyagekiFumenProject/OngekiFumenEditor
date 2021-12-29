@@ -18,6 +18,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "BeamStart", "Ongeki Objects")]
     public class BeamStartViewModel : DisplayObjectViewModelBase<BeamStart>
     {
-
+        public override OngekiObjectBase ReferenceOngekiObject
+        {
+            get
+            {
+                return base.ReferenceOngekiObject;
+            }
+            set
+            {
+                base.ReferenceOngekiObject = value;
+            }
+        }
     }
 }

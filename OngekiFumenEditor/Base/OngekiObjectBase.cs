@@ -11,6 +11,7 @@ namespace OngekiFumenEditor.Base
     public abstract class OngekiObjectBase : PropertyChangedBase,  ISerializable
     {
         public abstract string IDShortName { get; }
+
         public abstract string Serialize(OngekiFumen fumenData);
     }
 }

@@ -6,6 +6,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,6 +28,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 isSelected = value;
                 NotifyOfPropertyChange(() => IsSelected);
+
+                EditorViewModel?.OnSelectPropertyChanged(this,value);
 
                 if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
                     propertyBrowser.OngekiObject = value ? ReferenceOngekiObject : default;
@@ -174,8 +177,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return nearestUnitLine != null ? nearestUnitLine.x : x;
         }
 
-        private static BindingBase XGridMapToXBinding { get; }
-        private static BindingBase TGridMapToYBinding { get; }
+        public static BindingBase XGridMapToXBinding { get; }
+        public static BindingBase TGridMapToYBinding { get; }
 
         static DisplayObjectViewModelBase()
         {

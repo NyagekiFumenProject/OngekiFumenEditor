@@ -8,6 +8,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
     public abstract class BeamChildBase : BeamBase
     {
+        public override int RecordId { get => ReferenceBeam.RecordId; set { } }
+
         public BeamStart ReferenceBeam { get; set; }
         public BeamBase PrevBeam { get; set; }
     }

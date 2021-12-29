@@ -70,12 +70,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             IsMouseDown = false;
             IsDragging = false;
             var pos = e.GetPosition(parent);
-            var selectObjectViewModels = ViewModel.DisplayObjectList
-                .OfType<OngekiObjectViewBase>()
-                .Select(x => x.ViewModel)
-                .Where(x => x.IsSelected)
-                .ToArray();
-            selectObjectViewModels.ForEach(x => x.OnDragEnd(pos));
+            ViewModel.SelectObjects.ForEach(x => x.OnDragEnd(pos));
             //e.Handled = true;
         }
 
@@ -84,15 +79,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             //Log.LogInfo("OnMouseUp");
             if (!(IsMouseDown && Parent is IInputElement parent))
                 return;
-            var selectObjectViewModels = ViewModel.DisplayObjectList
-                .OfType<OngekiObjectViewBase>()
-                .Select(x => x.ViewModel)
-                .Where(x => x.IsSelected)
-                .ToArray();
 
             var pos = e.GetPosition(parent);
             if (IsDragging)
-                selectObjectViewModels.ForEach(x => x.OnDragEnd(pos));
+                ViewModel.SelectObjects.ForEach(x => x.OnDragEnd(pos));
 
             IsMouseDown = false;
             IsDragging = false;
@@ -116,22 +106,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             IsDragging = true;
 
             var pos = e.GetPosition(parent);
-            var selectObjectViewModels = ViewModel.DisplayObjectList
-                .OfType<OngekiObjectViewBase>()
-                .Select(x => x.ViewModel)
-                .Where(x => x.IsSelected)
-                .ToArray();
             if (VisualTreeUtility.FindParent<Visual>(this) is FrameworkElement uiElement)
             {
                 var bound = new Rect(0, 0, uiElement.ActualWidth, uiElement.ActualHeight);
                 if (bound.Contains(pos))
                 {
-                    selectObjectViewModels.ForEach(x => dragCall(x, pos));
+                    ViewModel.SelectObjects.ForEach(x => dragCall(x, pos));
                 }
             }
             else
             {
-                selectObjectViewModels.ForEach(x => dragCall(x, pos));
+                ViewModel.SelectObjects.ForEach(x => dragCall(x, pos));
             }
         }
 

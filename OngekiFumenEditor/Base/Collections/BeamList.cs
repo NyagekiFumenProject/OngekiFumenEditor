@@ -23,6 +23,8 @@ namespace OngekiFumenEditor.Base.Collections
             if (beam is BeamStart beamStart)
             {
                 beamStart.PropertyChanged += OnBeamStartPropertyChanged;
+                if (beamStart.RecordId < 0)
+                    beamStart.RecordId = beams.Count + 1;
                 beams.Add(beamStart);
             }
             else if (beam is BeamChildBase beamChild)

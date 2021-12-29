@@ -11,6 +11,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         private List<BeamChildBase> children = new();
         public IEnumerable<BeamChildBase> Children => children;
 
+        private int recordId = -1;
+        public override int RecordId { get => recordId; set => Set(ref recordId, value); }
+
         public override Type ModelViewType => typeof(BeamStartViewModel);
 
         public override string IDShortName => "BMS";
@@ -29,9 +32,23 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         public void RemoveChildBeamObject(BeamChildBase child)
         {
             children.Remove(child);
+
+            var prev = child.PrevBeam;
+            var next = children.FirstOrDefault(x => x.PrevBeam == child);
+            if (next is not null)
+                next.PrevBeam = prev;
             child.PrevBeam = default;
+
             child.ReferenceBeam = default;
+
             NotifyOfPropertyChange(() => Children);
+        }
+
+        public IEnumerable<IDisplayableObject> GetDisplayableObjects()
+        {
+            yield return this;
+            foreach (var child in Children)
+                yield return child;
         }
     }
 }
