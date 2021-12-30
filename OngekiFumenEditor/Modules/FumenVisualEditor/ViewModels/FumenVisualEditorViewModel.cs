@@ -318,11 +318,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void DeleteSelectedObjects()
         {
             var selectedObject = SelectObjects.ToArray();
+            var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+
             foreach (var obj in selectedObject)
             {
                 DisplayObjectList.Remove(obj.View);
                 fumen.RemoveObject(obj.ReferenceOngekiObject);
+                if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
+                    propertyBrowser.OngekiObject = default;
             }
+            Redraw(RedrawTarget.OngekiObjects);
             //Log.LogInfo($"deleted {selectedObject.Length} objects.");
         }
 
