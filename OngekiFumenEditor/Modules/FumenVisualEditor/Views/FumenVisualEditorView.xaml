@@ -6,9 +6,10 @@
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    cal:Message.Attach="     [Event KeyDown] = [Action OnKeyDown($executionContext)];     [Event KeyUp] = [Action OnKeyUp($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Event MouseWheel] = [Action OnMouseWheel($executionContext)];     "
+    cal:Message.Attach="   [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event DragEnter] = [Action Grid_DragEnter($executionContext)];             [Event Drop] = [Action Grid_Drop($executionContext)];       [Event KeyDown] = [Action OnKeyDown($executionContext)];          [Event KeyUp] = [Action OnKeyUp($executionContext)];          [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Event MouseWheel] = [Action OnMouseWheel($executionContext)];     [Event MouseLeftButtonDown] = [Action OnMouseDown($executionContext)];     [Event MouseMove] = [Action OnMouseMove($executionContext)];     [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];     [Event MouseLeave] = [Action OnMouseLeave($executionContext)];     "
     d:DesignHeight="450"
     d:DesignWidth="800"
+    AllowDrop="True"
     Focusable="True"
     mc:Ignorable="d">
     <UserControl.Resources>
@@ -20,11 +21,7 @@
     <Grid Focusable="False">
         <Canvas
             Name="VisualDisplayer"
-            cal:Message.Attach="[Event SizeChanged] = [Action OnSizeChanged($executionContext)]"
-            AllowDrop="True"
             Background="Black"
-            DragEnter="Grid_DragEnter"
-            Drop="Grid_Drop"
             Visibility="Visible">
             <Canvas.ContextMenu>
                 <ContextMenu>
