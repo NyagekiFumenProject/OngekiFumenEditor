@@ -1,30 +1,28 @@
 ﻿using Caliburn.Micro;
-using ExtrameFunctionCalculator.Script.Types;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Beam
+namespace OngekiFumenEditor.Base.EditorObjects
 {
-    public class BeamConnector : PropertyChangedBase, IDisplayableObject
+    public abstract class ConnectorLineBase<T> : PropertyChangedBase, IDisplayableObject where T : IDisplayableObject, IHorizonPositionObject, ITimelineObject
     {
-        public Type ModelViewType => typeof(BeamConnectorViewModel);
+        public abstract Type ModelViewType { get; }
 
-        private BeamBase from;
-        public BeamBase From
+        private T from;
+        public T From
         {
             get => from;
             set => Set(ref from, value);
         }
 
-        private BeamBase to;
+        private T to;
 
         public event EventHandler<ViewAttachedEventArgs> ViewAttached;
 
-        public BeamBase To
+        public T To
         {
             get => to;
             set => Set(ref to, value);

@@ -1,7 +1,7 @@
-﻿using ExtrameFunctionCalculator;
-using OngekiFumenEditor.Base;
+﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             var beamRecordId = args.GetData<int>(1);
             if (fumen.Beams.FirstOrDefault(x => x.RecordId == beamRecordId) is not BeamStart beamStart)
             {
-                Log.Error($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
+                Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;
             }
 
@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             var beamRecordId = args.GetData<int>(1);
             if (fumen.Beams.FirstOrDefault(x => x.RecordId == beamRecordId) is not BeamStart beamStart)
             {
-                Log.Error($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
+                Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;
             }
 

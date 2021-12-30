@@ -10,7 +10,6 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
@@ -336,7 +335,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (e.EventArgs is KeyEventArgs arg)
             {
-                Log.LogInfo(arg.Key.ToString());
+                //Log.LogInfo(arg.Key.ToString());
                 if (arg.Key == Key.Delete)
                 {
                     DeleteSelectedObjects();
@@ -352,7 +351,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (e.EventArgs is KeyEventArgs arg)
             {
-                Log.LogInfo(arg.Key.ToString());
+                //Log.LogInfo(arg.Key.ToString());
                 if (arg.Key == Key.Delete)
                 {
                     DeleteSelectedObjects();

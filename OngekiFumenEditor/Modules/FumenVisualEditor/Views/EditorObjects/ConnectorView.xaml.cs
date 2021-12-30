@@ -16,14 +16,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.Base
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.EditorObjects
 {
     /// <summary>
     /// BeamConnectorView.xaml 的交互逻辑
     /// </summary>
-    public partial class BeamConnectorView : UserControl
+    public partial class ConnectorView : UserControl
     {
-        public BeamConnectorView()
+        public ConnectorView()
         {
             InitializeComponent();
         }

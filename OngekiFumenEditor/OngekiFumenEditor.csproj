@@ -18,10 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ExtrameFunctionCalculator" Version="1.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj" />
     <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj" />
   </ItemGroup>
