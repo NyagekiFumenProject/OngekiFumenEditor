@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
-    public abstract class BeamBase : OngekiTimelineObjectBase, IHorizonPositionObject, IDisplayableObject
+    public abstract class BeamBase : OngekiTimelineObjectBase, IHorizonPositionObject
     {
         public abstract int RecordId { get; set; }
 
@@ -22,8 +22,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         }
 
         public int WidthId { get; set; } = 2;
-
-        public abstract Type ModelViewType { get; }
 
         public override string Serialize(OngekiFumen fumenData)
         {

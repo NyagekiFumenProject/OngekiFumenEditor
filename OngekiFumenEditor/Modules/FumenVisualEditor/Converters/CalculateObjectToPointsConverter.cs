@@ -16,22 +16,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
         {
             if (values[0] is FumenVisualEditorViewModel editorViewModel)
             {
-                if ((int)parameter == 0)
+                if (parameter.ToString() == "0")
                 {
                     //Get X
-                    if (values[1] is IHorizonPositionObject horizonPositionObject)
+                    if (values[1] is XGrid xGrid)
                     {
-                        var xGrid = horizonPositionObject.XGrid;
                         return XGridCalculator.ConvertXGridToX(xGrid, editorViewModel);
                     }
                 }
                 else
                 {
                     //Get Y
-                    if (values[1] is ITimelineObject timelineObject)
+                    if (values[1] is TGrid tGrid)
                     {
-                        var tGrid = timelineObject.TGrid;
-                        return TGridCalculator.ConvertTGridToY(tGrid, editorViewModel);
+                        return editorViewModel.CanvasHeight - TGridCalculator.ConvertTGridToY(tGrid, editorViewModel);
                     }
                 }
             }

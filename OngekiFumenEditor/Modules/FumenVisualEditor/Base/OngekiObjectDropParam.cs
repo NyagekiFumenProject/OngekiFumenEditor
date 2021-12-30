@@ -9,6 +9,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public class OngekiObjectDropParam
     {
-        public DisplayObjectViewModelBase OngekiObjectViewModel { get; set; }
+        public OngekiObjectDropParam(Func<DisplayObjectViewModelBase> lazyLoadFunc)
+        {
+            OngekiObjectViewModel = new Lazy<DisplayObjectViewModelBase>(lazyLoadFunc);
+        }
+
+        public Lazy<DisplayObjectViewModelBase> OngekiObjectViewModel { get; }
     }
 }

@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Base.Collections
         {
             if (beam is BeamStart beamStart)
             {
-                beamStart.PropertyChanged += OnBeamStartPropertyChanged;
+                //beamStart.PropertyChanged += OnBeamStartPropertyChanged;
                 if (beamStart.RecordId < 0)
                     beamStart.RecordId = beams.Count + 1;
                 beams.Add(beamStart);
@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Base.Collections
         {
             if (beam is BeamStart beamStart)
             {
-                beamStart.PropertyChanged -= OnBeamStartPropertyChanged;
+                //beamStart.PropertyChanged -= OnBeamStartPropertyChanged;
                 beams.Remove(beamStart);
             }
             else if (beam is BeamChildBase beamChild)
@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Base.Collections
             if (e.PropertyName != nameof(BeamBase.RecordId) || sender is not BeamStart beamStart)
                 return;
 
-            if (beams.FirstOrDefault(x => x == beamStart) is BeamStart s)
+            if (beams.FirstOrDefault(x => x.RecordId == beamStart.RecordId) is BeamStart s)
             {
                 beams.Remove(s);
                 Log.LogDebug($"migrate recId {s.RecordId} -> {beamStart.RecordId}");

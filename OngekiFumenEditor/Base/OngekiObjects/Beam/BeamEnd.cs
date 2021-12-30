@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
     public class BeamEnd : BeamChildBase
     {
-        public override Type ModelViewType => throw new NotImplementedException();
+        public override Type ModelViewType => typeof(BeamEndViewModel);
 
         public override string IDShortName => "BME";
     }

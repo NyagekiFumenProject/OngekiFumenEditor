@@ -5,11 +5,10 @@ namespace OngekiFumenEditor.Base
 {
     public interface IDisplayableObject
     {
-        public Type ModelViewType { get; }
+        Type ModelViewType { get; }
 
-        public virtual IEnumerable<IDisplayableObject> GetDisplayableObjects()
-        {
-            yield return this;
-        }
+        bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid);
+
+        IEnumerable<IDisplayableObject> GetDisplayableObjects();
     }
 }

@@ -4,10 +4,13 @@ using Gemini.Framework.Threading;
 using Gemini.Modules.Toolbox.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
@@ -209,44 +212,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private void RedrawOngekiObjects()
+        private void RedrawEditorObjects()
         {
             var begin = TGridCalculator.ConvertYToTGrid(0, this) ?? new TGrid(0, 0);
             var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
 
             //Log.LogDebug($"begin:({begin})  end:({end})");
 
-            foreach (var obj in DisplayObjectList.OfType<OngekiObjectViewBase>().Where(x =>
-            {
-                if (x.ViewModel.ReferenceOngekiObject is OngekiTimelineObjectBase timeline)
-                    return !timeline.CheckVisiable(begin, end);
-                return false;
-            }).ToArray())
-            {
-                DisplayObjectList.Remove(obj);
-            }
-            var remainObj = DisplayObjectList.OfType<OngekiObjectViewBase>().ToArray();
-            foreach (var item in remainObj)
-            {
-                //recalc xy for remain objs.
-                item.RecalcCanvasXY();
-            }
+            DisplayObjectList.Clear();
             var list = Fumen.GetAllDisplayableObjects()
-                .OfType<OngekiTimelineObjectBase>()
-                .Where(x => x.CheckVisiable(begin, end))
-                .Where(x => !remainObj.Select(r => r.ViewModel.ReferenceOngekiObject as ITimelineObject).Contains(x))
                 .OfType<IDisplayableObject>()
+                .Where(x => x.CheckVisiable(begin, end))
                 .ToArray();
             foreach (var item in list)
             {
-                if (Activator.CreateInstance(item.ModelViewType) is DisplayObjectViewModelBase viewModel &&
-                     ViewHelper.CreateView(viewModel) is UIElement view &&
-                     item is OngekiObjectBase o)
-                {
-                    viewModel.ReferenceOngekiObject = o;
-                    viewModel.EditorViewModel = this;
-                    DisplayObjectList.Add(view);
-                }
+                var obj = Activator.CreateInstance(item.ModelViewType);
+                var view = ViewHelper.CreateView(obj);
+
+                if (obj is IEditorDisplayableViewModel editorObjectViewModel)
+                    editorObjectViewModel.OnObjectCreated(item, this);
+
+                DisplayObjectList.Add(view);
             }
         }
 
@@ -321,7 +307,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             DisplayObjectList.Add(view);
             viewModel.EditorViewModel = this;
 
-            Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
+            //Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
         }
 
         public void DeleteSelectedObjects()
@@ -329,11 +315,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var selectedObject = SelectObjects.ToArray();
             foreach (var obj in selectedObject)
             {
-                DisplayObjectList.Remove(obj);
+                DisplayObjectList.Remove(obj.View);
                 fumen.RemoveObject(obj.ReferenceOngekiObject);
                 SelectObjects.Remove(obj);
             }
-            Log.LogInfo($"deleted {selectedObject.Length} objects.");
+            //Log.LogInfo($"deleted {selectedObject.Length} objects.");
         }
 
         public void CopySelectedObjects()
@@ -391,7 +377,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void Redraw(RedrawTarget target)
         {
             if (target.HasFlag(RedrawTarget.OngekiObjects))
-                RedrawOngekiObjects();
+                RedrawEditorObjects();
             if (target.HasFlag(RedrawTarget.TGridUnitLines))
                 RedrawTimeline();
             if (target.HasFlag(RedrawTarget.XGridUnitLines))

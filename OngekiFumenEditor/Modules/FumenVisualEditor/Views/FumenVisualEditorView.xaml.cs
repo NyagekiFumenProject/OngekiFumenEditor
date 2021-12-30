@@ -154,7 +154,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
                     displayObject = Activator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
                     break;
                 case OngekiObjectDropParam dropParam:
-                    displayObject = dropParam.OngekiObjectViewModel;
+                    displayObject = dropParam.OngekiObjectViewModel.Value;
                     break;
             }
 

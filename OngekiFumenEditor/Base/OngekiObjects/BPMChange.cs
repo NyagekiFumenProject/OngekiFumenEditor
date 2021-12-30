@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class BPMChange : OngekiTimelineObjectBase
     {
+        public override Type ModelViewType => typeof(BPMChangeViewModel);
+
         private double bpm = 240;
         public double BPM
         {

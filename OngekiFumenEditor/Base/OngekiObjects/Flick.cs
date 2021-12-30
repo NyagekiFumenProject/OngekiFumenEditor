@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Flick : OngekiTimelineObjectBase, IHorizonPositionObject, IDisplayableObject
+    public class Flick : OngekiTimelineObjectBase, IHorizonPositionObject
     {
         public enum FlickDirection
         {
@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public Type ModelViewType => typeof(FlickViewModel);
+        public override Type ModelViewType => typeof(FlickViewModel);
 
         public override string IDShortName => IsCritical ? "CFK" : "FLK";
 

@@ -9,6 +9,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
     public class BeamStart : BeamBase
     {
         private List<BeamChildBase> children = new();
+        private List<BeamConnector> connectors = new();
         public IEnumerable<BeamChildBase> Children => children;
 
         private int recordId = -1;
@@ -25,6 +26,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
                 child.PrevBeam = children.LastOrDefault() ?? this as BeamBase;
                 children.Add(child);
                 NotifyOfPropertyChange(() => Children);
+                connectors.Add(new BeamConnector()
+                {
+                    From = child.PrevBeam,
+                    To = child
+                });
             }
             child.ReferenceBeam = this;
         }
@@ -32,6 +38,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         public void RemoveChildBeamObject(BeamChildBase child)
         {
             children.Remove(child);
+
+            connectors.RemoveAll(x => x.From == child || x.To == child);
 
             var prev = child.PrevBeam;
             var next = children.FirstOrDefault(x => x.PrevBeam == child);
@@ -44,10 +52,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
             NotifyOfPropertyChange(() => Children);
         }
 
-        public IEnumerable<IDisplayableObject> GetDisplayableObjects()
+        public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
             yield return this;
             foreach (var child in Children)
+                yield return child;
+            foreach (var child in connectors)
                 yield return child;
         }
     }

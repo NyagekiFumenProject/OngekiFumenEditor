@@ -1,13 +1,16 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Converters;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -15,7 +18,7 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
-    public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IViewAware
+    public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IEditorDisplayableViewModel,IViewAware
     {
         private bool isSelected;
         public bool IsSelected
@@ -29,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 isSelected = value;
                 NotifyOfPropertyChange(() => IsSelected);
 
-                EditorViewModel?.OnSelectPropertyChanged(this,value);
+                EditorViewModel?.OnSelectPropertyChanged(this, value);
             }
         }
 
@@ -45,12 +48,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 NotifyOfPropertyChange(() => IsTimelineObject);
             }
         }
-
-        public event EventHandler<ViewAttachedEventArgs> ViewAttached;
-
-        public object View { get; private set; }
-
-        public object Context { get; private set; }
 
         /// <summary>
         /// 表示此物件是否能设置水平位置(即此物件是否支持XGrid)
@@ -78,7 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnDragEnd(Point pos)
         {
-            if (View is not FrameworkElement v)
+            if (View is null)
                 return;
 
             var movePoint = new Point(
@@ -98,13 +95,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         Point dragViewStartPoint = default;
         Point dragStartPoint = default;
 
+        public event EventHandler<ViewAttachedEventArgs> ViewAttached;
+
         public void OnDragStart(Point pos)
         {
-            if (View is not FrameworkElement v)
+            if (View is null)
                 return;
 
-            var x = (double)v.GetValue(Canvas.LeftProperty);
-            var y = (double)v.GetValue(Canvas.TopProperty);
+            var x = (double)View.GetValue(Canvas.LeftProperty);
+            var y = (double)View.GetValue(Canvas.TopProperty);
             dragViewStartPoint = new Point(x, y);
             dragStartPoint = pos;
 
@@ -218,15 +217,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Refresh();
         }
 
-        public void AttachView(object view, object context = null)
+        public void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
         {
-            View = view;
-            Context = context;
-
-            OnAttachedView(View);
+            if (createFrom is OngekiObjectBase obj)
+                ReferenceOngekiObject = obj;
+            EditorViewModel = editorViewModel;
         }
 
-        public object GetView(object context = null) => View;
+        public FrameworkElement View { get; private set; }
+
+        public void AttachView(object view, object context = null)
+        {
+            View = view as FrameworkElement;
+        }
+
+        public object GetView(object context = null)
+        {
+            return View;
+        }
     }
 
     public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, new()

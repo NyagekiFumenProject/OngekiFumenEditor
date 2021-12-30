@@ -59,23 +59,23 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
-                BeamChildBase genBeamChild = isBeamNext ? new BeamNext() : new BeamEnd();
-                DisplayObjectViewModelBase genViewModel = isBeamNext ? new BeamNextViewModel() : new BeamEndViewModel();
-                genViewModel.ReferenceOngekiObject = genBeamChild;
+                var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
+                {
+                    BeamChildBase genBeamChild = isBeamNext ? new BeamNext() : new BeamEnd();
+                    DisplayObjectViewModelBase genViewModel = isBeamNext ? new BeamNextViewModel() : new BeamEndViewModel();
+                    genViewModel.ReferenceOngekiObject = genBeamChild;
 
-                if (Beam is BeamStart beamStart)
-                {
-                    beamStart.AddChildBeamObject(genBeamChild);
-                }
-                else if (Beam is BeamNext { ReferenceBeam: { } } beamNext1)
-                {
-                    beamNext1.ReferenceBeam.AddChildBeamObject(genBeamChild);
-                }
+                    if (Beam is BeamStart beamStart)
+                    {
+                        beamStart.AddChildBeamObject(genBeamChild);
+                    }
+                    else if (Beam is BeamNext { ReferenceBeam: { } } beamNext1)
+                    {
+                        beamNext1.ReferenceBeam.AddChildBeamObject(genBeamChild);
+                    }
 
-                var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam()
-                {
-                    OngekiObjectViewModel = genViewModel
-                });
+                    return genViewModel;
+                }));
                 DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
                 _draggingItem = false;
             }

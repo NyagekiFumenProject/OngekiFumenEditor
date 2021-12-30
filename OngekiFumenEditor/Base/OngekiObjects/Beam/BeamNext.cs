@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
     public class BeamNext : BeamChildBase
     {
-        public override Type ModelViewType => throw new NotImplementedException();
+        public override Type ModelViewType => typeof(BeamNextViewModel);
 
         public override string IDShortName => "BMN";
     }

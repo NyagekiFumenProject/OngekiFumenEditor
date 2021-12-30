@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class EnemySet : OngekiTimelineObjectBase
     {
+        public override Type ModelViewType => typeof(EnemySetViewModel);
+
         public class WaveChangeConst : FadeStringEnum
         {
             public static WaveChangeConst Wave1 { get; } = new WaveChangeConst("WAVE1");

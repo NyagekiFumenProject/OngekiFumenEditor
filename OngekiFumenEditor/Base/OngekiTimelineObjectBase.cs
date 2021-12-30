@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public abstract class OngekiTimelineObjectBase : OngekiObjectBase, ITimelineObject
+    public abstract class OngekiTimelineObjectBase : OngekiObjectBase, ITimelineObject, IDisplayableObject
     {
         private TGrid tGrid = new TGrid();
         public virtual TGrid TGrid
@@ -21,9 +21,16 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-        public virtual bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
+        public abstract Type ModelViewType { get; }
+
+        public bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
         {
             return minVisibleTGrid <= TGrid && TGrid <= maxVisibleTGrid;
+        }
+
+        public virtual IEnumerable<IDisplayableObject> GetDisplayableObjects()
+        {
+            yield return this;
         }
 
         public int CompareTo(object obj)
