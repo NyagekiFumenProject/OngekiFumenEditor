@@ -53,10 +53,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
                     ViewModel.OnMouseClick(default);
             };
         }
-
-        public void RecalcCanvasXY()
-        {
-            ViewModel.NotifyOfPropertyChange(nameof(ViewModel.EditorViewModel));
-        }
     }
 }
