@@ -44,20 +44,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 referenceOngekiObject = value;
                 NotifyOfPropertyChange(() => ReferenceOngekiObject);
-                NotifyOfPropertyChange(() => CanMoveX);
-                NotifyOfPropertyChange(() => IsTimelineObject);
             }
         }
-
-        /// <summary>
-        /// 表示此物件是否能设置水平位置(即此物件是否支持XGrid)
-        /// </summary>
-        public bool CanMoveX => ReferenceOngekiObject is IHorizonPositionObject;
-
-        /// <summary>
-        /// 表示此物件是否能设置时间轴位置(即此物件是否支持TGrid)
-        /// </summary>
-        public bool IsTimelineObject => ReferenceOngekiObject is ITimelineObject;
 
         private FumenVisualEditorViewModel editorViewModel;
         public FumenVisualEditorViewModel EditorViewModel
