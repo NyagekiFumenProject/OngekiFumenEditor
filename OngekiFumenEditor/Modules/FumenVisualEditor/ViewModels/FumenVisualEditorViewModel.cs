@@ -524,6 +524,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             OnNewObjectAdd(displayObject);
             displayObject.MoveCanvas(mousePosition);
+            Redraw(RedrawTarget.OngekiObjects);
         }
 
         #endregion
