@@ -8,7 +8,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:Background="White"
     mc:Ignorable="d">
-    <StackPanel Margin="21,5,0,0">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter">
+        </BooleanToVisibilityConverter>
+    </UserControl.Resources>
+    <StackPanel Margin="21,5,0,0" Visibility="{Binding IsEnableDrag, Converter={StaticResource BooleanToVisibilityConverter}}">
         <Border
             x:Name="BeamNext"
             Width="130"

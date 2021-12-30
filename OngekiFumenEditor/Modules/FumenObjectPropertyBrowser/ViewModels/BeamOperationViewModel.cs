@@ -32,7 +32,34 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             {
                 beam = value;
                 NotifyOfPropertyChange(() => Beam);
+                CheckEnableDrag();
             }
+        }
+
+        private bool isEnableDrag = true;
+        public bool IsEnableDrag
+        {
+            get
+            {
+                return isEnableDrag;
+            }
+            set
+            {
+                var p = isEnableDrag;
+                isEnableDrag = value;
+                if (p != value)
+                    NotifyOfPropertyChange(() => IsEnableDrag);
+            }
+        }
+
+        private void CheckEnableDrag()
+        {
+            IsEnableDrag = !((Beam switch
+            {
+                BeamStart start => start,
+                BeamNext next => next.ReferenceBeam,
+                _ => default,
+            })?.Children.OfType<BeamEnd>().Any() ?? false);
         }
 
         public BeamOperationViewModel(BeamBase obj)
@@ -74,6 +101,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                         beamNext1.ReferenceBeam.AddChildBeamObject(genBeamChild);
                     }
 
+                    CheckEnableDrag();
                     return genViewModel;
                 }));
                 DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
