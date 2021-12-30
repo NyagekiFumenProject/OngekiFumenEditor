@@ -229,12 +229,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void AttachView(object view, object context = null)
         {
             View = view as FrameworkElement;
+            OnAttachedView(View);
         }
 
-        public object GetView(object context = null)
-        {
-            return View;
-        }
+        public object GetView(object context = null) => View;
     }
 
     public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, new()
