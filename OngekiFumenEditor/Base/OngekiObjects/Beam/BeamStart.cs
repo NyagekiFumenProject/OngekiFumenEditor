@@ -45,7 +45,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
             var prev = child.PrevBeam;
             var next = children.FirstOrDefault(x => x.PrevBeam == child);
             if (next is not null)
+            {
                 next.PrevBeam = prev;
+                connectors.Add(new BeamConnector()
+                {
+                    From = next.PrevBeam,
+                    To = next
+                });
+            }
             child.PrevBeam = default;
 
             child.ReferenceBeam = default;
