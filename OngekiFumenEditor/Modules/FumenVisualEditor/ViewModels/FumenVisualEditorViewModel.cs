@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [Export(typeof(FumenVisualEditorViewModel))]
     public class FumenVisualEditorViewModel : PersistedDocument
     {
-        public HashSet<DisplayObjectViewModelBase> SelectObjects { get; } = new();
+        public IEnumerable<DisplayObjectViewModelBase> SelectObjects => DisplayObjectList.OfType<OngekiObjectViewBase>().Select(x => x.ViewModel).Where(x => x.IsSelected);
 
         [Flags]
         public enum RedrawTarget
@@ -305,6 +305,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             DisplayObjectList.Add(view);
             viewModel.EditorViewModel = this;
+            //Redraw(RedrawTarget.OngekiObjects);
 
             //Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
         }
@@ -316,7 +317,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 DisplayObjectList.Remove(obj.View);
                 fumen.RemoveObject(obj.ReferenceOngekiObject);
-                SelectObjects.Remove(obj);
             }
             //Log.LogInfo($"deleted {selectedObject.Length} objects.");
         }
@@ -406,17 +406,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 if (!shiftKeyDown)
                 {
-                    foreach (var o in SelectObjects)
+                    foreach (var o in SelectObjects.Where(x => x != obj))
                         o.IsSelected = false;
-                    SelectObjects.Clear();
                 }
-                SelectObjects.Add(obj);
                 if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
-                    propertyBrowser.OngekiObject = SelectObjects.Count == 1 ? SelectObjects.First().ReferenceOngekiObject : default;
+                    propertyBrowser.OngekiObject = SelectObjects.Count() == 1 ? SelectObjects.First().ReferenceOngekiObject : default;
             }
             else
             {
-                SelectObjects.Remove(obj);
                 if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
                     propertyBrowser.OngekiObject = default;
             }
