@@ -145,7 +145,7 @@ namespace OngekiFumenEditor.Base
                 .Concat(Bells)
                 .Concat(Flicks)
                 .Concat(MeterChanges)
-                .Concat(BpmList)
+                .Concat(BpmList.Skip(1)) //not show first bpm
                 .Concat(ClickSEs)
                 .Concat(EnemySets)
                 .Concat(Beams);
