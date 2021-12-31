@@ -29,6 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\EnumValueTypeUIView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -50,6 +53,10 @@
 
   <ItemGroup>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\BoolValueTypeUIView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenObjectPropertyBrowser\Views\EnumValueTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
