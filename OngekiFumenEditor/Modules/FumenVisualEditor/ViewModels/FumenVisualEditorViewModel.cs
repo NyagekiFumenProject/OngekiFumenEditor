@@ -526,7 +526,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     displayObject = dropParam.OngekiObjectViewModel.Value;
                     break;
             }
-
+/*
+            if (displayObject is IEditorDisplayableViewModel editorObjectViewModel)
+                editorObjectViewModel.OnObjectCreated(displayObject.ReferenceOngekiObject, this);
+*/
             OnNewObjectAdd(displayObject);
             displayObject.MoveCanvas(mousePosition);
             Redraw(RedrawTarget.OngekiObjects);

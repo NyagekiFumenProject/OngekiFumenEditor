@@ -11,8 +11,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     {
         public enum FlickDirection
         {
-            Left = 0,
-            Right = 1
+            Left = 1,
+            Right = -1
         }
 
         private XGrid xGrid = new XGrid();

@@ -19,6 +19,7 @@ namespace OngekiFumenEditor.Base
         public List<BulletPalleteList> BulletPalleteList { get; } = new();
         public List<Bell> Bells { get; } = new();
         public List<Flick> Flicks { get; } = new();
+        public List<ClickSE> ClickSEs { get; } = new();
         public BpmList BpmList { get; } = new();
         public List<MeterChange> MeterChanges { get; } = new();
         public List<EnemySet> EnemySets { get; } = new();
@@ -85,6 +86,10 @@ namespace OngekiFumenEditor.Base
             {
                 Beams.Add(beam);
             }
+            else if (obj is ClickSE clickSE)
+            {
+                ClickSEs.Add(clickSE);
+            }
             else
             {
                 Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.Name}");
@@ -122,6 +127,10 @@ namespace OngekiFumenEditor.Base
             {
                 Beams.Remove(beam);
             }
+            else if (obj is ClickSE clickSE)
+            {
+                ClickSEs.Remove(clickSE);
+            }
             else
             {
                 Log.LogWarn($"delete list target not found, object type : {obj?.GetType()?.Name}");
@@ -135,6 +144,10 @@ namespace OngekiFumenEditor.Base
             var first = Enumerable.Empty<IDisplayableObject>()
                 .Concat(Bells)
                 .Concat(Flicks)
+                .Concat(MeterChanges)
+                .Concat(BpmList)
+                .Concat(ClickSEs)
+                .Concat(EnemySets)
                 .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());
@@ -166,6 +179,10 @@ namespace OngekiFumenEditor.Base
             sb.AppendLine();
             foreach (var o in MeterChanges.OrderBy(x => x.TGrid))
                 sb.AppendLine(o.Serialize(this));
+            sb.AppendLine();
+            foreach (var o in ClickSEs.OrderBy(x => x.TGrid))
+                sb.AppendLine(o.Serialize(this));
+            sb.AppendLine();
             foreach (var o in EnemySets.OrderBy(x => x.TGrid))
                 sb.AppendLine(o.Serialize(this));
             #endregion

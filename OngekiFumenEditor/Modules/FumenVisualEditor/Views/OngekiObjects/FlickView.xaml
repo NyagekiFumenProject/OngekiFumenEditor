@@ -8,10 +8,18 @@
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     Width="100"
     mc:Ignorable="d">
+    <ongekiobjects:OngekiObjectViewBase.Resources>
+        <converters:EnumToIntConverter x:Key="EnumToIntConverter">
+        </converters:EnumToIntConverter>
+    </ongekiobjects:OngekiObjectViewBase.Resources>
     <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/flick.png">
         <Image.RenderTransform>
-            <TranslateTransform X="-52" Y="-56">
-            </TranslateTransform>
+            <TransformGroup>
+                <TranslateTransform X="-52" Y="-56">
+                </TranslateTransform>
+                <ScaleTransform ScaleX="{Binding ReferenceOngekiObject.Direction, Converter={StaticResource EnumToIntConverter}}">
+                </ScaleTransform>
+            </TransformGroup>
         </Image.RenderTransform>
     </Image>
 </ongekiobjects:OngekiObjectViewBase>
