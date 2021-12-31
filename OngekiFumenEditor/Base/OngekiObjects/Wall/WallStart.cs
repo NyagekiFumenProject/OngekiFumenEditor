@@ -7,57 +7,57 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Beam
+namespace OngekiFumenEditor.Base.OngekiObjects.Wall
 {
-    public class BeamStart : BeamBase
+    public class WallStart : WallBase
     {
-        private List<BeamChildBase> children = new();
-        private List<ConnectorLineBase<BeamBase>> connectors = new();
-        public IEnumerable<BeamChildBase> Children => children;
+        private List<WallChildBase> children = new();
+        private List<ConnectorLineBase<WallBase>> connectors = new();
+        public IEnumerable<WallChildBase> Children => children;
 
         private int recordId = -1;
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
-        public override Type ModelViewType => typeof(BeamStartViewModel);
+        public override Type ModelViewType => typeof(WallStartViewModel);
 
-        public override string IDShortName => "BMS";
+        public override string IDShortName => "WLS";
 
-        public void AddChildBeamObject(BeamChildBase child)
+        public void AddChildWallObject(WallChildBase child)
         {
             if (!children.Contains(child))
             {
-                child.PrevBeam = children.LastOrDefault() ?? this as BeamBase;
+                child.PrevWall = children.LastOrDefault() ?? this as WallBase;
                 children.Add(child);
                 NotifyOfPropertyChange(() => Children);
-                connectors.Add(new BeamConnector()
+                connectors.Add(new WallConnector()
                 {
-                    From = child.PrevBeam,
+                    From = child.PrevWall,
                     To = child
                 });
             }
-            child.ReferenceBeam = this;
+            child.ReferenceWall = this;
         }
 
-        public void RemoveChildBeamObject(BeamChildBase child)
+        public void RemoveChildWallObject(WallChildBase child)
         {
             children.Remove(child);
 
             connectors.RemoveAll(x => x.From == child || x.To == child);
 
-            var prev = child.PrevBeam;
-            var next = children.FirstOrDefault(x => x.PrevBeam == child);
+            var prev = child.PrevWall;
+            var next = children.FirstOrDefault(x => x.PrevWall == child);
             if (next is not null)
             {
-                next.PrevBeam = prev;
-                connectors.Add(new BeamConnector()
+                next.PrevWall = prev;
+                connectors.Add(new WallConnector()
                 {
-                    From = next.PrevBeam,
+                    From = next.PrevWall,
                     To = next
                 });
             }
-            child.PrevBeam = default;
+            child.PrevWall = default;
 
-            child.ReferenceBeam = default;
+            child.ReferenceWall = default;
 
             NotifyOfPropertyChange(() => Children);
         }
@@ -65,9 +65,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
             yield return this;
-            foreach (var child in connectors)
-                yield return child;
             foreach (var child in Children)
+                yield return child;
+            foreach (var child in connectors)
                 yield return child;
         }
 

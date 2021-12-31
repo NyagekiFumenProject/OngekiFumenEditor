@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.Collections;
+using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace OngekiFumenEditor.Base
         public List<Flick> Flicks { get; } = new();
         public List<ClickSE> ClickSEs { get; } = new();
         public BpmList BpmList { get; } = new();
+        public WallList Walls { get; } = new();
         public List<MeterChange> MeterChanges { get; } = new();
         public List<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
@@ -90,6 +92,10 @@ namespace OngekiFumenEditor.Base
             {
                 ClickSEs.Add(clickSE);
             }
+            else if (obj is WallBase wall)
+            {
+                Walls.Add(wall);
+            }
             else
             {
                 Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.Name}");
@@ -131,6 +137,10 @@ namespace OngekiFumenEditor.Base
             {
                 ClickSEs.Remove(clickSE);
             }
+            else if (obj is WallBase wall)
+            {
+                Walls.Remove(wall);
+            }
             else
             {
                 Log.LogWarn($"delete list target not found, object type : {obj?.GetType()?.Name}");
@@ -148,6 +158,7 @@ namespace OngekiFumenEditor.Base
                 .Concat(BpmList.Skip(1)) //not show first bpm
                 .Concat(ClickSEs)
                 .Concat(EnemySets)
+                .Concat(Walls)
                 .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());

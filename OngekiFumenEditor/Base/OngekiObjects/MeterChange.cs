@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     {
         public override Type ModelViewType => typeof(MeterChangeViewModel);
 
-        private int bunShi = default;
+        private int bunShi = 4;
         public int BunShi
         {
             get { return bunShi; }
@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        private int bunbo = default;
+        private int bunbo = 4;
         public int Bunbo
         {
             get { return bunbo; }

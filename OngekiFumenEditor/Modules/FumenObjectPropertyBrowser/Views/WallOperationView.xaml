@@ -1,0 +1,39 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views.WallOperationView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:Background="White"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter">
+        </BooleanToVisibilityConverter>
+    </UserControl.Resources>
+    <StackPanel Margin="21,5,0,0" Visibility="{Binding IsEnableDrag, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Border
+            Width="130"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
+            BorderBrush="Black"
+            BorderThickness="1">
+            <TextBlock
+                Margin="5"
+                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Text="Drag new WallNext" />
+        </Border>
+        <Border
+            Width="130"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove2($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
+            BorderBrush="Black"
+            BorderThickness="1">
+            <TextBlock
+                Margin="5"
+                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Text="Drag new WallEnd" />
+        </Border>
+    </StackPanel>
+</UserControl>

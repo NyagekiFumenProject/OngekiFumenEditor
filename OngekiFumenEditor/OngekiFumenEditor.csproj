@@ -33,6 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\EnumValueTypeUIView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -56,6 +59,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\BoolValueTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
@@ -88,6 +95,17 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamEndView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallEndView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallNextView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallStartView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamStartView.xaml">
