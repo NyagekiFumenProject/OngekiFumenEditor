@@ -315,22 +315,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
         }
 
-        public void DeleteSelectedObjects()
-        {
-            var selectedObject = SelectObjects.ToArray();
-            var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-
-            foreach (var obj in selectedObject)
-            {
-                DisplayObjectList.Remove(obj.View);
-                fumen.RemoveObject(obj.ReferenceOngekiObject);
-                if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
-                    propertyBrowser.OngekiObject = default;
-            }
-            Redraw(RedrawTarget.OngekiObjects);
-            //Log.LogInfo($"deleted {selectedObject.Length} objects.");
-        }
-
         public void CopySelectedObjects()
         {
 
@@ -346,12 +330,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (e.EventArgs is KeyEventArgs arg)
             {
                 //Log.LogInfo(arg.Key.ToString());
-                if (arg.Key == Key.Delete)
-                {
-                    DeleteSelectedObjects();
-                }
                 if (arg.Key == Key.LeftShift)
                 {
+                    //开始多物件选择
                     shiftKeyDown = true;
                 }
             }
@@ -362,12 +343,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (e.EventArgs is KeyEventArgs arg)
             {
                 //Log.LogInfo(arg.Key.ToString());
-                if (arg.Key == Key.Delete)
-                {
-                    DeleteSelectedObjects();
-                }
                 if (arg.Key == Key.LeftShift)
                 {
+                    //取消多物件选择
                     shiftKeyDown = false;
                 }
             }
@@ -429,7 +407,39 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        #region DragActions
+        #region Keyboard Actions
+
+        public void KeyboardAction_DeleteSelectingObjects()
+        {
+            //删除已选择的物件
+            var selectedObject = SelectObjects.ToArray();
+            var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+
+            foreach (var obj in selectedObject)
+            {
+                DisplayObjectList.Remove(obj.View);
+                fumen.RemoveObject(obj.ReferenceOngekiObject);
+                if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
+                    propertyBrowser.OngekiObject = default;
+            }
+            Redraw(RedrawTarget.OngekiObjects);
+            //Log.LogInfo($"deleted {selectedObject.Length} objects.");
+        }
+
+        public void KeyboardAction_SelectAllObjects()
+        {
+            DisplayObjectList.OfType<OngekiObjectViewBase>().Select(x => x.ViewModel).ForEach(x => x.IsSelected = true);
+        }
+
+        public void KeyboardAction_CancelSelectingObjects()
+        {
+            //取消选择
+            SelectObjects.ForEach(x => x.IsSelected = false);
+        }
+
+        #endregion
+
+        #region Drag Actions
 
         public void OnMouseLeave(ActionExecutionContext e)
         {
@@ -526,10 +536,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     displayObject = dropParam.OngekiObjectViewModel.Value;
                     break;
             }
-/*
-            if (displayObject is IEditorDisplayableViewModel editorObjectViewModel)
-                editorObjectViewModel.OnObjectCreated(displayObject.ReferenceOngekiObject, this);
-*/
+            /*
+                        if (displayObject is IEditorDisplayableViewModel editorObjectViewModel)
+                            editorObjectViewModel.OnObjectCreated(displayObject.ReferenceOngekiObject, this);
+            */
             OnNewObjectAdd(displayObject);
             displayObject.MoveCanvas(mousePosition);
             Redraw(RedrawTarget.OngekiObjects);

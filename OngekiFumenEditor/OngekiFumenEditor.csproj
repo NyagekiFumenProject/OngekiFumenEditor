@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj" />
     <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj" />
   </ItemGroup>
