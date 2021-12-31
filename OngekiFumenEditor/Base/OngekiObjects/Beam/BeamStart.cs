@@ -1,9 +1,11 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
@@ -67,6 +69,19 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
                 yield return child;
             foreach (var child in connectors)
                 yield return child;
+        }
+
+        public override string Serialize(OngekiFumen fumenData)
+        {
+            using var disp = ObjectPool<StringBuilder>.GetWithUsingDisposable(out var sb, out var isNew);
+            if (!isNew)
+                sb.Clear();
+
+            sb.AppendLine(base.Serialize(fumenData));
+            foreach (var child in Children)
+                sb.AppendLine(child.Serialize(fumenData));
+
+            return sb.ToString();
         }
     }
 }

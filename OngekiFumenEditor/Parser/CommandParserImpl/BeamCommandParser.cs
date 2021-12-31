@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             {
                 RecordId = beamRecordId
             };
-            fumen.AddObject(beam);
+            //fumen.AddObject(beam);
 
             CommonParse(beam, args, fumen);
 
