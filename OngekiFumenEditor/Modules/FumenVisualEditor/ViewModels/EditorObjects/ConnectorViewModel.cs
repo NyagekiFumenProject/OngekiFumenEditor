@@ -1,7 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.OngekiObjects.CommonConnectable;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.EditorObjects;
 using OngekiFumenEditor.Utils;
@@ -53,11 +52,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 Connector = connector;
             EditorViewModel = editorViewModel;
         }
-    }
-
-
-    public class DefaultConnectorViewModel : ConnectorViewModel<ConnectableObjectBase>
-    {
-        public override Brush LineBrush { get; } = new SolidColorBrush(Color.FromRgb((byte)MathUtils.Random(255), (byte)MathUtils.Random(255), (byte)MathUtils.Random(255)));
     }
 }
