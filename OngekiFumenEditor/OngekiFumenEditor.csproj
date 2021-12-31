@@ -49,6 +49,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Modules\FumenObjectPropertyBrowser\Views\BoolValueTypeUIView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

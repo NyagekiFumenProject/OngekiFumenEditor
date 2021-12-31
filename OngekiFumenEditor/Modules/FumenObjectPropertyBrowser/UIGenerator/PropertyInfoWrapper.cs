@@ -22,8 +22,16 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
             }
             set
             {
-                var actualType = TypeDescriptor.GetConverter(PropertyInfo.PropertyType);
-                PropertyInfo.SetValue(OwnerObject, actualType.ConvertFrom(value));
+                if (PropertyInfo.PropertyType == (value?.GetType() ?? default))
+                {
+                    PropertyInfo.SetValue(OwnerObject, value);
+                }
+                else
+                {
+                    var actualType = TypeDescriptor.GetConverter(PropertyInfo.PropertyType);
+                    PropertyInfo.SetValue(OwnerObject, actualType.ConvertFrom(value));
+                }
+
                 NotifyOfPropertyChange(() => ProxyValue);
             }
         }
