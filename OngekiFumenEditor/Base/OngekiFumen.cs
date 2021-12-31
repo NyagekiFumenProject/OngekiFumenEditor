@@ -161,7 +161,7 @@ namespace OngekiFumenEditor.Base
             sb.AppendLine();
             sb.AppendLine("[COMPOSITION]");
 
-            foreach (var o in BpmList.OrderBy(x => x.TGrid).Where(x=>x != BpmList.FirstBpm))
+            foreach (var o in BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != BpmList.FirstBpm.TGrid))
                 sb.AppendLine(o.Serialize(this));
             sb.AppendLine();
             foreach (var o in MeterChanges.OrderBy(x => x.TGrid))
