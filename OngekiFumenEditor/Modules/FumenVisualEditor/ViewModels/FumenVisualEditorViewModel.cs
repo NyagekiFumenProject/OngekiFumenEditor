@@ -72,7 +72,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public double XUnitSize => CanvasWidth / (24 * 2) * Setting.UnitCloseSize;
+        public double XUnitSize => CanvasWidth / (Setting.XGridMaxUnit * 2) * Setting.UnitCloseSize;
         public double CanvasWidth => View?.VisualDisplayer?.ActualWidth ?? 0;
         public double CanvasHeight => View?.VisualDisplayer?.ActualHeight ?? 0;
         public FumenVisualEditorView View { get; private set; }
@@ -137,6 +137,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 case nameof(EditorSetting.EditorDisplayName):
                     if (IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
                         title.TitleContent = base.DisplayName;
+                    break;
+                case nameof(EditorSetting.XGridMaxUnit):
+                    Redraw(RedrawTarget.OngekiObjects | RedrawTarget.XGridUnitLines);
                     break;
                 default:
                     break;
@@ -221,8 +224,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var begin = TGridCalculator.ConvertYToTGrid(0, this) ?? new TGrid(0, 0);
             var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
 
-            //Log.LogDebug($"begin:({begin})  end:({end})");
-
+            //Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
             DisplayObjectList.Clear();
             var list = Fumen.GetAllDisplayableObjects()
                 .OfType<IDisplayableObject>()

@@ -143,5 +143,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 NotifyOfPropertyChange(() => MouseWheelTimelineSpeed);
             }
         }
+
+        private int xGridMaxUnit = 28;
+        /// <summary>
+        /// 横轴长度
+        /// </summary>
+        public int XGridMaxUnit
+        {
+            get
+            {
+                return xGridMaxUnit;
+            }
+            set
+            {
+                xGridMaxUnit = value;
+                NotifyOfPropertyChange(() => XGridMaxUnit);
+            }
+        }
     }
 }
