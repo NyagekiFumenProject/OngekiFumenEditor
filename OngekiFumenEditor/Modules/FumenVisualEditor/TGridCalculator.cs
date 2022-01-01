@@ -76,7 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             (var pickStartY, var pickBpm) = positionBpmList.LastOrDefault(x => x.bpm.TGrid <= tGrid);
             if (pickBpm is null)
                 return default;
-            var relativeBpmLenOffset = MathUtils.CalculateLength(pickBpm.TGrid, tGrid, setting.BaseLineY);
+            var relativeBpmLenOffset = MathUtils.CalculateBPMLength(pickBpm, tGrid, setting.BaseLineY);
 
             var pickTGrid = pickStartY + relativeBpmLenOffset;
             return pickTGrid;
