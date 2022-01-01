@@ -198,6 +198,18 @@ namespace OngekiFumenEditor.Base
                 sb.AppendLine(o.Serialize(this));
             #endregion
 
+            #region LANE
+            sb.AppendLine();
+            sb.AppendLine("[LANE]");
+            foreach (var group in Walls.GroupBy(x => x.IDShortName[1]).OrderBy(x => x.Key))
+            {
+                foreach (var wallStart in group.OrderBy(x => x.RecordId))
+                {
+                    sb.AppendLine(wallStart.Serialize(this));
+                }
+            }
+            #endregion
+
             #region BEAM
             sb.AppendLine();
             sb.AppendLine("[BEAM]");

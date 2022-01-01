@@ -26,15 +26,12 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         public abstract OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen);
     }
 
-    [Export(typeof(ICommandParser))]
-    public class WallStartCommandParser : WallCommandParserBase
+    public abstract class WallStartCommandParser<T> : WallCommandParserBase where T : WallStart, new()
     {
-        public override string CommandLineHeader => "WLS";
-
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            var beam = new WallStart()
+            var beam = new T()
             {
                 RecordId = beamRecordId
             };
@@ -46,45 +43,79 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         }
     }
 
+    public abstract class WallNextCommandParser<T> : WallCommandParserBase where T : WallNext, new()
+    {
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        {
+            var beamRecordId = args.GetData<int>(1);
+            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not WallStart beamStart)
+            {
+                Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
+                return default;
+            }
+
+            var beam = new T();
+            CommonParse(beam, args, fumen);
+            beamStart.AddChildWallObject(beam);
+            return beam;
+        }
+    }
+
+    public abstract class WallEndCommandParser<T> : WallCommandParserBase where T : WallEnd, new()
+    {
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        {
+            var beamRecordId = args.GetData<int>(1);
+            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not WallStart beamStart)
+            {
+                Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
+                return default;
+            }
+
+            var beam = new T();
+            CommonParse(beam, args, fumen);
+            beamStart.AddChildWallObject(beam);
+            return beam;
+        }
+    }
+
+    #region Implements
+
     [Export(typeof(ICommandParser))]
-    public class WallNextCommandParser : WallCommandParserBase
+    public class WallLeftStartCommandParser : WallStartCommandParser<WallLeftStart>
+    {
+        public override string CommandLineHeader => "WLS";
+    }
+
+    [Export(typeof(ICommandParser))]
+    public class WallLeftNextCommandParser : WallNextCommandParser<WallLeftNext>
     {
         public override string CommandLineHeader => "WLN";
-
-        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
-        {
-            var beamRecordId = args.GetData<int>(1);
-            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not WallStart beamStart)
-            {
-                Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
-                return default;
-            }
-
-            var beam = new WallNext();
-            CommonParse(beam, args, fumen);
-            beamStart.AddChildWallObject(beam);
-            return beam;
-        }
     }
 
     [Export(typeof(ICommandParser))]
-    public class WallEndCommandParser : WallCommandParserBase
+    public class WallLeftEndommandParser : WallEndCommandParser<WallLeftEnd>
     {
         public override string CommandLineHeader => "WLE";
-
-        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
-        {
-            var beamRecordId = args.GetData<int>(1);
-            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not WallStart beamStart)
-            {
-                Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
-                return default;
-            }
-
-            var beam = new WallEnd();
-            CommonParse(beam, args, fumen);
-            beamStart.AddChildWallObject(beam);
-            return beam;
-        }
     }
+
+    [Export(typeof(ICommandParser))]
+    public class WallRightStartCommandParser : WallStartCommandParser<WallRightStart>
+    {
+        public override string CommandLineHeader => "WRS";
+    }
+
+    [Export(typeof(ICommandParser))]
+    public class WallRightNextCommandParser : WallNextCommandParser<WallRightNext>
+    {
+        public override string CommandLineHeader => "WRN";
+    }
+
+    [Export(typeof(ICommandParser))]
+    public class WallRightEndommandParser : WallEndCommandParser<WallRightEnd>
+    {
+        public override string CommandLineHeader => "WRE";
+    }
+
+    #endregion
 }

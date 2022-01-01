@@ -16,8 +16,7 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "WallStart", "Ongeki Objects")]
-    public class WallStartViewModel : DisplayObjectViewModelBase<WallStart>
+    public class WallStartViewModel<T> : DisplayObjectViewModelBase<T> where T : WallStart, new()
     {
         public override OngekiObjectBase ReferenceOngekiObject
         {
@@ -30,5 +29,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                 base.ReferenceOngekiObject = value;
             }
         }
+    }
+
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "WallLeftStart", "Ongeki Objects")]
+    public class WallLeftStartViewModel : WallStartViewModel<WallLeftStart>
+    {
+
+    }
+
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "WallRightStart", "Ongeki Objects")]
+    public class WallRightStartViewModel : WallStartViewModel<WallRightStart>
+    {
+
     }
 }

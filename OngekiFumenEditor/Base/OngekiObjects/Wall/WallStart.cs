@@ -9,7 +9,7 @@ using System.Text;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Wall
 {
-    public class WallStart : WallBase
+    public abstract class WallStart : WallBase
     {
         private List<WallChildBase> children = new();
         private List<ConnectorLineBase<WallBase>> connectors = new();
@@ -18,9 +18,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
         private int recordId = -1;
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
-        public override Type ModelViewType => typeof(WallStartViewModel);
-
-        public override string IDShortName => "WLS";
+        protected abstract ConnectorLineBase<WallBase> GenerateWallConnector(WallBase from, WallBase to);
 
         public void AddChildWallObject(WallChildBase child)
         {
@@ -29,11 +27,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
                 child.PrevWall = children.LastOrDefault() ?? this as WallBase;
                 children.Add(child);
                 NotifyOfPropertyChange(() => Children);
-                connectors.Add(new WallConnector()
-                {
-                    From = child.PrevWall,
-                    To = child
-                });
+                connectors.Add(GenerateWallConnector(child.PrevWall, child));
             }
             child.ReferenceWall = this;
         }
@@ -49,11 +43,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
             if (next is not null)
             {
                 next.PrevWall = prev;
-                connectors.Add(new WallConnector()
-                {
-                    From = next.PrevWall,
-                    To = next
-                });
+                connectors.Add(GenerateWallConnector(next.PrevWall, next));
             }
             child.PrevWall = default;
 

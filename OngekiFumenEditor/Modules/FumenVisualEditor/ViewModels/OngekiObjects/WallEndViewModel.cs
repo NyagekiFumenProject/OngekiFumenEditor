@@ -16,7 +16,7 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public class WallEndViewModel : WallChildBaseViewModel<WallEnd>
+    public class WallEndViewModel<T> : WallChildBaseViewModel<T> where T : WallEnd, new()
     {
 
     }

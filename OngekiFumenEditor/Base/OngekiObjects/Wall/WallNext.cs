@@ -6,10 +6,8 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Wall
 {
-    public class WallNext : WallChildBase
+    public abstract class WallNext : WallChildBase
     {
-        public override Type ModelViewType => typeof(WallNextViewModel);
 
-        public override string IDShortName => "WLN";
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public abstract class WallChildBaseViewModel<T> : DisplayObjectViewModelBase<T> where T : WallChildBase, new()
+    public abstract class WallChildBaseViewModel<T> : WallBaseViewModel<T> where T : WallChildBase, new()
     {
         public override double CheckAndAdjustY(double y)
         {

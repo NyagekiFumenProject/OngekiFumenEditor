@@ -22,7 +22,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         private Point _mouseStartPosition;
 
         private WallBase wall;
-
         public WallBase Wall
         {
             get
@@ -36,6 +35,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 CheckEnableDrag();
             }
         }
+
+        public bool IsLeftWall => wall.IDShortName[1] == 'L';
 
         private bool isEnableDrag = true;
         public bool IsEnableDrag
@@ -60,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 WallStart start => start,
                 WallNext next => next.ReferenceWall,
                 _ => default,
-            })?.Children.OfType<BeamEnd>().Any() ?? false);
+            })?.Children.OfType<WallEnd>().Any() ?? false);
         }
 
         public WallOperationViewModel(WallBase obj)
@@ -89,8 +90,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             {
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
                 {
-                    WallChildBase genWallChild = isWallNext ? new WallNext() : new WallEnd();
-                    DisplayObjectViewModelBase genViewModel = isWallNext ? new WallNextViewModel() : new WallEndViewModel();
+                    WallChildBase genWallChild = isWallNext ? (IsLeftWall ? new WallLeftNext() : new WallRightNext()) : (IsLeftWall ? new WallLeftEnd() : new WallRightEnd());
+                    DisplayObjectViewModelBase genViewModel = isWallNext ? (IsLeftWall ? new WallNextViewModel<WallLeftNext>() : new WallNextViewModel<WallRightNext>()) : (IsLeftWall ? new WallEndViewModel<WallLeftEnd>() : new WallEndViewModel<WallRightEnd>());
                     genViewModel.ReferenceOngekiObject = genWallChild;
 
                     if (Wall is WallStart beamStart)
