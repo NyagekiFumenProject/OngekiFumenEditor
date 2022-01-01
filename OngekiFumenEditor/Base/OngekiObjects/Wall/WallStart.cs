@@ -54,10 +54,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
+            foreach (var child in connectors)
+                yield return child;
             yield return this;
             foreach (var child in Children)
-                yield return child;
-            foreach (var child in connectors)
                 yield return child;
         }
 
