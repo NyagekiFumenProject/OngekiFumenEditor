@@ -360,17 +360,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnBPMListChanged()
         {
-            RedrawTimeline();
+            Redraw(RedrawTarget.TGridUnitLines);
         }
 
         public void Redraw(RedrawTarget target)
         {
-            if (target.HasFlag(RedrawTarget.OngekiObjects))
-                RedrawEditorObjects();
             if (target.HasFlag(RedrawTarget.TGridUnitLines))
                 RedrawTimeline();
             if (target.HasFlag(RedrawTarget.XGridUnitLines))
                 RedrawUnitCloseXLines();
+            if (target.HasFlag(RedrawTarget.OngekiObjects))
+                RedrawEditorObjects();
         }
 
         public void OnSizeChanged(ActionExecutionContext e)
@@ -463,7 +463,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
             if (isDragging)
-                SelectObjects.ForEach(x => x.OnDragEnd(pos));
+                SelectObjects.ToArray().ForEach(x => x.OnDragEnd(pos));
 
             isMouseDown = false;
             isDragging = false;
@@ -480,7 +480,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Action<DisplayObjectViewModelBase, Point> dragCall = (vm, pos) =>
             {
                 if (r)
-                    vm.OnDragEnd(pos);
+                    vm.OnDragMoving(pos);
                 else
                     vm.OnDragStart(pos);
             };
@@ -492,12 +492,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var bound = new Rect(0, 0, uiElement.ActualWidth, uiElement.ActualHeight);
                 if (bound.Contains(pos))
                 {
-                    SelectObjects.ForEach(x => dragCall(x, pos));
+                    SelectObjects.ToArray().ForEach(x => dragCall(x, pos));
                 }
             }
             else
             {
-                SelectObjects.ForEach(x => dragCall(x, pos));
+                SelectObjects.ToArray().ForEach(x => dragCall(x, pos));
             }
         }
 
