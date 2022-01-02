@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Wall
+namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
-    public abstract class WallBase : OngekiTimelineObjectBase, IHorizonPositionObject
+    public abstract class ConnectableObjectBase : OngekiTimelineObjectBase, IHorizonPositionObject
     {
         public abstract int RecordId { get; set; }
 

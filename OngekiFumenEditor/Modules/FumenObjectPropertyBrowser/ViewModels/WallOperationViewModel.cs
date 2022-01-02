@@ -2,6 +2,7 @@
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -21,8 +22,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         private bool _draggingItem;
         private Point _mouseStartPosition;
 
-        private WallBase wall;
-        public WallBase Wall
+        private ConnectableObjectBase wall;
+        public ConnectableObjectBase Wall
         {
             get
             {
@@ -58,13 +59,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         {
             IsEnableDrag = !((Wall switch
             {
-                WallStart start => start,
-                WallNext next => next.ReferenceWall,
+                ConnectableStartObject start => start,
+                ConnectableNextObject next => next.ReferenceStartObject,
                 _ => default,
-            })?.Children.OfType<WallEnd>().Any() ?? false);
+            })?.Children.OfType<ConnectableEndObject>().Any() ?? false);
         }
 
-        public WallOperationViewModel(WallBase obj)
+        public WallOperationViewModel(ConnectableObjectBase obj)
         {
             Wall = obj;
         }
@@ -90,17 +91,17 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             {
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
                 {
-                    WallChildBase genWallChild = isWallNext ? (IsLeftWall ? new WallLeftNext() : new WallRightNext()) : (IsLeftWall ? new WallLeftEnd() : new WallRightEnd());
+                    ConnectableChildObjectBase genWallChild = isWallNext ? (IsLeftWall ? new WallLeftNext() : new WallRightNext()) : (IsLeftWall ? new WallLeftEnd() : new WallRightEnd());
                     DisplayObjectViewModelBase genViewModel = isWallNext ? (IsLeftWall ? new WallNextViewModel<WallLeftNext>() : new WallNextViewModel<WallRightNext>()) : (IsLeftWall ? new WallEndViewModel<WallLeftEnd>() : new WallEndViewModel<WallRightEnd>());
                     genViewModel.ReferenceOngekiObject = genWallChild;
 
-                    if (Wall is WallStart beamStart)
+                    if (Wall is ConnectableStartObject beamStart)
                     {
                         beamStart.AddChildWallObject(genWallChild);
                     }
-                    else if (Wall is WallNext { ReferenceWall: { } } beamNext1)
+                    else if (Wall is ConnectableNextObject { ReferenceStartObject: { } } beamNext1)
                     {
-                        beamNext1.ReferenceWall.AddChildWallObject(genWallChild);
+                        beamNext1.ReferenceStartObject.AddChildWallObject(genWallChild);
                     }
 
                     CheckEnableDrag();

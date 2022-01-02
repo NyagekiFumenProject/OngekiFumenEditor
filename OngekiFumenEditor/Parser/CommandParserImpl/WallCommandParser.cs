@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Utils;
 using System;
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
     {
         public abstract string CommandLineHeader { get; }
 
-        public void CommonParse(WallBase beam, CommandArgs args, OngekiFumen fumen)
+        public void CommonParse(ConnectableObjectBase beam, CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
 
@@ -26,7 +27,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         public abstract OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen);
     }
 
-    public abstract class WallStartCommandParser<T> : WallCommandParserBase where T : WallStart, new()
+    public abstract class WallStartCommandParser<T> : WallCommandParserBase where T : ConnectableStartObject, new()
     {
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
@@ -43,12 +44,12 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         }
     }
 
-    public abstract class WallNextCommandParser<T> : WallCommandParserBase where T : WallNext, new()
+    public abstract class WallNextCommandParser<T> : WallCommandParserBase where T : ConnectableNextObject, new()
     {
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not WallStart beamStart)
+            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
             {
                 Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;
@@ -61,12 +62,12 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         }
     }
 
-    public abstract class WallEndCommandParser<T> : WallCommandParserBase where T : WallEnd, new()
+    public abstract class WallEndCommandParser<T> : WallCommandParserBase where T : ConnectableEndObject, new()
     {
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not WallStart beamStart)
+            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
             {
                 Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;

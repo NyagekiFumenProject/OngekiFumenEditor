@@ -7,47 +7,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Wall
+namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
-    public abstract class WallStart : WallBase
+    public abstract class ConnectableStartObject : ConnectableObjectBase
     {
-        private List<WallChildBase> children = new();
-        private List<ConnectorLineBase<WallBase>> connectors = new();
-        public IEnumerable<WallChildBase> Children => children;
+        private List<ConnectableChildObjectBase> children = new();
+        private List<ConnectorLineBase<ConnectableObjectBase>> connectors = new();
+        public IEnumerable<ConnectableChildObjectBase> Children => children;
 
         private int recordId = -1;
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
-        protected abstract ConnectorLineBase<WallBase> GenerateWallConnector(WallBase from, WallBase to);
+        protected abstract ConnectorLineBase<ConnectableObjectBase> GenerateWallConnector(ConnectableObjectBase from, ConnectableObjectBase to);
 
-        public void AddChildWallObject(WallChildBase child)
+        public void AddChildWallObject(ConnectableChildObjectBase child)
         {
             if (!children.Contains(child))
             {
-                child.PrevWall = children.LastOrDefault() ?? this as WallBase;
+                child.PrevObject = children.LastOrDefault() ?? this as ConnectableObjectBase;
                 children.Add(child);
                 NotifyOfPropertyChange(() => Children);
-                connectors.Add(GenerateWallConnector(child.PrevWall, child));
+                connectors.Add(GenerateWallConnector(child.PrevObject, child));
             }
-            child.ReferenceWall = this;
+            child.ReferenceStartObject = this;
         }
 
-        public void RemoveChildWallObject(WallChildBase child)
+        public void RemoveChildWallObject(ConnectableChildObjectBase child)
         {
             children.Remove(child);
 
             connectors.RemoveAll(x => x.From == child || x.To == child);
 
-            var prev = child.PrevWall;
-            var next = children.FirstOrDefault(x => x.PrevWall == child);
+            var prev = child.PrevObject;
+            var next = children.FirstOrDefault(x => x.PrevObject == child);
             if (next is not null)
             {
-                next.PrevWall = prev;
-                connectors.Add(GenerateWallConnector(next.PrevWall, next));
+                next.PrevObject = prev;
+                connectors.Add(GenerateWallConnector(next.PrevObject, next));
             }
-            child.PrevWall = default;
+            child.PrevObject = default;
 
-            child.ReferenceWall = default;
+            child.ReferenceStartObject = default;
 
             NotifyOfPropertyChange(() => Children);
         }

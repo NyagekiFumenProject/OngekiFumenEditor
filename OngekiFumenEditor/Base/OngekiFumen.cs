@@ -2,7 +2,9 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.Collections;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -92,7 +94,11 @@ namespace OngekiFumenEditor.Base
             {
                 ClickSEs.Add(clickSE);
             }
-            else if (obj is WallBase wall)
+            else if (obj switch
+            {
+                WallStartBase or WallEndBase or WallNextBase => obj,
+                _ => null
+            } is ConnectableObjectBase wall)
             {
                 Walls.Add(wall);
             }
@@ -137,7 +143,11 @@ namespace OngekiFumenEditor.Base
             {
                 ClickSEs.Remove(clickSE);
             }
-            else if (obj is WallBase wall)
+            else if (obj switch
+            {
+                WallStartBase or WallEndBase or WallNextBase => obj,
+                _ => null
+            } is ConnectableObjectBase wall)
             {
                 Walls.Remove(wall);
             }

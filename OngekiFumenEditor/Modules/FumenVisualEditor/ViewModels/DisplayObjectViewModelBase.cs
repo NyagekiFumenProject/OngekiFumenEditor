@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (View is null)
                 return;
             OnDragMoving(pos);
-            Log.LogInfo($"OnDragEnd");
+            //Log.LogInfo($"OnDragEnd");
         }
 
         public virtual void OnDragMoving(Point pos)
@@ -85,7 +85,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             MoveCanvas(movePoint);
 
-            Log.LogInfo($"OnDragMoving");
+            //Log.LogInfo($"OnDragMoving");
             //Log.LogInfo($"movePoint: {movePoint}");
         }
 
@@ -104,7 +104,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             dragViewStartPoint = new Point(x, y);
             dragStartPoint = pos;
 
-            Log.LogInfo($"OnDragStart");
+            //Log.LogInfo($"OnDragStart");
         }
 
         public void OnMouseClick(Point pos)

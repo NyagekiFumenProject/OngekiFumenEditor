@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Wall
+namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
-    public abstract class WallEnd : WallChildBase
+    public abstract class ConnectableNextObject : ConnectableChildObjectBase
     {
 
     }

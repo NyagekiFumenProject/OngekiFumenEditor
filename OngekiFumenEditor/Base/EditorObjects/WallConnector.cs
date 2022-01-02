@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
 using System;
@@ -12,7 +13,7 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Base.EditorObjects
 {
-    public abstract class WallConnector : ConnectorLineBase<WallBase>
+    public abstract class WallConnector : ConnectorLineBase<ConnectableObjectBase>
     {
         public abstract Color LineColor { get; }
         public override Type ModelViewType => typeof(WallConnectorViewModel);

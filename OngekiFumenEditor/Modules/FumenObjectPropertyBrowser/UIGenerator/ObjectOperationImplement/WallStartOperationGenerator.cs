@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -17,13 +18,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.Objec
     public class WallStartOperationGenerator : IOngekiObjectOperationGenerator
     {
         public IEnumerable<Type> SupportOngekiTypes { get; } = new[] {
-            typeof(WallStart),
-            typeof(WallNext)
+            typeof(ConnectableStartObject),
+            typeof(ConnectableNextObject)
         };
 
         public UIElement Generate(OngekiObjectBase obj)
         {
-            return ViewHelper.CreateViewByViewModelType(() => new WallOperationViewModel(obj as WallBase));
+            return ViewHelper.CreateViewByViewModelType(() => new WallOperationViewModel(obj as ConnectableObjectBase));
         }
     }
 }
