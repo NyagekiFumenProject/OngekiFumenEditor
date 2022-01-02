@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 if (prevBPM is BPMChange)
                 {
                     var bpmLen = MathUtils.CalculateBPMLength(prevBPM, baseBPM, setting.BaseLineY);
-                    yield return (-(offsetY - baseOffsetLen + bpmLen), prevBPM);
+                    yield return (-baseOffsetLen - bpmLen + offsetY, prevBPM);
                 }
             }
 
@@ -75,7 +75,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             //获取pickY对应的bpm和bpm起始位置
             (var pickStartY, var pickBpm) = positionBpmList.LastOrDefault(x => x.bpm.TGrid <= tGrid);
             if (pickBpm is null)
-                return default;
+                if (tGrid < positionBpmList.FirstOrDefault().bpm?.TGrid)
+                    return 0;
+                else
+                    return default;
             var relativeBpmLenOffset = MathUtils.CalculateBPMLength(pickBpm, tGrid, setting.BaseLineY);
 
             var pickTGrid = pickStartY + relativeBpmLenOffset;
