@@ -13,21 +13,27 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Base.EditorObjects
 {
-    public abstract class WallConnector : ConnectorLineBase<ConnectableObjectBase>
+    public abstract class LaneConnector : ConnectorLineBase<ConnectableObjectBase>
     {
         public abstract Color LineColor { get; }
-        public override Type ModelViewType => typeof(WallConnectorViewModel);
+        public override Type ModelViewType => typeof(LaneConnectorViewModel);
     }
 
-    public class WallLeftConnector : WallConnector
+    public class LaneLeftConnector : LaneConnector
     {
-        static readonly Color DefaultColor = Colors.HotPink;
+        static readonly Color DefaultColor = Colors.Red;
         public override Color LineColor => DefaultColor;
     }
 
-    public class WallRightConnector : WallConnector
+    public class LaneCenterConnector : LaneConnector
     {
-        static readonly Color DefaultColor = Colors.HotPink;
+        static readonly Color DefaultColor = Colors.Green;
+        public override Color LineColor => DefaultColor;
+    }
+
+    public class LaneRightConnector : LaneConnector
+    {
+        static readonly Color DefaultColor = Colors.Blue;
         public override Color LineColor => DefaultColor;
     }
 }

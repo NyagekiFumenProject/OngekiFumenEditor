@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Base
 
         public abstract Type ModelViewType { get; }
 
-        public bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
+        public virtual bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
         {
             return minVisibleTGrid <= TGrid && TGrid <= maxVisibleTGrid;
         }

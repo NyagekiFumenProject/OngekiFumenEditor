@@ -10,6 +10,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
     {
         public override int RecordId { get => ReferenceStartObject.RecordId; set { } }
 
+        public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
+        {
+            return base.CheckVisiable(minVisibleTGrid, maxVisibleTGrid) || (TGrid > maxVisibleTGrid && PrevObject is not null && PrevObject.TGrid < minVisibleTGrid);
+        }
+
         public ConnectableStartObject ReferenceStartObject { get; set; }
         public ConnectableObjectBase PrevObject { get; set; }
     }

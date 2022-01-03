@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 yield break;
             var setting = editor.Setting;
             var bpmList = editor.Fumen.BpmList;
-            var offsetY = setting.BaseLineY;
+            var offsetY = 50;
             var baseBPM = bpmList.GetBpm(setting.CurrentDisplayTimePosition);
             var baseOffsetLen = MathUtils.CalculateBPMLength(baseBPM, setting.CurrentDisplayTimePosition, setting.BaseLineY);
 
