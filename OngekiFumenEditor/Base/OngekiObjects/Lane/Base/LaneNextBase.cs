@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane.Base
 {
     public abstract class LaneNextBase : ConnectableNextObject
     {
-        public override Type ModelViewType => throw new NotImplementedException();
+
     }
 }

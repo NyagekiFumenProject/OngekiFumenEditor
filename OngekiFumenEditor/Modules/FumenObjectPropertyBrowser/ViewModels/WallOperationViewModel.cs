@@ -17,115 +17,23 @@ using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-    public class WallOperationViewModel : PropertyChangedBase
+    public class WallOperationViewModel : ConnectableObjectOperationViewModel
     {
-        private bool _draggingItem;
-        private Point _mouseStartPosition;
+        public bool IsLeftWall => ConnectableObject.IDShortName[1] == 'L';
 
-        private ConnectableObjectBase wall;
-        public ConnectableObjectBase Wall
+        public WallOperationViewModel(ConnectableObjectBase obj) : base(obj)
         {
-            get
-            {
-                return wall;
-            }
-            set
-            {
-                wall = value;
-                NotifyOfPropertyChange(() => Wall);
-                CheckEnableDrag();
-            }
+
         }
 
-        public bool IsLeftWall => wall.IDShortName[1] == 'L';
-
-        private bool isEnableDrag = true;
-        public bool IsEnableDrag
+        public override ConnectableChildObjectBase GenerateChildObject(bool needNext)
         {
-            get
-            {
-                return isEnableDrag;
-            }
-            set
-            {
-                var p = isEnableDrag;
-                isEnableDrag = value;
-                if (p != value)
-                    NotifyOfPropertyChange(() => IsEnableDrag);
-            }
+            return needNext ? (IsLeftWall ? new WallLeftNext() : new WallRightNext()) : (IsLeftWall ? new WallLeftEnd() : new WallRightEnd());
         }
 
-        private void CheckEnableDrag()
+        public override DisplayObjectViewModelBase GenerateChildObjectViewModel(bool needNext)
         {
-            IsEnableDrag = !((Wall switch
-            {
-                ConnectableStartObject start => start,
-                ConnectableNextObject next => next.ReferenceStartObject,
-                _ => default,
-            })?.Children.OfType<ConnectableEndObject>().Any() ?? false);
-        }
-
-        public WallOperationViewModel(ConnectableObjectBase obj)
-        {
-            Wall = obj;
-        }
-
-        public void Border_MouseMove(ActionExecutionContext e)
-        {
-            ProcessDragStart(e, true);
-        }
-
-        private void ProcessDragStart(ActionExecutionContext e, bool isWallNext)
-        {
-            if (!_draggingItem)
-                return;
-
-            var arg = e.EventArgs as MouseEventArgs;
-
-            Point mousePosition = arg.GetPosition(null);
-            Vector diff = _mouseStartPosition - mousePosition;
-
-            if (arg.LeftButton == MouseButtonState.Pressed &&
-                (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
-                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
-            {
-                var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
-                {
-                    ConnectableChildObjectBase genWallChild = isWallNext ? (IsLeftWall ? new WallLeftNext() : new WallRightNext()) : (IsLeftWall ? new WallLeftEnd() : new WallRightEnd());
-                    DisplayObjectViewModelBase genViewModel = isWallNext ? (IsLeftWall ? new WallNextViewModel<WallLeftNext>() : new WallNextViewModel<WallRightNext>()) : (IsLeftWall ? new WallEndViewModel<WallLeftEnd>() : new WallEndViewModel<WallRightEnd>());
-                    genViewModel.ReferenceOngekiObject = genWallChild;
-
-                    if (Wall is ConnectableStartObject beamStart)
-                    {
-                        beamStart.AddChildWallObject(genWallChild);
-                    }
-                    else if (Wall is ConnectableNextObject { ReferenceStartObject: { } } beamNext1)
-                    {
-                        beamNext1.ReferenceStartObject.AddChildWallObject(genWallChild);
-                    }
-
-                    CheckEnableDrag();
-                    return genViewModel;
-                }));
-                DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
-                _draggingItem = false;
-            }
-        }
-
-        public void Border_MouseMove2(ActionExecutionContext e)
-        {
-            ProcessDragStart(e, false);
-        }
-
-        public void Border_MouseLeftButtonDown(ActionExecutionContext e)
-        {
-            var arg = e.EventArgs as MouseEventArgs;
-
-            if (arg.LeftButton != MouseButtonState.Pressed)
-                return;
-
-            _mouseStartPosition = arg.GetPosition(null);
-            _draggingItem = true;
+            return needNext ? (IsLeftWall ? new WallNextViewModel<WallLeftNext>() : new WallNextViewModel<WallRightNext>()) : (IsLeftWall ? new WallEndViewModel<WallLeftEnd>() : new WallEndViewModel<WallRightEnd>());
         }
     }
 }

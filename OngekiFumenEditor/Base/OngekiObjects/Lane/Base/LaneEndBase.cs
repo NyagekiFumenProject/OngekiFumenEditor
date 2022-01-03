@@ -9,6 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane.Base
 {
     public abstract class LaneEndBase : ConnectableEndObject
     {
-        public override Type ModelViewType => throw new NotImplementedException();
+
     }
 }

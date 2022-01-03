@@ -12,6 +12,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 {
     public class LaneLeftEnd : LaneEndBase
     {
-        public override string IDShortName => "WLE";
+        public override string IDShortName => "LLE";
+        public override Type ModelViewType => typeof(LaneEndViewModel<LaneLeftEnd>);
     }
 }
