@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public class WallNextViewModel<T> : WallChildBaseViewModel<T> where T : ConnectableNextObject, new()
+    public class WallNextViewModel<T> : ConnectableChildBaseViewModel<T> where T : WallNextBase, new()
     {
 
     }

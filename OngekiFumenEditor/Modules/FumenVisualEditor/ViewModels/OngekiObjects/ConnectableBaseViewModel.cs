@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public abstract class WallBaseViewModel<T> : DisplayObjectViewModelBase<T> where T : ConnectableChildObjectBase, new()
+    public abstract class ConnectableBaseViewModel<T> : DisplayObjectViewModelBase<T> where T : ConnectableChildObjectBase, new()
     {
 
     }

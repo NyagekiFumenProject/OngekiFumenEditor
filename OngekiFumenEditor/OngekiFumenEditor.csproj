@@ -97,11 +97,23 @@
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamEndView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\LaneEndView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallEndView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\LaneNextView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallNextView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\LaneStartView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

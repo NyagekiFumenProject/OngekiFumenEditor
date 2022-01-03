@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.Collections;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
 using OngekiFumenEditor.Utils;
@@ -25,6 +26,7 @@ namespace OngekiFumenEditor.Base
         public List<ClickSE> ClickSEs { get; } = new();
         public BpmList BpmList { get; } = new();
         public WallList Walls { get; } = new();
+        public LaneList Lanes { get; } = new();
         public List<MeterChange> MeterChanges { get; } = new();
         public List<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
@@ -102,6 +104,14 @@ namespace OngekiFumenEditor.Base
             {
                 Walls.Add(wall);
             }
+            else if (obj switch
+            {
+                LaneStartBase or LaneEndBase or LaneNextBase => obj,
+                _ => null
+            } is ConnectableObjectBase lane)
+            {
+                Lanes.Add(lane);
+            }
             else
             {
                 Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.Name}");
@@ -151,6 +161,14 @@ namespace OngekiFumenEditor.Base
             {
                 Walls.Remove(wall);
             }
+            else if (obj switch
+            {
+                LaneStartBase or LaneEndBase or LaneNextBase => obj,
+                _ => null
+            } is ConnectableObjectBase lane)
+            {
+                Lanes.Remove(lane);
+            }
             else
             {
                 Log.LogWarn($"delete list target not found, object type : {obj?.GetType()?.Name}");
@@ -169,6 +187,7 @@ namespace OngekiFumenEditor.Base
                 .Concat(ClickSEs)
                 .Concat(EnemySets)
                 .Concat(Walls)
+                .Concat(Lanes)
                 .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());
@@ -216,6 +235,13 @@ namespace OngekiFumenEditor.Base
                 foreach (var wallStart in group.OrderBy(x => x.RecordId))
                 {
                     sb.AppendLine(wallStart.Serialize(this));
+                }
+            }
+            foreach (var group in Lanes.GroupBy(x => x.IDShortName[1]).OrderBy(x => x.Key))
+            {
+                foreach (var laneStart in group.OrderBy(x => x.RecordId))
+                {
+                    sb.AppendLine(laneStart.Serialize(this));
                 }
             }
             #endregion
