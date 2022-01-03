@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public class EditorSetting : PropertyChangedBase
     {
-        private TGrid currentDisplayTimePosition = new TGrid(4, 500);
+        private TGrid currentDisplayTimePosition = new TGrid(0, 0);
         /// <summary>
         /// 表示当前显示物件的时间
         /// </summary>
@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private int baseLineY = 50;
+        private int baseLineY = 240;
         /// <summary>
         /// 时间轴上单位线间距大小
         /// </summary>
