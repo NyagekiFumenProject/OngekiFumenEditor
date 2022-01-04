@@ -1,0 +1,123 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views.FumenBulletPalleteListViewerView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    d:DesignHeight="300"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:FadeStringEnumValuesConverter x:Key="FadeStringEnumValuesConverter">
+        </converters:FadeStringEnumValuesConverter>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="5" Orientation="Horizontal">
+            <Button
+                Margin="0,0,5,0"
+                cal:Message.Attach="[Event Click] = [Action OnCreateNew()];"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                新增子弹类型
+            </Button>
+            <Button
+                Margin="0,0,5,0"
+                cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                删除已选子弹类型
+            </Button>
+        </StackPanel>
+        <ListView
+            Grid.Row="1"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding Fumen.BulletPalleteList}"
+            ScrollViewer.CanContentScroll="True"
+            SelectedValue="{Binding SelectingPallete}">
+            <ListView.Resources>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+                <Style TargetType="TextBox">
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                </Style>
+            </ListView.Resources>
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridViewColumn
+                        Width="60"
+                        DisplayMemberBinding="{Binding StrID}"
+                        Header="StrID" />
+                    <GridViewColumn Width="120" Header="Name">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding EditorName}">
+                                </TextBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="120" Header="Shooter">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox SelectedValue="{Binding ShooterValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                    <system:String>TargetHead</system:String>
+                                    <system:String>Enemy</system:String>
+                                    <system:String>Center</system:String>
+                                </ComboBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="120" Header="PlaceOffset">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding PlaceOffset}">
+                                </TextBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="120" Header="Target">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox SelectedValue="{Binding TargetValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                    <system:String>Player</system:String>
+                                    <system:String>FixField</system:String>
+                                </ComboBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="60" Header="Speed">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Speed}">
+                                </TextBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="120" Header="BulletType">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox SelectedValue="{Binding BulletTypeValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                    <system:String>Normal</system:String>
+                                    <system:String>Hard</system:String>
+                                    <system:String>Danger</system:String>
+                                </ComboBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>

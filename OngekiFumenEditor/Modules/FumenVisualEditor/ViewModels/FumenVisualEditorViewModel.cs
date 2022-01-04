@@ -7,6 +7,7 @@ using Gemini.Modules.Toolbox.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -167,6 +168,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void OnFumenObjectLoaded()
         {
             IoC.Get<IFumenMetaInfoBrowser>().Fumen = Fumen;
+            IoC.Get<IFumenBulletPalleteListViewer>().Fumen = Fumen; 
         }
 
         private void RedrawTimeline()

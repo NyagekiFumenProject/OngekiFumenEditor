@@ -6,15 +6,10 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class BulletPalleteList : OngekiObjectBase
+    public class BulletPallete : OngekiObjectBase
     {
         public class Shooter : FadeStringEnum
         {
-            public static implicit operator string(Shooter s)
-            {
-                return s.Value;
-            }
-
             /// <summary>
             /// 从玩家头顶位置
             /// </summary>
@@ -38,10 +33,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             public Target(string value) : base(value)
             {
             }
-            public static implicit operator string(Target s)
-            {
-                return s.Value;
-            }
 
             /// <summary>
             /// 射向玩家位置
@@ -57,11 +48,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             public BulletType(string value) : base(value)
             {
-            }
 
-            public static implicit operator string(BulletType s)
-            {
-                return s.Value;
             }
 
             /// <summary>
@@ -86,6 +73,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             {
                 strID = value;
                 NotifyOfPropertyChange(() => StrID);
+            }
+        }
+
+        private string editorName = string.Empty;
+        public string EditorName
+        {
+            get { return editorName; }
+            set
+            {
+                editorName = value;
+                NotifyOfPropertyChange(() => EditorName);
             }
         }
 
@@ -122,7 +120,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        private float speed = default;
+        private float speed = 1;
         public float Speed
         {
             get { return speed; }

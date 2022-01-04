@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Base
     public class OngekiFumen
     {
         public FumenMetaInfo MetaInfo { get; } = new();
-        public List<BulletPalleteList> BulletPalleteList { get; } = new();
+        public BulletPalleteList BulletPalleteList { get; } = new();
         public List<Bell> Bells { get; } = new();
         public List<Flick> Flicks { get; } = new();
         public List<ClickSE> ClickSEs { get; } = new();
@@ -80,9 +80,9 @@ namespace OngekiFumenEditor.Base
             {
                 EnemySets.Add(est);
             }
-            else if (obj is BulletPalleteList bpl)
+            else if (obj is BulletPallete bpl)
             {
-                BulletPalleteList.Add(bpl);
+                BulletPalleteList.AddPallete(bpl);
             }
             else if (obj is Flick flick)
             {
@@ -137,9 +137,9 @@ namespace OngekiFumenEditor.Base
             {
                 EnemySets.Remove(est);
             }
-            else if (obj is BulletPalleteList bpl)
+            else if (obj is BulletPallete bpl)
             {
-                BulletPalleteList.Remove(bpl);
+                BulletPalleteList.RemovePallete(bpl);
             }
             else if (obj is Flick flick)
             {

@@ -33,6 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -62,6 +65,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
