@@ -1,0 +1,48 @@
+﻿<ongekiobjects:OngekiObjectViewBase
+    x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects.BulletView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
+    Width="30"
+    mc:Ignorable="d">
+    <ongekiobjects:OngekiObjectViewBase.Resources>
+        <converters:FadeStringEnumToStringConverter x:Key="FadeStringEnumToStringConverter">
+        </converters:FadeStringEnumToStringConverter>
+    </ongekiobjects:OngekiObjectViewBase.Resources>
+    <Grid>
+        <Image>
+            <Image.Style>
+                <Style TargetType="Image">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML">
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_red.png">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR">
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_pur.png">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG">
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_blk.png">
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Style>
+        </Image>
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontWeight="Bold"
+            Foreground="White"
+            Text="{Binding ReferenceOngekiObject.ReferenceBulletPallete.StrID}">
+        </TextBlock>
+        <Grid.RenderTransform>
+            <TranslateTransform X="-15" Y="-15">
+            </TranslateTransform>
+        </Grid.RenderTransform>
+    </Grid>
+</ongekiobjects:OngekiObjectViewBase>

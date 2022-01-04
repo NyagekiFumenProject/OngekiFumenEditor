@@ -116,6 +116,19 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+
+                    <GridViewColumn Width="240" Header="操作">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    cal:Message.Attach="[Event MouseMove] = [Action OnMouseMove($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
+                                    TextDecorations="Baseline">
+                                    拖动生成子弹
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>

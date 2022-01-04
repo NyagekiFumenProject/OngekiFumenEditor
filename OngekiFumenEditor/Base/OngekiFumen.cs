@@ -23,6 +23,7 @@ namespace OngekiFumenEditor.Base
         public BulletPalleteList BulletPalleteList { get; } = new();
         public List<Bell> Bells { get; } = new();
         public List<Flick> Flicks { get; } = new();
+        public List<Bullet> Bullets { get; } = new();
         public List<ClickSE> ClickSEs { get; } = new();
         public BpmList BpmList { get; } = new();
         public WallList Walls { get; } = new();
@@ -92,6 +93,10 @@ namespace OngekiFumenEditor.Base
             {
                 Beams.Add(beam);
             }
+            else if (obj is Bullet bullet)
+            {
+                Bullets.Add(bullet);
+            }
             else if (obj is ClickSE clickSE)
             {
                 ClickSEs.Add(clickSE);
@@ -149,6 +154,10 @@ namespace OngekiFumenEditor.Base
             {
                 Beams.Remove(beam);
             }
+            else if (obj is Bullet bullet)
+            {
+                Bullets.Remove(bullet);
+            }
             else if (obj is ClickSE clickSE)
             {
                 ClickSEs.Remove(clickSE);
@@ -187,6 +196,7 @@ namespace OngekiFumenEditor.Base
                 .Concat(ClickSEs)
                 .Concat(EnemySets)
                 .Concat(Walls)
+                .Concat(Bullets)
                 .Concat(Lanes)
                 .Concat(Beams);
 
@@ -244,6 +254,13 @@ namespace OngekiFumenEditor.Base
                     sb.AppendLine(laneStart.Serialize(this));
                 }
             }
+            #endregion
+
+            #region BULLET
+            sb.AppendLine();
+            sb.AppendLine("[BULLET]");
+            foreach (var u in Bullets.OrderBy(x => x.TGrid))
+                sb.AppendLine(u.Serialize(this));
             #endregion
 
             #region BEAM

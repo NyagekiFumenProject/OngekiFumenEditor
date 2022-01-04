@@ -9,6 +9,9 @@
   <ItemGroup>
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
     <None Remove="Resources\empty_ogkr_template.ogkr" />
     <None Remove="Resources\Images\logo.png" />
   </ItemGroup>
@@ -29,6 +32,9 @@
   <ItemGroup>
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
     <Resource Include="Resources\logo.png" />
   </ItemGroup>
 
@@ -61,6 +67,9 @@
     </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\XGridTypeUIView - 复制.xaml.cs">
       <DependentUpon>XGridTypeUIView.xaml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
+      <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
 
@@ -110,6 +119,10 @@
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamEndView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\LaneEndView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

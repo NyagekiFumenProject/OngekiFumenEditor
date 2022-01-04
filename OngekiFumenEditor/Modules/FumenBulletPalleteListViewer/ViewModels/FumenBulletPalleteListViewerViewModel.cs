@@ -1,9 +1,13 @@
-﻿using Gemini.Framework;
+﻿using Caliburn.Micro;
+using Gemini.Framework;
 using Gemini.Framework.Services;
+using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 {
@@ -69,6 +74,54 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             {
                 Fumen.RemoveObject(SelectingPallete);
             }
+        }
+
+        private bool _draggingItem;
+        private Point _mouseStartPosition;
+        private BulletPallete _selecting;
+
+        public void OnMouseMove(ActionExecutionContext e)
+        {
+            if (!_draggingItem)
+                return;
+
+            var arg = e.EventArgs as MouseEventArgs;
+
+            Point mousePosition = arg.GetPosition(null);
+            Vector diff = _mouseStartPosition - mousePosition;
+
+            if (arg.LeftButton == MouseButtonState.Pressed &&
+                (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
+            {
+                var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
+                {
+                    var bullet = new Bullet()
+                    {
+                        ReferenceBulletPallete = selectingPallete
+                    };
+                    var bulletViewModel = new BulletViewModel()
+                    {
+                        ReferenceOngekiObject = bullet
+                    };
+                    bulletViewModel.ReferenceOngekiObject = bullet;
+
+                    return bulletViewModel;
+                }));
+                DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
+                _draggingItem = false;
+            }
+        }
+
+        public void OnMouseLeftButtonDown(ActionExecutionContext e)
+        {
+            var arg = e.EventArgs as MouseEventArgs;
+            if ((arg.LeftButton != MouseButtonState.Pressed) || (e.Source as FrameworkElement)?.DataContext is not BulletPallete pallete)
+                return;
+
+            _mouseStartPosition = arg.GetPosition(null);
+            _selecting = pallete;
+            _draggingItem = true;
         }
     }
 }
