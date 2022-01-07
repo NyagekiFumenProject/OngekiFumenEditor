@@ -9,6 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane.Base
 {
     public abstract class LaneStartBase : ConnectableStartObject
     {
-
+        public abstract LaneType LaneType { get; }
     }
 }

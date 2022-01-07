@@ -38,7 +38,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         private bool isCritical = false;
-
         public bool IsCritical
         {
             get { return isCritical; }

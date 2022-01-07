@@ -16,6 +16,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
         public override string IDShortName => "LCS";
         public override Type ModelViewType => typeof(LaneLeftStartViewModel);
 
+        public override LaneType LaneType => LaneType.Center;
+
         protected override ConnectorLineBase<ConnectableObjectBase> GenerateWallConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneCenterConnector()
         {
             From = from,
