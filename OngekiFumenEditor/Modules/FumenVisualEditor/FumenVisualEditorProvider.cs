@@ -14,11 +14,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
     [Export(typeof(IEditorProvider))]
     class FumenVisualEditorProvider : IEditorProvider
     {
+        public const string FILE_EXTENSION_NAME = ".ogkr_fve";
+
         public IEnumerable<EditorFileType> FileTypes
         {
             get
             {
-                yield return new EditorFileType("Ongeki Fumen Visual Editor", ".ogkr_fve");
+                yield return new EditorFileType("Ongeki Fumen Visual Editor", FILE_EXTENSION_NAME);
             }
         }
 
@@ -26,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
         public IDocument Create() => new FumenVisualEditorViewModel();
 
-        public bool Handles(string path) => Path.GetExtension(path).Equals(".ogkr_fve",StringComparison.OrdinalIgnoreCase);
+        public bool Handles(string path) => Path.GetExtension(path).Equals(FILE_EXTENSION_NAME, StringComparison.OrdinalIgnoreCase);
 
         public async Task New(IDocument document, string name) => await (document as FumenVisualEditorViewModel)?.New(name);
 

@@ -55,7 +55,7 @@
                         Width="60"
                         DisplayMemberBinding="{Binding StrID}"
                         Header="StrID" />
-                    <GridViewColumn Width="120" Header="Name">
+                    <GridViewColumn Width="120" Header="名字">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding EditorName}">
@@ -64,7 +64,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="120" Header="Shooter">
+                    <GridViewColumn Width="100" Header="发射来源">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox SelectedValue="{Binding ShooterValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
@@ -76,7 +76,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="120" Header="PlaceOffset">
+                    <GridViewColumn Width="80" Header="发射位置偏移">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding PlaceOffset}">
@@ -85,7 +85,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="120" Header="Target">
+                    <GridViewColumn Width="100" Header="发射目标">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox SelectedValue="{Binding TargetValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
@@ -96,7 +96,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="60" Header="Speed">
+                    <GridViewColumn Width="60" Header="子弹速度">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding Speed}">
@@ -105,7 +105,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="120" Header="BulletType">
+                    <GridViewColumn Width="100" Header="伤害类型">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox SelectedValue="{Binding BulletTypeValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
@@ -113,6 +113,19 @@
                                     <system:String>Hard</system:String>
                                     <system:String>Danger</system:String>
                                 </ComboBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="80" Header="辅助线颜色">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnChangeEditorAxuiliaryLineColor($executionContext)];" Text="{Binding EditorAxuiliaryLineColor}">
+                                    <TextBlock.Background>
+                                        <SolidColorBrush Color="{Binding EditorAxuiliaryLineColor}">
+                                        </SolidColorBrush>
+                                    </TextBlock.Background>
+                                </TextBlock>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

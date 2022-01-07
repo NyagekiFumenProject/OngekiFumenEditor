@@ -13,6 +13,7 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditor.EditorDataProcesser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
@@ -161,14 +162,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             using var _ = StatusNotifyHelper.BeginStatus("Fumen loading : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
             using var fileStream = File.OpenRead(filePath);
-            Fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fileStream);
+            var fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fileStream);
+            Fumen = fumen;
             Redraw(RedrawTarget.All);
         }
+
 
         private void OnFumenObjectLoaded()
         {
             IoC.Get<IFumenMetaInfoBrowser>().Fumen = Fumen;
-            IoC.Get<IFumenBulletPalleteListViewer>().Fumen = Fumen; 
+            IoC.Get<IFumenBulletPalleteListViewer>().Fumen = Fumen;
         }
 
         private void RedrawTimeline()
@@ -289,8 +292,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         protected override async Task DoSave(string filePath)
         {
             using var _ = StatusNotifyHelper.BeginStatus("Fumen saving : " + filePath);
-            await File.WriteAllTextAsync(filePath, fumen.Serialize());
+            await File.WriteAllTextAsync(filePath, Fumen.Serialize());
+            if (filePath.EndsWith(FumenVisualEditorProvider.FILE_EXTENSION_NAME))
+            {
+                await SerializeEditorData(filePath);
+            }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
+        }
+
+        private async Task SerializeEditorData(string filePath)
+        {
+            using var _ = StatusNotifyHelper.BeginStatus("Fumen editor data saving...");
+            using var file = File.Open(filePath, FileMode.Append);
+            using var writer = new StreamWriter(file);
+
+            var procs = IoC.GetAll<IEditorDataProcesser>();
+            await writer.WriteLineAsync("[EDITOR]");
+            foreach (var proc in procs)
+            {
+                var data = proc.SerializeAll(Fumen);
+                await writer.WriteLineAsync(data);
+                await writer.WriteLineAsync();
+            }
         }
 
         protected override Task OnActivateAsync(CancellationToken cancellationToken)

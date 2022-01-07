@@ -14,7 +14,11 @@
         <converters:BulletLineTopPointConverter x:Key="BulletLineTopPointConverter">
         </converters:BulletLineTopPointConverter>
     </UserControl.Resources>
-    <Line Stroke="{Binding LineBrush}" StrokeDashArray="4">
+    <Line StrokeDashArray="4">
+        <Line.Stroke>
+            <SolidColorBrush Color="{Binding Connector.From.ReferenceBulletPallete.EditorAxuiliaryLineColor}">
+            </SolidColorBrush>
+        </Line.Stroke>
         <Line.X1>
             <MultiBinding Converter="{StaticResource BulletLineButtomPointConverter}" ConverterParameter="0">
                 <MultiBinding.Bindings>

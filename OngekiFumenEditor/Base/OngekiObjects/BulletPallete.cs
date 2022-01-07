@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
@@ -84,6 +85,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             {
                 editorName = value;
                 NotifyOfPropertyChange(() => EditorName);
+            }
+        }
+
+        private Color editorAxuiliaryLineColor = Colors.DarkKhaki;
+        public Color EditorAxuiliaryLineColor
+        {
+            get { return editorAxuiliaryLineColor; }
+            set
+            {
+                editorAxuiliaryLineColor = value;
+                NotifyOfPropertyChange(() => EditorAxuiliaryLineColor);
             }
         }
 

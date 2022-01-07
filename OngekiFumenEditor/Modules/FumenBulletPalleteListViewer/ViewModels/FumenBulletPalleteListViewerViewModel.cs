@@ -10,6 +10,7 @@ using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -114,12 +115,21 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
         public void OnMouseLeftButtonDown(ActionExecutionContext e)
         {
             var arg = e.EventArgs as MouseEventArgs;
-            if ((arg.LeftButton != MouseButtonState.Pressed) || (e.Source as FrameworkElement)?.DataContext is not BulletPallete pallete)
+            if ((arg.LeftButton != MouseButtonState.Pressed) || e.Source?.DataContext is not BulletPallete pallete)
                 return;
 
             _mouseStartPosition = arg.GetPosition(null);
             _selecting = pallete;
             _draggingItem = true;
+        }
+
+        public void OnChangeEditorAxuiliaryLineColor(ActionExecutionContext e)
+        {
+            if (e.Source?.DataContext is not BulletPallete pallete)
+                return;
+
+            var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color);
+            dialog.Show();
         }
     }
 }

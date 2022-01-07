@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
     [MapToView(ViewType = typeof(BulletAuxiliaryLineView))]
     public class BulletAuxiliaryLineViewModel : ConnectorViewModel<Bullet>
     {
-        public override Brush LineBrush => Brushes.SlateGray;
+        public override Brush LineBrush => throw new NotImplementedException();
 
         public override void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
         {
