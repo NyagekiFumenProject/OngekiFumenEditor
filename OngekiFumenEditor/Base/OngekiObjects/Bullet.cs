@@ -1,19 +1,21 @@
-﻿using OngekiFumenEditor.Base.Collections;
+﻿using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Attrbutes;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
+    //[DontShowPropertyInfoAttrbute]
     public class Bullet : OngekiTimelineObjectBase, IHorizonPositionObject
     {
         private XGrid xGrid = new XGrid();
         public XGrid XGrid
         {
-            get { return xGrid; }
+            get
+            {
+                return xGrid;
+            }
             set
             {
                 xGrid = value;
@@ -30,6 +32,19 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 referenceBulletPallete = value;
                 NotifyOfPropertyChange(() => ReferenceBulletPallete);
             }
+        }
+
+        private BulletAuxiliaryLine line;
+
+        public Bullet()
+        {
+            line = new BulletAuxiliaryLine(this);
+        }
+
+        public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
+        {
+            yield return line;
+            yield return this;
         }
 
         public override Type ModelViewType => typeof(BulletViewModel);

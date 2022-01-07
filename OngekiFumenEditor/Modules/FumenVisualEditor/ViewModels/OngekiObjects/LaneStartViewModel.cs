@@ -24,17 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     [MapToView(ViewType = typeof(LaneStartView))]
     public class LaneStartViewModel<T> : DisplayObjectViewModelBase<T> where T : LaneStartBase, new()
     {
-        public override OngekiObjectBase ReferenceOngekiObject
-        {
-            get
-            {
-                return base.ReferenceOngekiObject;
-            }
-            set
-            {
-                base.ReferenceOngekiObject = value;
-            }
-        }
+
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Left(Red) Start", "Ongeki Objects")]

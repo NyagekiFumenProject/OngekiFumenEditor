@@ -68,6 +68,9 @@
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\XGridTypeUIView - 复制.xaml.cs">
       <DependentUpon>XGridTypeUIView.xaml.cs</DependentUpon>
     </Compile>
+    <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletAuxiliaryLineView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -111,6 +114,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletAuxiliaryLineView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

@@ -39,6 +39,20 @@
             FontWeight="Bold"
             Foreground="White"
             Text="{Binding ReferenceOngekiObject.ReferenceBulletPallete.StrID}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TargetValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="PLR">
+                            <Setter Property="TextDecorations" Value="Baseline">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.ShooterValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="UPS">
+                            <Setter Property="TextDecorations" Value="OverLine">
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
         </TextBlock>
         <Grid.RenderTransform>
             <TranslateTransform X="-15" Y="-15">

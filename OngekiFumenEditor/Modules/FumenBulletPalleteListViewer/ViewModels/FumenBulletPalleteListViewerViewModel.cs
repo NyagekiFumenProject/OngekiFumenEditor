@@ -3,10 +3,12 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
@@ -96,16 +98,12 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             {
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
                 {
+                    var bulletViewModel = new BulletViewModel();
                     var bullet = new Bullet()
                     {
                         ReferenceBulletPallete = selectingPallete
                     };
-                    var bulletViewModel = new BulletViewModel()
-                    {
-                        ReferenceOngekiObject = bullet
-                    };
                     bulletViewModel.ReferenceOngekiObject = bullet;
-
                     return bulletViewModel;
                 }));
                 DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);

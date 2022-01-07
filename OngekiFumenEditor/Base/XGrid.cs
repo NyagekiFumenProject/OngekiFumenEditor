@@ -21,6 +21,8 @@ namespace OngekiFumenEditor.Base
             }
         }
 
+        public static XGrid Zero { get; private set; } = new XGrid();
+
         public XGrid(float unit = default, int grid = default, uint resX = DEFAULT_RES_X) : base(unit, grid) => ResX = resX;
 
         public override string Serialize(OngekiFumen fumenData)

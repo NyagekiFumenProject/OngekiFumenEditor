@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
             set => Set(ref to, value);
         }
 
-        public bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
+        public virtual bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
         {
             return (From?.CheckVisiable(minVisibleTGrid, maxVisibleTGrid) ?? false) || (To?.CheckVisiable(minVisibleTGrid, maxVisibleTGrid) ?? false);
         }

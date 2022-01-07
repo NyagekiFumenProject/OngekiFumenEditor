@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.Collections;

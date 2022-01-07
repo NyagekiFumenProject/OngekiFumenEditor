@@ -22,17 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     [MapToView(ViewType = typeof(WallStartView))]
     public class WallStartViewModel<T> : DisplayObjectViewModelBase<T> where T : WallStartBase, new()
     {
-        public override OngekiObjectBase ReferenceOngekiObject
-        {
-            get
-            {
-                return base.ReferenceOngekiObject;
-            }
-            set
-            {
-                base.ReferenceOngekiObject = value;
-            }
-        }
+
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "WallLeftStart", "Ongeki Objects")]

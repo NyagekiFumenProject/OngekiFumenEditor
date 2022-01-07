@@ -235,11 +235,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var item in list)
             {
                 var obj = Activator.CreateInstance(item.ModelViewType);
-                var view = ViewHelper.CreateView(obj);
 
                 if (obj is IEditorDisplayableViewModel editorObjectViewModel)
                     editorObjectViewModel.OnObjectCreated(item, this);
 
+                var view = ViewHelper.CreateView(obj);
                 DisplayObjectList.Add(view);
             }
         }

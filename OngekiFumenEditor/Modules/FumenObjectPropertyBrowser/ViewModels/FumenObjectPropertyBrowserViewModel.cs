@@ -1,6 +1,8 @@
 ﻿using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Attrbutes;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using System;
 using System.Collections.Generic;
@@ -27,6 +29,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             }
             set
             {
+                if (value?.GetType().GetCustomAttribute<DontShowPropertyInfoAttrbute>() is not null)
+                    value = null;
                 ongekiObject = value;
                 NotifyOfPropertyChange(() => OngekiObject);
                 OnObjectChanged();

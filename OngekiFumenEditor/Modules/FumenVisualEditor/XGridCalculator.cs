@@ -25,5 +25,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var x = (xUnit * (editor.XUnitSize / editor.Setting.UnitCloseSize)) + editor.CanvasWidth / 2;
             return x;
         }
+
+        internal static double ConvertXGridToX(object zero, FumenVisualEditorViewModel editorViewModel)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

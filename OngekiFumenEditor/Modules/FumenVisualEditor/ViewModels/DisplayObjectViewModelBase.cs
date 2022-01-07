@@ -101,6 +101,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var x = (double)View.GetValue(Canvas.LeftProperty);
             var y = (double)View.GetValue(Canvas.TopProperty);
+            if (double.IsNaN(x))
+                x = default;
+            if (double.IsNaN(y))
+                y = default;
             dragViewStartPoint = new Point(x, y);
             dragStartPoint = pos;
 
@@ -214,7 +218,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Refresh();
         }
 
-        public void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
+        public virtual void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
         {
             if (createFrom is OngekiObjectBase obj)
                 ReferenceOngekiObject = obj;
@@ -234,7 +238,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
     public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, new()
     {
-        public override OngekiObjectBase ReferenceOngekiObject
+        public new T ReferenceOngekiObject
         {
             get
             {
@@ -242,7 +246,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     ReferenceOngekiObject = new T();
                 }
-                return base.ReferenceOngekiObject;
+                return (T)base.ReferenceOngekiObject;
             }
             set
             {
@@ -254,18 +258,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [MapToView(ViewType = typeof(DisplayTextLineObjectViewBase))]
     public abstract class DisplayTextLineObjectViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase, new()
     {
-        public new T ReferenceOngekiObject
-        {
-            get
-            {
-                return base.ReferenceOngekiObject as T;
-            }
-            set
-            {
-                base.ReferenceOngekiObject = value;
-            }
-        }
-
         public abstract Brush DisplayBrush { get; }
         public virtual string DisplayName => ReferenceOngekiObject.IDShortName;
         public abstract BindingBase DisplayValueBinding { get; }
