@@ -38,17 +38,13 @@ namespace OngekiFumenEditor.UI.Dialogs
             }
         }
 
-        public CommonColorPicker(Func<Color> getter, Action<Color> setter)
+        public CommonColorPicker(Func<Color> getter, Action<Color> setter, string title)
         {
             this.getter = getter;
             this.setter = setter;
             InitializeComponent();
             this.DataContext = this;
-        }
-
-        private void OnColorChanged(object sender, RoutedEventArgs e)
-        {
-            var arg = e as ColorRoutedEventArgs;
+            Title = title;
         }
     }
 }

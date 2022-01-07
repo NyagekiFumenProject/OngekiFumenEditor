@@ -128,7 +128,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             if (e.Source?.DataContext is not BulletPallete pallete)
                 return;
 
-            var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color);
+            var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color, $"变更 {pallete.StrID} 辅助线颜色");
             dialog.Show();
         }
     }
