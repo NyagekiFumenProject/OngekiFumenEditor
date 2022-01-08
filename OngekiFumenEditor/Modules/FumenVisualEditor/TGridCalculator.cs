@@ -1,7 +1,9 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Collections;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +14,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
     public static class TGridCalculator
     {
-        public static TGrid ConvertYToTGrid(double pickY, FumenVisualEditorViewModel editor)
+        public static TGrid ConvertYToTGrid(double pickY, FumenVisualEditorViewModel editor, bool visibleCheck = true)
         {
             var bpmList = editor.Fumen.BpmList;
             var setting = editor.Setting;
             var baseBPM = bpmList.GetBpm(setting.CurrentDisplayTimePosition);
-            var positionBpmList = GetVisibleBpmList(editor).ToList();
+            var positionBpmList = (visibleCheck ? GetVisibleBpmList(editor) : GetAllBpmPositionList(editor)).ToList();
 
             //获取pickY对应的bpm和bpm起始位置
             (var pickStartY, var pickBpm) = positionBpmList.LastOrDefault(x => x.startY <= pickY);
@@ -46,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 if (prevBPM is BPMChange)
                 {
                     var bpmLen = MathUtils.CalculateBPMLength(prevBPM, baseBPM, setting.BaseLineY);
-                    yield return (-baseOffsetLen - bpmLen + offsetY, prevBPM);
+                    yield return (offsetY - baseOffsetLen - bpmLen, prevBPM);
                 }
             }
 
@@ -64,13 +66,62 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             }
         }
 
-        public static double? ConvertTGridToY(TGrid tGrid, FumenVisualEditorViewModel editor)
+        public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmPositionList(FumenVisualEditorViewModel editor)
+        {
+            if (editor?.Fumen?.BpmList is not BpmList bpmList || editor.Setting.CurrentDisplayTimePosition is not TGrid currentTime)
+                yield break;
+            var offsetY = 240d;
+            using var d = ObjectPool<Dictionary<BPMChange, double>>.GetWithUsingDisposable(out var result, out _);
+            result.Clear();
+            var baseBPM = bpmList.GetBpm(currentTime);
+            var baseOffsetLen = MathUtils.CalculateBPMLength(baseBPM, currentTime, offsetY);
+
+            result[bpmList.FirstBpm] = 0;
+            var prev = bpmList.FirstBpm;
+            var y = 0d;
+            var totalOffset = 0d;
+
+            if (bpmList.FirstBpm == baseBPM)
+            {
+                totalOffset = -(50 - baseOffsetLen);
+                //Console.WriteLine($"pre-totalOffset : {totalOffset}");
+                foreach (var bpm in result.Keys)
+                {
+                    result[bpm] -= totalOffset;
+                }
+            }
+
+            while (true)
+            {
+                var cur = bpmList.GetNextBpm(prev);
+                if (cur is null)
+                    break;
+                var len = MathUtils.CalculateBPMLength(prev, cur.TGrid, offsetY);
+                prev = cur;
+                y += len;
+                result[cur] = y - totalOffset;
+
+                if (cur == baseBPM)
+                {
+                    totalOffset = baseOffsetLen + y;
+                    //Console.WriteLine($"totalOffset : {totalOffset}");
+                    foreach (var bpm in result.Keys)
+                    {
+                        result[bpm] -= totalOffset;
+                    }
+                }
+            }
+
+            foreach (var item in result)
+                yield return (item.Value, item.Key);
+        }
+
+        public static double? ConvertTGridToY(TGrid tGrid, FumenVisualEditorViewModel editor, bool visibleCheck = true)
         {
             var setting = editor.Setting;
             var bpmList = editor.Fumen.BpmList;
             var baseBPM = bpmList.GetBpm(setting.CurrentDisplayTimePosition);
-            var positionBpmList = GetVisibleBpmList(editor).ToList();
-
+            var positionBpmList = (visibleCheck ? GetVisibleBpmList(editor) : GetAllBpmPositionList(editor)).ToList();
 
             //获取pickY对应的bpm和bpm起始位置
             (var pickStartY, var pickBpm) = positionBpmList.LastOrDefault(x => x.bpm.TGrid <= tGrid);
