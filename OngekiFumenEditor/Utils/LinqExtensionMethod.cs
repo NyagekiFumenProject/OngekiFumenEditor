@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,23 +9,16 @@ namespace OngekiFumenEditor.Utils
 {
     public static class LinqExtensionMethod
     {
-        /// <summary>
-        /// 在有序的集合上，通过条件去确定前后两个元素
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sortedList"></param>
-        /// <param name="predicator">条件判断，bool predicator(T previous,T next)</param>
-        /// <returns></returns>
-        public static T[] FindBetweenByPredicator<T>(this IEnumerable<T> sortedList,Func<T,T,bool> predicator,bool enableFirstLastEmpty = false)
-        {
-            //todo
-            return default;
-        }
-
         public static void ForEach<T>(this IEnumerable<T> list, Action<T> fun)
         {
             foreach (var item in list)
                 fun(item);
         }
+
+        public static IEnumerable<T> DistinctBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
+
+        public static IEnumerable<T> DistinctBy<T>(this IEnumerable<T> collection, Func<T, T, bool> compFunc) => collection.Distinct(new FuncDistinctComparer<T>(compFunc));
+
+        public static IEnumerable<T> FilterNull<T>(this IEnumerable<T> collection) => collection.Where(x => x != null);
     }
 }
