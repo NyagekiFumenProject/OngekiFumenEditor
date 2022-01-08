@@ -32,6 +32,7 @@ namespace OngekiFumenEditor.Base
         public List<MeterChange> MeterChanges { get; } = new();
         public List<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
+        public List<Tap> Taps { get; } = new();
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,6 +103,10 @@ namespace OngekiFumenEditor.Base
             {
                 ClickSEs.Add(clickSE);
             }
+            else if (obj is Tap tap)
+            {
+                Taps.Add(tap);
+            }
             else if (obj switch
             {
                 WallStartBase or WallEndBase or WallNextBase => obj,
@@ -163,6 +168,10 @@ namespace OngekiFumenEditor.Base
             {
                 ClickSEs.Remove(clickSE);
             }
+            else if (obj is Tap tap)
+            {
+                Taps.Remove(tap);
+            }
             else if (obj switch
             {
                 WallStartBase or WallEndBase or WallNextBase => obj,
@@ -199,6 +208,7 @@ namespace OngekiFumenEditor.Base
                 .Concat(Walls)
                 .Concat(Bullets)
                 .Concat(Lanes)
+                .Concat(Taps)
                 .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());

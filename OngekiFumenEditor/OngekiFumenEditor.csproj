@@ -9,6 +9,9 @@
   <ItemGroup>
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
@@ -33,6 +36,9 @@
   <ItemGroup>
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
@@ -70,6 +76,9 @@
       <DependentUpon>XGridTypeUIView.xaml.cs</DependentUpon>
     </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletAuxiliaryLineView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
@@ -127,6 +136,10 @@
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamEndView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

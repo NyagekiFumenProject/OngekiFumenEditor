@@ -238,7 +238,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
     public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, new()
     {
-        public new T ReferenceOngekiObject
+        public override OngekiObjectBase ReferenceOngekiObject
         {
             get
             {
@@ -246,7 +246,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     ReferenceOngekiObject = new T();
                 }
-                return (T)base.ReferenceOngekiObject;
+                return base.ReferenceOngekiObject;
             }
             set
             {

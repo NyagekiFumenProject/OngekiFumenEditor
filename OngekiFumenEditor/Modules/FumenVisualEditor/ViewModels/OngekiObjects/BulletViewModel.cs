@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     {
         public override double CheckAndAdjustX(double x)
         {
-            var bullet = ReferenceOngekiObject;
+            var bullet = ReferenceOngekiObject as Bullet;
             var pallete = bullet.ReferenceBulletPallete;
 
             if (pallete.TargetValue == Target.Player)

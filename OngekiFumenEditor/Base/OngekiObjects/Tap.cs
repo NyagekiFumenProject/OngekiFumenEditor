@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +47,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public override Type ModelViewType => throw new NotImplementedException();
+        public override Type ModelViewType => typeof(TapViewModel);
 
         public override string IDShortName => IsCritical ? "CTP" : "TAP";
 
