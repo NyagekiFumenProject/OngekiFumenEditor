@@ -15,7 +15,7 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "BeamStart", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Beam Start", "Ongeki Objects")]
     public class BeamStartViewModel : DisplayObjectViewModelBase<BeamStart>
     {
 

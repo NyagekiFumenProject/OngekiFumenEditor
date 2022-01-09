@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Lane.Base
+namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public enum LaneType
     {
         Left,
         Center,
-        Right
+        Right,
+        Wall
     }
 }

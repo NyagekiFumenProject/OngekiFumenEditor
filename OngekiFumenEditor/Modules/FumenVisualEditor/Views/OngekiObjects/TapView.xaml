@@ -7,8 +7,31 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     Width="40"
+    Height="16"
     mc:Ignorable="d">
-    <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_extap_02.png">
+    <Image Stretch="Fill">
+        <Image.Style>
+            <Style TargetType="Image">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Left">
+                        <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_tap_02.png">
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Center">
+                        <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_extap_02.png">
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Right">
+                        <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_hold_02.png">
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="{x:Null}">
+                        <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_extap_01.png">
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Image.Style>
         <Image.RenderTransform>
             <TranslateTransform X="-20" Y="-5">
             </TranslateTransform>

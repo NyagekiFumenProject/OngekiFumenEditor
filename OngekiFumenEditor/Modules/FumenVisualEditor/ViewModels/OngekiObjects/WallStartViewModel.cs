@@ -25,13 +25,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 
     }
 
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "WallLeftStart", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Left Start", "Ongeki Objects")]
     public class WallLeftStartViewModel : WallStartViewModel<WallLeftStart>
     {
 
     }
 
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "WallRightStart", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Right Start", "Ongeki Objects")]
     public class WallRightStartViewModel : WallStartViewModel<WallRightStart>
     {
 

@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
@@ -36,6 +37,7 @@
   <ItemGroup>
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />

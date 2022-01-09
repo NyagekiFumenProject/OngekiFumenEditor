@@ -9,6 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall.Base
 {
     public abstract class WallStartBase : ConnectableStartObject
     {
-
+        public LaneType LaneType => LaneType.Wall;
     }
 }
