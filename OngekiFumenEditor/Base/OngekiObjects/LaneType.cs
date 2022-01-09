@@ -8,9 +8,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public enum LaneType
     {
-        Left,
-        Center,
-        Right,
-        Wall
+        Left = 2,
+        Center = 0,
+        Right = 3,
+        WallLeft = 1,
+        WallRight = -1,
     }
 }

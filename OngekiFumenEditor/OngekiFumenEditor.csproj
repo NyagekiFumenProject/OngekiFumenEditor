@@ -16,6 +16,7 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
     <None Remove="Resources\empty_ogkr_template.ogkr" />
     <None Remove="Resources\Images\logo.png" />
   </ItemGroup>
@@ -44,6 +45,7 @@
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
     <Resource Include="Resources\logo.png" />
   </ItemGroup>
 

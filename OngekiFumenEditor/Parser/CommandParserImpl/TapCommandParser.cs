@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,16 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
-            var tap = new Tap();
+
+            var laneId = args.GetData<int>(1);
+            var refLaneStart = fumen.Lanes.FirstOrDefault(x => x.RecordId == laneId);
+            if (refLaneStart is null)
+            {
+                Log.LogWarn($"Tap parse can't find lane/wallLane RecordId = {laneId}");
+            }
+            var tap = (refLaneStart?.IsWallLane ?? false) ? new WallTap() : new Tap();
+
+            tap.ReferenceLaneStart = refLaneStart;
 
             tap.IsCritical = args.GetData<string>(0) == "CTP" || args.GetData<string>(0) == "XTP";
 
@@ -27,15 +37,6 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             tap.TGrid.Grid = (int)dataArr[3];
             tap.XGrid.Unit = dataArr[4];
             tap.XGrid.Grid = (int)dataArr[5];
-
-            var laneId = args.GetData<int>(1);
-            var refLaneStart = fumen.Lanes.FirstOrDefault(x => x.RecordId == laneId);
-            if (refLaneStart is null)
-            {
-                Log.LogWarn($"Tap parse can't find lane RecordId = {laneId}");
-            }
-
-            tap.ReferenceLaneStart = refLaneStart;
             return tap;
         }
     }

@@ -24,7 +24,8 @@ namespace OngekiFumenEditor.Utils
 
         public static UIElement CreateView(object viewModel)
         {
-            var view = (viewModel.GetType().GetCustomAttribute<MapToViewAttribute>() is MapToViewAttribute mtv ? Activator.CreateInstance(mtv.ViewType) : ViewLocator.LocateForModel(viewModel, null, null)) as UIElement;
+            var mapToAttr = viewModel.GetType().GetCustomAttribute<MapToViewAttribute>();
+            var view = (mapToAttr is not null ? Activator.CreateInstance(mapToAttr.ViewType) : ViewLocator.LocateForModel(viewModel, null, null)) as UIElement;
             ViewModelBinder.Bind(viewModel, view, null);
             return view;
         }

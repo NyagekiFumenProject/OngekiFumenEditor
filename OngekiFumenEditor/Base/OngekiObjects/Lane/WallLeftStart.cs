@@ -10,12 +10,14 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Wall
 {
-    public class WallRightStart : WallStartBase
+    public class WallLeftStart : WallStartBase
     {
-        public override string IDShortName => "WRS";
-        public override Type ModelViewType => typeof(WallStartViewModel<WallRightStart>); 
-        
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateWallConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new WallRightConnector()
+        public override string IDShortName => "WLS";
+        public override Type ModelViewType => typeof(WallStartViewModel<WallLeftStart>);
+
+        public override LaneType LaneType => LaneType.WallLeft;
+
+        protected override ConnectorLineBase<ConnectableObjectBase> GenerateWallConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new WallLeftConnector()
         {
             From = from,
             To = to

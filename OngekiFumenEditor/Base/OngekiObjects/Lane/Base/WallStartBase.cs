@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Wall.Base
 {
-    public abstract class WallStartBase : ConnectableStartObject
+    public abstract class WallStartBase : LaneStartBase
     {
-        public LaneType LaneType => LaneType.Wall;
+
     }
 }

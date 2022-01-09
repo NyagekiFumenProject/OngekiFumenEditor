@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
+            if (fumen.Lanes.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
             {
                 Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;
@@ -67,7 +67,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            if (fumen.Walls.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
+            if (fumen.Lanes.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
             {
                 Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;

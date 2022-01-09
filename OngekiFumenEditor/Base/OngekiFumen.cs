@@ -27,7 +27,6 @@ namespace OngekiFumenEditor.Base
         public List<Bullet> Bullets { get; } = new();
         public List<ClickSE> ClickSEs { get; } = new();
         public BpmList BpmList { get; } = new();
-        public WallList Walls { get; } = new();
         public LaneList Lanes { get; } = new();
         public List<MeterChange> MeterChanges { get; } = new();
         public List<EnemySet> EnemySets { get; } = new();
@@ -109,14 +108,6 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj switch
             {
-                WallStartBase or WallEndBase or WallNextBase => obj,
-                _ => null
-            } is ConnectableObjectBase wall)
-            {
-                Walls.Add(wall);
-            }
-            else if (obj switch
-            {
                 LaneStartBase or LaneEndBase or LaneNextBase => obj,
                 _ => null
             } is ConnectableObjectBase lane)
@@ -174,14 +165,6 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj switch
             {
-                WallStartBase or WallEndBase or WallNextBase => obj,
-                _ => null
-            } is ConnectableObjectBase wall)
-            {
-                Walls.Remove(wall);
-            }
-            else if (obj switch
-            {
                 LaneStartBase or LaneEndBase or LaneNextBase => obj,
                 _ => null
             } is ConnectableObjectBase lane)
@@ -205,7 +188,6 @@ namespace OngekiFumenEditor.Base
                 .Concat(BpmList.Skip(1)) //not show first bpm
                 .Concat(ClickSEs)
                 .Concat(EnemySets)
-                .Concat(Walls)
                 .Concat(Bullets)
                 .Concat(Lanes)
                 .Concat(Taps)
@@ -251,14 +233,7 @@ namespace OngekiFumenEditor.Base
             #region LANE
             sb.AppendLine();
             sb.AppendLine("[LANE]");
-            foreach (var group in Walls.GroupBy(x => x.IDShortName[1]).OrderBy(x => x.Key))
-            {
-                foreach (var wallStart in group.OrderBy(x => x.RecordId))
-                {
-                    sb.AppendLine(wallStart.Serialize(this));
-                }
-            }
-            foreach (var group in Lanes.GroupBy(x => x.IDShortName[1]).OrderBy(x => x.Key))
+            foreach (var group in Lanes.GroupBy(x => x.LaneType).OrderByDescending(x => x.Key))
             {
                 foreach (var laneStart in group.OrderBy(x => x.RecordId))
                 {

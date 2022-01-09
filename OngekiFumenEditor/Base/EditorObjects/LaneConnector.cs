@@ -36,4 +36,16 @@ namespace OngekiFumenEditor.Base.EditorObjects
         static readonly Color DefaultColor = Colors.Blue;
         public override Color LineColor => DefaultColor;
     }
+
+    public class WallLeftConnector : LaneConnector
+    {
+        static readonly Color DefaultColor = Colors.HotPink;
+        public override Color LineColor => DefaultColor;
+    }
+
+    public class WallRightConnector : LaneConnector
+    {
+        static readonly Color DefaultColor = Colors.HotPink;
+        public override Color LineColor => DefaultColor;
+    }
 }
