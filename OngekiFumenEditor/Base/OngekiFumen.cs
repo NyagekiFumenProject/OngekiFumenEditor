@@ -297,6 +297,13 @@ namespace OngekiFumenEditor.Base
                 sb.AppendLine(u.Serialize(this));
             #endregion
 
+            #region NOTES
+            sb.AppendLine();
+            sb.AppendLine("[NOTES]");
+            foreach (var u in Taps.OrderBy(x => x.TGrid))
+                sb.AppendLine(u.Serialize(this));
+            #endregion
+
             return sb.ToString();
         }
     }

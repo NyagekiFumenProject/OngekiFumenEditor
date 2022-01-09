@@ -80,6 +80,9 @@
     <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletAuxiliaryLineView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -138,6 +141,10 @@
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamEndView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

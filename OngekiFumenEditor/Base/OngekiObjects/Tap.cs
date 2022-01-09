@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override string Serialize(OngekiFumen fumenData)
         {
-            return $"{IDShortName} {ReferenceLaneStart.RecordId} {TGrid.Serialize(fumenData)} {XGrid.Unit} {XGrid.Grid}";
+            return $"{IDShortName} {ReferenceLaneStart?.RecordId ?? -1} {TGrid.Serialize(fumenData)} {XGrid.Unit} {XGrid.Grid}";
         }
     }
 }
