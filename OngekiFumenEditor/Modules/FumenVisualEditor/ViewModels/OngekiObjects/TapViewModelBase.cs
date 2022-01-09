@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public abstract class TapViewModelBase<T> : DisplayObjectViewModelBase<T> where T : Tap,new()
+    public abstract class TapViewModelBase<T> : DisplayObjectViewModelBase<T> where T : Tap, new()
     {
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
@@ -75,8 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                     var curY = TGridCalculator.ConvertTGridToY(cur.TGrid, EditorViewModel, false) ?? 0;
 
                     var timeY = TGridCalculator.ConvertTGridToY(tGrid, EditorViewModel) ?? 0;
-                    var formula = MathUtils.BuildTwoPointFormFormula(prevX, prevY, curX, curY);
-                    var timeX = formula(timeY);
+                    var timeX = MathUtils.CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
 
                     return timeX;
                 }
