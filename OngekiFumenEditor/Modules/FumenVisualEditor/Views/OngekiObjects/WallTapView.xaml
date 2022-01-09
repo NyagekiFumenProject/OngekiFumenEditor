@@ -1,0 +1,43 @@
+﻿<ongekiobjects:OngekiObjectViewBase
+    x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects.WallTapView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
+    Width="40"
+    mc:Ignorable="d">
+    <ongekiobjects:OngekiObjectViewBase.Resources>
+        <converters:EnumToIntConverter x:Key="EnumToIntConverter">
+        </converters:EnumToIntConverter>
+    </ongekiobjects:OngekiObjectViewBase.Resources>
+    <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/walltap.png" Stretch="Fill">
+        <Image.Style>
+            <Style TargetType="Image">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="WallLeft">
+                        <Setter Property="Opacity" Value="1">
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="WallRight">
+                        <Setter Property="Opacity" Value="1">
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="{x:Null}">
+                        <Setter Property="Opacity" Value="0.4">
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Image.Style>
+        <Image.RenderTransform>
+            <TransformGroup>
+                <TranslateTransform X="-20" Y="-20.2">
+                </TranslateTransform>
+                <ScaleTransform ScaleX="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType, Converter={StaticResource EnumToIntConverter}}">
+                </ScaleTransform>
+            </TransformGroup>
+        </Image.RenderTransform>
+    </Image>
+</ongekiobjects:OngekiObjectViewBase>

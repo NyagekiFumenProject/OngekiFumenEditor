@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
     public class LaneOperationViewModel : ConnectableObjectOperationViewModel
     {
         public char LaneChar => ConnectableObject.IDShortName[1];
+        public char LaneTypeChar => ConnectableObject.IDShortName[0];
 
         public LaneOperationViewModel(ConnectableObjectBase obj) : base(obj)
         {
@@ -29,6 +30,16 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public override ConnectableChildObjectBase GenerateChildObject(bool needNext)
         {
+            if (LaneTypeChar == 'W')
+            {
+                return LaneChar switch
+                {
+                    'L' => needNext ? new WallLeftNext() : new WallLeftEnd(),
+                    'R' => needNext ? new WallRightNext() : new WallRightEnd(),
+                    _ => default
+                };
+            }
+
             return LaneChar switch
             {
                 'L' => needNext ? new LaneLeftNext() : new LaneLeftEnd(),
@@ -40,6 +51,16 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public override DisplayObjectViewModelBase GenerateChildObjectViewModel(bool needNext)
         {
+            if (LaneTypeChar == 'W')
+            {
+                return LaneChar switch
+                {
+                    'L' => needNext ? new WallNextViewModel<WallLeftNext>() : new WallEndViewModel<WallLeftEnd>(),
+                    'R' => needNext ? new WallNextViewModel<WallRightNext>() : new WallEndViewModel<WallRightEnd>(),
+                    _ => default
+                };
+            }
+
             return LaneChar switch
             {
                 'L' => needNext ? new LaneNextViewModel<LaneLeftNext>() : new LaneEndViewModel<LaneLeftEnd>(),

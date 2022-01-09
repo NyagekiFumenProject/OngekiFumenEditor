@@ -16,7 +16,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
     {
         public static TGrid ConvertYToTGrid(double pickY, FumenVisualEditorViewModel editor, bool visibleCheck = true)
         {
-            var bpmList = editor.Fumen.BpmList;
+            var bpmList = editor.Fumen?.BpmList;
+            if (bpmList is null)
+                return default;
             var setting = editor.Setting;
             var baseBPM = bpmList.GetBpm(setting.CurrentDisplayTimePosition);
             var positionBpmList = (visibleCheck ? GetVisibleBpmList(editor) : GetAllBpmPositionList(editor)).ToList();
@@ -119,7 +121,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public static double? ConvertTGridToY(TGrid tGrid, FumenVisualEditorViewModel editor, bool visibleCheck = true)
         {
             var setting = editor.Setting;
-            var bpmList = editor.Fumen.BpmList;
+            var bpmList = editor.Fumen?.BpmList;
+            if (bpmList is null)
+                return default;
             var baseBPM = bpmList.GetBpm(setting.CurrentDisplayTimePosition);
             var positionBpmList = (visibleCheck ? GetVisibleBpmList(editor) : GetAllBpmPositionList(editor)).ToList();
 

@@ -14,6 +14,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
     public class WallConnectorViewModel : ConnectorViewModel<ConnectableObjectBase>
     {
         private Brush lineBrush;
-        public override Brush LineBrush => lineBrush ??= new SolidColorBrush((Connector as WallConnector).LineColor);
+        public override Brush LineBrush => lineBrush ??= new SolidColorBrush((Connector as LaneConnector).LineColor);
     }
 }
