@@ -17,5 +17,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public ConnectableStartObject ReferenceStartObject { get; set; }
         public ConnectableObjectBase PrevObject { get; set; }
+
+        public override string ToString() => $"{base.ToString()} {RecordId} Ref:{ReferenceStartObject}";
     }
 }

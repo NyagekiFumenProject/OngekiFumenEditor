@@ -37,5 +37,7 @@ namespace OngekiFumenEditor.Base
         {
             return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
         }
+
+        public override string ToString() => $"{base.ToString()} TGrid:{TGrid}";
     }
 }

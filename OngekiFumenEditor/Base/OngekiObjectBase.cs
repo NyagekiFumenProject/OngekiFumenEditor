@@ -13,5 +13,7 @@ namespace OngekiFumenEditor.Base
         public abstract string IDShortName { get; }
 
         public abstract string Serialize(OngekiFumen fumenData);
+
+        public override string ToString() => IDShortName;
     }
 }

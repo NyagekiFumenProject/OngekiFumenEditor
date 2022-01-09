@@ -55,5 +55,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             return $"{IDShortName} {ReferenceBulletPallete?.StrID} {TGrid.Serialize(fumenData)} {XGrid.Serialize(fumenData)}";
         }
+
+        public override string ToString() => $"{base.ToString()} Pallete:({ReferenceBulletPallete})";
     }
 }

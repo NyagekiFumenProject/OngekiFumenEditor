@@ -44,6 +44,19 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             {
                 referenceLaneStart = value;
                 NotifyOfPropertyChange(() => ReferenceLaneStart);
+                NotifyOfPropertyChange(() => ReferenceLaneStrId);
+            }
+        }
+
+        private int referenceLaneStrId = default;
+        public int ReferenceLaneStrId
+        {
+            get { return ReferenceLaneStart?.RecordId ?? referenceLaneStrId; }
+            set
+            {
+                if (ReferenceLaneStart is null)
+                    referenceLaneStrId = value;
+                NotifyOfPropertyChange(() => ReferenceLaneStrId);
             }
         }
 

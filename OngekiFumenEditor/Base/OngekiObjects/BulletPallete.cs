@@ -161,5 +161,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             return $"{IDShortName} {StrID} {ShooterValue} {PlaceOffset} {TargetValue} {Speed} {BulletTypeValue}";
         }
+
+        public override string ToString() => Serialize(default);
     }
 }

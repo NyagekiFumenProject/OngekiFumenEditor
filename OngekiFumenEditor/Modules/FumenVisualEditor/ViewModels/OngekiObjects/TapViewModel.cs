@@ -9,6 +9,7 @@ using System.Windows;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
@@ -22,8 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 
             if (tGrid is not null)
             {
-
-                var connectableXList = editor.DisplayObjectList
+                var closestLaneObject = editor.DisplayObjectList
                     .OfType<FrameworkElement>()
                     .Select(x => x.DataContext)
                     .OfType<DisplayObjectViewModelBase>()
@@ -31,25 +31,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                     .FilterNull()
                     .Select(x => x switch
                     {
-                        ConnectableChildObjectBase child => child.ReferenceStartObject,
-                        ConnectableStartObject start => start,
+                        ConnectableChildObjectBase child => child.ReferenceStartObject as LaneStartBase,
+                        LaneStartBase start => start,
                         _ => default
                     })
                     .FilterNull()
                     .Select(startObject => (CalculateConnectableObjectCurrentRelativeX(startObject, tGrid), startObject))
                     .Where(x => x.Item1 != null)
                     .Select(x => (Math.Abs(x.Item1.Value - relativePoint.X), x.Item1.Value, x.startObject))
-                    .OrderByDescending(x => x.Item1)
+                    .OrderBy(x => x.Item1)
                     .FirstOrDefault();
 
-                if (connectableXList.startObject is not null && connectableXList.Item1 < 5)
+                if (closestLaneObject.startObject is not null && closestLaneObject.Item1 < 8)
                 {
-                    relativePoint.X = connectableXList.Value;
-                    //todo apply lane* object to tap object.
-                }
-                if (connectableXList.startObject is not null)
-                {
-                    Log.LogDebug($"dist:{connectableXList.Item1} pos:{connectableXList.Value}");
+                    relativePoint.X = closestLaneObject.Value;
+                    var tap = ReferenceOngekiObject as Tap;
+                    tap.ReferenceLaneStart = closestLaneObject.startObject;
+                    //Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
                 }
             }
 
