@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Tap", "Ongeki Objects")]
     [MapToView(ViewType = typeof(WallTapView))]
-    public class WallTapViewModel : TapViewModelBase<WallTap>
+    public class WallTapViewModel : LaneDockableViewModelBase<WallTap>
     {
         public override IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {

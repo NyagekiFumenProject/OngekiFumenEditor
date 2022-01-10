@@ -14,7 +14,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Tap", "Ongeki Objects")]
-    public class TapViewModel : TapViewModelBase<Tap>
+    public class TapViewModel : LaneDockableViewModelBase<Tap>
     {
         public override IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {

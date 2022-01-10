@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public abstract class TapViewModelBase<T> : DisplayObjectViewModelBase<T> where T : Tap, new()
+    public abstract class LaneDockableViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase, ILaneDockable, new()
     {
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                 if (closestLaneObject.startObject is not null && closestLaneObject.Item1 < 8)
                 {
                     relativePoint.X = closestLaneObject.Value;
-                    var tap = ReferenceOngekiObject as Tap;
+                    var tap = ReferenceOngekiObject as T;
                     tap.ReferenceLaneStart = closestLaneObject.startObject;
                     //Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
                 }
@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
             base.MoveCanvas(relativePoint);
         }
 
-        private double? CalculateConnectableObjectCurrentRelativeX(ConnectableStartObject startObject, TGrid tGrid)
+        protected virtual double? CalculateConnectableObjectCurrentRelativeX(ConnectableStartObject startObject, TGrid tGrid)
         {
             if (tGrid < startObject.TGrid)
                 return default;
@@ -69,14 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                 if (tGrid < cur.TGrid)
                 {
                     //就在当前[prev,cur]范围内，那么就插值计算咯
-                    var prevX = XGridCalculator.ConvertXGridToX(prev.XGrid, EditorViewModel);
-                    var prevY = TGridCalculator.ConvertTGridToY(prev.TGrid, EditorViewModel, false) ?? 0;
-                    var curX = XGridCalculator.ConvertXGridToX(cur.XGrid, EditorViewModel);
-                    var curY = TGridCalculator.ConvertTGridToY(cur.TGrid, EditorViewModel, false) ?? 0;
-
-                    var timeY = TGridCalculator.ConvertTGridToY(tGrid, EditorViewModel) ?? 0;
-                    var timeX = MathUtils.CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
-
+                    var timeX = MathUtils.CalculateXFromBetweenObjects(prev, cur, EditorViewModel, tGrid);
                     return timeX;
                 }
 
