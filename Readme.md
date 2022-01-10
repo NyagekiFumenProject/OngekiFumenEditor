@@ -6,8 +6,8 @@
 
 当前进度&roadmap:
 * Tap实现 
-* WallTap实现 <- we are here!
-* Hold实现
+* WallTap实现 
+* Hold实现 <- we are here!
 * WallHold实现
 * 音频播放相关
 * 谱面滚动播放
