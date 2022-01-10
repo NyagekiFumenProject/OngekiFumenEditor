@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Tap : OngekiTimelineObjectBase, IHorizonPositionObject
+    public class Tap : OngekiTimelineObjectBase, IHorizonPositionObject, ILaneDockable
     {
         private XGrid xGrid = new XGrid();
         public XGrid XGrid
