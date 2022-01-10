@@ -38,6 +38,6 @@ namespace OngekiFumenEditor.Base.EditorObjects
             yield return this;
         }
 
-        public override string ToString() => $"[T:{typeof(T)}] {From} -> {To}";
+        public override string ToString() => $"[T:{typeof(T).Name}] {From} -> {To}";
     }
 }

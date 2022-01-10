@@ -32,6 +32,7 @@ namespace OngekiFumenEditor.Base
         public List<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
         public List<Tap> Taps { get; } = new();
+        public HoldList Holds { get; } = new();
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -106,6 +107,14 @@ namespace OngekiFumenEditor.Base
             {
                 Taps.Add(tap);
             }
+            else if (obj is Hold hold)
+            {
+                Holds.Add(hold);
+            }
+            else if (obj is HoldEnd holdEnd)
+            {
+                Holds.Add(holdEnd);
+            }
             else if (obj switch
             {
                 LaneStartBase or LaneEndBase or LaneNextBase => obj,
@@ -163,6 +172,14 @@ namespace OngekiFumenEditor.Base
             {
                 Taps.Remove(tap);
             }
+            else if (obj is Hold hold)
+            {
+                Holds.Remove(hold);
+            }
+            else if (obj is HoldEnd holdEnd)
+            {
+                Holds.Remove(holdEnd);
+            }
             else if (obj switch
             {
                 LaneStartBase or LaneEndBase or LaneNextBase => obj,
@@ -191,6 +208,7 @@ namespace OngekiFumenEditor.Base
                 .Concat(Bullets)
                 .Concat(Lanes)
                 .Concat(Taps)
+                .Concat(Holds)
                 .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());
@@ -275,7 +293,7 @@ namespace OngekiFumenEditor.Base
             #region NOTES
             sb.AppendLine();
             sb.AppendLine("[NOTES]");
-            foreach (var u in Taps.OrderBy(x => x.TGrid))
+            foreach (var u in Taps.OfType<OngekiTimelineObjectBase>().Concat(Holds).OrderBy(x => x.TGrid))
                 sb.AppendLine(u.Serialize(this));
             #endregion
 

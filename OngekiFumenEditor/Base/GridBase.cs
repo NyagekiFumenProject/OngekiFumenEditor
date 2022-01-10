@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -91,5 +93,48 @@ namespace OngekiFumenEditor.Base
         }
 
         public abstract string Serialize(OngekiFumen fumenData);
+
+        #region Implement Equals and Compares
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+
+            return obj is not GridBase g ? false : (g == this);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Unit, Grid, gridBaseRadix);
+        }
+
+        public static bool operator <(GridBase left, GridBase right)
+        {
+            return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
+        }
+
+        public static bool operator <=(GridBase left, GridBase right)
+        {
+            return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >(GridBase left, GridBase right)
+        {
+            return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
+        }
+
+        public static bool operator >=(GridBase left, GridBase right)
+        {
+            return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
+        }
+        #endregion
     }
 }

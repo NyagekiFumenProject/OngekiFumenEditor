@@ -28,9 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
 
             var speed = bullet.ReferenceBulletPallete.Speed;
 
-            //calculate fromTGrid
-            var expandY = (editor.CanvasHeight - 50) * speed;
-            var fromTGrid = 0;
+            //todo calculate fromTGrid
 
             return 0;
         }
