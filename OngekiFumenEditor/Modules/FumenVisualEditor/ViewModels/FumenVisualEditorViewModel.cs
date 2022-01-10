@@ -101,7 +101,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private EditorSetting setting;
-        private bool shiftKeyDown;
 
         public EditorSetting Setting
         {
@@ -354,32 +353,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         }
 
-        public void OnKeyDown(ActionExecutionContext e)
-        {
-            if (e.EventArgs is KeyEventArgs arg)
-            {
-                //Log.LogInfo(arg.Key.ToString());
-                if (arg.Key == Key.LeftShift)
-                {
-                    //开始多物件选择
-                    shiftKeyDown = true;
-                }
-            }
-        }
-
-        public void OnKeyUp(ActionExecutionContext e)
-        {
-            if (e.EventArgs is KeyEventArgs arg)
-            {
-                //Log.LogInfo(arg.Key.ToString());
-                if (arg.Key == Key.LeftShift)
-                {
-                    //取消多物件选择
-                    shiftKeyDown = false;
-                }
-            }
-        }
-
         public void OnFocusableChanged(ActionExecutionContext e)
         {
             Log.LogInfo($"OnFocusableChanged {e.EventArgs}");
@@ -421,7 +394,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (value)
             {
-                if (!shiftKeyDown)
+                if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
                 {
                     foreach (var o in SelectObjects.Where(x => x != obj))
                         o.IsSelected = false;
