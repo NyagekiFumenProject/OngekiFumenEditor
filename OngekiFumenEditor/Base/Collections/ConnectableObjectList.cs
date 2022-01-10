@@ -1,87 +1,81 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
+﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Utils;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-    public class ConnectableObjectList<START_TYPE, BASE_TYPE> : IEnumerable<START_TYPE> where START_TYPE : ConnectableStartObject where BASE_TYPE : ConnectableObjectBase
+    public class ConnectableObjectList<START_TYPE, CHILD_TYPE> : IEnumerable<START_TYPE> where START_TYPE : ConnectableStartObject where CHILD_TYPE : ConnectableChildObjectBase
     {
-        private List<START_TYPE> walls = new();
+        private List<START_TYPE> startObjects = new();
 
-        public IEnumerator<START_TYPE> GetEnumerator() => walls.GetEnumerator();
+        public IEnumerator<START_TYPE> GetEnumerator() => startObjects.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public void Add(BASE_TYPE wall)
+        public void Add(ConnectableObjectBase obj)
         {
-            if (wall is START_TYPE wallStart)
+            if (obj is START_TYPE startObject)
             {
                 //wallStart.PropertyChanged += OnBeamStartPropertyChanged;
-                if (wallStart.RecordId < 0)
-                    wallStart.RecordId = walls.Count + 1;
-                walls.Add(wallStart);
+                if (startObject.RecordId < 0)
+                    startObject.RecordId = startObjects.Count + 1;
+                startObjects.Add(startObject);
             }
-            else if (wall is ConnectableChildObjectBase wallChild)
+            else if (obj is CHILD_TYPE child)
             {
-                wallChild.PropertyChanged += OnBeamChildPropertyChanged;
-                if (walls.FirstOrDefault(x => x.RecordId == wallChild.RecordId) is START_TYPE start)
-                    start.AddChildWallObject(wallChild);
+                child.PropertyChanged += OnBeamChildPropertyChanged;
+                if (startObjects.FirstOrDefault(x => x.RecordId == child.RecordId) is START_TYPE start)
+                    start.AddChildWallObject(child);
             }
         }
 
-        public void Remove(BASE_TYPE beam)
+        public void Remove(ConnectableObjectBase obj)
         {
-            if (beam is START_TYPE wallStart)
+            if (obj is START_TYPE startObj)
             {
                 //wallStart.PropertyChanged -= OnBeamStartPropertyChanged;
-                walls.Remove(wallStart);
+                startObjects.Remove(startObj);
             }
-            else if (beam is ConnectableChildObjectBase wallChild)
+            else if (obj is CHILD_TYPE child)
             {
-                wallChild.PropertyChanged -= OnBeamChildPropertyChanged;
-                if (walls.FirstOrDefault(x => x.RecordId == wallChild.RecordId) is START_TYPE start)
-                    start.RemoveChildWallObject(wallChild);
+                child.PropertyChanged -= OnBeamChildPropertyChanged;
+                if (startObjects.FirstOrDefault(x => x.RecordId == child.RecordId) is START_TYPE start)
+                    start.RemoveChildWallObject(child);
             }
         }
 
         private void OnBeamStartPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(ConnectableObjectBase.RecordId) || sender is not START_TYPE wallStart)
+            if (e.PropertyName != nameof(ConnectableObjectBase.RecordId) || sender is not START_TYPE startObject)
                 return;
 
-            if (walls.FirstOrDefault(x => x.RecordId == wallStart.RecordId) is START_TYPE s)
+            if (startObjects.FirstOrDefault(x => x.RecordId == startObject.RecordId) is START_TYPE s)
             {
-                walls.Remove(s);
-                Log.LogDebug($"migrate recId {s.RecordId} -> {wallStart.RecordId}");
+                startObjects.Remove(s);
+                Log.LogDebug($"migrate recId {s.RecordId} -> {startObject.RecordId}");
             }
 
-            walls.Add(wallStart);
+            startObjects.Add(startObject);
         }
 
         private void OnBeamChildPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(ConnectableObjectBase.RecordId) || sender is not ConnectableChildObjectBase wallChild)
+            if (e.PropertyName != nameof(ConnectableObjectBase.RecordId) || sender is not CHILD_TYPE child)
                 return;
 
-            if (walls.FirstOrDefault(x => x.RecordId == wallChild.RecordId) is START_TYPE newRefBeam)
+            if (startObjects.FirstOrDefault(x => x.RecordId == child.RecordId) is START_TYPE start)
             {
-                wallChild.ReferenceStartObject?.RemoveChildWallObject(wallChild);
-                newRefBeam.AddChildWallObject(wallChild);
-                Log.LogDebug($"Changed child recId {wallChild.ReferenceStartObject?.RecordId} -> {wallChild.RecordId}");
+                child.ReferenceStartObject?.RemoveChildWallObject(child);
+                start.AddChildWallObject(child);
+                Log.LogDebug($"Changed child recId {child.ReferenceStartObject?.RecordId} -> {child.RecordId}");
             }
             else
             {
-                if (wallChild.ReferenceStartObject is START_TYPE prevRefBeam)
-                    wallChild.RecordId = prevRefBeam.RecordId;//set failed and roll back
-                Log.LogDebug($"Can't change child recId {wallChild.ReferenceStartObject?.RecordId} -> {wallChild.RecordId}");
+                if (child.ReferenceStartObject is START_TYPE prevStart)
+                    child.RecordId = prevStart.RecordId;//set failed and roll back
+                Log.LogDebug($"Can't change child recId {child.ReferenceStartObject?.RecordId} -> {child.RecordId}");
             }
         }
     }

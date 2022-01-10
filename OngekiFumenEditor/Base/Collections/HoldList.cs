@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.Beam;
+﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-    public class LaneList : ConnectableObjectList<LaneStartBase, ConnectableChildObjectBase>
+    public class HoldList : ConnectableObjectList<Hold, ConnectableChildObjectBase>
     {
 
     }
