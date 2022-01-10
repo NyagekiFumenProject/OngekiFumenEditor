@@ -1,9 +1,12 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Collections;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -101,6 +104,23 @@ namespace OngekiFumenEditor.Utils
             var bx = x2 - x1;
 
             return (y - y1) * 1.0 / by * bx + x1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double CalculateXFromBetweenObjects<T>(T from, T to, FumenVisualEditorViewModel editor, TGrid tGrid) where T : IHorizonPositionObject, ITimelineObject
+            => CalculateXFromBetweenObjects(from.TGrid, from.XGrid, to.TGrid, to.XGrid, editor, tGrid);
+
+        public static double CalculateXFromBetweenObjects(TGrid fromTGrid, XGrid fromXGrid, TGrid toTGrid, XGrid toXGrid, FumenVisualEditorViewModel editor, TGrid tGrid)
+        {
+            var prevX = XGridCalculator.ConvertXGridToX(fromXGrid, editor);
+            var prevY = TGridCalculator.ConvertTGridToY(fromTGrid, editor, false) ?? 0;
+            var curX = XGridCalculator.ConvertXGridToX(toXGrid, editor);
+            var curY = TGridCalculator.ConvertTGridToY(toTGrid, editor, false) ?? 0;
+
+            var timeY = TGridCalculator.ConvertTGridToY(tGrid, editor) ?? 0;
+            var timeX = CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
+
+            return timeX;
         }
     }
 }
