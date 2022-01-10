@@ -57,8 +57,9 @@ namespace OngekiFumenEditor.Kernel.Scheduler
                     .Where(x => DateTime.Now - schedulersCallTime[x] >= x.ScheduleCallLoopInterval)
                     .Select(x => x.OnScheduleCall(cancellationToken).ContinueWith(_ => schedulersCallTime[x] = DateTime.Now))
                     .ToArray();
-                await Task.WhenAll(schedulers);
-                await Task.Yield();
+                if (schedulers.Length > 0)
+                    await Task.WhenAll(schedulers);
+                await Task.Delay(10);
             }
         }
 
