@@ -15,20 +15,17 @@
         </converters:BulletLineTopPointConverter>
     </UserControl.Resources>
     <Path
+        IsHitTestVisible="False"
+        Opacity="0.75"
         Stroke="LightPink"
         StrokeEndLineCap="Round"
         StrokeLineJoin="Round"
         StrokeStartLineCap="Round"
-        StrokeThickness="30">
+        StrokeThickness="15">
         <Path.Data>
             <PathGeometry>
                 <PathGeometry.Figures>
-                    <PathFigure>
-                        <PathFigure.Segments>
-                            <LineSegment Point="100,100" />
-                            <LineSegment Point="200,100" />
-                            <LineSegment Point="300,400" />
-                        </PathFigure.Segments>
+                    <PathFigure Segments="{Binding Lines}" StartPoint="{Binding Lines[0].Point}">
                     </PathFigure>
                 </PathGeometry.Figures>
             </PathGeometry>
