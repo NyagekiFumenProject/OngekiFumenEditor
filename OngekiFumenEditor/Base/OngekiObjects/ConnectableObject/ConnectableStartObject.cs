@@ -4,6 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -11,6 +12,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
     public abstract class ConnectableStartObject : ConnectableObjectBase
     {
+        public event Action<object, PropertyChangedEventArgs> ConnectableObjectsPropertyChanged;
+
         private List<ConnectableChildObjectBase> children = new();
         private List<ConnectorLineBase<ConnectableObjectBase>> connectors = new();
         public IEnumerable<ConnectableChildObjectBase> Children => children;
@@ -20,6 +23,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         protected abstract ConnectorLineBase<ConnectableObjectBase> GenerateWallConnector(ConnectableObjectBase from, ConnectableObjectBase to);
 
+        public ConnectableStartObject()
+        {
+            PropertyChanged += OnPropertyChanged;
+        }
+
         public void AddChildWallObject(ConnectableChildObjectBase child)
         {
             if (!children.Contains(child))
@@ -28,6 +36,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 children.Add(child);
                 NotifyOfPropertyChange(() => Children);
                 connectors.Add(GenerateWallConnector(child.PrevObject, child));
+                child.PropertyChanged += OnPropertyChanged;
             }
             child.ReferenceStartObject = this;
         }
@@ -48,8 +57,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             child.PrevObject = default;
 
             child.ReferenceStartObject = default;
-
+            child.PropertyChanged += OnPropertyChanged;
             NotifyOfPropertyChange(() => Children);
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            ConnectableObjectsPropertyChanged?.Invoke(sender, e);
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
