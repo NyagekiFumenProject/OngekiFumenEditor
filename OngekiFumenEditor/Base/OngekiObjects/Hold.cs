@@ -32,6 +32,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             {
                 referenceLaneStart = value;
                 NotifyOfPropertyChange(() => ReferenceLaneStart);
+                Children?.FirstOrDefault()?.NotifyOfPropertyChange(() => ReferenceLaneStart);
             }
         }
 
