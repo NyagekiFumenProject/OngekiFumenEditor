@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
 
         public override LaneType LaneType => LaneType.WallLeft;
 
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateWallConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new WallLeftConnector()
+        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new WallLeftConnector()
         {
             From = from,
             To = to

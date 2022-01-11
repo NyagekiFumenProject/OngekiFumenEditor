@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override string IDShortName => IsCritical ? "CHD" : "HLD";
 
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateWallConnector(ConnectableObjectBase from, ConnectableObjectBase to)
+        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to)
         {
             return new HoldConnector()
             {

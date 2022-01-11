@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         private int recordId = -1;
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
-        protected abstract ConnectorLineBase<ConnectableObjectBase> GenerateWallConnector(ConnectableObjectBase from, ConnectableObjectBase to);
+        protected abstract ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to);
 
         public ConnectableStartObject()
         {
@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 child.PrevObject = children.LastOrDefault() ?? this as ConnectableObjectBase;
                 children.Add(child);
                 NotifyOfPropertyChange(() => Children);
-                connectors.Add(GenerateWallConnector(child.PrevObject, child));
+                connectors.Add(GenerateConnector(child.PrevObject, child));
                 child.PropertyChanged += OnPropertyChanged;
             }
             child.ReferenceStartObject = this;
@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             if (next is not null)
             {
                 next.PrevObject = prev;
-                connectors.Add(GenerateWallConnector(next.PrevObject, next));
+                connectors.Add(GenerateConnector(next.PrevObject, next));
             }
             child.PrevObject = default;
 
