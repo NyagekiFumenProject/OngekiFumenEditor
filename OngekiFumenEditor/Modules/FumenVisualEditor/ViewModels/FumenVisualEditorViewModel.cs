@@ -225,7 +225,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RedrawEditorObjects()
         {
-            if (Fumen is null)
+            if (Fumen is null || CanvasHeight == 0)
                 return;
             var begin = TGridCalculator.ConvertYToTGrid(0, this) ?? new TGrid(0, 0);
             var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);

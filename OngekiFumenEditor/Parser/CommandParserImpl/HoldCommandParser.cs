@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             hold.XGrid.Unit = dataArr[4];
             hold.XGrid.Grid = (int)dataArr[5];
 
-            var holdEnd = new HoldEnd();
+            var holdEnd = (refLaneStart?.IsWallLane ?? false) ? new WallHoldEnd() : new HoldEnd();
             hold.AddChildObject(holdEnd);
 
             holdEnd.TGrid.Unit = dataArr[6];

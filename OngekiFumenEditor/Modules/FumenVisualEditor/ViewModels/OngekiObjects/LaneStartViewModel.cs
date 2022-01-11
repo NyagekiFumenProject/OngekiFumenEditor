@@ -27,19 +27,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 
     }
 
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Left(Red) Start", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Left(Red) Start", "Ongeki Lanes")]
     public class LaneLeftStartViewModel : LaneStartViewModel<LaneLeftStart>
     {
 
     }
 
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Center(Green) Start", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Center(Green) Start", "Ongeki Lanes")]
     public class LaneCenterStartViewModel : LaneStartViewModel<LaneCenterStart>
     {
 
     }
 
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Right(Blue) Start", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Right(Blue) Start", "Ongeki Lanes")]
     public class LaneRightStartViewModel : LaneStartViewModel<LaneRightStart>
     {
 

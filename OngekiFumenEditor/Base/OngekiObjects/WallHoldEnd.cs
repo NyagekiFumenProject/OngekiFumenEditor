@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class WallHold : Hold
+    public class WallHoldEnd : HoldEnd
     {
-        public override Type ModelViewType => typeof(WallHoldViewModel);
+        public override Type ModelViewType => typeof(WallHoldEndViewModel);
     }
 }

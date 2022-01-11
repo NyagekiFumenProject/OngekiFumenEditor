@@ -83,8 +83,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             {
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
                 {
-                    var genWallChild = new HoldEnd();
-                    var genViewModel = new HoldEndViewModel();
+                    var laneType = ConnectableObject.ReferenceLaneStart?.LaneType;
+                    var isWall = laneType == LaneType.WallLeft || laneType == LaneType.WallRight;
+                    var genWallChild = isWall ? new WallHoldEnd() : new HoldEnd();
+                    var genViewModel = isWall ? new WallHoldEndViewModel() : new HoldEndViewModel();
                     genViewModel.ReferenceOngekiObject = genWallChild;
 
                     ConnectableObject.AddChildObject(genWallChild);
