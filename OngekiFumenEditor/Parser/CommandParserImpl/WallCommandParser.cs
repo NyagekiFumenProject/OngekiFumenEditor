@@ -57,7 +57,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
 
             var beam = new T();
             CommonParse(beam, args, fumen);
-            beamStart.AddChildWallObject(beam);
+            beamStart.AddChildObject(beam);
             return beam;
         }
     }
@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
 
             var beam = new T();
             CommonParse(beam, args, fumen);
-            beamStart.AddChildWallObject(beam);
+            beamStart.AddChildObject(beam);
             return beam;
         }
     }

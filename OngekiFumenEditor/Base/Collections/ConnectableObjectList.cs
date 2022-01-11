@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Base.Collections
             {
                 child.PropertyChanged += OnBeamChildPropertyChanged;
                 if (startObjects.FirstOrDefault(x => x.RecordId == child.RecordId) is START_TYPE start)
-                    start.AddChildWallObject(child);
+                    start.AddChildObject(child);
             }
         }
 
@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Base.Collections
             {
                 child.PropertyChanged -= OnBeamChildPropertyChanged;
                 if (startObjects.FirstOrDefault(x => x.RecordId == child.RecordId) is START_TYPE start)
-                    start.RemoveChildWallObject(child);
+                    start.RemoveChildObject(child);
             }
         }
 
@@ -67,8 +67,8 @@ namespace OngekiFumenEditor.Base.Collections
 
             if (startObjects.FirstOrDefault(x => x.RecordId == child.RecordId) is START_TYPE start)
             {
-                child.ReferenceStartObject?.RemoveChildWallObject(child);
-                start.AddChildWallObject(child);
+                child.ReferenceStartObject?.RemoveChildObject(child);
+                start.AddChildObject(child);
                 Log.LogDebug($"Changed child recId {child.ReferenceStartObject?.RecordId} -> {child.RecordId}");
             }
             else

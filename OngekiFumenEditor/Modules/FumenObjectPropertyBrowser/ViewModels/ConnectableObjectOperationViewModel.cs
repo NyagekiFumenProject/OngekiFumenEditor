@@ -98,11 +98,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
                     if (ConnectableObject is ConnectableStartObject start)
                     {
-                        start.AddChildWallObject(genWallChild);
+                        start.AddChildObject(genWallChild);
                     }
                     else if (ConnectableObject is ConnectableNextObject { ReferenceStartObject: { } } next)
                     {
-                        next.ReferenceStartObject.AddChildWallObject(genWallChild);
+                        next.ReferenceStartObject.AddChildObject(genWallChild);
                     }
 
                     CheckEnableDrag();

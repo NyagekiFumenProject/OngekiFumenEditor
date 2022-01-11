@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             PropertyChanged += OnPropertyChanged;
         }
 
-        public void AddChildWallObject(ConnectableChildObjectBase child)
+        public void AddChildObject(ConnectableChildObjectBase child)
         {
             if (!children.Contains(child))
             {
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             child.ReferenceStartObject = this;
         }
 
-        public void RemoveChildWallObject(ConnectableChildObjectBase child)
+        public void RemoveChildObject(ConnectableChildObjectBase child)
         {
             children.Remove(child);
 

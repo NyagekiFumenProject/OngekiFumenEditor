@@ -87,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     var genViewModel = new HoldEndViewModel();
                     genViewModel.ReferenceOngekiObject = genWallChild;
 
-                    ConnectableObject.AddChildWallObject(genWallChild);
+                    ConnectableObject.AddChildObject(genWallChild);
 
                     CheckEnableDrag();
                     return genViewModel;
