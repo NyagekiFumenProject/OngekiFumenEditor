@@ -39,18 +39,23 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             var holdEnd = new HoldEnd();
             hold.AddChildObject(holdEnd);
 
+            holdEnd.TGrid.Unit = dataArr[6];
+            holdEnd.TGrid.Grid = (int)dataArr[7];
+            holdEnd.XGrid.Unit = dataArr[8];
+            holdEnd.XGrid.Grid = (int)dataArr[9];
+
             return hold;
         }
     }
 
     [Export(typeof(ICommandParser))]
-    public class CriticalHoldCommandParser1 : TapCommandParser
+    public class CriticalHoldCommandParser1 : HoldCommandParser
     {
         public override string CommandLineHeader => "CHD";
     }
 
     [Export(typeof(ICommandParser))]
-    public class CriticalHoldCommandParser2 : TapCommandParser
+    public class CriticalHoldCommandParser2 : HoldCommandParser
     {
         public override string CommandLineHeader => "XHD";
     }
