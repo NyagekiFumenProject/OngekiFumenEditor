@@ -1,0 +1,14 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:fumenOngekiObject="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects"
+    xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Base">
+    <views:EditorObjectDataTemplateSelector x:Key="EditorObjectDataTemplateSelector">
+        <views:EditorObjectDataTemplateSelector.DataTemplates>
+            <DataTemplate x:Key="BellDataTemplate" DataType="{x:Type fumenOngekiObject:BellViewModel}">
+                <ongekiobjects:BellView />
+            </DataTemplate>
+        </views:EditorObjectDataTemplateSelector.DataTemplates>
+    </views:EditorObjectDataTemplateSelector>
+</ResourceDictionary>

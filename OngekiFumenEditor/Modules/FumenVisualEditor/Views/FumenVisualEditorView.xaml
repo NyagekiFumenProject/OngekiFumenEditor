@@ -15,10 +15,16 @@
     Focusable="True"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter">
-        </converters:UnitCloseSizeConverter>
-        <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter">
-        </converters:IsStringEmptyConverter>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="./EditorObjectDataTemplates.xaml">
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+            <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter">
+            </converters:UnitCloseSizeConverter>
+            <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter">
+            </converters:IsStringEmptyConverter>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid Focusable="False">
         <Canvas
