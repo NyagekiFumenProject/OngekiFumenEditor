@@ -9,13 +9,14 @@
 * WallTap实现 
 * Hold实现 
 * WallHold实现 
-* 音频播放相关 <- we are here!
+* 音频播放相关
+* 编辑器优化&重构  <- we are here!
 * 谱面滚动播放
 * 实现时间轴的简便操作
 * 编辑器细节优化
 * OpenTK/Vulkan/SkiaSharp 三选一重写渲染器
-* 写个谱面 <- goal
-* 实现Soflan变速
+* 写个谱面  <- goal
+* 实现Soflan变速/LispBlock/LispDisp/EmenyLane...等命令
 * 实现各种工具等
 ....
 ![S4N@T)957%Y7V46~_IDH@WY](https://user-images.githubusercontent.com/7549173/149096560-e21b793a-fd24-4001-bbca-89ad7c44088f.jpg)
