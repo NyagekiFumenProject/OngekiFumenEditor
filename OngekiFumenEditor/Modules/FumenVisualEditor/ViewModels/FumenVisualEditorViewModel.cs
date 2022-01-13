@@ -121,6 +121,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Setting = new EditorSetting();
         }
 
+        public ObservableCollection<IEditorDisplayableViewModel> EditorViewModels { get; } = new ();
+
         private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -337,6 +339,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             fumen.AddObject(viewModel.ReferenceOngekiObject);
 
             DisplayObjectList.Add(view);
+            EditorViewModels.Add(viewModel);
             viewModel.EditorViewModel = this;
             //Redraw(RedrawTarget.OngekiObjects);
 

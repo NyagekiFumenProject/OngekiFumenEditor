@@ -166,7 +166,17 @@
             <ItemsControl
                 x:Name="DisplayObjectList"
                 Width="{Binding ElementName=VisualDisplayer, Path=ActualWidth}"
-                Height="{Binding ElementName=VisualDisplayer, Path=ActualHeight}">
+                Height="{Binding ElementName=VisualDisplayer, Path=ActualHeight}"
+                Visibility="Hidden">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas>
+                        </Canvas>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <ItemsControl ItemTemplateSelector="{StaticResource EditorObjectDataTemplateSelector}" ItemsSource="{Binding EditorViewModels}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas>

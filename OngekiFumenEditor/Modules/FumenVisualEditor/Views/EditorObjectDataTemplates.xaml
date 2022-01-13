@@ -1,13 +1,119 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:editorObject="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects"
+    xmlns:editorobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.EditorObjects"
     xmlns:fumenOngekiObject="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects"
-    xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Base">
+    xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Base"
+    xmlns:views1="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views">
     <views:EditorObjectDataTemplateSelector x:Key="EditorObjectDataTemplateSelector">
         <views:EditorObjectDataTemplateSelector.DataTemplates>
-            <DataTemplate x:Key="BellDataTemplate" DataType="{x:Type fumenOngekiObject:BellViewModel}">
+            <DataTemplate DataType="{x:Type fumenOngekiObject:BellViewModel}">
                 <ongekiobjects:BellView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:BeamEndViewModel}">
+                <ongekiobjects:BeamEndView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:BeamNextViewModel}">
+                <ongekiobjects:BeamNextView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:BeamStartViewModel}">
+                <ongekiobjects:BeamStartView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:BPMChangeViewModel}">
+                <views1:DisplayTextLineObjectViewBase />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:BulletViewModel}">
+                <ongekiobjects:BulletView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:ClickSEViewModel}">
+                <views1:DisplayTextLineObjectViewBase />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:EnemySetViewModel}">
+                <views1:DisplayTextLineObjectViewBase />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:FlickViewModel}">
+                <ongekiobjects:FlickView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:HoldEndViewModel}">
+                <ongekiobjects:TapView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:HoldViewModel}">
+                <ongekiobjects:TapView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneCenterEndViewModel}">
+                <ongekiobjects:LaneEndView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneCenterNextViewModel}">
+                <ongekiobjects:LaneNextView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneCenterStartViewModel}">
+                <ongekiobjects:LaneStartView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneLeftEndViewModel}">
+                <ongekiobjects:LaneEndView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneLeftNextViewModel}">
+                <ongekiobjects:LaneNextView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneLeftStartViewModel}">
+                <ongekiobjects:LaneStartView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneRightEndViewModel}">
+                <ongekiobjects:LaneEndView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneRightNextViewModel}">
+                <ongekiobjects:LaneNextView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneRightStartViewModel}">
+                <ongekiobjects:LaneStartView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:MeterChangeViewModel}">
+                <views1:DisplayTextLineObjectViewBase />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:TapViewModel}">
+                <ongekiobjects:TapView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallHoldViewModel}">
+                <ongekiobjects:WallTapView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallTapViewModel}">
+                <ongekiobjects:WallTapView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallLeftEndViewModel}">
+                <ongekiobjects:WallEndView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallLeftNextViewModel}">
+                <ongekiobjects:WallNextView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallLeftStartViewModel}">
+                <ongekiobjects:WallStartView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallRightEndViewModel}">
+                <ongekiobjects:WallEndView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallRightNextViewModel}">
+                <ongekiobjects:WallNextView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallRightStartViewModel}">
+                <ongekiobjects:WallStartView />
+            </DataTemplate>
+            <!--  EditorObjects  -->
+            <DataTemplate DataType="{x:Type editorObject:BeamConnectorViewModel}">
+                <editorobjects:ConnectorView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type editorObject:BulletAuxiliaryLineViewModel}">
+                <editorobjects:BulletAuxiliaryLineView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type editorObject:HoldConnectorViewModel}">
+                <editorobjects:HoldConnectorView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type editorObject:LaneConnectorViewModel}">
+                <editorobjects:HoldConnectorView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type editorObject:WallConnectorViewModel}">
+                <editorobjects:HoldConnectorView />
             </DataTemplate>
         </views:EditorObjectDataTemplateSelector.DataTemplates>
     </views:EditorObjectDataTemplateSelector>

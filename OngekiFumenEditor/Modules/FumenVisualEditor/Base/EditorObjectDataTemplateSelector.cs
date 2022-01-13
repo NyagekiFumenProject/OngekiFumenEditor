@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -13,8 +14,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public class EditorObjectDataTemplateSelector : DataTemplateSelector
     {
-        private ResourceDictionary dataTemplates = new();
-        public ResourceDictionary DataTemplates
+        private List<DataTemplate> dataTemplates = new();
+        public List<DataTemplate> DataTemplates
         {
             get => dataTemplates;
             set
@@ -32,9 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
             if (!cachedDataTemplate.TryGetValue(dataType, out var dateTemplate))
             {
-                dateTemplate = DataTemplates.Values.OfType<DataTemplate>().FirstOrDefault(x =>
-                dataType == (x.DataType as Type)
-                ) ?? null;
+                dateTemplate = DataTemplates.FirstOrDefault(x => dataType == (x.DataType as Type)) ?? null;
                 cachedDataTemplate[dataType] = dateTemplate;
             }
 
