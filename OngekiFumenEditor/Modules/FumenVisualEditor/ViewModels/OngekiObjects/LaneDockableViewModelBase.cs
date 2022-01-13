@@ -17,9 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
             editor = editor ?? EditorViewModel;
-            return editor.DisplayObjectList
-                    .OfType<FrameworkElement>()
-                    .Select(x => x.DataContext)
+            return editor.EditorViewModels
                     .OfType<DisplayObjectViewModelBase>()
                     .Select(x => x.ReferenceOngekiObject as ConnectableObjectBase)
                     .FilterNull();

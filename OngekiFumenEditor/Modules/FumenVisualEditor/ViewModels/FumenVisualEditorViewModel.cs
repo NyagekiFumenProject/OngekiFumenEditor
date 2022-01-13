@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [Export(typeof(FumenVisualEditorViewModel))]
     public class FumenVisualEditorViewModel : PersistedDocument
     {
-        public IEnumerable<DisplayObjectViewModelBase> SelectObjects => DisplayObjectList.OfType<OngekiObjectViewBase>().Select(x => x.ViewModel).Where(x => x.IsSelected);
+        public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
 
         [Flags]
         public enum RedrawTarget
@@ -80,7 +80,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public FumenVisualEditorView View { get; private set; }
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
-        public ItemCollection DisplayObjectList => View?.DisplayObjectList.Items;
+        //public ItemCollection DisplayObjectList => View?.DisplayObjectList.Items;
         public bool isDragging;
         public bool isMouseDown;
 
@@ -121,7 +121,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Setting = new EditorSetting();
         }
 
-        public ObservableCollection<IEditorDisplayableViewModel> EditorViewModels { get; } = new ();
+        public ObservableCollection<object> EditorViewModels { get; } = new();
 
         private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -233,20 +233,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
 
             //Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
-            DisplayObjectList.Clear();
+            EditorViewModels.Clear();
             var list = Fumen.GetAllDisplayableObjects()
                 .OfType<IDisplayableObject>()
                 .Where(x => x.CheckVisiable(begin, end))
                 .ToArray();
             foreach (var item in list)
             {
-                var obj = Activator.CreateInstance(item.ModelViewType);
+                var viewModel = Activator.CreateInstance(item.ModelViewType);
 
-                if (obj is IEditorDisplayableViewModel editorObjectViewModel)
+                if (viewModel is IEditorDisplayableViewModel editorObjectViewModel)
                     editorObjectViewModel.OnObjectCreated(item, this);
 
-                var view = ViewHelper.CreateView(obj);
-                DisplayObjectList.Add(view);
+                EditorViewModels.Add(viewModel);
             }
         }
 
@@ -338,7 +337,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var view = ViewHelper.CreateView(viewModel);
             fumen.AddObject(viewModel.ReferenceOngekiObject);
 
-            DisplayObjectList.Add(view);
             EditorViewModels.Add(viewModel);
             viewModel.EditorViewModel = this;
             //Redraw(RedrawTarget.OngekiObjects);
@@ -422,7 +420,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             foreach (var obj in selectedObject)
             {
-                DisplayObjectList.Remove(obj.View);
+                EditorViewModels.Remove(obj);
                 fumen.RemoveObject(obj.ReferenceOngekiObject);
                 if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
                     propertyBrowser.OngekiObject = default;
@@ -433,7 +431,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_SelectAllObjects()
         {
-            DisplayObjectList.OfType<OngekiObjectViewBase>().Select(x => x.ViewModel).ForEach(x => x.IsSelected = true);
+            EditorViewModels.OfType<DisplayObjectViewModelBase>().ForEach(x => x.IsSelected = true);
         }
 
         public void KeyboardAction_CancelSelectingObjects()

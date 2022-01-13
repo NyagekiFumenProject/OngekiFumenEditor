@@ -32,8 +32,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public FumenVisualEditorView()
         {
             InitializeComponent();
-
-            var r = Resources["EditorObjectDataTemplateSelector"] as EditorObjectDataTemplateSelector;
         }
     }
 }
