@@ -12,6 +12,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
     public class WallLeftNext : WallNextBase
     {
         public override string IDShortName => "WLN";
-        public override Type ModelViewType => typeof(WallNextViewModel<WallLeftNext>);
+        public override Type ModelViewType => typeof(WallLeftNextViewModel);
     }
 }

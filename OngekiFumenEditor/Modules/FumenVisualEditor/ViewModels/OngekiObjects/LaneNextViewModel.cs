@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
@@ -23,4 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     {
 
     }
+
+    public class LaneRightNextViewModel : LaneNextViewModel<LaneRightNext> { }
+    public class LaneCenterNextViewModel : LaneNextViewModel<LaneCenterNext> { }
+    public class LaneLeftNextViewModel : LaneNextViewModel<LaneLeftNext> { }
 }

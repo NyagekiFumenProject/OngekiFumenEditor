@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+﻿using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
@@ -6,4 +7,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     {
 
     }
+
+    public class LaneCenterEndViewModel: LaneEndViewModel<LaneCenterEnd> { }
+    public class LaneLeftEndViewModel : LaneEndViewModel<LaneLeftEnd> { }
+    public class LaneRightEndViewModel : LaneEndViewModel<LaneRightEnd> { }
 }

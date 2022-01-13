@@ -55,17 +55,17 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             {
                 return LaneChar switch
                 {
-                    'L' => needNext ? new WallNextViewModel<WallLeftNext>() : new WallEndViewModel<WallLeftEnd>(),
-                    'R' => needNext ? new WallNextViewModel<WallRightNext>() : new WallEndViewModel<WallRightEnd>(),
+                    'L' => needNext ? new WallLeftNextViewModel() : new WallLeftEndViewModel(),
+                    'R' => needNext ? new WallRightNextViewModel() : new WallRightEndViewModel(),
                     _ => default
                 };
             }
 
             return LaneChar switch
             {
-                'L' => needNext ? new LaneNextViewModel<LaneLeftNext>() : new LaneEndViewModel<LaneLeftEnd>(),
-                'C' => needNext ? new LaneNextViewModel<LaneCenterNext>() : new LaneEndViewModel<LaneCenterEnd>(),
-                'R' => needNext ? new LaneNextViewModel<LaneRightNext>() : new LaneEndViewModel<LaneRightEnd>(),
+                'L' => needNext ? new LaneLeftNextViewModel() : new LaneLeftEndViewModel(),
+                'C' => needNext ? new LaneCenterNextViewModel() : new LaneCenterEndViewModel(),
+                'R' => needNext ? new LaneRightNextViewModel() : new LaneRightEndViewModel(),
                 _ => default
             };
         }

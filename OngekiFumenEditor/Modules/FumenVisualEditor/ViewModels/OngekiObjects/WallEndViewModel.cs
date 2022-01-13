@@ -22,4 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     {
 
     }
+
+    public class WallLeftEndViewModel : WallEndViewModel<WallLeftEnd>{ }
+    public class WallRightEndViewModel : WallEndViewModel<WallRightEnd> { }
 }
