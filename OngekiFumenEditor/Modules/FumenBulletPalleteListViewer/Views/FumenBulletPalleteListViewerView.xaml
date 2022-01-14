@@ -37,6 +37,7 @@
         </StackPanel>
         <ListView
             Grid.Row="1"
+            Background="Transparent"
             BorderBrush="Transparent"
             ItemsSource="{Binding Fumen.BulletPalleteList}"
             ScrollViewer.CanContentScroll="True"
@@ -45,12 +46,15 @@
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 </Style>
-                <Style TargetType="TextBox">
-                    <Setter Property="BorderBrush" Value="Transparent" />
-                </Style>
             </ListView.Resources>
             <ListView.View>
                 <GridView AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
                     <GridViewColumn
                         Width="60"
                         DisplayMemberBinding="{Binding StrID}"
