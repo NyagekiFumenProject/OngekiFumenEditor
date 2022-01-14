@@ -13,7 +13,8 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor.EditorDataProcesser;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
@@ -54,23 +55,79 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             UnitLines = TGridUnitLines | XGridUnitLines,
         }
 
-        private OngekiFumen fumen;
+        private EditorProjectDataModel editorProjectData = new EditorProjectDataModel();
+        public EditorProjectDataModel EditorProjectData
+        {
+            get
+            {
+                return editorProjectData;
+            }
+            set
+            {
+                Set(ref editorProjectData, value);
+                Fumen = EditorProjectData.Fumen;
+                NotifyOfPropertyChange(() => Setting);
+            }
+        }
+
         public OngekiFumen Fumen
         {
             get
             {
-                return fumen;
+                return EditorProjectData.Fumen;
             }
             set
             {
-                if (fumen is not null)
-                    fumen.BpmList.OnChangedEvent -= OnBPMListChanged;
+                if (EditorProjectData.Fumen is not null)
+                    EditorProjectData.Fumen.BpmList.OnChangedEvent -= OnBPMListChanged;
                 if (value is not null)
                     value.BpmList.OnChangedEvent += OnBPMListChanged;
-                fumen = value;
+                EditorProjectData.Fumen = value;
                 OnFumenObjectLoaded();
                 Redraw(RedrawTarget.All);
                 NotifyOfPropertyChange(() => Fumen);
+            }
+        }
+
+        private double scrollViewerActualHeight;
+        public double ScrollViewerActualHeight
+        {
+            get => scrollViewerActualHeight;
+            set
+            {
+                Set(ref scrollViewerActualHeight, value);
+            }
+        }
+
+        private double startVisibleCanvasY;
+        public double StartVisibleCanvasY
+        {
+            get => startVisibleCanvasY;
+            set
+            {
+                Set(ref startVisibleCanvasY, value);
+            }
+        }
+
+        private double endVisibleCanvasY;
+        public double EndVisibleCanvasY
+        {
+            get => endVisibleCanvasY;
+            set
+            {
+                Set(ref endVisibleCanvasY, value);
+            }
+        }
+
+        private double scrollViewerVerticalOffset;
+        public double ScrollViewerVerticalOffset
+        {
+            get => scrollViewerVerticalOffset;
+            set
+            {
+                Set(ref scrollViewerVerticalOffset, value);
+                StartVisibleCanvasY = CanvasHeight - (ScrollViewerVerticalOffset + ScrollViewerActualHeight);
+                EndVisibleCanvasY = CanvasHeight - ScrollViewerVerticalOffset;
             }
         }
 
@@ -100,18 +157,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private EditorSetting setting;
-
         public EditorSetting Setting
         {
             get
             {
-                return setting;
+                return EditorProjectData.EditorSetting;
             }
             set
             {
-                this.RegisterOrUnregisterPropertyChangeEvent(setting, value, OnSettingPropertyChanged);
-                setting = value;
+                this.RegisterOrUnregisterPropertyChangeEvent(EditorProjectData.EditorSetting, value, OnSettingPropertyChanged);
+                EditorProjectData.EditorSetting = value;
                 NotifyOfPropertyChange(() => Setting);
             }
         }
@@ -160,11 +215,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task DoLoad(string filePath)
         {
-            using var _ = StatusNotifyHelper.BeginStatus("Fumen loading : " + filePath);
+            using var _ = StatusNotifyHelper.BeginStatus("Editor project file loading : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
-            using var fileStream = File.OpenRead(filePath);
-            var fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fileStream);
-            Fumen = fumen;
+            var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
+            EditorProjectData = projectData;
             Redraw(RedrawTarget.All);
         }
 
@@ -182,7 +236,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             TGridUnitLineLocations.Clear();
             var baseLineAdded = false;
 
-            foreach ((_, var bpm) in TGridCalculator.GetVisibleBpmList(this))
+            foreach ((_, var bpm) in TGridCalculator.GetAllBpmUniformPositionList(this))
             {
                 var nextBpm = Fumen.BpmList.GetNextBpm(bpm);
                 var per = bpm.TGrid.ResT / Setting.BeatSplit;
@@ -192,19 +246,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var tGrid = bpm.TGrid + new GridOffset(0, (int)(per * i));
                     if (nextBpm is not null && tGrid >= nextBpm.TGrid)
                         break;
-                    if (TGridCalculator.ConvertTGridToY(tGrid, this) is double y)
-                    {
-                        if (y > CanvasHeight)
-                            break;
-                        var line = ObjectPool<TGridUnitLineViewModel>.Get();
-                        line.TGrid = tGrid;
-                        line.IsBaseLine = tGrid == Setting.CurrentDisplayTimePosition;
-                        line.Y = CanvasHeight - y;
+                    var y = TGridCalculator.ConvertTGridToY(tGrid, this);
+                    if (y > CanvasHeight)
+                        break;
+                    var line = ObjectPool<TGridUnitLineViewModel>.Get();
+                    line.TGrid = tGrid;
+                    line.IsBaseLine = tGrid == Setting.CurrentDisplayTimePosition;
+                    line.Y = CanvasHeight - y;
 
-                        baseLineAdded = baseLineAdded || line.IsBaseLine;
-
-                        TGridUnitLineLocations.Add(line);
-                    }
+                    baseLineAdded = baseLineAdded || line.IsBaseLine;
+                    TGridUnitLineLocations.Add(line);
                     i++;
                 }
             }
@@ -233,20 +284,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
 
             //Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
-            EditorViewModels.Clear();
-            var list = Fumen.GetAllDisplayableObjects()
-                .OfType<IDisplayableObject>()
-                .Where(x => x.CheckVisiable(begin, end))
-                .ToArray();
-            foreach (var item in list)
-            {
-                var viewModel = Activator.CreateInstance(item.ModelViewType);
-
-                if (viewModel is IEditorDisplayableViewModel editorObjectViewModel)
-                    editorObjectViewModel.OnObjectCreated(item, this);
-
-                EditorViewModels.Add(viewModel);
-            }
+            foreach (var item in EditorViewModels.OfType<DisplayObjectViewModelBase>())
+                item.RecaulateCanvasXY();
         }
 
         private void RedrawUnitCloseXLines()
@@ -283,39 +322,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             XGridUnitLineLocations.Add(line);
         }
 
-        protected override Task DoNew()
+        protected override async Task DoNew()
         {
-            Fumen = new OngekiFumen();
+            var dialogViewModel = new EditorProjectSetupDialogViewModel();
+            var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialogViewModel);
+            if (result != true)
+            {
+                Log.LogInfo($"用户无法完成新建项目向导，关闭此编辑器");
+                await TryCloseAsync(false);
+                return;
+            }
+            EditorProjectData = dialogViewModel.EditorProjectData;
             Redraw(RedrawTarget.All);
             Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
-            return TaskUtility.Completed;
         }
 
         protected override async Task DoSave(string filePath)
         {
             using var _ = StatusNotifyHelper.BeginStatus("Fumen saving : " + filePath);
-            await File.WriteAllTextAsync(filePath, Fumen.Serialize());
-            if (filePath.EndsWith(FumenVisualEditorProvider.FILE_EXTENSION_NAME))
-            {
-                await SerializeEditorData(filePath);
-            }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
-        }
-
-        private async Task SerializeEditorData(string filePath)
-        {
-            using var _ = StatusNotifyHelper.BeginStatus("Fumen editor data saving...");
-            using var file = File.Open(filePath, FileMode.Append);
-            using var writer = new StreamWriter(file);
-
-            var procs = IoC.GetAll<IEditorDataProcesser>();
-            await writer.WriteLineAsync("[EDITOR]");
-            foreach (var proc in procs)
-            {
-                var data = proc.SerializeAll(Fumen);
-                await writer.WriteLineAsync(data);
-                await writer.WriteLineAsync();
-            }
+            await EditorProjectDataUtils.TrySaveToFileAsync(filePath, EditorProjectData);
         }
 
         protected override Task OnActivateAsync(CancellationToken cancellationToken)
@@ -335,7 +361,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnNewObjectAdd(DisplayObjectViewModelBase viewModel)
         {
             var view = ViewHelper.CreateView(viewModel);
-            fumen.AddObject(viewModel.ReferenceOngekiObject);
+            Fumen.AddObject(viewModel.ReferenceOngekiObject);
 
             EditorViewModels.Add(viewModel);
             viewModel.EditorViewModel = this;
@@ -421,7 +447,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var obj in selectedObject)
             {
                 EditorViewModels.Remove(obj);
-                fumen.RemoveObject(obj.ReferenceOngekiObject);
+                Fumen.RemoveObject(obj.ReferenceOngekiObject);
                 if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
                     propertyBrowser.OngekiObject = default;
             }

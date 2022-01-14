@@ -17,7 +17,7 @@
             Height="20"
             Fill="CadetBlue">
             <Ellipse.RenderTransform>
-                <TranslateTransform X="-10" Y="-10">
+                <TranslateTransform X="-10" Y="+10">
                 </TranslateTransform>
             </Ellipse.RenderTransform>
         </Ellipse>

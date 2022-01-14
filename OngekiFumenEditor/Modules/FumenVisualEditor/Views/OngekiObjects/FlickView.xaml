@@ -15,7 +15,7 @@
     <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/flick.png">
         <Image.RenderTransform>
             <TransformGroup>
-                <TranslateTransform X="-52" Y="-56">
+                <TranslateTransform X="-52" Y="11">
                 </TranslateTransform>
                 <ScaleTransform ScaleX="{Binding ReferenceOngekiObject.Direction, Converter={StaticResource EnumToIntConverter}}">
                 </ScaleTransform>

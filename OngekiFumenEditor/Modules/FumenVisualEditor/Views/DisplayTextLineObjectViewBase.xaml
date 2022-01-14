@@ -8,7 +8,7 @@
     xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects"
     cal:Bind.AtDesignTime="True"
-    d:DataContext="{d:DesignInstance Type=vm:EnemySetViewModel,
+    d:DataContext="{d:DesignInstance Type=vm:MeterChangeViewModel,
                                      IsDesignTimeCreatable=True}"
     mc:Ignorable="d">
     <Grid
@@ -29,10 +29,37 @@
             <TextBlock Foreground="{Binding DisplayBrush}" Text="{Binding DisplayName}">
             </TextBlock>
             <TextBlock
-                Name="displayValueTextBlock"
                 Margin="5,0,0,0"
                 d:Text="{Binding ReferenceOngekiObject.TagTblValue.Value}"
                 Foreground="{Binding DisplayBrush}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ReferenceOngekiObject.IDShortName}" Value="EST">
+                                <Setter Property="Text" Value="{Binding ReferenceOngekiObject.TagTblValue.Value}">
+                                </Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ReferenceOngekiObject.IDShortName}" Value="BPM">
+                                <Setter Property="Text" Value="{Binding ReferenceOngekiObject.BPM}">
+                                </Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ReferenceOngekiObject.IDShortName}" Value="CLK">
+                                <Setter Property="Text" Value="{Binding ReferenceOngekiObject.BPM}">
+                                </Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ReferenceOngekiObject.IDShortName}" Value="MET">
+                                <Setter Property="Text">
+                                    <Setter.Value>
+                                        <MultiBinding StringFormat="{}{0} {1}">
+                                            <Binding Path="ReferenceOngekiObject.BunShi" />
+                                            <Binding Path="ReferenceOngekiObject.Bunbo" />
+                                        </MultiBinding>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
             </TextBlock>
         </StackPanel>
         <Rectangle

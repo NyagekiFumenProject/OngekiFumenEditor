@@ -113,11 +113,11 @@ namespace OngekiFumenEditor.Utils
         public static double CalculateXFromBetweenObjects(TGrid fromTGrid, XGrid fromXGrid, TGrid toTGrid, XGrid toXGrid, FumenVisualEditorViewModel editor, TGrid tGrid)
         {
             var prevX = XGridCalculator.ConvertXGridToX(fromXGrid, editor);
-            var prevY = TGridCalculator.ConvertTGridToY(fromTGrid, editor, false) ?? 0;
+            var prevY = TGridCalculator.ConvertTGridToY(fromTGrid, editor);
             var curX = XGridCalculator.ConvertXGridToX(toXGrid, editor);
-            var curY = TGridCalculator.ConvertTGridToY(toTGrid, editor, false) ?? 0;
+            var curY = TGridCalculator.ConvertTGridToY(toTGrid, editor);
 
-            var timeY = TGridCalculator.ConvertTGridToY(tGrid, editor) ?? 0;
+            var timeY = TGridCalculator.ConvertTGridToY(tGrid, editor);
             var timeX = CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
 
             return timeX;

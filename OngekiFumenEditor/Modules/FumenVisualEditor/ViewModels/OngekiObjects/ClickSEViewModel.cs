@@ -10,6 +10,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     public class ClickSEViewModel : DisplayTextLineObjectViewModelBase<ClickSE>
     {
         public override Brush DisplayBrush => Brushes.CadetBlue;
-        public override BindingBase DisplayValueBinding => null;
     }
 }

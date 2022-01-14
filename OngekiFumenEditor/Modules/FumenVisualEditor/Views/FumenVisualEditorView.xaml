@@ -27,11 +27,11 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Focusable="False">
-        <Canvas
+        <Grid
             Name="VisualDisplayer"
             Background="Black"
             Visibility="Visible">
-            <Canvas.ContextMenu>
+            <Grid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Selected Object...">
                         <MenuItem cal:Message.Attach="DeleteSelectedObjects()" Header="Delete">
@@ -42,7 +42,7 @@
                         </MenuItem>
                     </MenuItem>
                 </ContextMenu>
-            </Canvas.ContextMenu>
+            </Grid.ContextMenu>
             <ItemsControl ItemsSource="{Binding XGridUnitLineLocations}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -164,11 +164,15 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <ItemsControl
-                Width="{Binding ElementName=VisualDisplayer, Path=ActualWidth}"
-                Height="{Binding ElementName=VisualDisplayer, Path=ActualHeight}"
-                ItemTemplateSelector="{StaticResource EditorObjectDataTemplateSelector}"
-                ItemsSource="{Binding EditorViewModels}">
+            <ItemsControl ItemTemplateSelector="{StaticResource EditorObjectDataTemplateSelector}" ItemsSource="{Binding EditorViewModels}">
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding CanvasX}">
+                        </Setter>
+                        <Setter Property="Canvas.Bottom" Value="{Binding CanvasY}">
+                        </Setter>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Canvas>
@@ -176,8 +180,8 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
-        </Canvas>
-        <Grid d:Visibility="Hidden">
+        </Grid>
+        <Grid d:Visibility="Collapsed">
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Style.Triggers>

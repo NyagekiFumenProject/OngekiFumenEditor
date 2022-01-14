@@ -13,8 +13,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     public class BPMChangeViewModel : DisplayTextLineObjectViewModelBase<BPMChange>
     {
         public override Brush DisplayBrush => Brushes.Pink;
-        private static BindingBase SharedDisplayValueBinding = new Binding("ReferenceOngekiObject.BPM");
-        public override BindingBase DisplayValueBinding => SharedDisplayValueBinding;
 
         public override void OnDragEnd(Point pos)
         {

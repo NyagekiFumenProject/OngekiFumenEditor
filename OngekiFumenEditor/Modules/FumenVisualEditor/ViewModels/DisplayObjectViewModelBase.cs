@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Gemini.Framework;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -18,7 +19,7 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
-    public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IEditorDisplayableViewModel,IViewAware
+    public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IEditorDisplayableViewModel
     {
         private bool isSelected;
         public bool IsSelected
@@ -36,6 +37,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public double canvasX = 0;
+        public double CanvasX
+        {
+            get => canvasX;
+            set => Set(ref canvasX, value);
+        }
+
+        public double canvasY = 0;
+        public double CanvasY
+        {
+            get => canvasY;
+            set => Set(ref canvasY, value);
+        }
+
+        private bool isHorizonPositionObject = false;
+        private bool isTimelineObject = false;
+
         protected OngekiObjectBase referenceOngekiObject;
         public virtual OngekiObjectBase ReferenceOngekiObject
         {
@@ -43,6 +61,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 referenceOngekiObject = value;
+                isHorizonPositionObject = value is IHorizonPositionObject;
+                isTimelineObject = value is ITimelineObject;
                 NotifyOfPropertyChange(() => ReferenceOngekiObject);
             }
         }
@@ -63,20 +83,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public virtual void OnDragEnd(Point pos)
         {
-            if (View is null)
-                return;
             OnDragMoving(pos);
             //Log.LogInfo($"OnDragEnd");
         }
 
         public virtual void OnDragMoving(Point pos)
         {
-            if (View is null)
-                return;
-
             var movePoint = new Point(
                 dragViewStartPoint.X + (pos.X - dragStartPoint.X),
-                dragViewStartPoint.Y + (pos.Y - dragStartPoint.Y)
+                dragViewStartPoint.Y - (pos.Y - dragStartPoint.Y)
                 );
 
             //这里限制一下
@@ -92,15 +107,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         Point dragViewStartPoint = default;
         Point dragStartPoint = default;
 
-        public event EventHandler<ViewAttachedEventArgs> ViewAttached;
-
         public virtual void OnDragStart(Point pos)
         {
-            if (View is null)
-                return;
-
-            var x = (double)View.GetValue(Canvas.LeftProperty);
-            var y = (double)View.GetValue(Canvas.TopProperty);
+            var x = CanvasX;
+            var y = CanvasY;
             if (double.IsNaN(x))
                 x = default;
             if (double.IsNaN(y))
@@ -128,6 +138,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         timeObj.TGrid = tGrid;
                         //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
                     }
+                    RecaulateCanvasY();
                 }
 
                 if (ReferenceOngekiObject is IHorizonPositionObject posObj)
@@ -136,6 +147,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var xGrid = XGridCalculator.ConvertXToXGrid(x, hostModelView);
                     posObj.XGrid = xGrid;
                     //Log.LogInfo($"x : {x:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, hostModelView)}");
+                    RecaulateCanvasX();
                 }
             }
             else
@@ -146,6 +158,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public virtual double CheckAndAdjustY(double y)
         {
+            return y;
+            /*
             var s = y;
             y = EditorViewModel.CanvasHeight - y;
             var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventTimelineAutoClose ?? false);
@@ -156,8 +170,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : default;
             var nearestUnitLine = mid?.FirstOrDefault();
             var fin = nearestUnitLine != null ? (EditorViewModel.CanvasHeight - nearestUnitLine.y) : y;
-            //Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.y:F2}) ,fin:{fin:F2}");
+            Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.y:F2}) ,fin:{fin:F2}");
             return fin;
+            */
         }
 
         public virtual double CheckAndAdjustX(double x)
@@ -177,45 +192,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public static BindingBase XGridMapToXBinding { get; }
         public static BindingBase TGridMapToYBinding { get; }
 
-        static DisplayObjectViewModelBase()
+        public void RecaulateCanvasX()
         {
-            var xb = new MultiBinding()
-            {
-                Converter = new XGridCanvasConverter(),
-            };
-            xb.Bindings.Add(new Binding("ReferenceOngekiObject.XGrid.Unit"));
-            xb.Bindings.Add(new Binding("EditorViewModel"));
-            xb.Bindings.Add(new Binding("EditorViewModel.Setting"));
+            if (isHorizonPositionObject == false || EditorViewModel is null)
+                return;
 
-            XGridMapToXBinding = xb;
+            var xGrid = ((IHorizonPositionObject)ReferenceOngekiObject).XGrid;
+            var modelView = EditorViewModel;
+            var xgridUnit = xGrid.Unit + xGrid.Grid / xGrid.ResX;
+            var x = xgridUnit * (modelView.XUnitSize / modelView.Setting.UnitCloseSize) + modelView.CanvasWidth / 2;
 
-            var tb = new MultiBinding()
-            {
-                Converter = new TGridCanvasConverter(),
-            };
-            tb.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Grid"));
-            tb.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid.Unit"));
-            tb.Bindings.Add(new Binding("ReferenceOngekiObject.TGrid"));
-            tb.Bindings.Add(new Binding("EditorViewModel"));
-
-            TGridMapToYBinding = tb;
+            CanvasX = x;
         }
 
-        protected virtual void OnAttachedView(object view)
+        public void RecaulateCanvasY()
         {
-            var element = view as FrameworkElement;
+            if (isTimelineObject == false || EditorViewModel is null)
+                return;
+            var tGrid = ((ITimelineObject)ReferenceOngekiObject).TGrid;
+            var y = TGridCalculator.ConvertTGridToY(tGrid, EditorViewModel);
+            CanvasY = y;
+            //Log.LogInfo($"Y: {CanvasY} , TGrid: {tGrid}");
+        }
 
-            if (ReferenceOngekiObject is IHorizonPositionObject)
-            {
-                element.SetBinding(Canvas.LeftProperty, XGridMapToXBinding);
-            }
-
-            if (ReferenceOngekiObject is ITimelineObject)
-            {
-                element.SetBinding(Canvas.TopProperty, TGridMapToYBinding);
-            }
-
-            Refresh();
+        public void RecaulateCanvasXY()
+        {
+            RecaulateCanvasX();
+            RecaulateCanvasY();
         }
 
         public virtual void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
@@ -224,16 +227,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 ReferenceOngekiObject = obj;
             EditorViewModel = editorViewModel;
         }
-
-        public FrameworkElement View { get; private set; }
-
-        public void AttachView(object view, object context = null)
-        {
-            View = view as FrameworkElement;
-            OnAttachedView(View);
-        }
-
-        public object GetView(object context = null) => View;
     }
 
     public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, new()
@@ -258,16 +251,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [MapToView(ViewType = typeof(DisplayTextLineObjectViewBase))]
     public abstract class DisplayTextLineObjectViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase, new()
     {
+        public string DisplayName => ReferenceOngekiObject.IDShortName;
         public abstract Brush DisplayBrush { get; }
-        public virtual string DisplayName => ReferenceOngekiObject.IDShortName;
-        public abstract BindingBase DisplayValueBinding { get; }
-
-        protected override void OnAttachedView(object v)
-        {
-            base.OnAttachedView(v);
-
-            if (v is DisplayTextLineObjectViewBase view && DisplayValueBinding is not null)
-                view.displayValueTextBlock.SetBinding(TextBlock.TextProperty, DisplayValueBinding);
-        }
     }
 }

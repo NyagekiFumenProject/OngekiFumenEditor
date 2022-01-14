@@ -33,7 +33,7 @@
         </Image.Style>
         <Image.RenderTransform>
             <TransformGroup>
-                <TranslateTransform X="-20" Y="-20.2">
+                <TranslateTransform X="-20" Y="+20.2">
                 </TranslateTransform>
                 <ScaleTransform ScaleX="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType, Converter={StaticResource EnumToIntConverter}}">
                 </ScaleTransform>

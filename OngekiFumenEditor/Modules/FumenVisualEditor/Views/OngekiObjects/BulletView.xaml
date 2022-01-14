@@ -55,7 +55,7 @@
             </TextBlock.Style>
         </TextBlock>
         <Grid.RenderTransform>
-            <TranslateTransform X="-15" Y="-15">
+            <TranslateTransform X="-15" Y="+15">
             </TranslateTransform>
         </Grid.RenderTransform>
     </Grid>
