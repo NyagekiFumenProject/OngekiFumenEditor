@@ -1,0 +1,72 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.Dialogs.EditorProjectSetupDialogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.Dialogs"
+    xmlns:local2="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="项目新建向导"
+    Width="600"
+    Height="600"
+    d:DataContext="{d:DesignInstance Type=local2:EditorProjectSetupDialogViewModel,
+                                     IsDesignTimeCreatable=True}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    Style="{StaticResource MainWindowStyle}"
+    mc:Ignorable="d">
+    <Grid Focusable="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="5">
+                <GroupBox BorderBrush="Black" Header="音频设置">
+                    <StackPanel Margin="10,5,10,5">
+                        <Label>音频文件路径:</Label>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding EditorProjectData.AudioFilePath}" ToolTip="{Binding EditorProjectData.AudioFilePath}">
+                            </TextBlock>
+                            <Button
+                                Grid.Column="1"
+                                Padding="10,5,10,5"
+                                cal:Message.Attach="[Event Click] = [Action OnSelectAudioFilePathButtonClicked()];">
+                                浏览
+                            </Button>
+                        </Grid>
+                        <TextBlock Foreground="{DynamicResource EnvironmentToolWindowText}">
+                            <Run Text="音频长度:">
+                            </Run>
+                            <Run Text="{Binding EditorProjectData.AudioDuration, StringFormat={}{0}ms}">
+                            </Run>
+                        </TextBlock>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox BorderBrush="Black" Header="谱面初始设置">
+                    <StackPanel Margin="10,5,10,5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="0,0,10,0">初始Bpm:</TextBlock>
+                            <TextBox Width="150" Text="{Binding EditorProjectData.BaseBPM}">
+                            </TextBox>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Button
+            Grid.Row="1"
+            Height="50"
+            cal:Message.Attach="[Event Click] = [Action OnCreateButtonClicked()];">
+            新建
+        </Button>
+    </Grid>
+</mah:MetroWindow>
