@@ -65,8 +65,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref editorProjectData, value);
+                Setting = EditorProjectData.EditorSetting;
                 Fumen = EditorProjectData.Fumen;
-                NotifyOfPropertyChange(() => Setting);
             }
         }
 
@@ -99,23 +99,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private double startVisibleCanvasY;
-        public double StartVisibleCanvasY
+        private double minVisibleCanvasY;
+        public double MinVisibleCanvasY
         {
-            get => startVisibleCanvasY;
+            get => minVisibleCanvasY;
             set
             {
-                Set(ref startVisibleCanvasY, value);
+                Set(ref minVisibleCanvasY, value);
             }
         }
 
-        private double endVisibleCanvasY;
-        public double EndVisibleCanvasY
+        private double maxVisibleCanvasY;
+        public double MaxVisibleCanvasY
         {
-            get => endVisibleCanvasY;
+            get => maxVisibleCanvasY;
             set
             {
-                Set(ref endVisibleCanvasY, value);
+                Set(ref maxVisibleCanvasY, value);
             }
         }
 
@@ -126,15 +126,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref scrollViewerVerticalOffset, value);
-                StartVisibleCanvasY = CanvasHeight - (ScrollViewerVerticalOffset + ScrollViewerActualHeight);
-                EndVisibleCanvasY = CanvasHeight - ScrollViewerVerticalOffset;
+                MinVisibleCanvasY = ScrollViewerVerticalOffset;
+                MaxVisibleCanvasY = ScrollViewerVerticalOffset + CanvasHeight;
+                Log.LogDebug($"current:{ScrollViewerVerticalOffset:F2}  min:{MinVisibleCanvasY:F2}  max:{MaxVisibleCanvasY:F2}");
             }
         }
 
         public double XUnitSize => CanvasWidth / (Setting.XGridMaxUnit * 2) * Setting.UnitCloseSize;
-        public double CanvasWidth => View?.VisualDisplayer?.ActualWidth ?? 0;
-        public double CanvasHeight => View?.VisualDisplayer?.ActualHeight ?? 0;
-        public FumenVisualEditorView View { get; private set; }
+        public double CanvasWidth { get; set; }
+        public double CanvasHeight { get; set; }
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
         //public ItemCollection DisplayObjectList => View?.DisplayObjectList.Items;
@@ -166,6 +166,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(EditorProjectData.EditorSetting, value, OnSettingPropertyChanged);
+                if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings && editorSettings.Setting == Setting)
+                    editorSettings.Setting = value;
                 EditorProjectData.EditorSetting = value;
                 NotifyOfPropertyChange(() => Setting);
             }
@@ -186,6 +188,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     Redraw(RedrawTarget.XGridUnitLines);
                     break;
                 case nameof(EditorSetting.CurrentDisplayTimePosition):
+                    ScrollViewerVerticalOffset = TGridCalculator.ConvertTGridToY(Setting.CurrentDisplayTimePosition, this);
                     Redraw(RedrawTarget.TGridUnitLines | RedrawTarget.OngekiObjects);
                     break;
                 case nameof(EditorSetting.BeatSplit):
@@ -207,9 +210,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         protected override void OnViewLoaded(object v)
         {
             base.OnViewLoaded(v);
-            var view = v as FumenVisualEditorView;
-
-            View = view;
             RedrawUnitCloseXLines();
         }
 
@@ -247,7 +247,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (nextBpm is not null && tGrid >= nextBpm.TGrid)
                         break;
                     var y = TGridCalculator.ConvertTGridToY(tGrid, this);
-                    if (y > CanvasHeight)
+                    if (y > MaxVisibleCanvasY)
                         break;
                     var line = ObjectPool<TGridUnitLineViewModel>.Get();
                     line.TGrid = tGrid;
@@ -280,8 +280,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (Fumen is null || CanvasHeight == 0)
                 return;
-            var begin = TGridCalculator.ConvertYToTGrid(0, this) ?? new TGrid(0, 0);
-            var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
+            //var begin = TGridCalculator.ConvertYToTGrid(0, this) ?? new TGrid(0, 0);
+            //var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
 
             //Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
             foreach (var item in EditorViewModels.OfType<DisplayObjectViewModelBase>())
@@ -400,8 +400,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 RedrawEditorObjects();
         }
 
+        public void OnLoaded(ActionExecutionContext e)
+        {
+            var view = (e.View as FrameworkElement);
+            CanvasWidth = view.ActualWidth;
+            CanvasHeight = view.ActualHeight;
+            Redraw(RedrawTarget.All);
+        }
+
         public void OnSizeChanged(ActionExecutionContext e)
         {
+            var arg = e.EventArgs as SizeChangedEventArgs;
+            CanvasWidth = arg.NewSize.Width;
+            CanvasHeight = arg.NewSize.Height;
             Redraw(RedrawTarget.All);
         }
 
@@ -473,7 +484,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseLeave(ActionExecutionContext e)
         {
             //Log.LogInfo("OnMouseLeave");
-            if (!(isMouseDown && View.Parent is IInputElement parent))
+            if (!(isMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
             isMouseDown = false;
             isDragging = false;
@@ -485,7 +496,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseUp(ActionExecutionContext e)
         {
             //Log.LogInfo("OnMouseUp");
-            if (!(isMouseDown && View.Parent is IInputElement parent))
+            if (!(isMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
@@ -500,7 +511,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseMove(ActionExecutionContext e)
         {
             //Log.LogInfo("OnMouseMove");
-            if (!(isMouseDown && View.Parent is IInputElement parent))
+            var view = e.View as FrameworkElement;
+            if (!(isMouseDown && view is not null && view.Parent is IInputElement parent))
                 return;
             //e.Handled = true;
             var r = isDragging;
@@ -514,7 +526,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             isDragging = true;
 
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
-            if (VisualTreeUtility.FindParent<Visual>(View) is FrameworkElement uiElement)
+            if (VisualTreeUtility.FindParent<Visual>(view) is FrameworkElement uiElement)
             {
                 var bound = new Rect(0, 0, uiElement.ActualWidth, uiElement.ActualHeight);
                 if (bound.Contains(pos))
@@ -537,7 +549,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 isDragging = false;
                 //e.Handled = true;
             }
-            View.Focus();
+            (e.View as FrameworkElement)?.Focus();
         }
 
         public void Grid_DragEnter(ActionExecutionContext e)
@@ -553,7 +565,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
                 return;
 
-            var mousePosition = arg.GetPosition(View.VisualDisplayer);
+            var mousePosition = arg.GetPosition(e.View as FrameworkElement);
             var displayObject = default(DisplayObjectViewModelBase);
 
             switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
@@ -570,6 +582,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             editorObjectViewModel.OnObjectCreated(displayObject.ReferenceOngekiObject, this);
             */
             OnNewObjectAdd(displayObject);
+            var ry = CanvasHeight - mousePosition.Y + MinVisibleCanvasY;
+            mousePosition.Y = ry;
             displayObject.MoveCanvas(mousePosition);
             Redraw(RedrawTarget.OngekiObjects);
         }
