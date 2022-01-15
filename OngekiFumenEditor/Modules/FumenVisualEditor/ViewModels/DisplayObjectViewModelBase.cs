@@ -158,21 +158,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public virtual double CheckAndAdjustY(double y)
         {
-            return y;
-            /*
-            var s = y;
-            y = EditorViewModel.CanvasHeight - y;
             var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventTimelineAutoClose ?? false);
             var mid = enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z => new
             {
-                distance = Math.Abs(z.Y - s),
+                distance = Math.Abs(z.Y - y),
                 y = z.Y
             })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : default;
             var nearestUnitLine = mid?.FirstOrDefault();
-            var fin = nearestUnitLine != null ? (EditorViewModel.CanvasHeight - nearestUnitLine.y) : y;
+            var fin = nearestUnitLine != null ? nearestUnitLine.y : y;
             Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.y:F2}) ,fin:{fin:F2}");
             return fin;
-            */
         }
 
         public virtual double CheckAndAdjustX(double x)
