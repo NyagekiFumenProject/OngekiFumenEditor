@@ -33,7 +33,7 @@
             </Style>
         </Image.Style>
         <Image.RenderTransform>
-            <TranslateTransform X="-20" Y="-5">
+            <TranslateTransform X="-20" Y="+8.1">
             </TranslateTransform>
         </Image.RenderTransform>
     </Image>

@@ -3,6 +3,7 @@ using Gemini.Modules.Output;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -72,7 +73,8 @@ namespace OngekiFumenEditor.Utils
         {
             var instance = Instance;
             var msg = instance.BuildLogMessage(message, "DEBUG", newLine, time, prefix);
-            instance.Output(msg);
+            Debug.WriteLine(msg);
+            //instance.Output(msg);
         }
 
         public static void LogInfo(string message, bool newLine = true, bool time = true, [CallerMemberName] string prefix = "<Unknown>")

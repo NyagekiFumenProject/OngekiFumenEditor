@@ -16,7 +16,7 @@
         d:Width="500"
         Opacity="1">
         <Grid.RenderTransform>
-            <TranslateTransform Y="-7.62">
+            <TranslateTransform Y="+7.62">
             </TranslateTransform>
         </Grid.RenderTransform>
         <Grid.ColumnDefinitions>
@@ -44,7 +44,7 @@
                                 </Setter>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding ReferenceOngekiObject.IDShortName}" Value="CLK">
-                                <Setter Property="Text" Value="{Binding ReferenceOngekiObject.BPM}">
+                                <Setter Property="Text" Value="">
                                 </Setter>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding ReferenceOngekiObject.IDShortName}" Value="MET">
