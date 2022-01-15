@@ -1,5 +1,6 @@
 ﻿using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         {
             base.OnDragEnd(pos);
             //when bpmChange drag done. all ongeki object need to redraw to adapt new bpmList changed.
-            EditorViewModel.Redraw(FumenVisualEditorViewModel.RedrawTarget.OngekiObjects);
+            EditorViewModel.Redraw(RedrawTarget.OngekiObjects);
         }
     }
 }

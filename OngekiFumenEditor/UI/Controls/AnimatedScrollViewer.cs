@@ -110,7 +110,7 @@ namespace OngekiFumenEditor.UI.Controls
             ScrollToVerticalOffsetWithAnimation(0, milliseconds);
         }
 
-        public void ScrollToVerticalOffsetWithAnimation(double offset, double milliseconds = 500, Action? onComplete = null)
+        public void ScrollToVerticalOffsetWithAnimation(double offset, double milliseconds = 500, Action onComplete = null)
         {
             var animation = AnimationHelper.CreateAnimation(offset, milliseconds);
             Timeline.SetDesiredFrameRate(animation, 60);

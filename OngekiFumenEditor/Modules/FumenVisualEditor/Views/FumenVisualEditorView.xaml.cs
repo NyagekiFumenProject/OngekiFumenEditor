@@ -6,6 +6,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public FumenVisualEditorView()
         {
             InitializeComponent();
+        }
+
+        private void Grid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            (DataContext as FumenVisualEditorViewModel)?.OnLoaded(new ActionExecutionContext() { View = this, EventArgs = e });
+        }
+
+        private void Grid_Loaded(object sender, RoutedEventArgs e)
+        {
+            (DataContext as FumenVisualEditorViewModel)?.OnLoaded(new ActionExecutionContext() { View = this });
         }
     }
 }

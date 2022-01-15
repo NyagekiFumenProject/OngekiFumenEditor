@@ -17,22 +17,10 @@ namespace Test
             var bpmList = new BpmList();
 
             bpmList.SetFirstBpm(new() { TGrid = new(0, 0), BPM = 240 });
-            bpmList.Add(new() { TGrid = new(1, 0), BPM = 480 });
+            bpmList.Add(new() { TGrid = new(1, 0), BPM = 6000 });
             bpmList.Add(new() { TGrid = new(2, 0), BPM = 240 });
             bpmList.Add(new() { TGrid = new(3, 0), BPM = 480 });
-            bpmList.Add(new() { TGrid = new(4, 0), BPM = 240 });
-
-            foreach (var t in _TGridCalculator.GetAllBpmUniformPositionList(bpmList))
-            {
-                Console.WriteLine($"({t.bpm})  {t.startY}");
-            }
-
-            var y = 950;
-            Console.WriteLine($"{y} -> ({_TGridCalculator.ConvertYToTGrid(y, bpmList)}) -> {_TGridCalculator.ConvertTGridToY(_TGridCalculator.ConvertYToTGrid(y, bpmList), bpmList)}");
-
-
-            var tGrid = new TGrid(2, 500);
-            Console.WriteLine($"({tGrid}) -> {_TGridCalculator.ConvertTGridToY(tGrid, bpmList)} -> ({_TGridCalculator.ConvertYToTGrid(_TGridCalculator.ConvertTGridToY(tGrid, bpmList), bpmList)})");
+            bpmList.Add(new() { TGrid = new(4, 0), BPM = 100 });
         }
     }
 }
