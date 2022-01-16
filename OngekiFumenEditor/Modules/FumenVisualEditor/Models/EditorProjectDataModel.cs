@@ -56,6 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 Fumen.MetaInfo.FirstBpm.BPM = value;
+                Fumen.BpmList.FirstBpm.BPM = value;
                 NotifyOfPropertyChange(() => BaseBPM);
             }
         }

@@ -95,8 +95,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 );
 
             //这里限制一下
-            movePoint.X = Math.Max(0, Math.Min(EditorViewModel.CanvasWidth, movePoint.X));
-            movePoint.Y = Math.Max(0, Math.Min(EditorViewModel.CanvasHeight, movePoint.Y));
+            movePoint.X = Math.Max(0, Math.Min(EditorViewModel.TotalDurationHeight, movePoint.X));
+            movePoint.Y = Math.Max(0, Math.Min(EditorViewModel.TotalDurationHeight, movePoint.Y));
 
             MoveCanvas(movePoint);
 
