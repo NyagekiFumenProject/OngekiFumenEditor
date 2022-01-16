@@ -10,7 +10,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
-    cal:Message.Attach="[Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Event MouseWheel] = [Action OnMouseWheel($executionContext)];     [Event MouseLeftButtonDown] = [Action OnMouseDown($executionContext)];     [Event MouseMove] = [Action OnMouseMove($executionContext)];     [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];     [Event MouseLeave] = [Action OnMouseLeave($executionContext)];     "
+    cal:Message.Attach="[Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Event MouseWheel] = [Action OnMouseWheel($executionContext)];    "
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel,
                                      IsDesignTimeCreatable=True}"
     d:DesignHeight="450"
@@ -30,147 +30,149 @@
             </converters:IsStringEmptyConverter>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid cal:Message.Attach="[Event SizeChanged] = [Action OnSizeChanged($executionContext)]; [Event Loaded] = [Action OnLoaded($executionContext)];     " Focusable="False">
-        <Grid
-            Name="VisualDisplayer"
-            Background="Black"
-            Visibility="Visible">
-            <Grid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Selected Object...">
-                        <MenuItem cal:Message.Attach="DeleteSelectedObjects()" Header="Delete">
-                        </MenuItem>
-                        <MenuItem cal:Message.Attach="CopySelectedObjects()" Header="Copy">
-                        </MenuItem>
-                        <MenuItem cal:Message.Attach="PasteCopiesObjects()" Header="Paste">
-                        </MenuItem>
+    <Grid
+        cal:Message.Attach="[Event MouseDown] = [Action OnMouseDown($executionContext)]; [Event MouseMove] = [Action OnMouseMove($executionContext)];     [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];     [Event MouseLeave] = [Action OnMouseLeave($executionContext)];     [Event SizeChanged] = [Action OnSizeChanged($executionContext)]; [Event Loaded] = [Action OnLoaded($executionContext)];     "
+        Background="Black"
+        Focusable="False">
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Selected Object...">
+                    <MenuItem cal:Message.Attach="DeleteSelectedObjects()" Header="Delete">
                     </MenuItem>
-                </ContextMenu>
-            </Grid.ContextMenu>
-            <ItemsControl ItemsSource="{Binding XGridUnitLineLocations}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas>
-                        </Canvas>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Line
-                                X1="{Binding X}"
-                                X2="{Binding X}"
-                                Y1="0"
-                                Y2="{Binding ElementName=VisualDisplayer, Path=ActualHeight}">
-                                <Line.Style>
-                                    <Style TargetType="Line">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                                <Setter Property="Stroke" Value="#90FFFFFF">
-                                                </Setter>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsCenterLine}" Value="False">
-                                                <Setter Property="Stroke" Value="#40FFFFFF">
-                                                </Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Line.Style>
-                            </Line>
-                            <TextBlock
-                                FontSize="10"
-                                Foreground="White"
-                                Opacity="0.35"
-                                Text="{Binding Unit}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                                <Setter Property="Visibility" Value="Hidden">
-                                                </Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                                <TextBlock.RenderTransformOrigin>
-                                    <Point X="1">
-                                    </Point>
-                                </TextBlock.RenderTransformOrigin>
-                                <TextBlock.RenderTransform>
-                                    <TranslateTransform X="{Binding X}">
-                                    </TranslateTransform>
-                                </TextBlock.RenderTransform>
-                            </TextBlock>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <ItemsControl ItemsSource="{Binding TGridUnitLineLocations}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas>
-                        </Canvas>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Line
-                                X1="{Binding ElementName=VisualDisplayer, Path=ActualWidth}"
-                                X2="0"
-                                Y1="{Binding Y}"
-                                Y2="{Binding Y}">
-                                <Line.Style>
-                                    <Style TargetType="Line">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsBaseLine}" Value="True">
-                                                <Setter Property="Stroke" Value="#FFFFFFFF">
-                                                </Setter>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsBaseLine}" Value="False">
-                                                <Setter Property="Stroke" Value="#40FFFFFF">
-                                                </Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Line.Style>
-                            </Line>
-                            <TextBlock
-                                FontSize="10"
-                                Foreground="White"
-                                Opacity="0.35"
-                                Text="{Binding TGrid}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsBaseLine}" Value="True">
-                                                <Setter Property="HorizontalAlignment" Value="Right">
-                                                </Setter>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsBaseLine}" Value="False">
-                                                <Setter Property="HorizontalAlignment" Value="Left">
-                                                </Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                                <TextBlock.RenderTransformOrigin>
-                                    <Point Y="0.5">
-                                    </Point>
-                                </TextBlock.RenderTransformOrigin>
-                                <TextBlock.RenderTransform>
-                                    <TranslateTransform Y="{Binding Y}">
-                                    </TranslateTransform>
-                                </TextBlock.RenderTransform>
-                            </TextBlock>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <controls:AnimatedScrollViewer
-                cal:Message.Attach="[Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];"
-                HorizontalScrollBarVisibility="Disabled"
-                VerticalScrollBarVisibility="Visible">
+                    <MenuItem cal:Message.Attach="CopySelectedObjects()" Header="Copy">
+                    </MenuItem>
+                    <MenuItem cal:Message.Attach="PasteCopiesObjects()" Header="Paste">
+                    </MenuItem>
+                </MenuItem>
+            </ContextMenu>
+        </Grid.ContextMenu>
+        <ItemsControl x:Name="XGridUnitLineLocations" ItemsSource="{Binding XGridUnitLineLocations}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas>
+                    </Canvas>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Line
+                            X1="{Binding X}"
+                            X2="{Binding X}"
+                            Y1="0"
+                            Y2="{Binding ActualHeight, ElementName=XGridUnitLineLocations}">
+                            <Line.Style>
+                                <Style TargetType="Line">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
+                                            <Setter Property="Stroke" Value="#90FFFFFF">
+                                            </Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsCenterLine}" Value="False">
+                                            <Setter Property="Stroke" Value="#40FFFFFF">
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Line.Style>
+                        </Line>
+                        <TextBlock
+                            FontSize="10"
+                            Foreground="White"
+                            Opacity="0.35"
+                            Text="{Binding Unit}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden">
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <TextBlock.RenderTransformOrigin>
+                                <Point X="1">
+                                </Point>
+                            </TextBlock.RenderTransformOrigin>
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform X="{Binding X}">
+                                </TranslateTransform>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <controls:AnimatedScrollViewer
+            x:Name="VisualDisplayer"
+            cal:Message.Attach="[Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];"
+            HorizontalScrollBarVisibility="Disabled"
+            IsPenetrating="True"
+            VerticalScrollBarVisibility="Visible">
+            <Grid>
+                <ItemsControl Height="{Binding TotalDurationHeight}" ItemsSource="{Binding TGridUnitLineLocations}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas>
+                            </Canvas>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Line
+                                    X1="{Binding ElementName=VisualDisplayer, Path=ActualWidth}"
+                                    X2="0"
+                                    Y1="{Binding Y}"
+                                    Y2="{Binding Y}">
+                                    <Line.Style>
+                                        <Style TargetType="Line">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsBaseLine}" Value="True">
+                                                    <Setter Property="Stroke" Value="#FFFFFFFF">
+                                                    </Setter>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsBaseLine}" Value="False">
+                                                    <Setter Property="Stroke" Value="#40FFFFFF">
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Line.Style>
+                                </Line>
+                                <TextBlock
+                                    FontSize="10"
+                                    Foreground="White"
+                                    Opacity="0.35"
+                                    Text="{Binding TGrid}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsBaseLine}" Value="True">
+                                                    <Setter Property="HorizontalAlignment" Value="Right">
+                                                    </Setter>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsBaseLine}" Value="False">
+                                                    <Setter Property="HorizontalAlignment" Value="Left">
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    <TextBlock.RenderTransformOrigin>
+                                        <Point Y="0.5">
+                                        </Point>
+                                    </TextBlock.RenderTransformOrigin>
+                                    <TextBlock.RenderTransform>
+                                        <TranslateTransform Y="{Binding Y}">
+                                        </TranslateTransform>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
                 <ItemsControl
                     Height="{Binding TotalDurationHeight}"
                     ItemTemplateSelector="{StaticResource EditorObjectDataTemplateSelector}"
@@ -190,33 +192,7 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
-            </controls:AnimatedScrollViewer>
-        </Grid>
-        <Grid d:Visibility="Collapsed">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ErrorMessage, Mode=OneWay, Converter={StaticResource IsStringEmptyConverter}}" Value="True">
-                            <Setter Property="Visibility" Value="Hidden">
-                            </Setter>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding ErrorMessage, Mode=OneWay, Converter={StaticResource IsStringEmptyConverter}}" Value="False">
-                            <Setter Property="Visibility" Value="Visible">
-                            </Setter>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
-            <Border Background="IndianRed" Opacity="0.75">
-            </Border>
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock FontSize="30" Foreground="Wheat">Error:</TextBlock>
-                <TextBlock
-                    FontSize="20"
-                    Foreground="White"
-                    Text="{Binding ErrorMessage, Mode=OneWay}">
-                </TextBlock>
-            </StackPanel>
-        </Grid>
+            </Grid>
+        </controls:AnimatedScrollViewer>
     </Grid>
 </UserControl>

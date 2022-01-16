@@ -84,7 +84,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 case nameof(EditorSetting.CurrentDisplayTimePosition):
                     ScrollViewerVerticalOffset = TGridCalculator.ConvertTGridToY(Setting.CurrentDisplayTimePosition, this);
-                    Redraw(RedrawTarget.TGridUnitLines | RedrawTarget.OngekiObjects);
                     break;
                 case nameof(EditorSetting.BeatSplit):
                 case nameof(EditorSetting.BaseLineY):
@@ -144,24 +143,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
+        public ObservableCollection<TGridUnitLineViewModel> _TGridUnitLineLocations { get; } = new();
         public bool isDragging;
         public bool isMouseDown;
-
-        private string errorMessage;
-        public string ErrorMessage
-        {
-            get
-            {
-                return errorMessage;
-            }
-            set
-            {
-                errorMessage = value;
-                if (!string.IsNullOrWhiteSpace(value))
-                    Log.LogError("Current error message : " + value);
-                NotifyOfPropertyChange(() => ErrorMessage);
-            }
-        }
 
         public FumenVisualEditorViewModel()
         {

@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using Gemini.Framework;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using System;
@@ -19,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get => totalDurationHeight;
             set
             {
-                value = Math.Max(value, MaxVisibleCanvasY - MinVisibleCanvasY);
+                value = Math.Max(value, CanvasHeight);
                 //Log.LogDebug($"TotalDurationHeight {TotalDurationHeight} -> {value}");
                 Set(ref totalDurationHeight, value);
             }
@@ -34,6 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 Set(ref scrollViewerVerticalOffset, value);
                 NotifyOfPropertyChange(() => MaxVisibleCanvasY);
                 NotifyOfPropertyChange(() => MinVisibleCanvasY);
+                Redraw(RedrawTarget.TGridUnitLines);
                 //Log.LogDebug($"current:{ScrollViewerVerticalOffset:F2}  min:{MinVisibleCanvasY:F2}  max:{MaxVisibleCanvasY:F2}");
             }
         }
@@ -48,7 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as ScrollChangedEventArgs;
             var scrollViewer = e.Source as AnimatedScrollViewer;
 
-            ScrollViewerVerticalOffset = scrollViewer.ScrollableHeight - scrollViewer.VerticalOffset;
+            ScrollViewerVerticalOffset = scrollViewer.ScrollableHeight - arg.VerticalOffset;
             //Log.LogDebug($"ScrollViewerVerticalOffset = {ScrollViewerVerticalOffset}");
         }
     }

@@ -67,43 +67,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             TGridUnitLineLocations.Clear();
             var baseLineAdded = false;
 
-            foreach ((_, var bpm) in TGridCalculator.GetAllBpmUniformPositionList(this))
+            var bpmList = Fumen.BpmList;
+
+            var beginTGrid = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this);
+            var beginBpm = bpmList.GetBpm(beginTGrid);
+
+            var endTGrid = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
+
+            var currentBpm = beginBpm;
+            var currentTGridBase = beginTGrid;
+            while (currentBpm is not null)
             {
-                var nextBpm = Fumen.BpmList.GetNextBpm(bpm);
-                var per = bpm.TGrid.ResT / Setting.BeatSplit;
-                var i = 0;
+                var nextBpm = Fumen.BpmList.GetNextBpm(currentBpm);
+                var per = currentBpm.TGrid.ResT / Setting.BeatSplit;
+                var diff = currentTGridBase - currentBpm.TGrid;
+                var totalGrid = diff.Unit * currentBpm.TGrid.ResT + diff.Grid;
+                var i = (int)Math.Max(0, totalGrid / per);
                 while (true)
                 {
-                    var tGrid = bpm.TGrid + new GridOffset(0, (int)(per * i));
+                    var tGrid = currentBpm.TGrid + new GridOffset(0, (int)(per * i));
                     if (nextBpm is not null && tGrid >= nextBpm.TGrid)
                         break;
+                    if (tGrid > endTGrid)
+                    {
+                        return;
+                    }
                     var y = TGridCalculator.ConvertTGridToY(tGrid, this);
-                    if (y > MaxVisibleCanvasY)
-                        break;
                     var line = ObjectPool<TGridUnitLineViewModel>.Get();
                     line.TGrid = tGrid;
-                    line.IsBaseLine = tGrid == Setting.CurrentDisplayTimePosition;
-                    line.Y = CanvasHeight - y;
-
+                    line.Y = TotalDurationHeight - y;
+                    line.BeatRhythm = i;
                     baseLineAdded = baseLineAdded || line.IsBaseLine;
                     TGridUnitLineLocations.Add(line);
                     i++;
                 }
-            }
-
-            if (!baseLineAdded)
-            {
-                //添加一个基线表示当前时间轴
-                if (TGridCalculator.ConvertTGridToY(Setting.CurrentDisplayTimePosition, this) is double y)
-                {
-                    var line = ObjectPool<TGridUnitLineViewModel>.Get();
-
-                    line.TGrid = Setting.CurrentDisplayTimePosition;
-                    line.IsBaseLine = true;
-                    line.Y = CanvasHeight - y;
-
-                    TGridUnitLineLocations.Add(line);
-                }
+                currentBpm = nextBpm;
+                currentTGridBase = nextBpm.TGrid;
             }
         }
 
@@ -111,10 +110,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (Fumen is null || CanvasHeight == 0)
                 return;
-            //var begin = TGridCalculator.ConvertYToTGrid(0, this) ?? new TGrid(0, 0);
-            //var end = TGridCalculator.ConvertYToTGrid(CanvasHeight, this);
+            var begin = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? new TGrid(0, 0);
+            var end = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
 
-            //Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
+            Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
             foreach (var item in EditorViewModels.OfType<DisplayObjectViewModelBase>())
                 item.RecaulateCanvasXY();
         }

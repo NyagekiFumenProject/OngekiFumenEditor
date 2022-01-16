@@ -73,7 +73,7 @@ namespace OngekiFumenEditor.Utils
         {
             var instance = Instance;
             var msg = instance.BuildLogMessage(message, "DEBUG", newLine, time, prefix);
-            Debug.WriteLine(msg);
+            Debug.Write(msg);
             //instance.Output(msg);
         }
 
