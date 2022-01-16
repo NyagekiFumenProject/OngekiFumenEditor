@@ -63,18 +63,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Redraw(RedrawTarget.TGridUnitLines);
         }
 
-        public void OnMouseWheel(ActionExecutionContext e)
-        {
-            var arg = e.EventArgs as MouseWheelEventArgs;
-            var scrollDelta = (int)(arg.Delta * Setting.MouseWheelTimelineSpeed);
-            var tGrid = Setting.CurrentDisplayTimePosition + new GridOffset(0, scrollDelta);
-
-            if (tGrid < TGrid.ZeroDefault)
-                tGrid = TGrid.ZeroDefault;
-
-            //Setting.CurrentDisplayTimePosition = tGrid;
-        }
-
         internal void OnSelectPropertyChanged(DisplayObjectViewModelBase obj, bool value)
         {
             if (value)

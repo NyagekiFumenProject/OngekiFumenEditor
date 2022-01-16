@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private int baseLineY = 240;
+        private int baseLineY = 50;
         /// <summary>
         /// 时间轴上单位线间距大小
         /// </summary>
