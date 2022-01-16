@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OngekiFumenEditor.Utils;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,13 +17,23 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Collections
 
         public event Action OnChangedEvent;
 
+        public BpmList()
+        {
+            OnChangedEvent += BpmList_OnChangedEvent;
+        }
+
+        private void BpmList_OnChangedEvent()
+        {
+            UpdateCachedAllBpmUniformPositionList(cachedBpmTUnitLength);
+        }
+
         public void Add(BPMChange bpm)
         {
             changedBpmList.Add(bpm);
             bpm.PropertyChanged += OnBpmPropChanged;
             OnChangedEvent?.Invoke();
         }
-        
+
         private void OnBpmPropChanged(object sender, PropertyChangedEventArgs e)
         {
             OnChangedEvent?.Invoke();
@@ -47,7 +58,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Collections
         public IEnumerator<BPMChange> GetEnumerator()
         {
             yield return firstBpm;
-            foreach (var item in changedBpmList.OrderBy(x=>x.TGrid))
+            foreach (var item in changedBpmList.OrderBy(x => x.TGrid))
                 yield return item;
         }
 
@@ -64,5 +75,37 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Collections
         public BPMChange GetNextBpm(BPMChange bpm) => GetNextBpm(bpm.TGrid);
 
         public BPMChange GetNextBpm(TGrid time) => this.FirstOrDefault(bpm => time < bpm.TGrid);
+
+        private List<(double startY, BPMChange bpm)> cachedBpmUniformPosition = new();
+        private double cachedBpmTUnitLength = 240;
+
+        private void UpdateCachedAllBpmUniformPositionList(double tUnitLength)
+        {
+            cachedBpmTUnitLength = tUnitLength;
+            cachedBpmUniformPosition.Clear();
+
+            var prev = FirstBpm;
+            var y = 0d;
+
+            cachedBpmUniformPosition.Add((0, FirstBpm));
+
+            while (true)
+            {
+                var cur = GetNextBpm(prev);
+                if (cur is null)
+                    break;
+                var len = MathUtils.CalculateBPMLength(prev, cur.TGrid, tUnitLength);
+                prev = cur;
+                y += len;
+                cachedBpmUniformPosition.Add((y, cur));
+            }
+        }
+
+        public IEnumerable<(double startY, BPMChange bpm)> GetCachedAllBpmUniformPositionList(double tUnitLength)
+        {
+            if (tUnitLength != cachedBpmTUnitLength)
+                UpdateCachedAllBpmUniformPositionList(tUnitLength);
+            return cachedBpmUniformPosition;
+        }
     }
 }

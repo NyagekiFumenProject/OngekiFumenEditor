@@ -48,23 +48,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         }
 
         public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor) => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.BaseLineY);
-        public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(BpmList bpmList, int tUnitLength = 240)
-        {
-            var prev = bpmList.FirstBpm;
-            var y = 0d;
-
-            yield return (0, bpmList.FirstBpm);
-
-            while (true)
-            {
-                var cur = bpmList.GetNextBpm(prev);
-                if (cur is null)
-                    break;
-                var len = MathUtils.CalculateBPMLength(prev, cur.TGrid, tUnitLength);
-                prev = cur;
-                y += len;
-                yield return (y, cur);
-            }
-        }
+        public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(BpmList bpmList, int tUnitLength = 240) => bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
     }
 }
