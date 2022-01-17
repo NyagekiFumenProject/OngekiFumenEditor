@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
             {
                 //先写个死
                 var y = TGridCalculator.ConvertTGridToY(bullet.TGrid, editor);
-                return editor.CanvasHeight - y;
+                return editor.TotalDurationHeight - y;
             }
         }
 

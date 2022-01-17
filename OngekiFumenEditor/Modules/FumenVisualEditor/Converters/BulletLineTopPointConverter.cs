@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
             }
             else
             {
-                return 0.0;
+                return editor.TotalDurationHeight - editor.MaxVisibleCanvasY;
             }
         }
 

@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             var x = XGridCalculator.ConvertXGridToX(BindObject.XGrid, BindFumenEditor)
                 //为啥要加个随机数呢，是因为PathSegmentCollection重新绘制会有缓存机制，如果一个点没有变动，那么就不会绘制此点以及后面的点(我猜的)
                 + 0.0000001 * MathUtils.Random(100);
-            var y = BindFumenEditor.CanvasHeight - TGridCalculator.ConvertTGridToY(BindObject.TGrid, BindFumenEditor);
+            var y = BindFumenEditor.TotalDurationHeight - TGridCalculator.ConvertTGridToY(BindObject.TGrid, BindFumenEditor);
 
             Segment.Point = new Point(x, y);
 
