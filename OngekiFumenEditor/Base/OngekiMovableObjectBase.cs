@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Base
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(xGrid, value);
                 xGrid = value;
-                NotifyOfPropertyChange(() => TGrid);
+                NotifyOfPropertyChange(() => XGrid);
             }
         }
 

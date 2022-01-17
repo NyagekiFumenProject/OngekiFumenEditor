@@ -94,6 +94,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         title.TitleContent = base.DisplayName;
                     break;
                 case nameof(EditorSetting.XGridMaxUnit):
+                    RecalculateXUnitSize();
                     Redraw(RedrawTarget.OngekiObjects | RedrawTarget.XGridUnitLines);
                     break;
                 default:
