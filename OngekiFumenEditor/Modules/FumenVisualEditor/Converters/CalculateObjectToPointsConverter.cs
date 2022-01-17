@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
                     //Get Y
                     if (values[1] is TGrid tGrid)
                     {
-                        return editorViewModel.CanvasHeight - TGridCalculator.ConvertTGridToY(tGrid, editorViewModel);
+                        return editorViewModel.TotalDurationHeight - TGridCalculator.ConvertTGridToY(tGrid, editorViewModel);
                     }
                 }
             }

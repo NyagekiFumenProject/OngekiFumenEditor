@@ -110,10 +110,10 @@
                 <editorobjects:HoldConnectorView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type editorObject:LaneConnectorViewModel}">
-                <editorobjects:HoldConnectorView />
+                <editorobjects:ConnectorView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type editorObject:WallConnectorViewModel}">
-                <editorobjects:HoldConnectorView />
+                <editorobjects:ConnectorView />
             </DataTemplate>
         </views:EditorObjectDataTemplateSelector.DataTemplates>
     </views:EditorObjectDataTemplateSelector>

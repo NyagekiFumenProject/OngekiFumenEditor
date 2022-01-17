@@ -114,6 +114,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var end = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
 
             Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
+            using var d = ObjectPool<HashSet<IDisplayableObject>>.GetWithUsingDisposable(out var list, out var _);
+
+            EditorViewModels
+                .OfType<DisplayObjectViewModelBase>()
+                .Select(x => x.ReferenceOngekiObject)
+                .OfType<IDisplayableObject>()
+                .ForEach(x => list.Add(x));
+
+            foreach (var add in Fumen
+                .GetAllDisplayableObjects()
+                .Where(x => x.CheckVisiable(begin, end))
+                .Where(x => !list.Contains(x)))
+            {
+                list.Add(add);
+                var viewModel = Activator.CreateInstance(add.ModelViewType);
+                if (viewModel is IEditorDisplayableViewModel editorDisplayable)
+                    editorDisplayable.OnObjectCreated(add, this);
+                Log.LogDebug($"add ${add}");
+                EditorViewModels.Add(viewModel);
+            }
+
             foreach (var item in EditorViewModels.OfType<DisplayObjectViewModelBase>())
                 item.RecaulateCanvasXY();
         }
