@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Utils
 
             if (newValue is not null)
             {
-                var w = new PropertyChangedEventHandler((a, b) => t.NotifyOfPropertyChange(() => newValue));
+                var w = new PropertyChangedEventHandler((a, b) => t.NotifyOfPropertyChange(b.PropertyName));
                 newValue.PropertyChanged += w;
                 var q = new WeakReference<PropertyChangedEventHandler>(w);
                 savedMethod[newValue.GetHashCode()] = q;

@@ -10,6 +10,7 @@ using OngekiFumenEditor.Utils.Attributes;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -64,6 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get { return referenceOngekiObject; }
             set
             {
+                this.RegisterOrUnregisterPropertyChangeEvent(referenceOngekiObject, value, OnOngekiObjectPropChanged);
                 referenceOngekiObject = value;
                 isHorizonPositionObject = value is IHorizonPositionObject;
                 isTimelineObject = value is ITimelineObject;
@@ -244,6 +246,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (createFrom is OngekiObjectBase obj)
                 ReferenceOngekiObject = obj;
             EditorViewModel = editorViewModel;
+        }
+
+        protected virtual void OnOngekiObjectPropChanged(object sender,PropertyChangedEventArgs arg)
+        {
+            switch (arg.PropertyName)
+            {
+                case nameof(TGrid):
+                    RecaulateCanvasY();
+                    break;
+
+                case nameof(XGrid):
+                    RecaulateCanvasX();
+                    break;
+                case nameof(GridBase.Unit):
+                case nameof(GridBase.Grid):
+                    RecaulateCanvasXY();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
