@@ -7,6 +7,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Converters;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -156,17 +157,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        private class TempCloseLine
+        {
+            public double distance { get; set; }
+            public double value { get; set; }
+        }
+
         public virtual double CheckAndAdjustY(double y)
         {
             var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventTimelineAutoClose ?? false);
-            var mid = enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z => new
+            using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
+            mid.Clear();
+            mid.AddRange(enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z =>
             {
-                distance = Math.Abs(z.Y - y),
-                y = z.Y
-            })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : default;
+                var r = ObjectPool<TempCloseLine>.Get();
+                r.distance = Math.Abs((editorViewModel.TotalDurationHeight - z.Y) - y);
+                r.value = z.Y;
+                return r;
+            })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance) : Enumerable.Empty<TempCloseLine>());
             var nearestUnitLine = mid?.FirstOrDefault();
-            var fin = nearestUnitLine != null ? nearestUnitLine.y : y;
-            Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.y:F2}) ,fin:{fin:F2}");
+            var fin = nearestUnitLine != null ? (editorViewModel.TotalDurationHeight - nearestUnitLine.value) : y;
+            //Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.tGrid}) ,fin:{fin:F2}");
+            mid.ForEach(x => ObjectPool<TempCloseLine>.Return(x));
+            mid.Clear();
             return fin;
         }
 
@@ -174,14 +187,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //todo 基于二分法查询最近
             var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventXAutoClose ?? false);
-            var mid = enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z => new
+            using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
+            mid.Clear();
+            mid.AddRange(enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z =>
             {
-                distance = Math.Abs(z.X - x),
-                x = z.X
-            })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : default;
+                var r = ObjectPool<TempCloseLine>.Get();
+                r.distance = Math.Abs(z.X - x);
+                r.value = z.X;
+                return r;
+            })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : Enumerable.Empty<TempCloseLine>());
             var nearestUnitLine = mid?.FirstOrDefault();
-            //Log.LogInfo($"nearestUnitLine in:{x:F2} distance:{nearestUnitLine?.distance:F2} x:{nearestUnitLine?.x:F2}");
-            return nearestUnitLine != null ? nearestUnitLine.x : x;
+            var fin = nearestUnitLine != null ? nearestUnitLine.value : x;
+            //Log.LogInfo($"nearestUnitLine x:{x:F2} distance:{nearestUnitLine?.distance:F2} fin:{fin}");
+            mid.ForEach(x => ObjectPool<TempCloseLine>.Return(x));
+            mid.Clear();
+            return fin;
         }
 
         public static BindingBase XGridMapToXBinding { get; }
