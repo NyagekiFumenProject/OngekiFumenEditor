@@ -8,22 +8,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Tap : OngekiTimelineObjectBase, IHorizonPositionObject, ILaneDockable
+    public class Tap : OngekiMovableObjectBase, ILaneDockable
     {
-        private XGrid xGrid = new XGrid();
-        public XGrid XGrid
-        {
-            get
-            {
-                return xGrid;
-            }
-            set
-            {
-                xGrid = value;
-                NotifyOfPropertyChange(() => XGrid);
-            }
-        }
-
         private bool isCritical = false;
         public bool IsCritical
         {

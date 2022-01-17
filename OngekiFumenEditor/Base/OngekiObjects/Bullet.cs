@@ -7,22 +7,8 @@ using System.Collections.Generic;
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
     //[DontShowPropertyInfoAttrbute]
-    public class Bullet : OngekiTimelineObjectBase, IHorizonPositionObject
+    public class Bullet : OngekiMovableObjectBase
     {
-        private XGrid xGrid = new XGrid();
-        public XGrid XGrid
-        {
-            get
-            {
-                return xGrid;
-            }
-            set
-            {
-                xGrid = value;
-                NotifyOfPropertyChange(() => XGrid);
-            }
-        }
-
         private BulletPallete referenceBulletPallete;
         public BulletPallete ReferenceBulletPallete
         {

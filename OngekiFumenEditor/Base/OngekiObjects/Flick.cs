@@ -7,23 +7,12 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Flick : OngekiTimelineObjectBase, IHorizonPositionObject
+    public class Flick : OngekiMovableObjectBase
     {
         public enum FlickDirection
         {
             Left = 1,
             Right = -1
-        }
-
-        private XGrid xGrid = new XGrid();
-        public XGrid XGrid
-        {
-            get { return xGrid; }
-            set
-            {
-                xGrid = value;
-                NotifyOfPropertyChange(() => XGrid);
-            }
         }
 
         private FlickDirection direction = FlickDirection.Left;

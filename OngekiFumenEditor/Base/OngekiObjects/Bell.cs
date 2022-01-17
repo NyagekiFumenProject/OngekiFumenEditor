@@ -8,19 +8,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Bell : OngekiTimelineObjectBase, IHorizonPositionObject
+    public class Bell : OngekiMovableObjectBase
     {
-        private XGrid xGrid = new XGrid();
-        public XGrid XGrid
-        {
-            get { return xGrid; }
-            set
-            {
-                xGrid = value;
-                NotifyOfPropertyChange(() => XGrid);
-            }
-        }
-
         public static string CommandName => "BEL";
         public override string IDShortName => CommandName;
 
