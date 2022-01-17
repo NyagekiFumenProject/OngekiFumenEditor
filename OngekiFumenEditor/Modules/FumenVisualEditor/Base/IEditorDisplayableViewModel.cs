@@ -10,6 +10,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public interface IEditorDisplayableViewModel
     {
+        int RenderOrderZ { get; }
+        bool NeedCanvasPointsBinding { get; }
+
         void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel);
     }
 }

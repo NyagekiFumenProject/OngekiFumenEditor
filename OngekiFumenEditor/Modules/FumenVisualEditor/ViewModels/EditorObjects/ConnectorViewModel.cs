@@ -13,6 +13,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
     [MapToView(ViewType = typeof(ConnectorView))]
     public abstract class ConnectorViewModel : PropertyChangedBase, IEditorDisplayableViewModel
     {
+        public int RenderOrderZ => 2;
+        public bool NeedCanvasPointsBinding => false;
+
         public abstract void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel);
     }
 

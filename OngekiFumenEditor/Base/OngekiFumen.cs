@@ -195,7 +195,6 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects()
         {
             var first = Enumerable.Empty<IDisplayableObject>()

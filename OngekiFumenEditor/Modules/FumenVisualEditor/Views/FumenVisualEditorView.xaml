@@ -178,10 +178,13 @@
                     ItemsSource="{Binding EditorViewModels}">
                     <ItemsControl.ItemContainerStyle>
                         <Style TargetType="ContentPresenter">
-                            <Setter Property="Canvas.Left" Value="{Binding CanvasX}">
-                            </Setter>
-                            <Setter Property="Canvas.Bottom" Value="{Binding CanvasY}">
-                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding NeedCanvasPointsBinding}" Value="True">
+                                    <Setter Property="Canvas.Left" Value="{Binding CanvasX}" />
+                                    <Setter Property="Canvas.Bottom" Value="{Binding CanvasY}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                            <Setter Property="Panel.ZIndex" Value="{Binding RenderOrderZ}" />
                         </Style>
                     </ItemsControl.ItemContainerStyle>
                     <ItemsControl.ItemsPanel>

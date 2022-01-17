@@ -22,6 +22,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public abstract class DisplayObjectViewModelBase : PropertyChangedBase, IEditorDisplayableViewModel
     {
+        public virtual int RenderOrderZ => 5;
+        public bool NeedCanvasPointsBinding => true;
+
         private bool isSelected;
         public bool IsSelected
         {
