@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -12,6 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
     {
         int RenderOrderZ { get; }
         bool NeedCanvasPointsBinding { get; }
+        IDisplayableObject DisplayableObject { get; }
 
         void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel);
     }
