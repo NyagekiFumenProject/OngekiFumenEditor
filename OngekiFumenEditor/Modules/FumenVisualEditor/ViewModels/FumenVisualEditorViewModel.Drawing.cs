@@ -111,6 +111,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (Fumen is null || CanvasHeight == 0)
                 return;
+            Log.LogDebug($"begin");
             //var begin = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? new TGrid(0, 0);
             //var end = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
 
@@ -125,10 +126,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Fumen.GetAllDisplayableObjects().ForEach(x => allDisplayableObjects.Add(x));
 
             EditorViewModels
-                .OfType<DisplayObjectViewModelBase>()
-                .Select(x => x.ReferenceOngekiObject)
-                .OfType<IDisplayableObject>()
-                .ForEach(x => currentDisplayingObjects.Add(x));
+                .OfType<IEditorDisplayableViewModel>()
+                .ForEach(x => currentDisplayingObjects.Add(x.DisplayableObject));
 
             //检查当前显示的物件是否还在谱面中，不在就删除，在就更新位置
             foreach (var viewModel in EditorViewModels.OfType<IEditorDisplayableViewModel>())
@@ -155,6 +154,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (viewModel is IEditorDisplayableViewModel editorDisplayable)
                     editorDisplayable.OnObjectCreated(add, this);
                 EditorViewModels.Add(viewModel);
+                Log.LogDebug($"add viewmodel : {add}");
                 if (viewModel is DisplayObjectViewModelBase ongekiObjectViewModel)
                     ongekiObjectViewModel.RecaulateCanvasXY();
                 c++;
