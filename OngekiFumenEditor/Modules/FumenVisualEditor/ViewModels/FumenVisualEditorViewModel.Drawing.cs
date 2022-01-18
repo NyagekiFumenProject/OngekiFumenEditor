@@ -111,7 +111,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (Fumen is null || CanvasHeight == 0)
                 return;
-            Log.LogDebug($"begin");
+            //Log.LogDebug($"begin");
             //var begin = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? new TGrid(0, 0);
             //var end = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
 
@@ -154,7 +154,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (viewModel is IEditorDisplayableViewModel editorDisplayable)
                     editorDisplayable.OnObjectCreated(add, this);
                 EditorViewModels.Add(viewModel);
-                Log.LogDebug($"add viewmodel : {add}");
+                //odLog.LogDebug($"add viewmodel : {add}");
                 if (viewModel is DisplayObjectViewModelBase ongekiObjectViewModel)
                     ongekiObjectViewModel.RecaulateCanvasXY();
                 c++;
