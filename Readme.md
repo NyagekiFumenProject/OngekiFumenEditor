@@ -10,8 +10,8 @@
 * Hold实现 
 * WallHold实现 
 * 音频播放相关
-* 编辑器优化&重构  <- we are here!
-* 谱面滚动播放
+* 编辑器优化&重构
+* 谱面滚动播放   <- we are here!
 * 实现时间轴的简便操作
 * 编辑器细节优化
 * OpenTK/Vulkan/SkiaSharp 三选一重写渲染器
