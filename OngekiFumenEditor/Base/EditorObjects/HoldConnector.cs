@@ -15,16 +15,6 @@ namespace OngekiFumenEditor.Base.EditorObjects
 {
     public class HoldConnector : ConnectorLineBase<ConnectableObjectBase>
     {
-        private Color lineColor = default;
-        public Color LineColor {
-            get => lineColor;
-            set
-            {
-                lineColor = value;
-                NotifyOfPropertyChange(() => LineColor);
-            }
-        }
-
         public override Type ModelViewType => typeof(HoldConnectorViewModel);
     }
 }

@@ -89,31 +89,48 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                  有变动了就更新一下线
                  */
                 if ((Connector?.From as Hold)?.ReferenceLaneStart is ConnectableStartObject old)
-                    old.ConnectableObjectsPropertyChanged -= Old_ConnectableObjectsPropertyChanged;
+                    old.ConnectableObjectsPropertyChanged -= ConnectableObjectsPropertyChanged;
                 if (Connector?.From is Hold oldHold)
-                    oldHold.PropertyChanged -= Old_ConnectableObjectsPropertyChanged;
+                    oldHold.PropertyChanged -= ConnectableObjectsPropertyChanged;
                 if (Connector?.To is HoldEnd oldEnd)
-                    oldEnd.PropertyChanged -= Old_ConnectableObjectsPropertyChanged;
+                    oldEnd.PropertyChanged -= ConnectableObjectsPropertyChanged;
 
                 if ((value?.From as Hold)?.ReferenceLaneStart is ConnectableStartObject @new)
-                    @new.ConnectableObjectsPropertyChanged += Old_ConnectableObjectsPropertyChanged;
+                    @new.ConnectableObjectsPropertyChanged += ConnectableObjectsPropertyChanged;
                 if (value?.From is Hold newHold)
-                    newHold.PropertyChanged += Old_ConnectableObjectsPropertyChanged;
+                    newHold.PropertyChanged += ConnectableObjectsPropertyChanged;
                 if (value?.To is HoldEnd newEnd)
-                    newEnd.PropertyChanged += Old_ConnectableObjectsPropertyChanged;
+                    newEnd.PropertyChanged += ConnectableObjectsPropertyChanged;
 
                 Set(ref connector, value);
             }
         }
 
+        public Brush LineBrush => (Connector.From as Hold)?.ReferenceLaneStart?.LaneType switch
+        {
+            LaneType.Left => Brushes.OrangeRed,
+            LaneType.Center => Brushes.Green,
+            LaneType.Right => Brushes.Blue,
+            LaneType.WallLeft or LaneType.WallRight => Brushes.Pink,
+            _ => default
+        };
+
         public override IDisplayableObject DisplayableObject => Connector;
 
-        private void Old_ConnectableObjectsPropertyChanged(object arg1, PropertyChangedEventArgs arg2)
+        private void ConnectableObjectsPropertyChanged(object arg1, PropertyChangedEventArgs arg2)
         {
-            var name = arg2.PropertyName;
-            if (!(name == nameof(TGrid) || name == nameof(XGrid)))
-                return;
-            RebuildLines();
+            switch (arg2.PropertyName)
+            {
+                case nameof(TGrid):
+                case nameof(XGrid):
+                    RebuildLines();
+                    break;
+                case nameof(Hold.ReferenceLaneStart):
+                    NotifyOfPropertyChange(() => LineBrush);
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
