@@ -14,7 +14,7 @@
 * 谱面滚动播放   <- we are here!
 * 实现时间轴的简便操作
 * 编辑器细节优化
-* OpenTK/Vulkan/SkiaSharp 三选一重写渲染器
+* ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(可能跳过)
 * 写个谱面  <- goal
 * 实现Soflan变速/LispBlock/LispDisp/EmenyLane...等命令
 * 实现各种工具等
