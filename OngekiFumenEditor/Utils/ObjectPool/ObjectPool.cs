@@ -55,20 +55,23 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 
         public class AutoDisposable : IDisposable
         {
-            public AutoDisposable(T obj) => this.obj = obj;
-
-            private T obj;
+            public T RefObject { get; set; }
 
             public void Dispose()
             {
-                Return(obj);
+                if (RefObject is not null)
+                    Return(RefObject);
+                RefObject = default;
+                ObjectPool<AutoDisposable>.Return(this);
             }
         }
 
         public static IDisposable GetWithUsingDisposable(out T obj, out bool isNewObject)
         {
             isNewObject = Get(out obj);
-            return new AutoDisposable(obj);
+            var d = ObjectPool<AutoDisposable>.Get();
+            d.RefObject = obj;
+            return d;
         }
 
         /// <summary>
