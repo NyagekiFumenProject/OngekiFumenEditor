@@ -138,7 +138,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref canvasHeight, value);
-                RecalculateXUnitSize();
             }
         }
 

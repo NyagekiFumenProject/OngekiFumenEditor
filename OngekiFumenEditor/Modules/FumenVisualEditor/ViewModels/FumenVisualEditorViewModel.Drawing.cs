@@ -15,6 +15,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
@@ -110,33 +111,56 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (Fumen is null || CanvasHeight == 0)
                 return;
-            var begin = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? new TGrid(0, 0);
-            var end = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
+            //var begin = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? new TGrid(0, 0);
+            //var end = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
 
-            Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
-            using var d = ObjectPool<HashSet<IDisplayableObject>>.GetWithUsingDisposable(out var list, out var _);
+            //Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
+            using var d = ObjectPool<HashSet<IDisplayableObject>>.GetWithUsingDisposable(out var currentDisplayingObjects, out var _);
+            currentDisplayingObjects.Clear();
+            using var d2 = ObjectPool<HashSet<IDisplayableObject>>.GetWithUsingDisposable(out var allDisplayableObjects, out var _);
+            allDisplayableObjects.Clear();
+            using var d3 = ObjectPool<HashSet<IEditorDisplayableViewModel>>.GetWithUsingDisposable(out var removeObjects, out var _);
+            removeObjects.Clear();
+
+            Fumen.GetAllDisplayableObjects().ForEach(x => allDisplayableObjects.Add(x));
 
             EditorViewModels
                 .OfType<DisplayObjectViewModelBase>()
                 .Select(x => x.ReferenceOngekiObject)
                 .OfType<IDisplayableObject>()
-                .ForEach(x => list.Add(x));
+                .ForEach(x => currentDisplayingObjects.Add(x));
 
-            foreach (var add in Fumen
-                .GetAllDisplayableObjects()
-                .Where(x => x.CheckVisiable(begin, end))
-                .Where(x => !list.Contains(x)))
+            //检查当前显示的物件是否还在谱面中，不在就删除，在就更新位置
+            foreach (var viewModel in EditorViewModels.OfType<IEditorDisplayableViewModel>())
             {
-                list.Add(add);
+                var refObject = viewModel.DisplayableObject;
+                //检查是否还存在
+                if (!allDisplayableObjects.Contains(refObject))
+                    removeObjects.Add(viewModel);
+                else if (viewModel is DisplayObjectViewModelBase displayableViewModel)
+                {
+                    displayableViewModel.RecaulateCanvasXY();
+                }
+            }
+            foreach (var removeViewModel in removeObjects)
+                EditorViewModels.Remove(removeViewModel);
+
+            //将还没显示的都塞进去显示了
+            var c = 0;
+            foreach (var add in allDisplayableObjects
+                .Where(x => !currentDisplayingObjects.Contains(x)))
+            {
+                currentDisplayingObjects.Add(add);
                 var viewModel = Activator.CreateInstance(add.ModelViewType);
                 if (viewModel is IEditorDisplayableViewModel editorDisplayable)
                     editorDisplayable.OnObjectCreated(add, this);
-                Log.LogDebug($"add ${add}");
                 EditorViewModels.Add(viewModel);
+                if (viewModel is DisplayObjectViewModelBase ongekiObjectViewModel)
+                    ongekiObjectViewModel.RecaulateCanvasXY();
+                c++;
             }
 
-            foreach (var item in EditorViewModels.OfType<DisplayObjectViewModelBase>())
-                item.RecaulateCanvasXY();
+            //Log.LogDebug($"removed {removeObjects.Count} objects , added {c} objects.");
         }
 
         private void RedrawUnitCloseXLines()
