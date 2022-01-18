@@ -212,6 +212,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public static BindingBase XGridMapToXBinding { get; }
         public static BindingBase TGridMapToYBinding { get; }
 
+        public IDisplayableObject DisplayableObject => ReferenceOngekiObject as IDisplayableObject;
+
         public void RecaulateCanvasX()
         {
             if (isHorizonPositionObject == false || EditorViewModel is null)
@@ -248,7 +250,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             EditorViewModel = editorViewModel;
         }
 
-        protected virtual void OnOngekiObjectPropChanged(object sender,PropertyChangedEventArgs arg)
+        protected virtual void OnOngekiObjectPropChanged(object sender, PropertyChangedEventArgs arg)
         {
             switch (arg.PropertyName)
             {
@@ -269,7 +271,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
     }
 
-    public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, new()
+    public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, IDisplayableObject, new()
     {
         public override OngekiObjectBase ReferenceOngekiObject
         {
@@ -289,7 +291,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     }
 
     [MapToView(ViewType = typeof(DisplayTextLineObjectViewBase))]
-    public abstract class DisplayTextLineObjectViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase, new()
+    public abstract class DisplayTextLineObjectViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase, IDisplayableObject, new()
     {
         public string DisplayName => ReferenceOngekiObject.IDShortName;
         public abstract Brush DisplayBrush { get; }

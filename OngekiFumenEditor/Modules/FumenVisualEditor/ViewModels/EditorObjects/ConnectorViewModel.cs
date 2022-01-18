@@ -16,6 +16,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
         public int RenderOrderZ => 2;
         public bool NeedCanvasPointsBinding => false;
 
+        public abstract IDisplayableObject DisplayableObject { get; }
+
+        private FumenVisualEditorViewModel editorViewModel;
+        public FumenVisualEditorViewModel EditorViewModel
+        {
+            get
+            {
+                return editorViewModel;
+            }
+            set
+            {
+                Set(ref editorViewModel, value);
+            }
+        }
+
         public abstract void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel);
     }
 
@@ -34,18 +49,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
         }
 
-        private FumenVisualEditorViewModel editorViewModel;
-        public FumenVisualEditorViewModel EditorViewModel
-        {
-            get
-            {
-                return editorViewModel;
-            }
-            set
-            {
-                Set(ref editorViewModel, value);
-            }
-        }
+        public override IDisplayableObject DisplayableObject => Connector;
 
         public abstract Brush LineBrush { get; }
 

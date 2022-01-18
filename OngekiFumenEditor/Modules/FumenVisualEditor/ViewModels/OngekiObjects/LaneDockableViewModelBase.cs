@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public abstract class LaneDockableViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase, ILaneDockable, new()
+    public abstract class LaneDockableViewModelBase<T> : DisplayObjectViewModelBase<T> where T : OngekiObjectBase, ILaneDockable, IDisplayableObject, new()
     {
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {

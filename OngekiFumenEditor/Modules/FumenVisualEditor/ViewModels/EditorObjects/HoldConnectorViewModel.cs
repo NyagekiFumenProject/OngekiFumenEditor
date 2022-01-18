@@ -106,25 +106,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
         }
 
+        public override IDisplayableObject DisplayableObject => Connector;
+
         private void Old_ConnectableObjectsPropertyChanged(object arg1, PropertyChangedEventArgs arg2)
         {
             var name = arg2.PropertyName;
             if (!(name == nameof(TGrid) || name == nameof(XGrid)))
                 return;
             RebuildLines();
-        }
-
-        private FumenVisualEditorViewModel editorViewModel;
-        public FumenVisualEditorViewModel EditorViewModel
-        {
-            get
-            {
-                return editorViewModel;
-            }
-            set
-            {
-                Set(ref editorViewModel, value);
-            }
         }
 
         public override void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
