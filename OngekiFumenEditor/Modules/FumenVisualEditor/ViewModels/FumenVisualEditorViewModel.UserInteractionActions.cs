@@ -206,7 +206,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
             {
                 case ToolboxItem toolboxItem:
-                    displayObject = LambdaActivator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
+                    displayObject = CacheLambdaActivator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
                     break;
                 case OngekiObjectDropParam dropParam:
                     displayObject = dropParam.OngekiObjectViewModel.Value;

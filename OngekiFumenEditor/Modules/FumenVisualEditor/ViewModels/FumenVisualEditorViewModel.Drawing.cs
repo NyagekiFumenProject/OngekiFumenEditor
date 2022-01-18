@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 .Where(x => !currentDisplayingObjects.Contains(x)))
             {
                 currentDisplayingObjects.Add(add);
-                var viewModel = LambdaActivator.CreateInstance(add.ModelViewType);
+                var viewModel = CacheLambdaActivator.CreateInstance(add.ModelViewType);
                 if (viewModel is IEditorDisplayableViewModel editorDisplayable)
                     editorDisplayable.OnObjectCreated(add, this);
                 EditorViewModels.Add(viewModel);

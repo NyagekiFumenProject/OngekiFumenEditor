@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static OngekiFumenEditor.Utils.LambdaActivator;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -178,7 +179,7 @@ namespace OngekiFumenEditor.Utils
             return lambda.Compile();
         }
 
-        private static ConstructorInfo GetMatchingConstructor(Type type, params object[] args)
+        public static ConstructorInfo GetMatchingConstructor(Type type, params object[] args)
         {
             var types = from arg in args
                         where arg != null
@@ -186,5 +187,22 @@ namespace OngekiFumenEditor.Utils
 
             return type.GetConstructor(types.ToArray());
         }
+    }
+
+    public static class CacheLambdaActivator
+    {
+        private readonly static Dictionary<Type, ObjectActivator> cachedActivatorGenerator = new();
+
+        public static object CreateInstance(Type type)
+        {
+            if (!cachedActivatorGenerator.TryGetValue(type, out var activator))
+            {
+                activator = GetActivator(type);
+                cachedActivatorGenerator[type] = activator;
+            }
+            return activator();
+        }
+
+        public static T CreateInstance<T>() where T : class, new() => CreateInstance(typeof(T)) as T;
     }
 }
