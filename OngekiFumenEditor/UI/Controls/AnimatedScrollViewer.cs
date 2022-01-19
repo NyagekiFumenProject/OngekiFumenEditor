@@ -100,7 +100,7 @@ namespace OngekiFumenEditor.UI.Controls
             }
         }
 
-        internal void ScrollToTopInternal(double milliseconds = 500)
+        public void ScrollToTopInternal(double milliseconds = 500)
         {
             if (!_isRunning)
             {
@@ -108,6 +108,16 @@ namespace OngekiFumenEditor.UI.Controls
                 CurrentVerticalOffset = VerticalOffset;
             }
             ScrollToVerticalOffsetWithAnimation(0, milliseconds);
+        }
+
+        public void ScrollToBottomInternal(double milliseconds = 500)
+        {
+            if (!_isRunning)
+            {
+                _totalVerticalOffset = VerticalOffset;
+                CurrentVerticalOffset = VerticalOffset;
+            }
+            ScrollToVerticalOffsetWithAnimation(ScrollableHeight, milliseconds);
         }
 
         public void ScrollToVerticalOffsetWithAnimation(double offset, double milliseconds = 500, Action onComplete = null)
