@@ -29,17 +29,17 @@
             <StackPanel Margin="10" IsEnabled="{Binding IsAudioButtonEnabled}">
                 <TextBlock Margin="0,0,0,5">
                     <Run Text="当前播放：" />
-                    <Run d:Text="asd" Text="{Binding EditorBinding.AudioName}" />
+                    <Run d:Text="asd" Text="{Binding AudioName}" />
                 </TextBlock>
                 <Slider
                     Margin="0,0,0,5"
-                    Maximum="{Binding EditorBinding.AudioPlayer.Duration, Mode=OneWay}"
-                    Value="{Binding EditorBinding.AudioPlayer.CurrentTime, Mode=OneWay}">
+                    Maximum="{Binding AudioPlayer.Duration, Mode=OneWay}"
+                    Value="{Binding AudioPlayer.CurrentTime, Mode=OneWay}">
                 </Slider>
                 <TextBlock Margin="0,0,0,5" HorizontalAlignment="Right">
-                    <Run Text="{Binding EditorBinding.AudioPlayer.CurrentTime, Mode=OneWay, Converter={StaticResource IntToTimeDisplayConverter}}" />
+                    <Run Text="{Binding AudioPlayer.CurrentTime, Mode=OneWay, Converter={StaticResource IntToTimeDisplayConverter}}" />
                     <Run Text=" - " />
-                    <Run Text="{Binding EditorBinding.AudioPlayer.Duration, Mode=OneWay, Converter={StaticResource IntToTimeDisplayConverter}}" />
+                    <Run Text="{Binding AudioPlayer.Duration, Mode=OneWay, Converter={StaticResource IntToTimeDisplayConverter}}" />
                 </TextBlock>
             </StackPanel>
 
@@ -52,13 +52,13 @@
                     <Button.Style>
                         <Style TargetType="Button">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding EditorBinding.AudioPlayer.IsPlaying}" Value="True">
+                                <DataTrigger Binding="{Binding AudioPlayer.IsPlaying}" Value="True">
                                     <Setter Property="Content" Value="暂停" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding EditorBinding.AudioPlayer.IsPlaying}" Value="{x:Null}">
+                                <DataTrigger Binding="{Binding AudioPlayer.IsPlaying}" Value="{x:Null}">
                                     <Setter Property="Content" Value="播放" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding EditorBinding.AudioPlayer.IsPlaying}" Value="False">
+                                <DataTrigger Binding="{Binding AudioPlayer.IsPlaying}" Value="False">
                                     <Setter Property="Content" Value="播放" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -82,10 +82,22 @@
                 Margin="10,0,10,10"
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center">音量</TextBlock>
+                <Slider
+                    Width="150"
+                    Margin="0,0,0,5"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    LargeChange="0.2"
+                    Maximum="1"
+                    SmallChange="0.2"
+                    Value="{Binding AudioPlayer.Volume}">
+                </Slider>
                 <Button
                     Padding="30,5,30,5"
                     cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
-                    Content="加载音频文件" />
+                    Content="加载音频文件"
+                    Visibility="Collapsed" />
             </StackPanel>
         </Grid>
     </ScrollViewer>

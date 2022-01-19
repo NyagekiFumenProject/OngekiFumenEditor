@@ -7,6 +7,7 @@ using Gemini.Modules.Toolbox.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -55,6 +56,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 TotalDurationHeight = value.AudioDuration;
                 Setting = EditorProjectData.EditorSetting;
                 Fumen = EditorProjectData.Fumen;
+                if (IoC.Get<IAudioPlayerToolViewer>() is IAudioPlayerToolViewer audioPlayerToolViewer && IsActive)
+                    audioPlayerToolViewer.Editor = this;
             }
         }
 
@@ -195,6 +198,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings)
                 editorSettings.Setting = Setting;
+            if (IoC.Get<IAudioPlayerToolViewer>() is IAudioPlayerToolViewer audioPlayerTool)
+                audioPlayerTool.Editor = this;
             return base.OnActivateAsync(cancellationToken);
         }
 
@@ -202,6 +207,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings && editorSettings.Setting == Setting)
                 editorSettings.Setting = default;
+            if (IoC.Get<IAudioPlayerToolViewer>() is IAudioPlayerToolViewer audioPlayerTool && audioPlayerTool.Editor == this)
+                audioPlayerTool.Editor = default;
             return base.OnDeactivateAsync(close, cancellationToken);
         }
 

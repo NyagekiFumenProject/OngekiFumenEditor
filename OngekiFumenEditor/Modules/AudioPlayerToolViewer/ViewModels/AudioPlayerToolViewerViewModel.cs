@@ -17,8 +17,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
     [Export(typeof(IAudioPlayerToolViewer))]
     public class AudioPlayerToolViewerViewModel : Tool, IAudioPlayerToolViewer
     {
-        private Dictionary<FumenVisualEditorViewModel, EditorBindingModel> currentHoldingEditorModelMap = new();
-
         public AudioPlayerToolViewerViewModel()
         {
             DisplayName = "音频播放";
@@ -35,34 +33,35 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
             set
             {
-                editor = value;
-                NotifyOfPropertyChange(() => Editor);
-                if (!currentHoldingEditorModelMap.TryGetValue(Editor, out var binding))
-                {
-                    binding = new EditorBindingModel();
-                    currentHoldingEditorModelMap[Editor] = binding;
-                }
-
-                EditorBinding = binding;
+                Set(ref editor, value);
+                AudioPlayer?.Dispose();
+                LoadAudio();
             }
         }
 
-        private EditorBindingModel editorBinding = new EditorBindingModel();
-        public EditorBindingModel EditorBinding
+        private async void LoadAudio()
         {
-            get => editorBinding;
-            set
-            {
-                Set(ref editorBinding, value);
+            if (string.IsNullOrWhiteSpace(Editor?.EditorProjectData?.AudioFilePath))
+                return;
+            var audioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(Editor.EditorProjectData.AudioFilePath);
+            AudioPlayer = audioPlayer;
+        }
+
+        private IAudioPlayer audioPlayer = default;
+        public IAudioPlayer AudioPlayer
+        {
+            get => audioPlayer;
+            set {
+                Set(ref audioPlayer, value);
                 NotifyOfPropertyChange(() => IsAudioButtonEnabled);
             }
         }
 
-        public bool IsAudioButtonEnabled => EditorBinding?.AudioPlayer is not null;
+        public bool IsAudioButtonEnabled => AudioPlayer is not null;
 
         public void OnPlayOrPauseButtonClicked()
         {
-            if (EditorBinding?.AudioPlayer is not IAudioPlayer player)
+            if (AudioPlayer is not IAudioPlayer player)
                 return;
 
             if (player.IsPlaying)
@@ -73,7 +72,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void OnStopButtonClicked()
         {
-            if (EditorBinding?.AudioPlayer is not IAudioPlayer player)
+            if (AudioPlayer is not IAudioPlayer player)
                 return;
 
             player.Stop();
@@ -81,7 +80,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void OnJumpButtonClicked()
         {
-            if (EditorBinding?.AudioPlayer is not IAudioPlayer player)
+            if (AudioPlayer is not IAudioPlayer player)
                 return;
 
             //todo
@@ -96,9 +95,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var filePath = dialog.FileName;
                 try
                 {
-                    EditorBinding.AudioPlayer?.Stop();
-                    EditorBinding.AudioPlayer?.Dispose();
-                    EditorBinding.AudioName = string.Empty;
+                    AudioPlayer?.Stop();
+                    AudioPlayer?.Dispose();
                 }
                 catch
                 {
@@ -106,9 +104,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 }
                 try
                 {
+                    Editor.EditorProjectData.AudioFilePath = filePath;
                     var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(filePath);
-                    EditorBinding.AudioPlayer = audio;
-                    EditorBinding.AudioName = Path.GetFileNameWithoutExtension(filePath);
+                    AudioPlayer = audio;
                     NotifyOfPropertyChange(() => IsAudioButtonEnabled);
                 }
                 catch (Exception e)

@@ -10,19 +10,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Models
 {
     public class EditorBindingModel : PropertyChangedBase
     {
-        private IAudioPlayer audioPlayer = default;
-        public IAudioPlayer AudioPlayer
-        {
-            get => audioPlayer;
-            set => Set(ref audioPlayer, value);
-        }
-
-
-        private string audioName = default;
-        public string AudioName
-        {
-            get => audioName;
-            set => Set(ref audioName, value);
-        }
+        
     }
 }
