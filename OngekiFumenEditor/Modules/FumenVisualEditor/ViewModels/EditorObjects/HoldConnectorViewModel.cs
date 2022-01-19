@@ -63,11 +63,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             var y = BindFumenEditor.TotalDurationHeight - TGridCalculator.ConvertTGridToY(BindObject.TGrid, BindFumenEditor);
 
             Segment.Point = new Point(x, y);
-
-            if (BindObject is HoldEnd)
-            {
-                Debug.WriteLine($"T[{BindObject.TGrid}] X[{BindObject.XGrid}] ({Segment.Point})");
-            }
         }
     }
 
