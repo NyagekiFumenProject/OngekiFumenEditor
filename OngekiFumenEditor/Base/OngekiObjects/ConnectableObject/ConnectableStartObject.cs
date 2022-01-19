@@ -57,7 +57,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             child.PrevObject = default;
 
             child.ReferenceStartObject = default;
-            child.PropertyChanged += OnPropertyChanged;
+            child.PropertyChanged -= OnPropertyChanged;
             NotifyOfPropertyChange(() => Children);
         }
 

@@ -78,6 +78,9 @@
             <DataTemplate DataType="{x:Type fumenOngekiObject:WallHoldViewModel}">
                 <ongekiobjects:WallTapView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:WallHoldEndViewModel}">
+                <ongekiobjects:WallTapView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type fumenOngekiObject:WallTapViewModel}">
                 <ongekiobjects:WallTapView />
             </DataTemplate>
