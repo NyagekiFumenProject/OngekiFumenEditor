@@ -119,10 +119,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseLeave(ActionExecutionContext e)
         {
             //Log.LogInfo("OnMouseLeave");
-            if (!(isMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
+            if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
-            isMouseDown = false;
-            isDragging = false;
+            IsMouseDown = false;
+            IsDragging = false;
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
             SelectObjects.ForEach(x => x.OnDragEnd(pos));
             //e.Handled = true;
@@ -131,15 +131,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseUp(ActionExecutionContext e)
         {
             //Log.LogInfo("OnMouseUp");
-            if (!(isMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
+            if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
-            if (isDragging)
+            if (IsDragging)
                 SelectObjects.ToArray().ForEach(x => x.OnDragEnd(pos));
 
-            isMouseDown = false;
-            isDragging = false;
+            IsMouseDown = false;
+            IsDragging = false;
             //e.Handled = true;
         }
 
@@ -147,10 +147,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //Log.LogInfo("OnMouseMove");
             var view = e.View as FrameworkElement;
-            if (!(isMouseDown && view is not null && view.Parent is IInputElement parent))
+            if (!(IsMouseDown && view is not null && view.Parent is IInputElement parent))
                 return;
             //e.Handled = true;
-            var r = isDragging;
+            var r = IsDragging;
             Action<DisplayObjectViewModelBase, Point> dragCall = (vm, pos) =>
             {
                 if (r)
@@ -158,7 +158,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 else
                     vm.OnDragStart(pos);
             };
-            isDragging = true;
+            IsDragging = true;
 
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
             if (VisualTreeUtility.FindParent<Visual>(view) is FrameworkElement uiElement)
@@ -180,8 +180,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //Log.LogInfo("OnMouseDown");
             if ((e.EventArgs as MouseEventArgs).LeftButton == MouseButtonState.Pressed)
             {
-                isMouseDown = true;
-                isDragging = false;
+                IsMouseDown = true;
+                IsDragging = false;
                 //e.Handled = true;
             }
             (e.View as FrameworkElement)?.Focus();

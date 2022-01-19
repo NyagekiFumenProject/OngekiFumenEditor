@@ -143,16 +143,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
-        public ObservableCollection<TGridUnitLineViewModel> _TGridUnitLineLocations { get; } = new();
-        public bool isDragging;
-        public bool isMouseDown;
-
-        public FumenVisualEditorViewModel()
-        {
-            Setting = new EditorSetting();
-        }
-
-        public ObservableCollection<object> EditorViewModels { get; } = new();
+        public ObservableCollection<IEditorDisplayableViewModel> EditorViewModels { get; } = new();
+        public bool IsDragging { get; private set; }
+        public bool IsMouseDown { get; private set; }
 
         private void OnFumenObjectLoaded()
         {
@@ -175,6 +168,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             EditorProjectData = dialogViewModel.EditorProjectData;
             Redraw(RedrawTarget.All);
             Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
+            await Dispatcher.Yield();
         }
 
         protected override async Task DoLoad(string filePath)
