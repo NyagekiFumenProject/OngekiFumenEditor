@@ -1,11 +1,13 @@
 using Caliburn.Micro;
 using Gemini.Framework;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Security.Cryptography;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -42,7 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RecalculateScrollBar()
         {
-            //重新计算理论高度
+            //todo 重新计算理论高度
         }
 
         public void ScrollViewer_OnScrollChanged(ActionExecutionContext e)
@@ -53,5 +55,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             ScrollViewerVerticalOffset = scrollViewer.ScrollableHeight - arg.VerticalOffset;
             //Log.LogDebug($"ScrollViewerVerticalOffset = {ScrollViewerVerticalOffset}");
         }
+
+        #region ScrollViewer Animations
+
+        private AnimatedScrollViewer AnimatedScrollViewer => (GetView() as FumenVisualEditorView)?.myAnimatedScrollViewer;
+
+        public AnimationWrapper BeginScrollAnimation()
+        {
+            var animation = new DoubleAnimation(0, TotalDurationHeight, TimeSpan.FromMilliseconds(TotalDurationHeight));
+            Timeline.SetDesiredFrameRate(animation, 60);
+            animation.FillBehavior = FillBehavior.HoldEnd;
+
+            return new AnimationWrapper(animation, AnimatedScrollViewer, AnimatedScrollViewer.CurrentVerticalOffsetProperty);
+        }
+
+        #endregion
     }
 }

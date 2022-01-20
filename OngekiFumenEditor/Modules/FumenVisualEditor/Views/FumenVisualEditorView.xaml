@@ -103,7 +103,7 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
         <controls:AnimatedScrollViewer
-            x:Name="VisualDisplayer"
+            x:Name="myAnimatedScrollViewer"
             cal:Message.Attach="[Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];"
             Background="#01000000"
             HorizontalScrollBarVisibility="Disabled"

@@ -26,24 +26,24 @@ namespace OngekiFumenEditor.UI.Controls
             this.dp = dp;
         }
 
-        public void Start()
+        public virtual void Start()
         {
             clock = animation.CreateClock();
             frameworkElement.ApplyAnimationClock(dp, clock);
             Controller.Begin();
         }
 
-        public void Resume()
+        public virtual void Resume()
         {
             Controller.Resume();
         }
 
-        public void Stop()
+        public virtual void Stop()
         {
             Controller.Stop();
         }
 
-        public void Pause()
+        public virtual void Pause()
         {
             Controller.Pause();
         }
@@ -54,7 +54,7 @@ namespace OngekiFumenEditor.UI.Controls
             Jump(offset, origin);
         }
 
-        public void Jump(TimeSpan offset, TimeSeekOrigin origin = TimeSeekOrigin.BeginTime)
+        public virtual void Jump(TimeSpan offset, TimeSeekOrigin origin = TimeSeekOrigin.BeginTime)
         {
             Controller.Seek(offset, origin);
         }
