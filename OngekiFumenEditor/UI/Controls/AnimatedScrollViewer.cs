@@ -203,7 +203,7 @@ namespace OngekiFumenEditor.UI.Controls
         /// <summary>
         ///     当前垂直滚动偏移
         /// </summary>
-        internal static readonly DependencyProperty CurrentVerticalOffsetProperty = DependencyProperty.Register(
+        public static readonly DependencyProperty CurrentVerticalOffsetProperty = DependencyProperty.Register(
             "CurrentVerticalOffset", typeof(double), typeof(AnimatedScrollViewer), new PropertyMetadata(0d, OnCurrentVerticalOffsetChanged));
 
         private static void OnCurrentVerticalOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -227,7 +227,7 @@ namespace OngekiFumenEditor.UI.Controls
         /// <summary>
         ///     当前水平滚动偏移
         /// </summary>
-        internal static readonly DependencyProperty CurrentHorizontalOffsetProperty = DependencyProperty.Register(
+        public static readonly DependencyProperty CurrentHorizontalOffsetProperty = DependencyProperty.Register(
             "CurrentHorizontalOffset", typeof(double), typeof(AnimatedScrollViewer), new PropertyMetadata(0d, OnCurrentHorizontalOffsetChanged));
 
         private readonly Task _task;
