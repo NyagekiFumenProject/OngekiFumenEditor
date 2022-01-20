@@ -100,7 +100,7 @@ namespace OngekiFumenEditor.UI.Controls
             }
         }
 
-        public void ScrollToTopInternal(double milliseconds = 500)
+        public void AnimateScrollToTop(double milliseconds = 500)
         {
             if (!_isRunning)
             {
@@ -110,7 +110,7 @@ namespace OngekiFumenEditor.UI.Controls
             ScrollToVerticalOffsetWithAnimation(0, milliseconds);
         }
 
-        public void ScrollToBottomInternal(double milliseconds = 500)
+        public void AnimateScrollToBottom(double milliseconds = 500)
         {
             if (!_isRunning)
             {
@@ -217,7 +217,7 @@ namespace OngekiFumenEditor.UI.Controls
         /// <summary>
         ///     当前垂直滚动偏移
         /// </summary>
-        internal double CurrentVerticalOffset
+        public double CurrentVerticalOffset
         {
             // ReSharper disable once UnusedMember.Local
             get => (double)GetValue(CurrentVerticalOffsetProperty);
@@ -243,7 +243,7 @@ namespace OngekiFumenEditor.UI.Controls
         /// <summary>
         ///     当前水平滚动偏移
         /// </summary>
-        internal double CurrentHorizontalOffset
+        public double CurrentHorizontalOffset
         {
             get => (double)GetValue(CurrentHorizontalOffsetProperty);
             set => SetValue(CurrentHorizontalOffsetProperty, value);
