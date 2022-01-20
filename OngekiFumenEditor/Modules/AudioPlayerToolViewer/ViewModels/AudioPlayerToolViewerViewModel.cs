@@ -3,7 +3,6 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Microsoft.Win32;
 using OngekiFumenEditor.Kernel.Audio;
-using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;
@@ -17,11 +16,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
     [Export(typeof(IAudioPlayerToolViewer))]
     public class AudioPlayerToolViewerViewModel : Tool, IAudioPlayerToolViewer
     {
-        public AudioPlayerToolViewerViewModel()
-        {
-            DisplayName = "音频播放";
-        }
-
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
         private FumenVisualEditorViewModel editor = default;
@@ -39,6 +33,24 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
+        private IAudioPlayer audioPlayer = default;
+        public IAudioPlayer AudioPlayer
+        {
+            get => audioPlayer;
+            set
+            {
+                Set(ref audioPlayer, value);
+                NotifyOfPropertyChange(() => IsAudioButtonEnabled);
+            }
+        }
+
+        public bool IsAudioButtonEnabled => AudioPlayer is not null;
+
+        public AudioPlayerToolViewerViewModel()
+        {
+            DisplayName = "音频播放";
+        }
+
         private async void LoadAudio()
         {
             if (string.IsNullOrWhiteSpace(Editor?.EditorProjectData?.AudioFilePath))
@@ -46,18 +58,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var audioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(Editor.EditorProjectData.AudioFilePath);
             AudioPlayer = audioPlayer;
         }
-
-        private IAudioPlayer audioPlayer = default;
-        public IAudioPlayer AudioPlayer
-        {
-            get => audioPlayer;
-            set {
-                Set(ref audioPlayer, value);
-                NotifyOfPropertyChange(() => IsAudioButtonEnabled);
-            }
-        }
-
-        public bool IsAudioButtonEnabled => AudioPlayer is not null;
 
         public void OnPlayOrPauseButtonClicked()
         {

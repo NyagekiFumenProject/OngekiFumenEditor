@@ -59,7 +59,8 @@ namespace OngekiFumenEditor.Kernel.Scheduler
                     .ToArray();
                 if (schedulers.Length > 0)
                     await Task.WhenAll(schedulers);
-                await Task.Delay(10);
+                else
+                    await Task.Delay(10);
             }
         }
 
