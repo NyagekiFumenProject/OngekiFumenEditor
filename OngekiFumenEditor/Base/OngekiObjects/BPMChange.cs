@@ -35,9 +35,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public GridOffset LengthConvertToOffset(double len, int timeGridSize)
         {
-            var size = this.BPM / 240 * timeGridSize;
-            var unit = (int)(len / size);
-            var grid = (int)(len % size / size * TGrid.ResT);
+            var totalGrid = (len * (TGrid.ResT * BPM)) / 240000;
+
+            var p = totalGrid / TGrid.ResT;
+            var unit = (int)p;
+            var grid = (int)((p - unit)  * TGrid.ResT);
 
             return new GridOffset(unit, grid);
         }

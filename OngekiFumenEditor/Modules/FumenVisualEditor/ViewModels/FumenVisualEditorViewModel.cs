@@ -89,7 +89,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     ScrollViewerVerticalOffset = TGridCalculator.ConvertTGridToY(Setting.CurrentDisplayTimePosition, this);
                     break;
                 case nameof(EditorSetting.BeatSplit):
-                case nameof(EditorSetting.BaseLineY):
+                //case nameof(EditorSetting.BaseLineY):
                     Redraw(RedrawTarget.TGridUnitLines | RedrawTarget.ScrollBar);
                     break;
                 case nameof(EditorSetting.EditorDisplayName):

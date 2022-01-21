@@ -20,12 +20,6 @@ namespace OngekiFumenEditor.Utils
         public static int Random(int min, int max) => rand.Next(min, max);
         public static int Random(int max) => rand.Next(max);
 
-        public static double CalculateLength(TGrid from, TGrid to, double unitLen)
-        {
-            var diff = to - from;
-            return (diff.Unit + diff.Grid * 1.0 / from.ResT) * unitLen;
-        }
-
         public static double CalculateLength(TGrid from, TGrid to, BpmList bpmList, double unitLen)
         {
             var fromBpm = bpmList.GetBpm(from);
@@ -74,7 +68,7 @@ namespace OngekiFumenEditor.Utils
         {
             if (to is null)
                 return double.PositiveInfinity;
-
+            /*
             var size = bpm / 240 * timeGridSize;
 
             /**
@@ -86,8 +80,15 @@ namespace OngekiFumenEditor.Utils
              *     = (-500.0/1000 + 1) * 1000
              *     = 0.5 * 1000
              *     = 500
-             */
-            return CalculateLength(from, to, size);
+             *
+            var diff = to - from;
+            return (diff.Unit + diff.Grid * 1.0 / from.ResT) * size;
+            */
+
+            var diff = to - from;
+            var totalGrid = diff.Unit * from.ResT + diff.Grid;
+            var msec = 240_000 * totalGrid / (from.ResT * bpm);
+            return msec;
         }
 
         public static Func<double, double> BuildTwoPointFormFormula(double x1, double y1, double x2, double y2)

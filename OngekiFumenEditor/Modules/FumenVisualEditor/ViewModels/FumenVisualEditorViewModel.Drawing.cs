@@ -69,14 +69,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var baseLineAdded = false;
 
             var bpmList = Fumen.BpmList;
-
-            var beginTGrid = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this);
-            var beginBpm = bpmList.GetBpm(beginTGrid);
-
-            var endTGrid = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
-
+            var endTGrid = TGridCalculator.ConvertYToTGrid(TotalDurationHeight, this);
+            var beginBpm = bpmList.FirstBpm;
             var currentBpm = beginBpm;
-            var currentTGridBase = beginTGrid;
+            var currentTGridBase = new TGrid(0,0);
             while (currentBpm is not null)
             {
                 var nextBpm = Fumen.BpmList.GetNextBpm(currentBpm);
@@ -90,9 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (nextBpm is not null && tGrid >= nextBpm.TGrid)
                         break;
                     if (tGrid > endTGrid)
-                    {
                         return;
-                    }
                     var y = TGridCalculator.ConvertTGridToY(tGrid, this);
                     var line = ObjectPool<TGridUnitLineViewModel>.Get();
                     line.TGrid = tGrid;
