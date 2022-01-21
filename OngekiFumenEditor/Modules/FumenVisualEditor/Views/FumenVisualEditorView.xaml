@@ -121,7 +121,7 @@
                         <DataTemplate>
                             <Grid>
                                 <Line
-                                    X1="{Binding ElementName=VisualDisplayer, Path=ActualWidth}"
+                                    X1="{Binding ElementName=myAnimatedScrollViewer, Path=ActualWidth}"
                                     X2="0"
                                     Y1="{Binding Y}"
                                     Y2="{Binding Y}">

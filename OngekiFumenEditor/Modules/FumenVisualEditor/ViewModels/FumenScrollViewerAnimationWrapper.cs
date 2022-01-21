@@ -70,7 +70,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Animation.JumpAndPause(TimeSpan.FromMilliseconds(WrapCore.CurrentTime));
             WrapCore.Play();
             Animation.Resume();
-            //todo
         }
 
         public void Stop()

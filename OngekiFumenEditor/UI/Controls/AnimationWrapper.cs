@@ -26,36 +26,48 @@ namespace OngekiFumenEditor.UI.Controls
             this.dp = dp;
         }
 
-        public virtual void Start()
+        private void CheckController()
         {
+            if (clock is not null)
+                return;
             clock = animation.CreateClock();
             frameworkElement.ApplyAnimationClock(dp, clock);
+        }
+
+        public virtual void Start()
+        {
+            CheckController();
             Controller.Begin();
         }
 
         public virtual void Resume()
         {
+            CheckController();
             Controller.Resume();
         }
 
         public virtual void Stop()
         {
+            CheckController();
             Controller.Stop();
         }
 
         public virtual void Pause()
         {
+            CheckController();
             Controller.Pause();
         }
 
         public void JumpAndPause(TimeSpan offset, TimeSeekOrigin origin = TimeSeekOrigin.BeginTime)
         {
+            CheckController();
             Pause();
             Jump(offset, origin);
         }
 
         public virtual void Jump(TimeSpan offset, TimeSeekOrigin origin = TimeSeekOrigin.BeginTime)
         {
+            CheckController();
             Controller.Seek(offset, origin);
         }
     }

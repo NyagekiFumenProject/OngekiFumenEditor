@@ -60,13 +60,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private AnimatedScrollViewer AnimatedScrollViewer => (GetView() as FumenVisualEditorView)?.myAnimatedScrollViewer;
 
-        public AnimationWrapper BeginScrollAnimation()
+        public FumenScrollViewerAnimationWrapper BeginScrollAnimation()
         {
-            var animation = new DoubleAnimation(0, TotalDurationHeight, TimeSpan.FromMilliseconds(TotalDurationHeight));
+            var animation = new DoubleAnimation(TotalDurationHeight, 0, TimeSpan.FromMilliseconds(TotalDurationHeight));
             Timeline.SetDesiredFrameRate(animation, 60);
             animation.FillBehavior = FillBehavior.HoldEnd;
 
-            return new AnimationWrapper(animation, AnimatedScrollViewer, AnimatedScrollViewer.CurrentVerticalOffsetProperty);
+            return new FumenScrollViewerAnimationWrapper(this, new AnimationWrapper(animation, AnimatedScrollViewer, AnimatedScrollViewer.CurrentVerticalOffsetProperty));
         }
 
         #endregion

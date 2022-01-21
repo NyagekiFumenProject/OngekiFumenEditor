@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public bool IsPlaying { get => currentOut?.PlaybackState == PlaybackState.Playing; }
 
-        public float Volume { get => currentOut.Volume; set => currentOut.Volume = value; }
+        public float Volume { get => currentOut?.Volume ?? 0; set => currentOut.Volume = value; }
 
         public string SchedulerName => $"DefaultMusicPlayer Playing Updater";
 

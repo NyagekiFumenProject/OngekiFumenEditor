@@ -30,6 +30,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 Set(ref editor, value);
                 AudioPlayer?.Dispose();
                 LoadAudio();
+                Animator = value?.BeginScrollAnimation();
             }
         }
 
@@ -41,6 +42,21 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             {
                 Set(ref audioPlayer, value);
                 NotifyOfPropertyChange(() => IsAudioButtonEnabled);
+                if (Animator is not null)
+                    Animator.WrapCore = value;
+            }
+        }
+
+        private FumenScrollViewerAnimationWrapper animator = default;
+        public FumenScrollViewerAnimationWrapper Animator
+        {
+            get => animator;
+            set
+            {
+                Set(ref animator, value);
+                NotifyOfPropertyChange(() => IsAudioButtonEnabled);
+                if (AudioPlayer is not null && Animator is not null)
+                    Animator.WrapCore = AudioPlayer;
             }
         }
 
@@ -64,10 +80,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (AudioPlayer is not IAudioPlayer player)
                 return;
 
-            if (player.IsPlaying)
-                player.Pause();
+            if (Animator.IsPlaying)
+                Animator.Pause();
             else
-                player.Play();
+                Animator.Play();
         }
 
         public void OnStopButtonClicked()
@@ -75,7 +91,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (AudioPlayer is not IAudioPlayer player)
                 return;
 
-            player.Stop();
+            Animator.Stop();
         }
 
         public void OnJumpButtonClicked()
@@ -95,8 +111,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var filePath = dialog.FileName;
                 try
                 {
-                    AudioPlayer?.Stop();
-                    AudioPlayer?.Dispose();
+                    Animator?.Stop();
+                    Animator?.Dispose();
                 }
                 catch
                 {
@@ -107,6 +123,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                     Editor.EditorProjectData.AudioFilePath = filePath;
                     var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(filePath);
                     AudioPlayer = audio;
+                    Animator.WrapCore = audio;
                     NotifyOfPropertyChange(() => IsAudioButtonEnabled);
                 }
                 catch (Exception e)
