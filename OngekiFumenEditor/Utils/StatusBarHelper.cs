@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Utils
 {
-    public static class StatusNotifyHelper
+    public static class StatusBarHelper
     {
         public class Notify : IDisposable
         {
@@ -28,15 +28,7 @@ namespace OngekiFumenEditor.Utils
 
         private static List<Notify> currentStatusList = new List<Notify>();
 
-        public static Notify BeginStatus(string statusDescription)
-        {
-            var notify = new Notify(statusDescription);
-            currentStatusList.Add(notify);
-            UpdateStatusToStatusBar();
-            return notify;
-        }
-
-        public static void UpdateStatusToStatusBar()
+        private static void UpdateStatusToStatusBar()
         {
             var firstStatus = currentStatusList?.FirstOrDefault();
 
@@ -45,6 +37,14 @@ namespace OngekiFumenEditor.Utils
             {
                 viewModel.Message = descStr ?? "";
             }
+        }
+
+        public static Notify BeginStatus(string statusDescription)
+        {
+            var notify = new Notify(statusDescription);
+            currentStatusList.Add(notify);
+            UpdateStatusToStatusBar();
+            return notify;
         }
 
         public static void EndStatus(Notify notify)

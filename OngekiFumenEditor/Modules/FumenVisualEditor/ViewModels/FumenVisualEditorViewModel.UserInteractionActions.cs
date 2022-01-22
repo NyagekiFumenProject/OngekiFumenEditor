@@ -1,6 +1,8 @@
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Threading;
+using Gemini.Modules.StatusBar;
+using Gemini.Modules.StatusBar.ViewModels;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
 using Gemini.Modules.Toolbox.Services;
@@ -144,6 +146,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseLeave(ActionExecutionContext e)
         {
+            IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
+
             if (IsLocked)
                 return;
 
@@ -177,11 +181,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseMove(ActionExecutionContext e)
         {
+            //show current cursor position in statusbar
+            UpdateCurrentCursorPosition(e);
+
             if (IsLocked)
                 return;
 
-            //Log.LogInfo("OnMouseMove");
             var view = e.View as FrameworkElement;
+            //Log.LogInfo("OnMouseMove");
             if (!(IsMouseDown && view is not null && view.Parent is IInputElement parent))
                 return;
             //e.Handled = true;
@@ -208,6 +215,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 SelectObjects.ToArray().ForEach(x => dragCall(x, pos));
             }
+        }
+
+        private void UpdateCurrentCursorPosition(ActionExecutionContext e)
+        {
+            var view = e.View as FrameworkElement;
+            var contentViewModel = IoC.Get<CommonStatusBar>().SubRightMainContentViewModel;
+            if (view.Parent is not IInputElement parent)
+            {
+                contentViewModel.Message = string.Empty;
+                return;
+            }
+
+            var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
+            var canvasY = MaxVisibleCanvasY - pos.Y;
+            var canvasX = pos.X;
+
+            var tGrid = TGridCalculator.ConvertYToTGrid(canvasY, this);
+            var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
+            contentViewModel.Message = $"C[{canvasX:F2},{canvasY:F2}] T[{tGrid.Unit},{tGrid.Grid}] X[{xGrid.Unit:F2},{xGrid.Grid}]";
         }
 
         public void OnMouseDown(ActionExecutionContext e)

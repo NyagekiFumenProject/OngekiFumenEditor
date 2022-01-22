@@ -176,7 +176,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task DoLoad(string filePath)
         {
-            using var _ = StatusNotifyHelper.BeginStatus("Editor project file loading : " + filePath);
+            using var _ = StatusBarHelper.BeginStatus("Editor project file loading : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
             var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
             EditorProjectData = projectData;
@@ -185,7 +185,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task DoSave(string filePath)
         {
-            using var _ = StatusNotifyHelper.BeginStatus("Fumen saving : " + filePath);
+            using var _ = StatusBarHelper.BeginStatus("Fumen saving : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
             await EditorProjectDataUtils.TrySaveToFileAsync(filePath, EditorProjectData);
         }

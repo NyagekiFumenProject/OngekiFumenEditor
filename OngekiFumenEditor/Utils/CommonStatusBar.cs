@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -14,20 +15,22 @@ namespace OngekiFumenEditor.Utils
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class CommonStatusBar
     {
-        public IStatusBar StatusBar { get; private set; }
+        private IStatusBar statusBar;
 
-        public StatusBarItemViewModel MainContentViewModel => StatusBar.Items.ElementAtOrDefault(0);
-        public StatusBarItemViewModel SubLeftContentViewModel => StatusBar.Items.ElementAtOrDefault(1);
-        public StatusBarItemViewModel SubRightMainContentViewModel => StatusBar.Items.ElementAtOrDefault(2);
+        public StatusBarItemViewModel MainContentViewModel => statusBar.Items.ElementAtOrDefault(0);
+        public StatusBarItemViewModel SubLeftContentViewModel => statusBar.Items.ElementAtOrDefault(1);
+        public StatusBarItemViewModel SubRightMainContentViewModel => statusBar.Items.ElementAtOrDefault(2);
 
         [ImportingConstructor]
-        private CommonStatusBar(IStatusBar statusBar)
+        public CommonStatusBar(IStatusBar statusBar)
         {
-            StatusBar = statusBar;
+            this.statusBar = statusBar;
 
-            StatusBar.AddItem("", new GridLength(1, GridUnitType.Star));
-            StatusBar.AddItem("", new GridLength(100));
-            StatusBar.AddItem("", new GridLength(100));
+            statusBar.AddItem("", new GridLength(1, GridUnitType.Star));
+            statusBar.AddItem("", new GridLength(100));
+            statusBar.AddItem("", new GridLength());
+
+            statusBar.RefreshGridColumns();
         }
     }
 }
