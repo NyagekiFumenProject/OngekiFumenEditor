@@ -40,14 +40,15 @@ namespace OngekiFumenEditor.Parser
                 return (T[])array;
 
             var converter = TypeDescriptor.GetConverter(type);
-            var arr = line.Trim().Split(SplitEmptyCharArray, StringSplitOptions.RemoveEmptyEntries).Select(x =>
-            {
-                if (converter.IsValid(x))
-                    return (T)converter.ConvertFromString(x);
-                return default;
-            }).ToArray();
-            cacheDataArray[type] = arr;
-            return arr;
+            var arr = line.Trim().Split(SplitEmptyCharArray, StringSplitOptions.RemoveEmptyEntries).Skip(type == typeof(string) ? 0 : 1).Select(x =>
+                {
+                    if (converter.IsValid(x))
+                        return (T)converter.ConvertFromString(x);
+                    return default;
+                });
+            var a = (type == typeof(string) ? arr : arr.Prepend(default)).ToArray();
+            cacheDataArray[type] = a;
+            return a;
         }
     }
 }
