@@ -50,6 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Dispose()
         {
+            Stop();
             WrapCore.Dispose();
         }
 
@@ -67,6 +68,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Play()
         {
+            Editor.LockAllUserInteraction();
             Animation.JumpAndPause(TimeSpan.FromMilliseconds(WrapCore.CurrentTime));
             WrapCore.Play();
             Animation.Resume();
@@ -74,6 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Stop()
         {
+            Editor.UnlockAllUserInteraction();
             WrapCore.Stop();
             Animation.Stop();
             //todo
