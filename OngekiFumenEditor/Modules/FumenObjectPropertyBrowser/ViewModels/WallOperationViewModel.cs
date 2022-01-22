@@ -33,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public override DisplayObjectViewModelBase GenerateChildObjectViewModel(bool needNext)
         {
-            return needNext ? (IsLeftWall ? new WallNextViewModel<WallLeftNext>() : new WallNextViewModel<WallRightNext>()) : (IsLeftWall ? new WallEndViewModel<WallLeftEnd>() : new WallEndViewModel<WallRightEnd>());
+            return needNext ? (IsLeftWall ? new WallLeftNextViewModel() : new WallRightNextViewModel()) : (IsLeftWall ? new WallLeftEndViewModel() : new WallRightEndViewModel());
         }
     }
 }

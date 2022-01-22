@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
     public class WallLeftStart : WallStartBase
     {
         public override string IDShortName => "WLS";
-        public override Type ModelViewType => typeof(WallStartViewModel<WallLeftStart>);
+        public override Type ModelViewType => typeof(WallLeftStartViewModel);
 
         public override LaneType LaneType => LaneType.WallLeft;
 
