@@ -11,6 +11,8 @@ namespace OngekiFumenEditor.Utils
     {
         public static void ForEach<T>(this IEnumerable<T> list, Action<T> fun)
         {
+            if (list is null)
+                return;
             foreach (var item in list)
                 fun(item);
         }

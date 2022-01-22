@@ -41,15 +41,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
+        private bool isLocked = default;
+        public bool IsLocked
+        {
+            get => isLocked;
+            set
+            {
+                Set(ref isLocked, value);
+                NotifyOfPropertyChange(() => IsLockedVisible);
+            }
+        }
+
+        public Visibility IsLockedVisible => IsLocked ? Visibility.Hidden : Visibility.Visible;
+
         public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
 
         public void CopySelectedObjects()
         {
+            if (IsLocked)
+                return;
             //复制所选物件
         }
 
         public void PasteCopiesObjects()
         {
+            if (IsLocked)
+                return;
             //粘贴已被复制物件
         }
 
@@ -86,6 +103,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_DeleteSelectingObjects()
         {
+            if (IsLocked)
+                return;
+
             //删除已选择的物件
             var selectedObject = SelectObjects.ToArray();
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
@@ -103,11 +123,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_SelectAllObjects()
         {
+            if (IsLocked)
+                return;
+
             EditorViewModels.OfType<DisplayObjectViewModelBase>().ForEach(x => x.IsSelected = true);
         }
 
         public void KeyboardAction_CancelSelectingObjects()
         {
+            if (IsLocked)
+                return;
+
             //取消选择
             SelectObjects.ForEach(x => x.IsSelected = false);
         }
@@ -118,6 +144,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseLeave(ActionExecutionContext e)
         {
+            if (IsLocked)
+                return;
+
             //Log.LogInfo("OnMouseLeave");
             if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
@@ -130,6 +159,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseUp(ActionExecutionContext e)
         {
+            if (IsLocked)
+                return;
+
             //Log.LogInfo("OnMouseUp");
             if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
@@ -145,6 +177,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseMove(ActionExecutionContext e)
         {
+            if (IsLocked)
+                return;
+
             //Log.LogInfo("OnMouseMove");
             var view = e.View as FrameworkElement;
             if (!(IsMouseDown && view is not null && view.Parent is IInputElement parent))
@@ -177,6 +212,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseDown(ActionExecutionContext e)
         {
+            if (IsLocked)
+                return;
+
             //Log.LogInfo("OnMouseDown");
             if ((e.EventArgs as MouseEventArgs).LeftButton == MouseButtonState.Pressed)
             {
@@ -189,6 +227,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_DragEnter(ActionExecutionContext e)
         {
+            if (IsLocked)
+            {
+                Log.LogWarn($"discard user actions because editor was locked.");
+                return;
+            }
+
             var arg = e.EventArgs as DragEventArgs;
             if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
                 arg.Effects = DragDropEffects.None;
@@ -196,6 +240,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_Drop(ActionExecutionContext e)
         {
+            if (IsLocked)
+            {
+                Log.LogWarn($"discard user actions because editor was locked.");
+                return;
+            }
+
             var arg = e.EventArgs as DragEventArgs;
             if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
                 return;
@@ -221,6 +271,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             mousePosition.Y = ry;
             displayObject.MoveCanvas(mousePosition);
             Redraw(RedrawTarget.OngekiObjects);
+        }
+
+        #endregion
+
+        #region Lock/Unlock User Interaction
+
+        /// <summary>
+        /// 锁住编辑器所有交互操作，用户无法对此编辑器做任何的操作
+        /// </summary>
+        public void LockAllUserInteraction()
+        {
+            IsLocked = true;
+            SelectObjects.ToArray().ForEach(x => x.IsSelected = false);
+            Log.LogInfo($"Editor is locked now.");
+        }
+
+        /// <summary>
+        /// 接触对编辑器用户操作的封锁
+        /// </summary>
+        public void UnlockAllUserInteraction()
+        {
+            IsLocked = false;
+            Log.LogInfo($"Editor is unlocked now.");
         }
 
         #endregion
