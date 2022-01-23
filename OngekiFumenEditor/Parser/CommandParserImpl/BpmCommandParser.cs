@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class BpmCommandParser : ICommandParser
+    public class BpmCommandParser : CommandParserBase
     {
-        public string CommandLineHeader => BPMChange.CommandName;
+        public override string CommandLineHeader => BPMChange.CommandName;
 
-        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
             var bpm = new BPMChange();

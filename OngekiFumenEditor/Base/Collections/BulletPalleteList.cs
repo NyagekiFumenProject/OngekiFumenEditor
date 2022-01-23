@@ -74,10 +74,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         private void OnPalletePropChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (true)
-            {
 
-            }
         }
     }
 }

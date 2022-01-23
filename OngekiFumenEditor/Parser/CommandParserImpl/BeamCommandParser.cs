@@ -11,10 +11,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
-    public abstract class BeamCommandParserBase : ICommandParser
+    public abstract class BeamCommandParserBase : CommandParserBase
     {
-        public abstract string CommandLineHeader { get; }
-
         public void CommonParse(BeamBase beam, CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
@@ -24,8 +22,6 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             beam.XGrid = new XGrid(dataArr[4]);
             beam.WidthId = (int)dataArr[5];
         }
-
-        public abstract OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen);
     }
 
     [Export(typeof(ICommandParser))]

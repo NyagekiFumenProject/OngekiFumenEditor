@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class HoldCommandParser : ICommandParser
+    public class HoldCommandParser : CommandParserBase
     {
-        public virtual string CommandLineHeader => "HLD";
+        public override string CommandLineHeader => "HLD";
 
-        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
 

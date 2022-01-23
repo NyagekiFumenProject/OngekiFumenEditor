@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class TapCommandParser : ICommandParser
+    public class TapCommandParser : CommandParserBase
     {
-        public virtual string CommandLineHeader => "TAP";
+        public override string CommandLineHeader => "TAP";
 
-        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
 

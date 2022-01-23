@@ -33,6 +33,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             {
                 Set(ref editor, value);
                 AudioPlayer?.Dispose();
+                scrollAnimationClearFunc?.Invoke();
                 LoadAudio();
                 NotifyOfPropertyChange(() => IsAudioButtonEnabled);
             }

@@ -11,11 +11,11 @@ using static OngekiFumenEditor.Base.OngekiObjects.EnemySet;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class EnemySetCommandParser : ICommandParser
+    public class EnemySetCommandParser : CommandParserBase
     {
-        public string CommandLineHeader => CommandName;
+        public override string CommandLineHeader => CommandName;
 
-        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
             var set = new EnemySet();

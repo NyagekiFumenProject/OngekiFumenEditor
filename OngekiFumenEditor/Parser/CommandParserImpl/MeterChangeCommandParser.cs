@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class MeterChangeCommandParser : ICommandParser
+    public class MeterChangeCommandParser : CommandParserBase
     {
-        public string CommandLineHeader => MeterChange.CommandName;
+        public override string CommandLineHeader => MeterChange.CommandName;
 
-        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
             var met = new MeterChange();

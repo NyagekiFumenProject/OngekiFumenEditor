@@ -35,7 +35,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override Type ModelViewType => typeof(BulletViewModel);
 
-        public override string IDShortName => "BLT";
+        public override string IDShortName => CommandName;
+
+        public const string CommandName = "BLT";
 
         public override string Serialize(OngekiFumen fumenData)
         {

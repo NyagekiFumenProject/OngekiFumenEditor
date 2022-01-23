@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class BellCommandParser : ICommandParser
+    public class BellCommandParser : CommandParserBase
     {
-        public string CommandLineHeader => Bell.CommandName;
+        public override string CommandLineHeader => Bell.CommandName;
 
-        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
             var bell = new Bell();

@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class ClickSECommandParser : ICommandParser
+    public class ClickSECommandParser : CommandParserBase
     {
-        public string CommandLineHeader => ClickSE.CommandName;
+        public override string CommandLineHeader => ClickSE.CommandName;
 
-        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
             var se = new ClickSE();

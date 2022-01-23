@@ -11,11 +11,11 @@ using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
-    public class BulletPalleteCommandParser : ICommandParser
+    public class BulletPalleteCommandParser : CommandParserBase
     {
-        public string CommandLineHeader => CommandName;
+        public override string CommandLineHeader => CommandName;
 
-        public OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var dataIntArr = args.GetDataArray<float>();
             var dataStrArr = args.GetDataArray<string>();
