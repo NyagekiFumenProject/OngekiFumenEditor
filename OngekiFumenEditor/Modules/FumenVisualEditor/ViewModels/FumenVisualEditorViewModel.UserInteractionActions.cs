@@ -308,6 +308,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /// </summary>
         public void LockAllUserInteraction()
         {
+            if (IsLocked)
+                return;
             IsLocked = true;
             SelectObjects.ToArray().ForEach(x => x.IsSelected = false);
             Log.LogInfo($"Editor is locked now.");
@@ -318,6 +320,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /// </summary>
         public void UnlockAllUserInteraction()
         {
+            if (!IsLocked)
+                return;
             IsLocked = false;
             Log.LogInfo($"Editor is unlocked now.");
         }

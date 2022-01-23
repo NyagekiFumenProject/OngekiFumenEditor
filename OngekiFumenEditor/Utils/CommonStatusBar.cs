@@ -29,8 +29,6 @@ namespace OngekiFumenEditor.Utils
             statusBar.AddItem("", new GridLength(1, GridUnitType.Star));
             statusBar.AddItem("", new GridLength(100));
             statusBar.AddItem("", new GridLength());
-
-            statusBar.RefreshGridColumns();
         }
     }
 }

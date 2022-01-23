@@ -198,8 +198,4 @@
     </Page>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Modules\AudioPlayerToolViewer\Utils\" />
-  </ItemGroup>
-
 </Project>

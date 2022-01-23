@@ -6,6 +6,7 @@ using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Security.Cryptography;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
@@ -58,15 +59,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region ScrollViewer Animations
 
-        private AnimatedScrollViewer AnimatedScrollViewer => (GetView() as FumenVisualEditorView)?.myAnimatedScrollViewer;
+        public AnimatedScrollViewer AnimatedScrollViewer => (GetView() as FumenVisualEditorView)?.myAnimatedScrollViewer;
 
-        public FumenScrollViewerAnimationWrapper BeginScrollAnimation()
+        public (AnimationTimeline, AnimatedScrollViewer) BeginScrollAnimation()
         {
             var animation = new DoubleAnimation(TotalDurationHeight, 0, TimeSpan.FromMilliseconds(TotalDurationHeight));
             Timeline.SetDesiredFrameRate(animation, 60);
             animation.FillBehavior = FillBehavior.HoldEnd;
 
-            return new FumenScrollViewerAnimationWrapper(this, new AnimationWrapper(animation, AnimatedScrollViewer, AnimatedScrollViewer.CurrentVerticalOffsetProperty));
+            return (animation, AnimatedScrollViewer);
         }
 
         #endregion

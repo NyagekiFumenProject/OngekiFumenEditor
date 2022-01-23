@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,6 @@ namespace OngekiFumenEditor.UI.Controls
         {
             if (clock is not null)
                 return;
-            clock = animation.CreateClock();
             frameworkElement.ApplyAnimationClock(dp, clock);
         }
 

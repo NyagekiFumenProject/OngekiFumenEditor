@@ -9,6 +9,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
     cal:Message.Attach="[Event PreviewMouseDown] = [Action OnMouseDown($executionContext)]; [Event MouseMove] = [Action OnMouseMove($executionContext)]; [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];     [Event MouseLeave] = [Action OnMouseLeave($executionContext)];    [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];   "
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel,
@@ -25,10 +26,10 @@
                 <ResourceDictionary Source="./EditorObjectDataTemplates.xaml">
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
-            <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter">
-            </converters:UnitCloseSizeConverter>
-            <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter">
-            </converters:IsStringEmptyConverter>
+            <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
+            <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter" />
+            <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
+            <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid cal:Message.Attach="[Event SizeChanged] = [Action OnSizeChanged($executionContext)]; [Event Loaded] = [Action OnLoaded($executionContext)]; " Focusable="False">
@@ -106,9 +107,10 @@
             x:Name="myAnimatedScrollViewer"
             cal:Message.Attach="[Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];"
             Background="#01000000"
+            CanMouseWheel="{Binding IsLocked, Converter={StaticResource ReverseBoolConverter}}"
             HorizontalScrollBarVisibility="Disabled"
             IsPenetrating="True"
-            VerticalScrollBarVisibility="Visible">
+            VerticalScrollBarVisibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}">
             <Grid>
                 <ItemsControl Height="{Binding TotalDurationHeight}" ItemsSource="{Binding TGridUnitLineLocations}">
                     <ItemsControl.ItemsPanel>
