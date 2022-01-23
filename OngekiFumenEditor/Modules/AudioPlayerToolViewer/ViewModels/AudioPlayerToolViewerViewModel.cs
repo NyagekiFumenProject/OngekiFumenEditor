@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void OnPlayOrPauseButtonClicked()
         {
-            if (AudioPlayer is null || Editor is null)
+            if (AudioPlayer is null)
                 return;
 
             Editor.LockAllUserInteraction();
@@ -77,6 +77,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 (var timeline, var scrollViewer) = Editor.BeginScrollAnimation();
                 EventHandler func = (e, d) =>
                 {
+                    if (AudioPlayer is null || Editor is null)
+                        return;
                     scrollViewer.CurrentVerticalOffset = Math.Max(0, Editor.TotalDurationHeight - AudioPlayer.CurrentTime - Editor.CanvasHeight);
                 };
                 CompositionTarget.Rendering += func;
