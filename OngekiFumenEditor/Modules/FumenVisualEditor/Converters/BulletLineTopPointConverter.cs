@@ -22,6 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
             //计算此bullet理论辅助线
             var bullet = line.From;
             var pallete = bullet.ReferenceBulletPallete;
+            var canvasY = TGridCalculator.ConvertTGridToY(bullet.TGrid, editor);
 
             if (parameter.ToString() == "0")
             {
@@ -42,7 +43,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
             }
             else
             {
-                return editor.TotalDurationHeight - editor.MaxVisibleCanvasY;
+                return editor.TotalDurationHeight - (canvasY + editor.CanvasHeight);
             }
         }
 
