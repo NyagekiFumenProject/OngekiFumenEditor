@@ -10,23 +10,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public class EditorSetting : PropertyChangedBase
     {
-        private TGrid currentDisplayTimePosition = new TGrid(0, 0);
-        /// <summary>
-        /// 表示当前显示物件的时间
-        /// </summary>
-        public TGrid CurrentDisplayTimePosition
-        {
-            get
-            {
-                return currentDisplayTimePosition;
-            }
-            set
-            {
-                currentDisplayTimePosition = value;
-                NotifyOfPropertyChange(() => CurrentDisplayTimePosition);
-            }
-        }
-
         public string editorDisplayName;
         public string EditorDisplayName
         {
