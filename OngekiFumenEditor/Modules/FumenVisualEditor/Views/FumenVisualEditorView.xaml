@@ -29,6 +29,7 @@
             <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
             <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
             <converters:ReverseDoubleConverter x:Key="ReverseDoubleConverter" />
+            <converters:TGridDisplayConverter x:Key="TGridDisplayConverter" />
             <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter" />
             <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
@@ -206,6 +207,34 @@
                 </ItemsControl>
             </Grid>
         </controls:AnimatedScrollViewer>
+        <TextBlock
+            Height="30"
+            Margin="0,0,20,0"
+            HorizontalAlignment="Right"
+            d:Text="500000000000000000"
+            Foreground="Yellow">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource TGridDisplayConverter}">
+                    <MultiBinding.Bindings>
+                        <Binding Path="." />
+                        <Binding Path="Setting.JudgeLineOffsetY" />
+                        <Binding Path="MinVisibleCanvasY" />
+                    </MultiBinding.Bindings>
+                </MultiBinding>
+            </TextBlock.Text>
+            <TextBlock.RenderTransform>
+                <TranslateTransform>
+                    <TranslateTransform.Y>
+                        <MultiBinding Converter="{StaticResource JudgeLineConverter}" ConverterParameter="0">
+                            <MultiBinding.Bindings>
+                                <Binding Path="." />
+                                <Binding Path="Setting.JudgeLineOffsetY" />
+                            </MultiBinding.Bindings>
+                        </MultiBinding>
+                    </TranslateTransform.Y>
+                </TranslateTransform>
+            </TextBlock.RenderTransform>
+        </TextBlock>
         <Rectangle Height="2" Stroke="Yellow">
             <Rectangle.RenderTransform>
                 <TranslateTransform>

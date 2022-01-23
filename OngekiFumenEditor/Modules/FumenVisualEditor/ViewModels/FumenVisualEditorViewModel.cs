@@ -59,6 +59,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             switch (e.PropertyName)
             {
+                case nameof(EditorSetting.JudgeLineOffsetY):
+                    NotifyOfPropertyChange(() => MinVisibleCanvasY);
+                    NotifyOfPropertyChange(() => MaxVisibleCanvasY);
+                    break;
                 case nameof(EditorSetting.UnitCloseSize):
                     RecalculateXUnitSize();
                     Redraw(RedrawTarget.XGridUnitLines);

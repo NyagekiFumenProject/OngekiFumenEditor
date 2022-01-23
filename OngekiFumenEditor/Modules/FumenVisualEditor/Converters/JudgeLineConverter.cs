@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
             if (values[0] is FumenVisualEditorViewModel editor &&
                 values[1] is double judgeLineOffsetY)
             {
-                return editor.CanvasHeight / 2 - judgeLineOffsetY;
+                return editor.CanvasHeight / 2 - judgeLineOffsetY + (parameter is not null ? (double.TryParse(parameter.ToString(), out var d) ? d : 0) : 0);
             }
 
             return 0;
