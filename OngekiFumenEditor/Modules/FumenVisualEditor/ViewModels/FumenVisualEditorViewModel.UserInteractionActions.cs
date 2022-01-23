@@ -233,7 +233,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var tGrid = TGridCalculator.ConvertYToTGrid(canvasY, this);
             var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
-            contentViewModel.Message = $"C[{canvasX:F2},{canvasY:F2}] T[{tGrid.Unit},{tGrid.Grid}] X[{xGrid.Unit:F2},{xGrid.Grid}]";
+            contentViewModel.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}]";
         }
 
         public void OnMouseDown(ActionExecutionContext e)

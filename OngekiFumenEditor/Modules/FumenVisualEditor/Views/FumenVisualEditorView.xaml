@@ -27,6 +27,8 @@
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
             <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
+            <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
+            <converters:ReverseDoubleConverter x:Key="ReverseDoubleConverter" />
             <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter" />
             <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
@@ -116,6 +118,9 @@
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <Canvas>
+                                <Canvas.RenderTransform>
+                                    <TranslateTransform Y="{Binding Setting.JudgeLineOffsetY, Converter={StaticResource ReverseDoubleConverter}}" />
+                                </Canvas.RenderTransform>
                             </Canvas>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
@@ -192,11 +197,28 @@
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <Canvas>
+                                <Canvas.RenderTransform>
+                                    <TranslateTransform Y="{Binding Setting.JudgeLineOffsetY, Converter={StaticResource ReverseDoubleConverter}}" />
+                                </Canvas.RenderTransform>
                             </Canvas>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
             </Grid>
         </controls:AnimatedScrollViewer>
+        <Rectangle Height="2" Stroke="Yellow">
+            <Rectangle.RenderTransform>
+                <TranslateTransform>
+                    <TranslateTransform.Y>
+                        <MultiBinding Converter="{StaticResource JudgeLineConverter}">
+                            <MultiBinding.Bindings>
+                                <Binding Path="." />
+                                <Binding Path="Setting.JudgeLineOffsetY" />
+                            </MultiBinding.Bindings>
+                        </MultiBinding>
+                    </TranslateTransform.Y>
+                </TranslateTransform>
+            </Rectangle.RenderTransform>
+        </Rectangle>
     </Grid>
 </UserControl>

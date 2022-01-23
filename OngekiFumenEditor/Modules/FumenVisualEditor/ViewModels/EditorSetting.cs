@@ -10,6 +10,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public class EditorSetting : PropertyChangedBase
     {
+        private double judgeLineOffsetY = 0;
+        public double JudgeLineOffsetY
+        {
+            get => judgeLineOffsetY;
+            set => Set(ref judgeLineOffsetY, value);
+        }
+
         public string editorDisplayName;
         public string EditorDisplayName
         {

@@ -14,8 +14,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
-        public double MinVisibleCanvasY => ScrollViewerVerticalOffset;
-        public double MaxVisibleCanvasY => ScrollViewerVerticalOffset + CanvasHeight;
+        public double MinVisibleCanvasY => ScrollViewerVerticalOffset - Setting.JudgeLineOffsetY;
+        public double MaxVisibleCanvasY => ScrollViewerVerticalOffset + CanvasHeight - Setting.JudgeLineOffsetY;
 
         private double totalDurationHeight;
         public double TotalDurationHeight

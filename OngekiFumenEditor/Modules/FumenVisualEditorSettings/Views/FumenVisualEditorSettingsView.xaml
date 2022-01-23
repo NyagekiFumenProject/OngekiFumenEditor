@@ -41,6 +41,7 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">UnitCloseSize</TextBlock>
                 <ComboBox
@@ -104,6 +105,22 @@
                     VerticalContentAlignment="Center"
                     Text="{Binding Setting.XGridMaxUnit}">
                 </TextBox>
+                <TextBlock
+                    Grid.Row="5"
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center">
+                    JudgeLine:<LineBreak>
+                    </LineBreak><Run Text="{Binding Setting.JudgeLineOffsetY}">
+                    </Run>
+                </TextBlock>
+                <Slider
+                    Grid.Row="5"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Maximum="500"
+                    Minimum="0"
+                    Value="{Binding Setting.JudgeLineOffsetY, Mode=TwoWay}">
+                </Slider>
             </Grid>
         </StackPanel>
     </ScrollViewer>
