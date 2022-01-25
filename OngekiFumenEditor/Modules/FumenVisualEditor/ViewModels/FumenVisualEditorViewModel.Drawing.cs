@@ -130,10 +130,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //检查是否还存在
                 if (!allDisplayableObjects.Contains(refObject))
                     removeObjects.Add(viewModel);
-                else if (viewModel is DisplayObjectViewModelBase displayableViewModel)
-                {
-                    displayableViewModel.RecaulateCanvasXY();
-                }
+                else if (viewModel is IEditorDisplayableViewModel editorViewModel)
+                    editorViewModel.OnEditorRedrawObjects();
             }
             foreach (var removeViewModel in removeObjects)
                 EditorViewModels.Remove(removeViewModel);
@@ -148,8 +146,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 viewModel.OnObjectCreated(add, this);
                 EditorViewModels.Add(viewModel);
                 //odLog.LogDebug($"add viewmodel : {add}");
-                if (viewModel is DisplayObjectViewModelBase ongekiObjectViewModel)
-                    ongekiObjectViewModel.RecaulateCanvasXY();
+                if (viewModel is IEditorDisplayableViewModel editorViewModel)
+                    editorViewModel.OnEditorRedrawObjects();
                 c++;
             }
 

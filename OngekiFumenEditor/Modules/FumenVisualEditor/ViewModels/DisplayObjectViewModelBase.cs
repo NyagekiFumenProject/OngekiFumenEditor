@@ -269,6 +269,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
             }
         }
+
+        public void OnEditorRedrawObjects()
+        {
+            RecaulateCanvasXY();
+        }
     }
 
     public abstract class DisplayObjectViewModelBase<T> : DisplayObjectViewModelBase where T : OngekiObjectBase, IDisplayableObject, new()

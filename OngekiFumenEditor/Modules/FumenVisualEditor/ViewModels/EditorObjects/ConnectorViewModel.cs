@@ -32,6 +32,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
         }
 
         public abstract void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel);
+
+        public virtual void OnEditorRedrawObjects()
+        {
+            NotifyOfPropertyChange(() => EditorViewModel);
+        }
     }
 
     public abstract class ConnectorViewModel<T> : ConnectorViewModel where T : IDisplayableObject, IHorizonPositionObject, ITimelineObject

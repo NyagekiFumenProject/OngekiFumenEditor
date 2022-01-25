@@ -170,5 +170,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 
             NotifyOfPropertyChange(() => Lines);
         }
+
+        public override void OnEditorRedrawObjects()
+        {
+            RebuildLines();
+            base.OnEditorRedrawObjects();
+        }
     }
 }

@@ -16,5 +16,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         IDisplayableObject DisplayableObject { get; }
 
         void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel);
+        void OnEditorRedrawObjects();
     }
 }
