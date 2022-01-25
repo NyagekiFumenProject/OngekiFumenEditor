@@ -7,6 +7,7 @@
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Converters"
     xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -31,11 +32,12 @@
                     <Run Text="当前播放：" />
                     <Run d:Text="asd" Text="{Binding AudioName}" />
                 </TextBlock>
-                <Slider
+                <gemini:SliderEx
                     Margin="0,0,0,5"
+                    cal:Message.Attach="[Event ThumbDragCompleted] = [Action OnSliderValueChanged()];[Event ThumbDragStarted] = [Action OnSliderValueStartChanged()];"
                     Maximum="{Binding AudioPlayer.Duration, Mode=OneWay}"
-                    Value="{Binding AudioPlayer.CurrentTime, Mode=OneWay}">
-                </Slider>
+                    Value="{Binding SliderValue, Mode=TwoWay}">
+                </gemini:SliderEx>
                 <TextBlock Margin="0,0,0,5" HorizontalAlignment="Right">
                     <Run Text="{Binding AudioPlayer.CurrentTime, Mode=OneWay, Converter={StaticResource IntToTimeDisplayConverter}}" />
                     <Run Text=" - " />

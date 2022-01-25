@@ -198,7 +198,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public void Stop()
         {
-            thread.Abort();
+            thread?.Abort();
             isPlaying = false;
         }
 

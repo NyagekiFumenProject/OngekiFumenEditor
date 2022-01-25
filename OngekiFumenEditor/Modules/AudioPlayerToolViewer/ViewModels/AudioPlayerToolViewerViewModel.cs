@@ -9,6 +9,7 @@ using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,6 +23,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
     public class AudioPlayerToolViewerViewModel : Tool, IAudioPlayerToolViewer
     {
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
+
+        private double sliderDraggingValue = 0;
+        private bool isSliderDragging = false;
+        public double SliderValue
+        {
+            get => isSliderDragging ? sliderDraggingValue : (AudioPlayer?.CurrentTime ?? 0);
+            set
+            {
+                if (isSliderDragging)
+                    sliderDraggingValue = value;
+                NotifyOfPropertyChange(() => SliderValue);
+            }
+        }
 
         private FumenVisualEditorViewModel editor = default;
         public FumenVisualEditorViewModel Editor
@@ -47,9 +61,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             get => audioPlayer;
             set
             {
+                this.RegisterOrUnregisterPropertyChangeEvent(audioPlayer, value, OnAudioPlayerPropChanged);
                 Set(ref audioPlayer, value);
                 NotifyOfPropertyChange(() => IsAudioButtonEnabled);
             }
+        }
+
+        private void OnAudioPlayerPropChanged(object sender,PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IAudioPlayer.CurrentTime))
+                NotifyOfPropertyChange(() => SliderValue);
         }
 
         private System.Action scrollAnimationClearFunc = default;
@@ -162,6 +183,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                     MessageBox.Show(msg, "错误");
                 }
             }
+        }
+
+        public void OnSliderValueChanged()
+        {
+            Log.LogDebug($"Changed : {SliderValue}");
+            isSliderDragging = false;
+        }
+
+        public void OnSliderValueStartChanged()
+        {
+            sliderDraggingValue = SliderValue;
+            isSliderDragging = true;
+            Log.LogDebug($"Begin Changed : {SliderValue}");
         }
     }
 }
