@@ -24,9 +24,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
     {
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
-        private double sliderDraggingValue = 0;
+        private float sliderDraggingValue = 0;
         private bool isSliderDragging = false;
-        public double SliderValue
+        public float SliderValue
         {
             get => isSliderDragging ? sliderDraggingValue : (AudioPlayer?.CurrentTime ?? 0);
             set
@@ -67,7 +67,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
-        private void OnAudioPlayerPropChanged(object sender,PropertyChangedEventArgs e)
+        private void OnAudioPlayerPropChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(IAudioPlayer.CurrentTime))
                 NotifyOfPropertyChange(() => SliderValue);
@@ -187,15 +187,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void OnSliderValueChanged()
         {
-            Log.LogDebug($"Changed : {SliderValue}");
+            var seekTo = SliderValue;
+            Log.LogDebug($"Drag done, seek : {seekTo}");
             isSliderDragging = false;
+
+            AudioPlayer.Seek(seekTo, false);
+            fumenSoundPlayer.Seek(seekTo);
         }
 
         public void OnSliderValueStartChanged()
         {
             sliderDraggingValue = SliderValue;
             isSliderDragging = true;
-            Log.LogDebug($"Begin Changed : {SliderValue}");
+            Log.LogDebug($"Begin drag, from : {SliderValue}");
         }
     }
 }
