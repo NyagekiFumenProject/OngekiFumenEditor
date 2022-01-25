@@ -191,9 +191,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public void Seek(float msec)
         {
-            itor = events.Find(events.FirstOrDefault(x => x.Time < msec));
+            Pause();
+            itor = events.Find(events.FirstOrDefault(x => msec < x.Time));
             timer.Restart();
             baseTimeOffset = msec;
+            Play();
         }
 
         public void Stop()
