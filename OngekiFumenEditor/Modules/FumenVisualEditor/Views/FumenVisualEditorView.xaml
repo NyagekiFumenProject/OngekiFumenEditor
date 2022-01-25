@@ -48,7 +48,10 @@
                 </MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>
-        <ItemsControl x:Name="XGridUnitLineLocations" ItemsSource="{Binding XGridUnitLineLocations}">
+        <ItemsControl
+            x:Name="XGridUnitLineLocations"
+            ItemsSource="{Binding XGridUnitLineLocations}"
+            Visibility="{Binding IsLockedVisible}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas>

@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         private float baseTimeOffset = 0;
         private bool isPlaying = false;
 
-        public double CurrentTime => baseTimeOffset + timer.ElapsedMilliseconds + 240;
+        public double CurrentTime => baseTimeOffset + timer.ElapsedMilliseconds + editor.Setting.SoundOffset;
 
         private Dictionary<Sound, ISoundPlayer> cacheSounds = new();
         private Task loadTask;
