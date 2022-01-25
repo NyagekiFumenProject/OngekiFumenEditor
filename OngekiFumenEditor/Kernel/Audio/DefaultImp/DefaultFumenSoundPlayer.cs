@@ -161,7 +161,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 {
                     if (currentTime >= itor.Value.Time)
                     {
-                        Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");
+                        //Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");
                         PlaySounds(itor.Value.Sounds);
                         itor = itor.Next;
                     }

@@ -16,8 +16,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
     internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
     {
         private AudioFileReader audioFileReader;
-
         private WasapiOut currentOut;
+        private float currentOutPositionWeight = 0;
+        private float baseOffset = 0;
 
         public float Duration { get => (float)audioFileReader.TotalTime.TotalMilliseconds; }
 
@@ -33,8 +34,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromMilliseconds(1000.0 / 60);
 
-        private float baseOffset = 0;
-
         public Task Load(string audio_file)
         {
             //release resource before loading new one.
@@ -45,6 +44,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 currentOut = new WasapiOut();
                 audioFileReader = new AudioFileReader(audio_file);
                 currentOut?.Init(audioFileReader);
+                currentOutPositionWeight = 1000.0f / currentOut.OutputWaveFormat.BitsPerSample / currentOut.OutputWaveFormat.Channels * 8 / currentOut.OutputWaveFormat.SampleRate;
                 NotifyOfPropertyChange(() => Duration);
             }
             catch (Exception e)
@@ -61,8 +61,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             time = Math.Max(0, Math.Min(time, Duration));
 
             currentOut?.Stop();
-            currentOut.Dispose();
+            currentOut?.Dispose();
             currentOut = default;
+            currentOutPositionWeight = 0;
 
             audioFileReader.Seek(0, System.IO.SeekOrigin.Begin);
             var provider = new OffsetSampleProvider(audioFileReader)
@@ -74,6 +75,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
             currentOut = new WasapiOut();
             currentOut.Init(provider);
+            currentOutPositionWeight = 1000.0f / currentOut.OutputWaveFormat.BitsPerSample / currentOut.OutputWaveFormat.Channels * 8 / currentOut.OutputWaveFormat.SampleRate;
             UpdatePropsManually();
 
             if (!pause)
@@ -88,9 +90,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         private float GetTime()
         {
-            var time = (currentOut is null ? 0 : (currentOut.GetPosition() * 1000.0f / currentOut.OutputWaveFormat.BitsPerSample / currentOut.OutputWaveFormat.Channels * 8 / currentOut.OutputWaveFormat.SampleRate)) + baseOffset;
-
-            return time;
+            var coreTime = currentOut?.GetPosition() ?? 0;
+            return coreTime * currentOutPositionWeight + baseOffset;
         }
 
         public async void Stop()

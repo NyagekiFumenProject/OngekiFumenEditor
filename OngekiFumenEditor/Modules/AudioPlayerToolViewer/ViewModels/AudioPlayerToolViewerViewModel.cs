@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,7 +29,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private bool isSliderDragging = false;
         public float SliderValue
         {
-            get => isSliderDragging ? sliderDraggingValue : (AudioPlayer?.CurrentTime ?? 0);
+            get
+            {
+                var time = isSliderDragging ?
+                sliderDraggingValue :
+                (AudioPlayer?.CurrentTime ?? 0);
+                return time;
+            }
             set
             {
                 if (isSliderDragging)
