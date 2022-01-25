@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
     {
         private AudioFileReader audioFileReader;
 
-        private WaveOutEvent currentOut;
+        private WasapiOut currentOut;
 
         public float Duration { get => (float)audioFileReader.TotalTime.TotalMilliseconds; }
 
@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
             try
             {
-                currentOut = new WaveOutEvent();
+                currentOut = new WasapiOut();
                 audioFileReader = new AudioFileReader(audio_file);
                 currentOut?.Init(audioFileReader);
                 NotifyOfPropertyChange(() => Duration);
@@ -56,11 +56,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             return Task.CompletedTask;
         }
 
-        public void Jump(float time, bool pause)
+        public void Seek(float time, bool pause)
         {
             time = Math.Max(0, Math.Min(time, Duration));
 
             currentOut?.Stop();
+            currentOut.Dispose();
+            currentOut = default;
 
             audioFileReader.Seek(0, System.IO.SeekOrigin.Begin);
             var provider = new OffsetSampleProvider(audioFileReader)
@@ -70,7 +72,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
             baseOffset = time;
 
-            currentOut?.Init(provider);
+            currentOut = new WasapiOut();
+            currentOut.Init(provider);
             UpdatePropsManually();
 
             if (!pause)
@@ -93,7 +96,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         public async void Stop()
         {
             await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
-            Jump(0, true);
+            Seek(0, true);
         }
 
         public async void Pause()

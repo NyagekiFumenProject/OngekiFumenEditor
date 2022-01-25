@@ -54,9 +54,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             WrapCore.Dispose();
         }
 
-        public void Jump(float time, bool pause)
+        public void Seek(float time, bool pause)
         {
-            WrapCore.Jump(time, pause);
+            WrapCore.Seek(time, pause);
             Animation.JumpAndPause(TimeSpan.FromMilliseconds(time));
         }
 

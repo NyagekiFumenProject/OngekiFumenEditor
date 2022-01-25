@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -51,12 +52,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         }
 
         private System.Action scrollAnimationClearFunc = default;
-
         public bool IsAudioButtonEnabled => AudioPlayer is not null;
+        private IFumenSoundPlayer fumenSoundPlayer;
 
         public AudioPlayerToolViewerViewModel()
         {
             DisplayName = "音频播放";
+            fumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
         }
 
         private async void LoadAudio()
@@ -74,21 +76,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             Editor.LockAllUserInteraction();
             if (scrollAnimationClearFunc is null)
-            {
-                (var timeline, var scrollViewer) = Editor.BeginScrollAnimation();
-                EventHandler func = (e, d) =>
-                {
-                    if (AudioPlayer is null || Editor is null)
-                        return;
-                    scrollViewer.CurrentVerticalOffset = Math.Max(0, Editor.TotalDurationHeight - AudioPlayer.CurrentTime - Editor.CanvasHeight);
-                };
-                CompositionTarget.Rendering += func;
-                scrollAnimationClearFunc = () =>
-                {
-                    CompositionTarget.Rendering -= func;
-                    scrollAnimationClearFunc = default;
-                };
-            }
+                InitPreviewActions();
 
             if (AudioPlayer.IsPlaying)
                 OnPauseButtonClicked();
@@ -96,13 +84,33 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 OnPlayOrResumeButtonClicked();
         }
 
+        private async void InitPreviewActions()
+        {
+            await fumenSoundPlayer.Init(Editor, AudioPlayer);
+            (var timeline, var scrollViewer) = Editor.BeginScrollAnimation();
+            EventHandler func = (e, d) =>
+            {
+                if (AudioPlayer is null || Editor is null)
+                    return;
+                scrollViewer.CurrentVerticalOffset = Math.Max(0, Editor.TotalDurationHeight - AudioPlayer.CurrentTime - Editor.CanvasHeight);
+            };
+            CompositionTarget.Rendering += func;
+            scrollAnimationClearFunc = () =>
+            {
+                CompositionTarget.Rendering -= func;
+                scrollAnimationClearFunc = default;
+            };
+        }
+
         private void OnPauseButtonClicked()
         {
+            fumenSoundPlayer.Pause();
             AudioPlayer.Pause();
         }
 
         private void OnPlayOrResumeButtonClicked()
         {
+            fumenSoundPlayer.Play();
             AudioPlayer.Play();
         }
 
@@ -113,6 +121,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             Editor.UnlockAllUserInteraction();
             scrollAnimationClearFunc?.Invoke();
+            fumenSoundPlayer.Stop();
             AudioPlayer.Stop();
         }
 

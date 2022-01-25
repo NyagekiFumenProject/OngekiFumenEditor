@@ -120,6 +120,16 @@ namespace OngekiFumenEditor.UI.Controls
             ScrollToVerticalOffsetWithAnimation(ScrollableHeight, milliseconds);
         }
 
+        public Task ScrollToVerticalOffsetWithAnimationAsync(double offset, double milliseconds = 500)
+        {
+            var source = new TaskCompletionSource();
+            ScrollToVerticalOffsetWithAnimation(offset, milliseconds, () =>
+            {
+                source.SetResult();
+            });
+            return source.Task;
+        }
+
         public void ScrollToVerticalOffsetWithAnimation(double offset, double milliseconds = 500, Action onComplete = null)
         {
             var animation = AnimationHelper.CreateAnimation(offset, milliseconds);

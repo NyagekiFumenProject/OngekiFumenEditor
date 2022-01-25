@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio
 {
-    public interface IAudioManager
+    public interface ISoundPlayer
     {
-        Task<ISoundPlayer> LoadSoundAsync(string filePath);
-        Task<IAudioPlayer> LoadAudioAsync(string filePath);
+        void PlayOnce();
+
+        void PlayLoop();
+        void StopLoop();
     }
 }
