@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 {
     [Export(typeof(IFumenSoundPlayer))]
-    public class DefaultFumenSoundPlayer : IFumenSoundPlayer
+    public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     {
         [Flags]
         public enum Sound
@@ -214,6 +214,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         public void Pause()
         {
             isPlaying = false;
+        }
+
+        public void Dispose()
+        {
+            thread?.Abort();
+            foreach (var sound in cacheSounds.Values)
+                sound.Dispose();
         }
     }
 }

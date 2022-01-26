@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio
 {
-    public interface ISoundPlayer
+    public interface ISoundPlayer : IDisposable
     {
         void PlayOnce();
 

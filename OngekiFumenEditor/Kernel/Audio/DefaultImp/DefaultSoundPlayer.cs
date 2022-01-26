@@ -18,6 +18,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             cacheSound = cache;
         }
 
+        public void Dispose()
+        {
+
+        }
+
         public void PlayLoop()
         {
 
