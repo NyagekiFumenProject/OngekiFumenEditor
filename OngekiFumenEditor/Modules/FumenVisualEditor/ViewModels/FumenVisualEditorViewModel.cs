@@ -8,10 +8,12 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
@@ -146,6 +148,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 Log.LogInfo($"用户无法完成新建项目向导，关闭此编辑器");
                 await TryCloseAsync(false);
                 return;
+            }
+            var projectData = dialogViewModel.EditorProjectData;
+            if (File.Exists(projectData.FumenFilePath))
+            {
+                using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
+                var fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fumenFileStream);
+                projectData.Fumen = fumen;
             }
             EditorProjectData = dialogViewModel.EditorProjectData;
             Redraw(RedrawTarget.All);
