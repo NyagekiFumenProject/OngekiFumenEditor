@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
     [Export(typeof(IAudioManager))]
     public class DefaultAudioManager : IAudioManager
     {
+        private HashSet<IAudioPlayer> ownAudioPlayers = new();
+
         public class CachedSound
         {
             public float[] AudioData { get; private set; }
@@ -102,6 +105,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         public async Task<IAudioPlayer> LoadAudioAsync(string filePath)
         {
             var player = new DefaultMusicPlayer();
+            ownAudioPlayers.Add(player);
 
             await player.Load(filePath);
 
@@ -112,6 +116,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         {
             var cached = new CachedSound(filePath);
             return Task.FromResult<ISoundPlayer>(new DefaultSoundPlayer(cached, this));
+        }
+
+        public void Dispose()
+        {
+            Log.LogDebug("call DefaultAudioManager.Dispose()");
+            foreach (var player in ownAudioPlayers)
+                player?.Dispose();
+            ownAudioPlayers.Clear();
+            outputDevice?.Dispose();
         }
     }
 }

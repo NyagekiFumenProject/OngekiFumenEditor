@@ -11,5 +11,6 @@ namespace OngekiFumenEditor.Kernel.Scheduler
         Task Init();
         Task AddScheduler(ISchedulable s);
         Task RemoveScheduler(ISchedulable s);
+        Task Term();
     }
 }

@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using Gemini.Framework.Services;
+using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
@@ -67,6 +68,13 @@ namespace OngekiFumenEditor
             await InitKernels();
 
             Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
+        }
+
+        protected override async void OnExit(object sender, EventArgs e)
+        {
+            IoC.Get<IAudioManager>().Dispose();
+            await IoC.Get<ISchedulerManager>().Term();
+            base.OnExit(sender, e);
         }
     }
 }

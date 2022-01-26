@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio
 {
-    public interface IAudioManager
+    public interface IAudioManager : IDisposable
     {
         Task<ISoundPlayer> LoadSoundAsync(string filePath);
         Task<IAudioPlayer> LoadAudioAsync(string filePath);

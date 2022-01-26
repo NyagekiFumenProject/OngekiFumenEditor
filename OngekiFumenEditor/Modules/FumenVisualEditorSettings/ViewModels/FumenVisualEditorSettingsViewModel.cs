@@ -50,5 +50,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
                     DisplayName = "编辑器设置 - " + value.EditorDisplayName;
             }
         }
+
+        public FumenVisualEditorSettingsViewModel()
+        {
+            DisplayName = "编辑器设置";
+        }
     }
 }

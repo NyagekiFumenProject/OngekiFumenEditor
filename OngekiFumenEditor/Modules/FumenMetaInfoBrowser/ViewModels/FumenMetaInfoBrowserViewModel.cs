@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
     {
         public FumenMetaInfoBrowserViewModel()
         {
-            DisplayName = "FumenMetaInfoBrowser";
+            DisplayName = "谱面信息";
             Fumen = null;
         }
 

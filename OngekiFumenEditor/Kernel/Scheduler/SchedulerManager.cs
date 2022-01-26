@@ -64,8 +64,10 @@ namespace OngekiFumenEditor.Kernel.Scheduler
             }
         }
 
-        public Task OnExit()
+        public Task Term()
         {
+            Log.LogDebug("call SchedulerManager.Dispose()");
+
             try
             {
                 runThread.Abort();

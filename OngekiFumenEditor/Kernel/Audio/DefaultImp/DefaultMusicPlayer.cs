@@ -10,13 +10,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 {
     internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
     {
         private AudioFileReader audioFileReader;
-        private WasapiOut currentOut;
+        private WaveOut currentOut;
         private float currentOutPositionWeight = 0;
         private float baseOffset = 0;
 
@@ -41,7 +42,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
             try
             {
-                currentOut = new WasapiOut();
+                currentOut = new WaveOut();
                 audioFileReader = new AudioFileReader(audio_file);
                 currentOut?.Init(audioFileReader);
                 currentOutPositionWeight = 1000.0f / currentOut.OutputWaveFormat.BitsPerSample / currentOut.OutputWaveFormat.Channels * 8 / currentOut.OutputWaveFormat.SampleRate;
@@ -73,7 +74,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
             baseOffset = time;
 
-            currentOut = new WasapiOut();
+            currentOut = new WaveOut();
             currentOut.Init(provider);
             currentOutPositionWeight = 1000.0f / currentOut.OutputWaveFormat.BitsPerSample / currentOut.OutputWaveFormat.Channels * 8 / currentOut.OutputWaveFormat.SampleRate;
             UpdatePropsManually();
@@ -130,7 +131,14 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public Task OnScheduleCall(CancellationToken cancellationToken)
         {
-            UpdatePropsManually();
+            try
+            {
+                UpdatePropsManually();
+            }
+            catch
+            {
+
+            }
             return Task.CompletedTask;
         }
 
