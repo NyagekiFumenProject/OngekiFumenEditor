@@ -54,8 +54,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         private FumenVisualEditorViewModel editor;
         private float baseTimeOffset = 0;
         private bool isPlaying = false;
+        private double soundOffset = 0;
 
-        public double CurrentTime => baseTimeOffset + timer.ElapsedMilliseconds + editor.Setting.SoundOffset;
+        public double CurrentTime => baseTimeOffset + timer.ElapsedMilliseconds + soundOffset;
 
         private Dictionary<Sound, ISoundPlayer> cacheSounds = new();
         private Task loadTask;
@@ -100,6 +101,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
             this.player = player;
             this.editor = editor;
+
+            soundOffset = MathUtils.CalculateBPMLength(new (0, 0), new(1, 0), editor.Fumen.MetaInfo.ProgJudgeBpm, 0) / editor.Fumen.MetaInfo.MeterDefinition.Bunshi;
+            Log.LogDebug($"DefaultFumenSoundPlayer.soundOffset = {soundOffset}");
 
             RebuildEvents();
 
@@ -161,7 +165,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 {
                     if (currentTime >= itor.Value.Time)
                     {
-                        Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");
+                        //Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");
                         PlaySounds(itor.Value.Sounds);
                         itor = itor.Next;
                     }

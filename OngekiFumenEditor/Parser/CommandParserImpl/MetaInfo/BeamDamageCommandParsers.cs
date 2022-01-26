@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Parser.CommandParserImpl.MetaInfo
 {
     [Export(typeof(ICommandParser))]
-    class ProgJudgeBpmCommandParsers : MetaInfoCommandParserBase
+    class BeamDamageCommandParsers : MetaInfoCommandParserBase
     {
-        public override string CommandLineHeader => "PROGJUDGE_BPM";
+        public override string CommandLineHeader => "BEAM_DAMAGE";
 
         public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
         {
-            fumen.MetaInfo.BulletDamage = args.GetData<double>(1);
+            fumen.MetaInfo.BeamDamage = args.GetData<float>(1);
         }
     }
 }
