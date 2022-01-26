@@ -240,8 +240,6 @@ namespace OngekiFumenEditor.UI.Controls
         public static readonly DependencyProperty CurrentHorizontalOffsetProperty = DependencyProperty.Register(
             "CurrentHorizontalOffset", typeof(double), typeof(AnimatedScrollViewer), new PropertyMetadata(0d, OnCurrentHorizontalOffsetChanged));
 
-        private readonly Task _task;
-
         private static void OnCurrentHorizontalOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is AnimatedScrollViewer ctl && e.NewValue is double v)

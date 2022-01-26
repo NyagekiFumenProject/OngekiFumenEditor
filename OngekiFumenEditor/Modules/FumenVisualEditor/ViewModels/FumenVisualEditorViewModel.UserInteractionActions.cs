@@ -44,6 +44,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
+        #region Visibilities
+
         private bool isLocked = default;
         public bool IsLocked
         {
@@ -51,11 +53,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref isLocked, value);
-                NotifyOfPropertyChange(() => IsLockedVisible);
+                NotifyOfPropertyChange(() => EditorObjectVisibility);
+                NotifyOfPropertyChange(() => EditorLockedVisibility);
             }
         }
 
-        public Visibility IsLockedVisible => IsLocked ? Visibility.Hidden : Visibility.Visible;
+        private bool isUserRequestHideEditorObject = default;
+        public bool IsUserRequestHideEditorObject
+        {
+            get => isUserRequestHideEditorObject;
+            set
+            {
+                Set(ref isUserRequestHideEditorObject, value);
+                NotifyOfPropertyChange(() => EditorObjectVisibility);
+            }
+        }
+
+        public Visibility EditorLockedVisibility =>
+            IsLocked
+            ? Visibility.Hidden : Visibility.Visible;
+
+        public Visibility EditorObjectVisibility =>
+            IsLocked || // 编辑器被锁住
+            IsUserRequestHideEditorObject // 用户要求隐藏(比如按下Q)
+            ? Visibility.Hidden : Visibility.Visible;
+
+        #endregion
 
         public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
 
@@ -146,6 +169,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IoC.Get<IAudioPlayerToolViewer>().RequestPlayOrPause();
         }
 
+        public void KeyboardAction_HideOrShow()
+        {
+            IsUserRequestHideEditorObject = !IsUserRequestHideEditorObject;
+        }
         #endregion
 
         #region Drag Actions

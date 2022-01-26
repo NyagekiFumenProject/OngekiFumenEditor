@@ -31,6 +31,7 @@ namespace OngekiFumenEditor.UI.Controls
         {
             if (clock is not null)
                 return;
+            clock = animation.CreateClock();
             frameworkElement.ApplyAnimationClock(dp, clock);
         }
 

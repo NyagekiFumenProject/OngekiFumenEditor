@@ -20,8 +20,6 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
         private T to;
 
-        public event EventHandler<ViewAttachedEventArgs> ViewAttached;
-
         public T To
         {
             get => to;
