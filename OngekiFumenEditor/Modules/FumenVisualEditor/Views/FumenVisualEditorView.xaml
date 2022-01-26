@@ -11,7 +11,19 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
-    cal:Message.Attach="[Event PreviewMouseDown] = [Action OnMouseDown($executionContext)]; [Event MouseMove] = [Action OnMouseMove($executionContext)]; [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];     [Event MouseLeave] = [Action OnMouseLeave($executionContext)];    [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];   "
+    cal:Message.Attach="
+    [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];
+    [Event MouseMove] = [Action OnMouseMove($executionContext)];
+    [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];
+    [Event MouseLeave] = [Action OnMouseLeave($executionContext)];
+    [Event DragEnter] = [Action Grid_DragEnter($executionContext)];
+    [Event Drop] = [Action Grid_Drop($executionContext)];
+    [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];
+    [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];
+    [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];
+    [Key Space] = [Action KeyboardAction_PlayOrPause];
+    [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];
+    "
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel,
                                      IsDesignTimeCreatable=True}"
     d:DesignHeight="450"

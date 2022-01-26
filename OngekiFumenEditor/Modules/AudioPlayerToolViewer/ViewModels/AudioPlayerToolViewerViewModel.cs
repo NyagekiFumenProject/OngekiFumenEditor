@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 {
@@ -117,10 +118,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             await fumenSoundPlayer.Init(Editor, AudioPlayer);
             (var timeline, var scrollViewer) = Editor.BeginScrollAnimation();
-            EventHandler func = (e, d) =>
+            EventHandler func =  async (e, d) =>
             {
                 if (AudioPlayer is null || Editor is null)
                     return;
+                await Dispatcher.Yield();
                 scrollViewer.CurrentVerticalOffset = Math.Max(0, Editor.TotalDurationHeight - AudioPlayer.CurrentTime - Editor.CanvasHeight);
             };
             CompositionTarget.Rendering += func;
@@ -207,6 +209,30 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             sliderDraggingValue = SliderValue;
             isSliderDragging = true;
             Log.LogDebug($"Begin drag, from : {SliderValue}");
+        }
+
+        public void RequestPlayOrPause()
+        {
+            if (AudioPlayer is null)
+            {
+                Log.LogWarn($"音频未加载!");
+                return;
+            }
+
+            if (AudioPlayer.IsPlaying)
+            {
+                scrollAnimationClearFunc?.Invoke();
+                fumenSoundPlayer.Pause();
+                AudioPlayer.Pause();
+            }
+            else
+            {
+                if (scrollAnimationClearFunc is null)
+                    InitPreviewActions();
+                var seekTo = (float)Editor.MinVisibleCanvasY;
+                AudioPlayer.Seek(seekTo, false);
+                fumenSoundPlayer.Seek(seekTo);
+            }
         }
     }
 }

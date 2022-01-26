@@ -9,6 +9,7 @@ using Gemini.Modules.Toolbox.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -138,6 +139,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             //È¡ÏûÑ¡Ôñ
             SelectObjects.ForEach(x => x.IsSelected = false);
+        }
+
+        public void KeyboardAction_PlayOrPause()
+        {
+            IoC.Get<IAudioPlayerToolViewer>().RequestPlayOrPause();
         }
 
         #endregion
