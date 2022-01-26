@@ -37,6 +37,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set => Set(ref editorSetting, value);
         }
 
+        private string fumenFilePath = default;
+        [JsonInclude]
+        public string FumenFilePath
+        {
+            get => fumenFilePath;
+            set => Set(ref fumenFilePath, value);
+        }
+
         private OngekiFumen fumen = new();
         [JsonIgnore]
         public OngekiFumen Fumen
@@ -55,8 +63,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             get => Fumen.MetaInfo.FirstBpm.BPM;
             set
             {
-                Fumen.MetaInfo.FirstBpm.BPM = value;
-                Fumen.BpmList.FirstBpm.BPM = value;
+                if (Fumen is not null)
+                {
+                    Fumen.MetaInfo.FirstBpm.BPM = value;
+                    Fumen.BpmList.FirstBpm.BPM = value;
+                }
                 NotifyOfPropertyChange(() => BaseBPM);
             }
         }

@@ -25,7 +25,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             using var fileStream = File.OpenRead(filePath);
             var projectData = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(fileStream);
 
-            var fumenFilePath = GetRelativeOngekiFumenFilePath(filePath);
+            var fumenFilePath = projectData.FumenFilePath ?? GetRelativeOngekiFumenFilePath(filePath);
+            if (projectData.FumenFilePath is null)
+                projectData.FumenFilePath = fumenFilePath;
             using var fumenFileStream = File.OpenRead(fumenFilePath);
             var fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fumenFileStream);
             projectData.Fumen = fumen;
@@ -71,9 +73,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         {
             using var fileStream = File.OpenWrite(filePath);
             StoreBulletPalleteListEditorData(editorProject);
-            await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
 
-            var fumenFilePath = GetRelativeOngekiFumenFilePath(filePath);
+            var fumenFilePath = editorProject.FumenFilePath ?? GetRelativeOngekiFumenFilePath(filePath);
+            if (editorProject.FumenFilePath is null)
+                editorProject.FumenFilePath = fumenFilePath;
+
+            await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
             await File.WriteAllTextAsync(fumenFilePath, editorProject.Fumen.Serialize());
         }
     }

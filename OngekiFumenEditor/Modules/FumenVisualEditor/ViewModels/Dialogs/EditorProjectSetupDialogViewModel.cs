@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
 {
-    public class EditorProjectSetupDialogViewModel : Caliburn.Micro.Screen
+    public class EditorProjectSetupDialogViewModel : Screen
     {
         private EditorProjectDataModel editorProjectData = new();
         public EditorProjectDataModel EditorProjectData
@@ -32,6 +32,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
                 var durationMs = audio.Duration;
                 EditorProjectData.AudioDuration = durationMs;
             }
+        }
+
+        public void OnSelectFumenFilePathButtonClicked()
+        {
+            var dialog = new OpenFileDialog();
+            dialog.Multiselect = false;
+            if (dialog.ShowDialog() == true)
+                EditorProjectData.FumenFilePath = dialog.FileName;
         }
 
         public async void OnCreateButtonClicked()
