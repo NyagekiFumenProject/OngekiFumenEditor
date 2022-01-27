@@ -11,7 +11,16 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
-    cal:Message.Attach="          [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];      [Event MouseMove] = [Action OnMouseMove($executionContext)];         [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];        [Event MouseLeave] = [Action OnMouseLeave($executionContext)];        [Event DragEnter] = [Action Grid_DragEnter($executionContext)];         [Event Drop] = [Action Grid_Drop($executionContext)];       [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];       [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];        [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];        [Key Space] = [Action KeyboardAction_PlayOrPause];       [Key Q] = [Action KeyboardAction_HideOrShow];     "
+    cal:Message.Attach="
+    [Event DragEnter] = [Action Grid_DragEnter($executionContext)];
+    [Event Drop] = [Action Grid_Drop($executionContext)];
+    [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];
+    [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];
+    [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];
+    [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];
+    [Key Space] = [Action KeyboardAction_PlayOrPause];
+    [Key Q] = [Action KeyboardAction_HideOrShow];
+    "
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel,
                                      IsDesignTimeCreatable=True}"
     d:DesignHeight="450"
@@ -35,7 +44,7 @@
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid cal:Message.Attach="[Event SizeChanged] = [Action OnSizeChanged($executionContext)]; [Event Loaded] = [Action OnLoaded($executionContext)]; " Focusable="False">
+    <Grid Focusable="False">
         <Grid.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="Selected Object...">
@@ -111,7 +120,14 @@
         </ItemsControl>
         <controls:AnimatedScrollViewer
             x:Name="myAnimatedScrollViewer"
-            cal:Message.Attach="[Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];"
+            cal:Message.Attach="
+            [Event SizeChanged] = [Action OnSizeChanged($executionContext)];
+            [Event Loaded] = [Action OnLoaded($executionContext)]; 
+            [Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];
+            [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];
+            [Event MouseMove] = [Action OnMouseMove($executionContext)];
+            [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];
+            [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
             Background="#01000000"
             CanMouseWheel="{Binding IsLocked, Converter={StaticResource ReverseBoolConverter}}"
             HorizontalScrollBarVisibility="Disabled"

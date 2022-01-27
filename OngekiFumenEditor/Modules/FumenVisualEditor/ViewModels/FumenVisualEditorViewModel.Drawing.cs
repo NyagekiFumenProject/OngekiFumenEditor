@@ -20,6 +20,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -202,16 +203,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnLoaded(ActionExecutionContext e)
         {
+            var scrollViewer = e.Source as AnimatedScrollViewer;
             var view = e.View as FrameworkElement;
-            CanvasWidth = view.ActualWidth;
+            CanvasWidth = scrollViewer.ViewportWidth;
             CanvasHeight = view.ActualHeight;
             Redraw(RedrawTarget.All);
         }
 
         public void OnSizeChanged(ActionExecutionContext e)
         {
+            var scrollViewer = e.Source as AnimatedScrollViewer;
             var arg = e.EventArgs as SizeChangedEventArgs;
-            CanvasWidth = arg.NewSize.Width;
+            CanvasWidth = scrollViewer.ViewportWidth;
             CanvasHeight = arg.NewSize.Height;
             Redraw(RedrawTarget.All);
         }
