@@ -4,6 +4,7 @@ using Gemini.Framework.Services;
 using Microsoft.Win32;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Utils;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
@@ -89,6 +90,12 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             DisplayName = "音频播放";
             fumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
+            IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+        }
+
+        private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
+        {
+            Editor = @new;
         }
 
         private async void LoadAudio()

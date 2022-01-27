@@ -5,6 +5,7 @@ using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
@@ -23,6 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [Export(typeof(FumenVisualEditorViewModel))]
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
+        private IEditorDocumentManager EditorManager => IoC.Get<IEditorDocumentManager>();
+
         private EditorProjectDataModel editorProjectData = new EditorProjectDataModel();
         public EditorProjectDataModel EditorProjectData
         {
@@ -36,8 +39,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 TotalDurationHeight = value.AudioDuration;
                 Setting = EditorProjectData.EditorSetting;
                 Fumen = EditorProjectData.Fumen;
-                if (IoC.Get<IAudioPlayerToolViewer>() is IAudioPlayerToolViewer audioPlayerToolViewer && IsActive)
-                    audioPlayerToolViewer.Editor = this;
             }
         }
 
@@ -51,8 +52,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(EditorProjectData.EditorSetting, value, OnSettingPropertyChanged);
                 EditorProjectData.EditorSetting = value;
-                if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings && IsActive)
-                    editorSettings.Setting = value;
                 NotifyOfPropertyChange(() => Setting);
             }
         }
@@ -70,7 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     Redraw(RedrawTarget.XGridUnitLines);
                     break;
                 case nameof(EditorSetting.BeatSplit):
-                //case nameof(EditorSetting.BaseLineY):
+                    //case nameof(EditorSetting.BaseLineY):
                     Redraw(RedrawTarget.TGridUnitLines | RedrawTarget.ScrollBar);
                     break;
                 case nameof(EditorSetting.EditorDisplayName):
@@ -99,7 +98,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (value is not null)
                     value.BpmList.OnChangedEvent += OnBPMListChanged;
                 EditorProjectData.Fumen = value;
-                OnFumenObjectLoaded();
                 Redraw(RedrawTarget.All);
                 NotifyOfPropertyChange(() => Fumen);
             }
@@ -130,12 +128,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public ObservableCollection<IEditorDisplayableViewModel> EditorViewModels { get; } = new();
         public bool IsDragging { get; private set; }
         public bool IsMouseDown { get; private set; }
-
-        private void OnFumenObjectLoaded()
-        {
-            IoC.Get<IFumenMetaInfoBrowser>().Fumen = Fumen;
-            IoC.Get<IFumenBulletPalleteListViewer>().Fumen = Fumen;
-        }
 
         #region Document New/Save/Load
 
@@ -182,22 +174,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Activation
 
-        protected override Task OnActivateAsync(CancellationToken cancellationToken)
+        protected override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings)
-                editorSettings.Setting = Setting;
-            if (IoC.Get<IAudioPlayerToolViewer>() is IAudioPlayerToolViewer audioPlayerTool)
-                audioPlayerTool.Editor = this;
-            return base.OnActivateAsync(cancellationToken);
+            await base.OnActivateAsync(cancellationToken);
+            EditorManager.NotifyActivate(this);
         }
 
-        protected override Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
+        protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
-            if (IoC.Get<IFumenVisualEditorSettings>() is IFumenVisualEditorSettings editorSettings && editorSettings.Setting == Setting)
-                editorSettings.Setting = default;
-            if (IoC.Get<IAudioPlayerToolViewer>() is IAudioPlayerToolViewer audioPlayerTool && audioPlayerTool.Editor == this)
-                audioPlayerTool.Editor = default;
-            return base.OnDeactivateAsync(close, cancellationToken);
+            await base.OnDeactivateAsync(close, cancellationToken);
+            EditorManager.NotifyDeactivate(this);
+        }
+
+        protected override async Task OnInitializeAsync(CancellationToken cancellationToken)
+        {
+            await base.OnInitializeAsync(cancellationToken);
+            EditorManager.NotifyCreate(this);
+        }
+
+        public override async Task TryCloseAsync(bool? dialogResult = null)
+        {
+            await base.TryCloseAsync(dialogResult);
+            if (dialogResult == true)
+                EditorManager.NotifyDestory(this);
         }
 
         #endregion

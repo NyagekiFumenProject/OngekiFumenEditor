@@ -8,12 +8,15 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
@@ -29,7 +32,19 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
         public FumenBulletPalleteListViewerViewModel()
         {
             DisplayName = "子弹管理";
-            Fumen = null;
+            IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+        }
+
+        private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
+        {
+            Fumen = @new?.Fumen;
+            this.RegisterOrUnregisterPropertyChangeEvent(old, @new, OnEditorPropertyChanged);
+        }
+
+        private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+                Fumen = (sender as FumenVisualEditorViewModel).Fumen;
         }
 
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;

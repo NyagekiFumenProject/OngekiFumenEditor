@@ -1,10 +1,14 @@
-﻿using Gemini.Framework;
+﻿using Caliburn.Micro;
+using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
@@ -54,6 +58,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
         public FumenVisualEditorSettingsViewModel()
         {
             DisplayName = "编辑器设置";
+            IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+        }
+
+        private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
+        {
+            Setting = @new?.Setting;
+            this.RegisterOrUnregisterPropertyChangeEvent(old, @new, OnEditorPropertyChanged);
+        }
+
+        private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FumenVisualEditorViewModel.Setting))
+                Setting = (sender as FumenVisualEditorViewModel).Setting;
         }
     }
 }
