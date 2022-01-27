@@ -80,6 +80,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
+        #region Selection
+
+        private Visibility selectionVisibility;
+        public Visibility SelectionVisibility
+        {
+            get => selectionVisibility;
+            set => Set(ref selectionVisibility, value);
+        }
+
+        private Point selectionStartPosition;
+        public Point SelectionStartPosition
+        {
+            get => selectionStartPosition;
+            set => Set(ref selectionStartPosition, value);
+        }
+
+        private Point selectionCurrentCursorPosition;
+        public Point SelectionCurrentCursorPosition
+        {
+            get => selectionCurrentCursorPosition;
+            set
+            {
+                Set(ref selectionCurrentCursorPosition, value);
+                RecalculateSelectionRect();
+            }
+        }
+
+        private Rect selectionRect;
+        public Rect SelectionRect
+        {
+            get => selectionRect;
+            set => Set(ref selectionRect, value);
+        }
+
+        #endregion
+
         public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
 
         public void CopySelectedObjects()
@@ -209,7 +245,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             IsMouseDown = false;
             IsDragging = false;
+            SelectionVisibility = Visibility.Collapsed;
+            Log.LogDebug($"Visibility = Collapsed");
             //e.Handled = true;
+        }
+
+        public void OnMouseDown(ActionExecutionContext e)
+        {
+            if (IsLocked)
+                return;
+
+            //Log.LogInfo("OnMouseDown");
+            var view = e.View as FrameworkElement;
+
+            if ((e.EventArgs as MouseEventArgs).LeftButton == MouseButtonState.Pressed)
+            {
+                IsMouseDown = true;
+                IsDragging = false;
+                var position = Mouse.GetPosition(view.Parent as IInputElement);
+                var hitInputElement = (view.Parent as FrameworkElement)?.InputHitTest(position);
+                var hitOngekiObjectViewModel = (hitInputElement as FrameworkElement)?.DataContext as DisplayObjectViewModelBase;
+
+                if (hitOngekiObjectViewModel is null)
+                {
+                    //enable show selection
+                    SelectionStartPosition = position;
+                    SelectionCurrentCursorPosition = position;
+                    SelectionVisibility = Visibility.Visible;
+                    Log.LogDebug($"SelectionVisibility = Visible");
+                }
+                else
+                {
+                    SelectionVisibility = Visibility.Collapsed;
+                }
+            }
+            (e.View as FrameworkElement)?.Focus();
         }
 
         public void OnMouseMove(ActionExecutionContext e)
@@ -224,30 +294,44 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //Log.LogInfo("OnMouseMove");
             if (!(IsMouseDown && view is not null && view.Parent is IInputElement parent))
                 return;
-            //e.Handled = true;
+
             var r = IsDragging;
-            Action<DisplayObjectViewModelBase, Point> dragCall = (vm, pos) =>
+            IsDragging = true;
+            var dragCall = new Action<DisplayObjectViewModelBase, Point>((vm, pos) =>
             {
                 if (r)
                     vm.OnDragMoving(pos);
                 else
                     vm.OnDragStart(pos);
-            };
-            IsDragging = true;
+            });
 
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
-            if (VisualTreeUtility.FindParent<Visual>(view) is FrameworkElement uiElement)
+
+            //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
+            if (SelectionVisibility == Visibility.Visible)
             {
-                var bound = new Rect(0, 0, uiElement.ActualWidth, uiElement.ActualHeight);
-                if (bound.Contains(pos))
-                {
-                    SelectObjects.ToArray().ForEach(x => dragCall(x, pos));
-                }
+                //拉框
+                SelectionCurrentCursorPosition = pos;
             }
             else
             {
-                SelectObjects.ToArray().ForEach(x => dragCall(x, pos));
+                //拖动已选物件
+                SelectObjects.ForEach(x => dragCall(x, pos));
             }
+        }
+
+        private void RecalculateSelectionRect()
+        {
+            var x = Math.Min(SelectionStartPosition.X, SelectionCurrentCursorPosition.X);
+            var y = MaxVisibleCanvasY - Math.Min(SelectionStartPosition.Y, SelectionCurrentCursorPosition.Y);
+
+            var width = Math.Abs(SelectionStartPosition.X - SelectionCurrentCursorPosition.X);
+            var height = Math.Abs(SelectionStartPosition.Y - SelectionCurrentCursorPosition.Y);
+
+            y = y - height + Setting.JudgeLineOffsetY;
+
+            SelectionRect = new Rect(x, y, width, height);
+            //Log.LogDebug($"SelectionRect = {SelectionRect}");
         }
 
         private void UpdateCurrentCursorPosition(ActionExecutionContext e)
@@ -267,21 +351,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var tGrid = TGridCalculator.ConvertYToTGrid(canvasY, this);
             var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
             contentViewModel.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}]";
-        }
-
-        public void OnMouseDown(ActionExecutionContext e)
-        {
-            if (IsLocked)
-                return;
-
-            //Log.LogInfo("OnMouseDown");
-            if ((e.EventArgs as MouseEventArgs).LeftButton == MouseButtonState.Pressed)
-            {
-                IsMouseDown = true;
-                IsDragging = false;
-                //e.Handled = true;
-            }
-            (e.View as FrameworkElement)?.Focus();
         }
 
         public void Grid_DragEnter(ActionExecutionContext e)
