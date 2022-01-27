@@ -42,14 +42,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public double canvasX = 0;
+        private double canvasX = 0;
         public double CanvasX
         {
             get => canvasX;
             set => Set(ref canvasX, value);
         }
 
-        public double canvasY = 0;
+        private double canvasY = 0;
         public double CanvasY
         {
             get => canvasY;

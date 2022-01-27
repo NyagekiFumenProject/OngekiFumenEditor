@@ -114,6 +114,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set => Set(ref selectionRect, value);
         }
 
+        public bool IsRangeSelecting => SelectionVisibility == Visibility.Visible;
+
         #endregion
 
         public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
@@ -132,6 +134,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //粘贴已被复制物件
         }
 
+        private void SelectRangeObjects(Rect selectionRect)
+        {
+            var selectObjects = EditorViewModels
+                .OfType<DisplayObjectViewModelBase>()
+                .Where(x => selectionRect.Contains(x.CanvasX, x.CanvasY + Setting.JudgeLineOffsetY));
+            
+            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                foreach (var o in SelectObjects)
+                    o.IsSelected = false;
+
+            foreach (var o in selectObjects)
+                o.IsSelected = true;
+        }
+
         public void OnFocusableChanged(ActionExecutionContext e)
         {
             Log.LogInfo($"OnFocusableChanged {e.EventArgs}");
@@ -146,7 +162,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (value)
             {
-                if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+                if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting))
                 {
                     foreach (var o in SelectObjects.Where(x => x != obj))
                         o.IsSelected = false;
@@ -235,19 +251,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //Log.LogInfo("OnMouseUp");
             if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
-            var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
-            if (IsDragging)
-                SelectObjects.ToArray().ForEach(x => x.OnDragEnd(pos));
-
             IsMouseDown = false;
             IsDragging = false;
+
+            if (IsRangeSelecting)
+            {
+                SelectRangeObjects(SelectionRect);
+            }
+            else
+            {
+                var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
+                if (IsDragging)
+                    SelectObjects.ToArray().ForEach(x => x.OnDragEnd(pos));
+            }
+
             SelectionVisibility = Visibility.Collapsed;
-            Log.LogDebug($"Visibility = Collapsed");
-            //e.Handled = true;
         }
 
         public void OnMouseDown(ActionExecutionContext e)
@@ -272,7 +293,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     SelectionStartPosition = position;
                     SelectionCurrentCursorPosition = position;
                     SelectionVisibility = Visibility.Visible;
-                    Log.LogDebug($"SelectionVisibility = Visible");
+                    //Log.LogDebug($"SelectionVisibility = Visible");
                 }
                 else
                 {
@@ -308,7 +329,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
 
             //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
-            if (SelectionVisibility == Visibility.Visible)
+            if (IsRangeSelecting)
             {
                 //拉框
                 SelectionCurrentCursorPosition = pos;
