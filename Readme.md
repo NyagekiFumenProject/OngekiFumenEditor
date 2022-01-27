@@ -13,9 +13,9 @@
 * 编辑器优化&重构
 * 谱面滚动播放及预览   
 * 牛逼外服的判定线
-* 谱面预览播放音效
-* 实现时间轴的简便操作  <- we are here!
-* 编辑器细节优化
+* 谱面预览播放音效 ([有点小问题](https://github.com/MikiraSora/OngekiFumenEditor/issues/2))
+* 实现时间轴的简便操作
+* 编辑器细节优化  <- we are here!
 * ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(可能跳过)
 * 写个谱面  <- goal
 * 实现Soflan变速/LispBlock/LispDisp/EmenyLane...等命令
