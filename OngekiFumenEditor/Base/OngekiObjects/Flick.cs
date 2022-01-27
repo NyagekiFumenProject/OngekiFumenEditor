@@ -46,5 +46,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)} {XGrid.Serialize(fumenData)} {(Direction == FlickDirection.Left ? "L" : "R")}";
         }
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not Flick from)
+                return;
+
+            Direction = from.Direction;
+            IsCritical = from.IsCritical;
+        }
     }
 }

@@ -45,5 +45,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         public override string ToString() => $"{base.ToString()} Pallete:({ReferenceBulletPallete})";
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not Bullet from)
+                return;
+
+            ReferenceBulletPallete = from.ReferenceBulletPallete;
+        }
     }
 }

@@ -2,12 +2,14 @@
     x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects.TapView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:model="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     Width="40"
     Height="16"
+    d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
+                                     Type=model:TapViewModel}"
     mc:Ignorable="d">
     <Image Stretch="Fill">
         <Image.Style>
@@ -29,9 +31,19 @@
                         <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_extap_01.png">
                         </Setter>
                     </DataTrigger>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.IsCritical}" Value="True">
+
+                    </DataTrigger>
                 </Style.Triggers>
             </Style>
         </Image.Style>
+        <Image.BitmapEffect>
+            <OuterGlowBitmapEffect
+                GlowColor="Aqua"
+                GlowSize="51"
+                Noise="0.2"
+                Opacity="1 " />
+        </Image.BitmapEffect>
         <Image.RenderTransform>
             <TranslateTransform X="-20" Y="+8.1">
             </TranslateTransform>

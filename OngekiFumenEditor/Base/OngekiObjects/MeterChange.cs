@@ -40,5 +40,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)} {BunShi} {Bunbo}";
         }
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not MeterChange from)
+                return;
+
+            Bunbo = from.Bunbo;
+            BunShi = from.BunShi;
+        }
     }
 }

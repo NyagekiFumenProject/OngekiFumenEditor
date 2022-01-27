@@ -115,16 +115,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         public bool IsRangeSelecting => SelectionVisibility == Visibility.Visible;
+        public bool IsPreventMutualExclusionSelecting { get; set; }
 
         #endregion
 
         public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
 
+        private HashSet<DisplayObjectViewModelBase> currentCopySources = new();
         public void CopySelectedObjects()
         {
             if (IsLocked)
                 return;
             //复制所选物件
+            currentCopySources.Clear();
+            currentCopySources.AddRange(SelectObjects);
+            Log.LogInfo($"钦定 {currentCopySources.Count} 个物件作为复制源");
         }
 
         public void PasteCopiesObjects()
@@ -132,6 +137,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
             //粘贴已被复制物件
+            SelectObjects.ForEach(x => x.IsSelected = false);
+            IsPreventMutualExclusionSelecting = true;
+            var count = 0;
+            foreach (var displayObjectView in currentCopySources.Select(x => x.Copy()).OfType<DisplayObjectViewModelBase>())
+            {
+                AddOngekiObject(displayObjectView);
+                displayObjectView.IsSelected = true;
+                count++;
+            };
+            Log.LogInfo($"已粘贴生成 {count} 个物件.");
+            IsPreventMutualExclusionSelecting = false;
+            Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
         }
 
         private void SelectRangeObjects(Rect selectionRect)
@@ -139,7 +156,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var selectObjects = EditorViewModels
                 .OfType<DisplayObjectViewModelBase>()
                 .Where(x => selectionRect.Contains(x.CanvasX, x.CanvasY + Setting.JudgeLineOffsetY));
-            
+
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
                 foreach (var o in SelectObjects)
                     o.IsSelected = false;
@@ -162,7 +179,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (value)
             {
-                if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting))
+                if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
                 {
                     foreach (var o in SelectObjects.Where(x => x != obj))
                         o.IsSelected = false;

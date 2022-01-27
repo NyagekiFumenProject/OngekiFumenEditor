@@ -8,12 +8,18 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public abstract class OngekiObjectBase : PropertyChangedBase,  ISerializable
+    public abstract class OngekiObjectBase : PropertyChangedBase, ISerializable
     {
         public abstract string IDShortName { get; }
 
         public abstract string Serialize(OngekiFumen fumenData);
 
         public override string ToString() => IDShortName;
+
+        /// <summary>
+        /// 复制物件参数和内容
+        /// </summary>
+        /// <param name="fromObj">复制源，本对象的仿制目标</param>
+        public abstract void Copy(OngekiObjectBase fromObj, OngekiFumen fumen);
     }
 }

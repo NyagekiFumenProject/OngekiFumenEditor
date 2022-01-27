@@ -54,5 +54,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             return $"{IDShortName} {ReferenceLaneStart?.RecordId ?? -1} {TGrid.Serialize(fumenData)} {XGrid.Unit} {XGrid.Grid}";
         }
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not Tap from)
+                return;
+
+            IsCritical = from.IsCritical;
+            ReferenceLaneStart = from.ReferenceLaneStart;
+        }
     }
 }

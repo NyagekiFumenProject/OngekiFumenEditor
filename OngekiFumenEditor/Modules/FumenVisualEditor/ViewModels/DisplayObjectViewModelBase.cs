@@ -1,6 +1,9 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Converters;
@@ -273,6 +276,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnEditorRedrawObjects()
         {
             RecaulateCanvasXY();
+        }
+
+        public virtual DisplayObjectViewModelBase Copy()
+        {
+            var obj = ReferenceOngekiObject;
+            if (obj is not IDisplayableObject displayable 
+                //暂不支持 以下类型的复制粘贴
+                || obj is BeamBase 
+                || obj is ConnectableObjectBase
+                )
+                return default;
+
+            var copyNewViewModel = CacheLambdaActivator.CreateInstance(displayable.ModelViewType) as DisplayObjectViewModelBase;
+            var newObj = copyNewViewModel.ReferenceOngekiObject;
+            newObj.Copy(obj, EditorViewModel.Fumen);
+            return copyNewViewModel;
         }
     }
 

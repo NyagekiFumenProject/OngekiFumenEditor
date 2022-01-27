@@ -43,5 +43,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             return $"{IDShortName} {TGrid.Serialize(fumenData)} {TagTblValue}";
         }
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not EnemySet fromSet)
+                return;
+
+            TagTblValue = fromSet.TagTblValue;
+        }
     }
 }

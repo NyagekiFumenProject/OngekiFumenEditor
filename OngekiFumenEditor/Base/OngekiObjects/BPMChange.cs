@@ -35,13 +35,23 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public GridOffset LengthConvertToOffset(double len, int timeGridSize)
         {
-            var totalGrid = (len * (TGrid.ResT * BPM)) / 240000;
+            var totalGrid = len * (TGrid.ResT * BPM) / 240000;
 
             var p = totalGrid / TGrid.ResT;
             var unit = (int)p;
             var grid = (int)((p - unit)  * TGrid.ResT);
 
             return new GridOffset(unit, grid);
+        }
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not BPMChange fromBpm)
+                return;
+
+            BPM = fromBpm.BPM;
         }
     }
 }

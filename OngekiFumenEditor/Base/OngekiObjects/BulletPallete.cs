@@ -163,5 +163,20 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         public override string ToString() => Serialize(default);
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            if (fromObj is not BulletPallete fromBpl)
+                return;
+
+            PlaceOffset = fromBpl.PlaceOffset;
+            BulletTypeValue = fromBpl.BulletTypeValue;
+            StrID = fromBpl.StrID;
+            EditorName = fromBpl.EditorName;
+            EditorAxuiliaryLineColor = fromBpl.EditorAxuiliaryLineColor;
+            ShooterValue = fromBpl.ShooterValue;
+            Speed = fromBpl.Speed;
+            TargetValue = fromBpl.TargetValue;
+        }
     }
 }

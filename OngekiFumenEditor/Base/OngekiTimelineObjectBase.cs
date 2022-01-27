@@ -38,6 +38,14 @@ namespace OngekiFumenEditor.Base
             return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
         }
 
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            if (fromObj is not OngekiTimelineObjectBase timelineObject)
+                return;
+
+            TGrid = timelineObject.TGrid;
+        }
+
         public override string ToString() => $"{base.ToString()} TGrid:{TGrid}";
     }
 }
