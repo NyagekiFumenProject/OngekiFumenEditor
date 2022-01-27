@@ -96,6 +96,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
         {
             Editor = @new;
+            this.RegisterOrUnregisterPropertyChangeEvent(old, @new, OnEditorPropertyChanged);
+        }
+
+        private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(FumenVisualEditorViewModel.EditorProjectData))
+                return;
+            var d = Editor;
+            Editor = default;
+            Editor = d;
         }
 
         private async void LoadAudio()
