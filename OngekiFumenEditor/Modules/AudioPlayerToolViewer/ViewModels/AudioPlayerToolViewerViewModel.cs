@@ -135,11 +135,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             await fumenSoundPlayer.Init(Editor, AudioPlayer);
             (var timeline, var scrollViewer) = Editor.BeginScrollAnimation();
-            EventHandler func =  async (e, d) =>
+            EventHandler func = (e, d) =>
             {
                 if (AudioPlayer is null || Editor is null)
                     return;
-                await Dispatcher.Yield();
                 scrollViewer.CurrentVerticalOffset = Math.Max(0, Editor.TotalDurationHeight - AudioPlayer.CurrentTime - Editor.CanvasHeight);
             };
             CompositionTarget.Rendering += func;

@@ -152,7 +152,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         {
             while (!cancel.IsCancellationRequested)
             {
-                Thread.Yield();
                 if (itor is null || player is null || !isPlaying)
                     continue;
 
