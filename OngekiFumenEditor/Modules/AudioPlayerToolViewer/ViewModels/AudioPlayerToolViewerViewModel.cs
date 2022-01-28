@@ -139,7 +139,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             {
                 if (AudioPlayer is null || Editor is null)
                     return;
-                scrollViewer.CurrentVerticalOffset = Math.Max(0, Editor.TotalDurationHeight - AudioPlayer.CurrentTime - Editor.CanvasHeight);
+                var offset = Editor.TotalDurationHeight - AudioPlayer.CurrentTime - Editor.CanvasHeight;
+                scrollViewer.CurrentVerticalOffset = Math.Max(0, offset);
             };
             CompositionTarget.Rendering += func;
             scrollAnimationClearFunc = () =>

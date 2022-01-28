@@ -168,7 +168,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     editorViewModel.OnEditorRedrawObjects();
             }
 
-            Log.LogDebug($"removed {removeObjects.Count} objects , added {c} objects, displaying {CurrentDisplayEditorViewModels.Count} objects.");
+            //Log.LogDebug($"removed {removeObjects.Count} objects , added {c} objects, displaying {CurrentDisplayEditorViewModels.Count} objects.");
         }
 
         private void RedrawUnitCloseXLines()
