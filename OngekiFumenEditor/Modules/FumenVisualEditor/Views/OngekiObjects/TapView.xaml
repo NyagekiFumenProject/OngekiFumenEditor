@@ -6,47 +6,54 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
-    Width="40"
-    Height="16"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=model:TapViewModel}"
     mc:Ignorable="d">
-    <Image Stretch="Fill">
-        <Image.Style>
-            <Style TargetType="Image">
+    <Border BorderThickness="2">
+        <Image
+            Width="40"
+            Height="16"
+            Stretch="Fill">
+            <Image.Style>
+                <Style TargetType="Image">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Left">
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_tap_02.png">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Center">
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_extap_02.png">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Right">
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_hold_02.png">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="{x:Null}">
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_extap_01.png">
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Style>
+        </Image>
+        <Border.Style>
+            <Style TargetType="Border">
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Left">
-                        <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_tap_02.png">
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.IsCritical}" Value="True">
+                        <Setter Property="BorderBrush" Value="Yellow">
                         </Setter>
                     </DataTrigger>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Center">
-                        <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_extap_02.png">
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.IsCritical}" Value="False">
+                        <Setter Property="BorderBrush" Value="Transparent">
                         </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="Right">
-                        <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_hold_02.png">
-                        </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="{x:Null}">
-                        <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/mu3_nt_extap_01.png">
-                        </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.IsCritical}" Value="True">
-
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-        </Image.Style>
-        <Image.BitmapEffect>
-            <OuterGlowBitmapEffect
-                GlowColor="Aqua"
-                GlowSize="51"
-                Noise="0.2"
-                Opacity="1 " />
-        </Image.BitmapEffect>
-        <Image.RenderTransform>
-            <TranslateTransform X="-20" Y="+8.1">
+        </Border.Style>
+        <Border.RenderTransform>
+            <TranslateTransform X="-20" Y="+9">
             </TranslateTransform>
-        </Image.RenderTransform>
-    </Image>
+        </Border.RenderTransform>
+    </Border>
 </ongekiobjects:OngekiObjectViewBase>
