@@ -44,6 +44,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     [Export(typeof(FumenVisualEditorViewModel))]
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
+        public ObservableCollection<IEditorDisplayableViewModel> CurrentDisplayEditorViewModels { get; } = new();
+
         private double xUnitSize = default;
         public double XUnitSize
         {
@@ -107,8 +109,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (Fumen is null || CanvasHeight == 0)
                 return;
             //Log.LogDebug($"begin");
-            //var begin = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? new TGrid(0, 0);
-            //var end = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
+            var min = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? new TGrid(0, 0);
+            var max = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
 
             //Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
             using var d = ObjectPool<HashSet<IDisplayableObject>>.GetWithUsingDisposable(out var currentDisplayingObjects, out var _);
@@ -131,8 +133,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //检查是否还存在
                 if (!allDisplayableObjects.Contains(refObject))
                     removeObjects.Add(viewModel);
-                else if (viewModel is IEditorDisplayableViewModel editorViewModel)
-                    editorViewModel.OnEditorRedrawObjects();
             }
             foreach (var removeViewModel in removeObjects)
                 EditorViewModels.Remove(removeViewModel);
@@ -147,12 +147,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 viewModel.OnObjectCreated(add, this);
                 EditorViewModels.Add(viewModel);
                 //odLog.LogDebug($"add viewmodel : {add}");
-                if (viewModel is IEditorDisplayableViewModel editorViewModel)
-                    editorViewModel.OnEditorRedrawObjects();
                 c++;
             }
 
-            //Log.LogDebug($"removed {removeObjects.Count} objects , added {c} objects.");
+            removeObjects.Clear();//复用
+            foreach (var currentDisplaying in CurrentDisplayEditorViewModels)
+            {
+                if (!currentDisplaying.DisplayableObject.CheckVisiable(min, max))
+                {
+                    //remove
+                    removeObjects.Add(currentDisplaying);
+                }
+            }
+            removeObjects.ForEach(x => CurrentDisplayEditorViewModels.Remove(x));
+            CurrentDisplayEditorViewModels.AddRange(EditorViewModels.Where(x => x.DisplayableObject.CheckVisiable(min, max) && !CurrentDisplayEditorViewModels.Contains(x)));
+
+            foreach (var viewModel in CurrentDisplayEditorViewModels)
+            {
+                if (viewModel is IEditorDisplayableViewModel editorViewModel)
+                    editorViewModel.OnEditorRedrawObjects();
+            }
+
+            Log.LogDebug($"removed {removeObjects.Count} objects , added {c} objects, displaying {CurrentDisplayEditorViewModels.Count} objects.");
         }
 
         private void RedrawUnitCloseXLines()

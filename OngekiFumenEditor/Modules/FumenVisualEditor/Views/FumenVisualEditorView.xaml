@@ -185,7 +185,7 @@
                 <ItemsControl
                     Height="{Binding TotalDurationHeight}"
                     ItemTemplateSelector="{StaticResource EditorObjectDataTemplateSelector}"
-                    ItemsSource="{Binding EditorViewModels}">
+                    ItemsSource="{Binding CurrentDisplayEditorViewModels}">
                     <ItemsControl.ItemContainerStyle>
                         <Style TargetType="ContentPresenter">
                             <Style.Triggers>

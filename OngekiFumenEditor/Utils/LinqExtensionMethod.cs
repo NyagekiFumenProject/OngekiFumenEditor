@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,9 @@ namespace OngekiFumenEditor.Utils
             foreach (var item in list)
                 fun(item);
         }
+        
+
+        public static void AddRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
 
         public static void AddRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
 
