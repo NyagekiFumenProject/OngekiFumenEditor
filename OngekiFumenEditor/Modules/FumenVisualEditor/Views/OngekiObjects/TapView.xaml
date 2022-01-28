@@ -52,7 +52,7 @@
             </Style>
         </Border.Style>
         <Border.RenderTransform>
-            <TranslateTransform X="-20" Y="+9">
+            <TranslateTransform X="-22" Y="+9">
             </TranslateTransform>
         </Border.RenderTransform>
     </Border>
