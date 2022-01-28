@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(ProjectDir)$(OutDir)*&quot; &quot;$(SolutionDir)OngekiFumenEditor\bin\$(ConfigurationName)\net5.0-windows\Plugins\$(ProjectName)\&quot; /e /s /y" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Caliburn.Micro" Version="4.0.173" >
+      <ExcludeAssets>runtime;</ExcludeAssets>
+    </PackageReference>
+    <ProjectReference Include="..\..\OngekiFumenEditor\OngekiFumenEditor.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+</Project>

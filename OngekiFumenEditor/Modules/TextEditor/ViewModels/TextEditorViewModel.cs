@@ -59,7 +59,6 @@ namespace OngekiFumenEditor.Modules.TextEditor.ViewModels
         {
             Log.LogInfo($"TextEditorViewModel DoLoad() filePath : {filePath}");
             content = await File.ReadAllTextAsync(filePath);
-            var fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(File.OpenRead(filePath));
             ApplyTextAndUpdate();
         }
 

@@ -5,6 +5,11 @@ using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using System;
+using System.ComponentModel.Composition.Hosting;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -17,6 +22,41 @@ namespace OngekiFumenEditor
         protected async Task InitKernels()
         {
             await IoC.Get<ISchedulerManager>().Init();
+        }
+
+        protected override void BindServices(CompositionBatch batch)
+        {
+            base.BindServices(batch);
+
+            //setup Pluigins
+            var exePath = Assembly.GetExecutingAssembly().Location;
+            var exeDir = Path.GetDirectoryName(exePath);
+            var pluginsDirPath = Path.Combine(exeDir, "Plugins");
+            Directory.CreateDirectory(pluginsDirPath);
+            var pluginsDirPaths = Directory.EnumerateDirectories(pluginsDirPath);
+
+            foreach (var path in pluginsDirPaths)
+            {
+                Debug.WriteLine($"----------------");
+                Debug.WriteLine($"加载插件子目录:{path}");
+                try
+                {
+                    var directoryCatalog = new DirectoryCatalog(path);
+                    foreach (var partDef in directoryCatalog.Parts)
+                    {
+                        var part = partDef.CreatePart();
+                        batch.AddPart(part);
+                        var imports = part.ToString();
+                        var exports = string.Join(", ", part.ExportDefinitions.Select(x => x.ContractName));
+                        Debug.WriteLine($"Export ({imports}) => ({exports})");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"加载插件子目录出错:{e.Message}");
+                }
+                Debug.WriteLine($"----------------");
+            }
         }
 
         protected override void Configure()

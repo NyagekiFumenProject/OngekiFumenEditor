@@ -29,7 +29,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             if (projectData.FumenFilePath is null)
                 projectData.FumenFilePath = fumenFilePath;
             using var fumenFileStream = File.OpenRead(fumenFilePath);
-            var fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fumenFileStream);
+            var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(fumenFilePath);
+            if (fumenDeserializer is null)
+                throw new NotSupportedException($"不支持此谱面文件的解析:{fumenFilePath}");
+            var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
             projectData.Fumen = fumen;
 
             ApplyBulletPalleteListEditorData(projectData);

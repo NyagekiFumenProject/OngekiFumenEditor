@@ -32,8 +32,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj" />
-    <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj" />
+    <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

@@ -11,12 +11,14 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -133,34 +135,57 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task DoNew()
         {
-            var dialogViewModel = new EditorProjectSetupDialogViewModel();
-            var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialogViewModel);
-            if (result != true)
+            try
             {
-                Log.LogInfo($"用户无法完成新建项目向导，关闭此编辑器");
+                var dialogViewModel = new EditorProjectSetupDialogViewModel();
+                var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialogViewModel);
+                if (result != true)
+                {
+                    Log.LogInfo($"用户无法完成新建项目向导，关闭此编辑器");
+                    await TryCloseAsync(false);
+                    return;
+                }
+                var projectData = dialogViewModel.EditorProjectData;
+                if (File.Exists(projectData.FumenFilePath))
+                {
+                    using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
+                    var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
+                    if (fumenDeserializer is null)
+                        throw new NotSupportedException($"不支持此谱面文件的解析:{projectData.FumenFilePath}");
+                    var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
+                    projectData.Fumen = fumen;
+                }
+                EditorProjectData = dialogViewModel.EditorProjectData;
+                Redraw(RedrawTarget.All);
+                Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
+                await Dispatcher.Yield();
+            }
+            catch (Exception e)
+            {
+                var errMsg = $"无法新建项目:{e.Message}";
+                Log.LogError(errMsg);
+                MessageBox.Show(errMsg);
                 await TryCloseAsync(false);
-                return;
             }
-            var projectData = dialogViewModel.EditorProjectData;
-            if (File.Exists(projectData.FumenFilePath))
-            {
-                using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
-                var fumen = await IoC.Get<IOngekiFumenParser>().ParseAsync(fumenFileStream);
-                projectData.Fumen = fumen;
-            }
-            EditorProjectData = dialogViewModel.EditorProjectData;
-            Redraw(RedrawTarget.All);
-            Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
-            await Dispatcher.Yield();
         }
 
         protected override async Task DoLoad(string filePath)
         {
-            using var _ = StatusBarHelper.BeginStatus("Editor project file loading : " + filePath);
-            Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
-            var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
-            EditorProjectData = projectData;
-            Redraw(RedrawTarget.All);
+            try
+            {
+                using var _ = StatusBarHelper.BeginStatus("Editor project file loading : " + filePath);
+                Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
+                var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
+                EditorProjectData = projectData;
+                Redraw(RedrawTarget.All);
+            }
+            catch (Exception e)
+            {
+                var errMsg = $"无法加载项目:{e.Message}";
+                Log.LogError(errMsg);
+                MessageBox.Show(errMsg);
+                await TryCloseAsync(false);
+            }
         }
 
         protected override async Task DoSave(string filePath)
