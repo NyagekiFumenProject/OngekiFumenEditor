@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public override string IDShortName => "[HoldEnd]";
 
         public LaneStartBase ReferenceLaneStart {
-            get => (ReferenceStartObject as Hold)?.ReferenceLaneStart;
+            get => ((Hold)ReferenceStartObject).ReferenceLaneStart;
             set
             {
                 //ignore it :D

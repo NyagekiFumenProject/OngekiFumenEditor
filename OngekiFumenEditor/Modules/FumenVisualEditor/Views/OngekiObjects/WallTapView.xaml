@@ -6,38 +6,71 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
-    Width="40"
     mc:Ignorable="d">
     <ongekiobjects:OngekiObjectViewBase.Resources>
         <converters:EnumToIntConverter x:Key="EnumToIntConverter">
         </converters:EnumToIntConverter>
     </ongekiobjects:OngekiObjectViewBase.Resources>
-    <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/walltap.png" Stretch="Fill">
-        <Image.Style>
-            <Style TargetType="Image">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="WallLeft">
-                        <Setter Property="Opacity" Value="1">
-                        </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="WallRight">
-                        <Setter Property="Opacity" Value="1">
-                        </Setter>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="{x:Null}">
-                        <Setter Property="Opacity" Value="0.4">
-                        </Setter>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Image.Style>
-        <Image.RenderTransform>
+    <Grid>
+        <Image
+            Width="40"
+            Source="/Modules/FumenVisualEditor/Views/OngekiObjects/walltap.png"
+            Stretch="Fill">
+            <Image.Style>
+                <Style TargetType="Image">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="WallLeft">
+                            <Setter Property="Opacity" Value="1">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="WallRight">
+                            <Setter Property="Opacity" Value="1">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType}" Value="{x:Null}">
+                            <Setter Property="Opacity" Value="0.4">
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Style>
+        </Image>
+        <Path
+            Width="40"
+            Stroke="Yellow"
+            StrokeThickness="3">
+            <Path.Style>
+                <Style TargetType="Path">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.IsCritical}" Value="True">
+                            <Setter Property="Opacity" Value="1">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.IsCritical}" Value="False">
+                            <Setter Property="Opacity" Value="0">
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Path.Style>
+            <Path.Data>
+                <PathGeometry>
+                    <PathFigure IsClosed="True" StartPoint="2,2">
+                        <LineSegment Point="2,38.5" />
+                        <LineSegment Point="20,38.5" />
+                        <LineSegment Point="38,20.25" />
+                        <LineSegment Point="20,2" />
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+        </Path>
+        <Grid.RenderTransform>
             <TransformGroup>
                 <TranslateTransform X="-20" Y="+20.2">
                 </TranslateTransform>
                 <ScaleTransform ScaleX="{Binding ReferenceOngekiObject.ReferenceLaneStart.LaneType, Converter={StaticResource EnumToIntConverter}}">
                 </ScaleTransform>
             </TransformGroup>
-        </Image.RenderTransform>
-    </Image>
+        </Grid.RenderTransform>
+    </Grid>
 </ongekiobjects:OngekiObjectViewBase>
