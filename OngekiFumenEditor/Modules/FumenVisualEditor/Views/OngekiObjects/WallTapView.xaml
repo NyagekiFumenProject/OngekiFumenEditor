@@ -43,11 +43,11 @@
                 <Style TargetType="Path">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ReferenceOngekiObject.IsCritical}" Value="True">
-                            <Setter Property="Opacity" Value="1">
+                            <Setter Property="Visibility" Value="Visible">
                             </Setter>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding ReferenceOngekiObject.IsCritical}" Value="False">
-                            <Setter Property="Opacity" Value="0">
+                            <Setter Property="Visibility" Value="Hidden">
                             </Setter>
                         </DataTrigger>
                     </Style.Triggers>
