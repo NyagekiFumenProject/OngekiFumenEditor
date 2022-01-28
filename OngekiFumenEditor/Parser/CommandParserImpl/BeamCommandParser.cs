@@ -13,11 +13,10 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
 {
     public abstract class BeamCommandParserBase : CommandParserBase
     {
-        public void CommonParse(BeamBase beam, CommandArgs args, OngekiFumen fumen)
+        public void CommonParse(BeamBase beam, CommandArgs args)
         {
             var dataArr = args.GetDataArray<float>();
 
-            //todo add BeamTrack
             beam.TGrid = new TGrid(dataArr[2], (int)dataArr[3]);
             beam.XGrid = new XGrid(dataArr[4]);
             beam.WidthId = (int)dataArr[5];
@@ -36,9 +35,8 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             {
                 RecordId = beamRecordId
             };
-            //fumen.AddObject(beam);
 
-            CommonParse(beam, args, fumen);
+            CommonParse(beam, args);
 
             return beam;
         }
@@ -59,7 +57,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             }
 
             var beam = new BeamNext();
-            CommonParse(beam, args, fumen);
+            CommonParse(beam, args);
             beamStart.AddChildBeamObject(beam);
             return beam;
         }
@@ -80,7 +78,7 @@ namespace OngekiFumenEditor.Parser.CommandParserImpl
             }
 
             var beam = new BeamEnd();
-            CommonParse(beam, args, fumen);
+            CommonParse(beam, args);
             beamStart.AddChildBeamObject(beam);
             return beam;
         }

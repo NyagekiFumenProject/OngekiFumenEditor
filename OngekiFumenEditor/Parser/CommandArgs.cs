@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -14,6 +16,12 @@ namespace OngekiFumenEditor.Parser
 
         private string line = string.Empty;
         private Dictionary<Type, Array> cacheDataArray = new Dictionary<Type, Array>();
+        private Dictionary<Type, IArgValueConverter> converters = new Dictionary<Type, IArgValueConverter>();
+
+        public CommandArgs()
+        {
+            converters = IoC.GetAll<IArgValueConverter>().ToDictionary(x => x.ConvertType);
+        }
 
         public string Line
         {
@@ -39,16 +47,26 @@ namespace OngekiFumenEditor.Parser
             if (cacheDataArray.TryGetValue(type, out var array))
                 return (T[])array;
 
-            var converter = TypeDescriptor.GetConverter(type);
-            var arr = line.Trim().Split(SplitEmptyCharArray, StringSplitOptions.RemoveEmptyEntries).Skip(type == typeof(string) ? 0 : 1).Select(x =>
+            T[] arr = default;
+            var inputs = line.Trim().Split(SplitEmptyCharArray, StringSplitOptions.RemoveEmptyEntries);
+
+            if (converters.TryGetValue(type, out var argConverter))
+            {
+                arr = argConverter.Parser(inputs).OfType<T>().ToArray();
+            }
+            else
+            {
+                var converter = TypeDescriptor.GetConverter(type);
+                arr = inputs.Select(x =>
                 {
                     if (converter.IsValid(x))
                         return (T)converter.ConvertFromString(x);
                     return default;
-                });
-            var a = (type == typeof(string) ? arr : arr.Prepend(default)).ToArray();
-            cacheDataArray[type] = a;
-            return a;
+                }).ToArray();
+            }
+
+            cacheDataArray[type] = arr;
+            return arr;
         }
     }
 }
