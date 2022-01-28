@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 isCritical = value;
                 NotifyOfPropertyChange(() => IDShortName);
                 NotifyOfPropertyChange(() => IsCritical);
+                Children.ForEach(x => x.NotifyOfPropertyChange(() => IsCritical));
             }
         }
 
