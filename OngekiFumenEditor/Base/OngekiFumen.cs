@@ -125,7 +125,7 @@ namespace OngekiFumenEditor.Base
             }
             else
             {
-                Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.Name}");
+                Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.GetTypeName()}");
                 return;
             }
         }
@@ -190,7 +190,7 @@ namespace OngekiFumenEditor.Base
             }
             else
             {
-                Log.LogWarn($"delete list target not found, object type : {obj?.GetType()?.Name}");
+                Log.LogWarn($"delete list target not found, object type : {obj?.GetType()?.GetTypeName()}");
                 return;
             }
         }

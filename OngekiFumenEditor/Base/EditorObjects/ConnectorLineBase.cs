@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,6 @@ namespace OngekiFumenEditor.Base.EditorObjects
             yield return this;
         }
 
-        public override string ToString() => $"[T:{typeof(T).Name}] {From} -> {To}";
+        public override string ToString() => $"[T:{typeof(T).GetTypeName()}] {From} -> {To}";
     }
 }

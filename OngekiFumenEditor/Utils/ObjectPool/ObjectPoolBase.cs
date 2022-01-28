@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Utils.ObjectPool
             var diff = after - before;
 
             if (diff < 0)
-                Log.LogDebug($"Reduced {diff} {GetType().GenericTypeArguments?.FirstOrDefault()?.Name ?? "unknown type"} objects");
+                Log.LogDebug($"Reduced {diff} {GetType().GetTypeName()} objects");
 
         }
 

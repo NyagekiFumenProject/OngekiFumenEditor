@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Utils.ObjectPool
                 return;
 
             object_pools.Add(pool);
-            Log.LogDebug($"Register new object pool :{pool.GetType().Name}");
+            Log.LogDebug($"Register new object pool :{pool.GetType().GetTypeName()}");
         }
 
         public void OnSchedulerTerm()
