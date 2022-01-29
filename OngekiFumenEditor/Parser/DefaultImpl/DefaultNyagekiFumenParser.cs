@@ -54,6 +54,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
             ProcessNOTES(fumen, reader);
 
+            fumen.Setup();
+
             return Task.FromResult(fumen);
         }
 
