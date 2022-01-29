@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.Collections;
+﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
@@ -14,20 +15,31 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public class OngekiFumen
+    public class OngekiFumen : PropertyChangedBase
     {
-        public FumenMetaInfo MetaInfo { get; } = new();
+        private FumenMetaInfo metaInfo = new();
+        public FumenMetaInfo MetaInfo
+        {
+            get => metaInfo;
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(metaInfo, value, OnFumenMetaInfoPropChanged);
+                Set(ref metaInfo, value);
+            }
+        }
+
         public BulletPalleteList BulletPalleteList { get; } = new();
+        public BpmList BpmList { get; } = new();
+        public LaneList Lanes { get; } = new();
         public List<Bell> Bells { get; } = new();
         public List<Flick> Flicks { get; } = new();
         public List<Bullet> Bullets { get; } = new();
         public List<ClickSE> ClickSEs { get; } = new();
-        public BpmList BpmList { get; } = new();
-        public LaneList Lanes { get; } = new();
         public List<MeterChange> MeterChanges { get; } = new();
         public List<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
@@ -60,7 +72,21 @@ namespace OngekiFumenEditor.Base
         public void Setup()
         {
             Bells.Sort();
+
             BpmList.Sort();
+            var firstBpm = new BPMChange()
+            {
+                TGrid = new TGrid()
+                {
+                    Grid = 0,
+                    Unit = 0
+                },
+                BPM = MetaInfo.BpmDefinition.First,
+            };
+            var unusedBpm = BpmList.FirstOrDefault(x => x.BPM == firstBpm.BPM && x.TGrid == TGrid.ZeroDefault);
+            if (unusedBpm is not null)
+                BpmList.Remove(unusedBpm);
+            BpmList.SetFirstBpm(firstBpm);
             MeterChanges.Sort();
             EnemySets.Sort();
         }
@@ -211,6 +237,15 @@ namespace OngekiFumenEditor.Base
                 .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());
+        }
+
+        private void OnFumenMetaInfoPropChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FumenMetaInfo.BpmDefinition))
+            {
+                BpmList.FirstBpm.BPM = MetaInfo.BpmDefinition.First;
+                Log.LogDebug($"Apply metainfo.firstBpm to bpmList.firstBpm : {BpmList.FirstBpm.BPM}");
+            }
         }
     }
 }

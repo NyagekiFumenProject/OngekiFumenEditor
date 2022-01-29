@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using Gemini.Framework;
+using Microsoft.Win32;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
@@ -12,10 +13,12 @@ using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -192,6 +195,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             using var _ = StatusBarHelper.BeginStatus("Fumen saving : " + filePath);
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
+            if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
+            {
+                //ask fumen file save path before save project.
+                var dialog = new SaveFileDialog();
+                var hashSet = new HashSet<(string desc, string ext)>();
+
+                foreach (var formatDesc in IoC.Get<IFumenParserManager>().GetSerializerDescriptions())
+                    foreach (var ext in formatDesc.fileFormat)
+                        hashSet.Add((formatDesc.desc, ext));
+
+                dialog.Filter = string.Join("|", hashSet.Select(x => $"{x.desc} ({x.ext})|*{x.ext}"));
+
+                if (dialog.ShowDialog() != true)
+                {
+                    MessageBox.Show("无法保存谱面,项目保存取消");
+                    return;
+                }
+
+                EditorProjectData.FumenFilePath = dialog.FileName;
+            }
             await EditorProjectDataUtils.TrySaveToFileAsync(filePath, EditorProjectData);
         }
 

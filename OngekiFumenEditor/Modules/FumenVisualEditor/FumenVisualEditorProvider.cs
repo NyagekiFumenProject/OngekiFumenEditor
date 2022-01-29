@@ -14,13 +14,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
     [Export(typeof(IEditorProvider))]
     class FumenVisualEditorProvider : IEditorProvider
     {
-        public const string FILE_EXTENSION_NAME = ".ogkr_fve";
+        public const string FILE_EXTENSION_NAME = ".nyagekiProj";
 
         public IEnumerable<EditorFileType> FileTypes
         {
             get
             {
-                yield return new EditorFileType("Ongeki Fumen Visual Editor", FILE_EXTENSION_NAME);
+                yield return new EditorFileType("Fumen Visual Editor Project", FILE_EXTENSION_NAME);
             }
         }
 

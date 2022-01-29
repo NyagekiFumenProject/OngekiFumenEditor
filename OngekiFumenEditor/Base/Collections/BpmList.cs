@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Collections
@@ -17,9 +18,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Collections
 
         public event Action OnChangedEvent;
 
-        public BpmList()
+        public BpmList(IEnumerable<BPMChange> initBpmChanges = default)
         {
             OnChangedEvent += BpmList_OnChangedEvent;
+            foreach (var item in initBpmChanges ?? Enumerable.Empty<BPMChange>())
+                Add(item);
         }
 
         private void BpmList_OnChangedEvent()

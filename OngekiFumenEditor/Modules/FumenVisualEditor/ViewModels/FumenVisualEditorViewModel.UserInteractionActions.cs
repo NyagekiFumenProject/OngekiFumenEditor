@@ -208,6 +208,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var obj in selectedObject)
             {
                 EditorViewModels.Remove(obj);
+                CurrentDisplayEditorViewModels.Remove(obj);
                 Fumen.RemoveObject(obj.ReferenceOngekiObject);
                 if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
                     propertyBrowser.OngekiObject = default;

@@ -60,12 +60,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
         [JsonIgnore]
         public double BaseBPM
         {
-            get => Fumen.MetaInfo.FirstBpm.BPM;
+            get => Fumen.MetaInfo.BpmDefinition.First;
             set
             {
                 if (Fumen is not null)
                 {
-                    Fumen.MetaInfo.FirstBpm.BPM = value;
+                    Fumen.MetaInfo.BpmDefinition.First = value;
                     Fumen.BpmList.FirstBpm.BPM = value;
                 }
                 NotifyOfPropertyChange(() => BaseBPM);

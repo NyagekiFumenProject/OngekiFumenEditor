@@ -1,18 +1,26 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public class FumenMetaInfo
+    public class FumenMetaInfo : PropertyChangedBase
     {
-        public class BpmDef
+        public class BpmDef : PropertyChangedBase
         {
-            public double First { get; set; } = 240;
+            private double first = 240;
+            public double First
+            {
+                get => first;
+                set => Set(ref first, value);
+            }
+
             public double Common { get; set; } = 240;
             public double Minimum { get; set; } = 240;
             public double Maximum { get; set; } = 240;
@@ -37,8 +45,21 @@ namespace OngekiFumenEditor.Base
         /// <summary>
         /// BPM定义信息
         /// </summary>
-        public BpmDef BpmDefinition { get; set; } = new BpmDef();
-        public BPMChange FirstBpm { get; set; } = new BPMChange();
+        private BpmDef bpmDefinition = new BpmDef();
+        public BpmDef BpmDefinition
+        {
+            get => bpmDefinition;
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(bpmDefinition, value, OnBpmDefinitionPropChanged);
+                Set(ref bpmDefinition, value);
+            }
+        }
+
+        private void OnBpmDefinitionPropChanged(object sender, PropertyChangedEventArgs e)
+        {
+            NotifyOfPropertyChange(() => BpmDefinition);
+        }
 
         /// <summary>
         /// 节拍信息
