@@ -18,7 +18,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
         public string FileFormatName => DefaultOngekiFumenParser.FormatName;
         public string[] SupportFumenFileExtensions => DefaultOngekiFumenParser.FumenFileExtensions;
 
-        public Task<string> SerializeAsync(OngekiFumen fumen)
+        public Task<byte[]> SerializeAsync(OngekiFumen fumen)
         {
             var sb = new StringBuilder();
 
@@ -49,7 +49,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
             ProcessNOTES(fumen, sb);
             sb.AppendLine();
 
-            return Task.FromResult(sb.ToString());
+            return Task.FromResult(Encoding.UTF8.GetBytes(sb.ToString()));
         }
 
         public void ProcessHEADER(OngekiFumen fumen, StringBuilder sb)

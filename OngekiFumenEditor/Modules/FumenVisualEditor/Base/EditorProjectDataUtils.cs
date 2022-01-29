@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 throw new NotSupportedException($"不支持保存此文件格式:{fumenFilePath}");
 
             await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
-            await File.WriteAllTextAsync(fumenFilePath, await serializer.SerializeAsync(editorProject.Fumen));
+            await File.WriteAllBytesAsync(fumenFilePath, await serializer.SerializeAsync(editorProject.Fumen));
         }
     }
 }

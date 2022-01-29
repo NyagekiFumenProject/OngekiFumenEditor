@@ -12,6 +12,6 @@ namespace OngekiFumenEditor.Parser
     {
         string FileFormatName { get; }
         string[] SupportFumenFileExtensions { get; }
-        Task<string> SerializeAsync(OngekiFumen fumen);
+        Task<byte[]> SerializeAsync(OngekiFumen fumen);
     }
 }
