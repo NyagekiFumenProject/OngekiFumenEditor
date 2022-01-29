@@ -26,16 +26,6 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser.CommandParserImpl.MetaInfo
                 Minimum = dataArr.ElementAtOrDefault(3),
                 Maximum = dataArr.ElementAtOrDefault(4),
             };
-            fumen.MetaInfo.FirstBpm = new BPMChange()
-            {
-                TGrid = new TGrid()
-                {
-                    Grid = 0,
-                    Unit = 0
-                },
-                BPM = fumen.MetaInfo.BpmDefinition.First,
-            };
-            fumen.BpmList.SetFirstBpm(fumen.MetaInfo.FirstBpm);
         }
     }
 }
