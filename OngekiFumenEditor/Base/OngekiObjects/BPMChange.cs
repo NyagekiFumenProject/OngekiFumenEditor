@@ -26,12 +26,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "BPM";
         public override string IDShortName => CommandName;
 
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {TGrid.Serialize(fumenData)} {BPM}";
-        }
-
-        public override string ToString() => Serialize(default);
+        public override string ToString() => $"BPM T[{TGrid.Unit},{TGrid.Grid}] {BPM}";
 
         public GridOffset LengthConvertToOffset(double len, int timeGridSize)
         {

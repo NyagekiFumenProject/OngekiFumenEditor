@@ -36,11 +36,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "MET";
         public override string IDShortName => CommandName;
 
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {TGrid.Serialize(fumenData)} {BunShi} {Bunbo}";
-        }
-
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {
             base.Copy(fromObj, fumen);

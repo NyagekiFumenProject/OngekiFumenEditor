@@ -14,9 +14,13 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
     {
         public Dictionary<string, ICommandParser> CommandParsers { get; } = new();
 
-        public string[] SupportFumenFileExtensions => new[] { ".ogkr" };
+        public static readonly string[] FumenFileExtensions = new[] { ".ogkr" };
 
-        public string FileFormatName => "OngekiFumenFile";
+        public const string FormatName = "OngekiFumenFile";
+
+        public string[] SupportFumenFileExtensions => FumenFileExtensions;
+
+        public string FileFormatName => FormatName;
 
         [ImportingConstructor]
         public DefaultOngekiFumenParser([ImportMany] IEnumerable<ICommandParser> commandParsers)

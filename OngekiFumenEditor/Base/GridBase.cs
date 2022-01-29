@@ -92,7 +92,7 @@ namespace OngekiFumenEditor.Base
             return new GridOffset(unitDiff, (int)gridDiff);
         }
 
-        public abstract string Serialize(OngekiFumen fumenData);
+        public abstract string Serialize();
 
         #region Implement Equals and Compares
 

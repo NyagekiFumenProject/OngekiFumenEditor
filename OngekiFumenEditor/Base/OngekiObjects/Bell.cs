@@ -14,10 +14,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public override string IDShortName => CommandName;
 
         public override Type ModelViewType => typeof(BellViewModel);
-
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {TGrid.Serialize(fumenData)} {XGrid.Serialize(fumenData)}";
-        }
     }
 }

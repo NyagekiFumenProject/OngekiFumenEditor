@@ -50,11 +50,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 To = to
             };
         }
-
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            var end = Children.FirstOrDefault();
-            return $"{IDShortName} {ReferenceLaneStart.RecordId} {TGrid.Serialize(fumenData)} {XGrid.Unit} {XGrid.Grid} {end?.TGrid.Serialize(fumenData)} {end?.XGrid.Unit} {end?.XGrid.Grid}";
-        }
     }
 }

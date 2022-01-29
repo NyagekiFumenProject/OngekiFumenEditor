@@ -39,11 +39,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public const string CommandName = "BLT";
 
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {ReferenceBulletPallete?.StrID} {TGrid.Serialize(fumenData)} {XGrid.Serialize(fumenData)}";
-        }
-
         public override string ToString() => $"{base.ToString()} Pallete:({ReferenceBulletPallete})";
 
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)

@@ -13,6 +13,6 @@ namespace OngekiFumenEditor.Base
         /// </summary>
         /// <param name="fumenData"></param>
         /// <returns></returns>
-        public string Serialize(OngekiFumen fumenData);
+        public string Serialize();
     }
 }

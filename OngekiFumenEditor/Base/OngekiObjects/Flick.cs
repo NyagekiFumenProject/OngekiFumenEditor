@@ -42,11 +42,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override string IDShortName => IsCritical ? "CFK" : "FLK";
 
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {TGrid.Serialize(fumenData)} {XGrid.Serialize(fumenData)} {(Direction == FlickDirection.Left ? "L" : "R")}";
-        }
-
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {
             base.Copy(fromObj, fumen);

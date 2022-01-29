@@ -157,13 +157,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "BPL";
         public override string IDShortName => CommandName;
 
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {StrID} {ShooterValue} {PlaceOffset} {TargetValue} {Speed} {BulletTypeValue}";
-        }
-
-        public override string ToString() => Serialize(default);
-
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {
             if (fromObj is not BulletPallete fromBpl)

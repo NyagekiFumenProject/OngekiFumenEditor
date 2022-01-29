@@ -25,12 +25,12 @@ namespace OngekiFumenEditor.Base
 
         public XGrid(float unit = default, int grid = default, uint resX = DEFAULT_RES_X) : base(unit, grid) => ResX = resX;
 
-        public override string Serialize(OngekiFumen fumenData)
+        public override string Serialize()
         {
             return Unit.ToString();
         }
 
-        public override string ToString() => Serialize(default);
+        public override string ToString() => $"X[{Unit},{Grid}]";
 
         public static XGrid operator +(XGrid l, GridOffset r)
         {

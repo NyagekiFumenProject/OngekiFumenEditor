@@ -11,10 +11,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         public abstract int RecordId { get; set; }
 
         public int WidthId { get; set; } = 2;
-
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {RecordId} {TGrid.Serialize(fumenData)} {XGrid.Serialize(fumenData)} {WidthId}";
-        }
     }
 }

@@ -50,11 +50,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override string IDShortName => IsCritical ? "CTP" : "TAP";
 
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {ReferenceLaneStart?.RecordId ?? -1} {TGrid.Serialize(fumenData)} {XGrid.Unit} {XGrid.Grid}";
-        }
-
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {
             base.Copy(fromObj, fumen);

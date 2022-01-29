@@ -25,12 +25,12 @@ namespace OngekiFumenEditor.Base
 
         public TGrid(float unit = default, int grid = default, uint resT = DEFAULT_RES_T) : base(unit, grid) => ResT = resT;
 
-        public override string Serialize(OngekiFumen fumenData)
+        public override string Serialize()
         {
             return $"{Unit} {Grid}";
         }
 
-        public override string ToString() => Serialize(default);
+        public override string ToString() => $"T[{Unit},{Grid}]";
 
         public static bool operator <(TGrid l, TGrid r)
         {

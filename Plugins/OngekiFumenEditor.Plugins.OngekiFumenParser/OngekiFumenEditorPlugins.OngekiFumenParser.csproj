@@ -11,7 +11,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="Caliburn.Micro" Version="4.0.173" >
+    <PackageReference Include="Caliburn.Micro" Version="4.0.173">
       <ExcludeAssets>runtime;</ExcludeAssets>
     </PackageReference>
     <ProjectReference Include="..\..\OngekiFumenEditor\OngekiFumenEditor.csproj">

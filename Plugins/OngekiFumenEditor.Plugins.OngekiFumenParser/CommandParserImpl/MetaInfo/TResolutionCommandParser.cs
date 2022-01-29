@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
-using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Parser;
 using System.Threading.Tasks;
 

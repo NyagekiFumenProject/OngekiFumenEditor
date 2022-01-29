@@ -13,10 +13,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public static string CommandName => "CLK";
         public override string IDShortName => CommandName;
-
-        public override string Serialize(OngekiFumen fumenData)
-        {
-            return $"{IDShortName} {TGrid.Serialize(fumenData)}";
-        }
     }
 }

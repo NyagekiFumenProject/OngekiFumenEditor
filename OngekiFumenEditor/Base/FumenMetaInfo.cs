@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public class FumenMetaInfo : ISerializable
+    public class FumenMetaInfo
     {
         public class BpmDef
         {
@@ -89,26 +89,5 @@ namespace OngekiFumenEditor.Base
         /// (?)Hold用到，貌似用来做判定
         /// </summary>
         public float ProgJudgeBpm { get; set; } = 240;
-
-        public string Serialize(OngekiFumen fumenData)
-        {
-            var sb = new StringBuilder();
-
-            sb.AppendLine($"VERSION {Version.Major} {Version.Minor} {Version.Build}");
-            sb.AppendLine($"CREATOR {Creator}");
-            sb.AppendLine($"BPM_DEF {BpmDefinition.First} {BpmDefinition.Common} {BpmDefinition.Maximum} {BpmDefinition.Minimum}");
-            sb.AppendLine($"MET_DEF {MeterDefinition.Bunshi} {MeterDefinition.Bunbo}");
-            sb.AppendLine($"TRESOLUTION {TRESOLUTION}");
-            sb.AppendLine($"XRESOLUTION {XRESOLUTION}");
-            sb.AppendLine($"CLK_DEF {ClickDefinition}");
-            sb.AppendLine($"PROGJUDGE_BPM {ProgJudgeBpm}");
-            sb.AppendLine($"TUTORIAL {(Tutorial?1:0)}");
-            sb.AppendLine($"BULLET_DAMAGE {BulletDamage:F3}");
-            sb.AppendLine($"HARDBULLET_DAMAGE {HardBulletDamage:F3}");
-            sb.AppendLine($"DANGERBULLET_DAMAGE {DangerBulletDamage:F3}");
-            sb.AppendLine($"BEAM_DAMAGE {BeamDamage:F3}");
-
-            return sb.ToString();
-        }
     }
 }
