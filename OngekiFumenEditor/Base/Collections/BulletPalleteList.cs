@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-    public class BulletPalleteList : IEnumerable<BulletPallete>,INotifyCollectionChanged
+    public class BulletPalleteList : IEnumerable<BulletPallete>, INotifyCollectionChanged
     {
         private static readonly Dictionary<char, int> ALPHABET = Enumerable.Empty<char>()
             .Concat(Enumerable.Range(0, 10).Select(x => x + '0').Select(x => (char)x))

@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         XGridUnitLines = 4,
         ScrollBar = 8,
 
-        All = OngekiObjects | TGridUnitLines | XGridUnitLines,
+        All = OngekiObjects | TGridUnitLines | XGridUnitLines | ScrollBar,
         UnitLines = TGridUnitLines | XGridUnitLines,
     }
 }
