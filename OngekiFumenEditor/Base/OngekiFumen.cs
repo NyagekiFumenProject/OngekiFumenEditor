@@ -71,8 +71,9 @@ namespace OngekiFumenEditor.Base
 
         public void Setup()
         {
-            Bells.Sort();
+            MetaInfo = MetaInfo;
 
+            Bells.Sort();
             BpmList.Sort();
             var firstBpm = new BPMChange()
             {
