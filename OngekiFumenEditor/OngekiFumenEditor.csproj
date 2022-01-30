@@ -94,6 +94,9 @@
     <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -226,6 +229,10 @@
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\FlickView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
 
