@@ -52,6 +52,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
 
         public TGridCalculatorToolViewerViewModel()
         {
+            DisplayName = "时间计算器";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
         }
 
