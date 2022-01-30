@@ -114,6 +114,7 @@
             cal:Message.Attach="             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];              [Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];             "
             CanMouseWheel="{Binding IsLocked, Converter={StaticResource ReverseBoolConverter}}"
             HorizontalScrollBarVisibility="Disabled"
+            IsInertiaEnabled="False"
             IsPenetrating="True"
             VerticalScrollBarVisibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}">
             <Grid cal:Message.Attach="[Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];" Background="#01000000">
