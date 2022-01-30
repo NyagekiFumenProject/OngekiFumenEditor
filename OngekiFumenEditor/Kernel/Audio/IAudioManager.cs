@@ -9,6 +9,8 @@ namespace OngekiFumenEditor.Kernel.Audio
 {
     public interface IAudioManager : IDisposable
     {
+        float SoundVolume { get; set; }
+
         Task<ISoundPlayer> LoadSoundAsync(string filePath);
         Task<IAudioPlayer> LoadAudioAsync(string filePath);
     }

@@ -76,6 +76,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
+        public float SoundVolume
+        {
+            get => IoC.Get<IAudioManager>().SoundVolume;
+            set
+            {
+                IoC.Get<IAudioManager>().SoundVolume = value;
+                NotifyOfPropertyChange(() => SoundVolume);
+            }
+        }
+
         private void OnAudioPlayerPropChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(IAudioPlayer.CurrentTime))
@@ -135,11 +145,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             await fumenSoundPlayer.Init(Editor, AudioPlayer);
             (var timeline, var scrollViewer) = Editor.BeginScrollAnimation();
+            //var stopwatch = new Stopwatch();
+            var prevAudioTime = 0f;
             EventHandler func = (e, d) =>
             {
                 if (AudioPlayer is null || Editor is null)
                     return;
-                var offset = Editor.TotalDurationHeight - AudioPlayer.CurrentTime - Editor.CanvasHeight;
+                var audioTime = AudioPlayer.CurrentTime;
+                if (prevAudioTime == audioTime)
+                {
+                    Debug.WriteLine("gugu");
+                }
+                prevAudioTime = audioTime;
+                var offset = Editor.TotalDurationHeight - audioTime - Editor.CanvasHeight;
                 scrollViewer.CurrentVerticalOffset = Math.Max(0, offset);
             };
             CompositionTarget.Rendering += func;

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 {
     [Export(typeof(IFumenSoundPlayer))]
-    public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
+    public class DefaultFumenSoundPlayer : PropertyChangedBase, IFumenSoundPlayer, IDisposable
     {
         [Flags]
         public enum Sound
@@ -56,6 +56,16 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         private bool isPlaying = false;
 
         public double CurrentTime => baseTimeOffset + timer.ElapsedMilliseconds + editor.Setting.SoundOffset;
+
+        private float volume = 1;
+        public float Volume
+        {
+            get => volume; 
+            set
+            {
+                Set(ref volume, value);
+            }
+        }
 
         private Dictionary<Sound, ISoundPlayer> cacheSounds = new();
         private Task loadTask;

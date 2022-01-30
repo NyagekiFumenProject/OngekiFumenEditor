@@ -19,73 +19,29 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
     {
         private HashSet<IAudioPlayer> ownAudioPlayers = new();
 
-        public class CachedSound
-        {
-            public float[] AudioData { get; private set; }
-            public WaveFormat WaveFormat { get; private set; }
+        private readonly IWavePlayer soundOutputDevice;
+        private readonly MixingSampleProvider soundMixer;
+        private readonly VolumeSampleProvider soundVolumeWrapper;
 
-            public CachedSound(string audioFileName)
-            {
-                using var audioFileReader = new AudioFileReader(audioFileName);
-
-                WaveFormat = audioFileReader.WaveFormat;
-                var wholeFile = new List<float>((int)(audioFileReader.Length / 4));
-
-                var readLen = audioFileReader.WaveFormat.SampleRate * audioFileReader.WaveFormat.Channels;
-                var readBuffer = ArrayPool<float>.Shared.Rent(readLen);
-
-                int samplesRead;
-                while ((samplesRead = audioFileReader.Read(readBuffer, 0, readLen)) > 0)
-                {
-                    wholeFile.AddRange(readBuffer.Take(samplesRead));
-                }
-
-                AudioData = wholeFile.ToArray();
-                ArrayPool<float>.Shared.Return(readBuffer);
-            }
-        }
-
-        private class CachedSoundSampleProvider : ISampleProvider
-        {
-            private readonly CachedSound cachedSound;
-            private long position;
-
-            public WaveFormat WaveFormat => cachedSound.WaveFormat;
-
-            public CachedSoundSampleProvider(CachedSound cachedSound)
-            {
-                this.cachedSound = cachedSound;
-            }
-
-            public int Read(float[] buffer, int offset, int count)
-            {
-                var availableSamples = cachedSound.AudioData.Length - position;
-                var samplesToCopy = Math.Min(availableSamples, count);
-                Array.Copy(cachedSound.AudioData, position, buffer, offset, samplesToCopy);
-                position += samplesToCopy;
-                return (int)samplesToCopy;
-            }
-        }
-
-        private readonly IWavePlayer outputDevice;
-        private readonly MixingSampleProvider mixer;
+        public float SoundVolume { get => soundVolumeWrapper.Volume; set => soundVolumeWrapper.Volume = value; }
 
         public DefaultAudioManager()
         {
-            outputDevice = new WasapiOut();
-            mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
-            mixer.ReadFully = true;
-            outputDevice.Init(mixer);
-            outputDevice.Play();
+            soundOutputDevice = new WasapiOut();
+            soundMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
+            soundMixer.ReadFully = true;
+            soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
+            soundOutputDevice.Init(soundVolumeWrapper);
+            soundOutputDevice.Play();
         }
 
         private ISampleProvider ConvertToRightChannelCount(ISampleProvider input)
         {
-            if (input.WaveFormat.Channels == mixer.WaveFormat.Channels)
+            if (input.WaveFormat.Channels == soundMixer.WaveFormat.Channels)
             {
                 return input;
             }
-            if (input.WaveFormat.Channels == 1 && mixer.WaveFormat.Channels == 2)
+            if (input.WaveFormat.Channels == 1 && soundMixer.WaveFormat.Channels == 2)
             {
                 return new MonoToStereoSampleProvider(input);
             }
@@ -99,7 +55,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public void AddMixerInput(ISampleProvider input)
         {
-            mixer.AddMixerInput(ConvertToRightChannelCount(input));
+            soundMixer.AddMixerInput(ConvertToRightChannelCount(input));
         }
 
         public async Task<IAudioPlayer> LoadAudioAsync(string filePath)
@@ -124,7 +80,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             foreach (var player in ownAudioPlayers)
                 player?.Dispose();
             ownAudioPlayers.Clear();
-            outputDevice?.Dispose();
+            soundOutputDevice?.Dispose();
         }
     }
 }
