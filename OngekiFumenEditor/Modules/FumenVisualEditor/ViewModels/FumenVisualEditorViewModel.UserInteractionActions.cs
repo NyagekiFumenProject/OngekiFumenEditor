@@ -207,14 +207,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             foreach (var obj in selectedObject)
             {
-                EditorViewModels.Remove(obj);
-                CurrentDisplayEditorViewModels.Remove(obj);
-                Fumen.RemoveObject(obj.ReferenceOngekiObject);
+                RemoveObject(obj);
                 if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
                     propertyBrowser.OngekiObject = default;
             }
+
             Redraw(RedrawTarget.OngekiObjects);
             //Log.LogInfo($"deleted {selectedObject.Length} objects.");
+        }
+
+        private void RemoveObject(DisplayObjectViewModelBase obj)
+        {
+            EditorViewModels.Remove(obj);
+            Fumen.RemoveObject(obj.ReferenceOngekiObject);
+            CurrentDisplayEditorViewModels.Clear();
         }
 
         public void KeyboardAction_SelectAllObjects()
