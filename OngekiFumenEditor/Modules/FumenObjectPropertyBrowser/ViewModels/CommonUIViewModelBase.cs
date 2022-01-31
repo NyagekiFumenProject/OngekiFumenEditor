@@ -42,4 +42,17 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             NotifyOfPropertyChange(() => PropertyInfo);
         }
     }
+
+    public abstract class CommonUIViewModelBase<T> : CommonUIViewModelBase where T : class
+    {
+        public T TypedProxyValue
+        {
+            get => (T)PropertyInfo.ProxyValue;
+            set => PropertyInfo.ProxyValue = value;
+        }
+
+        protected CommonUIViewModelBase(PropertyInfoWrapper wrapper) : base(wrapper)
+        {
+        }
+    }
 }

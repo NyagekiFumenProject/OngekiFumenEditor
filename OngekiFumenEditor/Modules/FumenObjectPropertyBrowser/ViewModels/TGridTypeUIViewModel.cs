@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using System;
 using System.Collections.Generic;
@@ -9,8 +10,50 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-    public class TGridTypeUIViewModel : CommonUIViewModelBase
+    public class TGridTypeUIViewModel : CommonUIViewModelBase<TGrid>
     {
+        public int Grid
+        {
+            get => TypedProxyValue.Grid;
+            set
+            {
+                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
+                    undoable.ExecuteSubPropertySetAction(nameof(TGrid.Grid), (val) => TypedProxyValue.Grid = val, Grid, value);
+                else
+                    TypedProxyValue.Grid = value;
+
+                NotifyOfPropertyChange(() => Grid);
+            }
+        }
+
+        public float Unit
+        {
+            get => TypedProxyValue.Unit;
+            set
+            {
+                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
+                    undoable.ExecuteSubPropertySetAction(nameof(TGrid.Unit), (val) => TypedProxyValue.Unit = val, Unit, value);
+                else
+                    TypedProxyValue.Unit = value;
+
+                NotifyOfPropertyChange(() => Unit);
+            }
+        }
+
+        public uint ResT
+        {
+            get => TypedProxyValue.ResT;
+            set
+            {
+                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
+                    undoable.ExecuteSubPropertySetAction(nameof(TGrid.ResT), (val) => TypedProxyValue.ResT = val, ResT, value);
+                else
+                    TypedProxyValue.ResT = value;
+
+                NotifyOfPropertyChange(() => ResT);
+            }
+        }
+
         public TGridTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
         {
         }

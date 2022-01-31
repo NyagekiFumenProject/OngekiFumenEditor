@@ -74,32 +74,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
             this.referenceEditor = referenceEditor;
         }
 
-        private class PropertySetAction : IUndoableAction
-        {
-            private readonly PropertyInfoWrapper propertyWrapperCore;
-            private readonly object oldValue;
-            private readonly object newValue;
-
-            public string Name => "物件属性变更";
-
-            public PropertySetAction(PropertyInfoWrapper propertyWrapperCore, object oldValue, object newValue)
-            {
-                this.propertyWrapperCore = propertyWrapperCore;
-                this.oldValue = oldValue;
-                this.newValue = newValue;
-            }
-
-            public void Execute()
-            {
-                propertyWrapperCore.ProxyValue = newValue;
-            }
-
-            public void Undo()
-            {
-                propertyWrapperCore.ProxyValue = oldValue;
-            }
-        }
-
         public override object ProxyValue
         {
             get => base.ProxyValue;
@@ -107,10 +81,16 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
             {
                 var oldValue = ProxyValue;
                 var newValue = value;
+                referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction(PropertyInfo.Name, propertyWrapperCore, oldValue, newValue));
 
-                referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction(propertyWrapperCore, oldValue, newValue));
                 NotifyOfPropertyChange(() => ProxyValue);
             }
+        }
+
+        public void ExecuteSubPropertySetAction<T>(string subPropName, Action<T> setterAction, T oldValue, T newValue)
+        {
+            referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction<T>($"{PropertyInfo.Name}.{subPropName}", setterAction, oldValue, newValue));
+            NotifyOfPropertyChange(() => ProxyValue);
         }
 
         public override string ToString() => $"[Undoable]{base.ToString()}";
