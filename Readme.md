@@ -19,9 +19,8 @@
 * ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(可能跳过)
 * 一边写个谱面做测试一边修bugs  **<- we are here!**
 * 正式公布  **<-goal**
-* 实现撤回&重做功能
 * 实现Soflan变速/LispBlock/LispDisp/EmenyLane...等命令
-* 实现各种工具等
+* 实现各种工具等，比如智能画复杂线/曲线/文字，svg转线
 ....
 ![S4N@T)957%Y7V46~_IDH@WY](https://user-images.githubusercontent.com/7549173/149096560-e21b793a-fd24-4001-bbca-89ad7c44088f.jpg)
 
