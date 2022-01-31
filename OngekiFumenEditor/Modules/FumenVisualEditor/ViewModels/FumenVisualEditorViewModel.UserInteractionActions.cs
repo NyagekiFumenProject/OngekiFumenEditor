@@ -142,7 +142,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var count = 0;
             foreach (var displayObjectView in currentCopySources.Select(x => x.Copy()).OfType<DisplayObjectViewModelBase>())
             {
-                AddOngekiObject(displayObjectView);
+                AddObject(displayObjectView);
                 displayObjectView.IsSelected = true;
                 count++;
             };
@@ -203,17 +203,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             //删除已选择的物件
             var selectedObject = SelectObjects.ToArray();
-            var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
 
-            foreach (var obj in selectedObject)
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("删除物件", () =>
             {
-                RemoveObject(obj);
-                if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
-                    propertyBrowser.SetCurrentOngekiObject(default, this);
-            }
+                foreach (var obj in selectedObject)
+                    RemoveObject(obj);
 
-            Redraw(RedrawTarget.OngekiObjects);
-            //Log.LogInfo($"deleted {selectedObject.Length} objects.");
+                Redraw(RedrawTarget.OngekiObjects);
+                Log.LogInfo($"deleted {selectedObject.Length} objects.");
+            }, () =>
+            {
+                foreach (var obj in selectedObject)
+                    AddObject(obj);
+
+                Redraw(RedrawTarget.OngekiObjects);
+                Log.LogInfo($"deleted {selectedObject.Length} objects.");
+            }));
         }
 
         private void RemoveObject(DisplayObjectViewModelBase obj)
@@ -221,6 +226,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             EditorViewModels.Remove(obj);
             Fumen.RemoveObject(obj.ReferenceOngekiObject);
             CurrentDisplayEditorViewModels.Clear();
+
+            var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+            if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
+                propertyBrowser.SetCurrentOngekiObject(default, this);
         }
 
         public void KeyboardAction_SelectAllObjects()
@@ -425,6 +434,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var mousePosition = arg.GetPosition(e.View as FrameworkElement);
             var displayObject = default(DisplayObjectViewModelBase);
+            var ry = CanvasHeight - mousePosition.Y + MinVisibleCanvasY;
 
             switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
             {
@@ -439,11 +449,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         if (displayObject is IEditorDisplayableViewModel editorObjectViewModel)
                             editorObjectViewModel.OnObjectCreated(displayObject.ReferenceOngekiObject, this);
             */
-            AddOngekiObject(displayObject);
-            var ry = CanvasHeight - mousePosition.Y + MinVisibleCanvasY;
-            mousePosition.Y = ry;
-            displayObject.MoveCanvas(mousePosition);
-            Redraw(RedrawTarget.OngekiObjects);
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
+            {
+                AddObject(displayObject);
+                mousePosition.Y = ry;
+                displayObject.MoveCanvas(mousePosition);
+                Redraw(RedrawTarget.OngekiObjects);
+            }, () =>
+            {
+                RemoveObject(displayObject);
+                Redraw(RedrawTarget.OngekiObjects);
+            }));
+            
         }
 
         #endregion

@@ -249,7 +249,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
-        public void AddOngekiObject(DisplayObjectViewModelBase viewModel)
+        public void AddObject(DisplayObjectViewModelBase viewModel)
         {
             if (viewModel is IEditorDisplayableViewModel m)
                 m.OnObjectCreated(viewModel.ReferenceOngekiObject, this);
