@@ -214,7 +214,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }, () =>
             {
                 foreach (var obj in selectedObject)
+                {
                     AddObject(obj);
+                }
 
                 Redraw(RedrawTarget.OngekiObjects);
                 Log.LogInfo($"deleted {selectedObject.Length} objects.");
@@ -223,6 +225,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RemoveObject(DisplayObjectViewModelBase obj)
         {
+            obj.IsSelected = false;
             EditorViewModels.Remove(obj);
             Fumen.RemoveObject(obj.ReferenceOngekiObject);
             CurrentDisplayEditorViewModels.Clear();
@@ -287,9 +290,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
-            IsMouseDown = false;
-            IsDragging = false;
-
             if (IsRangeSelecting)
             {
                 SelectRangeObjects(SelectionRect);
@@ -301,6 +301,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     SelectObjects.ToArray().ForEach(x => x.OnDragEnd(pos));
             }
 
+            IsMouseDown = false;
+            IsDragging = false;
             SelectionVisibility = Visibility.Collapsed;
         }
 

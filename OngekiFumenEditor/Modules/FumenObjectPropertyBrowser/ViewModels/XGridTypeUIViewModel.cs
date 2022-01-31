@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,6 +57,18 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public XGridTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
         {
+            if (PropertyInfo.OwnerObject is INotifyPropertyChanged notifyProperty)
+            {
+                notifyProperty.PropertyChanged += NotifyProperty_PropertyChanged;
+            }
+        }
+
+        private void NotifyProperty_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(XGrid))
+            {
+                Refresh();
+            }
         }
     }
 }

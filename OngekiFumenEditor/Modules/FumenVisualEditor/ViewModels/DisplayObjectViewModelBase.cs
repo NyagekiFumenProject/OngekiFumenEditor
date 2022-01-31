@@ -94,6 +94,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             OnDragMoving(pos);
             //Log.LogInfo($"OnDragEnd");
+            var oldPos = dragViewStartPoint;
+            var newPos = new Point(CanvasX, CanvasY);
+            EditorViewModel?.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("物件拖动",
+                () =>
+                {
+                    MoveCanvas(newPos);
+                }, () =>
+                {
+                    MoveCanvas(oldPos);
+                }));
         }
 
         public virtual void OnDragMoving(Point pos)
@@ -281,9 +291,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public virtual DisplayObjectViewModelBase Copy()
         {
             var obj = ReferenceOngekiObject;
-            if (obj is not IDisplayableObject displayable 
+            if (obj is not IDisplayableObject displayable
                 //暂不支持 以下类型的复制粘贴
-                || obj is BeamBase 
+                || obj is BeamBase
                 || obj is ConnectableObjectBase
                 )
                 return default;
