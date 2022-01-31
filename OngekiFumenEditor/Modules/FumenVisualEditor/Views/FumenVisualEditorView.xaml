@@ -226,7 +226,8 @@
             Margin="0,0,20,0"
             HorizontalAlignment="Right"
             d:Text="500000000000000000"
-            Foreground="Yellow">
+            Foreground="Yellow"
+            IsHitTestVisible="False">
             <TextBlock.Text>
                 <MultiBinding Converter="{StaticResource TGridDisplayConverter}">
                     <MultiBinding.Bindings>
@@ -249,7 +250,10 @@
                 </TranslateTransform>
             </TextBlock.RenderTransform>
         </TextBlock>
-        <Rectangle Height="2" Stroke="Yellow">
+        <Rectangle
+            Height="2"
+            IsHitTestVisible="False"
+            Stroke="Yellow">
             <Rectangle.RenderTransform>
                 <TranslateTransform>
                     <TranslateTransform.Y>
