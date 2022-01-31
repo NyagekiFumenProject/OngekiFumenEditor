@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.IEditorDocumentManager;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
@@ -81,13 +82,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             if (!Properties.EditorGlobalSetting.Default.IsEnableAutoSave)
                 return;
 
-            if (CurrentActivatedEditor is null || string.IsNullOrWhiteSpace(CurrentActivatedEditor.FilePath))
+            if (CurrentActivatedEditor is null || string.IsNullOrWhiteSpace(CurrentActivatedEditor.FilePath) || Dispatcher.CurrentDispatcher is not Dispatcher dispatcher)
                 return;
 
-            Log.LogInfo($"begin auto save current document: {CurrentActivatedEditor.FileName}");
-            CurrentActivatedEditor.LockAllUserInteraction();
-            await CurrentActivatedEditor.Save(CurrentActivatedEditor.FilePath);
-            CurrentActivatedEditor.UnlockAllUserInteraction();
+            var editor = CurrentActivatedEditor;
+            Log.LogInfo($"begin auto save current document: {editor.FileName}");
+            await editor.Save(editor.FilePath);
             Log.LogInfo($"auto save done.");
         }
 
