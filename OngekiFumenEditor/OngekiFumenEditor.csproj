@@ -97,9 +97,18 @@
     <Compile Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Properties\EditorGlobalSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EditorGlobalSetting.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Properties\EditorGlobalSetting.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>EditorGlobalSetting.Designer.cs</LastGenOutput>
+    </None>
     <None Update="Resources\sounds\bell.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
