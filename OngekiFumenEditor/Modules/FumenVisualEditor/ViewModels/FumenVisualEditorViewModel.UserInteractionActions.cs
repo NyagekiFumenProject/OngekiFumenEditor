@@ -192,6 +192,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
                     propertyBrowser.SetCurrentOngekiObject(default, this);
             }
+
+            NotifyOfPropertyChange(() => SelectObjects);
         }
 
         #region Keyboard Actions

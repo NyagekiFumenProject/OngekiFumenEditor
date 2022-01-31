@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace OngekiFumenEditor.Base
     public abstract class OngekiObjectBase : PropertyChangedBase
     {
         public abstract string IDShortName { get; }
+        public string Name => GetType().GetTypeName();
 
         public override string ToString() => IDShortName;
 
