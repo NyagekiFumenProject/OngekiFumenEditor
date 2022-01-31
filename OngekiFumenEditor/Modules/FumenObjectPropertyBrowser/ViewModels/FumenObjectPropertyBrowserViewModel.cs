@@ -53,6 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             this.referenceEditor = referenceEditor;
 
             OnObjectChanged();
+            NotifyOfPropertyChange(() => OngekiObject);
         }
 
         public FumenObjectPropertyBrowserViewModel()
