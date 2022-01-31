@@ -185,12 +185,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         o.IsSelected = false;
                 }
                 if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
-                    propertyBrowser.OngekiObject = SelectObjects.Count() == 1 ? SelectObjects.First().ReferenceOngekiObject : default;
+                    propertyBrowser.SetCurrentOngekiObject(SelectObjects.Count() == 1 ? SelectObjects.First().ReferenceOngekiObject : default, this);
             }
             else
             {
                 if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
-                    propertyBrowser.OngekiObject = default;
+                    propertyBrowser.SetCurrentOngekiObject(default, this);
             }
         }
 
@@ -209,7 +209,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 RemoveObject(obj);
                 if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
-                    propertyBrowser.OngekiObject = default;
+                    propertyBrowser.SetCurrentOngekiObject(default, this);
             }
 
             Redraw(RedrawTarget.OngekiObjects);

@@ -1,4 +1,8 @@
 ﻿using Caliburn.Micro;
+using Gemini.Modules.UndoRedo;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditorSettings.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -55,5 +59,60 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
                 NotifyOfPropertyChange(() => ProxyValue);
             }
         }
+    }
+
+    public class UndoablePropertyInfoWrapper : PropertyInfoWrapper
+    {
+        private PropertyInfoWrapper propertyWrapperCore;
+        private FumenVisualEditorViewModel referenceEditor;
+
+        public UndoablePropertyInfoWrapper(PropertyInfoWrapper propertyWrapperCore, FumenVisualEditorViewModel referenceEditor)
+        {
+            this.propertyWrapperCore = propertyWrapperCore;
+            PropertyInfo = propertyWrapperCore.PropertyInfo;
+            OwnerObject = propertyWrapperCore.OwnerObject;
+            this.referenceEditor = referenceEditor;
+        }
+
+        private class PropertySetAction : IUndoableAction
+        {
+            private readonly PropertyInfoWrapper propertyWrapperCore;
+            private readonly object oldValue;
+            private readonly object newValue;
+
+            public string Name => "物件属性变更";
+
+            public PropertySetAction(PropertyInfoWrapper propertyWrapperCore, object oldValue, object newValue)
+            {
+                this.propertyWrapperCore = propertyWrapperCore;
+                this.oldValue = oldValue;
+                this.newValue = newValue;
+            }
+
+            public void Execute()
+            {
+                propertyWrapperCore.ProxyValue = newValue;
+            }
+
+            public void Undo()
+            {
+                propertyWrapperCore.ProxyValue = oldValue;
+            }
+        }
+
+        public override object ProxyValue
+        {
+            get => base.ProxyValue;
+            set
+            {
+                var oldValue = ProxyValue;
+                var newValue = value;
+
+                referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction(propertyWrapperCore, oldValue, newValue));
+                NotifyOfPropertyChange(() => ProxyValue);
+            }
+        }
+
+        public override string ToString() => $"[Undoable]{base.ToString()}";
     }
 }

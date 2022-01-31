@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Attrbutes;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,41 +22,37 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
         private OngekiObjectBase ongekiObject;
-        public OngekiObjectBase OngekiObject
-        {
-            get
-            {
-                return ongekiObject;
-            }
-            set
-            {
-                if (value?.GetType().GetCustomAttribute<DontShowPropertyInfoAttrbute>() is not null)
-                    value = null;
-                ongekiObject = value;
-                NotifyOfPropertyChange(() => OngekiObject);
-                OnObjectChanged();
-            }
-        }
+        private FumenVisualEditorViewModel referenceEditor;
 
         public ObservableCollection<PropertyInfoWrapper> PropertyInfoWrappers { get; } = new ObservableCollection<PropertyInfoWrapper>();
+
+        public OngekiObjectBase OngekiObject => ongekiObject;
 
         private void OnObjectChanged()
         {
             PropertyInfoWrappers.Clear();
-            var propertyWrappers = (OngekiObject?.GetType()
+            var propertyWrappers = (ongekiObject?.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 ?? Array.Empty<PropertyInfo>())?
                 .Where(x => x.CanWrite && x.CanRead)
-                .Select(x => new PropertyInfoWrapper()
+                .Select(x => new UndoablePropertyInfoWrapper(new PropertyInfoWrapper()
                 {
-                    OwnerObject = OngekiObject,
+                    OwnerObject = ongekiObject,
                     PropertyInfo = x
-                }).OrderBy(x => x.DisplayPropertyName).ToArray();
+                }, referenceEditor)).OrderBy(x => x.DisplayPropertyName).ToArray();
 
             foreach (var wrapper in propertyWrappers)
             {
                 PropertyInfoWrappers.Add(wrapper);
             }
+        }
+
+        public void SetCurrentOngekiObject(OngekiObjectBase ongekiObject, FumenVisualEditorViewModel referenceEditor)
+        {
+            this.ongekiObject = ongekiObject;
+            this.referenceEditor = referenceEditor;
+
+            OnObjectChanged();
         }
 
         public FumenObjectPropertyBrowserViewModel()
