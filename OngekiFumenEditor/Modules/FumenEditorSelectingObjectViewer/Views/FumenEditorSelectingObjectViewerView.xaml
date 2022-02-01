@@ -50,7 +50,7 @@
                         Header="物件时间" />
 
                     <GridViewColumn
-                        Width="400"
+                        Width="550"
                         DisplayMemberBinding="{Binding ReferenceOngekiObject}"
                         Header="描述" />
                 </GridView>

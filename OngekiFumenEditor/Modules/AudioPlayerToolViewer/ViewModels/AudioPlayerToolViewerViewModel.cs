@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -76,6 +77,22 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
+        private IFumenSoundPlayer fumenSoundPlayer = default;
+        public IFumenSoundPlayer FumenSoundPlayer
+        {
+            get => fumenSoundPlayer;
+            set
+            {
+                Set(ref fumenSoundPlayer, value);
+                var soundControl = FumenSoundPlayer.SoundControl;
+                for (int i = 0; i < 12; i++)
+                    SoundControls[i] = soundControl.HasFlag((SoundControl)(1 << i));
+                NotifyOfPropertyChange(() => SoundControls);
+            }
+        }
+
+        public bool[] SoundControls { get; set; } = new bool[13];
+
         public float SoundVolume
         {
             get => IoC.Get<IAudioManager>().SoundVolume;
@@ -94,12 +111,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private System.Action scrollAnimationClearFunc = default;
         public bool IsAudioButtonEnabled => AudioPlayer is not null;
-        private IFumenSoundPlayer fumenSoundPlayer;
 
         public AudioPlayerToolViewerViewModel()
         {
             DisplayName = "音频播放";
-            fumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
+            FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
         }
 
@@ -268,6 +284,18 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 AudioPlayer.Seek(seekTo, false);
                 fumenSoundPlayer.Seek(seekTo);
             }
+        }
+
+        public void OnSoundControlSwitchChanged(FrameworkElement sender)
+        {
+            var sc = 0;
+            for (int i = 0; i < 13; i++)
+                sc = sc | (SoundControls[i] ? (1 << i) : 0);
+            if (FumenSoundPlayer is IFumenSoundPlayer player)
+                player.SoundControl = (SoundControl)sc;
+
+            //Log.LogDebug($"Apply sound control:{(SoundControl)sc}");
+            NotifyOfPropertyChange(() => SoundControls);
         }
     }
 }

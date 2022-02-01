@@ -10,6 +10,7 @@ namespace OngekiFumenEditor.Kernel.Audio
 {
     public interface IFumenSoundPlayer
     {
+        SoundControl SoundControl { get; set; }
         Task Init(FumenVisualEditorViewModel editor, IAudioPlayer player);
         void Stop();
         void Play();

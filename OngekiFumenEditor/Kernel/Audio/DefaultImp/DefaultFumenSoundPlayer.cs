@@ -55,12 +55,14 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         private float baseTimeOffset = 0;
         private bool isPlaying = false;
 
+        public SoundControl SoundControl { get; set; } = SoundControl.All;
+
         public double CurrentTime => baseTimeOffset + timer.ElapsedMilliseconds + editor.Setting.SoundOffset;
 
         private float volume = 1;
         public float Volume
         {
-            get => volume; 
+            get => volume;
             set
             {
                 Set(ref volume, value);
@@ -182,20 +184,20 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         private void PlaySounds(Sound sounds)
         {
-            void checkPlay(Sound subFlag)
+            void checkPlay(Sound subFlag, SoundControl control)
             {
-                if (sounds.HasFlag(subFlag))
+                if (sounds.HasFlag(subFlag) && SoundControl.HasFlag(control))
                     cacheSounds[subFlag].PlayOnce();
             }
 
-            checkPlay(Sound.Tap);
-            checkPlay(Sound.ExTap);
-            checkPlay(Sound.Bell);
-            checkPlay(Sound.Wall);
-            checkPlay(Sound.WallExTap);
-            checkPlay(Sound.Bullet);
-            checkPlay(Sound.Flick);
-            checkPlay(Sound.ExFlick);
+            checkPlay(Sound.Tap, SoundControl.Tap);
+            checkPlay(Sound.ExTap, SoundControl.CriticalTap);
+            checkPlay(Sound.Bell, SoundControl.Bell);
+            checkPlay(Sound.Wall, SoundControl.WallTap);
+            checkPlay(Sound.WallExTap, SoundControl.CriticalWallTap);
+            checkPlay(Sound.Bullet, SoundControl.Bullet);
+            checkPlay(Sound.Flick, SoundControl.Flick);
+            checkPlay(Sound.ExFlick, SoundControl.CriticalFlick);
         }
 
         public void Seek(float msec)
