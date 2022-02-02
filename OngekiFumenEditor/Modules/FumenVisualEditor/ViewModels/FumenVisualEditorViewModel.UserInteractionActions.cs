@@ -270,7 +270,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseLeave(ActionExecutionContext e)
         {
             IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
-
+            OnMouseUp(e);
+            /*
             if (IsLocked)
                 return;
 
@@ -281,7 +282,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IsDragging = false;
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
             SelectObjects.ForEach(x => x.OnDragEnd(pos));
-            //e.Handled = true;
+            //e.Handled = true;*/
         }
 
         public void OnMouseUp(ActionExecutionContext e)
