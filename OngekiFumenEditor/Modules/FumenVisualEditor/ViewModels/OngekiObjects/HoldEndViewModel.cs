@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 
         public override double CheckAndAdjustY(double y)
         {
-            return y;
+            return base.CheckAndAdjustY(y);
         }
     }
 }
