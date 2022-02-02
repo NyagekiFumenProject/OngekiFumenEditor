@@ -15,6 +15,6 @@ namespace OngekiFumenEditor.Kernel.Audio
         void Stop();
         void Play();
         void Pause();
-        void Seek(float msec);
+        void Seek(float msec,bool pause);
     }
 }

@@ -159,20 +159,15 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private async void InitPreviewActions()
         {
+            scrollAnimationClearFunc?.Invoke();
             await fumenSoundPlayer.Init(Editor, AudioPlayer);
             (var timeline, var scrollViewer) = Editor.BeginScrollAnimation();
             //var stopwatch = new Stopwatch();
-            var prevAudioTime = 0f;
             EventHandler func = (e, d) =>
             {
                 if (AudioPlayer is null || Editor is null)
                     return;
                 var audioTime = AudioPlayer.CurrentTime;
-                if (prevAudioTime == audioTime)
-                {
-                    Debug.WriteLine("gugu");
-                }
-                prevAudioTime = audioTime;
                 var offset = Editor.TotalDurationHeight - audioTime - Editor.CanvasHeight;
                 scrollViewer.CurrentVerticalOffset = Math.Max(0, offset);
             };
@@ -247,12 +242,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void OnSliderValueChanged()
         {
+            Log.LogDebug($"seek by OnSliderValueChanged()");
+
+            if (scrollAnimationClearFunc is null)
+                InitPreviewActions();
             var seekTo = SliderValue;
+            AudioPlayer.Seek(seekTo, true);
+            fumenSoundPlayer.Seek(seekTo, true);
+
             Log.LogDebug($"Drag done, seek : {seekTo}");
             isSliderDragging = false;
-
-            AudioPlayer.Seek(seekTo, false);
-            fumenSoundPlayer.Seek(seekTo);
         }
 
         public void OnSliderValueStartChanged()
@@ -280,9 +279,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             {
                 if (scrollAnimationClearFunc is null)
                     InitPreviewActions();
+                Log.LogDebug($"seek by RequestPlayOrPause()");
                 var seekTo = (float)Editor.MinVisibleCanvasY;
                 AudioPlayer.Seek(seekTo, false);
-                fumenSoundPlayer.Seek(seekTo);
+                fumenSoundPlayer.Seek(seekTo, false);
             }
         }
 

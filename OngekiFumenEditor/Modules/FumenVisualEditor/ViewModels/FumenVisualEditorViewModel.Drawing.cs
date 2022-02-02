@@ -41,7 +41,6 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
-    [Export(typeof(FumenVisualEditorViewModel))]
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
         public ObservableCollection<IEditorDisplayableViewModel> CurrentDisplayEditorViewModels { get; } = new();

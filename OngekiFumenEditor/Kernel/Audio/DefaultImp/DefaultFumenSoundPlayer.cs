@@ -200,13 +200,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             checkPlay(Sound.ExFlick, SoundControl.CriticalFlick);
         }
 
-        public void Seek(float msec)
+        public void Seek(float msec,bool pause)
         {
             Pause();
             itor = events.Find(events.FirstOrDefault(x => msec < x.Time));
             timer.Restart();
-            baseTimeOffset = msec;
-            Play();
+            baseTimeOffset = int.MinValue;
+
+            if (!pause)
+                Play();
         }
 
         public void Stop()
@@ -217,6 +219,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public void Play()
         {
+            if (player is null)
+                return;
             timer.Restart();
             baseTimeOffset = player.CurrentTime;
             isPlaying = true;
@@ -224,6 +228,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public void Pause()
         {
+            baseTimeOffset = int.MinValue;
             isPlaying = false;
         }
 
