@@ -50,7 +50,7 @@
                             <DataTrigger Binding="{Binding ReferenceOngekiObject.IDShortName}" Value="MET">
                                 <Setter Property="Text">
                                     <Setter.Value>
-                                        <MultiBinding StringFormat="{}{0} {1}">
+                                        <MultiBinding StringFormat="{}{0}/{1}">
                                             <Binding Path="ReferenceOngekiObject.BunShi" />
                                             <Binding Path="ReferenceOngekiObject.Bunbo" />
                                         </MultiBinding>

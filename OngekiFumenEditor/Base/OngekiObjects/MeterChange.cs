@@ -12,6 +12,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public override Type ModelViewType => typeof(MeterChangeViewModel);
 
         private int bunShi = 4;
+        //分子(numerator)
         public int BunShi
         {
             get { return bunShi; }
@@ -23,6 +24,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         private int bunbo = 4;
+        //分母(denominator)
         public int Bunbo
         {
             get { return bunbo; }
@@ -46,5 +48,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Bunbo = from.Bunbo;
             BunShi = from.BunShi;
         }
+
+        public override string ToString() => $"{base.ToString()} {BunShi}/{Bunbo}";
     }
 }
