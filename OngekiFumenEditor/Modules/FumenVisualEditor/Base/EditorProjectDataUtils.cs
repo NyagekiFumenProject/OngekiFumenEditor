@@ -74,7 +74,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
         public static async Task TrySaveToFileAsync(string filePath, EditorProjectDataModel editorProject)
         {
-            using var fileStream = File.Open(filePath, FileMode.Truncate);
+            using var fileStream = File.Open(filePath, FileMode.Create);
             StoreBulletPalleteListEditorData(editorProject);
 
             var fumenFilePath = editorProject.FumenFilePath ?? GetRelativeOngekiFumenFilePath(filePath);
