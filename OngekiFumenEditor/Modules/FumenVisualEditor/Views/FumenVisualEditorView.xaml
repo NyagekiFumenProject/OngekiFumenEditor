@@ -132,44 +132,17 @@
                         <DataTemplate>
                             <Grid>
                                 <Line
+                                    Stroke="#80FFFFFF"
                                     X1="{Binding ElementName=myAnimatedScrollViewer, Path=ActualWidth}"
                                     X2="0"
                                     Y1="{Binding Y}"
                                     Y2="{Binding Y}">
-                                    <Line.Style>
-                                        <Style TargetType="Line">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsBaseLine}" Value="True">
-                                                    <Setter Property="Stroke" Value="#FFFFFFFF">
-                                                    </Setter>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsBaseLine}" Value="False">
-                                                    <Setter Property="Stroke" Value="#40FFFFFF">
-                                                    </Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Line.Style>
                                 </Line>
                                 <TextBlock
                                     FontSize="10"
                                     Foreground="White"
                                     Opacity="0.35"
                                     Text="{Binding TGrid}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsBaseLine}" Value="True">
-                                                    <Setter Property="HorizontalAlignment" Value="Right">
-                                                    </Setter>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsBaseLine}" Value="False">
-                                                    <Setter Property="HorizontalAlignment" Value="Left">
-                                                    </Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
                                     <TextBlock.RenderTransformOrigin>
                                         <Point Y="0.5">
                                         </Point>
