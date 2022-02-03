@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //划线的中止位置
             var endTGrid = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
             //可显示划线的起始位置
-            var currentTGridBase = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY + Setting.JudgeLineOffsetY, this);
+            var currentTGridBaseOffset = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY + Setting.JudgeLineOffsetY, this);
 
             var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(240, bpmList);
             var currentTimeSignatureIndex = 0;
@@ -85,30 +85,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             }
             //钦定好要画的起始timeSignatrue
-            (double startY, MeterChange meter, BPMChange bpm) currentTimeSignature = timeSignatures[currentTimeSignatureIndex];
+            (double startY, TGrid startTGrid, MeterChange meter, BPMChange bpm) currentTimeSignature = timeSignatures[currentTimeSignatureIndex];
 
-            while (currentTGridBase is not null)
+            while (currentTGridBaseOffset is not null)
             {
                 var nextTimeSignatureIndex = currentTimeSignatureIndex + 1;
                 var nextTimeSignature = timeSignatures.Count > nextTimeSignatureIndex ? timeSignatures[nextTimeSignatureIndex] : default;
 
                 //钦定好要画的相对于当前timeSignature的偏移Y，节拍信息，节奏速度
-                (var currentStartY, var currentMeter, var currentBpm) = currentTimeSignature;
-                (var nextStartY, _, var nextBpm) = nextTimeSignature;
+                (var currentStartY, var currentTGridBase, var currentMeter, var currentBpm) = currentTimeSignature;
+                (var nextStartY, var nextTGridBase, _, var nextBpm) = nextTimeSignature;
 
                 //计算每一拍的(grid)长度
-                var lengthPerBeat = (int)(currentBpm.TGrid.ResT / (currentMeter.BunShi * Setting.BeatSplit));
+                var resT = currentTGridBase.ResT;
+                var lengthPerBeat = (int)(resT / (currentMeter.BunShi * Setting.BeatSplit));
 
                 //这里也可以跳过添加完全看不到的线
-                var diff = currentTGridBase - currentBpm.TGrid;
-                var totalGrid = diff.Unit * currentBpm.TGrid.ResT + diff.Grid;
+                var diff = currentTGridBaseOffset - currentTGridBase;
+                var totalGrid = diff.Unit * resT + diff.Grid;
                 var i = (int)Math.Max(0, totalGrid / lengthPerBeat);
 
                 while (true)
                 {
-                    var tGrid = currentBpm.TGrid + new GridOffset(0, lengthPerBeat * i);
+                    var tGrid = currentTGridBase + new GridOffset(0, lengthPerBeat * i);
                     //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
-                    var y = currentStartY + MathUtils.CalculateBPMLength(currentBpm, tGrid, 240);
+                    var y = currentStartY + MathUtils.CalculateBPMLength(currentTGridBase, tGrid, currentBpm.BPM, 240);
                     //超过当前timeSignature范围，切换到下一个timeSignature画新的线
                     if (nextBpm is not null && y >= nextStartY)
                         break;
@@ -119,7 +120,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     TryAddUnitLine(tGrid, TotalDurationHeight - y, i);
                     i++;
                 }
-                currentTGridBase = nextBpm.TGrid;
+                currentTGridBaseOffset = nextTGridBase;
                 currentTimeSignatureIndex = nextTimeSignatureIndex;
                 currentTimeSignature = timeSignatures[currentTimeSignatureIndex];
             }
