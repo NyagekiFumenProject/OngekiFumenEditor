@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Collections
+namespace OngekiFumenEditor.Base.Collections
 {
     public class BpmList : IEnumerable<BPMChange>
     {
@@ -104,7 +105,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Collections
             }
         }
 
-        public IEnumerable<(double startY, BPMChange bpm)> GetCachedAllBpmUniformPositionList(double tUnitLength)
+        public List<(double startY, BPMChange bpm)> GetCachedAllBpmUniformPositionList(double tUnitLength)
         {
             if (tUnitLength != cachedBpmTUnitLength)
                 UpdateCachedAllBpmUniformPositionList(tUnitLength);

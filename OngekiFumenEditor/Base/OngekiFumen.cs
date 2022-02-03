@@ -1,22 +1,14 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.Collections;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
-using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
 using OngekiFumenEditor.Utils;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {

@@ -1,6 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Collections;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;

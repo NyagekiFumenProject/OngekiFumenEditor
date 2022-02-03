@@ -1,5 +1,5 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Collections;
+﻿using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
