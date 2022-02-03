@@ -37,13 +37,16 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser.CommandParserImpl
             hold.XGrid.Unit = dataArr[4];
             hold.XGrid.Grid = (int)dataArr[5];
 
-            var holdEnd = (refLaneStart?.IsWallLane ?? false) ? new WallHoldEnd() : new HoldEnd();
-            hold.AddChildObject(holdEnd);
+            if (dataArr.Length > 6)
+            {
+                var holdEnd = (refLaneStart?.IsWallLane ?? false) ? new WallHoldEnd() : new HoldEnd();
+                hold.AddChildObject(holdEnd);
 
-            holdEnd.TGrid.Unit = dataArr[6];
-            holdEnd.TGrid.Grid = (int)dataArr[7];
-            holdEnd.XGrid.Unit = dataArr[8];
-            holdEnd.XGrid.Grid = (int)dataArr[9];
+                holdEnd.TGrid.Unit = dataArr[6];
+                holdEnd.TGrid.Grid = (int)dataArr[7];
+                holdEnd.XGrid.Unit = dataArr[8];
+                holdEnd.XGrid.Grid = (int)dataArr[9];
+            }
 
             return hold;
         }
