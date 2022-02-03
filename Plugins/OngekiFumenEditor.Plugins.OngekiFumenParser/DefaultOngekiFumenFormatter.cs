@@ -89,7 +89,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
                 sb.AppendLine($"{o.IDShortName} {o.TGrid.Serialize()} {o.BPM}");
             sb.AppendLine();
 
-            foreach (var o in fumen.MeterChanges.OrderBy(x => x.TGrid))
+            foreach (var o in fumen.MeterChanges.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.MeterChanges.FirstMeter.TGrid))
                 sb.AppendLine($"{o.IDShortName} {o.TGrid.Serialize()} {o.BunShi} {o.Bunbo}");
             sb.AppendLine();
 
