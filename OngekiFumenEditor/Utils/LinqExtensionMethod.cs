@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Utils
             foreach (var item in list)
                 fun(item);
         }
-        
+
 
         public static void AddRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
 
@@ -83,6 +83,29 @@ namespace OngekiFumenEditor.Utils
             foreach (var item in collection)
                 dic[keySelector(item)] = valueSelector(item);
             return disposable;
+        }
+
+        public static void Sort<T>(this List<T> list, Func<T, T, int> compFunc) => list.Sort(new ComparerWrapper<T>(compFunc));
+
+        public static void SortBy<T, X>(this List<T> list, Func<T, X> keySelect) => list.Sort((a, b) => Comparer<X>.Default.Compare(keySelect(a), keySelect(b)));
+
+        public static int InsertBySortBy<T, X>(this IList<T> insertable, T needInsert, Func<T, X> keySelect)
+        {
+            var comparer = Comparer<X>.Default;
+            var needInsertKey = keySelect(needInsert);
+
+            for (int i = 0; i < insertable.Count; i++)
+            {
+                var cmp = comparer.Compare(needInsertKey, keySelect(insertable[i]));
+                if (cmp < 0)
+                {
+                    insertable.Insert(i, needInsert);
+                    return i;
+                }
+            }
+
+            insertable.Add(needInsert);
+            return insertable.Count - 1;
         }
     }
 }
