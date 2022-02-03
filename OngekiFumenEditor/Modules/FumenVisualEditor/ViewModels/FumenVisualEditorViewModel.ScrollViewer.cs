@@ -38,9 +38,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 Set(ref scrollViewerVerticalOffset, value);
                 NotifyOfPropertyChange(() => MaxVisibleCanvasY);
                 NotifyOfPropertyChange(() => MinVisibleCanvasY);
-                //Redraw(RedrawTarget.TGridUnitLines);
-                //Log.LogDebug($"current:{ScrollViewerVerticalOffset:F2}  min:{MinVisibleCanvasY:F2}  max:{MaxVisibleCanvasY:F2}");
-                Redraw(RedrawTarget.OngekiObjects);
+
+                Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
             }
         }
 

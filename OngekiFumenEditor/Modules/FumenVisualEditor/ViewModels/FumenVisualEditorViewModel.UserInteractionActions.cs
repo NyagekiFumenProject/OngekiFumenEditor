@@ -170,7 +170,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Log.LogInfo($"OnFocusableChanged {e.EventArgs}");
         }
 
-        public void OnBPMListChanged()
+        public void OnTimeSignatureListChanged()
         {
             Redraw(RedrawTarget.TGridUnitLines);
         }

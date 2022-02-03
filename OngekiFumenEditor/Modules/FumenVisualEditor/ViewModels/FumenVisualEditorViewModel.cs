@@ -99,9 +99,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 if (EditorProjectData.Fumen is not null)
-                    EditorProjectData.Fumen.BpmList.OnChangedEvent -= OnBPMListChanged;
+                {
+                    EditorProjectData.Fumen.BpmList.OnChangedEvent -= OnTimeSignatureListChanged;
+                    EditorProjectData.Fumen.MeterChanges.OnChangedEvent -= OnTimeSignatureListChanged;
+                }
                 if (value is not null)
-                    value.BpmList.OnChangedEvent += OnBPMListChanged;
+                {
+                    value.BpmList.OnChangedEvent += OnTimeSignatureListChanged;
+                    value.MeterChanges.OnChangedEvent += OnTimeSignatureListChanged;
+                }
                 EditorProjectData.Fumen = value;
                 Redraw(RedrawTarget.All);
                 NotifyOfPropertyChange(() => Fumen);
