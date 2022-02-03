@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         private void BpmList_OnChangedEvent()
         {
-            UpdateCachedAllBpmUniformPositionList(cachedBpmTUnitLength);
+            cachedBpmContentHash = int.MinValue;
         }
 
         public void Add(BPMChange bpm)
@@ -81,11 +81,10 @@ namespace OngekiFumenEditor.Base.Collections
         public BPMChange GetNextBpm(TGrid time) => this.FirstOrDefault(bpm => time < bpm.TGrid);
 
         private List<(double startY, BPMChange bpm)> cachedBpmUniformPosition = new();
-        private double cachedBpmTUnitLength = 240;
+        internal double cachedBpmContentHash = int.MinValue;
 
         private void UpdateCachedAllBpmUniformPositionList(double tUnitLength)
         {
-            cachedBpmTUnitLength = tUnitLength;
             cachedBpmUniformPosition.Clear();
 
             var prev = FirstBpm;
@@ -107,8 +106,17 @@ namespace OngekiFumenEditor.Base.Collections
 
         public List<(double startY, BPMChange bpm)> GetCachedAllBpmUniformPositionList(double tUnitLength)
         {
-            if (tUnitLength != cachedBpmTUnitLength)
+            int calcHash(BPMChange e) => HashCode.Combine(e.BPM, e.TGrid.Grid, e.TGrid.Unit, e.TGrid.ResT);
+            var hash = this.Aggregate(calcHash(FirstBpm), (x, e) => HashCode.Combine(x, calcHash(e)));
+            hash = HashCode.Combine(hash, tUnitLength);
+
+            if (hash != cachedBpmContentHash)
+            {
+                Log.LogDebug("recalculate all bpm postions.");
                 UpdateCachedAllBpmUniformPositionList(tUnitLength);
+                cachedBpmContentHash = hash;
+            }
+
             return cachedBpmUniformPosition;
         }
     }

@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Base.Collections
 {
@@ -21,14 +22,14 @@ namespace OngekiFumenEditor.Base.Collections
 
         public MeterChangeList(IEnumerable<MeterChange> initBpmChanges = default)
         {
-            OnChangedEvent += BpmList_OnChangedEvent;
+            OnChangedEvent += OnChilidrenSubPropsChangedEvent;
             foreach (var item in initBpmChanges ?? Enumerable.Empty<MeterChange>())
                 Add(item);
         }
 
-        private void BpmList_OnChangedEvent()
+        private void OnChilidrenSubPropsChangedEvent()
         {
-            cachedBpmTUnitLength = int.MinValue;
+            cachedBpmListCacheHash = int.MinValue;
         }
 
         public void Add(MeterChange bpm)
@@ -81,11 +82,10 @@ namespace OngekiFumenEditor.Base.Collections
         public MeterChange GetNextMeter(TGrid time) => this.FirstOrDefault(bpm => time < bpm.TGrid);
 
         private List<(double startY, MeterChange meterChange, BPMChange bpmChange)> cachedBpmUniformPosition = new();
-        private double cachedBpmTUnitLength = int.MinValue;
+        private double cachedBpmListCacheHash = int.MinValue;
 
         private void UpdateCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
         {
-            cachedBpmTUnitLength = tUnitLength;
             cachedBpmUniformPosition.Clear();
 
             //最初默认的
@@ -128,10 +128,16 @@ namespace OngekiFumenEditor.Base.Collections
                 cachedBpmUniformPosition.Remove(item);
         }
 
-        public List<(double startY, MeterChange meter,BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
+        public List<(double startY, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
         {
-            if (tUnitLength != cachedBpmTUnitLength)
+            var hash = HashCode.Combine(tUnitLength, bpmList.cachedBpmContentHash);
+
+            if (cachedBpmListCacheHash != hash)
+            {
+                Log.LogDebug("recalculate all time signatures.");
                 UpdateCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
+                cachedBpmListCacheHash = hash;
+            }
             return cachedBpmUniformPosition;
         }
     }

@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Base
         public List<Flick> Flicks { get; } = new();
         public List<Bullet> Bullets { get; } = new();
         public List<ClickSE> ClickSEs { get; } = new();
-        public List<MeterChange> MeterChanges { get; } = new();
+        public MeterChangeList MeterChanges { get; } = new();
         public List<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
         public List<Tap> Taps { get; } = new();
@@ -66,7 +66,9 @@ namespace OngekiFumenEditor.Base
             MetaInfo = MetaInfo;
 
             Bells.Sort();
+
             BpmList.Sort();
+            //setup firstBPM from fumen metainfo
             var firstBpm = new BPMChange()
             {
                 TGrid = new TGrid()
@@ -80,7 +82,24 @@ namespace OngekiFumenEditor.Base
             if (unusedBpm is not null)
                 BpmList.Remove(unusedBpm);
             BpmList.SetFirstBpm(firstBpm);
+
+            //setup firstMeter from fumen metainfo
             MeterChanges.Sort();
+            var firstMeter = new MeterChange()
+            {
+                TGrid = new TGrid()
+                {
+                    Grid = 0,
+                    Unit = 0
+                },
+                Bunbo = MetaInfo.MeterDefinition.Bunbo,
+                BunShi = MetaInfo.MeterDefinition.Bunshi,
+            };
+            var unusedMeter = MeterChanges.FirstOrDefault(x => x.Bunbo == firstMeter.Bunbo && x.BunShi == firstMeter.BunShi && x.TGrid == TGrid.ZeroDefault);
+            if (unusedMeter is not null)
+                MeterChanges.Remove(unusedMeter);
+            MeterChanges.SetFirstBpm(firstMeter);
+
             EnemySets.Sort();
         }
 
@@ -219,7 +238,7 @@ namespace OngekiFumenEditor.Base
             var first = Enumerable.Empty<IDisplayableObject>()
                 .Concat(Bells)
                 .Concat(Flicks)
-                .Concat(MeterChanges)
+                .Concat(MeterChanges.Skip(1)) //not show first meter
                 .Concat(BpmList.Skip(1)) //not show first bpm
                 .Concat(ClickSEs)
                 .Concat(EnemySets)
@@ -238,6 +257,12 @@ namespace OngekiFumenEditor.Base
             {
                 BpmList.FirstBpm.BPM = MetaInfo.BpmDefinition.First;
                 Log.LogDebug($"Apply metainfo.firstBpm to bpmList.firstBpm : {BpmList.FirstBpm.BPM}");
+            }
+            if (e.PropertyName == nameof(FumenMetaInfo.MeterDefinition))
+            {
+                MeterChanges.FirstMeter.Bunbo = MetaInfo.MeterDefinition.Bunbo;
+                MeterChanges.FirstMeter.BunShi = MetaInfo.MeterDefinition.Bunshi;
+                Log.LogDebug($"Apply metainfo.firstMeter to bpmList.firstMeter : {MeterChanges.FirstMeter.BunShi}/{MeterChanges.FirstMeter.Bunbo}");
             }
         }
     }
