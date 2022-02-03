@@ -189,7 +189,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             mid.AddRange(enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z =>
             {
                 var r = ObjectPool<TempCloseLine>.Get();
-                r.distance = Math.Abs((editorViewModel.TotalDurationHeight - z.Y) - y);
+                r.distance = Math.Abs(editorViewModel.TotalDurationHeight - z.Y - y);
                 r.value = z.Y;
                 return r;
             })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance) : Enumerable.Empty<TempCloseLine>());
