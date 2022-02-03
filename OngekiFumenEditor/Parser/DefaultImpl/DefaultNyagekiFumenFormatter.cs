@@ -118,8 +118,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 sb.Write(o.BPM);
             }
 
-            sb.Write(fumen.MeterChanges.Count);
-            foreach (var o in fumen.MeterChanges.OrderBy(x => x.TGrid))
+            sb.Write(fumen.MeterChanges.Count() - 1);
+            foreach (var o in fumen.MeterChanges.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.MeterChanges.FirstMeter.TGrid))
             {
                 sb.Write(o.TGrid.Unit);
                 sb.Write(o.TGrid.Grid);
