@@ -55,10 +55,17 @@
                         DisplayMemberBinding="{Binding BPMChange.BPM}"
                         Header="Bpm" />
 
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding Meter, Converter={StaticResource MeterDisplayConverter}}"
-                        Header="TimeSignature" />
+                    <GridViewColumn Width="100" Header="TimeSignature">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding Meter.BunShi}" />
+                                    <Run Text="/" />
+                                    <Run Text="{Binding Meter.Bunbo}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>

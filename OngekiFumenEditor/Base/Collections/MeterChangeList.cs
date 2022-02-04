@@ -98,7 +98,7 @@ namespace OngekiFumenEditor.Base.Collections
             foreach (var meterChange in changedMeterList)
             {
                 (var startY, var refBpm) = bpmUnitList.LastOrDefault(x => x.bpm.TGrid <= meterChange.TGrid);
-                var meterY = MathUtils.CalculateBPMLength(refBpm, meterChange.TGrid, tUnitLength);
+                var meterY = startY + MathUtils.CalculateBPMLength(refBpm, meterChange.TGrid, tUnitLength);
                 cachedBpmUniformPosition.Add((meterY, pickBiggerTGrid(meterChange, refBpm), meterChange, refBpm));
             }
 

@@ -6,6 +6,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,12 +21,35 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
     [Export(typeof(IFumenTimeSignatureListViewer))]
     public class FumenTimeSignatureListViewerViewModel : Tool, IFumenTimeSignatureListViewer
     {
-        public struct DisplayTimeSignatureItem
+        public class DisplayTimeSignatureItem : PropertyChangedBase
         {
-            public float StartY { get; set; }
-            public TGrid StartTGrid { get; set; }
-            public MeterChange Meter { get; set; }
-            public BPMChange BPMChange { get; set; }
+            private float startY;
+            public float StartY
+            {
+                get => startY;
+                set => Set(ref startY, value);
+            }
+
+            private TGrid startTGrid;
+            public TGrid StartTGrid
+            {
+                get => startTGrid;
+                set => Set(ref startTGrid, value);
+            }
+
+            private MeterChange meter;
+            public MeterChange Meter
+            {
+                get => meter;
+                set => Set(ref meter, value);
+            }
+
+            private BPMChange bPMChange;
+            public BPMChange BPMChange
+            {
+                get => bPMChange;
+                set => Set(ref bPMChange, value);
+            }
         }
 
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
@@ -40,8 +64,36 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropertyChanged);
                 Set(ref editor, value);
+                Fumen = Editor?.Fumen;
+            }
+        }
+
+        private OngekiFumen fumen;
+        public OngekiFumen Fumen
+        {
+            get => fumen;
+            set
+            {
+                if (fumen is not null)
+                {
+                    fumen.BpmList.OnChangedEvent -= OnTimeSignatureListChanged;
+                    fumen.MeterChanges.OnChangedEvent -= OnTimeSignatureListChanged;
+                }
+                if (value is not null)
+                {
+                    value.BpmList.OnChangedEvent += OnTimeSignatureListChanged;
+                    value.MeterChanges.OnChangedEvent += OnTimeSignatureListChanged;
+                }
+                Set(ref fumen, value);
+                Log.LogDebug("Refresh time signatures list viewer by fumen object changed.");
                 RefreshFumen();
             }
+        }
+
+        private void OnTimeSignatureListChanged()
+        {
+            Log.LogDebug("Refresh time signatures list viewer.");
+            RefreshFumen();
         }
 
         private DisplayTimeSignatureItem currentSelectTimeSignature;
@@ -57,7 +109,7 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
         private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
-                RefreshFumen();
+                Fumen = Editor.Fumen;
         }
 
         public FumenTimeSignatureListViewerViewModel()
@@ -68,16 +120,33 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
 
         private void RefreshFumen()
         {
-            DisplayTimeSignatures.Clear();
+            using var disp = DisplayTimeSignatures.ToListWithObjectPool(out var removeList);
+            CurrentSelectTimeSignature = default;
+
             var list = Editor.Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(240, Editor.Fumen.BpmList);
             foreach (var ts in list)
-                DisplayTimeSignatures.Add(new DisplayTimeSignatureItem()
+            {
+                var cacheObj = removeList.FirstOrDefault();
+                if (cacheObj is null)
                 {
-                    BPMChange = ts.bpm,
-                    Meter = ts.meter,
-                    StartTGrid = ts.startTGrid,
-                    StartY = (float)ts.startY
-                });
+                    cacheObj = ObjectPool<DisplayTimeSignatureItem>.Get();
+                    DisplayTimeSignatures.Add(cacheObj);
+                }
+                else
+                {
+                    removeList.RemoveAt(0);
+                }
+
+                cacheObj.BPMChange = ts.bpm;
+                cacheObj.Meter = ts.meter;
+                cacheObj.StartTGrid = ts.startTGrid;
+                cacheObj.StartY = (float)ts.startY;
+            }
+
+            foreach (var item in removeList)
+                DisplayTimeSignatures.Remove(item);
+
+            NotifyOfPropertyChange(() => CurrentSelectTimeSignature);
         }
     }
 }

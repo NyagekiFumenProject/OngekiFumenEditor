@@ -43,6 +43,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var addnew = 0;
             void TryAddUnitLine(TGrid tGrid, double y, int i)
             {
+                //Log.LogDebug($"add to {tGrid} {y:F2} {i}");
                 if (removeUnusedSet.FirstOrDefault(x => x.Y == y) is TGridUnitLineViewModel lineModel)
                 {
                     removeUnusedSet.Remove(lineModel);
@@ -73,17 +74,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(240, bpmList);
             var currentTimeSignatureIndex = 0;
             //快速定位,尽量避免计算完全不用画的timesignature(
-            for (int i = 0; i < timeSignatures.Count - 1; i++)
+            for (int i = 0; i < timeSignatures.Count; i++)
             {
                 var cur = timeSignatures[i];
-                var next = timeSignatures[i + 1];
 
-                if (next.startY > MinVisibleCanvasY)
-                {
-                    currentTimeSignatureIndex = i;
+                if (cur.startY > MinVisibleCanvasY)
                     break;
-                }
+
+                currentTimeSignatureIndex = i;
             }
+
             //钦定好要画的起始timeSignatrue
             (double startY, TGrid startTGrid, MeterChange meter, BPMChange bpm) currentTimeSignature = timeSignatures[currentTimeSignatureIndex];
 
