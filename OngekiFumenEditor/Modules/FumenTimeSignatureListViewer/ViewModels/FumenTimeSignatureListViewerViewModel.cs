@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -120,10 +121,13 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
 
         private void RefreshFumen()
         {
+            if (Editor is null || Fumen is null)
+                return;
+
             using var disp = DisplayTimeSignatures.ToListWithObjectPool(out var removeList);
             CurrentSelectTimeSignature = default;
 
-            var list = Editor.Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(240, Editor.Fumen.BpmList);
+            var list = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(240, Fumen.BpmList);
             foreach (var ts in list)
             {
                 var cacheObj = removeList.FirstOrDefault();
@@ -147,6 +151,16 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
                 DisplayTimeSignatures.Remove(item);
 
             NotifyOfPropertyChange(() => CurrentSelectTimeSignature);
+        }
+
+        public void OnItemSingleClick(DisplayTimeSignatureItem item)
+        {
+            IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(item.StartTGrid == item.BPMChange.TGrid ? item.BPMChange : item.Meter, Editor);
+        }
+
+        public void OnItemDoubleClick(DisplayTimeSignatureItem item)
+        {
+            Editor.ScrollTo(item.StartTGrid);
         }
     }
 }

@@ -32,6 +32,11 @@
             ItemsSource="{Binding DisplayTimeSignatures}"
             ScrollViewer.CanContentScroll="True"
             SelectedValue="{Binding CurrentSelectTimeSignature}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];[Event PreviewMouseDown]=[Action OnItemSingleClick($dataContext)];" />
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="True">
                     <GridView.ColumnHeaderContainerStyle>
