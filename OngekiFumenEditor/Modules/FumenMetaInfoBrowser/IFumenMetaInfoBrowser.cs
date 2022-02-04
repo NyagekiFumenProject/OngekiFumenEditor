@@ -10,6 +10,6 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser
 {
     public interface IFumenMetaInfoBrowser : ITool
     {
-        public OngekiFumen Fumen { get; set; }
+
     }
 }
