@@ -117,6 +117,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             DisplayName = "音频播放";
             FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+            Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -129,9 +130,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             if (e.PropertyName != nameof(FumenVisualEditorViewModel.EditorProjectData))
                 return;
-            var d = Editor;
-            Editor = default;
-            Editor = d;
+            Editor = Editor;
         }
 
         private async void LoadAudio()

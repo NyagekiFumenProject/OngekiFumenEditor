@@ -11,7 +11,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer
 {
     public interface IAudioPlayerToolViewer : ITool
     {
-        public FumenVisualEditorViewModel Editor { get; set; }
         void RequestPlayOrPause();
     }
 }

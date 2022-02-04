@@ -11,6 +11,6 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer
 {
     public interface IFumenEditorSelectingObjectViewer : ITool
     {
-        public FumenVisualEditorViewModel Editor { get; set; }
+
     }
 }

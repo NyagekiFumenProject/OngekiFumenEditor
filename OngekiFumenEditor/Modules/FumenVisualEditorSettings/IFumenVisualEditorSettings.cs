@@ -5,6 +5,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings
 {
     public interface IFumenVisualEditorSettings : ITool
     {
-        public EditorSetting Setting { get; set; }
+
     }
 }

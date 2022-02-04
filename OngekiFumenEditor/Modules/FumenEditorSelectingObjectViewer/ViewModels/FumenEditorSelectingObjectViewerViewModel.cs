@@ -40,6 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
         {
             DisplayName = "当前选择物件查看器";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+            Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)

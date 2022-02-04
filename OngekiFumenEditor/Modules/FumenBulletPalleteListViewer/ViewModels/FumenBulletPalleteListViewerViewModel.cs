@@ -33,6 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
         {
             DisplayName = "子弹管理";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+            Fumen = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor?.Fumen;
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)

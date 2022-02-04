@@ -59,6 +59,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
         {
             DisplayName = "编辑器设置";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+            Setting = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor?.Setting;
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)

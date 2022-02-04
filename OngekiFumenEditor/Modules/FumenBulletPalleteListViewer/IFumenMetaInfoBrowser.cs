@@ -10,6 +10,6 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer
 {
     public interface IFumenBulletPalleteListViewer : ITool
     {
-        public OngekiFumen Fumen { get; set; }
+
     }
 }

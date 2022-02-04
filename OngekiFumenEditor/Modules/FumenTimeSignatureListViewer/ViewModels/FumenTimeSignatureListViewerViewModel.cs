@@ -117,6 +117,7 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
         {
             DisplayName = "节拍查看器";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (n, o) => Editor = n;
+            Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
         }
 
         private void RefreshFumen()

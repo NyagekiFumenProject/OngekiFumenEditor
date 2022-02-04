@@ -39,11 +39,11 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
             set => Set(ref tGrid, value);
         }
 
-        private double msec = 0;
-        public double Msec
+        private string msecStr;
+        public string MsecStr
         {
-            get => msec;
-            set => Set(ref msec, value);
+            get => msecStr;
+            set => Set(ref msecStr, value);
         }
 
         public bool IsEnabled => Editor is not null;
@@ -54,6 +54,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
         {
             DisplayName = "时间计算器";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+            Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -63,12 +64,42 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
 
         public void UpdateToTGrid()
         {
-            TGrid = TGridCalculator.ConvertYToTGrid(Msec, Editor);
+            TGrid = TGridCalculator.ConvertYToTGrid(ParseMsecStr(), Editor);
+        }
+
+        private double ParseMsecStr()
+        {
+            if (MsecStr.Contains(":"))
+            {
+                var revArr = MsecStr.Split(":").Select(x => float.Parse(x)).Reverse().ToArray();
+                if (MsecStr.Contains("."))
+                {
+                    //hh:mm:ss.msec
+                    //01:05:500.571
+                    return (TimeSpan.FromSeconds(revArr.ElementAtOrDefault(0)) +
+                        TimeSpan.FromMinutes(revArr.ElementAtOrDefault(1)) +
+                        TimeSpan.FromHours(revArr.ElementAtOrDefault(2))
+                        ).TotalMilliseconds;
+                }
+                else
+                {
+                    //mm:ss:msec
+                    //01:05:571
+                    return (TimeSpan.FromMilliseconds(revArr.ElementAtOrDefault(0)) +
+                        TimeSpan.FromSeconds(revArr.ElementAtOrDefault(1)) +
+                        TimeSpan.FromMinutes(revArr.ElementAtOrDefault(2))
+                        ).TotalMilliseconds;
+                }
+            }
+            else
+            {
+                return float.Parse(MsecStr);
+            }
         }
 
         public void UpdateToMsec()
         {
-            Msec = TGridCalculator.ConvertTGridToY(TGrid, Editor);
+            MsecStr = TGridCalculator.ConvertTGridToY(TGrid, Editor).ToString();
         }
     }
 }
