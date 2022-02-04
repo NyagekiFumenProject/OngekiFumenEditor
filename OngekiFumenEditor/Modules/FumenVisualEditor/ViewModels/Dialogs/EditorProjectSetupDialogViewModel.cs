@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
         {
             var dialog = new OpenFileDialog();
             dialog.Multiselect = false;
+            dialog.Filter = FileDialogFilterHelper.GetSupportAudioFileExtensionFilter();
             if (dialog.ShowDialog() == true)
             {
                 EditorProjectData.AudioFilePath = dialog.FileName;
@@ -38,6 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
         {
             var dialog = new OpenFileDialog();
             dialog.Multiselect = false;
+            dialog.Filter = FileDialogFilterHelper.GetSupportFumenFileExtensionFilter();
             if (dialog.ShowDialog() == true)
                 EditorProjectData.FumenFilePath = dialog.FileName;
         }

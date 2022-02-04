@@ -205,13 +205,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 //ask fumen file save path before save project.
                 var dialog = new SaveFileDialog();
-                var hashSet = new HashSet<(string desc, string ext)>();
 
-                foreach (var formatDesc in IoC.Get<IFumenParserManager>().GetSerializerDescriptions())
-                    foreach (var ext in formatDesc.fileFormat)
-                        hashSet.Add((formatDesc.desc, ext));
-
-                dialog.Filter = string.Join("|", hashSet.Select(x => $"{x.desc} ({x.ext})|*{x.ext}"));
+                dialog.Filter = FileDialogFilterHelper.GetSupportFumenFileExtensionFilter();
 
                 if (dialog.ShowDialog() != true)
                 {
