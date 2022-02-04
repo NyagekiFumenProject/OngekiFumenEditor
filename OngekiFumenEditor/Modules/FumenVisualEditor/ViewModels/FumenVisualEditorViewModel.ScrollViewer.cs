@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using Gemini.Framework;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.UI.Controls;
@@ -68,6 +69,38 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             animation.FillBehavior = FillBehavior.HoldEnd;
 
             return (animation, AnimatedScrollViewer);
+        }
+
+        #endregion
+
+        #region ScrollTo
+
+        public void ScrollTo(IEditorDisplayableViewModel objViewModel)
+        {
+            if ((objViewModel.DisplayableObject as ITimelineObject).TGrid is not TGrid tGrid)
+                throw new Exception("ScrollTo.objViewModel is not a timeline object view model.");
+            ScrollTo(tGrid);
+        }
+
+        public void ScrollTo(DisplayObjectViewModelBase objViewModel)
+        {
+            ScrollTo(objViewModel.CanvasY);
+        }
+
+        public void ScrollTo(ITimelineObject timelineObject)
+        {
+            ScrollTo(timelineObject.TGrid);
+        }
+
+        public void ScrollTo(TGrid startTGrid)
+        {
+            var y = TGridCalculator.ConvertTGridToY(startTGrid, this);
+            ScrollTo(y);
+        }
+
+        public void ScrollTo(double y)
+        {
+            AnimatedScrollViewer.CurrentVerticalOffset = TotalDurationHeight - y - CanvasHeight;
         }
 
         #endregion
