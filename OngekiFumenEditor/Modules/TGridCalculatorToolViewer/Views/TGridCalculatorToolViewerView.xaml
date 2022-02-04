@@ -51,7 +51,7 @@
                 <TextBox
                     Width="80"
                     Margin="10,0,0,0"
-                    Text="{Binding Msec}" />
+                    Text="{Binding MsecStr}" />
             </StackPanel>
         </StackPanel>
     </StackPanel>
