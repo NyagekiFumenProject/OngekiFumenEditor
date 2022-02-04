@@ -1,9 +1,11 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -47,6 +49,19 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
         {
             Editor = @new;
             CurrentPickedSelectObject = null;
+        }
+
+        public void OnItemSingleClick(DisplayObjectViewModelBase item)
+        {
+            IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(item.ReferenceOngekiObject, Editor);
+        }
+
+        public void OnItemDoubleClick(DisplayObjectViewModelBase item)
+        {
+            if (item.ReferenceOngekiObject is ITimelineObject timelineObject)
+                Editor.ScrollTo(timelineObject.TGrid);
+
+            Editor.SelectObjects.Where(x => x != item).ForEach(x => x.IsSelected = false);
         }
     }
 }
