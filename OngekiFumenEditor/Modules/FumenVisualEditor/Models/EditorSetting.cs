@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 {
     public class EditorSetting : PropertyChangedBase
     {
-        private double soundOffset = 240;
+        private double soundOffset = 200;
         public double SoundOffset
         {
             get => soundOffset;
@@ -39,71 +39,57 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
-        private bool isPreventXAutoClose;
+        private bool disableXGridMagneticDock;
         /// <summary>
         /// 表示物件或者其他在X轴上移动时，是否可以自动吸附到最近的单位线上
         /// </summary>
-        public bool IsPreventXAutoClose
+        public bool DisableXGridMagneticDock
         {
-            get
-            {
-                return isPreventXAutoClose;
-            }
-            set
-            {
-                isPreventXAutoClose = value;
-                NotifyOfPropertyChange(() => IsPreventTimelineAutoClose);
-            }
+            get => disableXGridMagneticDock;
+            set => Set(ref disableXGridMagneticDock, value);
         }
 
-        private bool isPreventTimelineAutoClose;
+        private bool forceMagneticDock = false;
+        public bool ForceMagneticDock
+        {
+            get => forceMagneticDock;
+            set => Set(ref forceMagneticDock, value);
+        }
+
+        private bool disableTGridMagneticDock;
         /// <summary>
         /// 表示物件或者其他在时间轴上移动时，是否可以自动吸附到最近的单位线上
         /// </summary>
-        public bool IsPreventTimelineAutoClose
+        public bool DisableTGridMagneticDock
         {
-            get
-            {
-                return isPreventTimelineAutoClose;
-            }
-            set
-            {
-                isPreventTimelineAutoClose = value;
-                NotifyOfPropertyChange(() => IsPreventTimelineAutoClose);
-            }
+            get => disableTGridMagneticDock;
+            set => Set(ref disableTGridMagneticDock, value);
         }
 
-        private double unitCloseSize = 4;
+        private double xGridUnitSpace = 4;
         /// <summary>
         /// X轴上单位线间距大小
         /// </summary>
-        public double UnitCloseSize
+        public double XGridUnitSpace
         {
-            get
-            {
-                return unitCloseSize;
-            }
-            set
-            {
-                unitCloseSize = value;
-                NotifyOfPropertyChange(() => UnitCloseSize);
-            }
+            get => xGridUnitSpace;
+            set => Set(ref xGridUnitSpace, value);
         }
 
-        private int baseLineY = 50;
+        private int tGridUnitLength = 50;
         /// <summary>
         /// 时间轴上单位线间距大小
         /// </summary>
-        public int BaseLineY
+        public int TGridUnitLength
         {
             get
             {
-                return baseLineY;
+                return tGridUnitLength;
             }
             set
             {
-                baseLineY = value;
-                NotifyOfPropertyChange(() => BaseLineY);
+                tGridUnitLength = value;
+                NotifyOfPropertyChange(() => TGridUnitLength);
             }
         }
 
@@ -124,37 +110,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
-        private float mouseWheelTimelineSpeed = 4f;
-        /// <summary>
-        /// 鼠标滚轮移动时间轴速度倍率
-        /// </summary>
-        public float MouseWheelTimelineSpeed
-        {
-            get
-            {
-                return mouseWheelTimelineSpeed;
-            }
-            set
-            {
-                mouseWheelTimelineSpeed = value;
-                NotifyOfPropertyChange(() => MouseWheelTimelineSpeed);
-            }
-        }
-
-        private int xGridMaxUnit = 28;
+        private int xGridDisplayMaxUnit = 28;
         /// <summary>
         /// 横轴长度
         /// </summary>
-        public int XGridMaxUnit
+        public int XGridDisplayMaxUnit
         {
             get
             {
-                return xGridMaxUnit;
+                return xGridDisplayMaxUnit;
             }
             set
             {
-                xGridMaxUnit = value;
-                NotifyOfPropertyChange(() => XGridMaxUnit);
+                xGridDisplayMaxUnit = value;
+                NotifyOfPropertyChange(() => XGridDisplayMaxUnit);
             }
         }
     }

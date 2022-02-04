@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected void RecalculateXUnitSize()
         {
-            XUnitSize = CanvasWidth / (Setting.XGridMaxUnit * 2) * Setting.UnitCloseSize;
+            XUnitSize = CanvasWidth / (Setting.XGridDisplayMaxUnit * 2) * Setting.XGridUnitSpace;
         }
 
         protected override void OnViewLoaded(object v)
@@ -219,7 +219,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             for (double totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
             {
-                totalUnitValue += Setting.UnitCloseSize;
+                totalUnitValue += Setting.XGridUnitSpace;
 
                 line = ObjectPool<XGridUnitLineViewModel>.Get();
                 line.X = totalLength;

@@ -26,9 +26,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         public override void MoveCanvas(Point relativePoint)
         {
             var editor = EditorViewModel;
-            var tGrid = TGridCalculator.ConvertYToTGrid(CheckAndAdjustY(relativePoint.Y), editor);
 
-            if (tGrid is not null)
+            if (CheckAndAdjustY(relativePoint.Y) is double y && TGridCalculator.ConvertYToTGrid(y, editor) is TGrid tGrid)
             {
                 var closestLaneObject = PickDockableObjects(editor)
                     .Select(x => x switch

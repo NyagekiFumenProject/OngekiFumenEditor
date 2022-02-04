@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj" />
     <ProjectReference Include="..\OngekiFumenEditor\OngekiFumenEditor.csproj" />
   </ItemGroup>
 

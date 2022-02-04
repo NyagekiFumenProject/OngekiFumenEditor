@@ -5,9 +5,10 @@
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:converters1="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:Background="White"
+    d:DataContext="{d:DesignInstance Type=local:FumenVisualEditorSettingsViewModel}"
     d:DesignHeight="800"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -22,13 +23,18 @@
         <StackPanel Margin="10,5,10,5" Visibility="{Binding Setting, Converter={StaticResource NullToVisibilityConverter}}">
             <CheckBox
                 Margin="0,2,0,2"
-                Content="IsPreventTimelineAutoClose"
-                IsChecked="{Binding Setting.IsPreventTimelineAutoClose}">
+                Content="禁止时间轴自动停靠"
+                IsChecked="{Binding Setting.DisableTGridMagneticDock}">
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
-                Content="IsPreventXAutoClose"
-                IsChecked="{Binding Setting.IsPreventXAutoClose}">
+                Content="禁止水平位置轴自动停靠"
+                IsChecked="{Binding Setting.DisableXGridMagneticDock}">
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                Content="强制自动停靠"
+                IsChecked="{Binding Setting.ForceMagneticDock}">
             </CheckBox>
             <Grid Margin="0,2,0,2">
                 <Grid.ColumnDefinitions>
@@ -44,31 +50,31 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">UnitCloseSize</TextBlock>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">水平辅助线间距</TextBlock>
                 <ComboBox
                     Grid.Column="1"
                     ItemsSource="{Binding UnitCloseSizeValues}"
                     SelectedIndex="4"
-                    SelectedValue="{Binding Setting.UnitCloseSize}">
+                    SelectedValue="{Binding Setting.XGridUnitSpace}">
                 </ComboBox>
                 <TextBlock
                     Grid.Row="1"
                     Margin="0,5,0,5"
                     VerticalAlignment="Center"
                     ToolTip="The vertical base length within standard bpm 240">
-                    TimeGridSize *
+                    水平轴缩放伸缩基准 *
                 </TextBlock>
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="1"
                     Margin="0,5,0,5"
-                    Text="{Binding Setting.BaseLineY}">
+                    Text="{Binding Setting.TGridUnitLength}">
                 </TextBox>
                 <TextBlock
                     Grid.Row="2"
                     Margin="0,0,0,5"
                     VerticalAlignment="Center">
-                    BeatSplit
+                    倍化细分时间轴辅助线
                 </TextBlock>
                 <TextBox
                     Grid.Row="2"
@@ -76,27 +82,13 @@
                     Margin="0,0,0,5"
                     Text="{Binding Setting.BeatSplit}">
                 </TextBox>
-                <TextBlock
-                    Grid.Row="3"
-                    Margin="0,0,0,5"
-                    VerticalAlignment="Center"
-                    TextWrapping="Wrap">
-                    MouseWheelTimelineSpeed
-                </TextBlock>
-                <TextBox
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Margin="0,0,0,5"
-                    VerticalAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    Text="{Binding Setting.MouseWheelTimelineSpeed}">
-                </TextBox>
+
                 <TextBlock
                     Grid.Row="4"
                     Margin="0,0,0,5"
                     VerticalAlignment="Center"
                     TextWrapping="Wrap">
-                    XGridMaxUnit
+                    水平轴最大显示范围
                 </TextBlock>
                 <TextBox
                     Grid.Row="4"
@@ -104,13 +96,13 @@
                     Margin="0,0,0,5"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
-                    Text="{Binding Setting.XGridMaxUnit}">
+                    Text="{Binding Setting.XGridDisplayMaxUnit}">
                 </TextBox>
                 <TextBlock
                     Grid.Row="5"
                     Margin="0,0,10,0"
                     VerticalAlignment="Center">
-                    JudgeLine:<LineBreak>
+                    判定线偏移位置:<LineBreak>
                     </LineBreak><Run Text="{Binding Setting.JudgeLineOffsetY}">
                     </Run>
                 </TextBlock>
@@ -126,7 +118,7 @@
                     Grid.Row="6"
                     Margin="0,0,10,0"
                     VerticalAlignment="Center">
-                    SoundOffset:<LineBreak>
+                    音效播放延迟:<LineBreak>
                     </LineBreak><Run Text="{Binding Setting.SoundOffset}">
                     </Run>
                 </TextBlock>

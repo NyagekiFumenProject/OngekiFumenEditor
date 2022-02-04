@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
     public static class TGridCalculator
     {
-        public static TGrid ConvertYToTGrid(double pickY, FumenVisualEditorViewModel editor) => ConvertYToTGrid(pickY, editor.Fumen.BpmList, editor.Setting.BaseLineY);
+        public static TGrid ConvertYToTGrid(double pickY, FumenVisualEditorViewModel editor) => ConvertYToTGrid(pickY, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         public static TGrid ConvertYToTGrid(double pickY, BpmList bpmList, int tUnitLength = 240)
         {
             var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return pickTGrid;
         }
 
-        public static double ConvertTGridToY(TGrid tGrid, FumenVisualEditorViewModel editor) => ConvertTGridToY(tGrid, editor.Fumen.BpmList, editor.Setting.BaseLineY);
+        public static double ConvertTGridToY(TGrid tGrid, FumenVisualEditorViewModel editor) => ConvertTGridToY(tGrid, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         public static double ConvertTGridToY(TGrid tGrid, BpmList bpmList, int tUnitLength = 240)
         {
             var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return pickTGrid;
         }
 
-        public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor) => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.BaseLineY);
+        public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor) => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(BpmList bpmList, int tUnitLength = 240) => bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
     }
 }

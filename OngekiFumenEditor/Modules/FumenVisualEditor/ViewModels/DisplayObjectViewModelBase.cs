@@ -152,19 +152,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (ReferenceOngekiObject is ITimelineObject timeObj)
                 {
                     var ry = CheckAndAdjustY(relativePoint.Y);
-                    if (TGridCalculator.ConvertYToTGrid(ry, hostModelView) is TGrid tGrid)
+                    if (ry is double dry && TGridCalculator.ConvertYToTGrid(dry, hostModelView) is TGrid tGrid)
                     {
                         timeObj.TGrid = tGrid;
                         //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
                     }
+
                     RecaulateCanvasY();
                 }
 
                 if (ReferenceOngekiObject is IHorizonPositionObject posObj)
                 {
-                    var x = CheckAndAdjustX(relativePoint.X);
-                    var xGrid = XGridCalculator.ConvertXToXGrid(x, hostModelView);
-                    posObj.XGrid = xGrid;
+                    var rx = CheckAndAdjustX(relativePoint.X);
+                    if (rx is double drx)
+                    {
+                        var xGrid = XGridCalculator.ConvertXToXGrid(drx, hostModelView);
+                        posObj.XGrid = xGrid;
+                    }
+
                     //Log.LogInfo($"x : {x:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, hostModelView)}");
                     RecaulateCanvasX();
                 }
@@ -181,9 +186,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             public double value { get; set; }
         }
 
-        public virtual double CheckAndAdjustY(double y)
+        public virtual double? CheckAndAdjustY(double y)
         {
-            var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventTimelineAutoClose ?? false);
+            var enableMagneticAdjust = !(editorViewModel?.Setting.DisableTGridMagneticDock ?? false);
+            var forceMagneticAdjust = (editorViewModel?.Setting.ForceMagneticDock ?? false);
             using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
             mid.Clear();
             mid.AddRange(enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z =>
@@ -194,17 +200,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return r;
             })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance) : Enumerable.Empty<TempCloseLine>());
             var nearestUnitLine = mid?.FirstOrDefault();
-            var fin = nearestUnitLine != null ? (editorViewModel.TotalDurationHeight - nearestUnitLine.value) : y;
+            double? fin = nearestUnitLine != null ? (editorViewModel.TotalDurationHeight - nearestUnitLine.value) : (forceMagneticAdjust ? null : y);
             //Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.tGrid}) ,fin:{fin:F2}");
             mid.ForEach(x => ObjectPool<TempCloseLine>.Return(x));
             mid.Clear();
             return fin;
         }
 
-        public virtual double CheckAndAdjustX(double x)
+        public virtual double? CheckAndAdjustX(double x)
         {
             //todo 基于二分法查询最近
-            var enableMagneticAdjust = !(editorViewModel?.Setting.IsPreventXAutoClose ?? false);
+            var enableMagneticAdjust = !(editorViewModel?.Setting.DisableXGridMagneticDock ?? false);
+            var forceMagneticAdjust = (editorViewModel?.Setting.ForceMagneticDock ?? false);
             using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
             mid.Clear();
             mid.AddRange(enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z =>
@@ -215,7 +222,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return r;
             })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : Enumerable.Empty<TempCloseLine>());
             var nearestUnitLine = mid?.FirstOrDefault();
-            var fin = nearestUnitLine != null ? nearestUnitLine.value : x;
+            double? fin = nearestUnitLine != null ? nearestUnitLine.value : (forceMagneticAdjust ? null : x);
             //Log.LogInfo($"nearestUnitLine x:{x:F2} distance:{nearestUnitLine?.distance:F2} fin:{fin}");
             mid.ForEach(x => ObjectPool<TempCloseLine>.Return(x));
             mid.Clear();
@@ -235,7 +242,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var xGrid = ((IHorizonPositionObject)ReferenceOngekiObject).XGrid;
             var modelView = EditorViewModel;
             var xgridUnit = xGrid.Unit + xGrid.Grid / xGrid.ResX;
-            var x = xgridUnit * (modelView.XUnitSize / modelView.Setting.UnitCloseSize) + modelView.CanvasWidth / 2;
+            var x = xgridUnit * (modelView.XUnitSize / modelView.Setting.XGridUnitSpace) + modelView.CanvasWidth / 2;
 
             CanvasX = x;
         }

@@ -26,8 +26,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         public override void MoveCanvas(Point relativePoint)
         {
             var editor = EditorViewModel;
-            var tGrid = TGridCalculator.ConvertYToTGrid(CheckAndAdjustY(relativePoint.Y), editor);
-            if (tGrid is not null)
+            var ry = CheckAndAdjustY(relativePoint.Y);
+            if (ry is double y && TGridCalculator.ConvertYToTGrid(y, editor) is TGrid tGrid)
             {
                 if (((ReferenceOngekiObject as HoldEnd)?.ReferenceStartObject as Hold)?.ReferenceLaneStart is LaneStartBase start)
                 {
@@ -37,17 +37,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                 }
             }
 
+
             base.MoveCanvas(relativePoint);
         }
 
-        public override double CheckAndAdjustX(double x)
+        public override double? CheckAndAdjustX(double x)
         {
             return x;
-        }
-
-        public override double CheckAndAdjustY(double y)
-        {
-            return base.CheckAndAdjustY(y);
         }
     }
 }

@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     NotifyOfPropertyChange(() => MinVisibleCanvasY);
                     NotifyOfPropertyChange(() => MaxVisibleCanvasY);
                     break;
-                case nameof(EditorSetting.UnitCloseSize):
+                case nameof(EditorSetting.XGridUnitSpace):
                     RecalculateXUnitSize();
                     Redraw(RedrawTarget.XGridUnitLines);
                     break;
@@ -81,7 +81,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
                         title.TitleContent = base.DisplayName;
                     break;
-                case nameof(EditorSetting.XGridMaxUnit):
+                case nameof(EditorSetting.XGridDisplayMaxUnit):
                     RecalculateXUnitSize();
                     Redraw(RedrawTarget.OngekiObjects | RedrawTarget.XGridUnitLines);
                     break;

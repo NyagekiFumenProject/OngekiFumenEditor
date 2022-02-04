@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
     {
         public static XGrid ConvertXToXGrid(double x, FumenVisualEditorViewModel editor)
         {
-            var xUnit = (x - editor.CanvasWidth / 2) / (editor.XUnitSize / editor.Setting.UnitCloseSize);
+            var xUnit = (x - editor.CanvasWidth / 2) / (editor.XUnitSize / editor.Setting.XGridUnitSpace);
             var nearXUnit = xUnit > 0 ? Math.Floor(xUnit + 0.5) : Math.Ceiling(xUnit - 0.5);
             return new XGrid() { Unit = Math.Abs(xUnit - nearXUnit) < 0.00001 ? (int)nearXUnit : (float)xUnit };
         }
@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public static double ConvertXGridToX(XGrid xGrid, FumenVisualEditorViewModel editor)
         {
             var xUnit = xGrid.Unit + xGrid.Grid * 1.0 / xGrid.ResX;
-            var x = (xUnit * (editor.XUnitSize / editor.Setting.UnitCloseSize)) + editor.CanvasWidth / 2;
+            var x = (xUnit * (editor.XUnitSize / editor.Setting.XGridUnitSpace)) + editor.CanvasWidth / 2;
             return x;
         }
 

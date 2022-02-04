@@ -18,21 +18,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     public class BulletViewModel : DisplayObjectViewModelBase<Bullet>
     {
-        public override double CheckAndAdjustX(double x)
+        public override double? CheckAndAdjustX(double x)
         {
             var bullet = ReferenceOngekiObject as Bullet;
             var pallete = bullet.ReferenceBulletPallete;
+            double? result;
 
             if (pallete.TargetValue == Target.Player)
             {
-                x = XGridCalculator.ConvertXGridToX(XGrid.Zero, EditorViewModel);
+                result = XGridCalculator.ConvertXGridToX(XGrid.Zero, EditorViewModel);
             }
             else
             {
-                x = base.CheckAndAdjustX(x);
+                result = base.CheckAndAdjustX(x);
             }
 
-            return x;
+            return result;
         }
     }
 }
