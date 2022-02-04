@@ -1,0 +1,66 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.Views.FumenTimeSignatureListViewerView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Converters"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Converters"
+    xmlns:converters2="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=vm:FumenTimeSignatureListViewerViewModel}"
+    d:DesignHeight="300"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters1:IntToTimeDisplayConverter x:Key="IntToTimeDisplayConverter" />
+        <converters2:MeterDisplayConverter x:Key="MeterDisplayConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ListView
+            Grid.Row="1"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding DisplayTimeSignatures}"
+            ScrollViewer.CanContentScroll="True"
+            SelectedValue="{Binding CurrentSelectTimeSignature}">
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding StartY, Converter={StaticResource IntToTimeDisplayConverter}}"
+                        Header="音频时间" />
+
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding StartTGrid}"
+                        Header="音频时间" />
+
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding BPMChange.BPM}"
+                        Header="Bpm" />
+
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding Meter, Converter={StaticResource MeterDisplayConverter}}"
+                        Header="TimeSignature" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>

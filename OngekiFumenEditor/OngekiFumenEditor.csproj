@@ -76,6 +76,9 @@
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\EnumValueTypeUIView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -168,6 +171,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\EnumValueTypeUIView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
