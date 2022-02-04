@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RecalculateScrollBar()
         {
-            //todo 重新计算理论高度
+            Setting.NotifyOfPropertyChange(nameof(Setting.JudgeLineOffsetY));
         }
 
         public void ScrollViewer_OnScrollChanged(ActionExecutionContext e)
