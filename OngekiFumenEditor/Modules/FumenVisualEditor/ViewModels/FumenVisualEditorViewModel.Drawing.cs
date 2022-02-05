@@ -265,7 +265,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var scrollViewer = e.Source as AnimatedScrollViewer;
             var arg = e.EventArgs as SizeChangedEventArgs;
-            CanvasWidth = scrollViewer.ViewportWidth;
+            scrollViewer.InvalidateMeasure();
+            CanvasWidth = Math.Min(scrollViewer.ActualWidth, scrollViewer.ViewportWidth);
             CanvasHeight = arg.NewSize.Height;
             Redraw(RedrawTarget.All);
         }
