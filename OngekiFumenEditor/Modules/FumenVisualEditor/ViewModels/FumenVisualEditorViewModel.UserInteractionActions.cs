@@ -1,44 +1,17 @@
 using Caliburn.Micro;
 using Gemini.Framework;
-using Gemini.Framework.Threading;
-using Gemini.Modules.StatusBar;
-using Gemini.Modules.StatusBar.ViewModels;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
-using Gemini.Modules.Toolbox.Services;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
-using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
-using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Controls.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
-using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
-using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.ComponentModel.Composition;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -122,7 +95,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
 
         private HashSet<DisplayObjectViewModelBase> currentCopySources = new();
-        public void CopySelectedObjects()
+
+        #region Selection Actions
+
+        public void MenuItemAction_SelectAll()
+        {
+            IsPreventMutualExclusionSelecting = true;
+
+            EditorViewModels.OfType<DisplayObjectViewModelBase>().ForEach(x => x.IsSelected = true);
+
+            IsPreventMutualExclusionSelecting = false;
+        }
+
+        public void MenuItemAction_ReverseSelect()
+        {
+            IsPreventMutualExclusionSelecting = true;
+
+            var selected = SelectObjects.ToArray();
+            EditorViewModels.OfType<DisplayObjectViewModelBase>().ForEach(x => x.IsSelected = !selected.Contains(x));
+
+            IsPreventMutualExclusionSelecting = false;
+        }
+
+        public void MenuItemAction_CopySelectedObjects()
         {
             if (IsLocked)
                 return;
@@ -132,7 +127,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Log.LogInfo($"钦定 {currentCopySources.Count} 个物件作为复制源");
         }
 
-        public void PasteCopiesObjects()
+        public enum PasteMirrorOption
+        {
+            XGridZeroMirror,
+            SelectedRangeCenterXGridMirror,
+            SelectedRangeCenterTGridMirror,
+            None
+        }
+
+        public void MenuItemAction_PasteCopiesObjects()
+            => PasteCopiesObjects(PasteMirrorOption.None);
+        public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror()
+            => PasteCopiesObjects(PasteMirrorOption.SelectedRangeCenterXGridMirror);
+        public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror()
+            => PasteCopiesObjects(PasteMirrorOption.SelectedRangeCenterTGridMirror);
+        public void MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror()
+            => PasteCopiesObjects(PasteMirrorOption.XGridZeroMirror);
+
+        public void PasteCopiesObjects(PasteMirrorOption mirrorOption)
         {
             if (IsLocked)
                 return;
@@ -140,16 +152,86 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             SelectObjects.ForEach(x => x.IsSelected = false);
             IsPreventMutualExclusionSelecting = true;
             var count = 0;
-            foreach (var displayObjectView in currentCopySources.Select(x => x.Copy()).OfType<DisplayObjectViewModelBase>())
+            var newObjects = currentCopySources.Select(x => x.Copy()).FilterNull().ToArray();
+            (var mirrorTGrid, var offsetTGrid) = CalculateTGridMirror(newObjects, mirrorOption);
+            (var mirrorXGrid, var offsetXGrid) = CalculateXGridMirror(newObjects, mirrorOption);
+            foreach (var displayObjectView in newObjects)
             {
                 AddObject(displayObjectView);
                 displayObjectView.IsSelected = true;
                 count++;
+
+                if (mirrorTGrid is not null && displayObjectView.ReferenceOngekiObject is ITimelineObject timelineObject)
+                {
+                    var tGrid = timelineObject.TGrid;
+                    var offset = mirrorTGrid - tGrid;
+                    var newTGrid = mirrorTGrid + offset;
+                    timelineObject.TGrid = newTGrid + offsetTGrid;
+                }
+
+                if (mirrorXGrid is not null && displayObjectView.ReferenceOngekiObject is IHorizonPositionObject horizonPositionObject)
+                {
+                    var xGrid = horizonPositionObject.XGrid;
+                    var offset = mirrorXGrid - xGrid;
+                    var newXGrid = mirrorXGrid + offset;
+                    horizonPositionObject.XGrid = newXGrid + offsetXGrid;
+                }
             };
             Log.LogInfo($"已粘贴生成 {count} 个物件.");
             IsPreventMutualExclusionSelecting = false;
             Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
         }
+
+        private (XGrid mirrorXGrid, GridOffset offsetXGrid) CalculateXGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
+        {
+            if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
+                return (XGrid.Zero, GridOffset.Zero);
+
+            if (mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
+            {
+                (var min, var max) = newObjects
+                .Select(x => x.ReferenceOngekiObject as IHorizonPositionObject)
+                .FilterNull()
+                .MaxMinBy(x => x.XGrid, (a, b) =>
+                {
+                    if (a > b)
+                        return 1;
+                    if (a < b)
+                        return -1;
+                    return 0;
+                });
+
+                var diff = max - min;
+                var mirror = min + new GridOffset(0, diff.TotalGrid(min.ResX) / 2);
+                return (mirror, GridOffset.Zero);
+            }
+
+            return default;
+        }
+
+        private (TGrid mirrorTGrid, GridOffset offsetTGrid) CalculateTGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
+        {
+            if (mirrorOption != PasteMirrorOption.SelectedRangeCenterTGridMirror)
+                return default;
+
+            (var min, var max) = newObjects
+                .Select(x => x.ReferenceOngekiObject as ITimelineObject)
+                .FilterNull()
+                .MaxMinBy(x => x.TGrid, (a, b) =>
+                {
+                    if (a > b)
+                        return 1;
+                    if (a < b)
+                        return -1;
+                    return 0;
+                });
+
+            var diff = max - min;
+            var mirror = min + new GridOffset(0, diff.TotalGrid(min.ResT) / 2);
+            return (mirror, GridOffset.Zero);
+        }
+
+        #endregion
 
         private void SelectRangeObjects(Rect selectionRect)
         {
@@ -465,7 +547,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 RemoveObject(displayObject);
                 Redraw(RedrawTarget.OngekiObjects);
             }));
-            
+
         }
 
         #endregion

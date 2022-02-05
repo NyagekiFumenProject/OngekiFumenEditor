@@ -16,7 +16,7 @@ namespace Test
     {
         static void Main(string[] args)
         {
-
+            Console.WriteLine(new[] { 5, 5, 197, 0, 1, 4, 6, 4, -5, 7, 9, 8, 22, 4, 3, 5 }.MaxMinBy());
         }
     }
 }

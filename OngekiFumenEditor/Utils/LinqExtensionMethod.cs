@@ -107,5 +107,27 @@ namespace OngekiFumenEditor.Utils
             insertable.Add(needInsert);
             return insertable.Count - 1;
         }
+
+        public static (T min, T max) MaxMinBy<T>(this IEnumerable<T> collection)
+            => collection.MaxMinBy(x => x, (a, b) => Comparer<T>.Default.Compare(a, b));
+        public static (T min, T max) MaxMinBy<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
+            => collection.MaxMinBy(x => x, comparer);
+        public static (X min, X max) MaxMinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
+        {
+            var first = collection.FirstOrDefault();
+            X min = keySelector(first);
+            X max = keySelector(first);
+
+            foreach (var item in collection)
+            {
+                var v = keySelector(item);
+                if (comparer(min, v) > 0)
+                    min = v;
+                if (comparer(v, max) > 0)
+                    max = v;
+            }
+
+            return (min, max);
+        }
     }
 }
