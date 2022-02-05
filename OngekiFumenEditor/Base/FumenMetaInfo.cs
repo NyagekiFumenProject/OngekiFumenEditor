@@ -32,6 +32,11 @@ namespace OngekiFumenEditor.Base
             public int Bunshi { get; set; } = 4;
         }
 
+        public FumenMetaInfo()
+        {
+            BpmDefinition = BpmDefinition;
+        }
+
         /// <summary>
         /// 版本号
         /// </summary>

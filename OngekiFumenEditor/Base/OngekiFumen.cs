@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Base
 {
     public class OngekiFumen : PropertyChangedBase
     {
-        private FumenMetaInfo metaInfo = new();
+        private FumenMetaInfo metaInfo = new FumenMetaInfo();
         public FumenMetaInfo MetaInfo
         {
             get => metaInfo;
@@ -37,6 +37,11 @@ namespace OngekiFumenEditor.Base
         public BeamList Beams { get; } = new();
         public List<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
+
+        public OngekiFumen()
+        {
+            Setup();
+        }
 
         #region Overload Methods
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

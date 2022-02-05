@@ -51,6 +51,10 @@
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror()" Header="按整体全体范围垂直镜像粘贴" />
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror()" Header="按X[0,0]为基准水平镜像粘贴" />
                     </MenuItem>
+                    <MenuItem Header="操作时间...">
+                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="记忆音频时间" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="恢复到音频时间" />
+                    </MenuItem>
                 </MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>

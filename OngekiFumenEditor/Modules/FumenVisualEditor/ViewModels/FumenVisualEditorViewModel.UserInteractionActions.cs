@@ -231,6 +231,50 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return (mirror, GridOffset.Zero);
         }
 
+        private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
+
+        public void MenuItemAction_RememberSelectedObjectAudioTime()
+        {
+            cacheObjectAudioTime.Clear();
+            foreach (var obj in SelectObjects)
+            {
+                if (obj.ReferenceOngekiObject is ITimelineObject timelineObject)
+                    cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this);
+                else
+                    Log.LogInfo($"无法记忆此物件，因为此物件没有实现ITimelineObject : {obj.ReferenceOngekiObject}");
+            }
+
+            Log.LogInfo($"已记忆 {cacheObjectAudioTime.Count} 个物件的音频时间");
+        }
+
+        public void MenuItemAction_RecoverySelectedObjectToAudioTime()
+        {
+            var recoverTargets = EditorViewModels
+                .OfType<DisplayObjectViewModelBase>()
+                .Select(x => x.ReferenceOngekiObject as ITimelineObject)
+                .Select(x => cacheObjectAudioTime.TryGetValue(x, out var audioTime) ? (x, audioTime) : default)
+                .Where(x => x.x is not null)
+                .OrderBy(x => x.audioTime)
+                .ToList();
+
+            var undoTargets = recoverTargets.Select(x => x.x).Select(x => (x, x.TGrid)).ToList();
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("恢复物件到音频时间",
+                () =>
+                {
+                    Log.LogInfo($"开始恢复物件时间...");
+                    foreach ((var timelineObject, var audioTime) in recoverTargets)
+                        timelineObject.TGrid = TGridCalculator.ConvertYToTGrid(audioTime, this);
+                    Log.LogInfo($"已恢复 {recoverTargets.Count} 个物件到音频时间...");
+                }, () =>
+                {
+                    foreach ((var timelineObject, var undoTGrid) in undoTargets)
+                        timelineObject.TGrid = undoTGrid;
+                    Log.LogInfo($"已撤回 {recoverTargets.Count} 个物件的音频时间恢复...");
+                }
+            ));
+        }
+
         #endregion
 
         private void SelectRangeObjects(Rect selectionRect)
