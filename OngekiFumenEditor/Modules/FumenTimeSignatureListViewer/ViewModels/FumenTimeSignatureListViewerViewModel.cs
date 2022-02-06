@@ -123,7 +123,10 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
         private void RefreshFumen()
         {
             if (Editor is null || Fumen is null)
+            {
+                DisplayTimeSignatures.Clear();
                 return;
+            }
 
             using var disp = DisplayTimeSignatures.ToListWithObjectPool(out var removeList);
             CurrentSelectTimeSignature = default;
@@ -149,7 +152,10 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
             }
 
             foreach (var item in removeList)
+            {
                 DisplayTimeSignatures.Remove(item);
+                ObjectPool<DisplayTimeSignatureItem>.Return(item);
+            }
 
             NotifyOfPropertyChange(() => CurrentSelectTimeSignature);
         }
