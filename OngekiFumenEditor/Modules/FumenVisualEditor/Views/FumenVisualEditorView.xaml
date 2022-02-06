@@ -39,7 +39,7 @@
             <ContextMenu>
                 <MenuItem Header="选取...">
                     <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()" Header="选所有物件" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="反向选取" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="反向选取所有物件" />
                 </MenuItem>
                 <MenuItem Header="对选取物件...">
                     <MenuItem cal:Message.Attach="DeleteSelectedObjects()" Header="删除" />

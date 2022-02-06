@@ -98,7 +98,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 //计算每一拍的(grid)长度
                 var resT = currentTGridBase.ResT;
-                var lengthPerBeat = (int)(resT / (currentMeter.BunShi * Setting.BeatSplit));
+                var lengthPerBeat = resT * 1.0d / (currentMeter.BunShi * Setting.BeatSplit);
 
                 //这里也可以跳过添加完全看不到的线
                 var diff = currentTGridBaseOffset - currentTGridBase;
@@ -107,7 +107,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 while (true)
                 {
-                    var tGrid = currentTGridBase + new GridOffset(0, lengthPerBeat * i);
+                    var tGrid = currentTGridBase + new GridOffset(0, (int)(lengthPerBeat * i));
                     //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
                     var y = currentStartY + MathUtils.CalculateBPMLength(currentTGridBase, tGrid, currentBpm.BPM, 240);
                     //超过当前timeSignature范围，切换到下一个timeSignature画新的线
