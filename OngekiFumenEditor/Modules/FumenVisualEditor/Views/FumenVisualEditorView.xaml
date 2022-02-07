@@ -42,7 +42,7 @@
                     <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="反向选取所有物件" />
                 </MenuItem>
                 <MenuItem Header="对选取物件...">
-                    <MenuItem cal:Message.Attach="DeleteSelectedObjects()" Header="删除" />
+                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()" Header="删除" />
                     <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="复制可复制的物件" />
                     <MenuItem Header="粘贴...">
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects()" Header="直接粘贴" />

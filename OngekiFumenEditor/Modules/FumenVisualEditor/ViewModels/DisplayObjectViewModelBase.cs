@@ -189,7 +189,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public virtual double? CheckAndAdjustY(double y)
         {
             var enableMagneticAdjust = !(editorViewModel?.Setting.DisableTGridMagneticDock ?? false);
-            var forceMagneticAdjust = (editorViewModel?.Setting.ForceMagneticDock ?? false);
+            var forceMagneticAdjust = editorViewModel?.Setting.ForceMagneticDock ?? false;
+            var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
             using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
             mid.Clear();
             mid.AddRange(enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z =>
@@ -198,7 +199,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 r.distance = Math.Abs(editorViewModel.TotalDurationHeight - z.Y - y);
                 r.value = z.Y;
                 return r;
-            })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance) : Enumerable.Empty<TempCloseLine>());
+            })?.Where(z => z.distance < dockableTriggerDistance)?.OrderBy(x => x.distance) : Enumerable.Empty<TempCloseLine>());
             var nearestUnitLine = mid?.FirstOrDefault();
             double? fin = nearestUnitLine != null ? (editorViewModel.TotalDurationHeight - nearestUnitLine.value) : (forceMagneticAdjust ? null : y);
             //Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.tGrid}) ,fin:{fin:F2}");
@@ -211,7 +212,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //todo 基于二分法查询最近
             var enableMagneticAdjust = !(editorViewModel?.Setting.DisableXGridMagneticDock ?? false);
-            var forceMagneticAdjust = (editorViewModel?.Setting.ForceMagneticDock ?? false);
+            var forceMagneticAdjust = editorViewModel?.Setting.ForceMagneticDock ?? false;
+            var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
             using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
             mid.Clear();
             mid.AddRange(enableMagneticAdjust ? editorViewModel?.XGridUnitLineLocations?.Select(z =>
@@ -220,7 +222,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 r.distance = Math.Abs(z.X - x);
                 r.value = z.X;
                 return r;
-            })?.Where(z => z.distance < 4)?.OrderBy(x => x.distance)?.ToList() : Enumerable.Empty<TempCloseLine>());
+            })?.Where(z => z.distance < dockableTriggerDistance)?.OrderBy(x => x.distance)?.ToList() : Enumerable.Empty<TempCloseLine>());
             var nearestUnitLine = mid?.FirstOrDefault();
             double? fin = nearestUnitLine != null ? nearestUnitLine.value : (forceMagneticAdjust ? null : x);
             //Log.LogInfo($"nearestUnitLine x:{x:F2} distance:{nearestUnitLine?.distance:F2} fin:{fin}");

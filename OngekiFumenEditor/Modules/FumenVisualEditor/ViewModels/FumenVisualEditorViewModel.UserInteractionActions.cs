@@ -94,6 +94,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
 
+        private Point? currentCursorPosition;
+        public Point? CurrentCursorPosition
+        {
+            get => currentCursorPosition;
+            set => Set(ref currentCursorPosition, value);
+        }
+
         private HashSet<DisplayObjectViewModelBase> currentCopySources = new();
 
         #region Selection Actions
@@ -153,8 +160,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IsPreventMutualExclusionSelecting = true;
             var count = 0;
             var newObjects = currentCopySources.Select(x => x.Copy()).FilterNull().ToArray();
-            (var mirrorTGrid, var offsetTGrid) = CalculateTGridMirror(newObjects, mirrorOption);
-            (var mirrorXGrid, var offsetXGrid) = CalculateXGridMirror(newObjects, mirrorOption);
+            var mirrorTGrid = CalculateTGridMirror(newObjects, mirrorOption);
+            var mirrorXGrid = CalculateXGridMirror(newObjects, mirrorOption);
             foreach (var displayObjectView in newObjects)
             {
                 AddObject(displayObjectView);
@@ -166,7 +173,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var tGrid = timelineObject.TGrid;
                     var offset = mirrorTGrid - tGrid;
                     var newTGrid = mirrorTGrid + offset;
-                    timelineObject.TGrid = newTGrid + offsetTGrid;
+                    timelineObject.TGrid = newTGrid;
                 }
 
                 if (mirrorXGrid is not null && displayObjectView.ReferenceOngekiObject is IHorizonPositionObject horizonPositionObject)
@@ -174,7 +181,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var xGrid = horizonPositionObject.XGrid;
                     var offset = mirrorXGrid - xGrid;
                     var newXGrid = mirrorXGrid + offset;
-                    horizonPositionObject.XGrid = newXGrid + offsetXGrid;
+                    horizonPositionObject.XGrid = newXGrid;
                 }
             };
             Log.LogInfo($"已粘贴生成 {count} 个物件.");
@@ -182,10 +189,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
         }
 
-        private (XGrid mirrorXGrid, GridOffset offsetXGrid) CalculateXGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
+        private XGrid CalculateXGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
         {
             if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
-                return (XGrid.Zero, GridOffset.Zero);
+                return XGrid.Zero;
 
             if (mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
             {
@@ -203,13 +210,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var diff = max - min;
                 var mirror = min + new GridOffset(0, diff.TotalGrid(min.ResX) / 2);
-                return (mirror, GridOffset.Zero);
+                return mirror;
             }
 
             return default;
         }
 
-        private (TGrid mirrorTGrid, GridOffset offsetTGrid) CalculateTGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
+        private TGrid CalculateTGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
         {
             if (mirrorOption != PasteMirrorOption.SelectedRangeCenterTGridMirror)
                 return default;
@@ -228,7 +235,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var diff = max - min;
             var mirror = min + new GridOffset(0, diff.TotalGrid(min.ResT) / 2);
-            return (mirror, GridOffset.Zero);
+            return mirror;
         }
 
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
@@ -475,9 +482,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            var view = e.View as FrameworkElement;
-            //Log.LogInfo("OnMouseMove");
-            if (!(IsMouseDown && view is not null && view.Parent is IInputElement parent))
+            if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
             var r = IsDragging;
@@ -526,6 +531,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (view.Parent is not IInputElement parent)
             {
                 contentViewModel.Message = string.Empty;
+                CurrentCursorPosition = null;
                 return;
             }
 
@@ -536,6 +542,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var tGrid = TGridCalculator.ConvertYToTGrid(canvasY, this);
             var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
             contentViewModel.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}]";
+            CurrentCursorPosition = new(canvasX, canvasY);
         }
 
         public void Grid_DragEnter(ActionExecutionContext e)
