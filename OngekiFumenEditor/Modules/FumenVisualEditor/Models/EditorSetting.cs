@@ -56,6 +56,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set => Set(ref forceMagneticDock, value);
         }
 
+        private bool forceTapHoldMagneticDockToLane = false;
+        public bool ForceTapHoldMagneticDockToLane
+        {
+            get => forceTapHoldMagneticDockToLane;
+            set => Set(ref forceTapHoldMagneticDockToLane, value);
+        }
+
         private bool disableTGridMagneticDock;
         /// <summary>
         /// 表示物件或者其他在时间轴上移动时，是否可以自动吸附到最近的单位线上

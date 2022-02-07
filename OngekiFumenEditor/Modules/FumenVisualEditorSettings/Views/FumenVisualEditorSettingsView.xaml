@@ -33,6 +33,11 @@
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
+                Content="强制Tap或Hold物件停靠到轨道上"
+                IsChecked="{Binding Setting.ForceTapHoldMagneticDockToLane}">
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
                 Content="强制自动停靠"
                 IsChecked="{Binding Setting.ForceMagneticDock}">
             </CheckBox>

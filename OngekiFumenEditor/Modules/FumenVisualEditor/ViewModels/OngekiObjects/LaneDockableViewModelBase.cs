@@ -26,6 +26,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         public override void MoveCanvas(Point relativePoint)
         {
             var editor = EditorViewModel;
+            var forceMagneticToLane = editor.Setting.ForceTapHoldMagneticDockToLane;
+            var enableMoveTo = !forceMagneticToLane;
 
             if (CheckAndAdjustY(relativePoint.Y) is double y && TGridCalculator.ConvertYToTGrid(y, editor) is TGrid tGrid)
             {
@@ -43,16 +45,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                     .OrderBy(x => x.Item1)
                     .FirstOrDefault();
 
-                if (closestLaneObject.startObject is not null && closestLaneObject.Item1 < 8)
+                var magneticDockDistance = forceMagneticToLane ? int.MaxValue : 8;
+
+                if (closestLaneObject.startObject is not null && closestLaneObject.Item1 < magneticDockDistance)
                 {
                     relativePoint.X = closestLaneObject.Value;
                     var tap = ReferenceOngekiObject as T;
                     tap.ReferenceLaneStart = closestLaneObject.startObject;
                     //Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
+
+                    enableMoveTo = true;
                 }
             }
 
-            base.MoveCanvas(relativePoint);
+            //如果ForceTapHoldMagneticDockToLane=true,则不需要这里钦定位置
+            if (enableMoveTo)
+                base.MoveCanvas(relativePoint);
         }
 
         protected virtual double? CalculateConnectableObjectCurrentRelativeX(ConnectableStartObject startObject, TGrid tGrid)

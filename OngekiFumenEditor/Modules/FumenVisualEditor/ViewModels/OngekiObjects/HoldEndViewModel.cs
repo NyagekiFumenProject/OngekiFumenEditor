@@ -20,6 +20,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     {
         public override IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = null)
         {
+            var forceMagneticToLane = editor?.Setting.ForceTapHoldMagneticDockToLane ?? false;
+            if (forceMagneticToLane)
+                return base.PickDockableObjects(editor);
             return Enumerable.Empty<ConnectableObjectBase>();
         }
 
