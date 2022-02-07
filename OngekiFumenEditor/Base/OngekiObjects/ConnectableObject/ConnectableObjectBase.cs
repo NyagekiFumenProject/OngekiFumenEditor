@@ -9,5 +9,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
     public abstract class ConnectableObjectBase : OngekiMovableObjectBase
     {
         public abstract int RecordId { get; set; }
+
+        public override string ToString() => $"id:{RecordId} {base.ToString()}";
     }
 }

@@ -9,12 +9,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     {
         public override Type ModelViewType => typeof(HoldEndViewModel);
 
-        public bool IsCritical => ((Hold)ReferenceStartObject).IsCritical;
+        public bool IsCritical => (ReferenceStartObject as Hold)?.IsCritical ?? false;
 
         public override string IDShortName => "[HoldEnd]";
 
-        public LaneStartBase ReferenceLaneStart {
-            get => ((Hold)ReferenceStartObject).ReferenceLaneStart;
+        public LaneStartBase ReferenceLaneStart
+        {
+            get => (ReferenceStartObject as Hold)?.ReferenceLaneStart;
             set
             {
                 //ignore it :D

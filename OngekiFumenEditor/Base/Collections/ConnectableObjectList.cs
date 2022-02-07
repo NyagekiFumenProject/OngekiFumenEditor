@@ -19,15 +19,17 @@ namespace OngekiFumenEditor.Base.Collections
             if (obj is START_TYPE startObject)
             {
                 //wallStart.PropertyChanged += OnBeamStartPropertyChanged;
-                if (startObject.RecordId < 0)
-                    startObject.RecordId = startObjects.Count + 1;
-                startObjects.Add(startObject);
+                if (startObject.RecordId < 0) //如果recordId < 0 ,那么添加到集合里面时会自动分配一个RecordId
+                    startObject.RecordId = (startObjects.LastOrDefault()?.RecordId ?? 0) + 1;
+                startObjects.InsertBySortBy(startObject, x => x.RecordId);
             }
             else if (obj is CHILD_TYPE child)
             {
-                child.PropertyChanged += OnBeamChildPropertyChanged;
                 if (startObjects.FirstOrDefault(x => x.RecordId == child.RecordId) is START_TYPE start)
+                {
                     start.AddChildObject(child);
+                    child.PropertyChanged += OnChildPropertyChanged;
+                }
             }
         }
 
@@ -40,27 +42,13 @@ namespace OngekiFumenEditor.Base.Collections
             }
             else if (obj is CHILD_TYPE child)
             {
-                child.PropertyChanged -= OnBeamChildPropertyChanged;
+                child.PropertyChanged -= OnChildPropertyChanged;
                 if (startObjects.FirstOrDefault(x => x.RecordId == child.RecordId) is START_TYPE start)
                     start.RemoveChildObject(child);
             }
         }
 
-        private void OnBeamStartPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName != nameof(ConnectableObjectBase.RecordId) || sender is not START_TYPE startObject)
-                return;
-
-            if (startObjects.FirstOrDefault(x => x.RecordId == startObject.RecordId) is START_TYPE s)
-            {
-                startObjects.Remove(s);
-                Log.LogDebug($"migrate recId {s.RecordId} -> {startObject.RecordId}");
-            }
-
-            startObjects.Add(startObject);
-        }
-
-        private void OnBeamChildPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnChildPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(ConnectableObjectBase.RecordId) || sender is not CHILD_TYPE child)
                 return;
