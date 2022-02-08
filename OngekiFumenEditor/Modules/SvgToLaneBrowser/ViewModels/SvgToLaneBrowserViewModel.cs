@@ -59,6 +59,16 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             }
         }
 
+        private float scale = 1;
+        public float Scale
+        {
+            get => scale;
+            set
+            {
+                Set(ref scale, value);
+            }
+        }
+
         public IEnumerable<PointAlignTarget> PointAlignTargetValues => Enum.GetValues<PointAlignTarget>();
 
         public class LineSegmentWrapper : PropertyChangedBase
@@ -120,6 +130,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 LineSegmentOptimzer.Optimze(item);
 
             LineSegments.Clear();
+
+
             foreach (var segments in lineSegements)
             {
                 var geometry = new PathGeometry();
@@ -128,10 +140,10 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 figure.IsClosed = false;
 
                 var firstPoint = segments.Points.FirstOrDefault();
-                figure.StartPoint = new(firstPoint.X, firstPoint.Y);
+                figure.StartPoint = new(firstPoint.X * scale, firstPoint.Y * scale);
 
                 foreach (var point in segments.Points)
-                    figure.Segments.Add(new LineSegment(new(point.X, point.Y), true));
+                    figure.Segments.Add(new LineSegment(new(point.X * scale, point.Y * scale), true));
 
                 geometry.Figures.Add(figure);
                 LineSegments.Add(new LineSegmentWrapper()
@@ -143,8 +155,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
 
 
             //calc bound
-            (var minX, var maxX) = lineSegements.SelectMany(x => x.Points).Select(x => x.X).MaxMinBy();
-            (var minY, var maxY) = lineSegements.SelectMany(x => x.Points).Select(x => x.Y).MaxMinBy();
+            (var minX, var maxX) = lineSegements.SelectMany(x => x.Points).Select(x => x.X * Scale).MaxMinBy();
+            (var minY, var maxY) = lineSegements.SelectMany(x => x.Points).Select(x => x.Y * Scale).MaxMinBy();
 
             var x = minX;
             var y = minY;
