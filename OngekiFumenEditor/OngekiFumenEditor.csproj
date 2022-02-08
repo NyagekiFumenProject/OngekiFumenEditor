@@ -29,6 +29,7 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.1.0" />
+    <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.4.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -98,6 +99,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\SvgToLaneBrowser\Views\SvgToLaneBrowserView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml.cs">
@@ -252,6 +256,10 @@
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\FlickView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\SvgToLaneBrowser\Views\SvgToLaneBrowserView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
