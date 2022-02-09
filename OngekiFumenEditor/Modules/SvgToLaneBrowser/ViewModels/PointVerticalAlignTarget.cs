@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
 {
-    public enum PointAlignTarget
+    public enum PointVerticalAlignTarget
     {
         Bottom,
-        Left,
-        Right,
         Top,
         Center
     }

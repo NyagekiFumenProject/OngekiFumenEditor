@@ -29,7 +29,7 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.1.0" />
-    <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.4.5" />
+    <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.5.0" />
   </ItemGroup>
 
   <ItemGroup>

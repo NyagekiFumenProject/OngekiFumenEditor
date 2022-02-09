@@ -4,11 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -122,6 +118,14 @@ namespace OngekiFumenEditor.Utils
             var timeX = CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
 
             return timeX;
+        }
+
+        public static float calcGradient(float x1, float y1, float x2, float y2)
+        {
+            if (y1 == y2)
+                return float.MaxValue;
+
+            return (y1 - y2) / (x1 - x2);
         }
     }
 }
