@@ -35,6 +35,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
     [Export(typeof(ISvgToLaneBrowser))]
     public class SvgToLaneBrowserViewModel : WindowBase, ISvgToLaneBrowser
     {
+        private InterpolaterOption interpolaterOption = new InterpolaterOption();
+
         private Brush previewBackground = Brushes.Gray;
         public Brush PreviewBackground
         {
@@ -106,6 +108,16 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             }
         }
 
+        public bool IsCircleSimplyAsLessPolygon
+        {
+            get => interpolaterOption.CircleSimplyAsLessPolygon;
+            set
+            {
+                interpolaterOption.CircleSimplyAsLessPolygon = value;
+                NotifyOfPropertyChange(() => IsCircleSimplyAsLessPolygon);
+            }
+        }
+
         private bool isShowLaneColor;
         public bool IsShowLaneColor
         {
@@ -116,13 +128,13 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             }
         }
 
-        private float scale = 1;
         public float Scale
         {
-            get => scale;
+            get => interpolaterOption.Scale;
             set
             {
-                Set(ref scale, value);
+                interpolaterOption.Scale = value;
+                NotifyOfPropertyChange(() => Scale);
             }
         }
 
@@ -133,6 +145,17 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             set
             {
                 Set(ref colorSimilar, value);
+                UpdateLinesLaneTarget();
+            }
+        }
+
+        private float edgeSimplfy = 0.1f;
+        public float EdgeSimplfy
+        {
+            get => edgeSimplfy;
+            set
+            {
+                Set(ref edgeSimplfy, value);
                 UpdateLinesLaneTarget();
             }
         }
@@ -252,16 +275,12 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
 
         public async void RegenerateSVGContent()
         {
-            var lineSegements = (await Interpolater.GenerateInterpolatedLineSegmentAsync(await File.ReadAllTextAsync(SvgFilePath), new InterpolaterOption()
-            {
-                Scale = Scale
-            })).Where(x => x.Points.Count > 0).ToList();
+            var lineSegements = (await Interpolater.GenerateInterpolatedLineSegmentAsync(await File.ReadAllTextAsync(SvgFilePath), interpolaterOption)).Where(x => x.Points.Count > 0).ToList();
 
             foreach (var item in lineSegements)
-                LineSegmentOptimzer.Optimze(item);
+                LineSegmentOptimzer.Optimze(item, EdgeSimplfy);
 
             LineSegments.Clear();
-
 
             foreach (var segments in lineSegements)
             {
