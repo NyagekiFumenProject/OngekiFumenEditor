@@ -4,9 +4,15 @@ using Gemini.Framework.Services;
 using Microsoft.Win32;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.SvgToLaneBrowser.Views;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -292,7 +298,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
 
             CurrentSegmentsBound = new Rect(x, y, width, height);
             CanvasTranslateOffset = new Point((int)(size.Width / 2 - width / 2), (int)(size.Height / 2 - height / 2));
-            
+
             UpdateHorizonVerticalAlignPreview();
             UpdateLinesLaneTarget();
         }
@@ -346,16 +352,88 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
         public void OutputToEditor()
         {
             var laneTargets = LineSegments
-                .Select(x => x.RawLineSegmentCollection)
-                .SelectMany(x => PointReforger.ReforgeAsUnidirectional(x.Points).Select(y => (x.Color, y.ToList())));
+                .Select(x => (x.RawLineSegmentCollection.Points, x.LaneTarget))
+                .SelectMany(x => PointReforger.ReforgeAsUnidirectional(x.Points).Select(y => (x.LaneTarget, y.ToList())));
 
-            foreach ((var color, var lineSegment) in laneTargets.Where(x => x.Item2.Count >= 2))
+            foreach ((var laneType, var lineSegment) in laneTargets.Where(x => x.Item2.Count >= 2))
             {
                 if (MathUtils.calcGradient(lineSegment[0].X, lineSegment[1].X, lineSegment[0].Y, lineSegment[1].Y) < 0)
                     lineSegment.Reverse();
 
-
+                if (GenerateLaneViewModel(lineSegment, laneType) is DisplayObjectViewModelBase generatedViewModel)
+                    Editor.AddObject(generatedViewModel);
             }
+        }
+
+        private DisplayObjectViewModelBase GenerateLaneViewModel(List<System.Drawing.PointF> lineSegment, LaneType? laneType)
+        {
+            var bx = XGridCalculator.ConvertXGridToX(XGrid, Editor);
+            var by = TGridCalculator.ConvertTGridToY(TGrid, Editor);
+
+            var xtGrids = lineSegment.Select((x, i) =>
+            {
+                var rx = bx + x.X - CurrentOriginOffset.X;
+                var ry = by + x.Y - CurrentOriginOffset.Y;
+
+                var rTGrid = TGridCalculator.ConvertYToTGrid(ry, Editor);
+                var rXGrid = XGridCalculator.ConvertXToXGrid(rx, Editor);
+
+                var status = (bool?)null;
+
+                if (i == 0)
+                    status = true;
+                else if (i == lineSegment.Count - 1)
+                    status = false;
+
+                return (rTGrid, rXGrid, status);
+            });
+
+            var laneStartViewModel = laneType switch
+            {
+                LaneType.Left => new LaneLeftStartViewModel(),
+                LaneType.Center => new LaneCenterStartViewModel(),
+                LaneType.Right => new LaneRightStartViewModel(),
+                _ => default(DisplayObjectViewModelBase)
+            };
+
+            var leneStartObj = laneStartViewModel.ReferenceOngekiObject as LaneStartBase;
+
+            var nextGenetor = laneType switch
+            {
+                LaneType.Left => () => new LaneLeftNext(),
+                LaneType.Center => () => new LaneCenterNext(),
+                LaneType.Right => () => new LaneRightNext(),
+                _ => default(Func<ConnectableChildObjectBase>)
+            };
+
+            var endGenetor = laneType switch
+            {
+                LaneType.Left => () => new LaneLeftEnd(),
+                LaneType.Center => () => new LaneCenterEnd(),
+                LaneType.Right => () => new LaneRightEnd(),
+                _ => default(Func<ConnectableChildObjectBase>)
+            };
+
+            if (laneStartViewModel is null)
+                return null;
+
+            foreach ((var tGrid, var xGrid, var status) in xtGrids)
+            {
+                if (status == true)
+                {
+                    leneStartObj.XGrid = xGrid;
+                    leneStartObj.TGrid = tGrid;
+                    continue;
+                }
+
+                var obj = status == null ? nextGenetor() : endGenetor();
+                leneStartObj.AddChildObject(obj);
+
+                obj.XGrid = xGrid;
+                obj.TGrid = tGrid;
+            }
+
+            return laneStartViewModel;
         }
     }
 }
