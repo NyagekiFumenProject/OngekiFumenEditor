@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.Converters
                 return values[1] switch
                 {
                     LaneType.Left or LaneType.Center or LaneType.Right => laneBrush,
-                    _ => Visibility.Hidden
+                    _ => Brushes.Transparent
                 };
             }
 

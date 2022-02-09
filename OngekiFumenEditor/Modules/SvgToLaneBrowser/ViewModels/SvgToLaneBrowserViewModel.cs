@@ -306,7 +306,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             bool IsEqualOrSimilar(Color color, float targetColorHue)
             {
                 var colorHue = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B).GetHue();
-                return Math.Abs(colorHue - targetColorHue) <= (60 * SolorSimilar / 100);
+                return Math.Abs(colorHue - targetColorHue) <= (120 * SolorSimilar / 100);
             }
 
             foreach (LineSegmentWrapper wrapper in LineSegments)
@@ -353,6 +353,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             {
                 if (MathUtils.calcGradient(lineSegment[0].X, lineSegment[1].X, lineSegment[0].Y, lineSegment[1].Y) < 0)
                     lineSegment.Reverse();
+
+
             }
         }
     }
