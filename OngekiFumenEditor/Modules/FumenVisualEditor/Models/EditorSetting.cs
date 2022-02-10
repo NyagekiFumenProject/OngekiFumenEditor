@@ -83,7 +83,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set => Set(ref xGridUnitSpace, value);
         }
 
-        private int tGridUnitLength = 50;
+        private int tGridUnitLength = 240;
         /// <summary>
         /// 时间轴上单位线间距大小
         /// </summary>
