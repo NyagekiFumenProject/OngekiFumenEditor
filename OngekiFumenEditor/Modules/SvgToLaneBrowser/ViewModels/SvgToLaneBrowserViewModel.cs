@@ -95,8 +95,11 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             set
             {
                 Set(ref editor, value);
+                NotifyOfPropertyChange(() => IsEnableOutput);
             }
         }
+
+        public bool IsEnableOutput => Editor is not null;
 
         private bool isShowOutputableOnly;
         public bool IsShowOutputableOnly
@@ -160,6 +163,17 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             }
         }
 
+        private float edgeCloseSimplfy = 0.1f;
+        public float EdgeCloseSimplfy
+        {
+            get => edgeCloseSimplfy;
+            set
+            {
+                Set(ref edgeCloseSimplfy, value);
+                UpdateLinesLaneTarget();
+            }
+        }
+
         private PointVerticalAlignTarget pointVerticalAlignTarget;
         public PointVerticalAlignTarget PointVerticalAlignTarget
         {
@@ -186,48 +200,18 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
 
         public IEnumerable<PointHorizonAlignTarget> PointHorizonAlignTargetValues => Enum.GetValues<PointHorizonAlignTarget>();
 
-        public class LineSegmentWrapper : PropertyChangedBase
+        private int beforeOptimzePointsCount;
+        public int BeforeOptimzePointsCount
         {
-            private PathGeometry path;
-            public PathGeometry Path
+            get => beforeOptimzePointsCount;
+            set
             {
-                get => path;
-                set => Set(ref path, value);
-            }
-
-            private SolidColorBrush color;
-            public SolidColorBrush Color
-            {
-                get => color;
-                set => Set(ref color, value);
-            }
-
-            public Brush LaneTargetColor => LaneTarget switch
-            {
-                LaneType.Left => Brushes.Red,
-                LaneType.Center => Brushes.Green,
-                LaneType.Right => Brushes.Blue,
-                _ => Brushes.Transparent
-            };
-
-            private LineSegementCollection rawLineSegmentCollection;
-            public LineSegementCollection RawLineSegmentCollection
-            {
-                get => rawLineSegmentCollection;
-                set => Set(ref rawLineSegmentCollection, value);
-            }
-
-            private LaneType? laneTarget = null;
-            public LaneType? LaneTarget
-            {
-                get => laneTarget;
-                set
-                {
-                    Set(ref laneTarget, value);
-                    NotifyOfPropertyChange(() => LaneTargetColor);
-                }
+                Set(ref beforeOptimzePointsCount, value);
             }
         }
+
+        public int AfterOptimzePointsCount => LineSegments.Select(x => x.RawLineSegmentCollection.Points.Count).Sum();
+        public int OutputOptimzePointsCount => LineSegments.Where(x => x.LaneTarget != null).Select(x => x.RawLineSegmentCollection.Points.Count).Sum();
 
         public ObservableCollection<LineSegmentWrapper> LineSegments { get; } = new ObservableCollection<LineSegmentWrapper>();
 
@@ -276,9 +260,15 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
         public async void RegenerateSVGContent()
         {
             var lineSegements = (await Interpolater.GenerateInterpolatedLineSegmentAsync(await File.ReadAllTextAsync(SvgFilePath), interpolaterOption)).Where(x => x.Points.Count > 0).ToList();
+            BeforeOptimzePointsCount = lineSegements.Select(x => x.Points.Count).Sum();
 
             foreach (var item in lineSegements)
-                LineSegmentOptimzer.Optimze(item, EdgeSimplfy);
+            {
+                if (EdgeSimplfy > 0)
+                    LineSegmentSimplifier.SimplifySameGradientPoints(item, EdgeSimplfy);
+                if (EdgeCloseSimplfy > 0)
+                    LineSegmentSimplifier.SimplifyTooClosePoints(item, EdgeCloseSimplfy * item.CalculateBound().Width);
+            }
 
             LineSegments.Clear();
 
@@ -320,6 +310,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
 
             UpdateHorizonVerticalAlignPreview();
             UpdateLinesLaneTarget();
+
+            NotifyOfPropertyChange(() => AfterOptimzePointsCount);
         }
 
         public void UpdateLinesLaneTarget()
@@ -345,6 +337,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 else
                     wrapper.LaneTarget = null;
             }
+
+            NotifyOfPropertyChange(() => OutputOptimzePointsCount);
         }
 
         public void UpdateHorizonVerticalAlignPreview()
@@ -382,17 +376,19 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 if (GenerateLaneViewModel(lineSegment, laneType) is DisplayObjectViewModelBase generatedViewModel)
                     Editor.AddObject(generatedViewModel);
             }
+
+            Editor.Redraw(RedrawTarget.OngekiObjects);
         }
 
-        private DisplayObjectViewModelBase GenerateLaneViewModel(List<System.Drawing.PointF> lineSegment, LaneType? laneType)
+        private IEnumerable<(TGrid tGrid, XGrid xGrid, bool? status)> EnumMappedPositionLineSegements(List<System.Drawing.PointF> lineSegment)
         {
             var bx = XGridCalculator.ConvertXGridToX(XGrid, Editor);
             var by = TGridCalculator.ConvertTGridToY(TGrid, Editor);
 
-            var xtGrids = lineSegment.Select((x, i) =>
+            return lineSegment.Select((x, i) =>
             {
-                var rx = bx + x.X - CurrentOriginOffset.X;
-                var ry = by + x.Y - CurrentOriginOffset.Y;
+                var rx = bx - (CurrentOriginOffset.X - x.X);
+                var ry = by + (CurrentOriginOffset.Y - CurrentSegmentsBound.Height + CanvasTranslateOffset.Y / 2 - x.Y);
 
                 var rTGrid = TGridCalculator.ConvertYToTGrid(ry, Editor);
                 var rXGrid = XGridCalculator.ConvertXToXGrid(rx, Editor);
@@ -406,6 +402,11 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
 
                 return (rTGrid, rXGrid, status);
             });
+        }
+
+        private DisplayObjectViewModelBase GenerateLaneViewModel(List<System.Drawing.PointF> lineSegment, LaneType? laneType)
+        {
+            var xtGrids = EnumMappedPositionLineSegements(lineSegment);
 
             var laneStartViewModel = laneType switch
             {
