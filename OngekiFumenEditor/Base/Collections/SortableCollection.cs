@@ -17,6 +17,7 @@ namespace OngekiFumenEditor.Base.Collections
         private ComparerWrapper<T> comparer;
 
         public bool IsBatching { get; private set; }
+        public int Count => items.Count;
 
         public SortableCollection(Func<T, X> sortKeySelector, string sortKeyPropertyName = default)
         {

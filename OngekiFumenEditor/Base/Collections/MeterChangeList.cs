@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Base.Collections
     public class MeterChangeList : IEnumerable<MeterChange>
     {
         private MeterChange firstMeter = new MeterChange();
-        private List<MeterChange> changedMeterList = new List<MeterChange>();
+        private TGridSortList<MeterChange> changedMeterList = new ();
         public MeterChange FirstMeter => firstMeter;
 
         public event Action OnChangedEvent;

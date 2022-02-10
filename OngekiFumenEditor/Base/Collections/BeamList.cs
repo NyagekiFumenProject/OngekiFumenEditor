@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Base.Collections
 {
     public class BeamList : IEnumerable<BeamStart>
     {
-        private List<BeamStart> beams = new();
+        private TGridSortList<BeamStart> beams = new();
 
         public IEnumerator<BeamStart> GetEnumerator() => beams.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

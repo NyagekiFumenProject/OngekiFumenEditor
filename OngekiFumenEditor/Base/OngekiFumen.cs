@@ -28,14 +28,14 @@ namespace OngekiFumenEditor.Base
         public BulletPalleteList BulletPalleteList { get; } = new();
         public BpmList BpmList { get; } = new();
         public LaneList Lanes { get; } = new();
-        public List<Bell> Bells { get; } = new();
-        public List<Flick> Flicks { get; } = new();
-        public List<Bullet> Bullets { get; } = new();
-        public List<ClickSE> ClickSEs { get; } = new();
+        public TGridSortList<Bell> Bells { get; } = new();
+        public TGridSortList<Flick> Flicks { get; } = new();
+        public TGridSortList<Bullet> Bullets { get; } = new();
+        public TGridSortList<ClickSE> ClickSEs { get; } = new();
         public MeterChangeList MeterChanges { get; } = new();
-        public List<EnemySet> EnemySets { get; } = new();
+        public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
-        public List<Tap> Taps { get; } = new();
+        public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
 
         public OngekiFumen()
@@ -70,9 +70,6 @@ namespace OngekiFumenEditor.Base
         {
             MetaInfo = MetaInfo;
 
-            Bells.Sort();
-
-            BpmList.Sort();
             //setup firstBPM from fumen metainfo
             var firstBpm = new BPMChange()
             {
@@ -104,8 +101,6 @@ namespace OngekiFumenEditor.Base
             if (unusedMeter is not null && MeterChanges.FirstMeter != unusedMeter)
                 MeterChanges.Remove(unusedMeter);
             MeterChanges.SetFirstBpm(firstMeter);
-
-            EnemySets.Sort();
         }
 
         public void AddObject(OngekiObjectBase obj)
