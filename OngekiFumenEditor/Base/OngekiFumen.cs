@@ -86,7 +86,6 @@ namespace OngekiFumenEditor.Base
             BpmList.SetFirstBpm(firstBpm);
 
             //setup firstMeter from fumen metainfo
-            MeterChanges.Sort();
             var firstMeter = new MeterChange()
             {
                 TGrid = new TGrid()

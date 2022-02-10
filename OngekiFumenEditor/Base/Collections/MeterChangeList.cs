@@ -69,8 +69,6 @@ namespace OngekiFumenEditor.Base.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public void Sort() => changedMeterList.Sort();
-
         public MeterChange GetMeter(TGrid time) => this.LastOrDefault(bpm => bpm.TGrid <= time);
 
         public MeterChange GetPrevMeter(MeterChange time) => GetPrevMeter(time.TGrid);

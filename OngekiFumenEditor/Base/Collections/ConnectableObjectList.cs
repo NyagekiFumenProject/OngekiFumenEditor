@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Base.Collections
 {
     public class ConnectableObjectList<START_TYPE, CHILD_TYPE> : IEnumerable<START_TYPE> where START_TYPE : ConnectableStartObject where CHILD_TYPE : ConnectableChildObjectBase
     {
-        private List<START_TYPE> startObjects = new();
+        private TGridSortList<START_TYPE> startObjects = new();
 
         public IEnumerator<START_TYPE> GetEnumerator() => startObjects.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -20,8 +20,8 @@ namespace OngekiFumenEditor.Base.Collections
             {
                 //wallStart.PropertyChanged += OnBeamStartPropertyChanged;
                 if (startObject.RecordId < 0) //如果recordId < 0 ,那么添加到集合里面时会自动分配一个RecordId
-                    startObject.RecordId = (startObjects.LastOrDefault()?.RecordId ?? 0) + 1;
-                startObjects.InsertBySortBy(startObject, x => x.RecordId);
+                    startObject.RecordId = startObjects.Count > 0 ? startObjects.Select(x=>x.RecordId).Max() + 1 : 0;
+                startObjects.Add(startObject);
             }
             else if (obj is CHILD_TYPE child)
             {
