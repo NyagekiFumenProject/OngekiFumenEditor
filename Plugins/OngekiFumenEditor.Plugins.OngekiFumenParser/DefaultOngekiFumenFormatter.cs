@@ -153,7 +153,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
 
         public void ProcessFLICK(OngekiFumen fumen, StringBuilder sb)
         {
-            sb.AppendLine("[FLICK]");   
+            sb.AppendLine("[FLICK]");
 
             foreach (var u in fumen.Flicks.OrderBy(x => x.TGrid))
                 sb.AppendLine($"{u.IDShortName} {u.TGrid.Serialize()} {u.XGrid.Serialize()} {(u.Direction == OngekiFumenEditor.Base.OngekiObjects.Flick.FlickDirection.Left ? "L" : "R")}");
@@ -172,7 +172,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
                         break;
                     case Hold h:
                         var end = h.Children.LastOrDefault();
-                        sb.AppendLine($"{h.IDShortName} {h.ReferenceLaneStart.RecordId} {h.TGrid.Serialize()} {h.XGrid.Unit} {h.XGrid.Grid} {end?.TGrid.Serialize()} {end?.XGrid.Unit} {end?.XGrid.Grid}");
+                        sb.AppendLine($"{h.IDShortName} {h.ReferenceLaneStart?.RecordId ?? -1} {h.TGrid.Serialize()} {h.XGrid.Unit} {h.XGrid.Grid} {end?.TGrid.Serialize()} {end?.XGrid.Unit} {end?.XGrid.Grid}");
                         break;
                     default:
                         break;
