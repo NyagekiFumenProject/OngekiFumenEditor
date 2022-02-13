@@ -41,6 +41,43 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             child.ReferenceStartObject = this;
         }
 
+        private void RemoveConnector(ConnectableObjectBase from,ConnectableObjectBase to)
+        {
+            connectors.Remove(connectors.FirstOrDefault(x => x.From == from && x.To == to));
+        }
+
+        public void InsertChildObject(TGrid dragTGrid, ConnectableChildObjectBase child)
+        {
+            if (!children.Contains(child))
+            {
+                child.PrevObject = default;
+                for (int i = 0; i < children.Count; i++)
+                {
+                    var next = children[i];
+
+                    if (dragTGrid < next.TGrid)
+                    {
+                        ConnectableObjectBase prev = i == 0 ? this : children[i - 1];
+                        children.Insert(i, child);
+                        RemoveConnector(prev, next);
+                        next.PrevObject = child;
+                        child.PrevObject = prev;
+
+                        connectors.Add(GenerateConnector(child.PrevObject, child));
+                        connectors.Add(GenerateConnector(next.PrevObject, next));
+
+                        NotifyOfPropertyChange(() => Children);
+                        child.PropertyChanged += OnPropertyChanged;
+                        break;
+                    }
+                }
+
+                if (child.PrevObject is null)
+                    AddChildObject(child);
+            }
+            child.ReferenceStartObject = this;
+        }
+
         public void RemoveChildObject(ConnectableChildObjectBase child)
         {
             children.Remove(child);
