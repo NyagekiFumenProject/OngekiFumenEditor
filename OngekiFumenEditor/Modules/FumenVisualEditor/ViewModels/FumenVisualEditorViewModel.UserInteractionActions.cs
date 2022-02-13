@@ -6,6 +6,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -358,7 +359,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
-        private void RemoveObject(DisplayObjectViewModelBase obj)
+        public void RemoveObject(DisplayObjectViewModelBase obj)
         {
             obj.IsSelected = false;
             EditorViewModels.Remove(obj);
@@ -571,34 +572,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             var mousePosition = arg.GetPosition(e.View as FrameworkElement);
-            var displayObject = default(DisplayObjectViewModelBase);
-            var ry = CanvasHeight - mousePosition.Y + MinVisibleCanvasY;
+            mousePosition.Y = CanvasHeight - mousePosition.Y + MinVisibleCanvasY;
 
             switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
             {
                 case ToolboxItem toolboxItem:
-                    displayObject = CacheLambdaActivator.CreateInstance(toolboxItem.ItemType) as DisplayObjectViewModelBase;
+                    new DefaultToolBoxDropAction(toolboxItem).Drop(this,mousePosition);
                     break;
-                case OngekiObjectDropParam dropParam:
-                    displayObject = dropParam.OngekiObjectViewModel.Value;
+                case IEditorDropHandler dropHandler:
+                    dropHandler.Drop(this, mousePosition);
                     break;
             }
-            /*
-                        if (displayObject is IEditorDisplayableViewModel editorObjectViewModel)
-                            editorObjectViewModel.OnObjectCreated(displayObject.ReferenceOngekiObject, this);
-            */
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Ìí¼ÓÎï¼þ", () =>
-            {
-                AddObject(displayObject);
-                mousePosition.Y = ry;
-                displayObject.MoveCanvas(mousePosition);
-                Redraw(RedrawTarget.OngekiObjects);
-            }, () =>
-            {
-                RemoveObject(displayObject);
-                Redraw(RedrawTarget.OngekiObjects);
-            }));
-
         }
 
         #endregion

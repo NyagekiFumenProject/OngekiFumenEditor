@@ -8,6 +8,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;

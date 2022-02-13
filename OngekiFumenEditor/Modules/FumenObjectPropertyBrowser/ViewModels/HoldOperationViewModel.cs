@@ -6,6 +6,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using System;

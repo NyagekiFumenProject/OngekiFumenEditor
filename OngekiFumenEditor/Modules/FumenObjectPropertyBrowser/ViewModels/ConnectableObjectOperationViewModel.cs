@@ -3,6 +3,7 @@ using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
