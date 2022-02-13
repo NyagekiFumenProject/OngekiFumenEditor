@@ -8,10 +8,9 @@
     d:Background="White"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter">
-        </BooleanToVisibilityConverter>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
-    <StackPanel Margin="21,5,0,0" Visibility="{Binding IsEnableDrag, Converter={StaticResource BooleanToVisibilityConverter}}">
+    <StackPanel Margin="21,5,0,0">
         <Border
             Width="130"
             HorizontalAlignment="Left"
@@ -29,7 +28,8 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove2($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             BorderBrush="Black"
-            BorderThickness="1">
+            BorderThickness="1"
+            Visibility="{Binding IsEnableDragEnd, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"

@@ -110,7 +110,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     removeObjects.Add(viewModel);
             }
             foreach (var removeViewModel in removeObjects)
+            {
                 EditorViewModels.Remove(removeViewModel);
+                CurrentDisplayEditorViewModels.Remove(removeViewModel);
+            }
 
             //将还没显示的都塞进去显示了
             var c = 0;

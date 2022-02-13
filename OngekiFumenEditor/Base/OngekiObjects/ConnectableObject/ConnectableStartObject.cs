@@ -48,6 +48,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public void InsertChildObject(TGrid dragTGrid, ConnectableChildObjectBase child)
         {
+            if (child is ConnectableEndObject)
+            {
+                AddChildObject(child);
+                return;
+            }
+
             if (!children.Contains(child))
             {
                 child.PrevObject = default;
@@ -75,6 +81,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 if (child.PrevObject is null)
                     AddChildObject(child);
             }
+
             child.ReferenceStartObject = this;
         }
 

@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
@@ -30,33 +31,34 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             {
                 connectableObject = value;
                 NotifyOfPropertyChange(() => ConnectableObject);
-                CheckEnableDrag();
+                CheckEnableDragEnd();
             }
         }
 
-        private bool isEnableDrag = true;
-        public bool IsEnableDrag
+        private bool isEnableDragEnd = true;
+        public bool IsEnableDragEnd
         {
             get
             {
-                return isEnableDrag;
+                return isEnableDragEnd;
             }
             set
             {
-                var p = isEnableDrag;
-                isEnableDrag = value;
-                NotifyOfPropertyChange(() => IsEnableDrag);
+                isEnableDragEnd = value;
+                NotifyOfPropertyChange(() => isEnableDragEnd);
             }
         }
 
-        private void CheckEnableDrag()
+        public ConnectableStartObject RefStartObject => ConnectableObject switch
         {
-            IsEnableDrag = !((ConnectableObject switch
-            {
-                ConnectableStartObject start => start,
-                ConnectableNextObject next => next.ReferenceStartObject,
-                _ => default,
-            })?.Children.OfType<ConnectableEndObject>().Any() ?? false);
+            ConnectableStartObject start => start,
+            ConnectableNextObject next => next.ReferenceStartObject,
+            _ => default,
+        };
+
+        private void CheckEnableDragEnd()
+        {
+            IsEnableDragEnd = !(RefStartObject?.Children.OfType<ConnectableEndObject>().Any() ?? false);
         }
 
         public ConnectableObjectOperationViewModel(ConnectableObjectBase obj)
@@ -91,25 +93,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
-                var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
-                {
-                    var genWallChild = GenerateChildObject(isWallNext);
-                    var genViewModel = GenerateChildObjectViewModel(isWallNext);
-                    genViewModel.ReferenceOngekiObject = genWallChild;
+                //ConnectableObjectDropAction
+                var genChild = GenerateChildObject(isWallNext);
+                var dropAction = new ConnectableObjectDropAction(RefStartObject, genChild, () => CheckEnableDragEnd());
 
-                    if (ConnectableObject is ConnectableStartObject start)
-                    {
-                        start.AddChildObject(genWallChild);
-                    }
-                    else if (ConnectableObject is ConnectableNextObject { ReferenceStartObject: { } } next)
-                    {
-                        next.ReferenceStartObject.AddChildObject(genWallChild);
-                    }
-
-                    CheckEnableDrag();
-                    return genViewModel;
-                }));
-                DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
+                DragDrop.DoDragDrop(e.Source, new DataObject(ToolboxDragDrop.DataFormat, dropAction), DragDropEffects.Move);
                 _draggingItem = false;
             }
         }
