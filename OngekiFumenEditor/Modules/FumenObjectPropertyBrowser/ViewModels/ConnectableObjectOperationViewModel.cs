@@ -76,10 +76,14 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             ProcessDragStart(e, false);
         }
 
-        public abstract ConnectableChildObjectBase GenerateChildObject(bool needNext);
-        public abstract DisplayObjectViewModelBase GenerateChildObjectViewModel(bool needNext);
+        public void Border_MouseMove3(ActionExecutionContext e)
+        {
+            ProcessDragStart(e, null);
+        }
 
-        private void ProcessDragStart(ActionExecutionContext e, bool isWallNext)
+        public abstract ConnectableChildObjectBase GenerateChildObject(bool needNext);
+
+        private void ProcessDragStart(ActionExecutionContext e, bool? isNext)
         {
             if (!_draggingItem)
                 return;
@@ -94,8 +98,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
                 //ConnectableObjectDropAction
-                var genChild = GenerateChildObject(isWallNext);
-                var dropAction = new ConnectableObjectDropAction(RefStartObject, genChild, () => CheckEnableDragEnd());
+                var genChild = GenerateChildObject(isNext ?? false);
+                IEditorDropHandler dropAction = isNext == null ? new ConnectableObjectSplitDropAction(RefStartObject, genChild, () => CheckEnableDragEnd()) : new ConnectableObjectDropAction(RefStartObject, genChild, () => CheckEnableDragEnd());
 
                 DragDrop.DoDragDrop(e.Source, new DataObject(ToolboxDragDrop.DataFormat, dropAction), DragDropEffects.Move);
                 _draggingItem = false;

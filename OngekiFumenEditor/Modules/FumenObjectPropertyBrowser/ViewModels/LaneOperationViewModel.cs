@@ -48,26 +48,5 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 _ => default
             };
         }
-
-        public override DisplayObjectViewModelBase GenerateChildObjectViewModel(bool needNext)
-        {
-            if (LaneTypeChar == 'W')
-            {
-                return LaneChar switch
-                {
-                    'L' => needNext ? new WallLeftNextViewModel() : new WallLeftEndViewModel(),
-                    'R' => needNext ? new WallRightNextViewModel() : new WallRightEndViewModel(),
-                    _ => default
-                };
-            }
-
-            return LaneChar switch
-            {
-                'L' => needNext ? new LaneLeftNextViewModel() : new LaneLeftEndViewModel(),
-                'C' => needNext ? new LaneCenterNextViewModel() : new LaneCenterEndViewModel(),
-                'R' => needNext ? new LaneRightNextViewModel() : new LaneRightEndViewModel(),
-                _ => default
-            };
-        }
     }
 }

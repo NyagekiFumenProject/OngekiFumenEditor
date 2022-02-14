@@ -35,5 +35,22 @@
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
                 Text="Drag new End" />
         </Border>
+        <Border
+            Height="2"
+            Margin="-21,10,0,0"
+            BorderBrush="Black"
+            BorderThickness="1" />
+        <Border
+            Width="130"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove3($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
+            BorderBrush="Black"
+            BorderThickness="1">
+            <TextBlock
+                Margin="5"
+                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Text="Split new End" />
+        </Border>
     </StackPanel>
 </UserControl>
