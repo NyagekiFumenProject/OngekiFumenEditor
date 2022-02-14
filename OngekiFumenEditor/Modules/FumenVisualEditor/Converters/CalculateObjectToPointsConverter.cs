@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
                 }
             }
 
-            return 0;
+            return 0d;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
