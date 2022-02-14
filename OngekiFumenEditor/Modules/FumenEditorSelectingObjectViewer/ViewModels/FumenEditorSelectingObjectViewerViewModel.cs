@@ -51,6 +51,11 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
             CurrentPickedSelectObject = null;
         }
 
+        public void OnRefresh()
+        {
+            Editor?.NotifyOfPropertyChange(nameof(Editor.SelectObjects));
+        }
+
         public void OnItemSingleClick(DisplayObjectViewModelBase item)
         {
             IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(item.ReferenceOngekiObject, Editor);
