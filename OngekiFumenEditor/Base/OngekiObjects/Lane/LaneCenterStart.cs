@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
     public class LaneCenterStart : LaneStartBase
     {
         public override string IDShortName => "LCS";
-        public override Type ModelViewType => typeof(LaneLeftStartViewModel);
+        public override Type ModelViewType => typeof(LaneCenterStartViewModel);
 
         public override LaneType LaneType => LaneType.Center;
 
