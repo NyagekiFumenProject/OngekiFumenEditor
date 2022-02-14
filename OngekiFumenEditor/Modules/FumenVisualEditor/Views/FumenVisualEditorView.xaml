@@ -26,7 +26,9 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
             <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
+            <converters:BeatRhythmToBrushConverter x:Key="BeatRhythmToBrushConverter" />
             <converters:ReverseDoubleConverter x:Key="ReverseDoubleConverter" />
+            <converters:BeatRhythmToVisibleConverter x:Key="BeatRhythmToVisibleConverter" />
             <converters:TGridDisplayConverter x:Key="TGridDisplayConverter" />
             <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter" />
             <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
@@ -119,6 +121,20 @@
                             </Canvas>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Visibility">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource BeatRhythmToVisibleConverter}">
+                                        <MultiBinding.Bindings>
+                                            <Binding Path="BeatRhythm" />
+                                            <Binding ElementName="XGridUnitLineLocations" Path="DataContext.EditorObjectVisibility" />
+                                        </MultiBinding.Bindings>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid>

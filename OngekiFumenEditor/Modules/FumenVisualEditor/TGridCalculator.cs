@@ -50,10 +50,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor) => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(BpmList bpmList, int tUnitLength = 240) => bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
 
-        public static IEnumerable<(TGrid tGrid, double y, int i)> GetVisbleTimelines(FumenVisualEditorViewModel editor, int tUnitLength = 240)
+        public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(FumenVisualEditorViewModel editor, int tUnitLength = 240)
             => GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.MinVisibleCanvasY, editor.MaxVisibleCanvasY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, tUnitLength);
         
-        public static IEnumerable<(TGrid tGrid, double y, int i)> GetVisbleTimelines(BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, int tUnitLength = 240)
+        public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, int tUnitLength = 240)
         {
             //划线的中止位置
             var endTGrid = ConvertYToTGrid(maxVisibleCanvasY, bpmList, tUnitLength);
@@ -85,7 +85,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
                 //计算每一拍的(grid)长度
                 var resT = currentTGridBase.ResT;
-                var lengthPerBeat = resT * 1.0d / (currentMeter.BunShi * beatSplit);
+                var beatCount = currentMeter.BunShi * beatSplit;
+                var lengthPerBeat = resT * 1.0d / beatCount;
 
                 //这里也可以跳过添加完全看不到的线
                 var diff = currentTGridBaseOffset - currentTGridBase;
@@ -104,7 +105,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                     if (tGrid > endTGrid)
                         yield break;
                     //
-                    yield return (tGrid, y, i);
+                    yield return (tGrid, y, i % beatCount);
                     i++;
                 }
                 currentTGridBaseOffset = nextTGridBase;
