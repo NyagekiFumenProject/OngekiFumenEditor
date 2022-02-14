@@ -22,8 +22,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="./EditorObjectDataTemplates.xaml">
-                </ResourceDictionary>
+                <ResourceDictionary Source="./EditorObjectDataTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
             <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
@@ -64,33 +63,18 @@
             Visibility="{Binding EditorObjectVisibility}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Canvas>
-                    </Canvas>
+                    <Canvas />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid>
                         <Line
+                            Stroke="#30FFFFFF"
                             X1="{Binding X}"
                             X2="{Binding X}"
                             Y1="0"
-                            Y2="{Binding ActualHeight, ElementName=XGridUnitLineLocations}">
-                            <Line.Style>
-                                <Style TargetType="Line">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                            <Setter Property="Stroke" Value="#90FFFFFF">
-                                            </Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsCenterLine}" Value="False">
-                                            <Setter Property="Stroke" Value="#40FFFFFF">
-                                            </Setter>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Line.Style>
-                        </Line>
+                            Y2="{Binding ActualHeight, ElementName=XGridUnitLineLocations}" />
                         <TextBlock
                             FontSize="10"
                             Foreground="White"
@@ -100,19 +84,16 @@
                                 <Style TargetType="TextBlock">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                            <Setter Property="Visibility" Value="Hidden">
-                                            </Setter>
+                                            <Setter Property="Visibility" Value="Hidden" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </TextBlock.Style>
                             <TextBlock.RenderTransformOrigin>
-                                <Point X="1">
-                                </Point>
+                                <Point X="1" />
                             </TextBlock.RenderTransformOrigin>
                             <TextBlock.RenderTransform>
-                                <TranslateTransform X="{Binding X}">
-                                </TranslateTransform>
+                                <TranslateTransform X="{Binding X}" />
                             </TextBlock.RenderTransform>
                         </TextBlock>
                     </Grid>
@@ -142,24 +123,21 @@
                         <DataTemplate>
                             <Grid>
                                 <Line
-                                    Stroke="#80FFFFFF"
+                                    Stroke="#30FFFFFF"
                                     X1="{Binding ElementName=myAnimatedScrollViewer, Path=ActualWidth}"
                                     X2="0"
                                     Y1="{Binding Y}"
-                                    Y2="{Binding Y}">
-                                </Line>
+                                    Y2="{Binding Y}" />
                                 <TextBlock
                                     FontSize="10"
                                     Foreground="White"
                                     Opacity="0.35"
                                     Text="{Binding TGrid}">
                                     <TextBlock.RenderTransformOrigin>
-                                        <Point Y="0.5">
-                                        </Point>
+                                        <Point Y="0.5" />
                                     </TextBlock.RenderTransformOrigin>
                                     <TextBlock.RenderTransform>
-                                        <TranslateTransform Y="{Binding Y}">
-                                        </TranslateTransform>
+                                        <TranslateTransform Y="{Binding Y}" />
                                     </TextBlock.RenderTransform>
                                 </TextBlock>
                             </Grid>
