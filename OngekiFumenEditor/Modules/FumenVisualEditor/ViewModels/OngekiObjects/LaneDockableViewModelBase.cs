@@ -27,6 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
         {
             var editor = EditorViewModel;
             var forceMagneticToLane = editor.Setting.ForceTapHoldMagneticDockToLane;
+            var forceMagnetic = editor.Setting.ForceMagneticDock;
             var enableMoveTo = !forceMagneticToLane;
 
             if (CheckAndAdjustY(relativePoint.Y) is double y && TGridCalculator.ConvertYToTGrid(y, editor) is TGrid tGrid)
@@ -45,7 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                     .OrderBy(x => x.Item1)
                     .FirstOrDefault();
 
-                var magneticDockDistance = forceMagneticToLane ? int.MaxValue : 8;
+                var magneticDockDistance = forceMagneticToLane || forceMagnetic ? int.MaxValue : 8;
 
                 if (closestLaneObject.startObject is not null && closestLaneObject.Item1 < magneticDockDistance)
                 {
