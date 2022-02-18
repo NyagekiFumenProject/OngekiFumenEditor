@@ -9,7 +9,7 @@
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
-    d:DataContext="{d:DesignInstance Type=local:ViewFumenCheckerListViewerViewModel}"
+    d:DataContext="{d:DesignInstance Type=local:FumenCheckerListViewerViewModel}"
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -31,10 +31,124 @@
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
                 刷新
             </Button>
+            <ToggleButton
+                Background="Transparent"
+                BorderBrush="Red"
+                IsChecked="{Binding EnableShowError}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe UI Symbol"
+                        FontSize="15"
+                        FontWeight="Bold"
+                        Foreground="Red"
+                        Text="⮿">
+                    </TextBlock>
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        Padding="10,2,10,2"
+                        VerticalAlignment="Center">
+                        <Run Text="错误">
+                        </Run>
+                        <Run Text="{Binding ErrorCount, Mode=OneWay, StringFormat={}{0} 个}" />
+                        <Run>
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EnableShowError}" Value="True">
+                                            <Setter Property="Text" Value="" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding EnableShowError}" Value="False">
+                                            <Setter Property="Text" Value="(不显示)" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                    </TextBlock>
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton
+                Margin="5,0,0,0"
+                Background="Transparent"
+                BorderBrush="LightGreen"
+                IsChecked="{Binding EnableShowProblem}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe UI Symbol"
+                        FontSize="15"
+                        FontWeight="Bold"
+                        Foreground="LightGreen"
+                        Text="">
+                    </TextBlock>
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        Padding="10,2,10,2"
+                        VerticalAlignment="Center">
+                        <Run Text="问题">
+                        </Run>
+                        <Run Text="{Binding ProblemCount, Mode=OneWay, StringFormat={}{0} 个}" />
+                        <Run>
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EnableShowProblem}" Value="True">
+                                            <Setter Property="Text" Value="" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding EnableShowProblem}" Value="False">
+                                            <Setter Property="Text" Value="(不显示)" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                    </TextBlock>
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton
+                Margin="5,0,0,0"
+                Background="Transparent"
+                BorderBrush="SkyBlue"
+                IsChecked="{Binding EnableShowSuggest}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe UI Symbol"
+                        FontSize="15"
+                        FontWeight="Bold"
+                        Foreground="SkyBlue"
+                        Text="">
+                    </TextBlock>
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        Padding="10,2,10,2"
+                        VerticalAlignment="Center">
+                        <Run Text="建议">
+                        </Run>
+                        <Run Text="{Binding SuggestCount, Mode=OneWay, StringFormat={}{0} 个}" />
+                        <Run>
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EnableShowSuggest}" Value="True">
+                                            <Setter Property="Text" Value="" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding EnableShowSuggest}" Value="False">
+                                            <Setter Property="Text" Value="(不显示)" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                    </TextBlock>
+                </StackPanel>
+            </ToggleButton>
         </StackPanel>
         <ListView
             Grid.RowSpan="3"
             Margin="0,31,0,0"
+            cal:Message.Attach="[Event Loaded]=[Action OnListViewLoaded($executionContext)]"
             Background="Transparent"
             BorderBrush="Transparent"
             ItemsSource="{Binding CheckResults}"

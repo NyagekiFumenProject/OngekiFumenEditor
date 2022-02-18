@@ -11,6 +11,9 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 {
@@ -21,17 +24,56 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 
         public ObservableCollection<ICheckResult> CheckResults { get; } = new ObservableCollection<ICheckResult>();
 
+        public int ErrorCount => CheckResults.Count(x => x.Severity == RuleSeverity.Error);
+        public int ProblemCount => CheckResults.Count(x => x.Severity == RuleSeverity.Problem);
+        public int SuggestCount => CheckResults.Count(x => x.Severity == RuleSeverity.Suggest);
+
+        private bool enableShowError = true;
+        public bool EnableShowError
+        {
+            get => enableShowError;
+            set
+            {
+                Set(ref enableShowError, value);
+                RefreshFilter();
+            }
+        }
+
+        private bool enableShowProblem = true;
+        public bool EnableShowProblem
+        {
+            get => enableShowProblem;
+            set
+            {
+                Set(ref enableShowProblem, value);
+                RefreshFilter();
+            }
+        }
+
+        private bool enableShowSuggest = true;
+        public bool EnableShowSuggest
+        {
+            get => enableShowSuggest;
+            set
+            {
+                Set(ref enableShowSuggest, value);
+                RefreshFilter();
+            }
+        }
+
         private FumenVisualEditorViewModel editor = default;
         public FumenVisualEditorViewModel Editor
         {
             get => editor;
-            set { 
+            set
+            {
                 Set(ref editor, value);
                 RefreshCurrentFumen();
             }
         }
 
         private List<IFumenCheckRule> checkRules;
+        private ListView listView;
 
         public FumenCheckerListViewerViewModel()
         {
@@ -58,6 +100,34 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
                 {
                     CheckResults.Add(checkRule);
                 }
+            }
+
+            NotifyOfPropertyChange(() => ErrorCount);
+            NotifyOfPropertyChange(() => ProblemCount);
+            NotifyOfPropertyChange(() => SuggestCount);
+        }
+
+        public void OnListViewLoaded(ActionExecutionContext e)
+        {
+            listView = e.Source as ListView;
+            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(listView.ItemsSource);
+            view.Filter = x => OnCheckResultsFilter(x as ICheckResult);
+        }
+
+        public void RefreshFilter() => CollectionViewSource.GetDefaultView(listView.ItemsSource)?.Refresh();
+
+        private bool OnCheckResultsFilter(ICheckResult checkResult)
+        {
+            switch (checkResult.Severity)
+            {
+                case RuleSeverity.Suggest:
+                    return EnableShowSuggest;
+                case RuleSeverity.Problem:
+                    return enableShowProblem;
+                case RuleSeverity.Error:
+                    return enableShowError;
+                default:
+                    return false;
             }
         }
     }
