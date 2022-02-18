@@ -66,6 +66,9 @@
     <Compile Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -155,6 +158,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

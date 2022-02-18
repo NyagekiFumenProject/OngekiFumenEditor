@@ -1,0 +1,88 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Modules.FumenCheckerListViewer.Views.FumenCheckerListViewerView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    d:DataContext="{d:DesignInstance Type=local:ViewFumenCheckerListViewerViewModel}"
+    d:DesignHeight="300"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:FadeStringEnumValuesConverter x:Key="FadeStringEnumValuesConverter">
+        </converters:FadeStringEnumValuesConverter>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="128*" />
+            <RowDefinition Height="141*" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="5,5,5,5" Orientation="Horizontal">
+            <Button
+                Margin="0,0,5,0"
+                Padding="20,2,20,2"
+                cal:Message.Attach="[Event Click] = [Action RefreshCurrentFumen()];"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                刷新
+            </Button>
+        </StackPanel>
+        <ListView
+            Grid.RowSpan="3"
+            Margin="0,31,0,0"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding CheckResults}"
+            ScrollViewer.CanContentScroll="True">
+            <ListView.Resources>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+                </Style>
+            </ListView.Resources>
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+
+                    <GridViewColumn
+                        Width="120"
+                        DisplayMemberBinding="{Binding Severity}"
+                        Header="严重程度">
+
+                    </GridViewColumn>
+
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding RuleName}"
+                        Header="检查规则">
+
+                    </GridViewColumn>
+
+                    <GridViewColumn
+                        Width="400"
+                        DisplayMemberBinding="{Binding Description}"
+                        Header="描述">
+
+                    </GridViewColumn>
+
+                    <GridViewColumn
+                        Width="200"
+                        DisplayMemberBinding="{Binding LocationDescription}"
+                        Header="错误位置">
+
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>

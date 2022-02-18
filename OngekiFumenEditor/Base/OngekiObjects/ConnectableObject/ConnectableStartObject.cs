@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             child.ReferenceStartObject = this;
         }
 
-        private void RemoveConnector(ConnectableObjectBase from,ConnectableObjectBase to)
+        private void RemoveConnector(ConnectableObjectBase from, ConnectableObjectBase to)
         {
             connectors.Remove(connectors.FirstOrDefault(x => x.From == from && x.To == to));
         }
@@ -117,6 +118,26 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             yield return this;
             foreach (var child in Children)
                 yield return child;
+        }
+
+        public GridRange GetTGridRange()
+        {
+            var x = children.AsEnumerable<ITimelineObject>().Append(this).Select(x => x.TGrid).MaxMinBy();
+            return new GridRange()
+            {
+                Max = x.max,
+                Min = x.min,
+            };
+        }
+
+        public GridRange GetXGridRange()
+        {
+            var x = children.AsEnumerable<IHorizonPositionObject>().Append(this).Select(x => x.XGrid).MaxMinBy();
+            return new GridRange()
+            {
+                Max = x.max,
+                Min = x.min,
+            };
         }
     }
 }
