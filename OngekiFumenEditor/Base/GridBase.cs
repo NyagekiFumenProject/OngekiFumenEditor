@@ -70,6 +70,10 @@ namespace OngekiFumenEditor.Base
 
         public static bool operator ==(GridBase l, GridBase r)
         {
+            if (l is null)
+                return r is null;
+            if (r is null)
+                return false;
             return l.CompareTo(r) == 0;
         }
 
