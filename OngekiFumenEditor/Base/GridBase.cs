@@ -35,6 +35,7 @@ namespace OngekiFumenEditor.Base
                 NotifyOfPropertyChange(() => Grid);
             }
         }
+
         public float Unit
         {
             get
@@ -45,6 +46,19 @@ namespace OngekiFumenEditor.Base
             {
                 unit = value;
                 NotifyOfPropertyChange(() => Unit);
+            }
+        }
+
+        public void NormalizeSelf()
+        {
+            var addUnit = Grid / gridBaseRadix;
+            Unit += addUnit;
+            Grid = (int)(Grid % gridBaseRadix);
+
+            if (Grid < 0)
+            {
+                Grid += (int)gridBaseRadix;
+                Unit --;
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Utils.ObjectPool;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
@@ -131,6 +132,48 @@ namespace OngekiFumenEditor.Utils
             }
 
             return (min, max);
+        }
+
+        public static IEnumerable<IEnumerable<T>> SequenceWrap<T>(this IEnumerable<T> collection, int wrapCount)
+        {
+            var i = 0;
+
+            var arr = ArrayPool<T>.Shared.Rent(wrapCount);
+
+            foreach (var item in collection)
+            {
+                arr[i++] = item;
+
+                if (i == wrapCount)
+                {
+                    yield return arr.Take(wrapCount);
+                    i = 0;
+                }
+            }
+
+            if (i != 0)
+                yield return arr.Take(i).ToArray();
+
+            ArrayPool<T>.Shared.Return(arr);
+        }
+
+        public static IEnumerable<IEnumerable<T>> SequenceConsecutivelyWrap<T>(this IEnumerable<T> collection, int wrapCount)
+        {
+            var link = new LinkedList<T>();
+
+            foreach (var item in collection)
+            {
+                if (link.Count == wrapCount)
+                    link.RemoveFirst();
+
+                link.AddLast(item);
+
+                if (link.Count == wrapCount)
+                    yield return link.Take(wrapCount);
+            }
+
+            if (link.Count < wrapCount)
+                yield return link.Take(wrapCount);
         }
     }
 }

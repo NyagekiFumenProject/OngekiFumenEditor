@@ -18,20 +18,9 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            var startObject = new LaneLeftStart();
-            startObject.RecordId = 0;
-
-            startObject.AddChildObject(new LaneLeftNext() { TGrid = new(1) });
-            startObject.AddChildObject(new LaneLeftNext() { TGrid = new(2) });
-            startObject.AddChildObject(new LaneLeftNext() { TGrid = new(3) });
-            startObject.AddChildObject(new LaneLeftNext() { TGrid = new(4) });
-
-            startObject.InsertChildObject(new(0.5f), new LaneLeftNext() { TGrid = new(0.5f) });
-
-            foreach (var item in startObject.GetDisplayableObjects())
-            {
-                Console.WriteLine(item.ToString());
-            }
+            var tGrid = new TGrid(4, -4000);
+            tGrid.NormalizeSelf();
+            Console.WriteLine(tGrid);
         }
     }
 }
