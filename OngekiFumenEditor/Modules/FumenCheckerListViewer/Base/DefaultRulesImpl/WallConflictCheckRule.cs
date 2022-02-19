@@ -11,25 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     [Export(typeof(IFumenCheckRule))]
     internal class WallConflictCheckRule : IFumenCheckRule
     {
-        public struct CheckResult : ICheckResult
-        {
-            public string RuleName => "WallConflict";
-
-            public RuleSeverity Severity => RuleSeverity.Error;
-
-            public string LocationDescription { get; set; }
-            public string Description { get; set; }
-
-            public TGrid NavigateTGridLocation { get; set; }
-
-            public void Navigate(object fumenHostedObj)
-            {
-                if (fumenHostedObj is FumenVisualEditorViewModel editor)
-                {
-                    editor.ScrollTo(NavigateTGridLocation);
-                }
-            }
-        }
+        const string RuleName = "WallConflict";
 
         public struct WallInfo
         {
@@ -65,8 +47,10 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 
                     if (cur.TGridRange.IsInRange(next.TGridRange, false) || next.TGridRange.IsInRange(cur.TGridRange, false))
                     {
-                        yield return new CheckResult()
+                        yield return new CommonCheckResult()
                         {
+                            RuleName = RuleName,
+                            Severity = RuleSeverity.Error,
                             Description = $"墙(id:{cur.Wall.RecordId})与另一个同方向的墙(id:{next.Wall.RecordId})发生时间冲突",
                             LocationDescription = cur.TGridRange.ToString(),
                             NavigateTGridLocation = cur.Wall.TGrid
@@ -84,8 +68,10 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                     {
                         if (child.TGrid < maxTGrid)
                         {
-                            yield return new CheckResult()
+                            yield return new CommonCheckResult()
                             {
+                                RuleName = RuleName,
+                                Severity = RuleSeverity.Error,
                                 LocationDescription = child.ToString(),
                                 Description = $"墙(id:{wall.Wall.RecordId})Next/End物件的TGrid({child.TGrid})不能低于前者({maxTGrid})",
                                 NavigateTGridLocation = child.TGrid
@@ -136,8 +122,10 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 {
                     if (rightWall.XGridRange.IsInRange(leftWall.XGridRange, false))
                     {
-                        yield return new CheckResult()
+                        yield return new CommonCheckResult()
                         {
+                            RuleName = RuleName,
+                            Severity = RuleSeverity.Error,
                             LocationDescription = leftWall.Wall.TGrid.ToString(),
                             Description = $"不同边的墙(id:{leftWall.Wall.RecordId})和(id:{rightWall.Wall.RecordId})水平交叉碰撞或重合",
                             NavigateTGridLocation = leftWall.Wall.TGrid
