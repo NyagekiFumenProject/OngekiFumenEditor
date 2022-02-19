@@ -25,6 +25,8 @@ namespace OngekiFumenEditor.Base
             }
         }
 
+        public virtual event PropertyChangedEventHandler ObjectModifiedChanged;
+
         public BulletPalleteList BulletPalleteList { get; } = new();
         public BpmList BpmList { get; } = new();
         public LaneList Lanes { get; } = new();
@@ -165,6 +167,8 @@ namespace OngekiFumenEditor.Base
                 Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.GetTypeName()}");
                 return;
             }
+
+            obj.PropertyChanged += OnOngekiObjectModify;
         }
 
         public void RemoveObject(OngekiObjectBase obj)
@@ -230,6 +234,14 @@ namespace OngekiFumenEditor.Base
                 Log.LogWarn($"delete list target not found, object type : {obj?.GetType()?.GetTypeName()}");
                 return;
             }
+
+            obj.PropertyChanged -= OnOngekiObjectModify;
+        }
+
+        private void OnOngekiObjectModify(object sender, PropertyChangedEventArgs e)
+        {
+            //Log.LogDebug($"Modified property name: {e.PropertyName} , Obj : {sender}");
+            ObjectModifiedChanged?.Invoke(sender, e);
         }
 
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects()

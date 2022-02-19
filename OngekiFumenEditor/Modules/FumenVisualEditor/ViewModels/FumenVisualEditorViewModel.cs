@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using Gemini.Framework;
+using Gemini.Modules.Shell.Commands;
 using Microsoft.Win32;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
@@ -102,16 +103,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     EditorProjectData.Fumen.BpmList.OnChangedEvent -= OnTimeSignatureListChanged;
                     EditorProjectData.Fumen.MeterChanges.OnChangedEvent -= OnTimeSignatureListChanged;
+                    EditorProjectData.Fumen.ObjectModifiedChanged -= OnFumenObjectModifiedChanged;
                 }
                 if (value is not null)
                 {
                     value.BpmList.OnChangedEvent += OnTimeSignatureListChanged;
                     value.MeterChanges.OnChangedEvent += OnTimeSignatureListChanged;
+                    value.ObjectModifiedChanged += OnFumenObjectModifiedChanged;
                 }
                 EditorProjectData.Fumen = value;
                 Redraw(RedrawTarget.All);
                 NotifyOfPropertyChange(() => Fumen);
             }
+        }
+
+        private void OnFumenObjectModifiedChanged(object sender, PropertyChangedEventArgs e)
+        {
+            IsDirty = true;
         }
 
         private double canvasWidth = default;
