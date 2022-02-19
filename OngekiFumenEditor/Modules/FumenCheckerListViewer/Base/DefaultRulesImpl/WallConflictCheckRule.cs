@@ -31,6 +31,8 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 
             public double x2 { get; set; }
             public double y2 { get; set; }
+
+            public override string ToString() => $"({x1:F2},{y1:F2})-({x2:F2},{y2:F2})";
         }
 
         private struct Point
@@ -53,13 +55,13 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 // equations of the form x = c (two vertical lines)
                 if (Math.Abs(x1 - x2) < tolerance && Math.Abs(x3 - x4) < tolerance && Math.Abs(x1 - x3) < tolerance)
                 {
-                    throw new Exception("Both lines overlap vertically, ambiguous intersection points.");
+                    return new() { x = x1, y = y3 };
                 }
 
                 //equations of the form y=c (two horizontal lines)
                 if (Math.Abs(y1 - y2) < tolerance && Math.Abs(y3 - y4) < tolerance && Math.Abs(y1 - y3) < tolerance)
                 {
-                    throw new Exception("Both lines overlap horizontally, ambiguous intersection points.");
+                    return new() { x = x1, y = y3 };
                 }
 
                 //equations of the form x=c (two vertical parallel lines)
@@ -173,6 +175,8 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 
         public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, object fumenHostViewModel)
         {
+            var editor = fumenHostViewModel as FumenVisualEditorViewModel;
+
             var leftWalls = fumen.Lanes.Where(x => x.LaneType == LaneType.WallLeft).Select(x => new WallInfo
             {
                 Wall = x,
@@ -281,12 +285,12 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                         var resT = leftWall.Wall.TGrid.ResT;
 
                         var leftPoints =
-                            leftWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Append(leftWall.Wall)
-                            .Select(x => new Point() { x = (x.XGrid - XGrid.Zero).TotalGrid(x.XGrid.ResX), y = (x.TGrid - TGrid.Zero).TotalGrid(x.TGrid.ResT) });
+                            leftWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Prepend(leftWall.Wall)
+                            .Select(x => new Point() { x = XGridCalculator.ConvertXGridToX(x.XGrid, editor), y = TGridCalculator.ConvertTGridToY(x.TGrid, editor) });
 
                         var rightPoints =
-                            rightWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Append(rightWall.Wall)
-                            .Select(x => new Point() { x = (x.XGrid - XGrid.Zero).TotalGrid(x.XGrid.ResX), y = (x.TGrid - TGrid.Zero).TotalGrid(x.TGrid.ResT) });
+                            rightWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Prepend(rightWall.Wall)
+                            .Select(x => new Point() { x = XGridCalculator.ConvertXGridToX(x.XGrid, editor), y = TGridCalculator.ConvertTGridToY(x.TGrid, editor) });
 
                         var leftLines = leftPoints
                             .SequenceConsecutivelyWrap(2)
@@ -309,13 +313,14 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                                 y2 = x[1].y
                             }).ToArray();
 
-                        if (leftLines.SelectMany(x => rightLines.Select(y => LineIntersection.FindIntersection(x, y))).FirstOrDefault(x=>x is not null) is Point p)
+                        (var leftLine, var rightLine, var point) = leftLines.SelectMany(x => rightLines.Select(y => (x, y, LineIntersection.FindIntersection(x, y, 0.000001f)))).FirstOrDefault(x => x.Item3 is not null);
+                        if (point is Point p)
                         {
                             yield return new CommonCheckResult()
                             {
                                 RuleName = RuleName,
                                 Severity = RuleSeverity.Error,
-                                LocationDescription = leftWall.Wall.TGrid.ToString(),
+                                LocationDescription = $"leftLine:{leftLine} rightLine:{rightLine} C[{p.x:F2},{p.y:F2}]",
                                 Description = $"不同边的墙(id:{leftWall.Wall.RecordId})和(id:{rightWall.Wall.RecordId})水平交叉碰撞或重合",
                                 NavigateTGridLocation = leftWall.Wall.TGrid
                             };

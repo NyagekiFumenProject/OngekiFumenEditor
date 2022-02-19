@@ -18,7 +18,10 @@ namespace OngekiFumenEditor.Base
 
         public bool IsInRange(GridRange range, bool includeEdge = true)
         {
-            return IsInRange(range.Min, includeEdge) || IsInRange(range.Max, includeEdge);
+            return IsInRange(range.Min, includeEdge)
+                || IsInRange(range.Max, includeEdge)
+                || range.IsInRange(Min, includeEdge)
+                || range.IsInRange(Max, includeEdge);
         }
 
         public override string ToString() => $"{{{Min} ~ {Max}}}";
