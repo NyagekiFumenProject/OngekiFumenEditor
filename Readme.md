@@ -1,7 +1,6 @@
 ## 音击谱面编辑器
 ----
 ## 简介
-懂得都懂，目前超级无敌大坑，很有可能弃坑，等个大爹起飞.<br>
 ![image](https://user-images.githubusercontent.com/7549173/148975306-6d95b2ab-0556-405d-ab3f-fef399d66a97.png)
 
 当前进度&roadmap:
@@ -16,13 +15,11 @@
 * 谱面预览播放音效 ([有点小问题](https://github.com/MikiraSora/OngekiFumenEditor/issues/2))
 * 实现时间轴的简便操作
 * 编辑器细节优化  
-* ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(可能跳过)
+* ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(暂时)
 * 一边写个谱面做测试一边修bugs  
-* 正式公布  **<-goal** **<- we are here!**
+* 正式公布 **<- we are here!**
 * 实现Soflan变速/LispBlock/LispDisp/EmenyLane...等命令
 * 实现各种工具等，比如智能画复杂线/曲线/文字，svg转线
 ....
-![S4N@T)957%Y7V46~_IDH@WY](https://user-images.githubusercontent.com/7549173/149096560-e21b793a-fd24-4001-bbca-89ad7c44088f.jpg)
-
 
 https://pastebin.com/hyNyvdwt
