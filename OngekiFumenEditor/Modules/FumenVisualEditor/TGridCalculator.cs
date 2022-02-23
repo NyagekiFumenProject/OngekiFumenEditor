@@ -74,6 +74,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             //钦定好要画的起始timeSignatrue
             (double startY, TGrid startTGrid, MeterChange meter, BPMChange bpm) currentTimeSignature = timeSignatures[currentTimeSignatureIndex];
 
+            if (endTGrid is null)
+                yield break;
+
             while (currentTGridBaseOffset is not null)
             {
                 var nextTimeSignatureIndex = currentTimeSignatureIndex + 1;
