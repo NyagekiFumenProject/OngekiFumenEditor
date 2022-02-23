@@ -57,19 +57,20 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
             var metaInfo = fumen.MetaInfo;
 
             sb.AppendLine("[HEADER]");
-            sb.AppendLine($"VERSION {metaInfo.Version.Major} {metaInfo.Version.Minor} {metaInfo.Version.Build}");
-            sb.AppendLine($"CREATOR {metaInfo.Creator}");
-            sb.AppendLine($"BPM_DEF {metaInfo.BpmDefinition.First} {metaInfo.BpmDefinition.Common} {metaInfo.BpmDefinition.Maximum} {metaInfo.BpmDefinition.Minimum}");
-            sb.AppendLine($"MET_DEF {metaInfo.MeterDefinition.Bunshi} {metaInfo.MeterDefinition.Bunbo}");
-            sb.AppendLine($"TRESOLUTION {metaInfo.TRESOLUTION}");
-            sb.AppendLine($"XRESOLUTION {metaInfo.XRESOLUTION}");
-            sb.AppendLine($"CLK_DEF {metaInfo.ClickDefinition}");
-            sb.AppendLine($"PROGJUDGE_BPM {metaInfo.ProgJudgeBpm}");
-            sb.AppendLine($"TUTORIAL {(metaInfo.Tutorial ? 1 : 0)}");
-            sb.AppendLine($"BULLET_DAMAGE {metaInfo.BulletDamage:F3}");
-            sb.AppendLine($"HARDBULLET_DAMAGE {metaInfo.HardBulletDamage:F3}");
-            sb.AppendLine($"DANGERBULLET_DAMAGE {metaInfo.DangerBulletDamage:F3}");
-            sb.AppendLine($"BEAM_DAMAGE {metaInfo.BeamDamage:F3}");
+            //sb.AppendLine($"VERSION\t{metaInfo.Version.Major}\t{metaInfo.Version.Minor}\t{metaInfo.Version.Build}");
+            sb.AppendLine($"VERSION\t{1}\t{2}\t{0}");
+            sb.AppendLine($"CREATOR\t{metaInfo.Creator}");
+            sb.AppendLine($"BPM_DEF\t{metaInfo.BpmDefinition.First}\t{metaInfo.BpmDefinition.Common}\t{metaInfo.BpmDefinition.Maximum}\t{metaInfo.BpmDefinition.Minimum}");
+            sb.AppendLine($"MET_DEF\t{metaInfo.MeterDefinition.Bunshi}\t{metaInfo.MeterDefinition.Bunbo}");
+            sb.AppendLine($"TRESOLUTION\t{metaInfo.TRESOLUTION}");
+            sb.AppendLine($"XRESOLUTION\t{metaInfo.XRESOLUTION}");
+            sb.AppendLine($"CLK_DEF\t{metaInfo.ClickDefinition}");
+            sb.AppendLine($"PROGJUDGE_BPM\t{metaInfo.ProgJudgeBpm}");
+            sb.AppendLine($"TUTORIAL\t{(metaInfo.Tutorial ? 1 : 0)}");
+            sb.AppendLine($"BULLET_DAMAGE\t{metaInfo.BulletDamage:F3}");
+            sb.AppendLine($"HARDBULLET_DAMAGE\t{metaInfo.HardBulletDamage:F3}");
+            sb.AppendLine($"DANGERBULLET_DAMAGE\t{metaInfo.DangerBulletDamage:F3}");
+            sb.AppendLine($"BEAM_DAMAGE\t{metaInfo.BeamDamage:F3}");
         }
 
         public void ProcessB_PALETTE(OngekiFumen fumen, StringBuilder sb)
@@ -77,7 +78,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
             sb.AppendLine("[B_PALETTE]");
 
             foreach (var bpl in fumen.BulletPalleteList.OrderBy(x => x.StrID))
-                sb.AppendLine($"{bpl.IDShortName} {bpl.StrID} {bpl.ShooterValue} {bpl.PlaceOffset} {bpl.TargetValue} {bpl.Speed} {bpl.BulletTypeValue}");
+                sb.AppendLine($"{bpl.IDShortName}\t{bpl.StrID}\t{bpl.ShooterValue}\t{bpl.PlaceOffset}\t{bpl.TargetValue}\t{bpl.Speed}\t{bpl.BulletTypeValue}");
         }
 
 
@@ -86,26 +87,26 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
             sb.AppendLine("[COMPOSITION]");
 
             foreach (var o in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
-                sb.AppendLine($"{o.IDShortName} {o.TGrid.Serialize()} {o.BPM}");
+                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.BPM}");
             sb.AppendLine();
 
             foreach (var o in fumen.MeterChanges.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.MeterChanges.FirstMeter.TGrid))
-                sb.AppendLine($"{o.IDShortName} {o.TGrid.Serialize()} {o.BunShi} {o.Bunbo}");
+                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.BunShi}\t{o.Bunbo}");
             sb.AppendLine();
 
             foreach (var o in fumen.ClickSEs.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{o.IDShortName} {o.TGrid.Serialize()}");
+                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}");
             sb.AppendLine();
 
             foreach (var o in fumen.EnemySets.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{o.IDShortName} {o.TGrid.Serialize()} {o.TagTblValue}");
+                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.TagTblValue}");
         }
 
         public void ProcessLANE(OngekiFumen fumen, StringBuilder sb)
         {
             void Serialize(ConnectableStartObject laneStart)
             {
-                void SerializeOutput(ConnectableObjectBase o) => sb.AppendLine($"{o.IDShortName} {o.RecordId} {o.TGrid.Serialize()} {o.XGrid.Serialize()}");
+                void SerializeOutput(ConnectableObjectBase o) => sb.AppendLine($"{o.IDShortName}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}");
 
                 SerializeOutput(laneStart);
                 foreach (var child in laneStart.Children)
@@ -127,12 +128,12 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
         {
             sb.AppendLine("[BULLET]");
             foreach (var u in fumen.Bullets.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{u.IDShortName} {u.ReferenceBulletPallete?.StrID} {u.TGrid.Serialize()} {u.XGrid.Serialize()}");
+                sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete?.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}");
         }
 
         public void ProcessBEAM(OngekiFumen fumen, StringBuilder sb)
         {
-            void SerializeOutput(BeamBase o) => sb.AppendLine($"{o.IDShortName} {o.RecordId} {o.TGrid.Serialize()} {o.XGrid.Serialize()} {o.WidthId}");
+            void SerializeOutput(BeamBase o) => sb.AppendLine($"{o.IDShortName}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}\t{o.WidthId}");
 
             sb.AppendLine("[BEAM]");
             foreach (var beamStart in fumen.Beams.OrderBy(x => x.RecordId))
@@ -148,7 +149,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
             sb.AppendLine("[BELL]");
 
             foreach (var u in fumen.Bells.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{u.IDShortName} {u.TGrid.Serialize()} {u.XGrid.Serialize()}");
+                sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}");
         }
 
         public void ProcessFLICK(OngekiFumen fumen, StringBuilder sb)
@@ -156,7 +157,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
             sb.AppendLine("[FLICK]");
 
             foreach (var u in fumen.Flicks.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{u.IDShortName} {u.TGrid.Serialize()} {u.XGrid.Serialize()} {(u.Direction == OngekiFumenEditor.Base.OngekiObjects.Flick.FlickDirection.Left ? "L" : "R")}");
+                sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{(u.Direction == Flick.FlickDirection.Left ? "L" : "R")}");
         }
 
         public void ProcessNOTES(OngekiFumen fumen, StringBuilder sb)
@@ -168,11 +169,11 @@ namespace OngekiFumenEditorPlugins.OngekiFumenParser
                 switch (u)
                 {
                     case Tap t:
-                        sb.AppendLine($"{t.IDShortName} {t.ReferenceLaneStart?.RecordId ?? -1} {t.TGrid.Serialize()} {t.XGrid.Unit} {t.XGrid.Grid}");
+                        sb.AppendLine($"{t.IDShortName}\t{t.ReferenceLaneStart?.RecordId ?? -1}\t{t.TGrid.Serialize()}\t{t.XGrid.Unit}\t{t.XGrid.Grid}");
                         break;
                     case Hold h:
                         var end = h.Children.LastOrDefault();
-                        sb.AppendLine($"{h.IDShortName} {h.ReferenceLaneStart?.RecordId ?? -1} {h.TGrid.Serialize()} {h.XGrid.Unit} {h.XGrid.Grid} {end?.TGrid.Serialize()} {end?.XGrid.Unit} {end?.XGrid.Grid}");
+                        sb.AppendLine($"{h.IDShortName}\t{h.ReferenceLaneStart?.RecordId ?? -1}\t{h.TGrid.Serialize()}\t{h.XGrid.Unit}\t{h.XGrid.Grid}\t{end?.TGrid.Serialize()}\t{end?.XGrid.Unit}\t{end?.XGrid.Grid}");
                         break;
                     default:
                         break;

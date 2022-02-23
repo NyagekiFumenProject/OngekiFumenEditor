@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Base
 
         public override string Serialize()
         {
-            return $"{Unit} {Grid}";
+            return $"{Unit}\t{Grid}";
         }
 
         public override string ToString() => $"T[{Unit},{Grid}]";
