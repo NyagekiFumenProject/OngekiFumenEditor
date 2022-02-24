@@ -10,10 +10,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini.Modules.Output", "ge
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{C6C1204B-1881-4B1E-9726-770A7591DDAC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{0FC92C5B-0646-41F8-B87F-BA5ADCE12763}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditorPlugins.OngekiFumenParser", "Plugins\OngekiFumenEditor.Plugins.OngekiFumenParser\OngekiFumenEditorPlugins.OngekiFumenParser.csproj", "{2CEFE9EB-BA30-4F75-97FE-7CF9386D8269}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{573B7FD6-0B10-4C15-8AE2-B9D5A3F93618}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -41,16 +37,9 @@ Global
 		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2CEFE9EB-BA30-4F75-97FE-7CF9386D8269}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2CEFE9EB-BA30-4F75-97FE-7CF9386D8269}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2CEFE9EB-BA30-4F75-97FE-7CF9386D8269}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2CEFE9EB-BA30-4F75-97FE-7CF9386D8269}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{2CEFE9EB-BA30-4F75-97FE-7CF9386D8269} = {0FC92C5B-0646-41F8-B87F-BA5ADCE12763}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4D0A040C-DC95-444E-A788-FDA822ED2244}
