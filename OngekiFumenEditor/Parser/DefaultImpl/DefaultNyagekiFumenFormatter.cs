@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -40,28 +41,29 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         {
             using var memory = new MemoryStream();
             using var gzip = new GZipStream(memory, CompressionLevel.Optimal);
-            var sb = new BinaryWriter(gzip);
+            using var writer = new BinaryWriter(gzip);
 
-            ProcessHEADER(fumen, sb);
+            ProcessHEADER(fumen, writer);
 
-            ProcessB_PALETTE(fumen, sb);
+            ProcessB_PALETTE(fumen, writer);
 
-            ProcessCOMPOSITION(fumen, sb);
+            ProcessCOMPOSITION(fumen, writer);
 
-            ProcessLANE(fumen, sb);
+            ProcessLANE(fumen, writer);
 
-            ProcessBULLET(fumen, sb);
+            ProcessBULLET(fumen, writer);
 
-            ProcessBEAM(fumen, sb);
+            ProcessBEAM(fumen, writer);
 
-            ProcessBELL(fumen, sb);
+            ProcessBELL(fumen, writer);
 
-            ProcessFLICK(fumen, sb);
+            ProcessFLICK(fumen, writer);
 
-            ProcessNOTES(fumen, sb);
+            ProcessNOTES(fumen, writer);
 
-            sb.Flush();
+            writer.Flush();
             await gzip.FlushAsync();
+            gzip.Close();
             await memory.FlushAsync();
 
             return memory.ToArray();
@@ -103,7 +105,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 sb.Write(bpl.PlaceOffset);
                 sb.Write(bpl.TargetValue);
                 sb.Write(bpl.Speed);
-                sb.Write(bpl.BulletTypeValue);
+                //sb.Write(bpl.BulletTypeValue);
+                sb.Write(bpl.SizeValue);
+                sb.Write(bpl.TypeValue);
             }
         }
 
@@ -220,7 +224,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
         public void ProcessFLICK(OngekiFumen fumen, BinaryWriter sb)
         {
-            sb.Write(fumen.Bells.Count);
+            sb.Write(fumen.Flicks.Count);
             foreach (var u in fumen.Flicks.OrderBy(x => x.TGrid))
             {
                 sb.Write(u.TGrid.Unit);

@@ -5,6 +5,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -116,12 +117,16 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                     _ => default
                 };
                 bpl.Speed = reader.ReadSingle();
-                bpl.BulletTypeValue = reader.ReadString() switch
+                bpl.SizeValue = reader.ReadString() switch
                 {
-                    "NML" => BulletType.Normal,
-                    "STR" => BulletType.Hard,
-                    "DNG" => BulletType.Danger,
-                    _ => default
+                    "L" => BulletSize.Lerge,
+                    "N" or _ => BulletSize.Normal,
+                };
+                bpl.TypeValue = reader.ReadString() switch
+                {
+                    "NDL" => BulletType.Needle,
+                    "SQR" => BulletType.Square,
+                    "CIR" or _ => BulletType.Circle,
                 };
 
                 fumen.AddObject(bpl);
@@ -213,9 +218,6 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
                         _ => default
                     };
-
-                    if (connectObject is null)
-                        return default;
 
                     connectObject.RecordId = reader.ReadInt32();
                     connectObject.TGrid.Unit = reader.ReadSingle();
@@ -337,7 +339,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             for (int i = 0; i < count; i++)
             {
                 var isWall = reader.ReadBoolean();
-                OngekiMovableObjectBase obj = reader.ReadString() switch
+                var id = reader.ReadString();
+                OngekiMovableObjectBase obj = id switch
                 {
                     "TAP" or "XTP" or "CTP" => isWall ? new WallTap() : new Tap(),
                     "HLD" or "CHD" or "XHD" => isWall ? new WallHold() : new Hold(),
