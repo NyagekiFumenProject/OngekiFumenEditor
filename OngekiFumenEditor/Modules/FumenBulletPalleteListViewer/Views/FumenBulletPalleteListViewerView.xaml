@@ -160,7 +160,7 @@
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
                                         TextDecorations="Baseline">
-                                        拖动生成ベル
+                                        拖动生成钟(Bell)
                                     </TextBlock>
                                 </StackPanel>
                             </DataTemplate>
