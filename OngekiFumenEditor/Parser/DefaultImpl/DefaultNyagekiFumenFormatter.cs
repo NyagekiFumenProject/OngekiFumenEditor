@@ -219,6 +219,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 sb.Write(u.TGrid.Unit);
                 sb.Write(u.TGrid.Grid);
                 sb.Write(u.XGrid.Unit);
+
+                sb.Write(u.ReferenceBulletPallete?.StrID ?? "");
             }
         }
 

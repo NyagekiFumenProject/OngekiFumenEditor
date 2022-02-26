@@ -312,6 +312,10 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 bel.TGrid.Grid = reader.ReadInt32();
                 bel.XGrid.Unit = reader.ReadSingle();
 
+                var palleteId = reader.ReadString();
+                if (!string.IsNullOrWhiteSpace(palleteId))
+                    bel.ReferenceBulletPallete = fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == palleteId);
+
                 fumen.AddObject(bel);
             }
         }
