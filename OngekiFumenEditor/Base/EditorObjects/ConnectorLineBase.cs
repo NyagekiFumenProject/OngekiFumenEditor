@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.EditorObjects
 {
-    public abstract class ConnectorLineBase<T> : PropertyChangedBase, IDisplayableObject where T : IDisplayableObject, IHorizonPositionObject, ITimelineObject
+    public abstract class ConnectorLineBase<T> : PropertyChangedBase, IDisplayableObject where T : IDisplayableObject
     {
         public abstract Type ModelViewType { get; }
 

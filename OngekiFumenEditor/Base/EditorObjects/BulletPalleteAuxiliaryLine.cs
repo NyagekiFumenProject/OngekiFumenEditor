@@ -6,15 +6,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 
 namespace OngekiFumenEditor.Base.EditorObjects
 {
-    public class BulletAuxiliaryLine : ConnectorLineBase<Bullet>
+    public class BulletPalleteAuxiliaryLine : ConnectorLineBase<IBulletPalleteReferencable>
     {
-        public override Type ModelViewType => typeof(BulletAuxiliaryLineViewModel);
+        public override Type ModelViewType => typeof(BulletPalleteAuxiliaryLineViewModel);
+        
+        private Visibility visibility = Visibility.Visible;
+        public Visibility Visibility
+        {
+            get => visibility;
+            set => Set(ref visibility, value);
+        }
 
-        public BulletAuxiliaryLine(Bullet bullet)
+        public BulletPalleteAuxiliaryLine(IBulletPalleteReferencable bullet)
         {
             To = bullet;
             From = bullet;
