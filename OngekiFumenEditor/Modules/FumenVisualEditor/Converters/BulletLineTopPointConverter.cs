@@ -16,25 +16,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values[0] is not FumenVisualEditorViewModel editor || values[1] is not BulletAuxiliaryLine line)
+            if (values[0] is not FumenVisualEditorViewModel editor ||
+                values[1] is not BulletPalleteAuxiliaryLine line)
                 return 0;
 
             //计算此bullet理论辅助线
-            var bullet = line.From;
-            var pallete = bullet.ReferenceBulletPallete;
-            var canvasY = TGridCalculator.ConvertTGridToY(bullet.TGrid, editor);
+            var refObject = line.From;
+            var pallete = refObject.ReferenceBulletPallete;
+
+            if (pallete == null)
+                return 0;
 
             if (parameter.ToString() == "0")
             {
                 var xUnit = 0f;
 
                 //暂时实现Shooter.TargetHead && Target.FixField的
-                if (pallete.ShooterValue == Shooter.TargetHead)
+                if (pallete.ShooterValue == Shooter.TargetHead &
+                    pallete.TargetValue == Target.FixField)
                 {
-                    if (pallete.TargetValue == Target.FixField)
-                    {
-                        xUnit = bullet.XGrid.Unit;
-                    }
+                    xUnit = refObject.XGrid.Unit;
                 }
 
                 xUnit += pallete.PlaceOffset;
@@ -43,6 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
             }
             else
             {
+                var canvasY = TGridCalculator.ConvertTGridToY(refObject.TGrid, editor);
                 return editor.TotalDurationHeight - (canvasY + editor.CanvasHeight);
             }
         }

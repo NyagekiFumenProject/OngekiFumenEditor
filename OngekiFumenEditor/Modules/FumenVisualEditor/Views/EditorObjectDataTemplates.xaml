@@ -106,8 +106,8 @@
             <DataTemplate DataType="{x:Type editorObject:BeamConnectorViewModel}">
                 <editorobjects:ConnectorView />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type editorObject:BulletAuxiliaryLineViewModel}">
-                <editorobjects:BulletAuxiliaryLineView />
+            <DataTemplate DataType="{x:Type editorObject:BulletPalleteAuxiliaryLineViewModel}">
+                <editorobjects:BulletPalleteAuxiliaryLineView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type editorObject:HoldConnectorViewModel}">
                 <editorobjects:HoldConnectorView />

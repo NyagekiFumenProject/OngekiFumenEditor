@@ -100,7 +100,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
         private Point _mouseStartPosition;
         private BulletPallete _selecting;
 
-        public void OnMouseMove(ActionExecutionContext e)
+        public void OnMouseMoveAndDragNewBullet (ActionExecutionContext e)
         {
             if (!_draggingItem)
                 return;
@@ -118,6 +118,35 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
                 {
                     var bulletViewModel = new BulletViewModel();
                     var bullet = new Bullet()
+                    {
+                        ReferenceBulletPallete = selectingPallete
+                    };
+                    bulletViewModel.ReferenceOngekiObject = bullet;
+                    return bulletViewModel;
+                }));
+                DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
+                _draggingItem = false;
+            }
+        }
+
+        public void OnMouseMoveAndDragNewBell(ActionExecutionContext e)
+        {
+            if (!_draggingItem)
+                return;
+
+            var arg = e.EventArgs as MouseEventArgs;
+
+            Point mousePosition = arg.GetPosition(null);
+            Vector diff = _mouseStartPosition - mousePosition;
+
+            if (arg.LeftButton == MouseButtonState.Pressed &&
+                (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
+            {
+                var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
+                {
+                    var bulletViewModel = new BellViewModel();
+                    var bullet = new Bell()
                     {
                         ReferenceBulletPallete = selectingPallete
                     };

@@ -17,15 +17,15 @@
             <Image.Style>
                 <Style TargetType="Image">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML">
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML">
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_red.png">
                             </Setter>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR">
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR">
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_pur.png">
                             </Setter>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG">
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG">
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_blk.png">
                             </Setter>
                         </DataTrigger>

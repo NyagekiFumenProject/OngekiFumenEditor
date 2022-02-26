@@ -109,13 +109,24 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="伤害类型">
+                    <GridViewColumn Width="100" Header="子弹大小">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding BulletTypeValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                <ComboBox SelectedValue="{Binding SizeValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
                                     <system:String>Normal</system:String>
-                                    <system:String>Hard</system:String>
-                                    <system:String>Danger</system:String>
+                                    <system:String>Large</system:String>
+                                </ComboBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="75" Header="子弹形状">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox SelectedValue="{Binding TypeValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                    <system:String>Circle</system:String>
+                                    <system:String>Needle</system:String>
+                                    <system:String>Square</system:String>
                                 </ComboBox>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -137,12 +148,21 @@
                     <GridViewColumn Width="240" Header="操作">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    cal:Message.Attach="[Event MouseMove] = [Action OnMouseMove($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
-                                    TextDecorations="Baseline">
-                                    拖动生成子弹
-                                </TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBullet($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
+                                        TextDecorations="Baseline">
+                                        拖动生成子弹
+                                    </TextBlock>
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
+                                        TextDecorations="Baseline">
+                                        拖动生成ベル
+                                    </TextBlock>
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

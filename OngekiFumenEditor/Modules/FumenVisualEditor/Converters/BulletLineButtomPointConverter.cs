@@ -13,16 +13,20 @@ using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
 {
-    public class BulletLineButtomPointConverter : IMultiValueConverter
+    public class BulletLineButtomPointConverter : IMultiValueConverter, IBulletLineButtomPointConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values[0] is not FumenVisualEditorViewModel editor || values[1] is not BulletAuxiliaryLine line)
+            if (values[0] is not FumenVisualEditorViewModel editor ||
+                values[1] is not BulletPalleteAuxiliaryLine line)
                 return 0;
 
             //计算此bullet理论辅助线
-            var bullet = line.From;
-            var pallete = bullet.ReferenceBulletPallete;
+            var refObject = line.From;
+            var pallete = refObject.ReferenceBulletPallete;
+
+            if (pallete == null)
+                return 0;
 
             if (parameter.ToString() == "0")
             {
@@ -31,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
                 //暂时实现Target.FixField的
                 if (pallete.TargetValue == Target.FixField)
                 {
-                    xUnit = bullet.XGrid.Unit;
+                    xUnit = refObject.XGrid.Unit;
                 }
                 else if (pallete.TargetValue == Target.Player)
                 {
@@ -45,7 +49,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
             else
             {
                 //先写个死
-                var y = TGridCalculator.ConvertTGridToY(bullet.TGrid, editor);
+                var y = TGridCalculator.ConvertTGridToY(refObject.TGrid, editor);
                 return editor.TotalDurationHeight - y;
             }
         }

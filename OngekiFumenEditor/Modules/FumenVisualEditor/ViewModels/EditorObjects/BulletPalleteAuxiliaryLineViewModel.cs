@@ -14,8 +14,8 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 {
-    [MapToView(ViewType = typeof(BulletAuxiliaryLineView))]
-    public class BulletAuxiliaryLineViewModel : ConnectorViewModel<Bullet>
+    [MapToView(ViewType = typeof(BulletPalleteAuxiliaryLineView))]
+    public class BulletPalleteAuxiliaryLineViewModel : ConnectorViewModel<IBulletPalleteReferencable>
     {
         public override Brush LineBrush => throw new NotImplementedException();
 

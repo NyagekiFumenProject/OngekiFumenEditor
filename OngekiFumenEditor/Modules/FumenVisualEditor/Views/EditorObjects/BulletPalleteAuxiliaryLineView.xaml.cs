@@ -21,9 +21,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.EditorObjects
     /// <summary>
     /// BeamConnectorView.xaml 的交互逻辑
     /// </summary>
-    public partial class BulletAuxiliaryLineView : UserControl
+    public partial class BulletPalleteAuxiliaryLineView : UserControl
     {
-        public BulletAuxiliaryLineView()
+        public BulletPalleteAuxiliaryLineView()
         {
             InitializeComponent();
         }

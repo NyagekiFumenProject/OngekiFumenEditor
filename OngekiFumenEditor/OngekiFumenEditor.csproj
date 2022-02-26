@@ -70,6 +70,9 @@
     <Compile Update="Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\FumenConverter\Views\FumenConverterView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -97,7 +100,7 @@
     <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\HoldConnectorView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletAuxiliaryLineView.xaml.cs">
+    <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletPalleteAuxiliaryLineView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml.cs">
@@ -166,6 +169,10 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Modules\FumenConverter\Views\FumenConverterView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
@@ -218,7 +225,7 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletAuxiliaryLineView.xaml">
+    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletPalleteAuxiliaryLineView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
