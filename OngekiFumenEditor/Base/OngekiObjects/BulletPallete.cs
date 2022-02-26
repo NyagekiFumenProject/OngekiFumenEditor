@@ -45,6 +45,23 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             public static Target FixField { get; } = new Target("FIX");
         }
 
+        public class BulletSize : FadeStringEnum
+        {
+            public BulletSize(string value) : base(value)
+            {
+
+            }
+
+            /// <summary>
+            /// 普通大小
+            /// </summary>
+            public static BulletSize Normal { get; } = new ("N");
+            /// <summary>
+            /// 加大版(是普通版的1.4x)
+            /// </summary>
+            public static BulletSize Lerge { get; } = new ("L");
+        }
+
         public class BulletType : FadeStringEnum
         {
             public BulletType(string value) : base(value)
@@ -53,17 +70,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
 
             /// <summary>
-            /// 将使用BULLET_DAMAGE伤害
+            /// 圆形子弹
             /// </summary>
-            public static BulletType Normal { get; } = new BulletType("NML");
+            public static BulletType Circle { get; } = new("CIR");
             /// <summary>
-            /// 将使用HARDBULLET_DAMAGE伤害
+            /// 针状子弹
             /// </summary>
-            public static BulletType Hard { get; } = new BulletType("STR");
+            public static BulletType Needle { get; } = new("NDL");
             /// <summary>
-            /// 将使用DANGERBULLET_DAMAGE伤害
+            /// 圆柱形(方状)子弹
             /// </summary>
-            public static BulletType Danger { get; } = new BulletType("DNG");
+            public static BulletType Square { get; } = new("SQR");
         }
 
         private string strID = string.Empty;
@@ -132,6 +149,20 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        private BulletSize sizeValue = BulletSize.Normal;
+        public BulletSize SizeValue
+        {
+            get => sizeValue;
+            set => Set(ref sizeValue, value);
+        }
+
+        private BulletType typeValue = BulletType.Circle;
+        public BulletType TypeValue
+        {
+            get => typeValue;
+            set => Set(ref typeValue, value);
+        }
+
         private float speed = 1;
         public float Speed
         {
@@ -140,17 +171,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             {
                 speed = value;
                 NotifyOfPropertyChange(() => Speed);
-            }
-        }
-
-        private BulletType bulletTypeValue = BulletType.Normal;
-        public BulletType BulletTypeValue
-        {
-            get { return bulletTypeValue; }
-            set
-            {
-                bulletTypeValue = value;
-                NotifyOfPropertyChange(() => BulletTypeValue);
             }
         }
 
@@ -163,8 +183,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 return;
 
             PlaceOffset = fromBpl.PlaceOffset;
-            BulletTypeValue = fromBpl.BulletTypeValue;
             StrID = fromBpl.StrID;
+            SizeValue = fromBpl.SizeValue;
+            TypeValue = fromBpl.TypeValue;
             EditorName = fromBpl.EditorName;
             EditorAxuiliaryLineColor = fromBpl.EditorAxuiliaryLineColor;
             ShooterValue = fromBpl.ShooterValue;
