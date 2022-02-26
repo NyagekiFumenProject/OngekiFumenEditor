@@ -175,5 +175,27 @@ namespace OngekiFumenEditor.Utils
             if (link.Count < wrapCount)
                 yield return link.Take(wrapCount);
         }
+
+        public static IEnumerable<T> UnionBy<T, X>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, X> keySelector)
+            => a.Union(b, new EqualsComparerWrapper<T>((x, y) =>
+            {
+                var kx = keySelector(x);
+                var ky = keySelector(y);
+                return (kx?.Equals(ky) ?? false) && (ky?.Equals(kx) ?? false);
+            }));
+
+        public static IEnumerable<T> UnionBy<T>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, T, bool> compFunc)
+            => a.Union(b, new EqualsComparerWrapper<T>(compFunc));
+
+        public static IEnumerable<T> ExceptBy<T, X>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, X> keySelector)
+            => a.Union(b, new EqualsComparerWrapper<T>((x, y) =>
+            {
+                var kx = keySelector(x);
+                var ky = keySelector(y);
+                return (kx?.Equals(ky) ?? false) && (ky?.Equals(kx) ?? false);
+            }));
+
+        public static IEnumerable<T> ExceptBy<T>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, T, bool> compFunc)
+            => a.Except(b, new EqualsComparerWrapper<T>(compFunc));
     }
 }
