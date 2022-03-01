@@ -13,6 +13,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 {
     public class LaneRightStart : LaneStartBase
     {
+        private ColorId colorId = default;
+        public ColorId ColorId
+        {
+            get => colorId;
+            set => Set(ref colorId, value);
+        }
+
         public override string IDShortName => "LRS";
         public override Type ModelViewType => typeof(LaneRightStartViewModel);
 

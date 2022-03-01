@@ -44,4 +44,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     {
 
     }
+
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Colorful Start", "Ongeki Lanes")]
+    public class LaneColorfulStartViewModel : LaneStartViewModel<ColorfulLaneStart>
+    {
+
+    }
 }

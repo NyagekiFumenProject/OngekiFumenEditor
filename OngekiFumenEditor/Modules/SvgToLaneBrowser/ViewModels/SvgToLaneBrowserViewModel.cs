@@ -413,6 +413,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 LaneType.Left => new LaneLeftStartViewModel(),
                 LaneType.Center => new LaneCenterStartViewModel(),
                 LaneType.Right => new LaneRightStartViewModel(),
+                LaneType.Colorful => new LaneColorfulStartViewModel(),
                 _ => default(DisplayObjectViewModelBase)
             };
 
@@ -423,6 +424,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 LaneType.Left => () => new LaneLeftNext(),
                 LaneType.Center => () => new LaneCenterNext(),
                 LaneType.Right => () => new LaneRightNext(),
+                LaneType.Colorful => new ColorfulLaneNext(),
                 _ => default(Func<ConnectableChildObjectBase>)
             };
 
@@ -431,6 +433,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 LaneType.Left => () => new LaneLeftEnd(),
                 LaneType.Center => () => new LaneCenterEnd(),
                 LaneType.Right => () => new LaneRightEnd(),
+                LaneType.Colorful => new ColorfulLaneEnd(),
                 _ => default(Func<ConnectableChildObjectBase>)
             };
 

@@ -11,6 +11,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         Left = 2,
         Center = 0,
         Right = 3,
+        Colorful = 4,
         WallLeft = 1,
         WallRight = -1,
     }
