@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
 using System;
@@ -51,6 +52,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
     public class LaneColorFulConnector : LaneConnector
     {
-        public override Color LineColor => From.ModelViewType;
+        public override Color LineColor => RefStart.ColorId.Color;
+        public ColorfulLaneStart RefStart { get; set; }
     }
 }

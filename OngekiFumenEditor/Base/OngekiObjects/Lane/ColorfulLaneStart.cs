@@ -17,10 +17,18 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 
         public override LaneType LaneType => LaneType.Colorful;
 
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneCenterConnector()
+        private ColorId colorId = ColorIdConst.Akari;
+        public ColorId ColorId
+        {
+            get => colorId;
+            set => Set(ref colorId, value);
+        }
+
+        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneColorFulConnector()
         {
             From = from,
-            To = to
+            To = to,
+            RefStart = this
         };
     }
 }

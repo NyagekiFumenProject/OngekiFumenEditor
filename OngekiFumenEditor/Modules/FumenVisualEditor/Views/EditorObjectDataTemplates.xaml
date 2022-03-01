@@ -69,6 +69,15 @@
             <DataTemplate DataType="{x:Type fumenOngekiObject:LaneRightStartViewModel}">
                 <ongekiobjects:LaneStartView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneColorfulEndViewModel}">
+                <ongekiobjects:LaneEndView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneColorfulNextViewModel}">
+                <ongekiobjects:LaneNextView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneColorfulStartViewModel}">
+                <ongekiobjects:LaneStartView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type fumenOngekiObject:MeterChangeViewModel}">
                 <views1:DisplayTextLineObjectViewBase />
             </DataTemplate>
