@@ -216,6 +216,10 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                         "LCN" => new LaneCenterNext(),
                         "LCE" => new LaneCenterEnd(),
 
+                        "CLS" => new ColorfulLaneStart(),
+                        "CLN" => new ColorfulLaneNext(),
+                        "CLE" => new ColorfulLaneEnd(),
+
                         _ => default
                     };
 
@@ -223,6 +227,13 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                     connectObject.TGrid.Unit = reader.ReadSingle();
                     connectObject.TGrid.Grid = reader.ReadInt32();
                     connectObject.XGrid.Unit = reader.ReadSingle();
+
+                    if (connectObject is IColorfulLane colorful)
+                    {
+                        var colorId = reader.ReadInt32();
+                        colorful.ColorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Id == colorId, ColorIdConst.Akari);
+                        colorful.Brightness = reader.ReadInt32();
+                    }
 
                     return connectObject;
                 }

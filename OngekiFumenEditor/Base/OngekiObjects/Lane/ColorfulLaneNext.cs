@@ -10,9 +10,23 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 {
-    public class ColorfulLaneNext : LaneNextBase
+    public class ColorfulLaneNext : LaneNextBase, IColorfulLane
     {
         public override string IDShortName => "CLN";
         public override Type ModelViewType => typeof(LaneColorfulNextViewModel);
+
+        private ColorId colorId = ColorIdConst.Akari;
+        public ColorId ColorId
+        {
+            get => colorId;
+            set => Set(ref colorId, value);
+        }
+
+        private int brightness = 0;
+        public int Brightness
+        {
+            get => brightness;
+            set => Set(ref brightness, value);
+        }
     }
 }

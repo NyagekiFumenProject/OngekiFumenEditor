@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -158,6 +159,12 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                     sb.Write(o.TGrid.Unit);
                     sb.Write(o.TGrid.Grid);
                     sb.Write(o.XGrid.Unit);
+
+                    if (o is IColorfulLane colorful)
+                    {
+                        sb.Write(colorful.ColorId.Id);
+                        sb.Write(colorful.Brightness);
+                    }
                 }
 
                 sb.Write(laneStart.Children.Count());

@@ -6,6 +6,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views.EditorObjects;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
+using System.ComponentModel;
 using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
@@ -50,7 +51,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
             set
             {
+                this.RegisterOrUnregisterPropertyChangeEvent(Connector, value, OnLanePropChanged);
                 Set(ref connector, value);
+            }
+        }
+
+        private void OnLanePropChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(LaneConnector.LineColor))
+            {
+                NotifyOfPropertyChange(() => LineBrush);
             }
         }
 

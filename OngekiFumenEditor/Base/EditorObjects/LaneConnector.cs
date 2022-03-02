@@ -1,13 +1,17 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -52,7 +56,22 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
     public class LaneColorFulConnector : LaneConnector
     {
-        public override Color LineColor => RefStart.ColorId.Color;
-        public ColorfulLaneStart RefStart { get; set; }
+        public override Color LineColor => ((IColorfulLane)From).ColorId.Color;
+
+        public override bool Set<T>(ref T oldValue, T newValue, [CallerMemberName] string propertyName = null)
+        {
+            if (propertyName == nameof(From))
+                this.RegisterOrUnregisterPropertyChangeEvent(oldValue as INotifyPropertyChanged, newValue as INotifyPropertyChanged, OnLanePropChanged);
+
+            return base.Set(ref oldValue, newValue, propertyName);
+        }
+
+        private void OnLanePropChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ColorfulLaneStart.ColorId))
+            {
+                NotifyOfPropertyChange(() => LineColor);
+            }
+        }
     }
 }

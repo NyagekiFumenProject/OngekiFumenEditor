@@ -20,7 +20,6 @@ namespace OngekiFumenEditor.Base.EditorObjects
         }
 
         private T to;
-
         public T To
         {
             get => to;

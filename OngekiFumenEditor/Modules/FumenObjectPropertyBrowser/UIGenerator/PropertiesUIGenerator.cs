@@ -13,6 +13,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
     {
         public static UIElement GenerateUI(PropertyInfoWrapper wrapper)
         {
+            if (wrapper.PropertyInfo.Name == nameof(PropertyChangedBase.IsNotifying))
+                return default;
+
             var typeGenerators = IoC.GetAll<ITypeUIGenerator>();
             return typeGenerators
                 .Where(x =>

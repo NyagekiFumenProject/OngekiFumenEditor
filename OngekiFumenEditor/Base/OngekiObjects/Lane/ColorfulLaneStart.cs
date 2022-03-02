@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 {
-    public class ColorfulLaneStart : LaneStartBase
+    public class ColorfulLaneStart : LaneStartBase, IColorfulLane
     {
         public override string IDShortName => "CLS";
         public override Type ModelViewType => typeof(LaneColorfulStartViewModel);
@@ -24,11 +24,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
             set => Set(ref colorId, value);
         }
 
+        private int brightness = 0;
+        public int Brightness
+        {
+            get => brightness;
+            set => Set(ref brightness, value);
+        }
+
         protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneColorFulConnector()
         {
             From = from,
-            To = to,
-            RefStart = this
+            To = to
         };
     }
 }
