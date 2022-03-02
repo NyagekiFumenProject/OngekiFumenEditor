@@ -8,10 +8,37 @@
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     Width="40"
     mc:Ignorable="d">
-    <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/bell.png">
-        <Image.RenderTransform>
+    <ongekiobjects:OngekiObjectViewBase.Resources>
+        <converters:FadeStringEnumToStringConverter x:Key="FadeStringEnumToStringConverter">
+        </converters:FadeStringEnumToStringConverter>
+    </ongekiobjects:OngekiObjectViewBase.Resources>
+    <Grid>
+        <Image Source="/Modules/FumenVisualEditor/Views/OngekiObjects/bell.png">
+        </Image>
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontWeight="Bold"
+            Foreground="Red"
+            Text="{Binding ReferenceOngekiObject.ReferenceBulletPallete.StrID}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TargetValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="PLR">
+                            <Setter Property="TextDecorations" Value="Baseline">
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.ShooterValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="UPS">
+                            <Setter Property="TextDecorations" Value="OverLine">
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <Grid.RenderTransform>
             <TranslateTransform X="-20" Y="20">
             </TranslateTransform>
-        </Image.RenderTransform>
-    </Image>
+        </Grid.RenderTransform>
+    </Grid>
 </ongekiobjects:OngekiObjectViewBase>

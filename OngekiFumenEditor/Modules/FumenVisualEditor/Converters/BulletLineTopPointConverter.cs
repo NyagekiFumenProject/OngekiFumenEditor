@@ -18,14 +18,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
         {
             if (values[0] is not FumenVisualEditorViewModel editor ||
                 values[1] is not BulletPalleteAuxiliaryLine line)
-                return 0;
+                return 0d;
 
             //计算此bullet理论辅助线
             var refObject = line.From;
             var pallete = refObject.ReferenceBulletPallete;
 
             if (pallete == null)
-                return 0;
+                return 0d;
 
             if (parameter.ToString() == "0")
             {
