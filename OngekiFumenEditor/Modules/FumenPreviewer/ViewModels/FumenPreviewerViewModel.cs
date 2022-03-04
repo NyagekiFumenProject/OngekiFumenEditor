@@ -75,6 +75,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             get => currentPlayTime;
             set
             {
+                //limit 
+                value = Math.Max(value, 0);
                 Set(ref currentPlayTime, value);
                 RecalcViewProjectionMatrix();
             }
@@ -83,7 +85,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         public Matrix4 ViewProjectionMatrix { get; private set; }
 
         private static Dictionary<string, IDrawingTarget> drawTargets = new();
-        private DummyDrawTarget dummyDraw;
 
         public FumenPreviewerViewModel()
         {
@@ -158,10 +159,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 #endif
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            dummyDraw.BeginDraw();
-            dummyDraw.Draw(null, null);
-            dummyDraw.EndDraw();
-            /*
             var fumen = Editor?.Fumen;
             if (fumen is null)
                 return;
@@ -176,14 +173,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                     drawingTarget.EndDraw();
                 }
             }
-            */
         }
 
         #region UserActions
 
         public void OnMouseWheel(MouseWheelEventArgs args)
         {
-            CurrentPlayTime += args.Delta > 0 ? 100 : -50f;
+            CurrentPlayTime += args.Delta > 0 ? 25 : -25f;
             Log.LogDebug($"CurrentPlayTime = {CurrentPlayTime}");
         }
 
