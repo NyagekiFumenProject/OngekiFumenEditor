@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public abstract class CommonDrawTargetBase<T> : IDrawingTarget where T : OngekiObjectBase
     {
-        public abstract string DrawTargetID { get; }
+        public abstract IEnumerable<string> DrawTargetID { get; }
 
         public virtual void BeginDraw()
         {

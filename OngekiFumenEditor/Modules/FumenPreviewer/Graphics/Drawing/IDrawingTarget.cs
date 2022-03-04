@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public interface IDrawingTarget
     {
-        string DrawTargetID { get; }
+        IEnumerable<string> DrawTargetID { get; }
 
         void BeginDraw();
         void Draw(OngekiObjectBase ongekiObject,OngekiFumen fumen);

@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     [Export(typeof(IDrawingTarget))]
     public class BellDrawingTarget : CommonSpriteDrawTargetBase<Bell>
     {
-        public override string DrawTargetID => Bell.CommandName;
+        public override IEnumerable<string> DrawTargetID { get; } = new[] { Bell.CommandName };
 
         public BellDrawingTarget() : base(new Texture(Properties.Resources.bell))
         {

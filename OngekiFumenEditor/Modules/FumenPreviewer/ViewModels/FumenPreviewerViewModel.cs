@@ -128,7 +128,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         private void RecalcViewProjectionMatrix()
         {
             var projection = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
-            var view = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, CurrentPlayTime, 0));
+            var view = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, -CurrentPlayTime, 0));
 
             ViewProjectionMatrix = view * projection;
         }
@@ -155,7 +155,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Viewport(0, 0, (int)ViewWidth, (int)ViewHeight);
 
-            drawTargets = IoC.GetAll<IDrawingTarget>().ToDictionary(x => x.DrawTargetID, x => x);
+            drawTargets = IoC.GetAll<IDrawingTarget>()
+                .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
+                .ToDictionary(x => x.supportId, x => x.target);
 
             dummy = IoC.Get<DummyLinesDrawTargetBase>();
 
@@ -174,7 +176,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             dummy.BeginDraw();
             dummy.Draw(default, default);
             dummy.EndDraw();
-  
+
             var fumen = Editor?.Fumen;
             if (fumen is null)
                 return;
@@ -188,7 +190,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                         drawingTarget.Draw(obj, fumen);
                     drawingTarget.EndDraw();
                 }
-            }   
+            }
         }
 
         #region UserActions
