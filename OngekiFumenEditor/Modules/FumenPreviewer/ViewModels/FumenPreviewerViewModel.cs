@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -85,6 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         public Matrix4 ViewProjectionMatrix { get; private set; }
 
         private static Dictionary<string, IDrawingTarget> drawTargets = new();
+        private DummyLinesDrawTargetBase dummy;
 
         public FumenPreviewerViewModel()
         {
@@ -108,9 +110,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         private void InitOpenGL()
         {
+            //GL.Enable(EnableCap.DebugOutput);
+            //GL.Enable(EnableCap.DebugOutputSynchronous);
+            GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
+
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        }
+
+        private void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
+        {
+            var str = Marshal.PtrToStringAnsi(message, length);
+            Log.LogDebug($"{id}\t:\t{str}");
         }
 
         private void RecalcViewProjectionMatrix()
@@ -145,7 +157,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
             drawTargets = IoC.GetAll<IDrawingTarget>().ToDictionary(x => x.DrawTargetID, x => x);
 
-            dummyDraw = IoC.Get<DummyDrawTarget>();
+            dummy = IoC.Get<DummyLinesDrawTargetBase>();
 
             openGLView.Render += (ts) => OnRender(openGLView, ts);
         }
@@ -159,6 +171,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 #endif
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            dummy.BeginDraw();
+            dummy.Draw(default, default);
+            dummy.EndDraw();
+
+            /*            
             var fumen = Editor?.Fumen;
             if (fumen is null)
                 return;
@@ -173,6 +190,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                     drawingTarget.EndDraw();
                 }
             }
+            */
         }
 
         #region UserActions

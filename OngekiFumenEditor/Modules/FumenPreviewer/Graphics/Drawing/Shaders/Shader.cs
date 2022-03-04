@@ -5,7 +5,7 @@ using ReOsuStoryboardPlayer.Core.PrimitiveValue;
 using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders
 {
     public class Shader
     {
@@ -44,13 +44,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 GL.ShaderSource(fragmentShader, frag);
 
                 GL.CompileShader(vertexShader);
+                if (!GL.IsShader(vertexShader))
+                    throw new Exception("Vertex shader compile failed.");
                 GL.CompileShader(fragmentShader);
+                if (!GL.IsShader(fragmentShader))
+                    throw new Exception("Fragment shader compile failed.");
 
-                if (!String.IsNullOrEmpty(GL.GetShaderInfoLog(vertexShader)))
-                    Log.LogError(GL.GetShaderInfoLog(vertexShader));
+                var info = GL.GetShaderInfoLog(vertexShader);
+                if (!string.IsNullOrEmpty(info))
+                    Log.LogDebug("[Vertex Shader]:" + info);
 
-                if (!String.IsNullOrEmpty(GL.GetShaderInfoLog(fragmentShader)))
-                    Log.LogError(GL.GetShaderInfoLog(fragmentShader));
+                info = GL.GetShaderInfoLog(fragmentShader);
+                if (!string.IsNullOrEmpty(info))
+                    Log.LogDebug("[Fragment Shader]:" + info);
 
                 program = GL.CreateProgram();
 
@@ -59,12 +65,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
                 GL.LinkProgram(program);
 
-                if (!String.IsNullOrEmpty(GL.GetProgramInfoLog(program)))
+                if (!string.IsNullOrEmpty(GL.GetProgramInfoLog(program)))
                     Log.LogError(GL.GetProgramInfoLog(program));
 
-                int total = 0;
-
-                GL.GetProgram(program, GetProgramParameterName.ActiveUniforms, out total);
+                GL.GetProgram(program, GetProgramParameterName.ActiveUniforms, out var total);
 
                 for (int i = 0; i < total; i++)
                     GL.GetActiveUniform(program, i, 16, out _, out _, out _, out var _);
