@@ -244,7 +244,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var xGrid = ((IHorizonPositionObject)ReferenceOngekiObject).XGrid;
             var modelView = EditorViewModel;
             var xgridUnit = xGrid.Unit + xGrid.Grid / xGrid.ResX;
-            var x = xgridUnit * (modelView.XUnitSize / modelView.Setting.XGridUnitSpace) + modelView.CanvasWidth / 2;
+            var x = xgridUnit * (XGridCalculator.CalculateXUnitSize(modelView) / modelView.Setting.XGridUnitSpace) + modelView.CanvasWidth / 2;
 
             CanvasX = x;
         }

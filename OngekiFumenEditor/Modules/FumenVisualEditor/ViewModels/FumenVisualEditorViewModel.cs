@@ -71,7 +71,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     NotifyOfPropertyChange(() => MaxVisibleCanvasY);
                     break;
                 case nameof(EditorSetting.XGridUnitSpace):
-                    RecalculateXUnitSize();
                     Redraw(RedrawTarget.XGridUnitLines);
                     break;
                 case nameof(EditorSetting.BeatSplit):
@@ -83,7 +82,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         title.TitleContent = base.DisplayName;
                     break;
                 case nameof(EditorSetting.XGridDisplayMaxUnit):
-                    RecalculateXUnitSize();
                     Redraw(RedrawTarget.OngekiObjects | RedrawTarget.XGridUnitLines);
                     break;
                 default:
@@ -129,7 +127,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref canvasWidth, value);
-                RecalculateXUnitSize();
             }
         }
         private double canvasHeight = default;

@@ -18,6 +18,7 @@
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
+            d:Text="500"
             FontWeight="Bold"
             Foreground="Red"
             Text="{Binding ReferenceOngekiObject.ReferenceBulletPallete.StrID}">

@@ -18,18 +18,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     {
         public ObservableCollection<IEditorDisplayableViewModel> CurrentDisplayEditorViewModels { get; } = new();
 
-        private double xUnitSize = default;
-        public double XUnitSize
-        {
-            get => xUnitSize;
-            set => Set(ref xUnitSize, value);
-        }
-
-        protected void RecalculateXUnitSize()
-        {
-            XUnitSize = CanvasWidth / (Setting.XGridDisplayMaxUnit * 2) * Setting.XGridUnitSpace;
-        }
-
         protected override void OnViewLoaded(object v)
         {
             base.OnViewLoaded(v);
@@ -156,7 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             XGridUnitLineLocations.Clear();
 
             var width = CanvasWidth;
-            var unitSize = XUnitSize;
+            var unitSize = XGridCalculator.CalculateXUnitSize(this);
             var totalUnitValue = 0d;
             var line = default(XGridUnitLineViewModel);
 
