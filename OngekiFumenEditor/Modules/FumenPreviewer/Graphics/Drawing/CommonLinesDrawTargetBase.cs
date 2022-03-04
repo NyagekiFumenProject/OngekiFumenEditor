@@ -21,9 +21,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         private readonly int vao;
 
         public const int LINE_DRAW_MAX = 50;
-        public readonly float[] vertexData = new float[LINE_DRAW_MAX * 6];
 
         public IFumenPreviewer Previewer { get; }
+        public int LineWidth { get; set; } = 2;
 
         public CommonLinesDrawTargetBase()
         {
@@ -44,14 +44,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             {
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
                 {
-                    GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * vertexData.Length),
-                        vertexData, BufferUsageHint.StreamDraw);
+                    GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * LINE_DRAW_MAX * 6),
+                        IntPtr.Zero, BufferUsageHint.StreamDraw);
 
                     GL.EnableVertexAttribArray(0);
                     GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, sizeof(float) * 6, 0);
 
                     GL.EnableVertexAttribArray(1);
-                    GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, sizeof(float) * 6, 2);
+                    GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, sizeof(float) * 6, sizeof(float) * 2);
                 }
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             }
@@ -85,12 +85,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 }
             }
 
+            GL.LineWidth(LineWidth);
             shader.Begin();
-            GL.LineWidth(1);
+            shader.PassUniform("Model", Matrix4.CreateTranslation(-Previewer.ViewWidth / 2, -Previewer.ViewHeight / 2, 0));
             shader.PassUniform("ViewProjection", Previewer.ViewProjectionMatrix);
             GL.BindVertexArray(vao);
             {
-                GL.DrawArrays(PrimitiveType.LineLoop, 0, i);
+                GL.DrawArrays(PrimitiveType.LineStrip, 0, i);
             }
             GL.BindVertexArray(0);
             shader.End();

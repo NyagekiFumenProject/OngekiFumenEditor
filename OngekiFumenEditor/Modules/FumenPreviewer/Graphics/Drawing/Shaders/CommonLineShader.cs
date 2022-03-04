@@ -18,13 +18,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders
 
 out vec4 varying_color;
 
+uniform mat4 Model;
 uniform mat4 ViewProjection;
 
 layout(location=0) in vec2 in_pos;
 layout(location=1) in vec4 in_color;
 
 void main(){
-	gl_Position = ViewProjection * vec4(in_pos.x,in_pos.y,0.0,1.0);
+	gl_Position = ViewProjection * Model * vec4(in_pos.x,in_pos.y,0.0,1.0);
 	varying_color=in_color;
 }
                 ";

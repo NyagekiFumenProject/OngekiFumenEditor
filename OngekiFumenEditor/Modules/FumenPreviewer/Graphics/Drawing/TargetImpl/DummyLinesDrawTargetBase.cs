@@ -16,10 +16,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public override void FillLine(Action<Vector2, Vector4> appendFunc)
         {
-            appendFunc(new(0, 0.5f), new(1, 1, 0, 1));
-            appendFunc(new(0, 1f), new(0, 1, 0, 1));
-            appendFunc(new(100.5f, 0), new(0, 1, 0, 1));
-            appendFunc(new(-100.5f, 0), new(1, 0, 0, 1));
+            appendFunc(new(0, 0), new(1, 0, 0, 1));
+            appendFunc(new(0, 200), new(0, 1, 0, 1));
+            appendFunc(new(200, 0), new(0, 0, 1, 1));
+            appendFunc(new(0, 0), new(1, 0, 0, 1));
         }
     }
 }

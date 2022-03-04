@@ -174,8 +174,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             dummy.BeginDraw();
             dummy.Draw(default, default);
             dummy.EndDraw();
-
-            /*            
+  
             var fumen = Editor?.Fumen;
             if (fumen is null)
                 return;
@@ -189,8 +188,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                         drawingTarget.Draw(obj, fumen);
                     drawingTarget.EndDraw();
                 }
-            }
-            */
+            }   
         }
 
         #region UserActions
