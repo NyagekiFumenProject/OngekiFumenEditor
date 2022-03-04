@@ -27,7 +27,7 @@ layout(location=1) in vec2 in_pos;
 
 void main(){
     vec2 v = in_pos;
-	gl_Position = Model * ViewProjection * vec4(v.x,v.y,0.0,1.0);
+	gl_Position = ViewProjection * Model * vec4(v.x,v.y,0.0,1.0);
 	varying_texPos=in_texPos;
 }
                 ";

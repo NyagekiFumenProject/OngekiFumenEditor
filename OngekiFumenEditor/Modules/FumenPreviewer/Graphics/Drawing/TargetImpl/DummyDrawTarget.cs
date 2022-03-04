@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         protected override Vector GetObjectPosition(Bell obj, OngekiFumen fumen)
         {
-            return new((float)0, (float)0);
+            return new(100, 100);
         }
     }
 }

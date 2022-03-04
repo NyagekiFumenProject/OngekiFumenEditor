@@ -87,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         {
             var pos = GetObjectPosition(ongekiObject, fumen);
 
-            var modelMatrix = Matrix4.Identity * Matrix4.CreateTranslation(pos.X, pos.Y, 0) * Matrix4.CreateScale(new Vector3(Size.X / texture.Width, Size.Y / texture.Height, 1));
+            var modelMatrix = Matrix4.CreateScale(new Vector3(Size.X / texture.Width, Size.Y / texture.Height, 1)) * Matrix4.CreateTranslation(pos.X, pos.Y, 0);
             //var mvpMatrix = previewer.ViewProjectionMatrix * modelMatrix;
 
             shader.Begin();

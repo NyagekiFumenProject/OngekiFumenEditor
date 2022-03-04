@@ -21,6 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
@@ -49,11 +50,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         private float viewWidth = 0;
         public float ViewWidth
         {
-            get=> viewWidth;
+            get => viewWidth;
             set
             {
                 Set(ref viewWidth, value);
-                ProjectionMatrix = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+                RecalcViewProjectionMatrix();
             }
         }
 
@@ -64,31 +65,18 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             set
             {
                 Set(ref viewHeight, value);
-                ProjectionMatrix = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+                RecalcViewProjectionMatrix();
             }
         }
 
-        public float CurrentPlayTime { get; private set; }
-
-        private Matrix4 viewMatrix = Matrix4.Identity;
-        public Matrix4 ViewMatrix
+        private float currentPlayTime;
+        public float CurrentPlayTime
         {
-            get => viewMatrix;
+            get => currentPlayTime;
             set
             {
-                Set(ref viewMatrix, value);
-                ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-            }
-        }
-
-        private Matrix4 projectionMatrix = Matrix4.Identity;
-        public Matrix4 ProjectionMatrix
-        {
-            get => projectionMatrix;
-            set
-            {
-                Set(ref projectionMatrix, value);
-                ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+                Set(ref currentPlayTime, value);
+                RecalcViewProjectionMatrix();
             }
         }
 
@@ -122,6 +110,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        }
+
+        private void RecalcViewProjectionMatrix()
+        {
+            var projection = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+            var view = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, CurrentPlayTime, 0));
+
+            ViewProjectionMatrix = view * projection;
         }
 
         void IFumenPreviewer.OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
@@ -182,5 +178,15 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             }
             */
         }
+
+        #region UserActions
+
+        public void OnMouseWheel(MouseWheelEventArgs args)
+        {
+            CurrentPlayTime += args.Delta > 0 ? 100 : -50f;
+            Log.LogDebug($"CurrentPlayTime = {CurrentPlayTime}");
+        }
+
+        #endregion
     }
 }

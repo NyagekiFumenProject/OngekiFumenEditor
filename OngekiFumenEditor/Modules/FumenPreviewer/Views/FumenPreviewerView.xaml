@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenPreviewer.ViewModels"
+    cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($eventArgs)];"
     d:DataContext="{d:DesignInstance Type=vm:FumenPreviewerViewModel}"
     mc:Ignorable="d">
     <opentkcontrol:GLWpfControl
