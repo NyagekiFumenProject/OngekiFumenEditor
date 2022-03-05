@@ -195,7 +195,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         public void OnMouseWheel(MouseWheelEventArgs args)
         {
-            CurrentPlayTime += args.Delta > 0 ? 25 : -25f;
+            CurrentPlayTime += (args.Delta > 0 ? 2 : -2) * (Keyboard.IsKeyDown(Key.LeftShift) ? 10 : 1);
             Log.LogDebug($"CurrentPlayTime = {CurrentPlayTime}");
         }
 

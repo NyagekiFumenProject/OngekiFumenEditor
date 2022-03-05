@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -22,12 +23,49 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         }
 
-        protected override Vector GetObjectPosition(Bell obj, OngekiFumen fumen)
+        public float CalculateBulletMsecTime(Bell obj,float userSpeed = 2.35f)
         {
-            var y = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 240);
-            var x = XGridCalculator.ConvertXGridToX(obj.XGrid, 30, Previewer.ViewWidth, 1);
+            const float fat = 3.95f;
+            return 32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (obj.ReferenceBulletPallete?.Speed ?? 1f)) * 16.666666f;
+        }
 
-            return new((float)x, (float)y);
+        protected override Vector? GetObjectPosition(Bell obj, OngekiFumen fumen)
+        {
+            var appearOffsetTime = CalculateBulletMsecTime(obj);
+
+            /*
+            --------------------------- toTime 
+                    \
+                     \
+                      \
+                       \
+                        \
+                         O      <- currentTime
+                          bell
+                           \
+                            \
+                             \
+                              \
+                               \
+            ---------------------------- fromTime = toTime - appearOffsetTime
+             */
+
+            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, fumen) ?? obj.XGrid, 30, Previewer.ViewWidth, 1);
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, fumen) ?? obj.XGrid, 30, Previewer.ViewWidth, 1);
+
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 240);
+            var fromTime = toTime - appearOffsetTime;
+            var currentTime = MathUtils.Limit(Previewer.CurrentPlayTime, toTime, fromTime);
+            if (Previewer.CurrentPlayTime < fromTime)
+                return null;
+            var precent = (currentTime - fromTime) / appearOffsetTime;
+
+            var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
+
+            timeX = MathUtils.Limit(timeX, fromX, toX);
+            var timeY = Previewer.CurrentPlayTime + Previewer.ViewHeight * (1 - precent);
+
+            return new((float)timeX, (float)timeY);
         }
     }
 }

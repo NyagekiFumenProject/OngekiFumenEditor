@@ -87,6 +87,18 @@ namespace OngekiFumenEditor.Utils
             return msec;
         }
 
+        internal static double Limit(double val, double min, double max)
+        {
+            if (min > max)
+            {
+                var t = min;
+                min = max;
+                max = t;
+            }
+
+            return Math.Max(Math.Min(val, max), min);
+        }
+
         public static Func<double, double> BuildTwoPointFormFormula(double x1, double y1, double x2, double y2)
         {
             var by = y2 - y1;

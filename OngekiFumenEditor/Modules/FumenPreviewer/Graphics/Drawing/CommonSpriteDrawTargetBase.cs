@@ -82,11 +82,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             GL.BindVertexArray(0);
         }
 
-        protected abstract Vector GetObjectPosition(T obj, OngekiFumen fumen);
+        protected abstract Vector? GetObjectPosition(T obj, OngekiFumen fumen);
 
         public override void Draw(T ongekiObject, OngekiFumen fumen)
         {
-            var pos = GetObjectPosition(ongekiObject, fumen);
+            if (GetObjectPosition(ongekiObject, fumen) is not Vector pos)
+                return;
 
             var modelMatrix =
                 Matrix4.CreateScale(new Vector3(Size.X / texture.Width, Size.Y / texture.Height, 1)) *
