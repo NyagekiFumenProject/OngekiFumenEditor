@@ -45,6 +45,43 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             public static Target FixField { get; } = new Target("FIX");
         }
 
+        public XGrid CalculateToXGrid(XGrid xGrid, OngekiFumen fumen)
+        {
+            var xUnit = 0f;
+
+            //暂时实现Target.FixField的
+            if (TargetValue == Target.FixField)
+            {
+                xUnit = xGrid.Unit;
+            }
+            else if (TargetValue == Target.Player)
+            {
+                //写死先
+                xUnit = 0;
+            }
+
+            xGrid = new XGrid(xUnit);
+            xGrid.NormalizeSelf();
+            return xGrid;
+        }
+
+        public XGrid CalculateFromXGrid(XGrid xGrid, OngekiFumen fumen)
+        {
+            var xUnit = 0f;
+
+            //暂时实现Shooter.TargetHead && Target.FixField的
+            if (ShooterValue == Shooter.TargetHead &
+                TargetValue == Target.FixField)
+            {
+                xUnit = xGrid.Unit;
+            }
+
+            xUnit += PlaceOffset;
+            xGrid = new XGrid(xUnit);
+            xGrid.NormalizeSelf();
+            return xGrid;
+        }
+
         public class BulletSize : FadeStringEnum
         {
             public BulletSize(string value) : base(value)
@@ -55,11 +92,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             /// <summary>
             /// 普通大小
             /// </summary>
-            public static BulletSize Normal { get; } = new ("N");
+            public static BulletSize Normal { get; } = new("N");
             /// <summary>
             /// 加大版(是普通版的1.4x)
             /// </summary>
-            public static BulletSize Lerge { get; } = new ("L");
+            public static BulletSize Lerge { get; } = new("L");
         }
 
         public class BulletType : FadeStringEnum
