@@ -114,6 +114,8 @@ namespace OngekiFumenEditor.Utils
 
         public static (T min, T max) MaxMinBy<T>(this IEnumerable<T> collection)
             => collection.MaxMinBy(x => x, (a, b) => Comparer<T>.Default.Compare(a, b));
+        public static (T min, T max) MaxMinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
+            => collection.MaxMinBy((a, b) => keySelector(a).CompareTo(keySelector(b)));
         public static (T min, T max) MaxMinBy<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
             => collection.MaxMinBy(x => x, comparer);
         public static (X min, X max) MaxMinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)

@@ -6,6 +6,7 @@ using OngekiFumenEditor.Modules.FumenPreviewer.Graphics;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl;
 using OngekiFumenEditor.Modules.FumenPreviewer.Views;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -159,8 +160,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .ToDictionary(x => x.supportId, x => x.target);
 
-            dummy = IoC.Get<DummyLinesDrawTargetBase>();
-
             openGLView.Render += (ts) => OnRender(openGLView, ts);
         }
 
@@ -173,20 +172,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 #endif
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            dummy.BeginDraw();
-            dummy.Draw(default, default);
-            dummy.EndDraw();
-
             var fumen = Editor?.Fumen;
             if (fumen is null)
                 return;
+
+            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 240);
+            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight , fumen.BpmList, 240);
 
             foreach (var objGroup in fumen.GetAllDisplayableObjects().OfType<OngekiObjectBase>().GroupBy(x => x.IDShortName))
             {
                 if (drawTargets.TryGetValue(objGroup.Key, out var drawingTarget))
                 {
                     drawingTarget.BeginDraw();
-                    foreach (var obj in objGroup)
+                    foreach (var obj in objGroup.Where(x => (x as IDisplayableObject)?.CheckVisiable(minTGrid, maxTGrid) ?? true))
                         drawingTarget.Draw(obj, fumen);
                     drawingTarget.EndDraw();
                 }
