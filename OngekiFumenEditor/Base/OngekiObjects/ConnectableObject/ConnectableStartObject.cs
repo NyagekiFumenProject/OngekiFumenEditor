@@ -19,6 +19,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         private List<ConnectorLineBase<ConnectableObjectBase>> connectors = new();
         public IEnumerable<ConnectableChildObjectBase> Children => children;
 
+        public TGrid MinTGrid => TGrid;
+        public TGrid MaxTGrid => children.Count == 0 ? MinTGrid : children[children.Count - 1].TGrid;
+
         private int recordId = -1;
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
@@ -118,6 +121,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             yield return this;
             foreach (var child in Children)
                 yield return child;
+        }
+
+        public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
+        {
+            if (maxVisibleTGrid < MinTGrid)
+                return false;
+
+            if (MaxTGrid < minVisibleTGrid)
+                return false;
+
+            return true;
         }
 
         public GridRange GetTGridRange()
