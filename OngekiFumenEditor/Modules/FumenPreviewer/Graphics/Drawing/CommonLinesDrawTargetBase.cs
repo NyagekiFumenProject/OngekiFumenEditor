@@ -97,8 +97,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                     using var d = ObjectPool<List<LinePoint>>.GetWithUsingDisposable(out var list, out _);
                     list.Clear();
                     FillLine(list, obj, fumen);
-                    
-                    var prevLinePoint = list[0];
+
+                    var prevLinePoint = list.Count > 0 ? list[0] : default;
 
                     foreach (var item in list.SequenceWrap(LINE_DRAW_MAX - 1))
                     {

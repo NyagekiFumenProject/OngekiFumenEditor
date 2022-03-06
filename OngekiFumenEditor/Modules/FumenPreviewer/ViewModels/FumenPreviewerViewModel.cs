@@ -37,6 +37,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         public event System.Action OnViewResized;
 
+        public DrawTimeSignatureHelper timeSignatureHelper;
+
         public FumenVisualEditorViewModel Editor
         {
             get
@@ -142,7 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             ViewHeight = (float)sizeArg.NewSize.Height;
 
             OnViewResized?.Invoke();
-        }
+        }   
 
         void IFumenPreviewer.PrepareOpenGLView(GLWpfControl openGLView)
         {
@@ -159,6 +161,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             drawTargets = IoC.GetAll<IDrawingTarget>()
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .ToDictionary(x => x.supportId, x => x.target);
+
+            timeSignatureHelper = new DrawTimeSignatureHelper();
 
             openGLView.Render += (ts) => OnRender(openGLView, ts);
         }
@@ -178,6 +182,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
             var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 240);
             var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight , fumen.BpmList, 240);
+
+            timeSignatureHelper.Draw(fumen);
 
             foreach (var objGroup in fumen.GetAllDisplayableObjects().OfType<OngekiObjectBase>().GroupBy(x => x.IDShortName))
             {
