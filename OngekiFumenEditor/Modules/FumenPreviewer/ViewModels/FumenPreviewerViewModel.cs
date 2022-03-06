@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,8 +36,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         private FumenVisualEditorViewModel editor = default;
 
-        public event System.Action OnViewResized;
-
         public DrawTimeSignatureHelper timeSignatureHelper;
 
         public FumenVisualEditorViewModel Editor
@@ -48,6 +47,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             set
             {
                 Set(ref editor, value);
+                if (IsFollowCurrentEditorTime)
+                    CurrentPlayTime = (float)(Editor?.ScrollViewerVerticalOffset ?? 0f);
             }
         }
 
@@ -86,10 +87,22 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             }
         }
 
+        private bool isFollowCurrentEditorTime = false;
+        public bool IsFollowCurrentEditorTime
+        {
+            get => isFollowCurrentEditorTime;
+            set
+            {
+                Set(ref isFollowCurrentEditorTime, value);
+                if (value)
+                    CurrentPlayTime = (float)Editor.ScrollViewerVerticalOffset;
+            }
+        }
+
+
         public Matrix4 ViewProjectionMatrix { get; private set; }
 
         private static Dictionary<string, IDrawingTarget> drawTargets = new();
-        private DummyLinesDrawTargetBase dummy;
 
         public FumenPreviewerViewModel()
         {
@@ -142,9 +155,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
             ViewWidth = (float)sizeArg.NewSize.Width;
             ViewHeight = (float)sizeArg.NewSize.Height;
-
-            OnViewResized?.Invoke();
-        }   
+        }
 
         void IFumenPreviewer.PrepareOpenGLView(GLWpfControl openGLView)
         {
@@ -180,8 +191,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             if (fumen is null)
                 return;
 
+            if (IsFollowCurrentEditorTime)
+                CurrentPlayTime = (float)Editor.ScrollViewerVerticalOffset;
+
             var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 240);
-            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight , fumen.BpmList, 240);
+            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 240);
 
             timeSignatureHelper.Draw(fumen);
 

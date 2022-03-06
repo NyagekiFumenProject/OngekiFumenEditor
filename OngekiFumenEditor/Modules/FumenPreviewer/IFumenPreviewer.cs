@@ -17,7 +17,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer
     {
         float ViewWidth { get; }
         float ViewHeight { get; }
-        event Action OnViewResized;
         float CurrentPlayTime { get; set; }
         Matrix4 ViewProjectionMatrix { get; }
 

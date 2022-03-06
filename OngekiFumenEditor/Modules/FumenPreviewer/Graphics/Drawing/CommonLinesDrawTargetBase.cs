@@ -61,11 +61,23 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             GL.BindVertexArray(0);
         }
 
-        public abstract void FillLine(List<LinePoint> appendFunc, T obj, OngekiFumen fumen);
+        public abstract void FillLine(List<LinePoint> list, T obj, OngekiFumen fumen);
 
         public override void Draw(T obj, OngekiFumen fumen)
         {
-            GL.LineWidth(LineWidth);
+            using var d = ObjectPool<List<LinePoint>>.GetWithUsingDisposable(out var list, out _);
+            list.Clear();
+            FillLine(list, obj, fumen);
+
+            Draw(list, LineWidth);
+        }
+
+        public void Draw(List<LinePoint> list, int lineWidth)
+        {
+            if (list.Count == 0)
+                return;
+
+            GL.LineWidth(lineWidth);
             shader.Begin();
             shader.PassUniform("Model", Matrix4.CreateTranslation(-Previewer.ViewWidth / 2, -Previewer.ViewHeight / 2, 0));
             shader.PassUniform("ViewProjection", Previewer.ViewProjectionMatrix);
@@ -94,11 +106,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                     var ptr = GL.MapBuffer(BufferTarget.ArrayBuffer, BufferAccess.WriteOnly);
                     var p = (float*)ptr.ToPointer();
 
-                    using var d = ObjectPool<List<LinePoint>>.GetWithUsingDisposable(out var list, out _);
-                    list.Clear();
-                    FillLine(list, obj, fumen);
-
-                    var prevLinePoint = list.Count > 0 ? list[0] : default;
+                    var prevLinePoint = list[0];
 
                     foreach (var item in list.SequenceWrap(LINE_DRAW_MAX - 1))
                     {

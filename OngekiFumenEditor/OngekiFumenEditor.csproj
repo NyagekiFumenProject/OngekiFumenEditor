@@ -133,24 +133,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>EditorGlobalSetting.settings</DependentUpon>
     </Compile>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
+      <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Properties\EditorGlobalSetting.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>EditorGlobalSetting.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Update="Resources\sounds\bell.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -14,21 +14,16 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public abstract class CommonSpriteDrawTargetBase<T> : CommonDrawTargetBase<T>, IDisposable where T : OngekiObjectBase
     {
-        private readonly Texture texture;
         private readonly Shader shader;
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
         private readonly IFumenPreviewer previewer;
 
-        public Vector2 Size { get; set; } = new Vector2(40, 40);
-
         public IFumenPreviewer Previewer => previewer;
 
-        protected CommonSpriteDrawTargetBase(Texture texture)
+        protected CommonSpriteDrawTargetBase()
         {
-            this.texture = texture;
-            //build textures.
             shader = CommonSpriteShader.Shared;
 
             vertexVBO = GL.GenBuffer();
@@ -66,10 +61,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 {
                     //绑定基本顶点
                     var cacheBaseVertex = new float[] {
-                            -0.5f * texture.Width, 0.5f * texture.Height,
-                             0.5f * texture.Width, 0.5f * texture.Height,
-                             0.5f * texture.Width, -0.5f * texture.Height,
-                            -0.5f * texture.Width, -0.5f * texture.Height,
+                            -0.5f , 0.5f ,
+                             0.5f , 0.5f ,
+                             0.5f , -0.5f ,
+                            -0.5f , -0.5f ,
                     };
                     GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * cacheBaseVertex.Length),
                         cacheBaseVertex, BufferUsageHint.StaticDraw);
@@ -82,22 +77,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             GL.BindVertexArray(0);
         }
 
-        protected abstract Vector? GetObjectPosition(T obj, OngekiFumen fumen);
-
-        public override void Draw(T ongekiObject, OngekiFumen fumen)
+        public void Draw(Texture texture, Vector2 size, Vector position, float rotation)
         {
-            if (GetObjectPosition(ongekiObject, fumen) is not Vector pos)
-                return;
-
             var modelMatrix =
-                Matrix4.CreateScale(new Vector3(Size.X / texture.Width, Size.Y / texture.Height, 1)) *
-                Matrix4.CreateTranslation(pos.X - previewer.ViewWidth / 2, pos.Y - previewer.ViewHeight / 2, 0);
+                Matrix4.CreateRotationY(rotation) *
+                Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
+                Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
+                Matrix4.CreateTranslation(position.X - previewer.ViewWidth / 2, position.Y - previewer.ViewHeight / 2, 0);
             //var mvpMatrix = previewer.ViewProjectionMatrix * modelMatrix;
 
             shader.Begin();
             shader.PassUniform("Model", modelMatrix);
             shader.PassUniform("ViewProjection", previewer.ViewProjectionMatrix);
-            shader.PassUniform("TextureSize", Size);
+            shader.PassUniform("TextureSize", size);
             shader.PassUniform("diffuse", texture);
 
             GL.BindVertexArray(vao);
