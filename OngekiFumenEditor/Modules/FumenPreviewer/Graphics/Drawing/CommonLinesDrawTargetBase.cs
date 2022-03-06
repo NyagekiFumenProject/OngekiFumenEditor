@@ -37,6 +37,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             Previewer = IoC.Get<IFumenPreviewer>();
 
             Init();
+
+            GL.Enable(EnableCap.LineSmooth);
         }
 
         private void Init()
