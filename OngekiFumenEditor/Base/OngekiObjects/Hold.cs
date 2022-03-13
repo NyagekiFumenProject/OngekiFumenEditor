@@ -38,6 +38,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        public HoldEnd HoldEnd => Children.LastOrDefault() as HoldEnd;
+
         public override Type ModelViewType => typeof(HoldViewModel);
 
         public override string IDShortName => IsCritical ? "CHD" : "HLD";

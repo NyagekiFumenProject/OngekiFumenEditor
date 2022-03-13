@@ -18,6 +18,7 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
@@ -60,6 +61,7 @@
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
