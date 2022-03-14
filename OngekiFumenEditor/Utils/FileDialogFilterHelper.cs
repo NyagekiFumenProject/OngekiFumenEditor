@@ -19,7 +19,8 @@ namespace OngekiFumenEditor.Utils
         public static string GetSupportAudioFileExtensionFilter()
             => BuildExtensionFilter(new[] {
             (".mp3","音频文件"),
-            (".wav","音频文件")
+            (".wav","音频文件"),
+            (".acb","Criware音频文件"),
         });
     }
 }

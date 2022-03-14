@@ -4,12 +4,23 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Version>0.2.2</Version>
+    <Version>0.2.8</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Dependencies\**" />
+    <EmbeddedResource Remove="Dependencies\**" />
+    <None Remove="Dependencies\**" />
+    <Page Remove="Dependencies\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
@@ -52,6 +63,24 @@
     <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj">
       <PrivateAssets>all</PrivateAssets>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="DereTore.Common">
+      <HintPath>Dependencies\DereTore\DereTore.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="DereTore.Common.StarlightStage">
+      <HintPath>Dependencies\DereTore\DereTore.Common.StarlightStage.dll</HintPath>
+    </Reference>
+    <Reference Include="DereTore.Exchange.Archive.ACB">
+      <HintPath>Dependencies\DereTore\DereTore.Exchange.Archive.ACB.dll</HintPath>
+    </Reference>
+    <Reference Include="DereTore.Exchange.Audio.HCA">
+      <HintPath>Dependencies\DereTore\DereTore.Exchange.Audio.HCA.dll</HintPath>
+    </Reference>
+    <Reference Include="DereTore.Interop.OS">
+      <HintPath>Dependencies\DereTore\DereTore.Interop.OS.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
