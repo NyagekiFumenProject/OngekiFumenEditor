@@ -104,7 +104,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 foreach (var entry in archive.Files)
                 {
                     var record = entry.Value;
-                    var extractFileName = AcbFile.GetSymbolicFileNameFromCueId(record.CueId);
                     var len = (int)record.FileLength;
                     var buffer = ArrayPool<byte>.Shared.Rent(len);
                     dataStream.Seek(record.FileOffsetAligned, SeekOrigin.Begin);
@@ -117,19 +116,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
                         try
                         {
-                            using (var fs = File.Open(extractFilePath, FileMode.Create, FileAccess.Write, FileShare.Write))
-                            {
-                                await DecodeHca(fileData, fs, DecodeParams.Default);
-                            }
+                            using var fs = File.Open(extractFilePath, FileMode.Create, FileAccess.Write, FileShare.Write);
+                            await DecodeHca(fileData, fs, DecodeParams.Default);
 
                             Log.LogDebug("decoded");
                         }
                         catch (Exception ex)
                         {
                             if (File.Exists(extractFilePath))
-                            {
                                 File.Delete(extractFilePath);
-                            }
 
                             Log.LogDebug(ex.ToString());
 
@@ -147,6 +142,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                     ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
+
+            Log.LogInfo($"Extract .acb to .wav and load the later , acb file path : {filePath}");
 
             using (var acb = AcbFile.FromFile(filePath))
             {
