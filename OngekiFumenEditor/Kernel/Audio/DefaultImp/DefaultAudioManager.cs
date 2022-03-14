@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         {
             if (filePath.EndsWith(".acb"))
             {
-                filePath = await Dispatcher.CurrentDispatcher.InvokeAsync(() => ParseAndDecodeACBFile(filePath));
+                filePath = await ParseAndDecodeACBFile(filePath);
                 if (filePath is null)
                     return null;
             }
@@ -78,89 +78,75 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             return player;
         }
 
-        private string ParseAndDecodeACBFile(string filePath)
+        private async Task<string> ParseAndDecodeACBFile(string filePath)
         {
-            void ProcessAllBinaries(uint acbFormatVersion, DecodeParams baseDecodeParams, string extractFilePath, Afs2Archive archive, Stream dataStream)
+            async ValueTask ProcessAllBinaries(uint acbFormatVersion, string extractFilePath, Afs2Archive archive, Stream dataStream)
             {
-                void DecodeHca(Stream hcaDataStream, Stream waveStream, DecodeParams decodeParams)
+                async ValueTask DecodeHca(Stream hcaDataStream, Stream waveStream, DecodeParams decodeParams)
                 {
-                    using (var hcaStream = new OneWayHcaAudioStream(hcaDataStream, decodeParams, true))
+                    using var hcaStream = new OneWayHcaAudioStream(hcaDataStream, decodeParams, true);
+                    var buffer = ArrayPool<byte>.Shared.Rent(10240);
+                    var read = 1;
+
+                    while (read > 0)
                     {
-                        var buffer = new byte[10240];
-                        var read = 1;
+                        read = await hcaStream.ReadAsync(buffer, 0, buffer.Length);
 
-                        while (read > 0)
+                        if (read > 0)
                         {
-                            read = hcaStream.Read(buffer, 0, buffer.Length);
-
-                            if (read > 0)
-                            {
-                                waveStream.Write(buffer, 0, read);
-                            }
+                            await waveStream.WriteAsync(buffer, 0, read);
                         }
                     }
+                    ArrayPool<byte>.Shared.Return(buffer);
                 }
 
-                var decodeParams = baseDecodeParams;
-
-                if (acbFormatVersion >= 0x01300000)
-                {
-                    decodeParams.KeyModifier = archive.HcaKeyModifier;
-                }
-                else
-                {
-                    decodeParams.KeyModifier = 0;
-                }
 
                 foreach (var entry in archive.Files)
                 {
                     var record = entry.Value;
                     var extractFileName = AcbFile.GetSymbolicFileNameFromCueId(record.CueId);
+                    var len = (int)record.FileLength;
+                    var buffer = ArrayPool<byte>.Shared.Rent(len);
+                    dataStream.Seek(record.FileOffsetAligned, SeekOrigin.Begin);
+                    var read = await dataStream.ReadAsync(buffer, 0, len);
+                    var fileData = new MemoryStream(buffer, 0, read);
 
-                    using (var fileData = AcbHelper.ExtractToNewStream(dataStream, record.FileOffsetAligned, (int)record.FileLength))
+                    if (HcaReader.IsHcaStream(fileData))
                     {
-                        var isHcaStream = HcaReader.IsHcaStream(fileData);
-
                         Log.LogDebug(string.Format("Processing {0} AFS: #{1} (offset={2} size={3})...   ", acbFormatVersion, record.CueId, record.FileOffsetAligned, record.FileLength));
 
-                        if (isHcaStream)
+                        try
                         {
-                            try
+                            using (var fs = File.Open(extractFilePath, FileMode.Create, FileAccess.Write, FileShare.Write))
                             {
-                                using (var fs = File.Open(extractFilePath, FileMode.Create, FileAccess.Write, FileShare.Write))
-                                {
-                                    DecodeHca(fileData, fs, decodeParams);
-                                }
-
-                                Log.LogDebug("decoded");
+                                await DecodeHca(fileData, fs, DecodeParams.Default);
                             }
-                            catch (Exception ex)
-                            {
-                                if (File.Exists(extractFilePath))
-                                {
-                                    File.Delete(extractFilePath);
-                                }
 
-                                Log.LogDebug(ex.ToString());
-
-                                if (ex.InnerException != null)
-                                {
-                                    Log.LogDebug("Details:");
-                                    Log.LogDebug(ex.InnerException.ToString());
-                                }
-                            }
+                            Log.LogDebug("decoded");
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            Log.LogDebug("skipped (not HCA)");
+                            if (File.Exists(extractFilePath))
+                            {
+                                File.Delete(extractFilePath);
+                            }
+
+                            Log.LogDebug(ex.ToString());
+
+                            if (ex.InnerException != null)
+                            {
+                                Log.LogDebug("Details:");
+                                Log.LogDebug(ex.InnerException.ToString());
+                            }
                         }
                     }
+                    else
+                    {
+                        Log.LogDebug("skipped (not HCA)");
+                    }
+                    ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
-
-            var decodeParams = DecodeParams.Default;
-            decodeParams.Key1 = 0xf27e3b22;
-            decodeParams.Key2 = 0x00003657;
 
             using (var acb = AcbFile.FromFile(filePath))
             {
@@ -171,7 +157,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 try
                 {
                     using var awbStream = awb == acb.InternalAwb ? acb.Stream : File.OpenRead(awb.FileName);
-                    ProcessAllBinaries(acb.FormatVersion, decodeParams, tempAwbFilePath, awb, awbStream);
+                    await ProcessAllBinaries(acb.FormatVersion, tempAwbFilePath, awb, awbStream);
                     return tempAwbFilePath;
                 }
                 catch (Exception e)
