@@ -53,8 +53,12 @@
                 <GroupBox BorderBrush="Black" Header="谱面初始设置">
                     <StackPanel Margin="10,5,10,5">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0,0,10,0">初始Bpm:</TextBlock>
-                            <TextBox Width="150" Text="{Binding EditorProjectData.BaseBPM}">
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">初始Bpm:</TextBlock>
+                            <TextBox
+                                Width="150"
+                                VerticalAlignment="Center"
+                                IsEnabled="{Binding EditorProjectData.FumenFilePath}"
+                                Text="{Binding EditorProjectData.BaseBPM}">
                             </TextBox>
                         </StackPanel>
                         <Grid Margin="0,5,0,0">

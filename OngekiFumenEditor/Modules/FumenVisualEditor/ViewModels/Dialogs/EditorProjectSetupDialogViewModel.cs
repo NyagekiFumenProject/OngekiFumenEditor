@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -36,13 +37,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
             }
         }
 
-        public void OnSelectFumenFilePathButtonClicked()
+        public async void OnSelectFumenFilePathButtonClicked()
         {
             var dialog = new OpenFileDialog();
             dialog.Multiselect = false;
             dialog.Filter = FileDialogFilterHelper.GetSupportFumenFileExtensionFilter();
             if (dialog.ShowDialog() == true)
-                EditorProjectData.FumenFilePath = dialog.FileName;
+            {
+                try
+                {
+                    using var fs = File.OpenRead(dialog.FileName);
+                    var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(dialog.FileName).DeserializeAsync(fs);
+
+                    EditorProjectData.FumenFilePath = dialog.FileName;
+                    EditorProjectData.BaseBPM = fumen.MetaInfo.BpmDefinition.First;
+                    EditorProjectData.Fumen = fumen;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show($"无法加载谱面 : {e.Message}");
+                }
+            }
         }
 
         public async void OnCreateButtonClicked()
