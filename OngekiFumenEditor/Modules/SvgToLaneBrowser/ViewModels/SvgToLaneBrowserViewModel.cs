@@ -417,8 +417,6 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 _ => default(DisplayObjectViewModelBase)
             };
 
-            var leneStartObj = laneStartViewModel.ReferenceOngekiObject as LaneStartBase;
-
             var nextGenetor = laneType switch
             {
                 LaneType.Left => () => new LaneLeftNext(),
@@ -439,6 +437,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
 
             if (laneStartViewModel is null)
                 return null;
+
+            var leneStartObj = laneStartViewModel.ReferenceOngekiObject as LaneStartBase;
 
             foreach ((var tGrid, var xGrid, var status) in xtGrids)
             {
