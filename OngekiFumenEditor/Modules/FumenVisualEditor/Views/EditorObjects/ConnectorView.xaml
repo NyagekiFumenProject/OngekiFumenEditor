@@ -12,7 +12,10 @@
         <converters:CalculateObjectToPointsConverter x:Key="CalculateObjectToPointsConverter">
         </converters:CalculateObjectToPointsConverter>
     </UserControl.Resources>
-    <Line Stroke="{Binding LineBrush}">
+    <Line
+        Stroke="{Binding LineBrush}"
+        StrokeDashArray="{Binding LineDashArray}"
+        StrokeThickness="{Binding LineThickness}">
         <Line.X1>
             <MultiBinding Converter="{StaticResource CalculateObjectToPointsConverter}" ConverterParameter="0">
                 <MultiBinding.Bindings>

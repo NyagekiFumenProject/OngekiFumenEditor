@@ -12,4 +12,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     public class LaneLeftEndViewModel : LaneEndViewModel<LaneLeftEnd> { }
     public class LaneRightEndViewModel : LaneEndViewModel<LaneRightEnd> { }
     public class LaneColorfulEndViewModel : LaneEndViewModel<ColorfulLaneEnd> { }
+    public class EnemyLaneEndViewModel : LaneEndViewModel<EnemyLaneEnd> { }
 }

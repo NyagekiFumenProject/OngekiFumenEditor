@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
             set => Set(ref brightness, value);
         }
 
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneColorFulConnector()
+        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneColorfulConnector()
         {
             From = from,
             To = to

@@ -41,6 +41,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     };
                 case 'C':
                     return needNext ? new ColorfulLaneNext() : new ColorfulLaneEnd();
+                case 'E':
+                    return needNext ? new EnemyLaneNext() : new EnemyLaneEnd();
                 case 'L':
                     return LaneChar switch
                     {

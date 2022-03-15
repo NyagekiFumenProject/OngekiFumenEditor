@@ -54,7 +54,12 @@ namespace OngekiFumenEditor.Base.EditorObjects
         public override Color LineColor => DefaultColor;
     }
 
-    public class LaneColorFulConnector : LaneConnector
+    public class EnemyLaneConnector : ConnectorLineBase<ConnectableObjectBase>
+    {
+        public override Type ModelViewType => typeof(EnemyLaneConnectorViewModel);
+    }
+
+    public class LaneColorfulConnector : LaneConnector
     {
         public override Color LineColor => ((IColorfulLane)From).ColorId.Color;
 

@@ -78,6 +78,15 @@
             <DataTemplate DataType="{x:Type fumenOngekiObject:LaneColorfulStartViewModel}">
                 <ongekiobjects:LaneStartView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:EnemyLaneEndViewModel}">
+                <ongekiobjects:LaneEndView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:EnemyLaneNextViewModel}">
+                <ongekiobjects:LaneNextView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:EnemyLaneStartViewModel}">
+                <ongekiobjects:LaneStartView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type fumenOngekiObject:MeterChangeViewModel}">
                 <views1:DisplayTextLineObjectViewBase />
             </DataTemplate>
@@ -122,6 +131,9 @@
                 <editorobjects:HoldConnectorView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type editorObject:LaneConnectorViewModel}">
+                <editorobjects:ConnectorView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type editorObject:EnemyLaneConnectorViewModel}">
                 <editorobjects:ConnectorView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type editorObject:WallConnectorViewModel}">

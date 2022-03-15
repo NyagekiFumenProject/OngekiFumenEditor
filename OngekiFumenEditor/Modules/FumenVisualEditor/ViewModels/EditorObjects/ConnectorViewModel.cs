@@ -66,7 +66,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 
         public override IDisplayableObject DisplayableObject => Connector;
 
-        public abstract Brush LineBrush { get; }
+        public virtual Brush LineBrush { get; } = new SolidColorBrush(Colors.White);
+        public virtual DoubleCollection LineDashArray { get; } = new DoubleCollection() { 10, 0 };
+        public virtual int LineThickness { get; } = 1;
 
         public override void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
         {
