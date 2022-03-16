@@ -2,9 +2,8 @@ name: Build Program
 
 on:
   push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
+  workflow_dispatch:
     
 env:
   Configuration: Release # 'Release' or 'Debug'
