@@ -28,5 +28,5 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: Make artifact
-        path: .\OngekiFumenEditor\OngekiFumenEditor\bin\githuibActions
+        path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
