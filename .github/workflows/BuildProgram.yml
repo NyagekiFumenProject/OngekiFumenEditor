@@ -19,7 +19,7 @@ on:
     
 env:
   Configuration: ${{ github.event.inputs.BuildConfiguration || 'Release' }} 
-  Branch: ${{ github.event.inputs.BuildBranch || 'master' }}
+  Branch: ${{ github.event.inputs.BuildBranch || github.ref_name }}
   Version: 0.2.8
 
 jobs:
