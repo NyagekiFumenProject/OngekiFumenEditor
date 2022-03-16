@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
@@ -24,6 +23,8 @@ jobs:
       run: dotnet restore
     - name: Publish
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c Release -o ./bin/githubActions/
+    - name: Enum files
+      run: dir /S
     - uses: actions/upload-artifact@v3
       with:
         name: Make artifact
