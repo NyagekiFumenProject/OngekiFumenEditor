@@ -18,16 +18,13 @@ on:
           - Debug
     
 env:
-  DEFAULT_CONFIGUTATION: "Release"
-  DEFAULT_BRANCH: "master"
+  Configuration: ${{ github.event.inputs.BuildConfiguration || 'Release' }} 
+  Branch: ${{ github.event.inputs.BuildBranch || 'master' }}
   Version: 0.2.8
 
 jobs:
   build:
     runs-on: windows-latest
-    env:
-      Configuration: ${{ github.event.inputs.BuildConfiguration || env.DEFAULT_CONFIGUTATION }}
-      Branch: ${{ github.event.inputs.BuildBranch || env.DEFAULT_BRANCH }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -41,11 +38,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish
-      run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{build.env.Configuration}} -o ./bin/githubActions/
+      run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o ./bin/githubActions/
     # - name: Enum files
     #  run: Get-ChildItem -Recurse
     - uses: actions/upload-artifact@v3
       with:
-        name: OngekiFumenEditor_${{build.env.Branch}}_${{build.env.Configuration}}_${{env.Version}}
+        name: OngekiFumenEditor_${{env.Branch}}_${{env.Configuration}}_${{env.Version}}
         path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
