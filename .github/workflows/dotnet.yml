@@ -24,4 +24,8 @@ jobs:
       run: dotnet restore
     - name: Publish
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c Release -o ./bin/githubActions/
+    - uses: actions/upload-artifact@v3
+      with:
+        name: Make artifact
+        path: ./OngekiFumenEditor/bin/githuibActions
     
