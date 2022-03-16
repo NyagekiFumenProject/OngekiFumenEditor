@@ -37,6 +37,7 @@ namespace OngekiFumenEditor.Base
         public MeterChangeList MeterChanges { get; } = new();
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
+        public TGridSortList<LaneBlockArea> LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
 
@@ -154,6 +155,10 @@ namespace OngekiFumenEditor.Base
             {
                 Holds.Add(holdEnd);
             }
+            else if (obj is LaneBlockArea laneBlock)
+            {
+                LaneBlocks.Add(laneBlock);
+            }
             else if (obj switch
             {
                 LaneStartBase or LaneEndBase or LaneNextBase => obj,
@@ -221,6 +226,10 @@ namespace OngekiFumenEditor.Base
             {
                 Holds.Remove(holdEnd);
             }
+            else if (obj is LaneBlockArea laneBlock)
+            {
+                LaneBlocks.Remove(laneBlock);
+            }
             else if (obj switch
             {
                 LaneStartBase or LaneEndBase or LaneNextBase => obj,
@@ -252,6 +261,7 @@ namespace OngekiFumenEditor.Base
                 .Concat(MeterChanges.Skip(1)) //not show first meter
                 .Concat(BpmList.Skip(1)) //not show first bpm
                 .Concat(ClickSEs)
+                .Concat(LaneBlocks)
                 .Concat(EnemySets)
                 .Concat(Bullets)
                 .Concat(Lanes)

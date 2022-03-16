@@ -139,6 +139,12 @@
             <DataTemplate DataType="{x:Type editorObject:WallConnectorViewModel}">
                 <editorobjects:ConnectorView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneBlockAreaViewModel}">
+                <views1:DisplayTextLineObjectViewBase />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type fumenOngekiObject:LaneBlockAreaEndIndicatorViewModel}">
+                <views1:DisplayTextLineObjectViewBase />
+            </DataTemplate>
         </views:EditorObjectDataTemplateSelector.DataTemplates>
     </views:EditorObjectDataTemplateSelector>
 </ResourceDictionary>
