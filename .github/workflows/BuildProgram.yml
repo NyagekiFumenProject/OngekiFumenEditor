@@ -17,8 +17,8 @@ on:
           - Debug
     
 env:
-  Configuration: ${{ github.event.inputs.BuildConfiguration }}
-  Branch: ${{ github.event.inputs.BuildBranch }}
+  Configuration: ${{ github.event.inputs.BuildConfiguration || "Release" }}
+  Branch: ${{ github.event.inputs.BuildBranch || "master" }}
   Version: 0.2.8
 
 jobs:
