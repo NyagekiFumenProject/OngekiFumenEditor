@@ -1,13 +1,24 @@
 name: Build Program
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
+    inputs: 
+      BuildBranch:
+        description: 'The branch you want to build.'  
+        required: true
+        default: 'master'
+      BuildConfiguration:
+        description: 'The configuration for dotnet build.'
+        required: true
+        default: 'Release'
+        type: choice
+        options: 
+          - Release
+          - Debug
     
 env:
-  Configuration: Release # 'Release' or 'Debug'
-  Branch: master # 'master' or other branch names in here: https://github.com/MikiraSora/OngekiFumenEditor/branches
+  Configuration: ${{ github.event.inputs.BuildConfiguration }}
+  Branch: ${{ github.event.inputs.BuildBranch }}
   Version: 0.2.8
 
 jobs:
