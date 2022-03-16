@@ -26,7 +26,7 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      Configuration: ${{${{ github.event.inputs.BuildConfiguration || env.DEFAULT_CONFIGUTATION }}}}
+      Configuration: ${{ github.event.inputs.BuildConfiguration || env.DEFAULT_CONFIGUTATION }}
       Branch: ${{ github.event.inputs.BuildBranch || env.DEFAULT_BRANCH }}
     steps:
     - uses: actions/checkout@v2
