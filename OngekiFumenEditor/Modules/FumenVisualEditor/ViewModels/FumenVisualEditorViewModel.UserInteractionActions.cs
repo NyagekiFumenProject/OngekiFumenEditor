@@ -289,7 +289,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var selectObjects = EditorViewModels
                 .OfType<DisplayObjectViewModelBase>()
-                .Where(x => selectionRect.Contains(x.CanvasX, x.CanvasY + Setting.JudgeLineOffsetY));
+                .Where(x => selectionRect.Contains(x.ReferenceOngekiObject is not IHorizonPositionObject ? selectionRect.X : x.CanvasX, x.CanvasY + Setting.JudgeLineOffsetY));
 
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
                 foreach (var o in SelectObjects)
@@ -577,7 +577,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
             {
                 case ToolboxItem toolboxItem:
-                    new DefaultToolBoxDropAction(toolboxItem).Drop(this,mousePosition);
+                    new DefaultToolBoxDropAction(toolboxItem).Drop(this, mousePosition);
                     break;
                 case IEditorDropHandler dropHandler:
                     dropHandler.Drop(this, mousePosition);
