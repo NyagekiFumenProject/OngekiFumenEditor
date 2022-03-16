@@ -22,7 +22,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish
-      run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c Release -r win-x64 -o ./bin/githubActions/
+      run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c Release -o ./bin/githubActions/
     # - name: Enum files
     #  run: Get-ChildItem -Recurse
     - uses: actions/upload-artifact@v3
