@@ -36,6 +36,10 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Focusable="False">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
         <Grid.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="选取...">
@@ -103,13 +107,12 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
         <controls:AnimatedScrollViewer
-            x:Name="myAnimatedScrollViewer"
+            x:Name="myScrollViewer"
+            Grid.Column="0"
             cal:Message.Attach="             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];              [Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];             "
             CanMouseWheel="{Binding IsLocked, Converter={StaticResource ReverseBoolConverter}}"
             HorizontalScrollBarVisibility="Disabled"
-            IsInertiaEnabled="False"
-            IsPenetrating="True"
-            VerticalScrollBarVisibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}">
+            VerticalScrollBarVisibility="Hidden">
             <Grid cal:Message.Attach="[Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];" Background="#01000000">
                 <ItemsControl Height="{Binding TotalDurationHeight}" ItemsSource="{Binding TGridUnitLineLocations}">
                     <ItemsControl.ItemsPanel>
@@ -140,7 +143,7 @@
                             <Grid>
                                 <Line
                                     Stroke="#30FFFFFF"
-                                    X1="{Binding ElementName=myAnimatedScrollViewer, Path=ActualWidth}"
+                                    X1="{Binding ElementName=myScrollViewer, Path=ActualWidth}"
                                     X2="0"
                                     Y1="{Binding Y}"
                                     Y2="{Binding Y}" />
@@ -199,6 +202,7 @@
             </Grid>
         </controls:AnimatedScrollViewer>
         <TextBlock
+            Grid.Column="0"
             Height="30"
             Margin="0,0,20,0"
             HorizontalAlignment="Right"
@@ -228,6 +232,7 @@
             </TextBlock.RenderTransform>
         </TextBlock>
         <Rectangle
+            Grid.Column="0"
             Height="2"
             IsHitTestVisible="False"
             Stroke="Yellow">
@@ -244,5 +249,17 @@
                 </TranslateTransform>
             </Rectangle.RenderTransform>
         </Rectangle>
+        <ScrollBar
+            Grid.Column="1"
+            ButtonBase.Click="ButtonBase_OnClick"
+            ContextMenu="{x:Null}"
+            Maximum="{Binding ElementName=myScrollViewer, Path=ScrollableHeight}"
+            Minimum="0"
+            Orientation="Vertical"
+            Thumb.DragCompleted="Thumb_DragCompleted"
+            Thumb.DragDelta="Thumb_DragDelta"
+            Thumb.DragStarted="Thumb_DragStarted"
+            Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
+            Value="{Binding ElementName=myScrollViewer, Path=CurrentVerticalOffset, Mode=OneWay}" />
     </Grid>
 </UserControl>

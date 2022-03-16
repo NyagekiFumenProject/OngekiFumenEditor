@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region ScrollViewer Animations
 
-        public AnimatedScrollViewer AnimatedScrollViewer => (GetView() as FumenVisualEditorView)?.myAnimatedScrollViewer;
+        public AnimatedScrollViewer AnimatedScrollViewer => (GetView() as FumenVisualEditorView)?.myScrollViewer;
 
         public (AnimationTimeline, AnimatedScrollViewer) BeginScrollAnimation()
         {
