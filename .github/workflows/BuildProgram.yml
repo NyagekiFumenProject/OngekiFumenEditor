@@ -1,6 +1,7 @@
 name: Build Program
 
 on:
+  push:
   workflow_dispatch:
     inputs: 
       BuildBranch:
