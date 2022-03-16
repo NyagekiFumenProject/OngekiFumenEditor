@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
@@ -45,5 +46,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public LaneBlockAreaEndIndicator EndIndicator { get; }
 
         public override Type ModelViewType => typeof(LaneBlockAreaViewModel);
+
+        public (LaneStartBase startWallLane, LaneStartBase endWallLane) CalculateReferenceWallLanes(OngekiFumen fumen)
+        {
+            var blockStartTGrid = TGrid;
+            var blockEndTGrid = EndIndicator.TGrid;
+
+            var startWallLane = fumen.Lanes.Where(x => x.IsWallLane).LastOrDefault(x => x.TGrid <= blockStartTGrid);
+            var endWallLane = fumen.Lanes.Where(x => x.IsWallLane).LastOrDefault(x => x.TGrid <= blockEndTGrid);
+
+            return (startWallLane, endWallLane);
+        }
     }
 }

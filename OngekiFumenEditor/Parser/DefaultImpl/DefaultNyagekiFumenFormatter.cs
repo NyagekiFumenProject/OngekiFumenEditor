@@ -52,6 +52,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
             ProcessLANE(fumen, writer);
 
+            ProcessLANE_BLOCK(fumen, writer);
+
             ProcessBULLET(fumen, writer);
 
             ProcessBEAM(fumen, writer);
@@ -68,6 +70,26 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             await memory.FlushAsync();
 
             return memory.ToArray();
+        }
+
+        private void ProcessLANE_BLOCK(OngekiFumen fumen, BinaryWriter writer)
+        {
+            writer.Write(fumen.LaneBlocks.Count);
+            foreach (var lbk in fumen.LaneBlocks)
+            {
+                (var refStartWallLane, var refEndWallLane) = lbk.CalculateReferenceWallLanes(fumen);
+
+                var end = lbk.EndIndicator;
+                writer.Write(refStartWallLane?.RecordId ?? -1);
+                writer.Write(lbk.TGrid.Unit);
+                writer.Write(lbk.TGrid.Grid);
+                writer.Write(refStartWallLane?.XGrid.Unit ?? 0f);
+                writer.Write(refStartWallLane?.XGrid.Grid ?? 0);
+                writer.Write(end.TGrid.Unit);
+                writer.Write(end.TGrid.Grid);
+                writer.Write(refEndWallLane?.XGrid.Unit ?? 0f);
+                writer.Write(refEndWallLane?.XGrid.Grid ?? 0);
+            }
         }
 
         public void ProcessHEADER(OngekiFumen fumen, BinaryWriter sb)
