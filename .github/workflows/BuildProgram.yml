@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs: 
       BuildBranch:
-        description: 'The branch you want to build.'  
+        description: 'The branch you want to build.' 
         required: true
         default: 'master'
       BuildConfiguration:
