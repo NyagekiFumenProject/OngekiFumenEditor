@@ -1,6 +1,8 @@
 name: Build Program
 
 on:
+  push:
+    branches: ['master']
   workflow_dispatch:
     inputs: 
       BuildBranch:
