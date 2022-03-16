@@ -18,8 +18,10 @@ on:
           - Debug
     
 env:
-  Configuration: ${{ github.event.inputs.BuildConfiguration || "Release" }}
-  Branch: ${{ github.event.inputs.BuildBranch || "master" }}
+  DEFAULT_CONFIGUTATION: "Release"
+  DEFAULT_BRANCH: "master"
+  Configuration: ${{ github.event.inputs.BuildConfiguration || env.DEFAULT_CONFIGUTATION }}
+  Branch: ${{ github.event.inputs.BuildBranch || env.DEFAULT_BRANCH }}
   Version: 0.2.8
 
 jobs:
