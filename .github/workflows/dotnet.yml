@@ -24,7 +24,7 @@ jobs:
     - name: Publish
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c Release -o ./bin/githubActions/
     - name: Enum files
-      run: dir /S
+      run: Get-ChildItem -Recurse
     - uses: actions/upload-artifact@v3
       with:
         name: Make artifact
