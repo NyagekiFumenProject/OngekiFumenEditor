@@ -119,16 +119,26 @@ namespace OngekiFumenEditor.Utils
         public static double CalculateXFromBetweenObjects<T>(T from, T to, FumenVisualEditorViewModel editor, TGrid tGrid) where T : IHorizonPositionObject, ITimelineObject
             => CalculateXFromBetweenObjects(from.TGrid, from.XGrid, to.TGrid, to.XGrid, editor, tGrid);
 
+        public static XGrid CalculateXGridFromBetweenObjects(TGrid fromTGrid, XGrid fromXGrid, TGrid toTGrid, XGrid toXGrid, TGrid tGrid)
+        {
+            var prevX = fromXGrid.TotalGrid;
+            var prevY = fromTGrid.TotalGrid;
+            var curX = toXGrid.TotalGrid;
+            var curY = toTGrid.TotalGrid;
+
+            var timeY = tGrid.TotalGrid;
+
+            var timeX = CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
+            var xGrid = new XGrid(0, (int)timeX, fromXGrid.ResX);
+            xGrid.NormalizeSelf();
+
+            return xGrid;
+        }
+
         public static double CalculateXFromBetweenObjects(TGrid fromTGrid, XGrid fromXGrid, TGrid toTGrid, XGrid toXGrid, FumenVisualEditorViewModel editor, TGrid tGrid)
         {
-            var prevX = XGridCalculator.ConvertXGridToX(fromXGrid, editor);
-            var prevY = TGridCalculator.ConvertTGridToY(fromTGrid, editor);
-            var curX = XGridCalculator.ConvertXGridToX(toXGrid, editor);
-            var curY = TGridCalculator.ConvertTGridToY(toTGrid, editor);
-
-            var timeY = TGridCalculator.ConvertTGridToY(tGrid, editor);
-            var timeX = CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
-
+            var xGrid = CalculateXGridFromBetweenObjects(fromTGrid, fromXGrid, toTGrid, toXGrid, tGrid);
+            var timeX = XGridCalculator.ConvertXGridToX(xGrid, editor);
             return timeX;
         }
 

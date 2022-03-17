@@ -22,6 +22,7 @@ namespace OngekiFumenEditor.Base
         }
 
         public static XGrid Zero { get; private set; } = new XGrid();
+        public int TotalGrid => (int)(Unit * ResX) + Grid;
 
         public XGrid(float unit = default, int grid = default, uint resX = DEFAULT_RES_X) : base(unit, grid) => ResX = resX;
 

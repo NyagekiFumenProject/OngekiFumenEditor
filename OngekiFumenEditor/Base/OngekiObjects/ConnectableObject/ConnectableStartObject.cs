@@ -153,5 +153,26 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 Min = x.min,
             };
         }
+
+        public XGrid CalulateXGrid(TGrid tGrid)
+        {
+            if (tGrid < TGrid)
+                return default;
+
+            var prev = this as ConnectableObjectBase;
+            foreach (var cur in Children)
+            {
+                if (tGrid < cur.TGrid)
+                {
+                    //就在当前[prev,cur]范围内，那么就插值计算咯
+                    var xGrid = MathUtils.CalculateXGridFromBetweenObjects(prev.TGrid, prev.XGrid, cur.TGrid, cur.XGrid, tGrid);
+                    return xGrid;
+                }
+
+                prev = cur;
+            }
+
+            return default;
+        }
     }
 }

@@ -40,6 +40,8 @@ namespace OngekiFumenEditor.Base
             return l.Grid + l.Unit * l.ResT < r.Grid + r.Unit * r.ResT;
         }
 
+        public TGrid CopyNew() => new(Unit, Grid, ResT);
+
         public static bool operator >(TGrid l, TGrid r)
         {
             return l.Grid + l.Unit * l.ResT > r.Grid + r.Unit * r.ResT;

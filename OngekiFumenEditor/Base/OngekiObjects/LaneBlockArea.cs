@@ -12,6 +12,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class LaneBlockArea : OngekiTimelineObjectBase
     {
+        public enum BlockDirection
+        {
+            Left = 1,
+            Right = -1
+        }
+
         public class LaneBlockAreaEndIndicator : OngekiTimelineObjectBase
         {
             public override Type ModelViewType => typeof(LaneBlockAreaEndIndicatorViewModel);
@@ -24,9 +30,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
             public override TGrid TGrid
             {
-                get => base.TGrid.TotalGrid <= 0 ? RefLaneBlockArea.TGrid : base.TGrid;
+                get => base.TGrid.TotalGrid <= 0 ? (TGrid = RefLaneBlockArea.TGrid.CopyNew()) : base.TGrid;
                 set => base.TGrid = value;
             }
+
+            public override string ToString() => $"{base.ToString()}";
         }
 
         private IDisplayableObject[] displayables;
@@ -45,17 +53,28 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         //private LaneBlockAreaConnector connector;
         public LaneBlockAreaEndIndicator EndIndicator { get; }
 
+        private BlockDirection direction = BlockDirection.Left;
+        public BlockDirection Direction
+        {
+            get => direction;
+            set => Set(ref direction, value);
+        }
+
         public override Type ModelViewType => typeof(LaneBlockAreaViewModel);
 
         public (LaneStartBase startWallLane, LaneStartBase endWallLane) CalculateReferenceWallLanes(OngekiFumen fumen)
         {
+            var wallType = Direction == BlockDirection.Left ? LaneType.WallLeft : LaneType.WallRight;
+
             var blockStartTGrid = TGrid;
             var blockEndTGrid = EndIndicator.TGrid;
 
-            var startWallLane = fumen.Lanes.Where(x => x.IsWallLane).LastOrDefault(x => x.TGrid <= blockStartTGrid);
-            var endWallLane = fumen.Lanes.Where(x => x.IsWallLane).LastOrDefault(x => x.TGrid <= blockEndTGrid);
+            var startWallLane = fumen.Lanes.Where(x => x.LaneType == wallType).LastOrDefault(x => x.TGrid <= blockStartTGrid);
+            var endWallLane = fumen.Lanes.Where(x => x.LaneType == wallType).LastOrDefault(x => x.TGrid <= blockEndTGrid);
 
             return (startWallLane, endWallLane);
         }
+
+        public override string ToString() => $"{base.ToString()} {Direction} End:({EndIndicator})";
     }
 }
