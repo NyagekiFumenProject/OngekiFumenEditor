@@ -18,8 +18,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
     {
         private AudioFileReader audioFileReader;
         private WaveOut currentOut;
-        private float currentOutPositionWeight = 0;
         private float baseOffset = 0;
+        private DateTime startTime;
+        private float pauseTime;
 
         public float Duration { get => (float)audioFileReader.TotalTime.TotalMilliseconds; }
 
@@ -45,7 +46,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 currentOut = new WaveOut();
                 audioFileReader = new AudioFileReader(audio_file);
                 currentOut?.Init(audioFileReader);
-                currentOutPositionWeight = 1000.0f / currentOut.OutputWaveFormat.BitsPerSample / currentOut.OutputWaveFormat.Channels * 8 / currentOut.OutputWaveFormat.SampleRate;
                 NotifyOfPropertyChange(() => Duration);
             }
             catch (Exception e)
@@ -64,7 +64,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             currentOut?.Stop();
             currentOut?.Dispose();
             currentOut = default;
-            currentOutPositionWeight = 0;
 
             audioFileReader.Seek(0, System.IO.SeekOrigin.Begin);
             var provider = new OffsetSampleProvider(audioFileReader)
@@ -73,10 +72,10 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             };
 
             baseOffset = time;
+            startTime = DateTime.Now;
 
             currentOut = new WaveOut();
             currentOut.Init(provider);
-            currentOutPositionWeight = 1000.0f / currentOut.OutputWaveFormat.BitsPerSample / currentOut.OutputWaveFormat.Channels * 8 / currentOut.OutputWaveFormat.SampleRate;
             UpdatePropsManually();
 
             if (!pause)
@@ -86,13 +85,17 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         public async void Play()
         {
             currentOut?.Play();
+            startTime = DateTime.Now;
             await IoC.Get<ISchedulerManager>().AddScheduler(this);
         }
 
         private float GetTime()
         {
-            var coreTime = currentOut?.GetPosition() ?? 0;
-            return coreTime * currentOutPositionWeight + baseOffset;
+            if (!IsPlaying)
+                return pauseTime;
+            var coreTime = (float)(DateTime.Now - startTime).TotalMilliseconds;
+            var actualTime = coreTime/* * currentOutPositionWeight*/ + baseOffset;
+            return actualTime;
         }
 
         public async void Stop()
@@ -103,6 +106,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public async void Pause()
         {
+            pauseTime = GetTime();
             currentOut?.Pause();
             UpdatePropsManually();
             await IoC.Get<ISchedulerManager>().RemoveScheduler(this);

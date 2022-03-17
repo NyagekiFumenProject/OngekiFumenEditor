@@ -50,14 +50,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         private AbortableThread thread;
 
         private IAudioPlayer player;
-        private Stopwatch timer = new Stopwatch();
         private FumenVisualEditorViewModel editor;
-        private float baseTimeOffset = 0;
         private bool isPlaying = false;
+        public bool IsPlaying => isPlaying && player.IsPlaying;
 
         public SoundControl SoundControl { get; set; } = SoundControl.All;
 
-        public double CurrentTime => baseTimeOffset + timer.ElapsedMilliseconds + editor.Setting.SoundOffset;
+        public double CurrentTime => player.CurrentTime + editor.Setting.SoundOffset;
 
         private float volume = 1;
         public float Volume
@@ -164,13 +163,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         {
             while (!cancel.IsCancellationRequested)
             {
-                if (itor is null || player is null || !isPlaying)
+                if (itor is null || player is null || !IsPlaying)
                     continue;
 
-                var currentTime = CurrentTime;
                 while (itor is not null)
                 {
-                    if (currentTime >= itor.Value.Time)
+                    if (CurrentTime >= itor.Value.Time)
                     {
                         //Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");
                         PlaySounds(itor.Value.Sounds);
@@ -200,12 +198,10 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             checkPlay(Sound.ExFlick, SoundControl.CriticalFlick);
         }
 
-        public void Seek(float msec,bool pause)
+        public void Seek(float msec, bool pause)
         {
             Pause();
             itor = events.Find(events.FirstOrDefault(x => msec < x.Time));
-            timer.Restart();
-            baseTimeOffset = int.MinValue;
 
             if (!pause)
                 Play();
@@ -221,14 +217,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         {
             if (player is null)
                 return;
-            timer.Restart();
-            baseTimeOffset = player.CurrentTime;
             isPlaying = true;
         }
 
         public void Pause()
         {
-            baseTimeOffset = int.MinValue;
             isPlaying = false;
         }
 
