@@ -18,9 +18,24 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            var tGrid = new TGrid(4, -4000);
-            tGrid.NormalizeSelf();
-            Console.WriteLine(tGrid);
+            var sortList = new SortableCollection<TGrid, TGrid>(x => x)
+            {
+                new TGrid(0,0),
+                new TGrid(1,0),
+                new TGrid(2,0),
+                new TGrid(3,0),
+                new TGrid(4,0),
+                new TGrid(5,0),
+                new TGrid(6,0),
+                new TGrid(7,0),
+                new TGrid(8,0),
+                new TGrid(9,0)
+            };
+
+            foreach (var item in sortList.FastPickRange(new(0, 0), new(0, 0)))
+            {
+                Console.WriteLine(item);
+            }
         }
     }
 }

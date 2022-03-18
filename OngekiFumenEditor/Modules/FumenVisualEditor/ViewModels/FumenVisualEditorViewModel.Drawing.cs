@@ -83,7 +83,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             using var d3 = ObjectPool<HashSet<IEditorDisplayableViewModel>>.GetWithUsingDisposable(out var removeObjects, out var _);
             removeObjects.Clear();
 
-            Fumen.GetAllDisplayableObjects().ForEach(x => allDisplayableObjects.Add(x));
+            Fumen.GetAllDisplayableObjects(min, max).ForEach(x => allDisplayableObjects.Add(x));
 
             EditorViewModels
                 .OfType<IEditorDisplayableViewModel>()

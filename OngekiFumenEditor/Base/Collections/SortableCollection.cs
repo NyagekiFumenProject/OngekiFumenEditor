@@ -13,6 +13,7 @@ namespace OngekiFumenEditor.Base.Collections
     public class SortableCollection<T, X> : IEnumerable<T> where T : INotifyPropertyChanged where X : IComparable<X>
     {
         private List<T> items = new List<T>();
+        private readonly Func<T, X> sortKeySelector;
         private readonly string sortKeyPropertyName;
         private ComparerWrapper<T> comparer;
 
@@ -22,6 +23,7 @@ namespace OngekiFumenEditor.Base.Collections
         public SortableCollection(Func<T, X> sortKeySelector, string sortKeyPropertyName = default)
         {
             comparer = new ComparerWrapper<T>((a, b) => sortKeySelector(a).CompareTo(sortKeySelector(b)));
+            this.sortKeySelector = sortKeySelector;
             this.sortKeyPropertyName = sortKeyPropertyName;
         }
 
@@ -77,6 +79,16 @@ namespace OngekiFumenEditor.Base.Collections
         {
             IsBatching = false;
             items.Sort(comparer);
+        }
+
+        public IEnumerable<T> FastPickRange(X min, X max)
+        {
+            var minIndex = items.BinarySearch(min, sortKeySelector);
+            minIndex = minIndex < 0 ? ~minIndex : minIndex;
+            var maxIndex = items.BinarySearch(max, sortKeySelector, minIndex);
+            maxIndex = maxIndex < 0 ? ~maxIndex : (maxIndex + 1);
+
+            return Enumerable.Range(minIndex, maxIndex - minIndex).Select(i => items[i]);
         }
     }
 }

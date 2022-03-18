@@ -93,6 +93,30 @@ namespace OngekiFumenEditor.Utils
 
         public static void SortBy<T, X>(this List<T> list, Func<T, X> keySelect) => list.Sort((a, b) => Comparer<X>.Default.Compare(keySelect(a), keySelect(b)));
 
+        public static int BinarySearch<T, X>(this IList<T> insertable, X value, Func<T, X> keySelect, int lo = 0) where X : IComparable<X>
+        {
+            //https://referencesource.microsoft.com/mscorlib/system/collections/generic/arraysorthelper.cs.html#f3d6c6df965a8a86
+
+            int hi = insertable.Count - 1;
+            while (lo <= hi)
+            {
+                int i = lo + ((hi - lo) >> 1);
+                int order = keySelect(insertable[i]).CompareTo(value);
+
+                if (order == 0) return i;
+                if (order < 0)
+                {
+                    lo = i + 1;
+                }
+                else
+                {
+                    hi = i - 1;
+                }
+            }
+
+            return ~lo;
+        }
+
         public static int InsertBySortBy<T, X>(this IList<T> insertable, T needInsert, Func<T, X> keySelect)
         {
             var comparer = Comparer<X>.Default;

@@ -5,6 +5,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Utils;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -255,22 +256,28 @@ namespace OngekiFumenEditor.Base
 
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects()
         {
+            return GetAllDisplayableObjects(TGrid.MinValue, TGrid.MaxValue);
+        }
+
+        public IEnumerable<IDisplayableObject> GetAllDisplayableObjects(TGrid min, TGrid max)
+        {
             var first = Enumerable.Empty<IDisplayableObject>()
-                .Concat(Bells)
-                .Concat(Flicks)
-                .Concat(MeterChanges.Skip(1)) //not show first meter
-                .Concat(BpmList.Skip(1)) //not show first bpm
-                .Concat(ClickSEs)
-                .Concat(LaneBlocks)
-                .Concat(EnemySets)
-                .Concat(Bullets)
-                .Concat(Lanes)
-                .Concat(Taps)
-                .Concat(Holds)
-                .Concat(Beams);
+                   .Concat(Bells.FastPickRange(min, max))
+                   .Concat(Flicks.FastPickRange(min, max))
+                   .Concat(MeterChanges.Skip(1)) //not show first meter
+                   .Concat(BpmList.Skip(1)) //not show first bpm
+                   .Concat(ClickSEs.FastPickRange(min, max))
+                   .Concat(LaneBlocks.FastPickRange(min, max))
+                   .Concat(EnemySets.FastPickRange(min, max))
+                   .Concat(Bullets.FastPickRange(min, max))
+                   .Concat(Lanes)
+                   .Concat(Taps.FastPickRange(min, max))
+                   .Concat(Holds)
+                   .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());
         }
+
 
         private void OnFumenMetaInfoPropChanged(object sender, PropertyChangedEventArgs e)
         {
