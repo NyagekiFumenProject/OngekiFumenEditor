@@ -261,7 +261,6 @@ namespace OngekiFumenEditor.Base
 
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects(TGrid min, TGrid max)
         {
-            var taps = Taps.BinaryFindRange(min, max);
             var first = Enumerable.Empty<IDisplayableObject>()
                    .Concat(Bells.BinaryFindRange(min, max))
                    .Concat(Flicks.BinaryFindRange(min, max))
@@ -272,7 +271,7 @@ namespace OngekiFumenEditor.Base
                    .Concat(EnemySets.BinaryFindRange(min, max))
                    .Concat(Bullets.BinaryFindRange(min, max))
                    .Concat(Lanes)
-                   .Concat(taps)
+                   .Concat(Taps.BinaryFindRange(min, max))
                    .Concat(Holds)
                    .Concat(Beams);
 
