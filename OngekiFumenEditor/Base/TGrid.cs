@@ -21,8 +21,9 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-        public static TGrid ZeroDefault { get; } = new TGrid();
-        public static TGrid Zero => ZeroDefault;
+        public static TGrid Zero { get; } = new TGrid();
+        public static TGrid MaxValue { get; } = new TGrid(float.MaxValue, int.MaxValue);
+        public static TGrid MinValue { get; } = new TGrid(float.MinValue, int.MinValue);
 
         public TGrid(float unit = default, int grid = default, uint resT = DEFAULT_RES_T) : base(unit, grid) => ResT = resT;
 

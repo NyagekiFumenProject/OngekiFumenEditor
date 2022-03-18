@@ -83,7 +83,7 @@ namespace OngekiFumenEditor.Base
                 },
                 BPM = MetaInfo.BpmDefinition.First,
             };
-            var unusedBpm = BpmList.FirstOrDefault(x => x.BPM == firstBpm.BPM && x.TGrid == TGrid.ZeroDefault);
+            var unusedBpm = BpmList.FirstOrDefault(x => x.BPM == firstBpm.BPM && x.TGrid == TGrid.Zero);
             if (unusedBpm is not null && unusedBpm != BpmList.FirstBpm)
                 BpmList.Remove(unusedBpm);
             BpmList.SetFirstBpm(firstBpm);
@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Base
                 Bunbo = MetaInfo.MeterDefinition.Bunbo,
                 BunShi = MetaInfo.MeterDefinition.Bunshi,
             };
-            var unusedMeter = MeterChanges.FirstOrDefault(x => x.Bunbo == firstMeter.Bunbo && x.BunShi == firstMeter.BunShi && x.TGrid == TGrid.ZeroDefault);
+            var unusedMeter = MeterChanges.FirstOrDefault(x => x.Bunbo == firstMeter.Bunbo && x.BunShi == firstMeter.BunShi && x.TGrid == TGrid.Zero);
             if (unusedMeter is not null && MeterChanges.FirstMeter != unusedMeter)
                 MeterChanges.Remove(unusedMeter);
             MeterChanges.SetFirstBpm(firstMeter);

@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 namespace OngekiFumenEditor.Base.EditorObjects
 {
@@ -26,32 +27,27 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
     public class LaneLeftConnector : LaneConnector
     {
-        static readonly Brush DefaultColor = new SolidColorBrush(Colors.Red);
-        public override Brush LineColor => DefaultColor;
+        public override Brush LineColor => Brushes.Red;
     }
 
     public class LaneCenterConnector : LaneConnector
     {
-        static readonly Brush DefaultColor = new SolidColorBrush(Colors.Green);
-        public override Brush LineColor => DefaultColor;
+        public override Brush LineColor => Brushes.Green;
     }
 
     public class LaneRightConnector : LaneConnector
     {
-        static readonly Brush DefaultColor = new SolidColorBrush(Colors.Blue);
-        public override Brush LineColor => DefaultColor;
+        public override Brush LineColor => Brushes.Blue;
     }
 
     public class WallLeftConnector : LaneConnector
     {
-        static readonly Brush DefaultColor = new SolidColorBrush(Colors.HotPink);
-        public override Brush LineColor => DefaultColor;
+        public override Brush LineColor => Brushes.HotPink;
     }
 
     public class WallRightConnector : LaneConnector
     {
-        static readonly Brush DefaultColor = new SolidColorBrush(Colors.HotPink);
-        public override Brush LineColor => DefaultColor;
+        public override Brush LineColor => Brushes.HotPink;
     }
 
     public class EnemyLaneConnector : ConnectorLineBase<ConnectableObjectBase>

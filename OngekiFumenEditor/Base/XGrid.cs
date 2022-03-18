@@ -22,6 +22,8 @@ namespace OngekiFumenEditor.Base
         }
 
         public static XGrid Zero { get; private set; } = new XGrid();
+        public static XGrid MaxValue { get; } = new XGrid(float.MaxValue, int.MaxValue);
+        public static XGrid MinValue { get; } = new XGrid(float.MinValue, int.MinValue);
 
         public XGrid(float unit = default, int grid = default, uint resX = DEFAULT_RES_X) : base(unit, grid) => ResX = resX;
 
