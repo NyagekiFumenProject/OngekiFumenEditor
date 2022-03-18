@@ -262,16 +262,16 @@ namespace OngekiFumenEditor.Base
         public IEnumerable<IDisplayableObject> GetAllDisplayableObjects(TGrid min, TGrid max)
         {
             var first = Enumerable.Empty<IDisplayableObject>()
-                   .Concat(Bells.FastPickRange(min, max))
-                   .Concat(Flicks.FastPickRange(min, max))
+                   .Concat(Bells.BinaryFindRange(min, max))
+                   .Concat(Flicks.BinaryFindRange(min, max))
                    .Concat(MeterChanges.Skip(1)) //not show first meter
                    .Concat(BpmList.Skip(1)) //not show first bpm
-                   .Concat(ClickSEs.FastPickRange(min, max))
-                   .Concat(LaneBlocks.FastPickRange(min, max))
-                   .Concat(EnemySets.FastPickRange(min, max))
-                   .Concat(Bullets.FastPickRange(min, max))
+                   .Concat(ClickSEs.BinaryFindRange(min, max))
+                   .Concat(LaneBlocks.BinaryFindRange(min, max))
+                   .Concat(EnemySets.BinaryFindRange(min, max))
+                   .Concat(Bullets.BinaryFindRange(min, max))
                    .Concat(Lanes)
-                   .Concat(Taps.FastPickRange(min, max))
+                   .Concat(Taps.BinaryFindRange(min, max))
                    .Concat(Holds)
                    .Concat(Beams);
 

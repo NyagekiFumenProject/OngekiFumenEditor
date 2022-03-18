@@ -81,7 +81,7 @@ namespace OngekiFumenEditor.Base.Collections
             items.Sort(comparer);
         }
 
-        public IEnumerable<T> FastPickRange(X min, X max)
+        public IEnumerable<T> BinaryFindRange(X min, X max)
         {
             var minIndex = items.BinarySearch(min, sortKeySelector);
             minIndex = minIndex < 0 ? ~minIndex : minIndex;

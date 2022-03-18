@@ -32,7 +32,7 @@ namespace Test
                 new TGrid(9,0)
             };
 
-            foreach (var item in sortList.FastPickRange(new(0, 0), new(0, 0)))
+            foreach (var item in sortList.BinaryFindRange(new(0, 0), new(0, 0)))
             {
                 Console.WriteLine(item);
             }
