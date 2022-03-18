@@ -199,7 +199,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
             timeSignatureHelper.Draw(fumen);
 
-            foreach (var objGroup in fumen.GetAllDisplayableObjects().OfType<OngekiObjectBase>().GroupBy(x => x.IDShortName))
+            foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiObjectBase>().GroupBy(x => x.IDShortName))
             {
                 if (drawTargets.TryGetValue(objGroup.Key, out var drawingTarget))
                 {

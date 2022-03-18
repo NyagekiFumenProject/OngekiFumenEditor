@@ -34,16 +34,16 @@ namespace OngekiFumenEditor.Base
 
         public override string ToString() => $"T[{Unit},{Grid}]";
 
+        public TGrid CopyNew() => new(Unit, Grid, ResT);
+
         public static bool operator <(TGrid l, TGrid r)
         {
-            return l.Grid + l.Unit * l.ResT < r.Grid + r.Unit * r.ResT;
+            return l.CompareTo(r) < 0;
         }
-
-        public TGrid CopyNew() => new(Unit, Grid, ResT);
 
         public static bool operator >(TGrid l, TGrid r)
         {
-            return l.Grid + l.Unit * l.ResT > r.Grid + r.Unit * r.ResT;
+            return l.CompareTo(r) > 0;
         }
 
         public static bool operator <=(TGrid l, TGrid r)
