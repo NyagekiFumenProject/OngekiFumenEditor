@@ -130,7 +130,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             foreach (var group in soundObjects.GroupBy(x => x.TGrid).OrderBy(x => x.Key))
             {
                 var sounds = (Sound)0;
-                var evt = ObjectPool<SoundEvent>.Get();
 
                 foreach (var obj in group.DistinctBy(x => x.IDShortName))
                 {
@@ -150,10 +149,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                     };
                 }
 
-                evt.Sounds = sounds;
-                evt.Time = TGridCalculator.ConvertTGridToY(group.Key, editor);
-
-                events.AddLast(evt);
+                if (sounds != 0)
+                {
+                    var evt = ObjectPool<SoundEvent>.Get();
+                    evt.Sounds = sounds;
+                    evt.Time = TGridCalculator.ConvertTGridToY(group.Key, editor);
+                    events.AddLast(evt);
+                }
             }
 
             itor = events.First;

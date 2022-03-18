@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Base
 
         public int CompareTo(GridBase other)
         {
-            return TotalGrid - other.TotalGrid;
+            return TotalGrid.CompareTo(other.TotalGrid);
         }
 
         public static bool operator ==(GridBase l, GridBase r)
