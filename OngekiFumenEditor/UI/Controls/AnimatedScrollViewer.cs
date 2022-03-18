@@ -166,7 +166,7 @@ namespace OngekiFumenEditor.UI.Controls
         }
 
         public void ScrollToVerticalOffsetWithAnimation(double offset, double milliseconds = 500,
-            Action? onCompleted = null)
+            Action onCompleted = null)
         {
             _totalVerticalOffset = offset;
             var verticalAnimation = new DoubleAnimation(offset, new Duration(TimeSpan.FromMilliseconds(milliseconds)))
@@ -203,7 +203,7 @@ namespace OngekiFumenEditor.UI.Controls
         }
 
         public void ScrollToHorizontalOffsetWithAnimation(double offset, double milliseconds = 500,
-            Action? onCompleted = null)
+            Action onCompleted = null)
         {
             _totalHorizontalOffset = offset;
             var horizontalAnimation = new DoubleAnimation(offset, new Duration(TimeSpan.FromMilliseconds(milliseconds)))
@@ -232,7 +232,7 @@ namespace OngekiFumenEditor.UI.Controls
             horizontalAnimation.Completed += (_, _) =>
             {
                 if (thisIndex > _horizontalDictionary.Count - 1) return;
-                ((Action?)_horizontalDictionary[thisIndex])?.Invoke();
+                ((Action)_horizontalDictionary[thisIndex])?.Invoke();
             };
 
             ScrollChanged -= Horizontal_ScrollChanged;

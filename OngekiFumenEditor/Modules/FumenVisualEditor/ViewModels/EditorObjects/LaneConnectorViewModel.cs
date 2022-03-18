@@ -14,13 +14,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 {
     public class LaneConnectorViewModel : ConnectorViewModel<ConnectableObjectBase>
     {
-        private SolidColorBrush lineBrush;
-        public override Brush LineBrush => lineBrush ??= new SolidColorBrush((Connector as LaneConnector).LineColor);
+        //private SolidColorBrush lineBrush;
+        public override Brush LineBrush => (Connector as LaneConnector).LineColor;
 
         public override void NotifyOfPropertyChange([CallerMemberName] string propertyName = null)
         {
+            /*
             if (propertyName == nameof(ConnectorViewModel<ConnectableObjectBase>.LineBrush))
                 lineBrush.Color = (Connector as LaneConnector).LineColor;
+            */
             base.NotifyOfPropertyChange(propertyName);
         }
     }

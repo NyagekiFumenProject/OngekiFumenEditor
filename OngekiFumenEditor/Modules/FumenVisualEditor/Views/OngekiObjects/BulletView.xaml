@@ -8,10 +8,6 @@
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     Width="30"
     mc:Ignorable="d">
-    <ongekiobjects:OngekiObjectViewBase.Resources>
-        <converters:FadeStringEnumToStringConverter x:Key="FadeStringEnumToStringConverter">
-        </converters:FadeStringEnumToStringConverter>
-    </ongekiobjects:OngekiObjectViewBase.Resources>
     <Grid>
         <Image>
             <Image.Style>

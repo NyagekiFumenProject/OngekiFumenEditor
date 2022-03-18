@@ -7,10 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     mc:Ignorable="d">
-    <ongekiobjects:OngekiObjectViewBase.Resources>
-        <converters:EnumToIntConverter x:Key="EnumToIntConverter">
-        </converters:EnumToIntConverter>
-    </ongekiobjects:OngekiObjectViewBase.Resources>
     <Grid>
         <Image
             Width="40"

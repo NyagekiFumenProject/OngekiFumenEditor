@@ -20,38 +20,38 @@ namespace OngekiFumenEditor.Base.EditorObjects
 {
     public abstract class LaneConnector : ConnectorLineBase<ConnectableObjectBase>
     {
-        public abstract Color LineColor { get; }
+        public abstract Brush LineColor { get; }
         public override Type ModelViewType => typeof(LaneConnectorViewModel);
     }
 
     public class LaneLeftConnector : LaneConnector
     {
-        static readonly Color DefaultColor = Colors.Red;
-        public override Color LineColor => DefaultColor;
+        static readonly Brush DefaultColor = new SolidColorBrush(Colors.Red);
+        public override Brush LineColor => DefaultColor;
     }
 
     public class LaneCenterConnector : LaneConnector
     {
-        static readonly Color DefaultColor = Colors.Green;
-        public override Color LineColor => DefaultColor;
+        static readonly Brush DefaultColor = new SolidColorBrush(Colors.Green);
+        public override Brush LineColor => DefaultColor;
     }
 
     public class LaneRightConnector : LaneConnector
     {
-        static readonly Color DefaultColor = Colors.Blue;
-        public override Color LineColor => DefaultColor;
+        static readonly Brush DefaultColor = new SolidColorBrush(Colors.Blue);
+        public override Brush LineColor => DefaultColor;
     }
 
     public class WallLeftConnector : LaneConnector
     {
-        static readonly Color DefaultColor = Colors.HotPink;
-        public override Color LineColor => DefaultColor;
+        static readonly Brush DefaultColor = new SolidColorBrush(Colors.HotPink);
+        public override Brush LineColor => DefaultColor;
     }
 
     public class WallRightConnector : LaneConnector
     {
-        static readonly Color DefaultColor = Colors.HotPink;
-        public override Color LineColor => DefaultColor;
+        static readonly Brush DefaultColor = new SolidColorBrush(Colors.HotPink);
+        public override Brush LineColor => DefaultColor;
     }
 
     public class EnemyLaneConnector : ConnectorLineBase<ConnectableObjectBase>
@@ -61,12 +61,16 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
     public class LaneColorfulConnector : LaneConnector
     {
-        public override Color LineColor => ((IColorfulLane)From).ColorId.Color;
+        private SolidColorBrush lineColor = new SolidColorBrush(Colors.Red);
+        public override Brush LineColor => lineColor;
 
         public override bool Set<T>(ref T oldValue, T newValue, [CallerMemberName] string propertyName = null)
         {
             if (propertyName == nameof(From))
+            {
                 this.RegisterOrUnregisterPropertyChangeEvent(oldValue as INotifyPropertyChanged, newValue as INotifyPropertyChanged, OnLanePropChanged);
+                UpdateLineColor();
+            }
 
             return base.Set(ref oldValue, newValue, propertyName);
         }
@@ -74,9 +78,13 @@ namespace OngekiFumenEditor.Base.EditorObjects
         private void OnLanePropChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ColorfulLaneStart.ColorId))
-            {
-                NotifyOfPropertyChange(() => LineColor);
-            }
+                UpdateLineColor();
+        }
+
+        private void UpdateLineColor()
+        {
+            lineColor.Color = ((IColorfulLane)From).ColorId.Color;
+            NotifyOfPropertyChange(() => LineColor);
         }
     }
 }
