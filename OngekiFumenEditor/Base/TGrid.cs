@@ -13,18 +13,16 @@ namespace OngekiFumenEditor.Base
         {
             get
             {
-                return gridBaseRadix;
+                return GridRadix;
             }
             set
             {
-                gridBaseRadix = value;
+                GridRadix = value;
             }
         }
 
         public static TGrid ZeroDefault { get; } = new TGrid();
         public static TGrid Zero => ZeroDefault;
-
-        public int TotalGrid => (int)(Unit * ResT + Grid);
 
         public TGrid(float unit = default, int grid = default, uint resT = DEFAULT_RES_T) : base(unit, grid) => ResT = resT;
 

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Text;
@@ -15,12 +16,26 @@ namespace OngekiFumenEditor.Base
         private int grid = 0; //grid
         private float unit = 0; //unit
 
-        protected uint gridBaseRadix = 2857;
+        private uint gridRadix = 2857;
+        protected uint GridRadix
+        {
+            get => gridRadix;
+            set
+            {
+                gridRadix = value;
+                RecalculateTotalGrid();
+            }
+        }
+
+        public int TotalGrid { get; private set; }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void RecalculateTotalGrid() => TotalGrid = (int)(Unit * GridRadix + Grid);
 
         public GridBase(float unit = default, int grid = default)
         {
-            this.grid = grid;
-            this.unit = unit;
+            Grid = grid;
+            Unit = unit;
         }
 
         public int Grid
@@ -32,6 +47,7 @@ namespace OngekiFumenEditor.Base
             set
             {
                 grid = value;
+                RecalculateTotalGrid();
                 NotifyOfPropertyChange(() => Grid);
             }
         }
@@ -45,20 +61,21 @@ namespace OngekiFumenEditor.Base
             set
             {
                 unit = value;
+                RecalculateTotalGrid();
                 NotifyOfPropertyChange(() => Unit);
             }
         }
 
         public void NormalizeSelf()
         {
-            var addUnit = Grid / gridBaseRadix;
+            var addUnit = Grid / GridRadix;
             Unit += addUnit;
-            Grid = (int)(Grid % gridBaseRadix);
+            Grid = (int)(Grid % GridRadix);
 
             if (Grid < 0)
             {
-                Grid += (int)gridBaseRadix;
-                Unit --;
+                Grid += (int)GridRadix;
+                Unit--;
             }
         }
 
@@ -69,17 +86,7 @@ namespace OngekiFumenEditor.Base
 
         public int CompareTo(GridBase other)
         {
-            if (other.Unit != Unit)
-            {
-                return Math.Sign(Unit - other.Unit);
-            }
-
-            if (other.Grid != Grid)
-            {
-                return Grid - other.Grid;
-            }
-
-            return 0;
+            return TotalGrid - other.TotalGrid;
         }
 
         public static bool operator ==(GridBase l, GridBase r)
@@ -104,7 +111,7 @@ namespace OngekiFumenEditor.Base
             while (gridDiff < 0)
             {
                 unitDiff = unitDiff - 1;
-                gridDiff = gridDiff + l.gridBaseRadix;
+                gridDiff = gridDiff + l.GridRadix;
             }
 
             return new GridOffset(unitDiff, (int)gridDiff);
@@ -131,7 +138,7 @@ namespace OngekiFumenEditor.Base
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Unit, Grid, gridBaseRadix);
+            return HashCode.Combine(Unit, Grid, GridRadix);
         }
 
         public static bool operator <(GridBase left, GridBase right)
