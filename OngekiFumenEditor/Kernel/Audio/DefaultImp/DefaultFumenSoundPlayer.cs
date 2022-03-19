@@ -137,13 +137,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                     {
                         WallTap { IsCritical: false } => Sound.WallExTap,
                         WallTap { IsCritical: true } => Sound.WallExTap,
-                        Tap { IsCritical: false } => Sound.Tap,
-                        Tap { IsCritical: true } => Sound.ExTap,
+                        Tap or Hold { IsCritical: false } => Sound.Tap,
+                        Tap or Hold { IsCritical: true } => Sound.ExTap,
                         Bell => Sound.Bell,
                         Bullet => Sound.Bullet,
                         Flick { IsCritical: false } => Sound.Flick,
                         Flick { IsCritical: true } => Sound.ExFlick,
-                        Hold => Sound.Tap,
                         HoldEnd => Sound.Tap,
                         _ => default
                     };
@@ -170,14 +169,19 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
                 while (itor is not null)
                 {
-                    if (CurrentTime >= itor.Value.Time)
+                    var ct = CurrentTime - itor.Value.Time;
+                    if (ct >= 0)
                     {
                         //Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");
                         PlaySounds(itor.Value.Sounds);
                         itor = itor.Next;
                     }
                     else
+                    {
+                        if (ct < -5)
+                            Thread.Sleep((int)(Math.Abs(ct) - 2));
                         break;
+                    }
                 }
             }
         }
