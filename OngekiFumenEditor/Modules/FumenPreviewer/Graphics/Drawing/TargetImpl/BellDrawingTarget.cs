@@ -33,8 +33,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public float CalculateBulletMsecTime(Bell obj, float userSpeed = 2.35f)
         {
-            const float fat = 3.95f;
-            return 32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
+            //const float fat = 3.95f;
+            //var time =  32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
+            var time = (float)Previewer.ViewHeight * (obj.ReferenceBulletPallete?.Speed ?? 1f);
+            return time;
         }
 
         public override void Draw(Bell obj, OngekiFumen fumen)

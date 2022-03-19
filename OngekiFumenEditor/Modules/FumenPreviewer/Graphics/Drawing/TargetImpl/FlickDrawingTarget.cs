@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         public override void Draw(Flick obj, OngekiFumen fumen)
         {
             var x = XGridCalculator.ConvertXGridToX(obj.XGrid, 30, Previewer.ViewWidth, 1);
-            var y = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 240);
+            var y = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 240) + 24;
             var pos = new Vector((float)x, (float)y);
             var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
 
