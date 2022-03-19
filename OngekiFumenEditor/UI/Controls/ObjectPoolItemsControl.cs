@@ -30,6 +30,7 @@ namespace OngekiFumenEditor.UI.Controls
                 //Log.LogDebug($"add {dirtyPrepareCreateItem.GetType().Name} -> ({(obj as ContentPresenter)?.Content?.GetType()?.Name})");
                 return obj;
             }
+            dirtyPrepareCreateItem = default;
             return base.GetContainerForItemOverride();
         }
 
