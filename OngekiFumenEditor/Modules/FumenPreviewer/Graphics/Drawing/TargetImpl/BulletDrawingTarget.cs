@@ -106,7 +106,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var fromTime = toTime - appearOffsetTime;
             var currentTime = MathUtils.Limit(Previewer.CurrentPlayTime, toTime, fromTime);
             var precent = (currentTime - fromTime) / appearOffsetTime;
-            Log.LogDebug($"precent : {precent * 100:F2}");
+            //Log.LogDebug($"precent : {precent * 100:F2}");
             if (Previewer.CurrentPlayTime < fromTime)
                 return;
 

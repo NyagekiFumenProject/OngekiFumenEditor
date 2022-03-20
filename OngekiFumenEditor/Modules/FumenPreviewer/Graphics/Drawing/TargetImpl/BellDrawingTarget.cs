@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         {
             //const float fat = 3.95f;
             //var time =  32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
-            var time = (float)Previewer.ViewHeight * (obj.ReferenceBulletPallete?.Speed ?? 1f);
+            var time = (float)Previewer.ViewHeight / (obj.ReferenceBulletPallete?.Speed ?? 1f);
             return time;
         }
 
