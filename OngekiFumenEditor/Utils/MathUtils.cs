@@ -104,7 +104,10 @@ namespace OngekiFumenEditor.Utils
             var by = y2 - y1;
             var bx = x2 - x1;
 
-            return (y) => (y - y1) * 1.0 / by * bx + x1;
+            if (by == 0)
+                return y => x1;
+
+            return y => (y - y1) * 1.0 / by * bx + x1;
         }
 
         public static double CalculateXFromTwoPointFormFormula(double y, double x1, double y1, double x2, double y2)
