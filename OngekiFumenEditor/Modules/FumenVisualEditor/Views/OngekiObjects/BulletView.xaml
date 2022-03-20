@@ -33,7 +33,7 @@
                         <Setter Property="Width" Value="30" />
                         <Setter Property="RenderTransform">
                             <Setter.Value>
-                                <TranslateTransform X="-15" Y="+15" />
+                                <TranslateTransform X="-15" Y="+6" />
                             </Setter.Value>
                         </Setter>
                     </DataTrigger>

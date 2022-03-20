@@ -121,7 +121,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var size = spritesSize[texture];
             var origOffset = spritesOriginOffset[texture];
 
-            Draw(texture, size, pos + origOffset, 0);
+            var rotate = Math.Atan((toX - fromX) / (toTime - fromTime));
+            //Log.LogDebug($"rotate : {rotate:F2}");
+
+            Draw(texture, size, pos + origOffset, (float)rotate);
         }
 
         public override void Dispose()

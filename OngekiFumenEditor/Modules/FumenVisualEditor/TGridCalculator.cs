@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(FumenVisualEditorViewModel editor, int tUnitLength = 240)
             => GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.MinVisibleCanvasY, editor.MaxVisibleCanvasY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, tUnitLength);
-        
+
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, int tUnitLength = 240)
         {
             //划线的中止位置
@@ -101,19 +101,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                     var tGrid = currentTGridBase + new GridOffset(0, (int)(lengthPerBeat * i));
                     //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
                     var y = currentStartY + MathUtils.CalculateBPMLength(currentTGridBase, tGrid, currentBpm.BPM, 240);
+
+                    //节奏线画不了惹,跳过
+                    if (beatCount == 0)
+                        break;
                     //超过当前timeSignature范围，切换到下一个timeSignature画新的线
                     if (nextBpm is not null && y >= nextStartY)
                         break;
                     //超过编辑器谱面范围，后面都不用画了
                     if (tGrid > endTGrid)
                         yield break;
-                    //
+
+
                     yield return (tGrid, y, i % beatCount);
                     i++;
                 }
                 currentTGridBaseOffset = nextTGridBase;
                 currentTimeSignatureIndex = nextTimeSignatureIndex;
-                currentTimeSignature = timeSignatures[currentTimeSignatureIndex];
+                currentTimeSignature = timeSignatures.Count > currentTimeSignatureIndex ? timeSignatures[currentTimeSignatureIndex] : default;
             }
         }
     }

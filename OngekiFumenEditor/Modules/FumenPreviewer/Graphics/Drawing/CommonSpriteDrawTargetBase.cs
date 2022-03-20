@@ -80,9 +80,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         public void Draw(Texture texture, Vector2 size, Vector position, float rotation)
         {
             var modelMatrix =
-                Matrix4.CreateRotationY(rotation) *
                 Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
                 Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
+                Matrix4.CreateRotationZ(rotation) *
                 Matrix4.CreateTranslation(position.X - previewer.ViewWidth / 2, position.Y - previewer.ViewHeight / 2, 0);
             //var mvpMatrix = previewer.ViewProjectionMatrix * modelMatrix;
 
