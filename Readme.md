@@ -19,6 +19,7 @@
 * 一边写个谱面做测试一边修bugs  
 * 正式公布 
 * 编写[github wiki](https://github.com/MikiraSora/OngekiFumenEditor/wiki)
+* 其他类型子弹
 * 制作预览器(OpenGL) **<- we are here!**
 * 实现Soflan变速/LispBlock/LispDisp/EmenyLane...等命令
 * 实现各种工具等，比如智能画复杂线/曲线/文字，svg转线
