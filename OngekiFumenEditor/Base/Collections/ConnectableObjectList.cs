@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Base.Collections
             {
                 //wallStart.PropertyChanged += OnBeamStartPropertyChanged;
                 if (startObject.RecordId < 0) //如果recordId < 0 ,那么添加到集合里面时会自动分配一个RecordId
-                    startObject.RecordId = startObjects.Count > 0 ? startObjects.Select(x=>x.RecordId).Max() + 1 : 0;
+                    startObject.RecordId = startObjects.Count > 0 ? startObjects.Select(x => x.RecordId).Max() + 1 : 0;
                 startObjects.Add(startObject);
             }
             else if (obj is CHILD_TYPE child)
@@ -65,6 +65,12 @@ namespace OngekiFumenEditor.Base.Collections
                     child.RecordId = prevStart.RecordId;//set failed and roll back
                 Log.LogDebug($"Can't change child recId {child.ReferenceStartObject?.RecordId} -> {child.RecordId}");
             }
+        }
+
+        public IEnumerable<START_TYPE> GetVisibleStartObjects(TGrid min, TGrid max)
+        {
+            //todo 理论上还能更优化一点但想不出就暂时咕了
+            return startObjects.Where(x => x.CheckVisiable(min, max));
         }
     }
 }

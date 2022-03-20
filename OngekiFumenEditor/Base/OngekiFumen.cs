@@ -270,9 +270,9 @@ namespace OngekiFumenEditor.Base
                    .Concat(LaneBlocks.BinaryFindRange(min, max))
                    .Concat(EnemySets.BinaryFindRange(min, max))
                    .Concat(Bullets.BinaryFindRange(min, max))
-                   .Concat(Lanes)
+                   .Concat(Lanes.GetVisibleStartObjects(min, max))
                    .Concat(Taps.BinaryFindRange(min, max))
-                   .Concat(Holds)
+                   .Concat(Holds.GetVisibleStartObjects(min, max))
                    .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());

@@ -198,17 +198,23 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 240);
 
             timeSignatureHelper.Draw(fumen);
+            var drawCall = 0;
 
             foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiObjectBase>().GroupBy(x => x.IDShortName))
             {
                 if (drawTargets.TryGetValue(objGroup.Key, out var drawingTarget))
                 {
                     drawingTarget.BeginDraw();
-                    foreach (var obj in objGroup.Where(x => (x as IDisplayableObject)?.CheckVisiable(minTGrid, maxTGrid) ?? true))
+                    foreach (var obj in objGroup)
+                    {
                         drawingTarget.Draw(obj, fumen);
+                        drawCall++;
+                    }
                     drawingTarget.EndDraw();
                 }
             }
+
+            //Log.LogDebug($"drawcall : {drawCall}");
         }
 
         #region UserActions

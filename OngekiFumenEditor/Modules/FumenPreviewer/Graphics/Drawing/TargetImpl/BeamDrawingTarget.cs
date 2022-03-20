@@ -32,6 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public override void Draw(BeamStart obj, OngekiFumen fumen)
         {
+            /*
             (var fromBeam, var fromY) = obj.Children.AsEnumerable<BeamBase>()
                 .Append(obj)
                 .Select(x => (x, TGridCalculator.ConvertTGridToY(x.TGrid, fumen.BpmList, 240)))
@@ -47,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var toX = XGridCalculator.ConvertXGridToX(toBeam.XGrid, 30, Previewer.ViewWidth, 1);
             var toY = TGridCalculator.ConvertTGridToY(toBeam.TGrid, fumen.BpmList, 240);
 
-
+            */
             //Draw(texture, size, pos, 0);
         }
 
