@@ -6,25 +6,118 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
-    Width="30"
     mc:Ignorable="d">
     <Grid>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="CIR">
+                        <Setter Property="Width" Value="40" />
+                        <Setter Property="RenderTransform">
+                            <Setter.Value>
+                                <TranslateTransform X="-20" Y="+20" />
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NDL">
+                        <Setter Property="Width" Value="30" />
+                        <Setter Property="RenderTransform">
+                            <Setter.Value>
+                                <TranslateTransform X="-15" Y="+5" />
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="SQR">
+                        <Setter Property="Width" Value="30" />
+                        <Setter Property="RenderTransform">
+                            <Setter.Value>
+                                <TranslateTransform X="-15" Y="+15" />
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Image>
             <Image.Style>
                 <Style TargetType="Image">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML">
-                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_red.png">
-                            </Setter>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR">
-                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_pur.png">
-                            </Setter>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.BulletTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG">
-                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_blk.png">
-                            </Setter>
-                        </DataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="CIR" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_red.png" />
+                            <Setter Property="Width" Value="40" />
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="CIR" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_pur.png" />
+                            <Setter Property="Width" Value="40" />
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="CIR" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Width" Value="40" />
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_blk.png" />
+                        </MultiDataTrigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NDL" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Width" Value="30" />
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/tri_bullet0.png" />
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NDL" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Width" Value="30" />
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/tri_bullet1.png" />
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NDL" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Width" Value="30" />
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/tri_bullet2.png" />
+                        </MultiDataTrigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="SQR" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Width" Value="30" />
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/sqrt_bullet0.png" />
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="SQR" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Width" Value="30" />
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/sqrt_bullet1.png" />
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="SQR" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Width" Value="30" />
+                            <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/sqrt_bullet2.png" />
+                        </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
             </Image.Style>
@@ -50,9 +143,5 @@
                 </Style>
             </TextBlock.Style>
         </TextBlock>
-        <Grid.RenderTransform>
-            <TranslateTransform X="-15" Y="+15">
-            </TranslateTransform>
-        </Grid.RenderTransform>
     </Grid>
 </ongekiobjects:OngekiObjectViewBase>

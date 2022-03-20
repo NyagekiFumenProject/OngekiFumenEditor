@@ -36,6 +36,16 @@ namespace Test
             {
                 Console.WriteLine(item);
             }
+
+            sortList = new SortableCollection<TGrid, TGrid>(x => x)
+            {
+                new TGrid(5,0),
+            };
+
+            foreach (var item in sortList.BinaryFindRange(new(4, 0), new(5, 0)))
+            {
+                Console.WriteLine(item);
+            }
         }
     }
 }

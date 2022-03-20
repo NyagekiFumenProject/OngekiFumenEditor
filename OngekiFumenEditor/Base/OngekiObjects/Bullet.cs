@@ -20,9 +20,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public class BulletType : FadeStringEnum
+        public class BulletDamageType : FadeStringEnum
         {
-            public BulletType(string value) : base(value)
+            public BulletDamageType(string value) : base(value)
             {
 
             }
@@ -30,15 +30,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             /// <summary>
             /// 将使用BULLET_DAMAGE伤害
             /// </summary>
-            public static BulletType Normal { get; } = new BulletType("NML");
+            public static BulletDamageType Normal { get; } = new BulletDamageType("NML");
             /// <summary>
             /// 将使用HARDBULLET_DAMAGE伤害
             /// </summary>
-            public static BulletType Hard { get; } = new BulletType("STR");
+            public static BulletDamageType Hard { get; } = new BulletDamageType("STR");
             /// <summary>
             /// 将使用DANGERBULLET_DAMAGE伤害
             /// </summary>
-            public static BulletType Danger { get; } = new BulletType("DNG");
+            public static BulletDamageType Danger { get; } = new BulletDamageType("DNG");
         }
 
         private BulletPalleteAuxiliaryLine line;
@@ -54,14 +54,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             yield return this;
         }
 
-        private BulletType bulletTypeValue = BulletType.Normal;
-        public BulletType BulletTypeValue
+        private BulletDamageType bulletDamageTypeValue = BulletDamageType.Normal;
+        public BulletDamageType BulletDamageTypeValue
         {
-            get { return bulletTypeValue; }
+            get { return bulletDamageTypeValue; }
             set
             {
-                bulletTypeValue = value;
-                NotifyOfPropertyChange(() => BulletTypeValue);
+                bulletDamageTypeValue = value;
+                NotifyOfPropertyChange(() => BulletDamageTypeValue);
             }
         }
 
@@ -81,7 +81,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 return;
 
             ReferenceBulletPallete = from.ReferenceBulletPallete;
-            BulletTypeValue = from.BulletTypeValue;
+            BulletDamageTypeValue = from.BulletDamageTypeValue;
         }
     }
 }
