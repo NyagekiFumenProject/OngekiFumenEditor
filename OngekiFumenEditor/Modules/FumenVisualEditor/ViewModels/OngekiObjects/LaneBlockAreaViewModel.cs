@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Block", "Lane Control")]
     public class LaneBlockAreaViewModel : DisplayTextLineObjectViewModelBase<LaneBlockArea>
     {
-        public static Brush Brush { get; } = new SolidColorBrush(Colors.HotPink);
+        public static Brush Brush { get; } = Brushes.HotPink;
         public override Brush DisplayBrush { get; } = Brush;
     }
 

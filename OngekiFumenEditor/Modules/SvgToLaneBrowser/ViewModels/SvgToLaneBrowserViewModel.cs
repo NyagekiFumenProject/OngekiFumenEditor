@@ -288,7 +288,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 geometry.Figures.Add(figure);
                 LineSegments.Add(new LineSegmentWrapper()
                 {
-                    Color = new SolidColorBrush(Color.FromArgb(segments.Color.A, segments.Color.R, segments.Color.G, segments.Color.B)),
+                    Color = BrushHelper.CreateSolidColorBrush(Color.FromArgb(segments.Color.A, segments.Color.R, segments.Color.G, segments.Color.B)),
                     Path = geometry,
                     RawLineSegmentCollection = segments
                 });

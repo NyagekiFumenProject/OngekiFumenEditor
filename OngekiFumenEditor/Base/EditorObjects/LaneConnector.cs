@@ -42,13 +42,13 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
     public class WallLeftConnector : LaneConnector
     {
-        public static Brush DefaultBrush { get; } = new SolidColorBrush(Color.FromArgb(255, 181, 156, 231));
+        public static Brush DefaultBrush { get; } = BrushHelper.CreateSolidColorBrush(Color.FromArgb(255, 181, 156, 231));
         public override Brush LineColor => DefaultBrush;
     }
 
     public class WallRightConnector : LaneConnector
     {
-        public static Brush DefaultBrush { get; } = new SolidColorBrush(Color.FromArgb(255, 231, 149, 178));
+        public static Brush DefaultBrush { get; } = BrushHelper.CreateSolidColorBrush(Color.FromArgb(255, 231, 149, 178));
         public override Brush LineColor => DefaultBrush;
     }
 
