@@ -42,15 +42,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public LaneBlockArea()
         {
             EndIndicator = new LaneBlockAreaEndIndicator() { RefLaneBlockArea = this };
-            //connector = new LaneBlockAreaConnector() { From = this, To = EndIndicator };
-            displayables = new IDisplayableObject[] { /*connector, */this, EndIndicator };
+            connector = new LaneBlockLaneDecoration() { From = this, To = EndIndicator };
+            displayables = new IDisplayableObject[] { connector, this, EndIndicator };
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => displayables;
 
         public override string IDShortName => "LBK";
 
-        //private LaneBlockAreaConnector connector;
+        private LaneBlockLaneDecoration connector;
         public LaneBlockAreaEndIndicator EndIndicator { get; }
 
         private BlockDirection direction = BlockDirection.Left;
@@ -76,5 +76,18 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         public override string ToString() => $"{base.ToString()} {Direction} End:({EndIndicator})";
+
+        public IEnumerable<LaneStartBase> GetAffactableWallLanes(OngekiFumen fumen)
+        {
+            var blockStartTGrid = TGrid;
+            var blockEndTGrid = EndIndicator.TGrid;
+            var wallType = Direction == BlockDirection.Left ? LaneType.WallLeft : LaneType.WallRight;
+
+            return fumen.Lanes.Where(x =>
+                x.LaneType == wallType &&
+                x.MaxTGrid > blockStartTGrid &&
+                x.MinTGrid < blockEndTGrid
+            );
+        }
     }
 }

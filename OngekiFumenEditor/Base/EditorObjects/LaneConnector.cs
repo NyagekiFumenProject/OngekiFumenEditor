@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
         private void UpdateLineColor()
         {
-            lineColor.Color = ((IColorfulLane)From).ColorId.Color;
+            lineColor.Color = ((From as IColorfulLane)?.ColorId ?? ColorIdConst.Akari).Color;
             NotifyOfPropertyChange(() => LineColor);
         }
     }

@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
     public abstract class BindableTGridSegement : PropertyChangedBase
     {
         public LineSegment Segment { get; } = new LineSegment();
-        public abstract void RecalcPoint();
+        public abstract bool RecalcPoint();
     }
 
     public class BindableTGridSegement<T> : BindableTGridSegement where T : INotifyPropertyChanged, IHorizonPositionObject, ITimelineObject
@@ -52,10 +52,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
         }
 
-        public override void RecalcPoint()
+        public override bool RecalcPoint()
         {
             if (BindObject is null || BindFumenEditor is null)
-                return;
+                return false;
 
             var x = XGridCalculator.ConvertXGridToX(BindObject.XGrid, BindFumenEditor)
                 //为啥要加个随机数呢，是因为PathSegmentCollection重新绘制会有缓存机制，如果一个点没有变动，那么就不会绘制此点以及后面的点(我猜的)
@@ -63,6 +63,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             var y = BindFumenEditor.TotalDurationHeight - TGridCalculator.ConvertTGridToY(BindObject.TGrid, BindFumenEditor);
 
             Segment.Point = new Point(x, y);
+            return true;
         }
     }
 
@@ -149,8 +150,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             {
                 if (map.TryGetValue(obj, out var seg))
                 {
-                    seg.RecalcPoint();
-                    Lines.Add(seg.Segment);
+                    if (seg.RecalcPoint())
+                        Lines.Add(seg.Segment);
                     return;
                 }
                 var bind = new BindableTGridSegement<T>()
@@ -158,9 +159,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                     BindFumenEditor = EditorViewModel,
                     BindObject = obj,
                 };
-                bind.RecalcPoint();
                 map[bind.BindObject] = bind;
-                Lines.Add(bind.Segment);
+                if (bind.RecalcPoint())
+                    Lines.Add(bind.Segment);
             }
 
             Upsert(hold);
