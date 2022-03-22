@@ -127,7 +127,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 lbk.EndIndicator is not LaneBlockAreaEndIndicator lbkEnd)
                 return;
             Lines.Clear();
-            Log.LogDebug($"----------");
+            //Log.LogDebug($"----------");
 
             void Upsert(ConnectableStartObject obj, TGrid pinTGrid, object key)
             {
@@ -137,7 +137,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                     seg.PinTGrid = pinTGrid;
                     if (seg.RecalcPoint())
                     {
-                        Log.LogDebug($"{pinTGrid} {key}");
+                        //Log.LogDebug($"{pinTGrid} {key}");
                         Lines.Add(seg.Segment);
                     }
                     return;
@@ -151,9 +151,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 map[key] = bind;
                 if (bind.RecalcPoint())
                 {
-                    Log.LogDebug($"{pinTGrid} {key}");
+                    //Log.LogDebug($"{pinTGrid} {key}");
                     Lines.Add(bind.Segment);
                 }
+                //Log.LogDebug("new");
             }
 
             using var d = lbk.GetAffactableWallLanes(EditorViewModel.Fumen).ToListWithObjectPool(out var list);
