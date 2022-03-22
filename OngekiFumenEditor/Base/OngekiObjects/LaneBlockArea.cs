@@ -89,5 +89,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 x.MinTGrid < blockEndTGrid
             );
         }
+
+        public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
+        {
+            if (maxVisibleTGrid < TGrid)
+                return false;
+
+            if (EndIndicator.TGrid < minVisibleTGrid)
+                return false;
+
+            return true;
+        }
     }
 }

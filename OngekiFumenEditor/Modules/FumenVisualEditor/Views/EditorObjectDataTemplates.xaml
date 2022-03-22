@@ -128,7 +128,7 @@
                 <editorobjects:BulletPalleteAuxiliaryLineView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type editorObject:LaneBlockLaneDecorationViewModel}">
-                <editorobjects:HoldConnectorView />
+                <editorobjects:LaneBlockLaneDecorationView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type editorObject:HoldConnectorViewModel}">
                 <editorobjects:HoldConnectorView />

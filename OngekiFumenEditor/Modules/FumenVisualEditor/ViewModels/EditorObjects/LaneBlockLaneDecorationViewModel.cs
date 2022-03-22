@@ -20,35 +20,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 {
     public class BindableDynmaticXGridTGridSegement : BindableTGridSegement
     {
-        private TGrid pinTGrid;
-        public TGrid PinTGrid
-        {
-            get => pinTGrid;
-            set
-            {
-                Set(ref pinTGrid, value);
-            }
-        }
-
-        private ConnectableStartObject bindObject;
-        public ConnectableStartObject BindObject
-        {
-            get => bindObject;
-            set
-            {
-                Set(ref bindObject, value);
-            }
-        }
-
-        private FumenVisualEditorViewModel bindFumenEditor;
-        public FumenVisualEditorViewModel BindFumenEditor
-        {
-            get => bindFumenEditor;
-            set
-            {
-                Set(ref bindFumenEditor, value);
-            }
-        }
+        public float OffsetX { get; set; }
+        public TGrid PinTGrid { get; set; }
+        public ConnectableStartObject BindObject { get; set; }
+        public FumenVisualEditorViewModel BindFumenEditor { get; set; }
 
         public override bool RecalcPoint()
         {
@@ -64,7 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
         }
     }
 
-    [MapToView(ViewType = typeof(HoldConnectorView))]
+    [MapToView(ViewType = typeof(LaneBlockLaneDecorationView))]
     public class LaneBlockLaneDecorationViewModel : ConnectorViewModel
     {
         private Dictionary<object, BindableDynmaticXGridTGridSegement> map = new();
@@ -95,7 +70,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
         }
 
-        public Brush LineBrush => Brushes.DeepPink;
+        private Brush lineBrush = Brushes.White;
+        public Brush LineBrush
+        {
+            get => lineBrush;
+            set => Set(ref lineBrush, value);
+        }
 
         public override IDisplayableObject DisplayableObject => Decoration;
 
@@ -146,7 +126,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 {
                     BindFumenEditor = EditorViewModel,
                     BindObject = obj,
-                    PinTGrid = pinTGrid
+                    PinTGrid = pinTGrid,
+                    OffsetX = lbk.Direction == BlockDirection.Left ? -20 : 20
                 };
                 map[key] = bind;
                 if (bind.RecalcPoint())
@@ -171,7 +152,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             if (list.LastOrDefault() is LaneStartBase laneStart && laneStart.MaxTGrid >= endTGrid)
                 Upsert(list.LastOrDefault(), endTGrid, lbkEnd);
 
-            NotifyOfPropertyChange(() => Lines);
+            LineBrush = lbk.Direction == BlockDirection.Left ? WallLeftConnector.DefaultBrush : WallRightConnector.DefaultBrush;
         }
 
         public override void OnEditorRedrawObjects()

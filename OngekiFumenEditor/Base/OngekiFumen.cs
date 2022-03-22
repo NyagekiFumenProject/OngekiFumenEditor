@@ -267,7 +267,7 @@ namespace OngekiFumenEditor.Base
                    .Concat(MeterChanges.Skip(1)) //not show first meter
                    .Concat(BpmList.Skip(1)) //not show first bpm
                    .Concat(ClickSEs.BinaryFindRange(min, max))
-                   .Concat(LaneBlocks.BinaryFindRange(min, max))
+                   .Concat(LaneBlocks)
                    .Concat(EnemySets.BinaryFindRange(min, max))
                    .Concat(Bullets.BinaryFindRange(min, max))
                    .Concat(Lanes.GetVisibleStartObjects(min, max))
