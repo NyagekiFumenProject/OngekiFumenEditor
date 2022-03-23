@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
     public abstract class BindableTGridSegement : PropertyChangedBase
     {
         public LineSegment Segment { get; } = new LineSegment();
-        public abstract bool RecalcPoint();
+        public abstract bool RecalcPoint(XGrid directValue = default);
     }
 
     public class BindableTGridSegement<T> : BindableTGridSegement where T : INotifyPropertyChanged, IHorizonPositionObject, ITimelineObject
@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
         }
 
-        public override bool RecalcPoint()
+        public override bool RecalcPoint(XGrid directValue = default)
         {
             if (BindObject is null || BindFumenEditor is null)
                 return false;
@@ -165,7 +165,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
 
             Upsert(hold);
-            foreach (var node in refLane.Children.AsEnumerable<ConnectableObjectBase>().Prepend(refLane).Where(x => hold.TGrid <= x.TGrid && x.TGrid <= holdEnd.TGrid))
+            foreach (var node in refLane.Children.AsEnumerable<ConnectableObjectBase>().Where(x => hold.TGrid <= x.TGrid && x.TGrid <= holdEnd.TGrid))
                 Upsert(node);
             Upsert(holdEnd);
 

@@ -25,9 +25,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
         public ConnectableStartObject BindObject { get; set; }
         public FumenVisualEditorViewModel BindFumenEditor { get; set; }
 
-        public override bool RecalcPoint()
+        public override bool RecalcPoint(XGrid directValue = default)
         {
-            if (BindObject is null || BindFumenEditor is null || BindObject.CalulateXGrid(PinTGrid) is not XGrid xGrid)
+            var xGrid = directValue ?? BindObject.CalulateXGrid(PinTGrid);
+            if (BindObject is null || BindFumenEditor is null || xGrid is not XGrid)
                 return false;
 
             var x = XGridCalculator.ConvertXGridToX(xGrid, BindFumenEditor)
@@ -109,15 +110,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             Lines.Clear();
             //Log.LogDebug($"----------");
 
-            void Upsert(ConnectableStartObject obj, TGrid pinTGrid, object key)
+            void Upsert(ConnectableStartObject obj, TGrid pinTGrid, object key, XGrid directValue = default,bool isStroke = true)
             {
                 if (map.TryGetValue(key, out var seg))
                 {
                     seg.BindObject = obj;
                     seg.PinTGrid = pinTGrid;
-                    if (seg.RecalcPoint())
+                    if (seg.RecalcPoint(directValue))
                     {
                         //Log.LogDebug($"{pinTGrid} {key}");
+                        seg.Segment.IsStroked = isStroke;
                         Lines.Add(seg.Segment);
                     }
                     return;
@@ -130,9 +132,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                     OffsetX = lbk.Direction == BlockDirection.Left ? -20 : 20
                 };
                 map[key] = bind;
-                if (bind.RecalcPoint())
+                if (bind.RecalcPoint(directValue))
                 {
                     //Log.LogDebug($"{pinTGrid} {key}");
+                    bind.Segment.IsStroked = isStroke;
                     Lines.Add(bind.Segment);
                 }
                 //Log.LogDebug("new");
@@ -143,12 +146,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             var endTGrid = lbk.EndIndicator.TGrid;
 
             Upsert(list.FirstOrDefault(), beginTGrid, lbk);
+            var cur = list.FirstOrDefault();
             foreach ((var node, var tGrid, var key) in list
                 .SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>()
                     .Prepend(x)
                     .Where(x => beginTGrid <= x.TGrid && x.TGrid <= endTGrid)
                     .Select(z => (x, z.TGrid, z))))
-                Upsert(node, tGrid, key);
+            {
+                Upsert(node, tGrid, key, key.XGrid, cur == node);
+                cur = node;
+            }
+
             if (list.LastOrDefault() is LaneStartBase laneStart && laneStart.MaxTGrid >= endTGrid)
                 Upsert(list.LastOrDefault(), endTGrid, lbkEnd);
 
