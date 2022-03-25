@@ -33,9 +33,10 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         public Task<OngekiFumen> DeserializeAsync(Stream stream)
         {
             using var gzipDecompress = new GZipStream(stream, CompressionMode.Decompress);
-            using var reader = new BinaryReader(gzipDecompress);
+            using var reader = new LoggableBinaryReader(new BinaryReader(gzipDecompress));
 
             var fumen = new OngekiFumen();
+            Log.LogDebug($"-----BeginDeserialize----");
 
             ProcessHEADER(fumen, reader);
 
@@ -44,6 +45,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             ProcessCOMPOSITION(fumen, reader);
 
             ProcessLANE(fumen, reader);
+
+            ProcessLANE_BLOCK(fumen, reader);
 
             ProcessBULLET(fumen, reader);
 
@@ -54,15 +57,34 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             ProcessFLICK(fumen, reader);
 
             ProcessNOTES(fumen, reader);
+            Log.LogDebug($"-----EndDeserialize----");
 
             fumen.Setup();
 
             return Task.FromResult(fumen);
         }
 
-
-        public void ProcessHEADER(OngekiFumen fumen, BinaryReader reader)
+        private void ProcessLANE_BLOCK(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessLANE_BLOCK()----");
+            var count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                var lbk = new LaneBlockArea();
+                var end = lbk.EndIndicator;
+
+                lbk.TGrid.Unit = reader.ReadSingle();
+                lbk.TGrid.Grid = reader.ReadInt32();
+                end.TGrid.Unit = reader.ReadSingle();
+                end.TGrid.Grid = reader.ReadInt32();
+
+                fumen.AddObject(lbk);
+            }
+        }
+
+        public void ProcessHEADER(OngekiFumen fumen, LoggableBinaryReader reader)
+        {
+            Log.LogDebug($"-----Begin ProcessHEADER()----");
             var metaInfo = fumen.MetaInfo;
 
             var major = reader.ReadInt32();
@@ -95,8 +117,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             metaInfo.BeamDamage = reader.ReadDouble();
         }
 
-        public void ProcessB_PALETTE(OngekiFumen fumen, BinaryReader reader)
+        public void ProcessB_PALETTE(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessB_PALETTE()----");
             var count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
@@ -133,8 +156,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessCOMPOSITION(OngekiFumen fumen, BinaryReader reader)
+        public void ProcessCOMPOSITION(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessCOMPOSITION()----");
             var count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
@@ -185,10 +209,23 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
                 fumen.AddObject(est);
             }
+
+            count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                var est = new Soflan();
+                est.TGrid.Unit = reader.ReadSingle();
+                est.TGrid.Grid = reader.ReadInt32();
+                est.EndIndicator.TGrid = est.TGrid + new GridOffset(0, reader.ReadInt32());
+                est.Speed = reader.ReadSingle();
+
+                fumen.AddObject(est);
+            }
         }
 
-        public void ProcessLANE(OngekiFumen fumen, BinaryReader reader)
+        public void ProcessLANE(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessLANE()----");
             ConnectableStartObject DeSerialize()
             {
                 ConnectableObjectBase DeSerializeInput()
@@ -262,8 +299,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessBULLET(OngekiFumen fumen, BinaryReader reader)
+        public void ProcessBULLET(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessBULLET()----");
             var count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
@@ -279,8 +317,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessBEAM(OngekiFumen fumen, BinaryReader reader)
+        public void ProcessBEAM(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessBEAM()----");
             BeamBase DeSerializeInput()
             {
                 BeamBase beamObject = reader.ReadString() switch
@@ -312,8 +351,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessBELL(OngekiFumen fumen, BinaryReader reader)
+        public void ProcessBELL(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessBELL()----");
             var count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
@@ -331,8 +371,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessFLICK(OngekiFumen fumen, BinaryReader reader)
+        public void ProcessFLICK(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessFLICK()----");
             var count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
@@ -348,8 +389,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessNOTES(OngekiFumen fumen, BinaryReader reader)
+        public void ProcessNOTES(OngekiFumen fumen, LoggableBinaryReader reader)
         {
+            Log.LogDebug($"-----Begin ProcessNOTES()----");
             var count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {

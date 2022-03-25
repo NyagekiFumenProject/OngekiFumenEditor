@@ -42,7 +42,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         {
             using var memory = new MemoryStream();
             using var gzip = new GZipStream(memory, CompressionLevel.Optimal);
-            using var writer = new BinaryWriter(gzip);
+            using var writer = new LoggableBinaryWriter(new BinaryWriter(gzip));
+
+            Log.LogDebug($"-----BeginSerialize----");
 
             ProcessHEADER(fumen, writer);
 
@@ -64,6 +66,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
             ProcessNOTES(fumen, writer);
 
+            Log.LogDebug($"-----EndSerialize----");
+
             writer.Flush();
             await gzip.FlushAsync();
             gzip.Close();
@@ -72,28 +76,24 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             return memory.ToArray();
         }
 
-        private void ProcessLANE_BLOCK(OngekiFumen fumen, BinaryWriter writer)
+        private void ProcessLANE_BLOCK(OngekiFumen fumen, LoggableBinaryWriter writer)
         {
+            Log.LogDebug($"-----Begin ProcessLANE_BLOCK()----");
+
             writer.Write(fumen.LaneBlocks.Count);
             foreach (var lbk in fumen.LaneBlocks)
             {
-                (var refStartWallLane, var refEndWallLane) = lbk.CalculateReferenceWallLanes(fumen);
-
                 var end = lbk.EndIndicator;
-                writer.Write(refStartWallLane?.RecordId ?? -1);
                 writer.Write(lbk.TGrid.Unit);
                 writer.Write(lbk.TGrid.Grid);
-                writer.Write(refStartWallLane?.XGrid.Unit ?? 0f);
-                writer.Write(refStartWallLane?.XGrid.Grid ?? 0);
                 writer.Write(end.TGrid.Unit);
                 writer.Write(end.TGrid.Grid);
-                writer.Write(refEndWallLane?.XGrid.Unit ?? 0f);
-                writer.Write(refEndWallLane?.XGrid.Grid ?? 0);
             }
         }
 
-        public void ProcessHEADER(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessHEADER(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessHEADER()----");
             var metaInfo = fumen.MetaInfo;
 
             sb.Write(metaInfo.Version.Major);
@@ -117,8 +117,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             sb.Write(metaInfo.BeamDamage);
         }
 
-        public void ProcessB_PALETTE(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessB_PALETTE(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessB_PALETTE()----");
             sb.Write(fumen.BulletPalleteList.Count());
 
             foreach (var bpl in fumen.BulletPalleteList.OrderBy(x => x.StrID))
@@ -135,8 +136,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         }
 
 
-        public void ProcessCOMPOSITION(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessCOMPOSITION(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessCOMPOSITION()----");
             sb.Write(fumen.BpmList.Count() - 1);
             foreach (var o in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
             {
@@ -168,10 +170,20 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 sb.Write(o.TGrid.Grid);
                 sb.Write(o.TagTblValue);
             }
+
+            sb.Write(fumen.Soflans.Count);
+            foreach (var o in fumen.Soflans)
+            {
+                sb.Write(o.TGrid.Unit);
+                sb.Write(o.TGrid.Grid);
+                sb.Write(o.GridLength);
+                sb.Write(o.Speed);
+            }
         }
 
-        public void ProcessLANE(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessLANE(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessLANE()----");
             void Serialize(ConnectableStartObject laneStart)
             {
                 void SerializeOutput(ConnectableObjectBase o)
@@ -206,8 +218,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessBULLET(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessBULLET(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessBULLET()----");
             sb.Write(fumen.Bullets.Count);
             foreach (var u in fumen.Bullets.OrderBy(x => x.TGrid))
             {
@@ -218,8 +231,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessBEAM(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessBEAM(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessBEAM()----");
             void SerializeOutput(BeamBase o)
             {
                 sb.Write(o.IDShortName);
@@ -240,8 +254,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessBELL(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessBELL(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessBELL()----");
             sb.Write(fumen.Bells.Count);
             foreach (var u in fumen.Bells.OrderBy(x => x.TGrid))
             {
@@ -253,8 +268,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessFLICK(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessFLICK(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessFLICK()----");
             sb.Write(fumen.Flicks.Count);
             foreach (var u in fumen.Flicks.OrderBy(x => x.TGrid))
             {
@@ -266,8 +282,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             }
         }
 
-        public void ProcessNOTES(OngekiFumen fumen, BinaryWriter sb)
+        public void ProcessNOTES(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
+            Log.LogDebug($"-----Begin ProcessNOTES()----");
             var notes = fumen.Taps.OfType<OngekiTimelineObjectBase>().Concat(fumen.Holds).OrderBy(x => x.TGrid).ToArray();
             sb.Write(notes.Length);
             foreach (var u in notes)
