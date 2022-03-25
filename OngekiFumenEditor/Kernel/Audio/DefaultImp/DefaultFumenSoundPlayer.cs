@@ -34,7 +34,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             Hold = 128,
 
             Flick = 256,
-            ExFlick = 512
+            ExFlick = 512,
+
+            HoldEnd = 1024,
         }
 
         public class SoundEvent
@@ -95,6 +97,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             await load(Sound.Flick, "Resources\\sounds\\flick.wav");
             await load(Sound.Bullet, "Resources\\sounds\\bullet.wav");
             await load(Sound.ExFlick, "Resources\\sounds\\exflick.wav");
+            //await load(Sound.HoldEnd, "Resources\\sounds\\exflick.wav");
 
             source.SetResult();
         }
@@ -137,13 +140,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                     {
                         WallTap { IsCritical: false } => Sound.WallExTap,
                         WallTap { IsCritical: true } => Sound.WallExTap,
-                        Tap or Hold { IsCritical: false } => Sound.Tap,
-                        Tap or Hold { IsCritical: true } => Sound.ExTap,
+                        Tap { IsCritical: false } or Hold { IsCritical: false } => Sound.Tap,
+                        Tap { IsCritical: true } or Hold { IsCritical: true } => Sound.ExTap,
                         Bell => Sound.Bell,
                         Bullet => Sound.Bullet,
                         Flick { IsCritical: false } => Sound.Flick,
                         Flick { IsCritical: true } => Sound.ExFlick,
-                        HoldEnd => Sound.Tap,
+                        HoldEnd => Sound.HoldEnd,
                         _ => default
                     };
                 }
