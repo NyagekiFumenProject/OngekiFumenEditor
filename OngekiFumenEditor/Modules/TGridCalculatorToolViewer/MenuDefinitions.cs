@@ -10,6 +10,6 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer
     {
         [Export]
         public static MenuItemDefinition ViewTGridCalculatorToolViewerMenuItem = new CommandMenuItemDefinition<ViewTGridCalculatorToolViewerCommandDefinition>(
-            Gemini.Modules.MainMenu.MenuDefinitions.ViewToolsMenuGroup, 2);
+            Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 0);
     }
 }

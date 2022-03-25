@@ -8,6 +8,6 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser
     {
         [Export]
         public static MenuItemDefinition ViewSvgToLaneBrowserViewerMenuItem = new CommandMenuItemDefinition<ViewSvgToLaneBrowserCommandDefinition>(
-            Gemini.Modules.MainMenu.MenuDefinitions.ViewToolsMenuGroup, 2);
+            Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 0);
     }
 }
