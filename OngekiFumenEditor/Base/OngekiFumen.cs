@@ -38,6 +38,7 @@ namespace OngekiFumenEditor.Base
         public MeterChangeList MeterChanges { get; } = new();
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
+        public TGridSortList<Soflan> Soflans { get; } = new();
         public TGridSortList<LaneBlockArea> LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
@@ -136,6 +137,10 @@ namespace OngekiFumenEditor.Base
             {
                 Beams.Add(beam);
             }
+            else if (obj is Soflan soflan)
+            {
+                Soflans.Add(soflan);
+            }
             else if (obj is Bullet bullet)
             {
                 Bullets.Add(bullet);
@@ -194,6 +199,10 @@ namespace OngekiFumenEditor.Base
             else if (obj is EnemySet est)
             {
                 EnemySets.Remove(est);
+            }
+            else if (obj is Soflan soflan)
+            {
+                Soflans.Remove(soflan);
             }
             else if (obj is BulletPallete bpl)
             {
@@ -268,6 +277,7 @@ namespace OngekiFumenEditor.Base
                    .Concat(BpmList.Skip(1)) //not show first bpm
                    .Concat(ClickSEs.BinaryFindRange(min, max))
                    .Concat(LaneBlocks)
+                   .Concat(Soflans)
                    .Concat(EnemySets.BinaryFindRange(min, max))
                    .Concat(Bullets.BinaryFindRange(min, max))
                    .Concat(Lanes.GetVisibleStartObjects(min, max))

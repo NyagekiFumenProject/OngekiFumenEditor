@@ -46,6 +46,6 @@ namespace OngekiFumenEditor.Base
             TGrid = timelineObject.TGrid;
         }
 
-        public override string ToString() => $"{base.ToString()} TGrid:{TGrid}";
+        public override string ToString() => $"{base.ToString()} {TGrid}";
     }
 }

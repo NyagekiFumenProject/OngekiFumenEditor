@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-        public override string ToString() => $"{base.ToString()} XGrid:{XGrid}";
+        public override string ToString() => $"{base.ToString()} {XGrid}";
 
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {
