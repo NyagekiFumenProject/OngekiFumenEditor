@@ -71,10 +71,12 @@ namespace OngekiFumenEditor.Utils
 
         public static void LogDebug(string message, bool newLine = true, bool time = true, [CallerMemberName] string prefix = "<Unknown>")
         {
+#if DEBUG
             var instance = Instance;
             var msg = instance.BuildLogMessage(message, "DEBUG", newLine, time, prefix);
             Debug.Write(msg);
             //instance.Output(msg);
+#endif
         }
 
         public static void LogInfo(string message, bool newLine = true, bool time = true, [CallerMemberName] string prefix = "<Unknown>")
