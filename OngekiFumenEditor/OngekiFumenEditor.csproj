@@ -64,7 +64,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\GLWpfControl\src\GLWpfControl\GLWpfControl.csproj" />
     <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj">
       <PrivateAssets>all</PrivateAssets>
     </ProjectReference>
@@ -152,6 +151,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneCurveObjectConnectorView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneBlockLaneDecorationView.xaml.cs">
@@ -295,6 +297,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneCurveObjectConnectorView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

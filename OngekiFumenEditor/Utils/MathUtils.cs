@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
@@ -154,6 +155,17 @@ namespace OngekiFumenEditor.Utils
                 return float.MaxValue;
 
             return (y1 - y2) / (x1 - x2);
+        }
+
+        public static Vector BezierQuadratic(Vector start, Vector midControl, Vector end, float T)
+        {
+            float A = 1 - T;
+            float B = T;
+            float A_2 = A * A;
+            float AB2 = A * B * 2;
+            float B_2 = B * B;
+
+            return new(start.X * A_2 + midControl.X * AB2 + end.X * B_2, start.Y * A_2 + midControl.Y * AB2 + end.Y * B_2);
         }
     }
 }

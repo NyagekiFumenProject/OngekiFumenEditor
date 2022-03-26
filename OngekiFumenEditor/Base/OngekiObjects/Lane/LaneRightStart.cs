@@ -25,10 +25,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 
         public override LaneType LaneType => LaneType.Right;
 
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneRightConnector()
-        {
-            From = from,
-            To = to
-        };
+        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => GenerateConnectorInternal<LaneRightConnector>(from, to);
     }
 }

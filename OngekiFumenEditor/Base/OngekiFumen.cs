@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.EditorObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
@@ -242,7 +243,7 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj switch
             {
-                LaneStartBase or LaneEndBase or LaneNextBase => obj,
+                LaneStartBase or LaneEndBase or LaneNextBase or LaneCurveObject => obj,
                 _ => null
             } is ConnectableObjectBase lane)
             {

@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.EditorObjects.Lane;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -26,6 +27,24 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
         protected abstract ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to);
+
+        protected ConnectorLineBase<ConnectableObjectBase> GenerateConnectorInternal<T>(ConnectableObjectBase from, ConnectableObjectBase to) where T : ConnectorLineBase<ConnectableObjectBase>, new()
+        {
+            if (to is LaneCurveObject)
+            {
+                return new LaneCurveObjectConnector()
+                {
+                    From = from,
+                    To = to,
+                };
+            }
+
+            return new T()
+            {
+                From = from,
+                To = to,
+            };
+        }
 
         public ConnectableStartObject()
         {

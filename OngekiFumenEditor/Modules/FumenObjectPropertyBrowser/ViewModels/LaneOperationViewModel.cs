@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
@@ -47,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     return LaneChar switch
                     {
                         'L' => needNext ? new LaneLeftNext() : new LaneLeftEnd(),
-                        'C' => needNext ? new LaneCenterNext() : new LaneCenterEnd(),
+                        'C' => needNext ? new LaneCurveObject() : new LaneCenterEnd(),
                         'R' => needNext ? new LaneRightNext() : new LaneRightEnd(),
                         _ => default
                     };

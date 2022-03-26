@@ -18,10 +18,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 
         public override LaneType LaneType => LaneType.Center;
 
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneCenterConnector()
-        {
-            From = from,
-            To = to
-        };
+        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => GenerateConnectorInternal<LaneCenterConnector>(from, to);
     }
 }
