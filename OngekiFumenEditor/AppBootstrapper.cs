@@ -5,6 +5,7 @@ using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
@@ -63,6 +64,7 @@ namespace OngekiFumenEditor
 
         protected override void Configure()
         {
+            FileLogOutput.Init();
             base.Configure();
             var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
 
@@ -119,6 +121,7 @@ namespace OngekiFumenEditor
             IoC.Get<IAudioManager>().Dispose();
             await IoC.Get<ISchedulerManager>().Term();
             base.OnExit(sender, e);
+            await FileLogOutput.Term();
         }
     }
 }

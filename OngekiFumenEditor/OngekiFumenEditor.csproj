@@ -183,10 +183,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>EditorGlobalSetting.settings</DependentUpon>
     </Compile>
-    <Compile Update="Properties\Settings.Designer.cs">
+    <Compile Update="Properties\LogSetting.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
+      <DependentUpon>LogSetting.settings</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -195,9 +195,9 @@
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>EditorGlobalSetting.Designer.cs</LastGenOutput>
     </None>
-    <None Update="Properties\Settings.settings">
+    <None Update="Properties\LogSetting.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <LastGenOutput>LogSetting.Designer.cs</LastGenOutput>
     </None>
     <None Update="Resources\sounds\bell.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

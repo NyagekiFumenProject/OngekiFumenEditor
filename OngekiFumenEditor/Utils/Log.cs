@@ -1,5 +1,7 @@
 using Caliburn.Micro;
 using Gemini.Modules.Output;
+using OngekiFumenEditor.Utils.Logs;
+using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -12,23 +14,6 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Utils
 {
-    public interface ILogOutput
-    {
-        public void WriteLog(string content);
-    }
-
-    [Export(typeof(ILogOutput))]
-    public class GeminiLogOutput : ILogOutput
-    {
-        [Import(typeof(IOutput))]
-        private IOutput output = default;
-
-        public void WriteLog(string content)
-        {
-            output.Append(content);
-        }
-    }
-
     [Export(typeof(Log))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log
@@ -75,6 +60,7 @@ namespace OngekiFumenEditor.Utils
             var instance = Instance;
             var msg = instance.BuildLogMessage(message, "DEBUG", newLine, time, prefix);
             Debug.Write(msg);
+            FileLogOutput.WriteLog(msg);
             //instance.Output(msg);
 #endif
         }

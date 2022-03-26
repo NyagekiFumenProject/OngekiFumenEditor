@@ -13,11 +13,11 @@ namespace OngekiFumenEditor.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
-    public sealed partial class EditorGlobalSetting : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class LogSetting : global::System.Configuration.ApplicationSettingsBase {
         
-        private static EditorGlobalSetting defaultInstance = ((EditorGlobalSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new EditorGlobalSetting())));
+        private static LogSetting defaultInstance = ((LogSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new LogSetting())));
         
-        public static EditorGlobalSetting Default {
+        public static LogSetting Default {
             get {
                 return defaultInstance;
             }
@@ -25,25 +25,13 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
-        public int AutoSaveTimeInterval {
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\Logs")]
+        public string LogFileDirPath {
             get {
-                return ((int)(this["AutoSaveTimeInterval"]));
+                return ((string)(this["LogFileDirPath"]));
             }
             set {
-                this["AutoSaveTimeInterval"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsEnableAutoSave {
-            get {
-                return ((bool)(this["IsEnableAutoSave"]));
-            }
-            set {
-                this["IsEnableAutoSave"] = value;
+                this["LogFileDirPath"] = value;
             }
         }
     }
