@@ -367,4 +367,8 @@
     </Page>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Kernel\SettingPages\Log\" />
+  </ItemGroup>
+
 </Project>

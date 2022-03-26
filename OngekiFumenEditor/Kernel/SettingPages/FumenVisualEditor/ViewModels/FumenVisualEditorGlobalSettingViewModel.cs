@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Settings
+namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
 {
     [Export(typeof(ISettingsEditor))]
     [PartCreationPolicy(CreationPolicy.Shared)]

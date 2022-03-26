@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views.Settings
+namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views
 {
     /// <summary>
     /// FumenVisualEditorGlobalSettingView.xaml 的交互逻辑
