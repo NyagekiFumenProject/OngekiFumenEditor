@@ -16,6 +16,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             set => Set(ref isSelecting, value);
         }
 
+        private float curvePrecision = 0.1f;
+        public float CurvePrecision
+        {
+            get => curvePrecision;
+            set => Set(ref curvePrecision, value <= 0 ? 0.01f : value);
+        }
+
         public bool IsAnyControlSelecting => PathControls.Any(x => x.IsSelecting);
 
         public ConnectableStartObject ReferenceStartObject { get; set; }

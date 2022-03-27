@@ -20,7 +20,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.Objec
     {
         public IEnumerable<Type> SupportOngekiTypes { get; } = new[] {
             typeof(WallStartBase),
-            typeof(WallNextBase)
+            typeof(WallNextBase),
+            typeof(WallEndBase)
         };
 
         public UIElement Generate(OngekiObjectBase obj)

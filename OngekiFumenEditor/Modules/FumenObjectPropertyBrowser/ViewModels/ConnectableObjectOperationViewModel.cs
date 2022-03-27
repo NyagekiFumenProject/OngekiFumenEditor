@@ -1,11 +1,13 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
 using System.Linq;
@@ -43,32 +45,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             }
         }
 
-        private bool isEnableDragEnd = true;
-        public bool IsEnableDragEnd
-        {
-            get
-            {
-                return isEnableDragEnd;
-            }
-            set
-            {
-                Set(ref isEnableDragEnd, value);
-            }
-        }
-
-        private bool isEnableDragPathControl = true;
-        public bool IsEnableDragPathControl
-        {
-            get
-            {
-                return isEnableDragPathControl;
-            }
-            set
-            {
-                Set(ref isEnableDragPathControl, value);
-            }
-        }
-
         public ConnectableStartObject RefStartObject => ConnectableObject switch
         {
             ConnectableStartObject start => start,
@@ -76,10 +52,15 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             _ => default,
         };
 
+        public bool IsEnableDragEnd => !(RefStartObject?.Children.OfType<ConnectableEndObject>().Any() ?? false);
+        public bool IsEnableDragPathControl => ConnectableObject is ConnectableChildObjectBase;
+        public bool IsStartObject => ConnectableObject is ConnectableStartObject;
+
         private void CheckEnable()
         {
-            IsEnableDragEnd = !(RefStartObject?.Children.OfType<ConnectableEndObject>().Any() ?? false);
-            isEnableDragPathControl = ConnectableObject is ConnectableChildObjectBase;
+            NotifyOfPropertyChange(() => IsEnableDragEnd);
+            NotifyOfPropertyChange(() => IsEnableDragPathControl);
+            NotifyOfPropertyChange(() => IsStartObject);
         }
 
         public ConnectableObjectOperationViewModel(ConnectableObjectBase obj)
@@ -107,6 +88,29 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             ProcessDragStart(e, DragActionType.Split);
         }
 
+        public void Interpolate(ActionExecutionContext e)
+        {
+            var genStarts = RefStartObject.InterpolateCurve(
+                () => LambdaActivator.CreateInstance(RefStartObject.GetType()) as ConnectableStartObject,
+                () => LambdaActivator.CreateInstance(RefStartObject.NextType) as ConnectableNextObject,
+                () => LambdaActivator.CreateInstance(RefStartObject.EndType) as ConnectableEndObject).ToArray();
+
+            var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值曲线", () =>
+            {
+                editor.Fumen.RemoveObject(RefStartObject);
+                foreach (var start in genStarts)
+                    editor.Fumen.AddObject(start);
+                editor.Redraw(RedrawTarget.OngekiObjects);
+            }, () =>
+            {
+                foreach (var start in genStarts)
+                    editor.Fumen.RemoveObject(start);
+                editor.Fumen.AddObject(RefStartObject);
+                editor.Redraw(RedrawTarget.OngekiObjects);
+            }));
+        }
+
         public abstract ConnectableChildObjectBase GenerateChildObject(bool needNext);
 
         private void ProcessDragStart(ActionExecutionContext e, DragActionType actionType)
@@ -124,11 +128,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
                 //ConnectableObjectDropAction
-                var genChild = GenerateChildObject(actionType == DragActionType.DropNext);
+                var genChildLazy = new Lazy<ConnectableChildObjectBase>(() => GenerateChildObject(actionType == DragActionType.DropNext));
                 IEditorDropHandler dropAction = actionType switch
                 {
-                    DragActionType.DropNext or DragActionType.DropEnd => new ConnectableObjectDropAction(RefStartObject, genChild, () => CheckEnable()),
-                    DragActionType.Split => new ConnectableObjectSplitDropAction(RefStartObject, genChild, () => CheckEnable()),
+                    DragActionType.DropNext or DragActionType.DropEnd => new ConnectableObjectDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
+                    DragActionType.Split => new ConnectableObjectSplitDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
                     DragActionType.DropCurvePathControl => new AddLaneCurvePathControlDropAction(ConnectableObject as ConnectableChildObjectBase),
                     _ => default
                 };

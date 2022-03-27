@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.Objec
     {
         public IEnumerable<Type> SupportOngekiTypes { get; } = new[] {
             typeof(LaneStartBase),
+            typeof(LaneEndBase),
             typeof(LaneNextBase)
         };
 

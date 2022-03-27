@@ -23,7 +23,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="Drag new Next" />
+                Text="拖动添加中间点" />
         </Border>
         <Border
             Width="130"
@@ -36,7 +36,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="Drag new End" />
+                Text="拖动添加终点" />
         </Border>
         <Border
             Height="2"
@@ -53,7 +53,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="Split new End" />
+                Text="拖动分割" />
         </Border>
         <Border
             Width="130"
@@ -66,7 +66,20 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="Add curve control" />
+                Text="拖动添加曲线控制" />
+        </Border>
+        <Border
+            Width="130"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
+            BorderBrush="Black"
+            BorderThickness="1"
+            Visibility="{Binding IsStartObject, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock
+                Margin="5"
+                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Text="插值曲线并清理" />
         </Border>
     </StackPanel>
 </UserControl>

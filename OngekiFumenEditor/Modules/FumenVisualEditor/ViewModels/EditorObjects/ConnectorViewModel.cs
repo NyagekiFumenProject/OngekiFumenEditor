@@ -86,6 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                     break;
                 case nameof(TGrid):
                 case nameof(XGrid):
+                case nameof(ConnectableChildObjectBase.CurvePrecision):
                 case nameof(ConnectableChildObjectBase.PathControls):
                     RebuildLines();
                     break;
@@ -131,14 +132,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             var fromPoint = getPoint(Connector.From);
             var midPoint = (Connector.To as ConnectableChildObjectBase)?.PathControls.Select(x => getPoint(x)) ?? Enumerable.Empty<Vector2>();
             var toPoint = getPoint(Connector.To);
+            var step = (Connector.To as ConnectableChildObjectBase)?.CurvePrecision ?? 2857;
             using var d = midPoint.Prepend(fromPoint).Append(toPoint).ToListWithObjectPool(out var points);
 
             if (points.Count > 2)
             {
-                for (var t = 0f; t <= 1; t += 0.01f)
+                var t = 0f;
+
+                while (true)
                 {
-                    var point = BezierCurve.CalculatePoint(points, t);
-                    addPoint(point);
+                    var p = BezierCurve.CalculatePoint(points, t);
+                    addPoint(p);
+
+                    if (t >= 1)
+                        break;
+
+                    t = MathF.Min(1, t + step);
                 }
             }
             else

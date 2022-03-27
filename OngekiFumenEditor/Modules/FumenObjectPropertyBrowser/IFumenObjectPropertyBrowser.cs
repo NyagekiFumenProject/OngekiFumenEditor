@@ -12,6 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
     public interface IFumenObjectPropertyBrowser : ITool
     {
         public OngekiObjectBase OngekiObject { get; }
+        public FumenVisualEditorViewModel Editor { get; }
         public void SetCurrentOngekiObject(OngekiObjectBase ongekiObject, FumenVisualEditorViewModel referenceEditor);
     }
 }

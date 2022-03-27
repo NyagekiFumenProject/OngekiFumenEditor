@@ -194,14 +194,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             return default;
         }
 
-        public IEnumerable<START> InterpolateCurve<START, NEXT, END>(float step)
+        public IEnumerable<START> InterpolateCurve<START, NEXT, END>()
             where START : ConnectableStartObject, new()
             where END : ConnectableEndObject, new()
-            where NEXT : ConnectableNextObject, new() => InterpolateCurve(step, () => new START(), () => new NEXT(), () => new END()).OfType<START>();
+            where NEXT : ConnectableNextObject, new() => InterpolateCurve(() => new START(), () => new NEXT(), () => new END()).OfType<START>();
 
-        public IEnumerable<ConnectableStartObject> InterpolateCurve(float step, Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc)
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc)
         {
-            var traveller = new CurveInterpolaterTraveller(this, step);
+            var traveller = new CurveInterpolaterTraveller(this);
 
             float calcGradient(CurvePoint a, CurvePoint b)
             {
@@ -254,14 +254,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             {
                 if (calcGradient(lineSegment[0], lineSegment[1]) < 0)
                     lineSegment.Reverse();
-                var col = new LineSegementCollection();
-                col.Points.AddRange(lineSegment.Skip(1).SkipLast(1).Select(x => new PointF(x.XGrid.TotalGrid, x.TGrid.TotalGrid)));
-                LineSegmentSimplifier.SimplifyTooClosePoints(col, 100);
-                LineSegmentSimplifier.SimplifySameGradientPoints(col);
 
                 var start = genStartFunc();
                 build(start, lineSegment[0]);
-                foreach (var childPos in col.Points.Select(x => new CurvePoint(new(x.X / XGrid.ResX, 0), new(x.Y / TGrid.ResT, 0))))
+                foreach (var childPos in lineSegment.Skip(1).SkipLast(1))
                 {
                     var next = genNextFunc();
                     build(next, childPos);
