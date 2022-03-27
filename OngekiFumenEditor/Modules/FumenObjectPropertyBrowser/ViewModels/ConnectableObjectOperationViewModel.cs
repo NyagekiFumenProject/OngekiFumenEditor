@@ -115,7 +115,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         private void ProcessDragStart(ActionExecutionContext e, DragActionType actionType)
         {
-            if (!_draggingItem)
+            if ((!_draggingItem) || RefStartObject is null)
                 return;
 
             var arg = e.EventArgs as MouseEventArgs;

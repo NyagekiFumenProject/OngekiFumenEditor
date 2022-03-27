@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels"
@@ -14,72 +15,52 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
     <StackPanel Margin="21,5,0,0">
-        <Border
-            Width="130"
+        <ContentControl>
+        </ContentControl>
+        <controls:CommonOperationButton
+            Width="150"
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
-            BorderBrush="Black"
-            BorderThickness="1">
-            <TextBlock
-                Margin="5"
-                Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="拖动添加中间点" />
-        </Border>
-        <Border
-            Width="130"
+            DecoratorBrush="Green"
+            Text="拖动添加中间点" />
+        <controls:CommonOperationButton
+            Width="150"
             Margin="0,10,0,0"
             HorizontalAlignment="Left"
-            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove2($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
-            BorderBrush="Black"
-            BorderThickness="1"
-            Visibility="{Binding IsEnableDragEnd, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="5"
-                Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="拖动添加终点" />
-        </Border>
+            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove2($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
+            DecoratorBrush="YellowGreen"
+            Text="拖动添加终点"
+            Visibility="{Binding IsEnableDragEnd, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <Border
             Height="2"
             Margin="-21,10,0,0"
             BorderBrush="Black"
             BorderThickness="1" />
-        <Border
-            Width="130"
+        <controls:CommonOperationButton
+            Width="150"
             Margin="0,10,0,0"
             HorizontalAlignment="Left"
-            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove3($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
-            BorderBrush="Black"
-            BorderThickness="1">
-            <TextBlock
-                Margin="5"
-                Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="拖动分割" />
-        </Border>
-        <Border
-            Width="130"
+            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove3($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
+            DecoratorBrush="DarkCyan"
+            Text="拖动分割"
+            ToolTip="按照某个时间点分割出新旧两个轨道" />
+        <controls:CommonOperationButton
+            Width="150"
             Margin="0,10,0,0"
             HorizontalAlignment="Left"
-            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove4($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
-            BorderBrush="Black"
-            BorderThickness="1"
-            Visibility="{Binding IsEnableDragPathControl, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="5"
-                Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="拖动添加曲线控制" />
-        </Border>
-        <Border
-            Width="130"
+            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove4($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
+            DecoratorBrush="DarkKhaki"
+            Text="拖动添加曲线控制"
+            ToolTip="添加一条曲线控制点"
+            Visibility="{Binding IsEnableDragPathControl, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <controls:CommonOperationButton
+            Width="150"
             Margin="0,10,0,0"
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
-            BorderBrush="Black"
-            BorderThickness="1"
-            Visibility="{Binding IsStartObject, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock
-                Margin="5"
-                Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="插值曲线并清理" />
-        </Border>
+            DecoratorBrush="DarkKhaki"
+            Text="插值曲线并清理"
+            ToolTip="对此轨道所有曲线进行插值成一条条直线,然后删除本轨道并生成新的"
+            Visibility="{Binding IsStartObject, Converter={StaticResource BooleanToVisibilityConverter}}" />
     </StackPanel>
 </UserControl>
