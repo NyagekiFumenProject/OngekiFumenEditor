@@ -237,13 +237,17 @@ namespace OngekiFumenEditor.Base
             {
                 Holds.Remove(holdEnd);
             }
+            else if (obj is LaneCurvePathControlObject pathControl)
+            {
+                pathControl.RefCurveObject.RemoveControlObject(pathControl);
+            }
             else if (obj is LaneBlockArea laneBlock)
             {
                 LaneBlocks.Remove(laneBlock);
             }
             else if (obj switch
             {
-                LaneStartBase or LaneEndBase or LaneNextBase or LaneCurveObject => obj,
+                LaneStartBase or LaneEndBase or LaneNextBase => obj,
                 _ => null
             } is ConnectableObjectBase lane)
             {

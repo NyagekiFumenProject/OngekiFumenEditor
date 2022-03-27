@@ -30,15 +30,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         protected ConnectorLineBase<ConnectableObjectBase> GenerateConnectorInternal<T>(ConnectableObjectBase from, ConnectableObjectBase to) where T : ConnectorLineBase<ConnectableObjectBase>, new()
         {
-            if (to is LaneCurveObject)
-            {
-                return new LaneCurveObjectConnector()
-                {
-                    From = from,
-                    To = to,
-                };
-            }
-
             return new T()
             {
                 From = from,

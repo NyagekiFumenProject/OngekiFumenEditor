@@ -8,41 +8,17 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Line
+    <Path
         Stroke="{Binding LineBrush}"
         StrokeDashArray="{Binding LineDashArray}"
         StrokeThickness="{Binding LineThickness}">
-        <Line.X1>
-            <MultiBinding Converter="{StaticResource CalculateObjectToPointsConverter}" ConverterParameter="0">
-                <MultiBinding.Bindings>
-                    <Binding Path="EditorViewModel" />
-                    <Binding Path="Connector.From.XGrid" />
-                </MultiBinding.Bindings>
-            </MultiBinding>
-        </Line.X1>
-        <Line.X2>
-            <MultiBinding Converter="{StaticResource CalculateObjectToPointsConverter}" ConverterParameter="0">
-                <MultiBinding.Bindings>
-                    <Binding Path="EditorViewModel" />
-                    <Binding Path="Connector.To.XGrid" />
-                </MultiBinding.Bindings>
-            </MultiBinding>
-        </Line.X2>
-        <Line.Y1>
-            <MultiBinding Converter="{StaticResource CalculateObjectToPointsConverter}" ConverterParameter="1">
-                <MultiBinding.Bindings>
-                    <Binding Path="EditorViewModel" />
-                    <Binding Path="Connector.From.TGrid" />
-                </MultiBinding.Bindings>
-            </MultiBinding>
-        </Line.Y1>
-        <Line.Y2>
-            <MultiBinding Converter="{StaticResource CalculateObjectToPointsConverter}" ConverterParameter="1">
-                <MultiBinding.Bindings>
-                    <Binding Path="EditorViewModel" />
-                    <Binding Path="Connector.To.TGrid" />
-                </MultiBinding.Bindings>
-            </MultiBinding>
-        </Line.Y2>
-    </Line>
+        <Path.Data>
+            <PathGeometry>
+                <PathGeometry.Figures>
+                    <PathFigure Segments="{Binding Lines}" StartPoint="{Binding Lines[0].Point}">
+                    </PathFigure>
+                </PathGeometry.Figures>
+            </PathGeometry>
+        </Path.Data>
+    </Path>
 </UserControl>

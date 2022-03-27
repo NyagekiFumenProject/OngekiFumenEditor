@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
@@ -14,10 +15,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 {
     public class AddLaneCurvePathControlDropAction : IEditorDropHandler
     {
-        private LaneCurveObject curveObject;
+        private ConnectableChildObjectBase curveObject;
         private LaneCurvePathControlObject cachePathControl;
 
-        public AddLaneCurvePathControlDropAction(LaneCurveObject obj)
+        public AddLaneCurvePathControlDropAction(ConnectableChildObjectBase obj)
         {
             curveObject = obj;
             cachePathControl = new LaneCurvePathControlObject();

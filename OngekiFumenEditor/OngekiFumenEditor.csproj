@@ -132,9 +132,6 @@
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\LaneCurveOperationView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -154,9 +151,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneCurveObjectConnectorView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneBlockLaneDecorationView.xaml.cs">
@@ -259,10 +253,6 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\LaneCurveOperationView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
@@ -304,10 +294,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneCurveObjectConnectorView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

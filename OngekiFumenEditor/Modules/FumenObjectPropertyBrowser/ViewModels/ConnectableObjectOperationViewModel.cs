@@ -17,6 +17,14 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
     [MapToView(ViewType = typeof(ConnectableObjectOperationView))]
     public abstract class ConnectableObjectOperationViewModel : PropertyChangedBase
     {
+        public enum DragActionType
+        {
+            DropEnd,
+            DropNext,
+            DropCurvePathControl,
+            Split
+        }
+
         private bool _draggingItem;
         private Point _mouseStartPosition;
 
@@ -31,7 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             {
                 connectableObject = value;
                 NotifyOfPropertyChange(() => ConnectableObject);
-                CheckEnableDragEnd();
+                CheckEnable();
             }
         }
 
@@ -44,8 +52,20 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             }
             set
             {
-                isEnableDragEnd = value;
-                NotifyOfPropertyChange(() => isEnableDragEnd);
+                Set(ref isEnableDragEnd, value);
+            }
+        }
+
+        private bool isEnableDragPathControl = true;
+        public bool IsEnableDragPathControl
+        {
+            get
+            {
+                return isEnableDragPathControl;
+            }
+            set
+            {
+                Set(ref isEnableDragPathControl, value);
             }
         }
 
@@ -56,9 +76,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             _ => default,
         };
 
-        private void CheckEnableDragEnd()
+        private void CheckEnable()
         {
             IsEnableDragEnd = !(RefStartObject?.Children.OfType<ConnectableEndObject>().Any() ?? false);
+            isEnableDragPathControl = ConnectableObject is ConnectableChildObjectBase;
         }
 
         public ConnectableObjectOperationViewModel(ConnectableObjectBase obj)
@@ -68,22 +89,27 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public void Border_MouseMove(ActionExecutionContext e)
         {
-            ProcessDragStart(e, true);
+            ProcessDragStart(e, DragActionType.DropNext);
+        }
+
+        public void Border_MouseMove4(ActionExecutionContext e)
+        {
+            ProcessDragStart(e, DragActionType.DropCurvePathControl);
         }
 
         public void Border_MouseMove2(ActionExecutionContext e)
         {
-            ProcessDragStart(e, false);
+            ProcessDragStart(e, DragActionType.DropEnd);
         }
 
         public void Border_MouseMove3(ActionExecutionContext e)
         {
-            ProcessDragStart(e, null);
+            ProcessDragStart(e, DragActionType.Split);
         }
 
         public abstract ConnectableChildObjectBase GenerateChildObject(bool needNext);
 
-        private void ProcessDragStart(ActionExecutionContext e, bool? isNext)
+        private void ProcessDragStart(ActionExecutionContext e, DragActionType actionType)
         {
             if (!_draggingItem)
                 return;
@@ -98,8 +124,14 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
                 //ConnectableObjectDropAction
-                var genChild = GenerateChildObject(isNext ?? false);
-                IEditorDropHandler dropAction = isNext == null ? new ConnectableObjectSplitDropAction(RefStartObject, genChild, () => CheckEnableDragEnd()) : new ConnectableObjectDropAction(RefStartObject, genChild, () => CheckEnableDragEnd());
+                var genChild = GenerateChildObject(actionType == DragActionType.DropNext);
+                IEditorDropHandler dropAction = actionType switch
+                {
+                    DragActionType.DropNext or DragActionType.DropEnd => new ConnectableObjectDropAction(RefStartObject, genChild, () => CheckEnable()),
+                    DragActionType.Split => new ConnectableObjectSplitDropAction(RefStartObject, genChild, () => CheckEnable()),
+                    DragActionType.DropCurvePathControl => new AddLaneCurvePathControlDropAction(ConnectableObject as ConnectableChildObjectBase),
+                    _ => default
+                };
 
                 DragDrop.DoDragDrop(e.Source, new DataObject(ToolboxDragDrop.DataFormat, dropAction), DragDropEffects.Move);
                 _draggingItem = false;

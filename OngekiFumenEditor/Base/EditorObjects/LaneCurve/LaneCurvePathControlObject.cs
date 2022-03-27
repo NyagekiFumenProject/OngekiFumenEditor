@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
+﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.LaneCurve
             set => Set(ref isSelecting, value);
         }
 
-        private LaneCurveObject refCurveObject;
-        public LaneCurveObject RefCurveObject
+        private ConnectableChildObjectBase refCurveObject;
+        public ConnectableChildObjectBase RefCurveObject
         {
             get => refCurveObject;
             set => Set(ref refCurveObject, value);

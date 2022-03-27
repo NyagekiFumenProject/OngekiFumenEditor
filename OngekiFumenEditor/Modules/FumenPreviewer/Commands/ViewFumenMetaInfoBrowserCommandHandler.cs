@@ -18,9 +18,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Commands
             _windowManager = windowManager;
         }
 
-        public override async Task Run(Command command)
+        public override Task Run(Command command)
         {
             _windowManager.ShowTool(IoC.Get<IFumenPreviewer>());
+            return TaskUtility.Completed;
         }
     }
 }

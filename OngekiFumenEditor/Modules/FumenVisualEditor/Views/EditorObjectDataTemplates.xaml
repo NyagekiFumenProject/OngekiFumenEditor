@@ -151,12 +151,6 @@
             <DataTemplate DataType="{x:Type editorObject:LaneCurvePathControlObjectViewModel}">
                 <editorobjects:LaneCurvePathControlObjectView />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type editorObject:LaneCurveObjectViewModel}">
-                <ongekiobjects:LaneNextView />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type editorObject:LaneCurveObjectConnectorViewModel}">
-                <editorobjects:LaneCurveObjectConnectorView />
-            </DataTemplate>
             <DataTemplate DataType="{x:Type fumenOngekiObject:LaneBlockAreaViewModel}">
                 <views1:DisplayTextLineObjectViewBase />
             </DataTemplate>

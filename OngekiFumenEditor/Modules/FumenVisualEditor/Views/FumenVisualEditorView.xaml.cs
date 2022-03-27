@@ -31,7 +31,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
     /// </summary>
     public partial class FumenVisualEditorView : UserControl
     {
+#pragma warning disable IDE0052 // 删除未读的私有成员
         private bool _dragging;
+#pragma warning restore IDE0052 // 删除未读的私有成员
         private readonly Binding _scrollBinding;
 
         public FumenVisualEditorView()

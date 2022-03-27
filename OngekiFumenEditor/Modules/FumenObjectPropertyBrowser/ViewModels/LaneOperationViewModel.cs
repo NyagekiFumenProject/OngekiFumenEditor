@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     return LaneChar switch
                     {
                         'L' => needNext ? new LaneLeftNext() : new LaneLeftEnd(),
-                        'C' => needNext ? new LaneCurveObject() : new LaneCenterEnd(),
+                        'C' => needNext ? new LaneCenterNext() : new LaneCenterEnd(),
                         'R' => needNext ? new LaneRightNext() : new LaneRightEnd(),
                         _ => default
                     };
