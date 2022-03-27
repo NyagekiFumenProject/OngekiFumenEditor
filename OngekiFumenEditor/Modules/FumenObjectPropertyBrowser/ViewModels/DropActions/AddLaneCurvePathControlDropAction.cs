@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.EditorObjects.Lane;
+﻿using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;

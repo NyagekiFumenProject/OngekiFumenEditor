@@ -1,6 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.EditorObjects.Lane;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;

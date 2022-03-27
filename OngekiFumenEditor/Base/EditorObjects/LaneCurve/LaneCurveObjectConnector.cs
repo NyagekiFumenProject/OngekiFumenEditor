@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.EditorObjects.Lane
+namespace OngekiFumenEditor.Base.EditorObjects.LaneCurve
 {
     public class LaneCurveObjectConnector : ConnectorLineBase<ConnectableObjectBase>
     {

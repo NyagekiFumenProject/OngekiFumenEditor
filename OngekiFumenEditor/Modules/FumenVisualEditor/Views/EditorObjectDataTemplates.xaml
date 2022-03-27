@@ -148,6 +148,9 @@
             <DataTemplate DataType="{x:Type editorObject:WallConnectorViewModel}">
                 <editorobjects:ConnectorView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type editorObject:LaneCurvePathControlObjectViewModel}">
+                <editorobjects:LaneCurvePathControlObjectView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type editorObject:LaneCurveObjectViewModel}">
                 <ongekiobjects:LaneNextView />
             </DataTemplate>

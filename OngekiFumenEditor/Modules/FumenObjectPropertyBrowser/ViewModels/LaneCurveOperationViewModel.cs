@@ -1,6 +1,6 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Toolbox;
-using OngekiFumenEditor.Base.EditorObjects.Lane;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;

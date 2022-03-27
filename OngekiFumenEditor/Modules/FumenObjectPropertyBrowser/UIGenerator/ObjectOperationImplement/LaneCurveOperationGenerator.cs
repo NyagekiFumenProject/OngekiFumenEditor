@@ -1,5 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects.Lane;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;

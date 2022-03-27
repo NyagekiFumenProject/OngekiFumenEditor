@@ -1,6 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.EditorObjects.Lane;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -135,10 +135,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
-            foreach (var child in connectors)
+            foreach (var child in connectors.SelectMany(x=>x.GetDisplayableObjects().Append(x)))
                 yield return child;
             yield return this;
-            foreach (var child in Children)
+            foreach (var child in Children.SelectMany(x => x.GetDisplayableObjects().Append(x)))
                 yield return child;
         }
 

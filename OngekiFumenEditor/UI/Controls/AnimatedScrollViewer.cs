@@ -195,7 +195,7 @@ namespace OngekiFumenEditor.UI.Controls
             verticalAnimation.Completed += (_, _) =>
             {
                 if (thisIndex > _verticalDictionary.Count - 1) return;
-                ((Action?)_verticalDictionary[thisIndex])?.Invoke();
+                ((Action)_verticalDictionary[thisIndex])?.Invoke();
             };
 
             ScrollChanged -= Vertical_ScrollChanged;
