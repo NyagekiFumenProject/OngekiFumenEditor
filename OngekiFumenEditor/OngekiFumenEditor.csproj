@@ -132,6 +132,9 @@
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\LaneCurveOperationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -253,6 +256,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\ColorIdEnumTypeUIView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenObjectPropertyBrowser\Views\LaneCurveOperationView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

@@ -1,0 +1,44 @@
+﻿using OngekiFumenEditor.Base.EditorObjects.Lane;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions
+{
+    public class AddLaneCurvePathControlDropAction : IEditorDropHandler
+    {
+        private LaneCurveObject curveObject;
+        private LaneCurvePathControlObject cachePathControl;
+
+        public AddLaneCurvePathControlDropAction(LaneCurveObject obj)
+        {
+            curveObject = obj;
+            cachePathControl = new LaneCurvePathControlObject();
+        }
+
+        public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
+        {
+            var dragTGrid = TGridCalculator.ConvertYToTGrid(dragEndPoint.Y, editor);
+            var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
+
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加曲线控制点", () =>
+            {
+                cachePathControl.TGrid = dragTGrid;
+                cachePathControl.XGrid = dragXGrid;
+                curveObject.AddControlObject(cachePathControl);
+                editor.Redraw(RedrawTarget.OngekiObjects);
+            }, () =>
+            {
+                curveObject.RemoveControlObject(cachePathControl);
+                editor.Redraw(RedrawTarget.OngekiObjects);
+            }));
+        }
+    }
+}

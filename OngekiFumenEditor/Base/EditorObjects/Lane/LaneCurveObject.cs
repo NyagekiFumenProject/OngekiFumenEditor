@@ -12,18 +12,55 @@ namespace OngekiFumenEditor.Base.EditorObjects.Lane
 {
     public class LaneCurveObject : ConnectableChildObjectBase
     {
-        private TGrid midControl = default;
-        public TGrid MidControl
+        private bool isSelecting;
+        public bool IsSelecting
         {
-            get => midControl ?? GetDefaultMidControlValue();
-            set => Set(ref midControl, value);
+            get => isSelecting;
+            set => Set(ref isSelecting, value);
         }
 
-        private TGrid GetDefaultMidControlValue()
+        private List<LaneCurvePathControlObject> pathControls = new();
+        public IReadOnlyList<LaneCurvePathControlObject> PathControls => pathControls;
+
+        public void AddControlObject(LaneCurvePathControlObject controlObj)
         {
-            if (PrevObject is null)
-                return TGrid;
-            return TGrid + new GridOffset(0, -(TGrid - PrevObject.TGrid).TotalGrid(TGrid.ResT) / 2);
+#if DEBUG
+            if (controlObj.RefCurveObject is not null)
+                throw new Exception("controlObj is using");
+#endif
+
+            pathControls.Add(controlObj);
+            controlObj.PropertyChanged += ControlObj_PropertyChanged;
+            controlObj.RefCurveObject = this;
+            NotifyOfPropertyChange(() => PathControls);
+        }
+
+        public void RemoveControlObject(LaneCurvePathControlObject controlObj)
+        {
+            if (pathControls.Remove(controlObj))
+            {
+                controlObj.RefCurveObject = null;
+                controlObj.PropertyChanged -= ControlObj_PropertyChanged;
+                NotifyOfPropertyChange(() => PathControls);
+            }
+        }
+
+        private void ControlObj_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(TGrid):
+                case nameof(XGrid):
+                    NotifyOfPropertyChange(e.PropertyName);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
+        {
+            return PathControls.AsEnumerable<IDisplayableObject>().Append(this);
         }
 
         public LaneType LaneType => (ReferenceStartObject as LaneStartBase)?.LaneType ?? LaneType.Center;

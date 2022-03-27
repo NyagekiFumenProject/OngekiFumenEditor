@@ -46,6 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             {
                 case nameof(TGrid):
                 case nameof(XGrid):
+                case nameof(LaneCurveObject.PathControls):
                     RebuildLines();
                     break;
                 default:
@@ -74,11 +75,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             Lines.Clear();
 
             var fromPoint = getPoint(Connector.From);
-            var midPoint = getPoint((LaneCurveObject)Connector.To);
-            midPoint = new Vector2(midPoint.X + 100, midPoint.Y);
+            var midPoint = ((LaneCurveObject)Connector.To).PathControls.Select(x => getPoint(x));
             var toPoint = getPoint(Connector.To);
+            using var d = midPoint.Prepend(fromPoint).Append(toPoint).ToListWithObjectPool(out var points);
 
-            var bezierCurve = new BezierCurve(fromPoint, midPoint, toPoint);
+            var bezierCurve = new BezierCurve(points);
             for (var t = 0f; t <= 1; t += 0.01f)
             {
                 var point = bezierCurve.CalculatePoint(t);
