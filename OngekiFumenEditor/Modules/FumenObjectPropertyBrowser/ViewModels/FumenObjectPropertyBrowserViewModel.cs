@@ -27,6 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         public ObservableCollection<PropertyInfoWrapper> PropertyInfoWrappers { get; } = new ObservableCollection<PropertyInfoWrapper>();
 
         public OngekiObjectBase OngekiObject => ongekiObject;
+        public FumenVisualEditorViewModel Editor => referenceEditor;
 
         private void OnObjectChanged()
         {
