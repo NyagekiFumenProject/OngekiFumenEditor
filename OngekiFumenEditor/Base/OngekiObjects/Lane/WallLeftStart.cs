@@ -16,6 +16,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
         public override Type ModelViewType => typeof(WallLeftStartViewModel);
 
         public override LaneType LaneType => LaneType.WallLeft;
+        public override Type NextType => typeof(WallLeftNext);
+        public override Type EndType => typeof(WallLeftEnd);
 
         protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new WallLeftConnector()
         {

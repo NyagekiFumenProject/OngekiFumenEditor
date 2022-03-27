@@ -4,11 +4,17 @@ using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
+using OpenTK.Mathematics;
+using SimpleSvg2LineSegementInterpolater;
+using SimpleSvg2LineSegementInterpolater.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using static OngekiFumenEditor.Utils.CurveInterpolaterTraveller;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
@@ -27,6 +33,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
         protected abstract ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to);
+
+        public abstract Type NextType { get; }
+        public abstract Type EndType { get; }
 
         protected ConnectorLineBase<ConnectableObjectBase> GenerateConnectorInternal<T>(ConnectableObjectBase from, ConnectableObjectBase to) where T : ConnectorLineBase<ConnectableObjectBase>, new()
         {
@@ -126,7 +135,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
-            foreach (var child in connectors.SelectMany(x=>x.GetDisplayableObjects().Append(x)))
+            foreach (var child in connectors.SelectMany(x => x.GetDisplayableObjects().Append(x)))
                 yield return child;
             yield return this;
             foreach (var child in Children.SelectMany(x => x.GetDisplayableObjects().Append(x)))
@@ -183,6 +192,87 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
 
             return default;
+        }
+
+        public IEnumerable<START> InterpolateCurve<START, NEXT, END>(float step)
+            where START : ConnectableStartObject, new()
+            where END : ConnectableEndObject, new()
+            where NEXT : ConnectableNextObject, new() => InterpolateCurve(step, () => new START(), () => new NEXT(), () => new END()).OfType<START>();
+
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(float step, Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc)
+        {
+            var traveller = new CurveInterpolaterTraveller(this, step);
+
+            float calcGradient(CurvePoint a, CurvePoint b)
+            {
+                if (a.TGrid == b.TGrid)
+                    return float.MaxValue;
+
+                return -(a.TGrid - b.TGrid).TotalGrid(a.TGrid.ResT);
+            }
+
+            IEnumerable<List<CurvePoint>> split()
+            {
+                var list = new List<CurvePoint>();
+                if (traveller.Travel() is not CurvePoint p)
+                    yield break;
+                var prevPoint = p;
+                traveller.PushBack(p);
+                var prevSign = 0;
+
+                while (true)
+                {
+                    if (traveller.Travel() is not CurvePoint point)
+                        break;
+                    var gradient = calcGradient(prevPoint, point);
+                    var sign = MathF.Sign(gradient);
+
+                    if (prevSign != sign && list.Count != 0)
+                    {
+                        yield return list;
+                        list = new List<CurvePoint>();
+                        list.Add(prevPoint);
+                    }
+
+                    prevPoint = point;
+                    prevSign = sign;
+
+                    list.Add(point);
+                }
+
+                if (list.Count != 0)
+                    yield return list;
+            }
+
+            void build(OngekiMovableObjectBase o, CurvePoint p)
+            {
+                o.TGrid = p.TGrid;
+                o.XGrid = p.XGrid;
+            }
+
+            foreach (var lineSegment in split().Where(x => x.Count() >= 2))
+            {
+                if (calcGradient(lineSegment[0], lineSegment[1]) < 0)
+                    lineSegment.Reverse();
+                var col = new LineSegementCollection();
+                col.Points.AddRange(lineSegment.Skip(1).SkipLast(1).Select(x => new PointF(x.XGrid.TotalGrid, x.TGrid.TotalGrid)));
+                LineSegmentSimplifier.SimplifyTooClosePoints(col, 100);
+                LineSegmentSimplifier.SimplifySameGradientPoints(col);
+
+                var start = genStartFunc();
+                build(start, lineSegment[0]);
+                foreach (var childPos in col.Points.Select(x => new CurvePoint(new(x.X / XGrid.ResX, 0), new(x.Y / TGrid.ResT, 0))))
+                {
+                    var next = genNextFunc();
+                    build(next, childPos);
+                    start.AddChildObject(next);
+                }
+                var end = genEndFunc();
+                build(end, lineSegment[lineSegment.Count - 1]);
+                start.AddChildObject(end);
+
+                yield return start;
+            }
         }
     }
 }

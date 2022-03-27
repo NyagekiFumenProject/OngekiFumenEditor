@@ -17,6 +17,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
         public override Type ModelViewType => typeof(LaneLeftStartViewModel);
 
         public override LaneType LaneType => LaneType.Left;
+        public override Type NextType => typeof(LaneLeftNext);
+        public override Type EndType => typeof(LaneLeftEnd);
 
         protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => GenerateConnectorInternal<LaneLeftConnector>(from, to);
     }

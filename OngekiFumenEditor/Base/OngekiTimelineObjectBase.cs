@@ -33,9 +33,9 @@ namespace OngekiFumenEditor.Base
             yield return this;
         }
 
-        public int CompareTo(object obj)
+        public int CompareTo(ITimelineObject obj)
         {
-            return TGrid.CompareTo((obj as ITimelineObject)?.TGrid);
+            return TGrid.CompareTo(obj?.TGrid);
         }
 
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)

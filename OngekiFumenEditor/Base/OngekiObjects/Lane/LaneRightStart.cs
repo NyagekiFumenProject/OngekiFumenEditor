@@ -23,6 +23,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
         public override string IDShortName => "LRS";
         public override Type ModelViewType => typeof(LaneRightStartViewModel);
 
+        public override Type NextType => typeof(LaneRightNext);
+        public override Type EndType => typeof(LaneRightEnd);
+
         public override LaneType LaneType => LaneType.Right;
 
         protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => GenerateConnectorInternal<LaneRightConnector>(from, to);

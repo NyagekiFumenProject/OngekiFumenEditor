@@ -17,6 +17,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
         public override Type ModelViewType => typeof(LaneCenterStartViewModel);
 
         public override LaneType LaneType => LaneType.Center;
+        public override Type NextType => typeof(LaneCenterNext);
+        public override Type EndType => typeof(LaneCenterEnd);
 
         protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => GenerateConnectorInternal<LaneCenterConnector>(from, to);
     }
