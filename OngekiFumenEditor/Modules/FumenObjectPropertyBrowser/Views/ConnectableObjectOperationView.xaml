@@ -5,7 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="[vm ]clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:ConnectableObjectOperationViewModel,
                                      IsDesignTimeCreatable=False}"
@@ -62,7 +62,7 @@
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove4($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             BorderBrush="Black"
             BorderThickness="1"
-            Visibility="{Binding IsEnableDragEnd, Converter={StaticResource BooleanToVisibilityConverter}}">
+            Visibility="{Binding IsEnableDragPathControl, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"

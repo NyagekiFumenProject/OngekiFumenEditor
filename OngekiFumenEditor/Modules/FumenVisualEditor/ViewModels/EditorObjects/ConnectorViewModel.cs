@@ -119,21 +119,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 return new(x, y);
             }
 
-            Lines.Clear();
-
-            var fromPoint = getPoint(Connector.From);
-            var midPoint = (Connector.To as ConnectableChildObjectBase).PathControls.Select(x => getPoint(x));
-            var toPoint = getPoint(Connector.To);
-            using var d = midPoint.Prepend(fromPoint).Append(toPoint).ToListWithObjectPool(out var points);
-
-            var bezierCurve = new BezierCurve(points);
-            for (var t = 0f; t <= 1; t += 0.01f)
+            void addPoint(Vector2 point)
             {
-                var point = bezierCurve.CalculatePoint(t);
                 var seg = new LineSegment(new(point.X + 0.0000001 * MathUtils.Random(100), point.Y), true);
                 seg.Freeze();
                 Lines.Add(seg);
             }
+
+            Lines.Clear();
+
+            var fromPoint = getPoint(Connector.From);
+            var midPoint = (Connector.To as ConnectableChildObjectBase)?.PathControls.Select(x => getPoint(x)) ?? Enumerable.Empty<Vector2>();
+            var toPoint = getPoint(Connector.To);
+            using var d = midPoint.Prepend(fromPoint).Append(toPoint).ToListWithObjectPool(out var points);
+
+            if (points.Count > 2)
+            {
+                for (var t = 0f; t <= 1; t += 0.01f)
+                {
+                    var point = BezierCurve.CalculatePoint(points, t);
+                    addPoint(point);
+                }
+            }
+            else
+            {
+                addPoint(points[0]);
+                addPoint(points[1]);
+            }
+
 
             NotifyOfPropertyChange(() => Lines);
         }

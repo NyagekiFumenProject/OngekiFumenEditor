@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public bool NeedCanvasPointsBinding => true;
 
         private bool isSelected;
-        public bool IsSelected
+        public virtual bool IsSelected
         {
             get
             {
@@ -40,7 +40,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 isSelected = value;
                 NotifyOfPropertyChange(() => IsSelected);
-
                 EditorViewModel?.OnSelectPropertyChanged(this, value);
             }
         }
@@ -140,7 +139,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //Log.LogInfo($"OnDragStart");
         }
 
-        public void OnMouseClick(Point pos)
+        public virtual void OnMouseClick(Point pos)
         {
             IsSelected = !IsSelected;
         }

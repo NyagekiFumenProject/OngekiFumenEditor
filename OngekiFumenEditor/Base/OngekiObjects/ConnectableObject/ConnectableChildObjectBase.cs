@@ -16,6 +16,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             set => Set(ref isSelecting, value);
         }
 
+        public bool IsAnyControlSelecting => PathControls.Any(x => x.IsSelecting);
+
         public ConnectableStartObject ReferenceStartObject { get; set; }
         public ConnectableObjectBase PrevObject { get; set; }
         public override int RecordId { get => ReferenceStartObject?.RecordId ?? int.MinValue; set { } }
@@ -39,6 +41,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         {
             switch (e.PropertyName)
             {
+                case nameof(IsSelecting):
+                    NotifyOfPropertyChange(() => IsAnyControlSelecting);
+                    break;
                 case nameof(TGrid):
                 case nameof(XGrid):
                     NotifyOfPropertyChange(e.PropertyName);

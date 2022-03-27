@@ -4,13 +4,18 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:gemini="http://schemas.timjones.io/gemini"
-    xmlns:local="clr-namespace:OngekiFumenEditor">
+    xmlns:local="clr-namespace:OngekiFumenEditor"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters">
     <Application.Resources>
         <ResourceDictionary>
             <converters:CalculateObjectToPointsConverter x:Key="CalculateObjectToPointsConverter">
             </converters:CalculateObjectToPointsConverter>
             <converters:EnumToIntConverter x:Key="EnumToIntConverter">
             </converters:EnumToIntConverter>
+            <valueconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter">
+            </valueconverters:BoolToVisibilityConverter>
+            <converters:CurvePathControlVisibilityConverter x:Key="CurvePathControlVisibilityConverter">
+            </converters:CurvePathControlVisibilityConverter>
             <converters:FadeStringEnumToStringConverter x:Key="FadeStringEnumToStringConverter">
             </converters:FadeStringEnumToStringConverter>
             <ResourceDictionary.MergedDictionaries>
