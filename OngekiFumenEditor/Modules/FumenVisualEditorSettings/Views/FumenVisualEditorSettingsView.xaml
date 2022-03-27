@@ -55,7 +55,12 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">水平辅助线间距</TextBlock>
+                <TextBlock
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}">
+                    水平辅助线间距
+                </TextBlock>
                 <ComboBox
                     Grid.Column="1"
                     ItemsSource="{Binding UnitCloseSizeValues}"
@@ -66,6 +71,7 @@
                     Grid.Row="1"
                     Margin="0,5,0,5"
                     VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
                     ToolTip="The vertical base length within standard bpm 240">
                     水平轴缩放伸缩基准 *
                 </TextBlock>
@@ -78,7 +84,8 @@
                 <TextBlock
                     Grid.Row="2"
                     Margin="0,0,0,5"
-                    VerticalAlignment="Center">
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}">
                     倍化细分时间轴辅助线
                 </TextBlock>
                 <TextBox
@@ -92,6 +99,7 @@
                     Grid.Row="4"
                     Margin="0,0,0,5"
                     VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
                     TextWrapping="Wrap">
                     水平轴最大显示范围
                 </TextBlock>
@@ -106,7 +114,8 @@
                 <TextBlock
                     Grid.Row="5"
                     Margin="0,0,10,0"
-                    VerticalAlignment="Center">
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}">
                     判定线偏移位置:<LineBreak>
                     </LineBreak><Run Text="{Binding Setting.JudgeLineOffsetY}">
                     </Run>
@@ -122,7 +131,8 @@
                 <TextBlock
                     Grid.Row="6"
                     Margin="0,0,10,0"
-                    VerticalAlignment="Center">
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}">
                     音效播放延迟:<LineBreak>
                     </LineBreak><Run Text="{Binding Setting.SoundOffset}">
                     </Run>

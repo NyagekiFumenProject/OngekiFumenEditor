@@ -19,7 +19,7 @@
         <TextBlock
             Margin="0,0,15,0"
             VerticalAlignment="Center"
-            Foreground="Black"
+            Foreground="{DynamicResource EnvironmentToolWindowText}"
             Text="{Binding PropertyInfo.DisplayPropertyName}">
         </TextBlock>
         <ComboBox

@@ -16,10 +16,7 @@
         <converters1:ObjectOperationGeneratorConverter x:Key="ObjectOperationGeneratorConverter">
         </converters1:ObjectOperationGeneratorConverter>
     </UserControl.Resources>
-    <ScrollViewer
-        Name="HostContent"
-        Background="White"
-        VerticalScrollBarVisibility="Auto">
+    <ScrollViewer Name="HostContent" VerticalScrollBarVisibility="Auto">
         <StackPanel>
             <ItemsControl ItemsSource="{Binding PropertyInfoWrappers}">
                 <ItemsControl.ItemTemplate>
