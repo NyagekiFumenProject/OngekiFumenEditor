@@ -12,22 +12,33 @@
 * 编辑器优化&重构
 * 谱面滚动播放及预览   
 * 牛逼外服的判定线
-* 谱面预览播放音效 ([有点小问题](https://github.com/MikiraSora/OngekiFumenEditor/issues/2))
+* 谱面预览播放音效 ([有点小问题](https://github.com/MikiraSora/OngekiFumenEditor/wiki/-1-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
 * 实现时间轴的简便操作
 * 编辑器细节优化  
 * ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(暂时)
 * 一边写个谱面做测试一边修bugs  
 * 正式公布 
 * 编写[github wiki](https://github.com/MikiraSora/OngekiFumenEditor/wiki)
-* 制作预览器(OpenGL) **<- we are here!**
-* 实现Soflan变速/LispBlock/LispDisp/EmenyLane...等命令
-* 实现各种工具等，比如智能画复杂线/曲线/文字，svg转线
+* 其他类型子弹
+* ~~制作预览器(OpenGL)~~(暂时跳过) 
+* 实现Soflan变速 ([有限支持](https://github.com/MikiraSora/OngekiFumenEditor/wiki/-1-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
+* svg转线 ([略有问题](https://github.com/MikiraSora/OngekiFumenEditor/wiki/-1-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
+* LispBlock实现
+* EmenyLane实现
+* 编辑器细节优化 pt.2
+* 智能画曲线&曲线插值 **<- we are here!**
+* 实现各种工具等，比如文字/图片转轨道,etc...
 ....
 
 https://pastebin.com/hyNyvdwt
 
 ## 编译&下载
 [wiki](https://github.com/MikiraSora/OngekiFumenEditor/wiki/0.%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96%E6%9C%AC%E9%A1%B9%E7%9B%AE%E5%BA%94%E7%94%A8)
+
+## 教程&问题&建议
+* [如何使用?](https://github.com/MikiraSora/OngekiFumenEditor/wiki)
+* [如何解决问题?](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-debugger?view=vs-2022)
+* [如何提交建议?](https://github.com/MikiraSora/OngekiFumenEditor/pulls)
 
 ## 声明
 ----
