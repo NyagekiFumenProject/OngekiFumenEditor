@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 
         public override bool RecalcPoint(XGrid directValue = default)
         {
-            var xGrid = directValue ?? BindObject.CalulateXGrid(PinTGrid);
+            var xGrid = directValue ?? BindObject?.CalulateXGrid(PinTGrid);
             if (BindObject is null || BindFumenEditor is null || xGrid is not XGrid)
                 return false;
 
@@ -110,7 +110,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             Lines.Clear();
             //Log.LogDebug($"----------");
 
-            void Upsert(ConnectableStartObject obj, TGrid pinTGrid, object key, XGrid directValue = default,bool isStroke = true)
+            void Upsert(ConnectableStartObject obj, TGrid pinTGrid, object key, XGrid directValue = default, bool isStroke = true)
             {
                 if (map.TryGetValue(key, out var seg))
                 {
@@ -144,22 +144,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             using var d = lbk.GetAffactableWallLanes(EditorViewModel.Fumen).ToListWithObjectPool(out var list);
             var beginTGrid = lbk.TGrid;
             var endTGrid = lbk.EndIndicator.TGrid;
-
-            Upsert(list.FirstOrDefault(), beginTGrid, lbk);
-            var cur = list.FirstOrDefault();
-            foreach ((var node, var tGrid, var key) in list
-                .SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>()
-                    .Prepend(x)
-                    .Where(x => beginTGrid <= x.TGrid && x.TGrid <= endTGrid)
-                    .Select(z => (x, z.TGrid, z))))
+            if (list.Count > 0)
             {
-                Upsert(node, tGrid, key, key.XGrid, cur == node);
-                cur = node;
+                Upsert(list.FirstOrDefault(), beginTGrid, lbk);
+                var cur = list.FirstOrDefault();
+                foreach ((var node, var tGrid, var key) in list
+                    .SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>()
+                        .Prepend(x)
+                        .Where(x => beginTGrid <= x.TGrid && x.TGrid <= endTGrid)
+                        .Select(z => (x, z.TGrid, z))))
+                {
+                    Upsert(node, tGrid, key, key.XGrid, cur == node);
+                    cur = node;
+                }
+
+                if (list.LastOrDefault() is LaneStartBase laneStart && laneStart.MaxTGrid >= endTGrid)
+                    Upsert(list.LastOrDefault(), endTGrid, lbkEnd);
             }
-
-            if (list.LastOrDefault() is LaneStartBase laneStart && laneStart.MaxTGrid >= endTGrid)
-                Upsert(list.LastOrDefault(), endTGrid, lbkEnd);
-
             LineBrush = lbk.Direction == BlockDirection.Left ? WallLeftConnector.DefaultBrush : WallRightConnector.DefaultBrush;
         }
 

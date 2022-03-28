@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using NAudio.Midi;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
@@ -183,9 +184,36 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             {
                 if (tGrid <= cur.TGrid)
                 {
-                    //就在当前[prev,cur]范围内，那么就插值计算咯
-                    var xGrid = MathUtils.CalculateXGridFromBetweenObjects(prev.TGrid, prev.XGrid, cur.TGrid, cur.XGrid, tGrid);
-                    return xGrid;
+                    if (cur.PathControls.Count > 0)
+                    {
+                        if (!cur.CheckCurveVaild())
+                            return default;
+                        using var d =
+                            cur.PathControls
+                            .AsEnumerable<OngekiMovableObjectBase>()
+                            .Prepend(prev)
+                            .Append(cur)
+                            .Select(x => new Vector2(x.XGrid.TotalGrid, x.TGrid.TotalGrid)).ToListWithObjectPool(out var points);
+
+                        var ct = tGrid.TotalGrid;
+                        var startY = points[0].Y;
+                        var endY = points[points.Count - 1].Y;
+                        var t = (ct - startY) / (endY - startY);
+
+                        var xTotalGrid = BezierCurve.CalculatePoint(points, t).X;
+                        var xGrid = new XGrid(xTotalGrid / XGrid.ResX);
+                        xGrid.NormalizeSelf();
+
+                        Log.LogDebug($"{xGrid} t:{t:F2}");
+
+                        return xGrid;
+                    }
+                    else
+                    {
+                        //就在当前[prev,cur]范围内，那么就插值计算咯
+                        var xGrid = MathUtils.CalculateXGridFromBetweenObjects(prev.TGrid, prev.XGrid, cur.TGrid, cur.XGrid, tGrid);
+                        return xGrid;
+                    }
                 }
 
                 prev = cur;
@@ -194,10 +222,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             return default;
         }
 
+        public IEnumerable<ConnectableStartObject> InterpolateCurve()
+            => InterpolateCurve(GetType(), NextType, EndType).OfType<ConnectableStartObject>();
+
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType)
+            => InterpolateCurve(
+                () => LambdaActivator.CreateInstance(startType) as ConnectableStartObject,
+                () => LambdaActivator.CreateInstance(nextType) as ConnectableNextObject,
+                () => LambdaActivator.CreateInstance(endType) as ConnectableEndObject
+                ).OfType<ConnectableStartObject>();
+
         public IEnumerable<START> InterpolateCurve<START, NEXT, END>()
             where START : ConnectableStartObject, new()
             where END : ConnectableEndObject, new()
-            where NEXT : ConnectableNextObject, new() => InterpolateCurve(() => new START(), () => new NEXT(), () => new END()).OfType<START>();
+            where NEXT : ConnectableNextObject, new()
+            => InterpolateCurve(() => new START(), () => new NEXT(), () => new END()).OfType<START>();
 
         public IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc)
         {

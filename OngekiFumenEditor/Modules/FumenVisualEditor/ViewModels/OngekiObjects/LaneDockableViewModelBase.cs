@@ -69,20 +69,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
             if (tGrid < startObject.TGrid)
                 return default;
 
-            var prev = startObject as ConnectableObjectBase;
-            foreach (var cur in startObject.Children)
-            {
-                if (tGrid < cur.TGrid)
-                {
-                    //就在当前[prev,cur]范围内，那么就插值计算咯
-                    var timeX = MathUtils.CalculateXFromBetweenObjects(prev, cur, EditorViewModel, tGrid);
-                    return timeX;
-                }
+            var xGrid = startObject.CalulateXGrid(tGrid);
+            if (xGrid == null)
+                return default;
 
-                prev = cur;
-            }
-
-            return default;
+            return XGridCalculator.ConvertXGridToX(xGrid, EditorViewModel);
         }
     }
 }

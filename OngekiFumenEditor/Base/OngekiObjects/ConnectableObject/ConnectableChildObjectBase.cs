@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,6 +70,50 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 controlObj.PropertyChanged -= ControlObj_PropertyChanged;
                 NotifyOfPropertyChange(() => PathControls);
             }
+        }
+
+        public IList<Vector2> GridBasePoints => PathControls
+            .AsEnumerable<OngekiMovableObjectBase>()
+            .Prepend(PrevObject)
+            .Append(this)
+            .Select(x => new Vector2(x.XGrid.TotalGrid, x.TGrid.TotalGrid))
+            .ToList();
+
+        public bool CheckCurveVaild()
+        {
+            int calcSign(Vector2 a, Vector2 b)
+            {
+                if (a.Y == b.Y)
+                    return 1;
+
+                return Math.Sign(b.Y - a.Y);
+            }
+            var points = GridBasePoints;
+            if (points.Count <= 2)
+                return true;
+
+            var prevPos = points[0];
+            var prevSign = 0;
+            var step = CurvePrecision;
+
+            var t = 0f;
+            while (true)
+            {
+                var curP = BezierCurve.CalculatePoint(points, t);
+                var sign = calcSign(prevPos, curP);
+
+                if (prevSign != sign && prevSign != 0)
+                    return false;
+                prevPos = curP;
+                prevSign = sign;
+
+                if (t >= 1)
+                    break;
+
+                t = MathF.Min(1, t + step);
+            }
+
+            return true;
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()

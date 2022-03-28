@@ -98,7 +98,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
         public override IDisplayableObject DisplayableObject => Connector;
 
         public virtual Brush LineBrush { get; } = Brushes.White;
-        public virtual DoubleCollection LineDashArray { get; } = new DoubleCollection() { 10, 0 };
+
+        public static DoubleCollection StaticDefaultLineDashArray { get; } = new() { 10, 0 };
+        public static DoubleCollection StaticInvaildCurveLineDashArray { get; } = new() { 10, 5 };
+
+        public virtual DoubleCollection DefaultLineDashArray => StaticDefaultLineDashArray;
+        public virtual DoubleCollection InvaildCurveLineDashArray => StaticInvaildCurveLineDashArray;
+
+        private DoubleCollection lineDashArray;
+        public DoubleCollection LineDashArray
+        {
+            get => lineDashArray;
+            set => Set(ref lineDashArray, value);
+        }
+
         public virtual int LineThickness { get; } = 1;
         public PathSegmentCollection Lines { get; set; } = new PathSegmentCollection();
 
@@ -120,6 +133,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 return new(x, y);
             }
 
+            int calcSign(Vector2 a, Vector2 b)
+            {
+                return Math.Sign(a.Y - b.Y);
+            }
+
             void addPoint(Vector2 point)
             {
                 var seg = new LineSegment(new(point.X + 0.0000001 * MathUtils.Random(100), point.Y), true);
@@ -135,6 +153,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             var step = (Connector.To as ConnectableChildObjectBase)?.CurvePrecision ?? 2857;
             using var d = midPoint.Prepend(fromPoint).Append(toPoint).ToListWithObjectPool(out var points);
 
+            var prevP = points[0];
+            var prevSign = 0;
+            var isVaild = true;
+
             if (points.Count > 2)
             {
                 var t = 0f;
@@ -142,20 +164,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 while (true)
                 {
                     var p = BezierCurve.CalculatePoint(points, t);
+                    var sign = calcSign(prevP, p);
+
+                    if (isVaild && prevSign != sign && prevSign * sign != 0)
+                        isVaild = false;
                     addPoint(p);
 
                     if (t >= 1)
                         break;
 
                     t = MathF.Min(1, t + step);
+                    prevP = p;
+                    prevSign = sign;
                 }
+                LineDashArray = isVaild ? DefaultLineDashArray : InvaildCurveLineDashArray;
             }
             else
             {
                 addPoint(points[0]);
                 addPoint(points[1]);
+                LineDashArray = DefaultLineDashArray;
             }
-
 
             NotifyOfPropertyChange(() => Lines);
         }

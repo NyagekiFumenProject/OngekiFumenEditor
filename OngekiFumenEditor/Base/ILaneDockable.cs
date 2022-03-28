@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public interface ILaneDockable
+    public interface ILaneDockable : IHorizonPositionObject, ITimelineObject
     {
         LaneStartBase ReferenceLaneStart { get; set; }
     }

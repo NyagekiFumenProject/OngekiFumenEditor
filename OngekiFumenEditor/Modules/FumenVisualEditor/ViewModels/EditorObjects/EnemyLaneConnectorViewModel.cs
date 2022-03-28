@@ -16,6 +16,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
     public class EnemyLaneConnectorViewModel : ConnectorViewModel<ConnectableObjectBase>
     {
         public override Brush LineBrush => Brushes.Yellow;
-        public override DoubleCollection LineDashArray { get; } = new DoubleCollection() { 10, 5 };
+
+        public static DoubleCollection StaticEnemyLaneLineDashArray { get; } = new() { 10, 5 };
+        public override DoubleCollection DefaultLineDashArray { get; } = StaticEnemyLaneLineDashArray;
     }
 }

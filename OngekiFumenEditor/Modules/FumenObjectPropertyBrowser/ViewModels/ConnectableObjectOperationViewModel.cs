@@ -90,10 +90,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public void Interpolate(ActionExecutionContext e)
         {
-            var genStarts = RefStartObject.InterpolateCurve(
-                () => LambdaActivator.CreateInstance(RefStartObject.GetType()) as ConnectableStartObject,
-                () => LambdaActivator.CreateInstance(RefStartObject.NextType) as ConnectableNextObject,
-                () => LambdaActivator.CreateInstance(RefStartObject.EndType) as ConnectableEndObject).ToArray();
+            var genStarts = RefStartObject.InterpolateCurve().ToArray();
 
             var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值曲线", () =>
