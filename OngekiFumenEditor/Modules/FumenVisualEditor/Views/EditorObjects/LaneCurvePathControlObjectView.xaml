@@ -19,13 +19,17 @@
     </UserControl.Visibility>
     <Grid>
         <Grid.RenderTransform>
-            <TranslateTransform X="-7" Y="+7">
+            <TranslateTransform X="-7" Y="+7.5">
             </TranslateTransform>
         </Grid.RenderTransform>
         <Ellipse
             Width="14"
             Height="14"
-            Fill="Bisque">
-        </Ellipse>
+            Fill="Bisque" />
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Foreground="Green"
+            Text="{Binding ReferenceOngekiObject.Index}" />
     </Grid>
 </ongekiobjects:OngekiObjectViewBase>

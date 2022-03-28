@@ -39,6 +39,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 #endif
 
             pathControls.Add(controlObj);
+            controlObj.Index = PathControls.Count;
             controlObj.PropertyChanged += ControlObj_PropertyChanged;
             controlObj.RefCurveObject = this;
             NotifyOfPropertyChange(() => PathControls);

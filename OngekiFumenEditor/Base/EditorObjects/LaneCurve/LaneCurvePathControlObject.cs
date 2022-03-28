@@ -17,6 +17,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.LaneCurve
             set => Set(ref isSelecting, value);
         }
 
+        public int Index { get; set; } = -1;
+
         private ConnectableChildObjectBase refCurveObject;
         public ConnectableChildObjectBase RefCurveObject
         {
