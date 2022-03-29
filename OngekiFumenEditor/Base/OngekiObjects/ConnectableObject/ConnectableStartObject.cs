@@ -184,7 +184,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             {
                 if (tGrid <= cur.TGrid)
                 {
-                    cur.CalulateXGrid(tGrid);
+                    var xGrid = cur.CalulateXGrid(tGrid);
+                    return xGrid;
                 }
 
                 prev = cur;
