@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-    public class BeamList : ConnectableObjectList<BeamStart, BeamChildObjectBase>
+    public class BeamList : ConnectableObjectList<BeamStart, ConnectableChildObjectBase>
     {
         public void Add(IBeamObject beam)
         {

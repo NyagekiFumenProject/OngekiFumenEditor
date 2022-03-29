@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         public ConnectableStartObject RefStartObject => ConnectableObject switch
         {
             ConnectableStartObject start => start,
-            ConnectableNextObject next => next.ReferenceStartObject,
+            ConnectableChildObjectBase next => next.ReferenceStartObject,
             _ => default,
         };
 

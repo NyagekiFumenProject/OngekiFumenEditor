@@ -345,7 +345,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 var childCount = reader.ReadInt32();
                 var beamStart = DeSerializeInput() as BeamStart;
                 for (int y = 0; y < childCount; y++)
-                    beamStart.AddChildObject(DeSerializeInput() as BeamChildObjectBase);
+                    beamStart.AddChildObject(DeSerializeInput() as ConnectableChildObjectBase);
 
                 fumen.AddObject(beamStart);
             }

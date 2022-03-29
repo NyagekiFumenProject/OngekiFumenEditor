@@ -7,10 +7,17 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
-    public class BeamNext : BeamChildObjectBase
+    public class BeamNext : ConnectableNextObject,IBeamObject
     {
         public override Type ModelViewType => typeof(BeamNextViewModel);
 
         public override string IDShortName => "BMN";
+
+        private int widthId = 2;
+        public int WidthId
+        {
+            get => widthId;
+            set => Set(ref widthId, value);
+        }
     }
 }
