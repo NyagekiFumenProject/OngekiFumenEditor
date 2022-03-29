@@ -15,37 +15,16 @@ using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.EditorObjects;
 using System.Windows;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Utils.ObjectPool;
+using OpenTK.Mathematics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 {
-    public class BindableDynmaticXGridTGridSegement : BindableTGridSegement
-    {
-        public float OffsetX { get; set; }
-        public TGrid PinTGrid { get; set; }
-        public ConnectableStartObject BindObject { get; set; }
-        public FumenVisualEditorViewModel BindFumenEditor { get; set; }
-
-        public override bool RecalcPoint(XGrid directValue = default)
-        {
-            var xGrid = directValue ?? BindObject?.CalulateXGrid(PinTGrid);
-            if (BindObject is null || BindFumenEditor is null || xGrid is not XGrid)
-                return false;
-
-            var x = XGridCalculator.ConvertXGridToX(xGrid, BindFumenEditor)
-                + 0.0000001 * MathUtils.Random(100);
-            var y = BindFumenEditor.TotalDurationHeight - TGridCalculator.ConvertTGridToY(PinTGrid, BindFumenEditor);
-
-            Segment.Point = new Point(x, y);
-            return true;
-        }
-    }
-
     [MapToView(ViewType = typeof(LaneBlockLaneDecorationView))]
     public class LaneBlockLaneDecorationViewModel : ConnectorViewModel
     {
-        private Dictionary<object, BindableDynmaticXGridTGridSegement> map = new();
         public PathSegmentCollection Lines { get; } = new();
-
+        public HashSet<INotifyPropertyChanged> listeners = new();
         private LaneBlockLaneDecoration decoration = default;
         public LaneBlockLaneDecoration Decoration
         {
@@ -108,65 +87,77 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 lbk.EndIndicator is not LaneBlockAreaEndIndicator lbkEnd)
                 return;
             Lines.Clear();
-            //Log.LogDebug($"----------");
 
-            void Upsert(ConnectableStartObject obj, TGrid pinTGrid, object key, XGrid directValue = default, bool isStroke = true)
+            foreach (var p in listeners)
+                p.PropertyChanged -= O_PropertyChanged;
+            listeners.Clear();
+
+            void RegisterNotifyListener(INotifyPropertyChanged o)
             {
-                if (map.TryGetValue(key, out var seg))
-                {
-                    seg.BindObject = obj;
-                    seg.PinTGrid = pinTGrid;
-                    if (seg.RecalcPoint(directValue))
-                    {
-                        //Log.LogDebug($"{pinTGrid} {key}");
-                        seg.Segment.IsStroked = isStroke;
-                        Lines.Add(seg.Segment);
-                    }
-                    return;
-                }
-                var bind = new BindableDynmaticXGridTGridSegement()
-                {
-                    BindFumenEditor = EditorViewModel,
-                    BindObject = obj,
-                    PinTGrid = pinTGrid,
-                    OffsetX = lbk.Direction == BlockDirection.Left ? -20 : 20
-                };
-                map[key] = bind;
-                if (bind.RecalcPoint(directValue))
-                {
-                    //Log.LogDebug($"{pinTGrid} {key}");
-                    bind.Segment.IsStroked = isStroke;
-                    Lines.Add(bind.Segment);
-                }
-                //Log.LogDebug("new");
+                o.PropertyChanged += O_PropertyChanged;
+                listeners.Add(o);
             }
 
-            void PostTGrid(ConnectableChildObjectBase obj, TGrid grid, bool isStroke = true)
+            void PostPointByXTGrid(XGrid xGrid, TGrid tGrid, bool isStroke = true)
             {
+                if (xGrid is null)
+                    return;
+                var x = XGridCalculator.ConvertXGridToX(xGrid, EditorViewModel) + 0.0000001 * MathUtils.Random(100);
+                var y = EditorViewModel.TotalDurationHeight - TGridCalculator.ConvertTGridToY(tGrid, EditorViewModel);
+                var segement = new LineSegment(new Point(x, y), isStroke);
+                segement.Freeze();
+                Lines.Add(segement);
+            }
 
+            void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid grid, bool isStroke = true)
+            {
+                var xGrid = obj.CalulateXGrid(grid);
+                PostPointByXTGrid(xGrid, grid, isStroke);
             }
 
             void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid)
             {
+                var minTotalGrid = minTGrid.TotalGrid;
+                var maxTotalGrid = maxTGrid.TotalGrid;
+
+                RegisterNotifyListener(obj);
+
                 if (!obj.IsCurvePath)
                 {
                     //直线，优化
-                    PostTGrid(obj, minTGrid);
-                    PostTGrid(obj, maxTGrid);
+                    PostPointByTGrid(obj, minTGrid);
+                    PostPointByTGrid(obj, maxTGrid);
                 }
                 else
                 {
+                    //PostPointByXTGrid(obj.CalulateXGrid(minTGrid), minTGrid);
+                    using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var list, out _);
+                    list.Clear();
 
+                    foreach ((var gridVec2, var isVaild) in obj.GenPath().Where(x => x.pos.Y <= maxTotalGrid && x.pos.Y >= minTotalGrid))
+                    {
+                        if (!isVaild)
+                        {
+                            PostPointByXTGrid(obj.PrevObject.XGrid, minTGrid, false);
+                            PostPointByXTGrid(obj.XGrid, maxTGrid, false);
+                            return;
+                        }
+                        list.Add(gridVec2);
+                    }
+                    foreach (var gridVec2 in list)
+                        PostPointByXTGrid(new(gridVec2.X / obj.XGrid.ResX), new(gridVec2.Y / obj.TGrid.ResT));
                 }
             }
 
             void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
             {
+                RegisterNotifyListener(wallStartLane);
+
                 foreach (var child in wallStartLane.Children)
                 {
                     if (child.TGrid < minTGrid)
                         continue;
-                    if (child.PrevObject.TGrid < maxTGrid)
+                    if (child.PrevObject.TGrid > maxTGrid)
                         break;
 
                     var childMinTGrid = MathUtils.Max(minTGrid, child.PrevObject.TGrid);
@@ -179,24 +170,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             using var d = lbk.GetAffactableWallLanes(EditorViewModel.Fumen).ToListWithObjectPool(out var list);
             var beginTGrid = lbk.TGrid;
             var endTGrid = lbk.EndIndicator.TGrid;
-            if (list.Count > 0)
+            var isNext = false;
+            foreach (var start in list)
             {
-                Upsert(list.FirstOrDefault(), beginTGrid, lbk);
-                var cur = list.FirstOrDefault();
-                foreach ((var node, var tGrid, var key) in list
-                    .SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>()
-                        .Prepend(x)
-                        .Where(x => beginTGrid <= x.TGrid && x.TGrid <= endTGrid)
-                        .Select(z => (x, z.TGrid, z))))
-                {
-                    Upsert(node, tGrid, key, key.XGrid, cur == node);
-                    cur = node;
-                }
-
-                if (list.LastOrDefault() is LaneStartBase laneStart && laneStart.MaxTGrid >= endTGrid)
-                    Upsert(list.LastOrDefault(), endTGrid, lbkEnd);
+                if (isNext)
+                    PostPointByXTGrid(start.XGrid, start.TGrid, false);
+                ProcessWallLane(start, beginTGrid, endTGrid);
+                isNext = true;
             }
+
+            NotifyOfPropertyChange(() => Lines);
             LineBrush = lbk.Direction == BlockDirection.Left ? WallLeftConnector.DefaultBrush : WallRightConnector.DefaultBrush;
+        }
+
+        private void O_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(TGrid):
+                case nameof(XGrid):
+                    RebuildLines();
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void OnEditorRedrawObjects()

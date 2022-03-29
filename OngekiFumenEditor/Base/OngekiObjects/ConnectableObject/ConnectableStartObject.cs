@@ -184,31 +184,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             {
                 if (tGrid <= cur.TGrid)
                 {
-                    if (cur.PathControls.Count > 0)
-                    {
-                        if (!cur.CheckCurveVaild())
-                            return default;
-                        using var d = cur.GridBasePoints.ToListWithObjectPool(out var points);
-
-                        var ct = tGrid.TotalGrid;
-                        var startY = points[0].Y;
-                        var endY = points[points.Count - 1].Y;
-                        var t = (ct - startY) / (endY - startY);
-
-                        var xTotalGrid = BezierCurve.CalculatePoint(points, t).X;
-                        var xGrid = new XGrid(xTotalGrid / XGrid.ResX);
-                        xGrid.NormalizeSelf();
-
-                        Log.LogDebug($"{xGrid} t:{t:F2}");
-
-                        return xGrid;
-                    }
-                    else
-                    {
-                        //就在当前[prev,cur]范围内，那么就插值计算咯
-                        var xGrid = MathUtils.CalculateXGridFromBetweenObjects(prev.TGrid, prev.XGrid, cur.TGrid, cur.XGrid, tGrid);
-                        return xGrid;
-                    }
+                    cur.CalulateXGrid(tGrid);
                 }
 
                 prev = cur;

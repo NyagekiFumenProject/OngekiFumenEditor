@@ -124,6 +124,35 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
+        public XGrid CalulateXGrid(TGrid tGrid)
+        {
+            if (PathControls.Count > 0)
+            {
+                if (!CheckCurveVaild())
+                    return default;
+                using var d = GridBasePoints.ToListWithObjectPool(out var points);
+
+                var ct = tGrid.TotalGrid;
+                var startY = points[0].Y;
+                var endY = points[points.Count - 1].Y;
+                var t = (ct - startY) / (endY - startY);
+
+                var xTotalGrid = BezierCurve.CalculatePoint(points, t).X;
+                var xGrid = new XGrid(xTotalGrid / XGrid.ResX);
+                xGrid.NormalizeSelf();
+
+                Log.LogDebug($"{xGrid} t:{t:F2}");
+
+                return xGrid;
+            }
+            else
+            {
+                //就在当前[prev,cur]范围内，那么就插值计算咯
+                var xGrid = MathUtils.CalculateXGridFromBetweenObjects(PrevObject.TGrid, PrevObject.XGrid, TGrid, XGrid, tGrid);
+                return xGrid;
+            }
+        }
+
         public bool CheckCurveVaild()
         {
             return GenPath().All(x => x.isVaild);
