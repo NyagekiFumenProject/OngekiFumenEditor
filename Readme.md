@@ -17,7 +17,7 @@
 * 编辑器细节优化  
 * ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(暂时)
 * 一边写个谱面做测试一边修bugs  
-* 正式公布 
+* ~~正式公布~~
 * 编写[github wiki](https://github.com/MikiraSora/OngekiFumenEditor/wiki)
 * 其他类型子弹
 * ~~制作预览器(OpenGL)~~(暂时跳过) 
