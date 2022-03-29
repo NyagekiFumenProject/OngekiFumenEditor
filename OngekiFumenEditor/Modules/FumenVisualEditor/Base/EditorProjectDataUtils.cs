@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
@@ -74,19 +76,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
         public static async Task TrySaveToFileAsync(string filePath, EditorProjectDataModel editorProject)
         {
-            using var fileStream = File.Open(filePath, FileMode.Create);
-            StoreBulletPalleteListEditorData(editorProject);
+            try
+            {
+                using var fileStream = File.Open(filePath, FileMode.Create);
+                StoreBulletPalleteListEditorData(editorProject);
 
-            var fumenFilePath = editorProject.FumenFilePath ?? GetRelativeOngekiFumenFilePath(filePath);
-            if (editorProject.FumenFilePath is null)
-                editorProject.FumenFilePath = fumenFilePath;
+                var fumenFilePath = editorProject.FumenFilePath ?? GetRelativeOngekiFumenFilePath(filePath);
+                if (editorProject.FumenFilePath is null)
+                    editorProject.FumenFilePath = fumenFilePath;
 
-            var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFilePath);
-            if (serializer is null)
-                throw new NotSupportedException($"不支持保存此文件格式:{fumenFilePath}");
+                var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFilePath);
+                if (serializer is null)
+                    throw new NotSupportedException($"不支持保存此文件格式:{fumenFilePath}");
 
-            await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
-            await File.WriteAllBytesAsync(fumenFilePath, await serializer.SerializeAsync(editorProject.Fumen));
+                await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
+                await File.WriteAllBytesAsync(fumenFilePath, await serializer.SerializeAsync(editorProject.Fumen));
+            }
+            catch (Exception e)
+            {
+                var msg = $"无法保存:{e.Message}{Environment.NewLine}{e.StackTrace}";
+                Log.LogError(msg);
+                MessageBox.Show(msg);
+            }
         }
     }
 }
