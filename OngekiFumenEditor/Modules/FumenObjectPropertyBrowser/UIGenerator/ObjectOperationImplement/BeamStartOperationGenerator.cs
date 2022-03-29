@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;
@@ -22,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.Objec
 
         public UIElement Generate(OngekiObjectBase obj)
         {
-            return ViewHelper.CreateViewByViewModelType(() => new BeamOperationViewModel(obj as BeamBase));
+            return ViewHelper.CreateViewByViewModelType(() => new BeamOperationViewModel(obj as ConnectableObjectBase));
         }
     }
 }

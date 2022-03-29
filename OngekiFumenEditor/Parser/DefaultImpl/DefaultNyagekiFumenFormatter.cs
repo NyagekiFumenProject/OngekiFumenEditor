@@ -234,14 +234,14 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         public void ProcessBEAM(OngekiFumen fumen, LoggableBinaryWriter sb)
         {
             Log.LogDebug($"-----Begin ProcessBEAM()----");
-            void SerializeOutput(BeamBase o)
+            void SerializeOutput(ConnectableObjectBase o)
             {
                 sb.Write(o.IDShortName);
                 sb.Write(o.RecordId);
                 sb.Write(o.TGrid.Unit);
                 sb.Write(o.TGrid.Grid);
                 sb.Write(o.XGrid.Unit);
-                sb.Write(o.WidthId);
+                sb.Write(((IBeamObject)o).WidthId);
             }
 
             sb.Write(fumen.Beams.Count());

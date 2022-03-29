@@ -141,10 +141,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 
             var isVaild = true;
 
-            foreach ((var gridVec2, var iv) in (Connector.To as ConnectableChildObjectBase)?.GenPath())
+            if (Connector.To is ConnectableChildObjectBase childObject)
             {
-                isVaild = isVaild && iv;
-                addPoint(gridVec2);
+                foreach ((var gridVec2, var iv) in childObject.GenPath())
+                {
+                    isVaild = isVaild && iv;
+                    addPoint(gridVec2);
+                }
+            }
+            else
+            {
+                addPoint(new(Connector.From.XGrid.TotalGrid, Connector.From.TGrid.TotalGrid));
+                addPoint(new(Connector.To.XGrid.TotalGrid, Connector.To.TGrid.TotalGrid));
             }
 
             LineDashArray = isVaild ? DefaultLineDashArray : InvaildCurveLineDashArray;

@@ -130,7 +130,7 @@ namespace OngekiFumenEditor.Base
             {
                 Flicks.Add(flick);
             }
-            else if (obj is BeamBase beam)
+            else if (obj is IBeamObject beam)
             {
                 Beams.Add(beam);
             }
@@ -209,7 +209,7 @@ namespace OngekiFumenEditor.Base
             {
                 Flicks.Remove(flick);
             }
-            else if (obj is BeamBase beam)
+            else if (obj is IBeamObject beam)
             {
                 Beams.Remove(beam);
             }

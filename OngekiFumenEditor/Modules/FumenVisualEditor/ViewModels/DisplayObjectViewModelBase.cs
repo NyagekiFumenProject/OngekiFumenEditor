@@ -301,7 +301,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var obj = ReferenceOngekiObject;
             if (obj is not IDisplayableObject displayable
                 //暂不支持 以下类型的复制粘贴
-                || obj is BeamBase
                 || obj is ConnectableObjectBase
                 )
                 return default;

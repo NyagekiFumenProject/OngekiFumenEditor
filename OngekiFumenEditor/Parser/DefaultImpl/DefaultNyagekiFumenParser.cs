@@ -320,9 +320,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         public void ProcessBEAM(OngekiFumen fumen, LoggableBinaryReader reader)
         {
             Log.LogDebug($"-----Begin ProcessBEAM()----");
-            BeamBase DeSerializeInput()
+            ConnectableObjectBase DeSerializeInput()
             {
-                BeamBase beamObject = reader.ReadString() switch
+                ConnectableObjectBase beamObject = reader.ReadString() switch
                 {
                     "BMS" => new BeamStart(),
                     "BMN" => new BeamNext(),
@@ -334,7 +334,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 beamObject.TGrid.Unit = reader.ReadSingle();
                 beamObject.TGrid.Grid = reader.ReadInt32();
                 beamObject.XGrid.Unit = reader.ReadSingle();
-                beamObject.WidthId = reader.ReadInt32();
+                ((IBeamObject)beamObject).WidthId = reader.ReadInt32();
 
                 return beamObject;
             }
@@ -345,7 +345,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 var childCount = reader.ReadInt32();
                 var beamStart = DeSerializeInput() as BeamStart;
                 for (int y = 0; y < childCount; y++)
-                    beamStart.AddChildBeamObject(DeSerializeInput() as BeamChildBase);
+                    beamStart.AddChildObject(DeSerializeInput() as BeamChildObjectBase);
 
                 fumen.AddObject(beamStart);
             }

@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public abstract class BeamChildBaseViewModel<T> : DisplayObjectViewModelBase<T> where T : BeamChildBase, new()
+    public abstract class BeamChildBaseViewModel<T> : DisplayObjectViewModelBase<T> where T : BeamChildObjectBase, new()
     {
         public override double? CheckAndAdjustY(double y)
         {
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                 return null;
             y = result ?? 0;
 
-            if (ReferenceOngekiObject is BeamChildBase childBase && childBase.PrevBeam is BeamBase prevBeam)
+            if (ReferenceOngekiObject is BeamChildObjectBase childBase && childBase.PrevObject is ConnectableObjectBase prevBeam)
             {
                 var prevY = TGridCalculator.ConvertTGridToY(prevBeam.TGrid, EditorViewModel);
                 if (prevY > y)

@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -9,66 +10,22 @@ using System.Text;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
-    public class BeamStart : BeamBase
+    public class BeamStart : ConnectableStartObject, IBeamObject
     {
-        private List<BeamChildBase> children = new();
-        private List<ConnectorLineBase<BeamBase>> connectors = new();
-        public IEnumerable<BeamChildBase> Children => children;
-
-        private int recordId = -1;
-        public override int RecordId { get => recordId; set => Set(ref recordId, value); }
-
         public override Type ModelViewType => typeof(BeamStartViewModel);
-
         public override string IDShortName => "BMS";
-
-        public void AddChildBeamObject(BeamChildBase child)
+        private int widthId = 2;
+        public int WidthId
         {
-            if (!children.Contains(child))
-            {
-                child.PrevBeam = children.LastOrDefault() ?? this as BeamBase;
-                children.Add(child);
-                NotifyOfPropertyChange(() => Children);
-                connectors.Add(new BeamConnector()
-                {
-                    From = child.PrevBeam,
-                    To = child
-                });
-            }
-            child.ReferenceBeam = this;
+            get => widthId;
+            set => Set(ref widthId, value);
         }
+        public override Type NextType => typeof(BeamNext);
+        public override Type EndType => typeof(BeamEnd);
 
-        public void RemoveChildBeamObject(BeamChildBase child)
+        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to)
         {
-            children.Remove(child);
-
-            connectors.RemoveAll(x => x.From == child || x.To == child);
-
-            var prev = child.PrevBeam;
-            var next = children.FirstOrDefault(x => x.PrevBeam == child);
-            if (next is not null)
-            {
-                next.PrevBeam = prev;
-                connectors.Add(new BeamConnector()
-                {
-                    From = next.PrevBeam,
-                    To = next
-                });
-            }
-            child.PrevBeam = default;
-
-            child.ReferenceBeam = default;
-
-            NotifyOfPropertyChange(() => Children);
-        }
-
-        public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
-        {
-            yield return this;
-            foreach (var child in connectors)
-                yield return child;
-            foreach (var child in Children)
-                yield return child;
+            return GenerateConnectorInternal<BeamConnector>(from, to);
         }
     }
 }
