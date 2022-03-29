@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using DereTore.Common;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
@@ -66,6 +67,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
             ProcessNOTES(fumen, writer);
 
+            ProcessCURVE(fumen, writer);
+
             Log.LogDebug($"-----EndSerialize----");
 
             writer.Flush();
@@ -74,6 +77,34 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             await memory.FlushAsync();
 
             return memory.ToArray();
+        }
+
+        private void ProcessCURVE(OngekiFumen fumen, LoggableBinaryWriter writer)
+        {
+            Log.LogDebug($"-----Begin ProcessCURVE()----");
+
+            var childObjects = fumen.Lanes
+                .AsEnumerable<ConnectableStartObject>()
+                .Concat(fumen.Beams)
+                .SelectMany(x => x.Children)
+                .Where(x => x.IsCurvePath).ToList();
+
+            writer.Write(childObjects.Count());
+            foreach (var child in childObjects)
+            {
+                writer.Write(child.ReferenceStartObject.RecordId);
+                writer.Write(child.ReferenceStartObject.IDShortName);
+                writer.Write(child.ReferenceStartObject.Children.FirstIndexOf(x => x == child));
+                writer.Write(child.CurvePrecision);
+                writer.Write(child.PathControls.Count);
+                foreach (var control in child.PathControls)
+                {
+                    writer.Write(control.TGrid.Unit);
+                    writer.Write(control.TGrid.Grid);
+                    writer.Write(control.XGrid.Unit);
+                    writer.Write(control.XGrid.Grid);
+                }
+            }
         }
 
         private void ProcessLANE_BLOCK(OngekiFumen fumen, LoggableBinaryWriter writer)
@@ -247,7 +278,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             sb.Write(fumen.Beams.Count());
             foreach (var beamStart in fumen.Beams.OrderBy(x => x.RecordId))
             {
-                sb.Write(beamStart.Children.Count() + 1);
+                sb.Write(beamStart.Children.Count());
                 SerializeOutput(beamStart);
                 foreach (var child in beamStart.Children)
                     SerializeOutput(child);

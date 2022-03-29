@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
@@ -57,11 +58,50 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             ProcessFLICK(fumen, reader);
 
             ProcessNOTES(fumen, reader);
+
+            ProcessCURVE(fumen, reader);
+
             Log.LogDebug($"-----EndDeserialize----");
 
             fumen.Setup();
 
             return Task.FromResult(fumen);
+        }
+
+        private void ProcessCURVE(OngekiFumen fumen, LoggableBinaryReader reader)
+        {
+            Log.LogDebug($"-----Begin ProcessCURVE()----");
+
+            var count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                var laneId = reader.ReadInt32();
+                var idName = reader.ReadString();
+                var idx = reader.ReadInt32();
+                var start = fumen.Lanes
+                .AsEnumerable<ConnectableStartObject>()
+                .Concat(fumen.Beams).FirstOrDefault(x => x.IDShortName == idName && x.RecordId == laneId);
+
+                if (start is null)
+                    throw new Exception($"Cant parse curve , ref obj id:{laneId} idName:{idName} not found.");
+                var child = start.Children.ElementAtOrDefault(idx);
+                if (child is null)
+                    throw new Exception($"Cant parse curve , child obj id:{laneId} idName:{idName} idx:{idx} not found.");
+
+                child.CurvePrecision= reader.ReadSingle();
+                var c = reader.ReadInt32();
+                for (int r = 0; r < c; r++)
+                {
+                    var control = new LaneCurvePathControlObject();
+
+                    control.TGrid.Unit = reader.ReadSingle();
+                    control.TGrid.Grid = reader.ReadInt32();
+                    control.XGrid.Unit = reader.ReadSingle();
+                    control.XGrid.Grid = reader.ReadInt32();
+
+                    child.AddControlObject(control);
+                }
+            }
         }
 
         private void ProcessLANE_BLOCK(OngekiFumen fumen, LoggableBinaryReader reader)
