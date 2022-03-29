@@ -167,5 +167,8 @@ namespace OngekiFumenEditor.Utils
 
             return new(start.X * A_2 + midControl.X * AB2 + end.X * B_2, start.Y * A_2 + midControl.Y * AB2 + end.Y * B_2);
         }
+
+        public static T Max<T>(T a, T b) where T : GridBase => a > b ? a : b;
+        public static T Min<T>(T a, T b) where T : GridBase => a > b ? b : a;
     }
 }

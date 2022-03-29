@@ -141,6 +141,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 //Log.LogDebug("new");
             }
 
+            void PostTGrid(ConnectableChildObjectBase obj, TGrid grid, bool isStroke = true)
+            {
+
+            }
+
+            void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid)
+            {
+                if (!obj.IsCurvePath)
+                {
+                    //直线，优化
+                    PostTGrid(obj, minTGrid);
+                    PostTGrid(obj, maxTGrid);
+                }
+                else
+                {
+
+                }
+            }
+
+            void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
+            {
+                foreach (var child in wallStartLane.Children)
+                {
+                    if (child.TGrid < minTGrid)
+                        continue;
+                    if (child.PrevObject.TGrid < maxTGrid)
+                        break;
+
+                    var childMinTGrid = MathUtils.Max(minTGrid, child.PrevObject.TGrid);
+                    var childMaxTGrid = MathUtils.Min(maxTGrid, child.TGrid);
+
+                    ProcessConnectable(child, childMinTGrid, childMaxTGrid);
+                }
+            }
+
             using var d = lbk.GetAffactableWallLanes(EditorViewModel.Fumen).ToListWithObjectPool(out var list);
             var beginTGrid = lbk.TGrid;
             var endTGrid = lbk.EndIndicator.TGrid;

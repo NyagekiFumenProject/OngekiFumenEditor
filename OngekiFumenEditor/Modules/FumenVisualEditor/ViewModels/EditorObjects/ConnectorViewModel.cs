@@ -125,67 +125,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 
         private void RebuildLines()
         {
-            Vector2 getPoint<X>(X o) where X : IHorizonPositionObject, ITimelineObject
+            var resT = Connector.From.TGrid.ResT;
+            var resX = Connector.From.XGrid.ResX;
+            void addPoint(Vector2 gv2)
             {
-                var y = (float)(EditorViewModel.TotalDurationHeight - TGridCalculator.ConvertTGridToY(o.TGrid, EditorViewModel));
-                var x = (float)XGridCalculator.ConvertXGridToX(o.XGrid, EditorViewModel);
+                var y = (float)(EditorViewModel.TotalDurationHeight - TGridCalculator.ConvertTGridToY(new(gv2.Y / resT, 0), EditorViewModel));
+                var x = (float)XGridCalculator.ConvertXGridToX(new(gv2.X / resX, 0), EditorViewModel);
 
-                return new(x, y);
-            }
-
-            int calcSign(Vector2 a, Vector2 b)
-            {
-                return Math.Sign(a.Y - b.Y);
-            }
-
-            void addPoint(Vector2 point)
-            {
-                var seg = new LineSegment(new(point.X + 0.0000001 * MathUtils.Random(100), point.Y), true);
+                var seg = new LineSegment(new(x + 0.0000001 * MathUtils.Random(100), y), true);
                 seg.Freeze();
                 Lines.Add(seg);
             }
 
             Lines.Clear();
 
-            var fromPoint = getPoint(Connector.From);
-            var midPoint = (Connector.To as ConnectableChildObjectBase)?.PathControls.Select(x => getPoint(x)) ?? Enumerable.Empty<Vector2>();
-            var toPoint = getPoint(Connector.To);
-            var step = (Connector.To as ConnectableChildObjectBase)?.CurvePrecision ?? 2857;
-            using var d = midPoint.Prepend(fromPoint).Append(toPoint).ToListWithObjectPool(out var points);
-
-            var prevP = points[0];
-            var prevSign = 0;
             var isVaild = true;
 
-            if (points.Count > 2)
+            foreach ((var gridVec2, var iv) in (Connector.To as ConnectableChildObjectBase)?.GenPath())
             {
-                var t = 0f;
-
-                while (true)
-                {
-                    var p = BezierCurve.CalculatePoint(points, t);
-                    var sign = calcSign(prevP, p);
-
-                    if (isVaild && prevSign != sign && prevSign * sign != 0)
-                        isVaild = false;
-                    addPoint(p);
-
-                    if (t >= 1)
-                        break;
-
-                    t = MathF.Min(1, t + step);
-                    prevP = p;
-                    prevSign = sign;
-                }
-                LineDashArray = isVaild ? DefaultLineDashArray : InvaildCurveLineDashArray;
-            }
-            else
-            {
-                addPoint(points[0]);
-                addPoint(points[1]);
-                LineDashArray = DefaultLineDashArray;
+                isVaild = isVaild && iv;
+                addPoint(gridVec2);
             }
 
+            LineDashArray = isVaild ? DefaultLineDashArray : InvaildCurveLineDashArray;
             NotifyOfPropertyChange(() => Lines);
         }
     }

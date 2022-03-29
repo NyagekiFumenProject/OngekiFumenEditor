@@ -188,12 +188,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     {
                         if (!cur.CheckCurveVaild())
                             return default;
-                        using var d =
-                            cur.PathControls
-                            .AsEnumerable<OngekiMovableObjectBase>()
-                            .Prepend(prev)
-                            .Append(cur)
-                            .Select(x => new Vector2(x.XGrid.TotalGrid, x.TGrid.TotalGrid)).ToListWithObjectPool(out var points);
+                        using var d = cur.GridBasePoints.ToListWithObjectPool(out var points);
 
                         var ct = tGrid.TotalGrid;
                         var startY = points[0].Y;

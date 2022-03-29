@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public override int RecordId { get => ReferenceStartObject?.RecordId ?? int.MinValue; set { } }
         private List<LaneCurvePathControlObject> pathControls = new();
         public IReadOnlyList<LaneCurvePathControlObject> PathControls => pathControls;
+        public bool IsCurvePath => PathControls.Count > 0;
 
         public void AddControlObject(LaneCurvePathControlObject controlObj)
         {
@@ -72,14 +74,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
-        public IList<Vector2> GridBasePoints => PathControls
+        public IEnumerable<Vector2> GridBasePoints => PathControls
             .AsEnumerable<OngekiMovableObjectBase>()
             .Prepend(PrevObject)
             .Append(this)
-            .Select(x => new Vector2(x.XGrid.TotalGrid, x.TGrid.TotalGrid))
-            .ToList();
+            .Select(x => new Vector2(x.XGrid.TotalGrid, x.TGrid.TotalGrid));
 
-        public bool CheckCurveVaild()
+        public IEnumerable<(Vector2 pos, bool isVaild)> GenPath()
         {
             int calcSign(Vector2 a, Vector2 b)
             {
@@ -88,13 +89,19 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
                 return Math.Sign(b.Y - a.Y);
             }
-            var points = GridBasePoints;
+
+            using var d = GridBasePoints.ToListWithObjectPool(out var points);
             if (points.Count <= 2)
-                return true;
+            {
+                yield return (points[0], true);
+                yield return (points[1], true);
+                yield break;
+            }
 
             var prevPos = points[0];
             var prevSign = 0;
             var step = CurvePrecision;
+            var isVaild = true;
 
             var t = 0f;
             while (true)
@@ -103,17 +110,23 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 var sign = calcSign(prevPos, curP);
 
                 if (prevSign != sign && prevSign != 0)
-                    return false;
+                    isVaild = isVaild && false;
+
                 prevPos = curP;
                 prevSign = sign;
+
+                yield return (curP, isVaild);
 
                 if (t >= 1)
                     break;
 
                 t = MathF.Min(1, t + step);
             }
+        }
 
-            return true;
+        public bool CheckCurveVaild()
+        {
+            return GenPath().All(x => x.isVaild);
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()

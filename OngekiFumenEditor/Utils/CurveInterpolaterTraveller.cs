@@ -65,35 +65,7 @@ namespace OngekiFumenEditor.Utils
                 return new(tGrid, xGrid);
             }
 
-            using var d =
-                x.PathControls
-                .AsEnumerable<OngekiMovableObjectBase>()
-                .Prepend(x.PrevObject)
-                .Append(x)
-                .Select(x => new Vector2(x.XGrid.TotalGrid, x.TGrid.TotalGrid))
-                .ToListWithObjectPool(out var points);
-
-            var t = 0f;
-            var step = x.CurvePrecision;
-
-            if (points.Count == 2)
-            {
-                yield return build(points[0]);
-                yield return build(points[1]);
-                yield break;
-            }
-
-            while (true)
-            {
-                var p = BezierCurve.CalculatePoint(points, t);
-
-                yield return build(p);
-
-                if (t >= 1)
-                    break;
-
-                t = MathF.Min(1, t + step);
-            }
+            return x.GenPath().Select(x => build(x.pos));
         }
 
         public CurvePoint? Travel()
