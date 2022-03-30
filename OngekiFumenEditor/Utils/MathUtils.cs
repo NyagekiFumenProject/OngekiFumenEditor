@@ -136,7 +136,7 @@ namespace OngekiFumenEditor.Utils
             var timeY = tGrid.TotalGrid;
 
             var timeX = CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
-            var xGrid = new XGrid(0, (int)timeX, fromXGrid.ResX);
+            var xGrid = new XGrid((float)(timeX / fromXGrid.ResX), 0, fromXGrid.ResX);
             xGrid.NormalizeSelf();
 
             return xGrid;

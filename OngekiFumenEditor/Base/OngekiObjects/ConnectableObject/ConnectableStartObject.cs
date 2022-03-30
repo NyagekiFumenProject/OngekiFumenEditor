@@ -197,7 +197,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             if (tGrid < TGrid)
                 return default;
 
-            var prev = this as ConnectableObjectBase;
             foreach (var cur in Children)
             {
                 if (tGrid <= cur.TGrid)
@@ -205,12 +204,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     var xGrid = cur.CalulateXGrid(tGrid);
                     return xGrid;
                 }
-
-                prev = cur;
             }
 
             return default;
         }
+
+        public bool IsPathVaild() => GenAllPath().All(x => x.isVaild);
 
         public IEnumerable<(Vector2 pos, bool isVaild)> GenAllPath(bool filterSamePointSameSeq = true)
         {

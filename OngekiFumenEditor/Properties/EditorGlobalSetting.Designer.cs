@@ -46,5 +46,29 @@ namespace OngekiFumenEditor.Properties {
                 this["IsEnableAutoSave"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public int UndoActionSavingLimit {
+            get {
+                return ((int)(this["UndoActionSavingLimit"]));
+            }
+            set {
+                this["UndoActionSavingLimit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsEnableUndoActionSavingLimit {
+            get {
+                return ((bool)(this["IsEnableUndoActionSavingLimit"]));
+            }
+            set {
+                this["IsEnableUndoActionSavingLimit"] = value;
+            }
+        }
     }
 }

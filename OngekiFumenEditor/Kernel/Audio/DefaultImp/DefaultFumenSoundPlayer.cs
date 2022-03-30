@@ -182,7 +182,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                     else
                     {
                         if (ct < -5)
-                            Thread.Sleep((int)(Math.Abs(ct) - 2));
+                            Thread.Sleep(Math.Min(1000,(int)(Math.Abs(ct) - 2)));
                         break;
                     }
                 }

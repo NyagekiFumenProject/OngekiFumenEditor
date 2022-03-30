@@ -102,7 +102,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set => Set(ref currentCursorPosition, value);
         }
 
-        private HashSet<DisplayObjectViewModelBase> currentCopySources = new();
+        private HashSet<DisplayObjectViewModelBase> currentCopiedSources = new();
+        public IEnumerable<DisplayObjectViewModelBase> CurrentCopiedSources => currentCopiedSources;
 
         #region Selection Actions
 
@@ -130,9 +131,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
             //复制所选物件
-            currentCopySources.Clear();
-            currentCopySources.AddRange(SelectObjects);
-            Log.LogInfo($"钦定 {currentCopySources.Count} 个物件作为复制源");
+            currentCopiedSources.Clear();
+            currentCopiedSources.AddRange(SelectObjects);
+            Log.LogInfo($"钦定 {currentCopiedSources.Count} 个物件作为复制源");
         }
 
         public enum PasteMirrorOption
@@ -160,7 +161,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             SelectObjects.ForEach(x => x.IsSelected = false);
             IsPreventMutualExclusionSelecting = true;
             var count = 0;
-            var newObjects = currentCopySources.Select(x => x.Copy()).FilterNull().ToArray();
+            var newObjects = currentCopiedSources.Select(x => x.Copy()).FilterNull().ToArray();
             var mirrorTGrid = CalculateTGridMirror(newObjects, mirrorOption);
             var mirrorXGrid = CalculateXGridMirror(newObjects, mirrorOption);
             foreach (var displayObjectView in newObjects)

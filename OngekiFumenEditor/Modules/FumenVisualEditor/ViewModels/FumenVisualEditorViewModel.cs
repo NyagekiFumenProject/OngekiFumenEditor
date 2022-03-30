@@ -145,6 +145,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public bool IsDragging { get; private set; }
         public bool IsMouseDown { get; private set; }
 
+        public FumenVisualEditorViewModel() : base()
+        {
+            var editorSetting = Properties.EditorGlobalSetting.Default;
+            UndoRedoManager.UndoCountLimit = editorSetting.IsEnableUndoActionSavingLimit ? editorSetting.UndoActionSavingLimit : null;
+            Log.LogDebug($"UndoRedoManager.UndoCountLimit: {UndoRedoManager.UndoCountLimit}");
+        }
+
         #region Document New/Save/Load
 
         protected override async Task DoNew()

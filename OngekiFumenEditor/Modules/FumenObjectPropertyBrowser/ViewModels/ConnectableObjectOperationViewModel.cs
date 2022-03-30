@@ -1,9 +1,12 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Toolbox;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -148,6 +151,87 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
             _mouseStartPosition = arg.GetPosition(null);
             _draggingItem = true;
+        }
+
+        public async void OnBrushButtonClick()
+        {
+            var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
+            var fumen = editor.Fumen;
+
+            if (RefStartObject?.IsPathVaild() != true)
+            {
+                MessageBox.Show("此轨道包含非法路径");
+                return;
+            }
+
+            if (editor.CurrentCopiedSources.Count() > 1)
+            {
+                MessageBox.Show("因为已复制的物件超过一个，无法使用刷子功能");
+                return;
+            }
+
+            if (editor.CurrentCopiedSources.Count() < 1)
+            {
+                MessageBox.Show("需要先复制一个可以复制的物件，才能使用刷子功能");
+                return;
+            }
+
+            var copiedObjectViewModel = editor.CurrentCopiedSources.FirstOrDefault();
+
+            if (copiedObjectViewModel?.Copy() is null)
+            {
+                MessageBox.Show("此复制的物件无法使用刷子功能");
+                return;
+            }
+
+            var dialog = new BrushTGridRangeDialogViewModel();
+            dialog.BeginTGrid = RefStartObject.MinTGrid;
+            dialog.EndTGrid = RefStartObject.MaxTGrid;
+
+            if ((await IoC.Get<IWindowManager>().ShowDialogAsync(dialog)) != true)
+                return;
+
+            var beginTGrid = dialog.BeginTGrid;
+            var endTGrid = dialog.EndTGrid;
+
+            var redoAction = new System.Action(() => { });
+            var undoAction = new System.Action(() => { });
+
+            foreach ((var tGrid, _, _) in TGridCalculator.GetVisbleTimelines(
+                fumen.BpmList,
+                fumen.MeterChanges,
+                TGridCalculator.ConvertTGridToY(beginTGrid, editor),
+                TGridCalculator.ConvertTGridToY(endTGrid, editor),
+                0,
+                editor.Setting.BeatSplit,
+                240))
+            {
+                var objViewModel = copiedObjectViewModel.Copy();
+                var obj = objViewModel.ReferenceOngekiObject;
+                var xGrid = RefStartObject.CalulateXGrid(tGrid);
+
+                if (xGrid is null)
+                    continue;
+
+                redoAction += () =>
+                {
+                    if (obj is ITimelineObject timelineObject)
+                        timelineObject.TGrid = tGrid;
+                    if (obj is IHorizonPositionObject horizonPositionObject)
+                        horizonPositionObject.XGrid = xGrid;
+
+                    editor.AddObject(objViewModel);
+                };
+                undoAction += () =>
+                {
+                    editor.RemoveObject(objViewModel);
+                };
+            }
+
+            redoAction += () => editor.Redraw(RedrawTarget.OngekiObjects);
+            undoAction += () => editor.Redraw(RedrawTarget.OngekiObjects);
+
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("批量粘贴刷子", redoAction, undoAction));
         }
     }
 }

@@ -29,5 +29,22 @@
                 </StackPanel>
             </StackPanel>
         </GroupBox>
+        <GroupBox Header="撤回/重做 (需要重启生效)">
+            <StackPanel Margin="10">
+                <CheckBox IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}">限制编辑器撤回操作保存数量</CheckBox>
+                <StackPanel
+                    Margin="0,5,0,0"
+                    IsEnabled="{Binding Setting.IsEnableUndoActionSavingLimit}"
+                    Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center">最大保存</TextBlock>
+                    <TextBox
+                        Width="50"
+                        Margin="5,0,5,0"
+                        Text="{Binding Setting.UndoActionSavingLimit}">
+                    </TextBox>
+                    <TextBlock VerticalAlignment="Center">个撤回操作</TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
     </StackPanel>
 </UserControl>
