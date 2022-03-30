@@ -128,22 +128,37 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         {
             if (PathControls.Count > 0)
             {
-                if (!CheckCurveVaild())
-                    return default;
-                using var d = GridBasePoints.ToListWithObjectPool(out var points);
+                Vector2? prevVec2 = null;
+                var totalGrid = tGrid.TotalGrid;
 
-                var ct = tGrid.TotalGrid;
-                var startY = points[0].Y;
-                var endY = points[points.Count - 1].Y;
-                var t = (ct - startY) / (endY - startY);
+                foreach ((var gridVec2, var isVaild) in GenPath())
+                {
+                    if (!isVaild)
+                        return default;
 
-                var xTotalGrid = BezierCurve.CalculatePoint(points, t).X;
-                var xGrid = new XGrid(xTotalGrid / XGrid.ResX);
-                xGrid.NormalizeSelf();
+                    if (totalGrid <= gridVec2.Y)
+                    {
+                        prevVec2 = prevVec2 ?? gridVec2;
 
-                Log.LogDebug($"{xGrid} t:{t:F2}");
+                        var fromXGrid = new TGrid(prevVec2.Value.Y / TGrid.ResT);
+                        fromXGrid.NormalizeSelf();
+                        var fromTGrid = new XGrid(prevVec2.Value.X / XGrid.ResX);
+                        fromTGrid.NormalizeSelf();
+                        var toTGrid = new TGrid(gridVec2.Y / TGrid.ResT);
+                        toTGrid.NormalizeSelf();
+                        var toXGrid = new XGrid(gridVec2.X / XGrid.ResX);
+                        toXGrid.NormalizeSelf();
 
-                return xGrid;
+                        var xGrid = MathUtils.CalculateXGridFromBetweenObjects(fromXGrid, fromTGrid, toTGrid, toXGrid, tGrid);
+
+                        //Log.LogDebug($"fromXGrid:{fromXGrid} fromTGrid:{fromTGrid} fromTGrid:{fromTGrid} fromTGrid:{fromTGrid} tGrid:{tGrid} -> {xGrid}");
+                        return xGrid;
+                    }
+
+                    prevVec2 = gridVec2;
+                }
+
+                return default;
             }
             else
             {

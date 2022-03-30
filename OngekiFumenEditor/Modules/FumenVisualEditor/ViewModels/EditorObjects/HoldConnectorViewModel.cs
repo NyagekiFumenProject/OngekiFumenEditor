@@ -10,6 +10,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views.EditorObjects;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using OngekiFumenEditor.Utils.ObjectPool;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,53 +25,9 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 {
-    public abstract class BindableTGridSegement : PropertyChangedBase
-    {
-        public LineSegment Segment { get; } = new LineSegment();
-        public abstract bool RecalcPoint(XGrid directValue = default);
-    }
-
-    public class BindableTGridSegement<T> : BindableTGridSegement where T : INotifyPropertyChanged, IHorizonPositionObject, ITimelineObject
-    {
-        private T bindObject;
-        public T BindObject
-        {
-            get => bindObject;
-            set
-            {
-                Set(ref bindObject, value);
-            }
-        }
-
-        private FumenVisualEditorViewModel bindFumenEditor;
-        public FumenVisualEditorViewModel BindFumenEditor
-        {
-            get => bindFumenEditor;
-            set
-            {
-                Set(ref bindFumenEditor, value);
-            }
-        }
-
-        public override bool RecalcPoint(XGrid directValue = default)
-        {
-            if (BindObject is null || BindFumenEditor is null)
-                return false;
-
-            var x = XGridCalculator.ConvertXGridToX(BindObject.XGrid, BindFumenEditor)
-                //为啥要加个随机数呢，是因为PathSegmentCollection重新绘制会有缓存机制，如果一个点没有变动，那么就不会绘制此点以及后面的点(我猜的)
-                + 0.0000001 * MathUtils.Random(100);
-            var y = BindFumenEditor.TotalDurationHeight - TGridCalculator.ConvertTGridToY(BindObject.TGrid, BindFumenEditor);
-
-            Segment.Point = new Point(x, y);
-            return true;
-        }
-    }
-
     [MapToView(ViewType = typeof(HoldConnectorView))]
     public class HoldConnectorViewModel : ConnectorViewModel
     {
-        private Dictionary<object, BindableTGridSegement> map = new();
         public PathSegmentCollection Lines { get; } = new();
 
         private HoldConnector connector = default;
@@ -146,28 +103,44 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                 return;
             Lines.Clear();
 
-            void Upsert<T>(T obj) where T : INotifyPropertyChanged, IHorizonPositionObject, ITimelineObject
+            void addPoint(Vector2 gv2)
             {
-                if (map.TryGetValue(obj, out var seg))
-                {
-                    if (seg.RecalcPoint())
-                        Lines.Add(seg.Segment);
-                    return;
-                }
-                var bind = new BindableTGridSegement<T>()
-                {
-                    BindFumenEditor = EditorViewModel,
-                    BindObject = obj,
-                };
-                map[bind.BindObject] = bind;
-                if (bind.RecalcPoint())
-                    Lines.Add(bind.Segment);
+                var y = (float)(EditorViewModel.TotalDurationHeight - TGridCalculator.ConvertTGridToY(new(gv2.Y / hold.TGrid.ResT, 0), EditorViewModel));
+                var x = (float)XGridCalculator.ConvertXGridToX(new(gv2.X / hold.XGrid.ResX, 0), EditorViewModel);
+
+                var seg = new LineSegment(new(x + 0.0000001 * MathUtils.Random(100), y), true);
+                seg.Freeze();
+                Lines.Add(seg);
             }
 
-            Upsert(hold);
-            foreach (var node in refLane.Children.AsEnumerable<ConnectableObjectBase>().Where(x => hold.TGrid <= x.TGrid && x.TGrid <= holdEnd.TGrid))
-                Upsert(node);
-            Upsert(holdEnd);
+            using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var points, out _);
+            points.Clear();
+            var isVaild = true;
+            var beginTotalGrid = hold.TGrid.TotalGrid;
+            var endTotalGrid = hold.HoldEnd.TGrid.TotalGrid;
+
+            foreach ((var p, var invaild) in refLane.GenAllPath())
+            {
+                /*
+                if (!invaild)
+                {
+                    isVaild = false;
+                    return;
+                }
+                */
+                if (!(p.Y >= beginTotalGrid && p.Y <= endTotalGrid))
+                    continue;
+
+                points.Add(p);
+            }
+
+            if (isVaild)
+            {
+                addPoint(new(hold.XGrid.TotalGrid, hold.TGrid.TotalGrid));
+                foreach (var gridVec2 in points)
+                    addPoint(gridVec2);
+                addPoint(new(hold.HoldEnd.XGrid.TotalGrid, hold.HoldEnd.TGrid.TotalGrid));
+            }
 
             NotifyOfPropertyChange(() => Lines);
         }

@@ -194,6 +194,27 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             return default;
         }
 
+        public IEnumerable<(Vector2 pos, bool isVaild)> GenAllPath(bool filterSamePointSameSeq = true)
+        {
+            Vector2? prevP = null;
+            var isVaild = true;
+
+            foreach (var child in Children)
+            {
+                foreach (var cg in child.GenPath())
+                {
+                    if (cg.pos == prevP && filterSamePointSameSeq)
+                        continue;
+
+                    isVaild = isVaild && cg.isVaild;
+
+                    yield return (cg.pos, isVaild);
+
+                    prevP = cg.pos;
+                }
+            }
+        }
+
         public IEnumerable<ConnectableStartObject> InterpolateCurve()
             => InterpolateCurve(GetType(), NextType, EndType).OfType<ConnectableStartObject>();
 
