@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             {
                 //Log.LogInfo("OngekiObjectViewBase.MouseUp");
                 if (!mouseMove)
-                    ViewModel.OnMouseClick(default);
+                    ViewModel?.OnMouseClick(default);
             };
         }
     }

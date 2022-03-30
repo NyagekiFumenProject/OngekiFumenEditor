@@ -54,27 +54,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
             set
             {
-                this.RegisterOrUnregisterPropertyChangeEvent(Connector, value, OnLanePropChanged);
-
-                if (Connector is not null)
-                {
-                    Connector.From.PropertyChanged -= OnLanePropChanged;
-                    Connector.To.PropertyChanged -= OnLanePropChanged;
-                }
-
-                if (value is not null)
-                {
-                    value.From.PropertyChanged += OnLanePropChanged;
-                    value.To.PropertyChanged += OnLanePropChanged;
-                }
-
+                this.RegisterOrUnregisterPropertyChangeEvent(connector, value, OnLanePropChanged);
                 Set(ref connector, value);
             }
-        }
-
-        private void From_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         private void OnLanePropChanged(object sender, PropertyChangedEventArgs e)

@@ -59,15 +59,33 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 child.PrevObject = children.LastOrDefault() ?? this as ConnectableObjectBase;
                 children.Add(child);
                 NotifyOfPropertyChange(() => Children);
-                connectors.Add(GenerateConnector(child.PrevObject, child));
+                AddConnector(GenerateConnector(child.PrevObject, child));
                 child.PropertyChanged += OnPropertyChanged;
             }
             child.ReferenceStartObject = this;
         }
 
+        private void RemoveConnector(ConnectorLineBase<ConnectableObjectBase> connector)
+        {
+            connectors.Remove(connector);
+            connector.OnConnectorRemoved();
+        }
+
         private void RemoveConnector(ConnectableObjectBase from, ConnectableObjectBase to)
         {
-            connectors.Remove(connectors.FirstOrDefault(x => x.From == from && x.To == to));
+            if (connectors.FirstOrDefault(x => x.From == from && x.To == to) is ConnectorLineBase<ConnectableObjectBase> connector)
+                RemoveConnector(connector);
+        }
+
+        private void RemoveAnyConnector(ConnectableObjectBase from, ConnectableObjectBase to)
+        {
+            foreach (var connector in connectors.Where(x => x.From == from || x.To == to).ToArray())
+                RemoveConnector(connector);
+        }
+
+        private void AddConnector(ConnectorLineBase<ConnectableObjectBase> connector)
+        {
+            connectors.Add(connector);
         }
 
         public void InsertChildObject(TGrid dragTGrid, ConnectableChildObjectBase child)
@@ -93,8 +111,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         next.PrevObject = child;
                         child.PrevObject = prev;
 
-                        connectors.Add(GenerateConnector(child.PrevObject, child));
-                        connectors.Add(GenerateConnector(next.PrevObject, next));
+                        AddConnector(GenerateConnector(child.PrevObject, child));
+                        AddConnector(GenerateConnector(next.PrevObject, next));
 
                         NotifyOfPropertyChange(() => Children);
                         child.PropertyChanged += OnPropertyChanged;
@@ -113,14 +131,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         {
             children.Remove(child);
 
-            connectors.RemoveAll(x => x.From == child || x.To == child);
+            RemoveAnyConnector(child, child);
 
             var prev = child.PrevObject;
             var next = children.FirstOrDefault(x => x.PrevObject == child);
             if (next is not null)
             {
                 next.PrevObject = prev;
-                connectors.Add(GenerateConnector(next.PrevObject, next));
+                AddConnector(GenerateConnector(next.PrevObject, next));
             }
             child.PrevObject = default;
 
