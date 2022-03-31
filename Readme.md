@@ -12,7 +12,7 @@
 * 编辑器优化&重构
 * 谱面滚动播放及预览   
 * 牛逼外服的判定线
-* 谱面预览播放音效 ([有点小问题](https://github.com/MikiraSora/OngekiFumenEditor/wiki/-1-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
+* 谱面预览播放音效 ([有点小问题](https://github.com/MikiraSora/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
 * 实现时间轴的简便操作
 * 编辑器细节优化  
 * ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(暂时)
@@ -20,8 +20,8 @@
 * ~~正式公布~~
 * 其他类型子弹
 * ~~制作预览器(OpenGL)~~(暂时跳过) 
-* 实现Soflan变速 ([有限支持](https://github.com/MikiraSora/OngekiFumenEditor/wiki/-1-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
-* svg转线 ([略有问题](https://github.com/MikiraSora/OngekiFumenEditor/wiki/-1-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
+* 实现Soflan变速 ([有限支持](https://github.com/MikiraSora/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
+* svg转线 ([略有问题](https://github.com/MikiraSora/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#svg%E5%88%92%E7%BA%BF%E9%97%AE%E9%A2%98))
 * LispBlock实现
 * EmenyLane实现
 * 编辑器细节优化 pt.2
