@@ -71,6 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     NotifyOfPropertyChange(() => MaxVisibleCanvasY);
                     break;
                 case nameof(EditorSetting.XGridUnitSpace):
+                    ClearDisplayingObjectCache();
                     Redraw(RedrawTarget.XGridUnitLines);
                     break;
                 case nameof(EditorSetting.BeatSplit):
@@ -82,11 +83,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         title.TitleContent = base.DisplayName;
                     break;
                 case nameof(EditorSetting.XGridDisplayMaxUnit):
-                    Redraw(RedrawTarget.OngekiObjects | RedrawTarget.XGridUnitLines);
+                    ClearDisplayingObjectCache();
+                    Redraw(RedrawTarget.XGridUnitLines);
                     break;
                 default:
                     break;
             }
+        }
+
+        private void ClearDisplayingObjectCache()
+        {
+            CurrentDisplayEditorViewModels.Clear();
+            EditorViewModels.Clear();
+            Redraw(RedrawTarget.OngekiObjects);
         }
 
         public OngekiFumen Fumen
