@@ -60,7 +60,7 @@
     <PackageReference Include="OpenTK" Version="4.3.0" />
     <PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.2.0" />
-    <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.0" />
+    <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
   </ItemGroup>
 
   <ItemGroup>
