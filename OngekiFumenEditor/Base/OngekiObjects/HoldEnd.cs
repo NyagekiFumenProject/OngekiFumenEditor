@@ -18,8 +18,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             get => (ReferenceStartObject as Hold)?.ReferenceLaneStart;
             set
             {
-                //ignore it :D
+                NotifyOfPropertyChange(() => ReferenceLaneStart);
             }
+        }
+
+        public int ReferenceLaneStrId
+        {
+            get => (ReferenceStartObject as Hold)?.ReferenceLaneStrId ?? -1;
+            set => NotifyOfPropertyChange(() => ReferenceLaneStrId);
         }
     }
 }

@@ -5,6 +5,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,6 +63,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
             //如果ForceTapHoldMagneticDockToLane=true,则不需要这里钦定位置
             if (enableMoveTo)
                 base.MoveCanvas(relativePoint);
+        }
+
+        protected override void OnOngekiObjectPropChanged(object sender, PropertyChangedEventArgs arg)
+        {
+            switch (arg.PropertyName)
+            {
+                case nameof(ILaneDockable.ReferenceLaneStrId):
+                    RefreshNewReferenceLaneStart();
+                    break;
+                default:
+                    base.OnOngekiObjectPropChanged(sender, arg);
+                    break;
+            }
+        }
+
+        private void RefreshNewReferenceLaneStart()
+        {
+            if (EditorViewModel?.Fumen is not OngekiFumen fumen || ReferenceOngekiObject is not ILaneDockable obj)
+                return;
+
+            var newLaneId = obj.ReferenceLaneStrId;
+            var newLane = fumen.Lanes.FirstOrDefault(x => x.RecordId == newLaneId);
+            if (obj.ReferenceLaneStart != newLane)
+            {
+                Log.LogDebug($"ReferenceLaneStrId has been changed and update ref lane object. (from {obj.ReferenceLaneStart?.RecordId} to {newLane?.RecordId})");
+                obj.ReferenceLaneStart = newLane;
+            }
         }
 
         protected virtual double? CalculateConnectableObjectCurrentRelativeX(ConnectableStartObject startObject, TGrid tGrid)

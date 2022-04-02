@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
 
             var result = editor == Visibility.Visible && (parent == Visibility.Visible || otherControls == Visibility.Visible) ? Visibility.Visible : Visibility.Hidden;
 
-            Log.LogDebug($"{editor} && ({parent} || {otherControls}) -> {result}");
+            //Log.LogDebug($"{editor} && ({parent} || {otherControls}) -> {result}");
             return result;
         }
 

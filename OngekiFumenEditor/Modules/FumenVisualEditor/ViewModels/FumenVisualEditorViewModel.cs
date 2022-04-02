@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     ClearDisplayingObjectCache();
                     Redraw(RedrawTarget.XGridUnitLines);
                     break;
-                default:
+                default:    
                     break;
             }
         }
