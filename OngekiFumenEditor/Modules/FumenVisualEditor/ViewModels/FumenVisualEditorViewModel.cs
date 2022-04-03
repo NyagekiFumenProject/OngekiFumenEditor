@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     ClearDisplayingObjectCache();
                     Redraw(RedrawTarget.XGridUnitLines);
                     break;
-                default:    
+                default:
                     break;
             }
         }
@@ -206,8 +206,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 using var _ = StatusBarHelper.BeginStatus("Editor project file loading : " + filePath);
                 Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
                 var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
-                EditorProjectData = projectData;
-                Redraw(RedrawTarget.All);
+                await Load(projectData);
             }
             catch (Exception e)
             {
@@ -218,9 +217,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public Task Load(EditorProjectDataModel projModel)
+        {
+            EditorProjectData = projModel;
+            Redraw(RedrawTarget.All);
+            return Task.CompletedTask;
+        }
+
         protected override async Task DoSave(string filePath)
         {
             using var _ = StatusBarHelper.BeginStatus("Fumen saving : " + filePath);
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                await DoSaveAs(this);
+                return;
+            }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
             if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
             {

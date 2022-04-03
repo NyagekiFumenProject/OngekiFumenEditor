@@ -1,5 +1,6 @@
 using Gemini.Framework;
 using Gemini.Framework.Services;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,8 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
     [Export(typeof(IEditorProvider))]
-    class FumenVisualEditorProvider : IEditorProvider
+    [Export(typeof(IFumenVisualEditorProvider))]
+    class FumenVisualEditorProvider : IFumenVisualEditorProvider
     {
         public const string FILE_EXTENSION_NAME = ".nyagekiProj";
 
@@ -33,5 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public async Task New(IDocument document, string name) => await (document as FumenVisualEditorViewModel)?.New(name);
 
         public async Task Open(IDocument document, string path) => await (document as FumenVisualEditorViewModel)?.Load(path);
+
+        public async Task Open(IDocument document, EditorProjectDataModel projModel) => await(document as FumenVisualEditorViewModel)?.Load(projModel);
     }
 }
