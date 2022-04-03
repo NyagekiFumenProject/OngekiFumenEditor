@@ -17,10 +17,10 @@ namespace OngekiFumenEditor.Base
         private float unit = 0; //unit
 
         private uint gridRadix = 2857;
-        protected uint GridRadix
+        public uint GridRadix
         {
             get => gridRadix;
-            set
+            protected set
             {
                 gridRadix = value;
                 RecalculateTotalGrid();
