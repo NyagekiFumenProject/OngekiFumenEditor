@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             /// <summary>
             /// 加大版(是普通版的1.4x)
             /// </summary>
-            public static BulletSize Lerge { get; } = new("L");
+            public static BulletSize Large { get; } = new("L");
         }
 
         public class BulletType : FadeStringEnum

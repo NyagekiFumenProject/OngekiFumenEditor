@@ -182,7 +182,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 bpl.Speed = reader.ReadSingle();
                 bpl.SizeValue = reader.ReadString() switch
                 {
-                    "L" => BulletSize.Lerge,
+                    "L" => BulletSize.Large,
                     "N" or _ => BulletSize.Normal,
                 };
                 bpl.TypeValue = reader.ReadString() switch
