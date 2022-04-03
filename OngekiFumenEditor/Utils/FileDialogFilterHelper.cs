@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Parser;
 using System;
 using System.Collections.Generic;
@@ -17,10 +18,6 @@ namespace OngekiFumenEditor.Utils
         public static string GetSupportFumenFileExtensionFilter()
             => BuildExtensionFilter(IoC.Get<IFumenParserManager>().GetSerializerDescriptions().SelectMany(x => x.fileFormat.Select(y => (y, x.desc))));
         public static string GetSupportAudioFileExtensionFilter()
-            => BuildExtensionFilter(new[] {
-            (".mp3","音频文件"),
-            (".wav","音频文件"),
-            (".acb","Criware音频文件"),
-        });
+            => BuildExtensionFilter(IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
     }
 }

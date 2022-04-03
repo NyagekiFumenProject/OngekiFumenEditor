@@ -13,5 +13,7 @@ namespace OngekiFumenEditor.Kernel.Audio
 
         Task<ISoundPlayer> LoadSoundAsync(string filePath);
         Task<IAudioPlayer> LoadAudioAsync(string filePath);
+
+        IEnumerable<(string fileExt,string extDesc)> SupportAudioFileExtensionList { get; }
     }
 }

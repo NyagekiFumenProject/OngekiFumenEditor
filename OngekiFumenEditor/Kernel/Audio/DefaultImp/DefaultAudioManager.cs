@@ -29,6 +29,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public float SoundVolume { get => soundVolumeWrapper.Volume; set => soundVolumeWrapper.Volume = value; }
 
+        public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; } = new[] {
+            (".mp3","音频文件"),
+            (".wav","音频文件"),
+            (".acb","Criware音频文件"),
+        };
+
         public DefaultAudioManager()
         {
             soundOutputDevice = new WasapiOut();
