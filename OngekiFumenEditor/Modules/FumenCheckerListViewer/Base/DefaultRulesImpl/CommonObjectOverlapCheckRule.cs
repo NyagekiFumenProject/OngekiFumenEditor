@@ -55,7 +55,8 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 yield return result;
             foreach (var result in CheckList(fumen.Taps
                 .AsEnumerable<OngekiMovableObjectBase>()
-                .Concat(fumen.Holds.SelectMany(x => x.Children.AsEnumerable<OngekiMovableObjectBase>().Append(x)))))
+                //HoldEnd暂时不用考虑重叠问题
+                .Concat(fumen.Holds)))
                 yield return result;
             foreach (var result in CheckList(fumen.Bullets))
                 yield return result;
