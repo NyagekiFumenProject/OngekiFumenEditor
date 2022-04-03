@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
         {
             var dialog = new OpenFileDialog();
             dialog.Multiselect = false;
-            dialog.Filter = FileDialogFilterHelper.GetSupportAudioFileExtensionFilter();
+            dialog.Filter = FileDialogHelper.GetSupportAudioFileExtensionFilter();
             if (dialog.ShowDialog() == true)
             {
                 EditorProjectData.AudioFilePath = dialog.FileName;
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
         {
             var dialog = new OpenFileDialog();
             dialog.Multiselect = false;
-            dialog.Filter = FileDialogFilterHelper.GetSupportFumenFileExtensionFilter();
+            dialog.Filter = FileDialogHelper.GetSupportFumenFileExtensionFilter();
             if (dialog.ShowDialog() == true)
             {
                 try

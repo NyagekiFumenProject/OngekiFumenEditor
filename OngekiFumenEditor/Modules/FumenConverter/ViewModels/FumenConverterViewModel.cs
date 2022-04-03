@@ -82,7 +82,7 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
         {
             var dialog = new OpenFileDialog();
             dialog.Multiselect = false;
-            dialog.Filter = FileDialogFilterHelper.GetSupportFumenFileExtensionFilter();
+            dialog.Filter = FileDialogHelper.GetSupportFumenFileExtensionFilter();
             if (dialog.ShowDialog() == true)
             {
                 InputFumenFilePath = dialog.FileName;
@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
         public void OnOpenSelectOutputFileDialog()
         {
             var dialog = new SaveFileDialog();
-            dialog.Filter = FileDialogFilterHelper.GetSupportFumenFileExtensionFilter();
+            dialog.Filter = FileDialogHelper.GetSupportFumenFileExtensionFilter();
             if (dialog.ShowDialog() == true)
                 OutputFumenFilePath = dialog.FileName;
         }

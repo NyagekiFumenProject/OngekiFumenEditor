@@ -247,7 +247,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
         public void OnLoadSvgFile()
         {
             var dialog = new OpenFileDialog();
-            dialog.Filter = FileDialogFilterHelper.BuildExtensionFilter((".svg", "Scalable Vector Graphics File Format"));
+            dialog.Filter = FileDialogHelper.BuildExtensionFilter((".svg", "Scalable Vector Graphics File Format"));
             dialog.Multiselect = false;
             dialog.CheckFileExists = true;
             if (dialog.ShowDialog() == true)

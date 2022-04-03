@@ -214,7 +214,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             var dialog = new OpenFileDialog();
             dialog.Multiselect = false;
-            dialog.Filter = FileDialogFilterHelper.GetSupportAudioFileExtensionFilter();
+            dialog.Filter = FileDialogHelper.GetSupportAudioFileExtensionFilter();
             if (dialog.ShowDialog() == true)
             {
                 var filePath = dialog.FileName;

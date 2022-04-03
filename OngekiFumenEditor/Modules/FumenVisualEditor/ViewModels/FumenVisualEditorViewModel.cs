@@ -238,7 +238,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //ask fumen file save path before save project.
                 var dialog = new SaveFileDialog();
 
-                dialog.Filter = FileDialogFilterHelper.GetSupportFumenFileExtensionFilter();
+                dialog.Filter = FileDialogHelper.GetSupportFumenFileExtensionFilter();
 
                 if (dialog.ShowDialog() != true)
                 {
