@@ -1,5 +1,7 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
@@ -37,6 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
         {
             var dragTGrid = TGridCalculator.ConvertYToTGrid(dragEndPoint.Y, editor);
             var backupStores = new HashSet<ConnectableChildObjectBase>();
+            var affactedObjects = new HashSet<ILaneDockable>();
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
@@ -46,6 +49,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
                 //计算出需要划分出来的后边子物件
                 backupStores.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
+                affactedObjects.AddRange(editor.Fumen.Taps.AsEnumerable<ILaneDockable>()
+                    .Concat(editor.Fumen.Holds)
+                    .Where(x => x.ReferenceLaneStart == startObject));
+
                 //前面删除，后面添加
                 foreach (var item in backupStores)
                 {
@@ -58,6 +65,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
                 prevEndViewModel.MoveCanvas(dragEndPoint);
                 nextStartViewModel.MoveCanvas(dragEndPoint);
+
+                foreach (var affactedObj in affactedObjects)
+                {
+                    var tGrid = affactedObj.TGrid;
+                    affactedObj.ReferenceLaneStart = (tGrid >= startObject.MinTGrid && tGrid <= startObject.MaxTGrid ? startObject : nextStartObject) as LaneStartBase;
+                }
 
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
@@ -72,7 +85,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                     startObject.InsertChildObject(item.TGrid, item);
                 }
 
+                foreach (var affactedObj in affactedObjects)
+                {
+                    affactedObj.ReferenceLaneStart = startObject as LaneStartBase;
+                }
+
                 backupStores.Clear();
+                affactedObjects.Clear();
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
             }));
