@@ -1,0 +1,24 @@
+﻿<ongekiobjects:OngekiObjectViewBase
+    x:Class="OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.Views.SvgPrefabView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
+    xmlns:viewModels="clr-namespace:OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels"
+    d:DataContext="{d:DesignInstance Type=viewModels:SvgPrefabViewModel}"
+    mc:Ignorable="d">
+    <Canvas>
+        <Rectangle
+            Width="15"
+            Height="15"
+            Fill="White">
+        </Rectangle>
+        <Image IsHitTestVisible="False">
+            <Image.Source>
+                <DrawingImage Drawing="{Binding ProcessingDrawingGroup}">
+                </DrawingImage>
+            </Image.Source>
+        </Image>
+    </Canvas>
+</ongekiobjects:OngekiObjectViewBase>

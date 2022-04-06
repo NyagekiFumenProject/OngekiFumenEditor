@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
@@ -39,6 +40,7 @@ namespace OngekiFumenEditor.Base
         public MeterChangeList MeterChanges { get; } = new();
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
+        public List<SvgPrefab> SvgPrefabs { get; } = new();
         public TGridSortList<Soflan> Soflans { get; } = new();
         public TGridSortList<LaneBlockArea> LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
@@ -162,6 +164,10 @@ namespace OngekiFumenEditor.Base
             {
                 LaneBlocks.Add(laneBlock);
             }
+            else if (obj is SvgPrefab prefab)
+            {
+                SvgPrefabs.Add(prefab);
+            }
             else if (obj switch
             {
                 LaneStartBase or LaneEndBase or LaneNextBase => obj,
@@ -233,6 +239,10 @@ namespace OngekiFumenEditor.Base
             {
                 Holds.Remove(holdEnd);
             }
+            else if (obj is SvgPrefab prefab)
+            {
+                SvgPrefabs.Remove(prefab);
+            }
             else if (obj is LaneCurvePathControlObject pathControl)
             {
                 pathControl.RefCurveObject.RemoveControlObject(pathControl);
@@ -284,6 +294,7 @@ namespace OngekiFumenEditor.Base
                    .Concat(Lanes.GetVisibleStartObjects(min, max))
                    .Concat(Taps.BinaryFindRange(min, max))
                    .Concat(Holds.GetVisibleStartObjects(min, max))
+                   .Concat(SvgPrefabs)
                    .Concat(Beams);
 
             return first.SelectMany(x => x.GetDisplayableObjects());

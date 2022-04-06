@@ -5,8 +5,10 @@
     xmlns:editorobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.EditorObjects"
     xmlns:fumenOngekiObject="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects"
+    xmlns:svg="clr-namespace:OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels"
     xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Base"
-    xmlns:views1="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views">
+    xmlns:views1="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
+    xmlns:views2="clr-namespace:OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.Views">
     <views:EditorObjectDataTemplateSelector x:Key="EditorObjectDataTemplateSelector">
         <views:EditorObjectDataTemplateSelector.DataTemplates>
             <DataTemplate DataType="{x:Type fumenOngekiObject:BellViewModel}">
@@ -156,6 +158,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type fumenOngekiObject:LaneBlockAreaEndIndicatorViewModel}">
                 <views1:DisplayTextLineObjectViewBase />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type svg:SvgPrefabViewModel}">
+                <views2:SvgPrefabView />
             </DataTemplate>
         </views:EditorObjectDataTemplateSelector.DataTemplates>
     </views:EditorObjectDataTemplateSelector>

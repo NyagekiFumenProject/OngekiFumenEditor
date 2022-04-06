@@ -60,14 +60,16 @@
     <PackageReference Include="OpenTK" Version="4.3.0" />
     <PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.2.0" />
+    <PackageReference Include="SharpVectors" Version="1.7.7" />
     <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj">
+    <ProjectReference Include="..\Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj" />
+    <ProjectReference Include="..\Dependences\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj">
       <PrivateAssets>all</PrivateAssets>
     </ProjectReference>
-    <ProjectReference Include="..\gemini\src\Gemini\Gemini.csproj">
+    <ProjectReference Include="..\Dependences\gemini\src\Gemini\Gemini.csproj">
       <PrivateAssets>all</PrivateAssets>
     </ProjectReference>
   </ItemGroup>
@@ -306,6 +308,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletPalleteAuxiliaryLineView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\EditorSvgObjectControlProvider\Views\SvgPrefabView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

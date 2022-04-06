@@ -51,6 +51,16 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
+        public static float RadianToAngle(float radian)
+        {
+            return radian * 180 / MathF.PI;
+        }
+
+        public static float AngleToRadian(float angle)
+        {
+            return angle * MathF.PI / 180;
+        }
+
         public static double CalculateLength(XGrid from, XGrid to, double unitLen)
         {
             var diff = to - from;
