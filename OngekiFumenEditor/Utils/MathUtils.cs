@@ -5,6 +5,9 @@ using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Utils
@@ -170,5 +173,50 @@ namespace OngekiFumenEditor.Utils
 
         public static T Max<T>(T a, T b) where T : GridBase => a > b ? a : b;
         public static T Min<T>(T a, T b) where T : GridBase => a > b ? b : a;
+
+        public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(IEnumerable<T> collection, Func<T, float> valMapFunc)
+        {
+            float calcGradient(T a, T b)
+            {
+                var va = valMapFunc(a);
+                var vb = valMapFunc(b);
+
+                if (va == vb)
+                    return float.MaxValue;
+
+                return -(va - vb);
+            }
+
+            var itor = collection.GetEnumerator();
+            if (!itor.MoveNext())
+                yield break;
+
+            var list = new List<T>();
+            var prevPoint = itor.Current;
+            var prevSign = 0;
+
+            while (true)
+            {
+                if (!itor.MoveNext())
+                    break;
+                var point = itor.Current;
+                var sign = MathF.Sign(calcGradient(prevPoint, point));
+
+                if (prevSign != sign && list.Count != 0)
+                {
+                    yield return list;
+                    list.Clear();
+                    list.Add(prevPoint);
+                }
+
+                prevPoint = point;
+                prevSign = sign;
+
+                list.Add(point);
+            }
+
+            if (list.Count > 0)
+                yield return list;
+        }
     }
 }

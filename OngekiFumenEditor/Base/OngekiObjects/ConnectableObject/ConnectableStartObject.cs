@@ -232,25 +232,26 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
-        public IEnumerable<ConnectableStartObject> InterpolateCurve()
-            => InterpolateCurve(GetType(), NextType, EndType).OfType<ConnectableStartObject>();
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(CurveInterpolaterTraveller curveInterpolater = default)
+            => InterpolateCurve(GetType(), NextType, EndType, curveInterpolater).OfType<ConnectableStartObject>();
 
-        public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType)
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType, CurveInterpolaterTraveller curveInterpolater = default)
             => InterpolateCurve(
                 () => LambdaActivator.CreateInstance(startType) as ConnectableStartObject,
                 () => LambdaActivator.CreateInstance(nextType) as ConnectableNextObject,
-                () => LambdaActivator.CreateInstance(endType) as ConnectableEndObject
+                () => LambdaActivator.CreateInstance(endType) as ConnectableEndObject,
+                curveInterpolater
                 ).OfType<ConnectableStartObject>();
 
-        public IEnumerable<START> InterpolateCurve<START, NEXT, END>()
+        public IEnumerable<START> InterpolateCurve<START, NEXT, END>(CurveInterpolaterTraveller curveInterpolater = default)
             where START : ConnectableStartObject, new()
             where END : ConnectableEndObject, new()
             where NEXT : ConnectableNextObject, new()
-            => InterpolateCurve(() => new START(), () => new NEXT(), () => new END()).OfType<START>();
+            => InterpolateCurve(() => new START(), () => new NEXT(), () => new END(), curveInterpolater).OfType<START>();
 
-        public IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc)
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, CurveInterpolaterTraveller curveInterpolater = default)
         {
-            var traveller = new CurveInterpolaterTraveller(this);
+            var traveller = curveInterpolater ?? new CurveInterpolaterTraveller(this);
 
             float calcGradient(CurvePoint a, CurvePoint b)
             {

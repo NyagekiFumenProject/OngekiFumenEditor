@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Utils
             }).GetEnumerator();
         }
 
-        private IEnumerable<CurvePoint> Interpolate(ConnectableChildObjectBase x)
+        protected virtual IEnumerable<CurvePoint> Interpolate(ConnectableChildObjectBase x)
         {
             CurvePoint build(Vector2 p)
             {
@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Utils
             return x.GenPath().Select(x => build(x.pos));
         }
 
-        public CurvePoint? Travel()
+        public virtual CurvePoint? Travel()
         {
             if (waiter.Count > 0)
             {
