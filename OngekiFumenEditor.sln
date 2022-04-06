@@ -4,9 +4,9 @@ VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditor", "OngekiFumenEditor\OngekiFumenEditor.csproj", "{53376E13-B8F4-4B1D-B377-3E938623B3D1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini", "gemini\src\Gemini\Gemini.csproj", "{A005356B-D652-418D-A970-77E7B704F5F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini", "Dependences\gemini\src\Gemini\Gemini.csproj", "{A005356B-D652-418D-A970-77E7B704F5F7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini.Modules.Output", "gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj", "{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini.Modules.Output", "Dependences\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj", "{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{C6C1204B-1881-4B1E-9726-770A7591DDAC}"
 EndProject
@@ -14,6 +14,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependences", "Dependences", "{52104FAE-CB77-4569-B3DC-4819A1BE2D34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SvgConverter", "Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj", "{D1B291FE-A21B-4C27-930D-39CC2C963E13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,9 +41,18 @@ Global
 		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6C1204B-1881-4B1E-9726-770A7591DDAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1B291FE-A21B-4C27-930D-39CC2C963E13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1B291FE-A21B-4C27-930D-39CC2C963E13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1B291FE-A21B-4C27-930D-39CC2C963E13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1B291FE-A21B-4C27-930D-39CC2C963E13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A005356B-D652-418D-A970-77E7B704F5F7} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
+		{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
+		{D1B291FE-A21B-4C27-930D-39CC2C963E13} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4D0A040C-DC95-444E-A788-FDA822ED2244}

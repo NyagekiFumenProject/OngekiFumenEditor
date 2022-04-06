@@ -1,3 +1,6 @@
 [submodule "gemini"]
-	path = gemini
+	path = Dependences/gemini
 	url = https://github.com/MikiraSora/gemini
+[submodule "SvgToXaml"]
+	path = Dependences/SvgToXaml
+	url = https://github.com/BerndK/SvgToXaml
