@@ -22,8 +22,6 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
     {
         public SvgPrefab RefSvgPrefab => (SvgPrefab)ReferenceOngekiObject;
 
-        protected DrawingGroup drawingGroup = default;
-
         public Rect GeometryBound => ProcessingDrawingGroup?.Bounds ?? Rect.Empty;
 
         private DrawingGroup processedDrawingGroup = default;
@@ -37,24 +35,11 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
             }
         }
 
-        public override void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
-        {
-            base.OnObjectCreated(createFrom, editorViewModel);
-            ReloadSvgFile();
-        }
-
         protected override void OnOngekiObjectPropChanged(object sender, PropertyChangedEventArgs arg)
         {
             switch (arg.PropertyName)
             {
-                case nameof(SvgPrefab.SvgFile):
-                    ReloadSvgFile();
-                    break;
-                case nameof(SvgPrefab.Rotation):
-                case nameof(SvgPrefab.Scale):
-                case nameof(SvgPrefab.Opacity):
-                case nameof(RangeValue.CurrentValue):
-                case nameof(SvgPrefab.Tolerance):
+                case nameof(SvgPrefab.ProcessingDrawingGroup):
                     RebuildGeometry();
                     break;
                 default:
@@ -63,114 +48,9 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
             }
         }
 
-        private void ReloadSvgFile()
-        {
-            CleanGeometry();
-
-            if (RefSvgPrefab.SvgFile is null)
-                return;
-
-            drawingGroup = ConverterLogic.ConvertSvgToObject(RefSvgPrefab.SvgFile.FullName, ResultMode.DrawingGroup, new WpfDrawingSettings()
-            {
-                IncludeRuntime = false,
-                TextAsGeometry = true,
-                OptimizePath = true,
-                EnsureViewboxSize = true
-            }, out _, new()) as DrawingGroup;
-            drawingGroup.Freeze();
-
-            RebuildGeometry();
-        }
-
-        private void CleanGeometry()
-        {
-            drawingGroup = null;
-            ProcessingDrawingGroup = default;
-        }
-
         private void RebuildGeometry()
         {
-            ProcessingDrawingGroup = default;
-            var inter = drawingGroup.Children.FirstOrDefault();
-            if (inter is null)
-                return;
-
-            var procDrawingGroup = new DrawingGroup();
-            var transform = new TransformGroup();
-            transform.Children.Add(new ScaleTransform()
-            {
-                ScaleX = RefSvgPrefab.Scale,
-                ScaleY = RefSvgPrefab.Scale,
-            });
-            transform.Children.Add(new RotateTransform()
-            {
-                Angle = RefSvgPrefab.Rotation.CurrentValue
-            });
-
-            Geometry GenFlattedGeometry(Geometry geometry)
-            {
-                /*
-                if (geometry is RectangleGeometry)
-                    return default;
-                */
-                /*
-                var r = geometry.GetFlattenedPathGeometry();
-                var flattedGeometry = new PathGeometry();
-                var fig = new PathFigure();
-                r.GetPointAtFractionLength(0, out var point, out _);
-                fig.StartPoint = point;
-                for (var i = RefSvgPrefab.Tolerance; i < 1; i += RefSvgPrefab.Tolerance)
-                {
-                    r.GetPointAtFractionLength(i, out point, out _);
-                    fig.Segments.Add(new LineSegment()
-                    {
-                        IsStroked = true,
-                        Point = point,
-                    });
-                }
-                r.GetPointAtFractionLength(1, out point, out _);
-                fig.Segments.Add(new LineSegment()
-                {
-                    IsStroked = true,
-                    Point = point,
-                });
-                flattedGeometry.Figures.Add(fig);
-                /**/
-                var flattedGeometry = geometry.GetFlattenedPathGeometry(RefSvgPrefab.Tolerance.CurrentValue, ToleranceType.Absolute);
-                flattedGeometry.Transform = transform;
-                flattedGeometry.Freeze();
-                return flattedGeometry;
-            }
-
-            void VisitGeometryDrawing(GeometryDrawing geometryDrawing, DrawingGroup parentGroup = default)
-            {
-                if (GenFlattedGeometry(geometryDrawing.Geometry) is not Geometry geometry)
-                    return;
-
-                var newDrawing = new GeometryDrawing();
-                newDrawing.Geometry = geometry;
-                newDrawing.Brush = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
-                newDrawing.Pen = new Pen(new SolidColorBrush(Color.FromArgb((byte)(RefSvgPrefab.Opacity.CurrentValue * 255), 0, 0, 255)), 2);
-                newDrawing.Freeze();
-
-                //append to list
-                procDrawingGroup.Children.Add(newDrawing);
-            }
-
-            void VisitGroup(DrawingGroup group, DrawingGroup parentGroup = default)
-            {
-                foreach (var child in group.Children.OfType<DrawingGroup>())
-                    VisitGroup(child, group);
-                foreach (var child in group.Children.OfType<GeometryDrawing>())
-                    VisitGeometryDrawing(child, group);
-            }
-
-            VisitGroup(drawingGroup);
-
-            procDrawingGroup.Freeze();
-            ProcessingDrawingGroup = procDrawingGroup;
-
-            Log.LogDebug($"Generate {ProcessingDrawingGroup.Children} geometries from svg file: {RefSvgPrefab.SvgFile}.");
+            ProcessingDrawingGroup = RefSvgPrefab.ProcessingDrawingGroup;
         }
     }
 }
