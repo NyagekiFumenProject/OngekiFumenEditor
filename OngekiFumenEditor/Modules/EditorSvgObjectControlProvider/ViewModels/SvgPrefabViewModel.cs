@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
         {
             switch (arg.PropertyName)
             {
-                case nameof(SvgPrefab.SvgFilePath):
+                case nameof(SvgPrefab.SvgFile):
                     ReloadSvgFile();
                     break;
                 case nameof(SvgPrefab.Rotation):
@@ -65,10 +65,10 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
         {
             CleanGeometry();
 
-            if (!File.Exists(RefSvgPrefab.SvgFilePath))
+            if (RefSvgPrefab.SvgFile is null)
                 return;
 
-            drawingGroup = ConverterLogic.ConvertSvgToObject(RefSvgPrefab.SvgFilePath, ResultMode.DrawingGroup, new WpfDrawingSettings()
+            drawingGroup = ConverterLogic.ConvertSvgToObject(RefSvgPrefab.SvgFile.FullName, ResultMode.DrawingGroup, new WpfDrawingSettings()
             {
                 IncludeRuntime = false,
                 TextAsGeometry = true,
@@ -102,7 +102,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
             });
             transform.Children.Add(new RotateTransform()
             {
-                Angle = RefSvgPrefab.Rotation
+                Angle = RefSvgPrefab.Rotation.CurrentValue
             });
 
             Geometry GenFlattedGeometry(Geometry geometry)
@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
                 });
                 flattedGeometry.Figures.Add(fig);
                 /**/
-                var flattedGeometry = geometry.GetFlattenedPathGeometry(RefSvgPrefab.Tolerance, ToleranceType.Absolute);
+                var flattedGeometry = geometry.GetFlattenedPathGeometry(RefSvgPrefab.Tolerance.CurrentValue, ToleranceType.Absolute);
                 flattedGeometry.Transform = transform;
                 flattedGeometry.Freeze();
                 return flattedGeometry;
@@ -168,7 +168,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
             procDrawingGroup.Freeze();
             ProcessingDrawingGroup = procDrawingGroup;
 
-            Log.LogDebug($"Generate {ProcessingDrawingGroup.Children} geometries from svg file: {RefSvgPrefab.SvgFilePath}.");
+            Log.LogDebug($"Generate {ProcessingDrawingGroup.Children} geometries from svg file: {RefSvgPrefab.SvgFile}.");
         }
     }
 }

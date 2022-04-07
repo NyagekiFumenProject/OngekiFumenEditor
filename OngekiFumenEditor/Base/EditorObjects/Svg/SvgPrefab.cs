@@ -15,11 +15,15 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         public override string IDShortName => "SVG";
         public override Type ModelViewType => typeof(SvgPrefabViewModel);
 
-        private float rotation = 0;
-        public float Rotation
+        private RangeValue rotation = RangeValue.Create(0, 360f, 0f);
+        public RangeValue Rotation
         {
             get => rotation;
-            set => Set(ref rotation, value);
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(rotation, value);
+                Set(ref rotation, value);
+            }
         }
 
         private float scale = 0;
@@ -29,27 +33,42 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             set => Set(ref scale, value);
         }
 
-        private float opacity = 1;
-        public float Opacity
+        private RangeValue opacity = RangeValue.CreateNormalized();
+        public RangeValue Opacity
         {
             get => opacity;
-            set => Set(ref opacity, value);
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(opacity, value);
+                Set(ref opacity, value);
+            }
         }
 
-        private float tolerance = 0.1f;
-        public float Tolerance
+        private RangeValue tolerance = RangeValue.Create(0, 20f, 1f);
+        public RangeValue Tolerance
         {
             get => tolerance;
-            set => Set(ref tolerance, value);
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(tolerance, value);
+                Set(ref tolerance, value);
+            }
         }
 
-        private string svgFilePath = "";
-        public string SvgFilePath
+        private FileInfo svgFile = null;
+        public FileInfo SvgFile
         {
-            get => svgFilePath;
-            set => Set(ref svgFilePath, value);
+            get => svgFile;
+            set => Set(ref svgFile, value);
         }
 
-        public override string ToString() => $"{base.ToString()} R:∠{Rotation}° O:{Opacity * 100:F2}% S:{Rotation:F2}x File:{Path.GetFileName(SvgFilePath)}";
+        public SvgPrefab()
+        {
+            Tolerance = Tolerance;
+            Opacity = Opacity;
+            Rotation = Rotation;
+        }
+
+        public override string ToString() => $"{base.ToString()} R:∠{Rotation}° O:{Opacity.ValuePercent * 100:F2}% S:{Rotation:F2}x File:{Path.GetFileName(SvgFile?.Name)}";
     }
 }

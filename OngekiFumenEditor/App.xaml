@@ -14,6 +14,8 @@
             </converters:EnumToIntConverter>
             <valueconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter">
             </valueconverters:BoolToVisibilityConverter>
+            <valueconverters:ReverseBoolToVisibilityConverter x:Key="ReverseBoolToVisibilityConverter">
+            </valueconverters:ReverseBoolToVisibilityConverter>
             <converters:CurvePathControlVisibilityConverter x:Key="CurvePathControlVisibilityConverter">
             </converters:CurvePathControlVisibilityConverter>
             <converters:FadeStringEnumToStringConverter x:Key="FadeStringEnumToStringConverter">

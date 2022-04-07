@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             get => tGrid;
             set
             {
-                this.RegisterOrUnregisterPropertyChangeEvent(TGrid, value);
+                this.RegisterOrUnregisterPropertyChangeEvent(tGrid, value);
                 Set(ref tGrid, value);
             }
         }
@@ -72,7 +72,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             get => xGrid;
             set
             {
-                this.RegisterOrUnregisterPropertyChangeEvent(XGrid, value);
+                this.RegisterOrUnregisterPropertyChangeEvent(xGrid, value);
                 Set(ref xGrid, value);
             }
         }
