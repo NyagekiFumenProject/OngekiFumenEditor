@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private float scale = 0;
+        private float scale = 1;
         public float Scale
         {
             get => scale;

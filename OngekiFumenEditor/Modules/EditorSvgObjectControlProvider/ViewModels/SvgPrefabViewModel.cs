@@ -1,4 +1,5 @@
 ﻿using Gemini.Modules.Toolbox;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -52,6 +53,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
                 case nameof(SvgPrefab.Rotation):
                 case nameof(SvgPrefab.Scale):
                 case nameof(SvgPrefab.Opacity):
+                case nameof(RangeValue.CurrentValue):
                 case nameof(SvgPrefab.Tolerance):
                     RebuildGeometry();
                     break;
@@ -148,7 +150,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
                 var newDrawing = new GeometryDrawing();
                 newDrawing.Geometry = geometry;
                 newDrawing.Brush = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
-                newDrawing.Pen = new Pen(new SolidColorBrush(Color.FromArgb(255, 0, 0, 255)), 2);
+                newDrawing.Pen = new Pen(new SolidColorBrush(Color.FromArgb((byte)(RefSvgPrefab.Opacity.CurrentValue * 255), 0, 0, 255)), 2);
                 newDrawing.Freeze();
 
                 //append to list
