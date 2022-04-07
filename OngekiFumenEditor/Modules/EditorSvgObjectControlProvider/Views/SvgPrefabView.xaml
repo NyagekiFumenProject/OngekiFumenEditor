@@ -10,11 +10,19 @@
     mc:Ignorable="d">
     <Canvas>
         <Rectangle
-            Width="15"
-            Height="15"
+            Width="14"
+            Height="14"
             Fill="White">
+            <Rectangle.RenderTransform>
+                <TranslateTransform X="-7" Y="-7">
+                </TranslateTransform>
+            </Rectangle.RenderTransform>
         </Rectangle>
         <Image IsHitTestVisible="False">
+            <Image.RenderTransform>
+                <TranslateTransform X="{Binding Point.X}" Y="{Binding Point.Y}">
+                </TranslateTransform>
+            </Image.RenderTransform>
             <Image.Source>
                 <DrawingImage Drawing="{Binding ProcessingDrawingGroup}">
                 </DrawingImage>

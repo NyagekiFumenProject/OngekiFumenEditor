@@ -29,6 +29,29 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
+
+        private RangeValue offsetX = RangeValue.CreateNormalized(0.5f);
+        public RangeValue OffsetX
+        {
+            get => offsetX;
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(offsetX, value);
+                Set(ref offsetX, value);
+            }
+        }
+
+        private RangeValue offsetY = RangeValue.CreateNormalized(0.5f);
+        public RangeValue OffsetY
+        {
+            get => offsetY;
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(offsetY, value);
+                Set(ref offsetY, value);
+            }
+        }
+
         private float scale = 1;
         public float Scale
         {
@@ -79,6 +102,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             Tolerance = Tolerance;
             Opacity = Opacity;
             Rotation = Rotation;
+            OffsetX = OffsetX;
+            OffsetY = OffsetY;
         }
 
         public override void NotifyOfPropertyChange([CallerMemberName] string propertyName = null)
@@ -93,6 +118,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 case nameof(Rotation):
                 case nameof(Scale):
                 case nameof(Opacity):
+                case nameof(OffsetX):
+                case nameof(OffsetY):
                 case nameof(RangeValue.CurrentValue):
                 case nameof(Tolerance):
                     RebuildGeometry();
@@ -135,7 +162,14 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 return;
 
             var procDrawingGroup = new DrawingGroup();
+            var bound = drawingGroup.Bounds;
+
             var transform = new TransformGroup();
+            transform.Children.Add(new TranslateTransform()
+            {
+                X = OffsetX.CurrentValue * bound.Width,
+                Y = OffsetY.CurrentValue * bound.Height
+            });
             transform.Children.Add(new ScaleTransform()
             {
                 ScaleX = Scale,
@@ -145,6 +179,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             {
                 Angle = Rotation.CurrentValue
             });
+            procDrawingGroup.Transform = transform;
 
             Geometry GenFlattedGeometry(Geometry geometry)
             {
@@ -176,7 +211,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 flattedGeometry.Figures.Add(fig);
                 /**/
                 var flattedGeometry = geometry.GetFlattenedPathGeometry(Tolerance.CurrentValue, ToleranceType.Absolute);
-                flattedGeometry.Transform = transform;
                 flattedGeometry.Freeze();
                 return flattedGeometry;
             }

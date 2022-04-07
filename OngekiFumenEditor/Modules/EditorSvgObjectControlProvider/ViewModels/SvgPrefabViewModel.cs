@@ -24,6 +24,13 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
 
         public Rect GeometryBound => ProcessingDrawingGroup?.Bounds ?? Rect.Empty;
 
+        private Point point;
+        public Point Point
+        {
+            get => point;
+            set => Set(ref point, value);
+        }
+
         private DrawingGroup processedDrawingGroup = default;
         public DrawingGroup ProcessingDrawingGroup
         {
@@ -42,10 +49,25 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
                 case nameof(SvgPrefab.ProcessingDrawingGroup):
                     RebuildGeometry();
                     break;
+                case nameof(SvgPrefab.OffsetX):
+                case nameof(SvgPrefab.OffsetY):
+                case nameof(RangeValue.CurrentValue):
+                    RecalculatePoint();
+                    break;
                 default:
                     base.OnOngekiObjectPropChanged(sender, arg);
                     break;
             }
+        }
+
+        private void RecalculatePoint()
+        {
+            var bound = RefSvgPrefab.ProcessingDrawingGroup.Bounds;
+            Point = new Point()
+            {
+                X = -RefSvgPrefab.OffsetX.CurrentValue * bound.Width,
+                Y = -RefSvgPrefab.OffsetY.CurrentValue * bound.Height
+            };
         }
 
         private void RebuildGeometry()
