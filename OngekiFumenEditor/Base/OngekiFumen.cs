@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-        public virtual event PropertyChangedEventHandler ObjectModifiedChanged;
+        public event PropertyChangedEventHandler ObjectModifiedChanged;
 
         public BulletPalleteList BulletPalleteList { get; } = new();
         public BpmList BpmList { get; } = new();
