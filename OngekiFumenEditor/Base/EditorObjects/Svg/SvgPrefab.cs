@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels;
+﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels;
 using OngekiFumenEditor.Utils;
 using SharpVectors.Renderers.Wpf;
 using SvgConverter;
@@ -29,7 +30,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-
         private RangeValue offsetX = RangeValue.CreateNormalized(0.5f);
         public RangeValue OffsetX
         {
@@ -41,6 +41,17 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
+        private RangeValue colorSimilar = RangeValue.Create(1,1000,600);
+        public RangeValue ColorSimilar
+        {
+            get => colorSimilar;
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(colorSimilar, value);
+                Set(ref colorSimilar, value);
+            }
+        }
+
         private RangeValue offsetY = RangeValue.CreateNormalized(0.5f);
         public RangeValue OffsetY
         {
@@ -49,6 +60,16 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(offsetY, value);
                 Set(ref offsetY, value);
+            }
+        }
+
+        private bool enableColorfulLaneSimilar = false;
+        public bool EnableColorfulLaneSimilar
+        {
+            get => enableColorfulLaneSimilar;
+            set
+            {
+                enableColorfulLaneSimilar = value;
             }
         }
 
@@ -104,6 +125,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             Rotation = Rotation;
             OffsetX = OffsetX;
             OffsetY = OffsetY;
+            ColorSimilar = ColorSimilar;
         }
 
         public override void NotifyOfPropertyChange([CallerMemberName] string propertyName = null)
@@ -115,11 +137,13 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 case nameof(SvgFile):
                     ReloadSvgFile();
                     break;
+                case nameof(EnableColorfulLaneSimilar):
                 case nameof(Rotation):
                 case nameof(Scale):
                 case nameof(Opacity):
                 case nameof(OffsetX):
                 case nameof(OffsetY):
+                case nameof(ColorSimilar):
                 case nameof(RangeValue.CurrentValue):
                 case nameof(Tolerance):
                     RebuildGeometry();
@@ -167,8 +191,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             var transform = new TransformGroup();
             transform.Children.Add(new TranslateTransform()
             {
-                X = OffsetX.CurrentValue * bound.Width,
-                Y = OffsetY.CurrentValue * bound.Height
+                X = -OffsetX.CurrentValue * bound.Width,
+                Y = -OffsetY.CurrentValue * bound.Height
             });
             transform.Children.Add(new ScaleTransform()
             {
@@ -222,8 +246,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
                 var newDrawing = new GeometryDrawing();
                 newDrawing.Geometry = geometry;
-                newDrawing.Brush = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
-                newDrawing.Pen = new Pen(new SolidColorBrush(Color.FromArgb((byte)(Opacity.CurrentValue * 255), 0, 0, 255)), 2);
+                newDrawing.Brush = Brushes.Transparent;
+                newDrawing.Pen = CalculateRelativePen(geometryDrawing.Pen);
                 newDrawing.Freeze();
 
                 //append to list
@@ -244,6 +268,40 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             ProcessingDrawingGroup = procDrawingGroup;
 
             Log.LogDebug($"Generate {ProcessingDrawingGroup.Children.Count} geometries from svg file: {SvgFile}.");
+        }
+
+        private Pen CalculateRelativePen(Pen pen)
+        {
+            float ColorDistance(Color a, Color b)
+            {
+                byte ra = a.R, rb = b.R, ga = a.G, gb = b.G, ba = a.B, bb = b.B;
+                var rm = (ra + rb) / 2.0f;
+                var R = (ra - rb);
+                var G = (ga - gb);
+                var B = (ba - bb);
+                return MathF.Sqrt((2 + rm / 256.0f) * MathF.Pow(R, 2) + 4 * MathF.Pow(G, 2) + (2 + (255 - rm) / 256.0f) * MathF.Pow(B, 2));
+            }
+
+            Color PickColor(Color color)
+            {
+                var arr = LaneColor.AllLaneColors;
+                if (!EnableColorfulLaneSimilar)
+                    arr = arr.Where(x => x.LaneType != LaneType.Colorful);
+
+                var r = arr
+                    .Select(x => (x.Color, ColorDistance(x.Color, color)))
+                    .OrderByDescending(x => x.Item2)
+                    .Where(x=>x.Item2 > ColorSimilar.CurrentValue);
+
+                return r.Select(x => x.Color).FirstOrDefault();
+            }
+
+            var color = pen?.Brush is SolidColorBrush b ? PickColor(b.Color) : Colors.Green;
+            var brush = new SolidColorBrush(Color.FromArgb((byte)(Opacity.CurrentValue * color.A), color.R, color.G, color.B));
+            brush.Freeze();
+            var p = new Pen(brush, 2);
+            p.Freeze();
+            return p;
         }
 
         public override string ToString() => $"{base.ToString()} R:∠{Rotation}° O:{Opacity.ValuePercent * 100:F2}% S:{Rotation:F2}x File:{Path.GetFileName(SvgFile?.Name)}";

@@ -31,6 +31,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
             set => Set(ref point, value);
         }
 
+
         private DrawingGroup processedDrawingGroup = default;
         public DrawingGroup ProcessingDrawingGroup
         {
