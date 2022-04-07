@@ -135,6 +135,14 @@ namespace OngekiFumenEditor.Utils
             return (y - y1) * 1.0 / by * bx + x1;
         }
 
+        public static double CalculateYFromTwoPointFormFormula(double x, double x1, double y1, double x2, double y2)
+        {
+            var by = y2 - y1;
+            var bx = x2 - x1;
+
+            return (x - x1) / (by * bx) + y1;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateXFromBetweenObjects<T>(T from, T to, FumenVisualEditorViewModel editor, TGrid tGrid) where T : IHorizonPositionObject, ITimelineObject
             => CalculateXFromBetweenObjects(from.TGrid, from.XGrid, to.TGrid, to.XGrid, editor, tGrid);

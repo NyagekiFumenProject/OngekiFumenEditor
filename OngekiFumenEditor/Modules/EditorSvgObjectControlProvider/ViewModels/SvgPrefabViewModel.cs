@@ -107,12 +107,36 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
 
             Geometry GenFlattedGeometry(Geometry geometry)
             {
+                /*
                 if (geometry is RectangleGeometry)
                     return default;
+                */
+                /*
+                var r = geometry.GetFlattenedPathGeometry();
+                var flattedGeometry = new PathGeometry();
+                var fig = new PathFigure();
+                r.GetPointAtFractionLength(0, out var point, out _);
+                fig.StartPoint = point;
+                for (var i = RefSvgPrefab.Tolerance; i < 1; i += RefSvgPrefab.Tolerance)
+                {
+                    r.GetPointAtFractionLength(i, out point, out _);
+                    fig.Segments.Add(new LineSegment()
+                    {
+                        IsStroked = true,
+                        Point = point,
+                    });
+                }
+                r.GetPointAtFractionLength(1, out point, out _);
+                fig.Segments.Add(new LineSegment()
+                {
+                    IsStroked = true,
+                    Point = point,
+                });
+                flattedGeometry.Figures.Add(fig);
+                /**/
                 var flattedGeometry = geometry.GetFlattenedPathGeometry(RefSvgPrefab.Tolerance, ToleranceType.Absolute);
                 flattedGeometry.Transform = transform;
                 flattedGeometry.Freeze();
-                var r = flattedGeometry.GetFlattenedPathGeometry();
                 return flattedGeometry;
             }
 
