@@ -29,7 +29,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public ConnectableStartObject ReferenceStartObject { get; set; }
         public ConnectableObjectBase PrevObject { get; set; }
-        public override int RecordId { get => ReferenceStartObject?.RecordId ?? int.MinValue; set { } }
+        private int recordId = int.MinValue;
+        internal int CacheRecoveryChildIndex { get; set; }
+        public override int RecordId { get => ReferenceStartObject?.RecordId ?? recordId; set => Set(ref recordId, value); }
         private List<LaneCurvePathControlObject> pathControls = new();
         public IReadOnlyList<LaneCurvePathControlObject> PathControls => pathControls;
         public bool IsCurvePath => PathControls.Count > 0;

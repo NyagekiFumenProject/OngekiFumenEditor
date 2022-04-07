@@ -54,15 +54,34 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public void AddChildObject(ConnectableChildObjectBase child)
         {
+            var insertIdx = child.CacheRecoveryChildIndex;
             if (!children.Contains(child))
             {
-                child.PrevObject = children.LastOrDefault() ?? this as ConnectableObjectBase;
-                children.Add(child);
+                if (insertIdx >= 0)
+                {
+                    var nextObj = children.ElementAtOrDefault(insertIdx);
+                    var prevObj = children.ElementAtOrDefault(insertIdx - 1) ?? this as ConnectableObjectBase;
+                    RemoveConnector(prevObj, nextObj);
+                    child.PrevObject = prevObj;
+
+                    if (nextObj is not null)
+                    {
+                        nextObj.PrevObject = child;
+                        AddConnector(GenerateConnector(nextObj.PrevObject, nextObj));
+                    }
+                    children.Insert(insertIdx, child);
+                }
+                else
+                {
+                    child.PrevObject = Children.LastOrDefault() ?? this as ConnectableObjectBase;
+                    children.Add(child);
+                }
                 NotifyOfPropertyChange(() => Children);
                 AddConnector(GenerateConnector(child.PrevObject, child));
                 child.PropertyChanged += OnPropertyChanged;
             }
             child.ReferenceStartObject = this;
+            child.RecordId = RecordId;
         }
 
         private void RemoveConnector(ConnectorLineBase<ConnectableObjectBase> connector)
@@ -116,6 +135,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
                         NotifyOfPropertyChange(() => Children);
                         child.PropertyChanged += OnPropertyChanged;
+                        child.RecordId = RecordId;
                         break;
                     }
                 }
@@ -129,6 +149,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public void RemoveChildObject(ConnectableChildObjectBase child)
         {
+            var idx = children.IndexOf(child);
             children.Remove(child);
 
             RemoveAnyConnector(child, child);
@@ -144,6 +165,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
             child.ReferenceStartObject = default;
             child.PropertyChanged -= OnPropertyChanged;
+            child.CacheRecoveryChildIndex = idx;
             NotifyOfPropertyChange(() => Children);
         }
 
