@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private RangeValue colorSimilar = RangeValue.Create(1,1000,600);
+        private RangeValue colorSimilar = RangeValue.Create(1, 1000, 600);
         public RangeValue ColorSimilar
         {
             get => colorSimilar;
@@ -69,7 +69,17 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             get => enableColorfulLaneSimilar;
             set
             {
-                enableColorfulLaneSimilar = value;
+                Set(ref enableColorfulLaneSimilar, value);
+            }
+        }
+
+        private bool showOriginColor = true;
+        public bool ShowOriginColor
+        {
+            get => showOriginColor;
+            set
+            {
+                Set(ref showOriginColor, value);
             }
         }
 
@@ -140,6 +150,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 case nameof(EnableColorfulLaneSimilar):
                 case nameof(Rotation):
                 case nameof(Scale):
+                case nameof(ShowOriginColor):
                 case nameof(Opacity):
                 case nameof(OffsetX):
                 case nameof(OffsetY):
@@ -246,7 +257,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
                 var newDrawing = new GeometryDrawing();
                 newDrawing.Geometry = geometry;
-                newDrawing.Brush = Brushes.Transparent;
+                newDrawing.Brush = geometryDrawing.Brush;
                 newDrawing.Pen = CalculateRelativePen(geometryDrawing.Pen);
                 newDrawing.Freeze();
 
@@ -291,11 +302,12 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 var r = arr
                     .Select(x => (x.Color, ColorDistance(x.Color, color)))
                     .OrderByDescending(x => x.Item2)
-                    .Where(x=>x.Item2 > ColorSimilar.CurrentValue);
+                    .Where(x => x.Item2 > ColorSimilar.CurrentValue);
 
                 return r.Select(x => x.Color).FirstOrDefault();
             }
-
+            if (ShowOriginColor)
+                return pen;
             var color = pen?.Brush is SolidColorBrush b ? PickColor(b.Color) : Colors.Green;
             var brush = new SolidColorBrush(Color.FromArgb((byte)(Opacity.CurrentValue * color.A), color.R, color.G, color.B));
             brush.Freeze();
