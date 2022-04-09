@@ -310,27 +310,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Redraw(RedrawTarget.TGridUnitLines);
         }
 
-        internal void OnSelectPropertyChanged(DisplayObjectViewModelBase obj, bool value)
-        {
-            if (value)
-            {
-                if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
-                {
-                    foreach (var o in SelectObjects.Where(x => x != obj))
-                        o.IsSelected = false;
-                }
-                if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser)
-                    propertyBrowser.SetCurrentOngekiObject(SelectObjects.Count() == 1 ? SelectObjects.First().ReferenceOngekiObject : default, this);
-            }
-            else
-            {
-                if (IoC.Get<IFumenObjectPropertyBrowser>() is IFumenObjectPropertyBrowser propertyBrowser && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
-                    propertyBrowser.SetCurrentOngekiObject(default, this);
-            }
-
-            NotifyOfPropertyChange(() => SelectObjects);
-        }
-
         #region Keyboard Actions
 
         public void KeyboardAction_DeleteSelectingObjects()
@@ -530,14 +509,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
             {
-                foreach (var o in SelectObjects.Where(x=> !expects.Contains(x)))
+                foreach (var o in SelectObjects.Where(x => !expects.Contains(x)))
                     o.IsSelected = false;
             }
         }
 
         public void NotifyObjectClicked(DisplayObjectViewModelBase obj)
         {
-            obj.IsSelected = !obj.IsSelected;
+            if (SelectObjects.Take(2).Count() > 1) //比如你目前有多个已选择的，但你单点了一个
+                obj.IsSelected = true;
+            else
+                obj.IsSelected = !obj.IsSelected;
             TryCancelAllObjectSelecting(obj);
         }
 

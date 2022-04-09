@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
             set
             {
                 ((ConnectableChildObjectBase)ReferenceOngekiObject).IsSelecting = value;
-                EditorViewModel?.OnSelectPropertyChanged(this, value);
+                //EditorViewModel?.OnSelectPropertyChanged(this, value);
                 NotifyOfPropertyChange(() => IsSelected);
             }
         }
