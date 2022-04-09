@@ -40,7 +40,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 isSelected = value;
                 NotifyOfPropertyChange(() => IsSelected);
-                EditorViewModel?.OnSelectPropertyChanged(this, value);
             }
         }
 
@@ -139,10 +138,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //Log.LogInfo($"OnDragStart");
         }
 
-        public virtual void OnMouseClick(Point pos)
-        {
-            IsSelected = !IsSelected;
-        }
+        public virtual void OnMouseClick(Point pos) => EditorViewModel?.NotifyObjectClicked(this);
 
         public virtual void MoveCanvas(Point relativePoint)
         {

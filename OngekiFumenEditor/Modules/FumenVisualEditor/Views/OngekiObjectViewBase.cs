@@ -27,31 +27,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         private static DropShadowEffect SelectEffect = new DropShadowEffect() { ShadowDepth = 0, Color = Colors.Yellow, BlurRadius = 25 };
         private readonly static LambdaConverter<bool, Effect> isSelectConverter = new(o => o ? SelectEffect : default);
 
-        private bool mouseMove = false;
-
         public OngekiObjectViewBase()
         {
             SetBinding(EffectProperty, new Binding("IsSelected")
             {
                 Converter = isSelectConverter
             });
-
-            MouseLeftButtonDown += (_, _) =>
-            {
-                //Log.LogInfo("OngekiObjectViewBase.MouseDown");
-                mouseMove = false;
-            };
-            MouseMove += (_, e) =>
-            {
-                //Log.LogInfo("OngekiObjectViewBase.MouseMove");
-                mouseMove = true;
-            };
-            MouseLeftButtonUp += (_, e) =>
-            {
-                //Log.LogInfo("OngekiObjectViewBase.MouseUp");
-                if (!mouseMove)
-                    ViewModel?.OnMouseClick(default);
-            };
         }
     }
 }

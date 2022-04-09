@@ -241,6 +241,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
+        private DisplayObjectViewModelBase mouseDownHitObject;
+        private Point mouseDownHitObjectPosition;
 
         public void MenuItemAction_RememberSelectedObjectAudioTime()
         {
@@ -292,12 +294,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 .OfType<DisplayObjectViewModelBase>()
                 .Where(x => selectionRect.Contains(x.ReferenceOngekiObject is not IHorizonPositionObject ? selectionRect.X : x.CanvasX, x.CanvasY + Setting.JudgeLineOffsetY));
 
-            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
-                foreach (var o in SelectObjects)
-                    o.IsSelected = false;
-
             foreach (var o in selectObjects)
+            {
                 o.IsSelected = true;
+            }
         }
 
         public void OnFocusableChanged(ActionExecutionContext e)
@@ -428,7 +428,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
-            if (IsRangeSelecting)
+            if (IsRangeSelecting && SelectionCurrentCursorPosition != SelectionStartPosition)
             {
                 SelectRangeObjects(SelectionRect);
             }
@@ -436,7 +436,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
                 if (IsDragging)
+                {
                     SelectObjects.ToArray().ForEach(x => x.OnDragEnd(pos));
+                }
+                else
+                {
+                    mouseDownHitObject?.OnMouseClick(mouseDownHitObjectPosition);
+                }
             }
 
             IsMouseDown = false;
@@ -459,18 +465,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var position = Mouse.GetPosition(view.Parent as IInputElement);
                 var hitInputElement = (view.Parent as FrameworkElement)?.InputHitTest(position);
                 var hitOngekiObjectViewModel = (hitInputElement as FrameworkElement)?.DataContext as DisplayObjectViewModelBase;
+                mouseDownHitObject = null;
+                mouseDownHitObjectPosition = default;
 
                 if (hitOngekiObjectViewModel is null)
                 {
+                    TryCancelAllObjectSelecting();
+
                     //enable show selection
                     SelectionStartPosition = position;
                     SelectionCurrentCursorPosition = position;
                     SelectionVisibility = Visibility.Visible;
-                    //Log.LogDebug($"SelectionVisibility = Visible");
                 }
                 else
                 {
                     SelectionVisibility = Visibility.Collapsed;
+                    Log.LogDebug($"hitOngekiObjectViewModel = {hitOngekiObjectViewModel.ReferenceOngekiObject}");
+                    mouseDownHitObject = hitOngekiObjectViewModel;
+                    mouseDownHitObjectPosition = position;
                 }
             }
             (e.View as FrameworkElement)?.Focus();
@@ -511,6 +523,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 SelectObjects.ForEach(x => dragCall(x, pos));
             }
         }
+
+        #region Object Click&Selection
+
+        public void TryCancelAllObjectSelecting(params DisplayObjectViewModelBase[] expects)
+        {
+            if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
+            {
+                foreach (var o in SelectObjects.Where(x=> !expects.Contains(x)))
+                    o.IsSelected = false;
+            }
+        }
+
+        public void NotifyObjectClicked(DisplayObjectViewModelBase obj)
+        {
+            obj.IsSelected = !obj.IsSelected;
+            TryCancelAllObjectSelecting(obj);
+        }
+
+        #endregion
 
         private void RecalculateSelectionRect()
         {
