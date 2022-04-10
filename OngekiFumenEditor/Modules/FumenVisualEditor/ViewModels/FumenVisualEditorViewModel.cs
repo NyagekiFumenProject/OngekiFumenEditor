@@ -151,8 +151,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
         public ObservableCollection<IEditorDisplayableViewModel> EditorViewModels { get; } = new();
-        public bool IsDragging { get; private set; }
-        public bool IsMouseDown { get; private set; }
+
+        private bool isDragging;
+        private bool isMouseDown;
+
+        public bool BrushMode { get; set; }
 
         public FumenVisualEditorViewModel() : base()
         {

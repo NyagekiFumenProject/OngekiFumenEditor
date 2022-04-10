@@ -242,7 +242,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
         private DisplayObjectViewModelBase mouseDownHitObject;
-        private Point mouseDownHitObjectPosition;
+        private Point? mouseDownHitObjectPosition;
 
         public void MenuItemAction_RememberSelectedObjectAudioTime()
         {
@@ -404,7 +404,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
+            if (!(isMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
             if (IsRangeSelecting && SelectionCurrentCursorPosition != SelectionStartPosition)
@@ -414,19 +414,55 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             else
             {
                 var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
-                if (IsDragging)
+                if (isDragging)
                 {
                     SelectObjects.ToArray().ForEach(x => x.OnDragEnd(pos));
                 }
                 else
                 {
-                    mouseDownHitObject?.OnMouseClick(mouseDownHitObjectPosition);
+                    //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
+                    if (mouseDownHitObjectPosition is Point p)
+                    {
+                        if (mouseDownHitObject is null)
+                        {
+                            //for object brush
+                            if (BrushMode)
+                            {
+                                TryApplyBrushObject(p);
+                            }
+                        }
+                        else
+                        {
+                            mouseDownHitObject?.OnMouseClick(p);
+                        }
+                    }
                 }
             }
 
-            IsMouseDown = false;
-            IsDragging = false;
+            isMouseDown = false;
+            isDragging = false;
             SelectionVisibility = Visibility.Collapsed;
+        }
+
+        private void TryApplyBrushObject(Point p)
+        {
+            if (!SelectObjects.IsOnlyOne(out var copySouceObj))
+                return;
+
+            var newObj = copySouceObj.Copy();
+            if (newObj is null)
+            {
+                Log.LogInfo($"笔刷模式下不支持创建{copySouceObj.ReferenceOngekiObject.Name}");
+                return;
+            }
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("刷子物件添加", () =>
+            {
+                //todo
+            }, () =>
+            {
+                //todo
+            }));
         }
 
         public void OnMouseDown(ActionExecutionContext e)
@@ -439,8 +475,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if ((e.EventArgs as MouseEventArgs).LeftButton == MouseButtonState.Pressed)
             {
-                IsMouseDown = true;
-                IsDragging = false;
+                isMouseDown = true;
+                isDragging = false;
                 var position = Mouse.GetPosition(view.Parent as IInputElement);
                 var hitInputElement = (view.Parent as FrameworkElement)?.InputHitTest(position);
                 var hitOngekiObjectViewModel = (hitInputElement as FrameworkElement)?.DataContext as DisplayObjectViewModelBase;
@@ -459,7 +495,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 else
                 {
                     SelectionVisibility = Visibility.Collapsed;
-                    Log.LogDebug($"hitOngekiObjectViewModel = {hitOngekiObjectViewModel.ReferenceOngekiObject}");
+                    //Log.LogDebug($"hitOngekiObjectViewModel = {hitOngekiObjectViewModel.ReferenceOngekiObject}");
                     mouseDownHitObject = hitOngekiObjectViewModel;
                     mouseDownHitObjectPosition = position;
                 }
@@ -475,11 +511,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
+            if (!(isMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
-            var r = IsDragging;
-            IsDragging = true;
+            var r = isDragging;
+            isDragging = true;
             var dragCall = new Action<DisplayObjectViewModelBase, Point>((vm, pos) =>
             {
                 if (r)
