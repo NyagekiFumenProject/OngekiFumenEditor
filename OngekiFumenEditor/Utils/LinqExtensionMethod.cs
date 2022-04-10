@@ -284,5 +284,19 @@ namespace OngekiFumenEditor.Utils
         }
 
         public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(this IEnumerable<T> a, Func<T, float> valMapFunc) => MathUtils.SplitByTurningGradient(a, valMapFunc);
+
+        public static bool IsOnlyOne<T>(this IEnumerable<T> a)
+            => IsOnlyOne(a, out _);
+
+        public static bool IsOnlyOne<T>(this IEnumerable<T> a,out T firstElement)
+        {
+            firstElement = default;
+
+            var itor = a.GetEnumerator();
+            if (!itor.MoveNext())
+                return false;
+            firstElement = itor.Current;
+            return !itor.MoveNext();
+        }
     }
 }
