@@ -8,6 +8,7 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Utils;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -158,8 +159,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
             //粘贴已被复制物件
-            SelectObjects.ForEach(x => x.IsSelected = false);
-            IsPreventMutualExclusionSelecting = true;
+            TryCancelAllObjectSelecting();
             var count = 0;
             var newObjects = currentCopiedSources.Select(x => x.Copy()).FilterNull().ToArray();
             var mirrorTGrid = CalculateTGridMirror(newObjects, mirrorOption);
@@ -187,7 +187,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             };
             Log.LogInfo($"已粘贴生成 {count} 个物件.");
-            IsPreventMutualExclusionSelecting = false;
             Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
         }
 
@@ -421,20 +420,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 else
                 {
                     //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
-                    if (mouseDownHitObjectPosition is Point p)
+
+                    if (mouseDownHitObject is null)
                     {
-                        if (mouseDownHitObject is null)
+                        //for object brush
+                        if (BrushMode)
                         {
-                            //for object brush
-                            if (BrushMode)
-                            {
-                                TryApplyBrushObject(p);
-                            }
+                            TryApplyBrushObject(pos);
                         }
-                        else
-                        {
+                    }
+                    else
+                    {
+                        if (mouseDownHitObjectPosition is Point p)
                             mouseDownHitObject?.OnMouseClick(p);
-                        }
                     }
                 }
             }
@@ -446,23 +444,43 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryApplyBrushObject(Point p)
         {
-            if (!SelectObjects.IsOnlyOne(out var copySouceObj))
+            if (!CurrentCopiedSources.IsOnlyOne(out var copySouceObj))
                 return;
 
-            var newObj = copySouceObj.Copy();
-            if (newObj is null)
+            var newObjViewModel = copySouceObj.Copy();
+            if (newObjViewModel is null)
             {
                 Log.LogInfo($"笔刷模式下不支持创建{copySouceObj.ReferenceOngekiObject.Name}");
                 return;
             }
 
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("刷子物件添加", () =>
+            p.Y = CanvasHeight - p.Y + MinVisibleCanvasY;
+            var v = new Vector2((float)p.X, (float)p.Y);
+
+            System.Action undo = () =>
             {
-                //todo
-            }, () =>
+                RemoveObject(newObjViewModel);
+                Redraw(RedrawTarget.OngekiObjects);
+            };
+
+            System.Action redo = () =>
             {
-                //todo
-            }));
+                newObjViewModel.OnObjectCreated(newObjViewModel.ReferenceOngekiObject, this);
+                newObjViewModel.MoveCanvas(p);
+                var dist = Vector2.Distance(v, new Vector2((float)newObjViewModel.CanvasX, (float)newObjViewModel.CanvasY));
+                if (dist > 20)
+                {
+                    Log.LogDebug($"dist : {dist:F2} > 20 , undo&&discard");
+                    undo();
+                }
+                else
+                {
+                    AddObject(newObjViewModel);
+                    Redraw(RedrawTarget.OngekiObjects);
+                }
+            };
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("刷子物件添加", redo, undo));
         }
 
         public void OnMouseDown(ActionExecutionContext e)
