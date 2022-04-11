@@ -160,7 +160,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             scrollAnimationClearFunc?.Invoke();
             await fumenSoundPlayer.Init(Editor, AudioPlayer);
-            (var timeline, var scrollViewer) = Editor.BeginScrollAnimation();
+            var scrollViewer = Editor.AnimatedScrollViewer;
             //var stopwatch = new Stopwatch();
             EventHandler func = (e, d) =>
             {

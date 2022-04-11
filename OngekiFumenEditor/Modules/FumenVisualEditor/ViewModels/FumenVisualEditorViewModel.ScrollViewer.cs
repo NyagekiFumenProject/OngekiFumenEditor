@@ -62,15 +62,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public AnimatedScrollViewer AnimatedScrollViewer => (GetView() as FumenVisualEditorView)?.myScrollViewer;
 
-        public (AnimationTimeline, AnimatedScrollViewer) BeginScrollAnimation()
-        {
-            var animation = new DoubleAnimation(TotalDurationHeight, 0, TimeSpan.FromMilliseconds(TotalDurationHeight));
-            Timeline.SetDesiredFrameRate(animation, 60);
-            animation.FillBehavior = FillBehavior.HoldEnd;
-
-            return (animation, AnimatedScrollViewer);
-        }
-
         #endregion
 
         #region ScrollTo

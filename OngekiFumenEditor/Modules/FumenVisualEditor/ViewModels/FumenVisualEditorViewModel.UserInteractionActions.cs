@@ -655,6 +655,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
+        public void OnMouseWheel(ActionExecutionContext e)
+        {
+            var arg = e.EventArgs as MouseWheelEventArgs;
+            arg.Handled = true;
+
+            var delta = Math.Sign(arg.Delta) * AnimatedScrollViewer.VerticalScrollingDistance;
+            var _totalVerticalOffset = Math.Min(Math.Max(0, AnimatedScrollViewer.VerticalOffset - delta), AnimatedScrollViewer.ScrollableHeight);
+            AnimatedScrollViewer.ScrollToVerticalOffsetWithAnimation(_totalVerticalOffset);
+        }
+
         #region Lock/Unlock User Interaction
 
         /// <summary>

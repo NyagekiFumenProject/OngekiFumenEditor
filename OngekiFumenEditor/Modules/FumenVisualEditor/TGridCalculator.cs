@@ -47,8 +47,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return pickTGrid;
         }
 
-        public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor) => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
-        public static IEnumerable<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(BpmList bpmList, int tUnitLength = 240) => bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
+        public static List<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor) => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
+        public static List<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(BpmList bpmList, int tUnitLength = 240) => bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
 
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(FumenVisualEditorViewModel editor, int tUnitLength = 240)
             => GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.MinVisibleCanvasY, editor.MaxVisibleCanvasY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, tUnitLength);
@@ -119,6 +119,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 currentTimeSignatureIndex = nextTimeSignatureIndex;
                 currentTimeSignature = timeSignatures.Count > currentTimeSignatureIndex ? timeSignatures[currentTimeSignatureIndex] : default;
             }
+        }
+
+        public static (TGrid tGrid, double y, int beatIndex) TryPickMagneticBeatTime(float y, float range, FumenVisualEditorViewModel editor, int tUnitLength = 240)
+        {
+            return GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, y - range, y + range, 0, editor.Setting.BeatSplit, tUnitLength).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// 获取某个时间点上最近的节奏点
+        /// </summary>
+        /// <param name="y"></param>
+        /// <param name="editor"></param>
+        /// <param name="tUnitLength"></param>
+        /// <returns></returns>
+        public static (TGrid tGrid, double y, int beatIndex) TryPickClosestBeatTime(float y, FumenVisualEditorViewModel editor, int tUnitLength = 240)
+        {
+            /**
+             ...
+              |
+              |
+            __|__ 
+              |          downFirst
+              |
+            ------ prevY
+             */
+            var timeSignatures = editor.Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(240, editor.Fumen.BpmList);
+
+            (var prevY, _, _, _) = timeSignatures.LastOrDefault(x => x.startY > y);
+            var downFirst =  GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, prevY, y, 0, editor.Setting.BeatSplit, tUnitLength)
+                .LastOrDefault();
+            var nextFirst = GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, y, double.MaxValue, 0, editor.Setting.BeatSplit, tUnitLength)
+                .FirstOrDefault();
+
+            if (Math.Abs(downFirst.y - y) < Math.Abs(nextFirst.y - y))
+                return downFirst;
+            return nextFirst;
         }
     }
 }
