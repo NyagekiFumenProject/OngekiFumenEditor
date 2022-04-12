@@ -242,6 +242,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
         private DisplayObjectViewModelBase mouseDownHitObject;
         private Point? mouseDownHitObjectPosition;
+        private Point mouseStartPosition;
+        /// <summary>
+        /// 表示指针是否出拖动出滚动范围
+        /// </summary>
+        private bool dragOutBound;
 
         public void MenuItemAction_RememberSelectedObjectAudioTime()
         {
@@ -498,8 +503,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var position = Mouse.GetPosition(view.Parent as IInputElement);
                 var hitInputElement = (view.Parent as FrameworkElement)?.InputHitTest(position);
                 var hitOngekiObjectViewModel = (hitInputElement as FrameworkElement)?.DataContext as DisplayObjectViewModelBase;
+
                 mouseDownHitObject = null;
                 mouseDownHitObjectPosition = default;
+                mouseStartPosition = position;
+                dragOutBound = false;
 
                 if (hitOngekiObjectViewModel is null)
                 {
@@ -518,6 +526,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     mouseDownHitObjectPosition = position;
                 }
             }
+
             (e.View as FrameworkElement)?.Focus();
         }
 
@@ -543,12 +552,44 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             });
 
             var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
+            var rp = 1 - pos.Y / CanvasHeight;
+            var srp = 1 - mouseStartPosition.Y / CanvasHeight;
+            var offsetY = 0d;
+
+            //const double dragDist = 0.7;
+            const double trigPrecent = 0.15;
+            const double autoScrollSpeed = 30;
+
+            var offsetYAcc = 0d;
+            if (rp >= (1 - trigPrecent) && dragOutBound)
+                offsetYAcc = (rp - (1 - trigPrecent)) / trigPrecent;
+            else if (rp <= trigPrecent && dragOutBound)
+                offsetYAcc = rp / trigPrecent - 1;
+            else if (rp < 1 - trigPrecent && rp > trigPrecent)
+                dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
+            offsetY = offsetYAcc * autoScrollSpeed;
+            pos.Y = pos.Y + offsetY;
+
+            var prev = AnimatedScrollViewer.CurrentVerticalOffset;
+            var y = MinVisibleCanvasY + Setting.JudgeLineOffsetY + offsetY;
+
+            if (offsetY != 0)
+                ScrollTo(y);
+
+            //Log.LogDebug($"rp:{rp * 100:F2}% offsetYAcc = {offsetYAcc:F2} , offsetY = {offsetY:F2} , sc = {y:F2} , pos.Y = {pos.Y:F2}");
 
             //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
             if (IsRangeSelecting)
             {
                 //拉框
-                SelectionCurrentCursorPosition = pos;
+                var p = pos;
+                p.Y -= 2 * offsetY;
+                SelectionCurrentCursorPosition = p;
+
+                var p2 = SelectionStartPosition;
+                p2.Y += prev - AnimatedScrollViewer.CurrentVerticalOffset;
+                SelectionStartPosition = p2;
+                //Log.LogDebug($"prevY:{-AnimatedScrollViewer.CurrentVerticalOffset + prev:F2} offsetY:{offsetY:F2}");
             }
             else
             {
@@ -590,7 +631,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             y = y - height + Setting.JudgeLineOffsetY;
 
             SelectionRect = new Rect(x, y, width, height);
-            //Log.LogDebug($"SelectionRect = {SelectionRect}");
+            Log.LogDebug($"SelectionRect = {SelectionRect}");
         }
 
         private void UpdateCurrentCursorPosition(ActionExecutionContext e)
@@ -657,6 +698,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseWheel(ActionExecutionContext e)
         {
+            if (IsLocked)
+                return;
+
             var arg = e.EventArgs as MouseWheelEventArgs;
             arg.Handled = true;
 
