@@ -424,7 +424,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
+                    Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
 
                     if (mouseDownHitObject is null)
                     {
@@ -521,7 +521,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 else
                 {
                     SelectionVisibility = Visibility.Collapsed;
-                    //Log.LogDebug($"hitOngekiObjectViewModel = {hitOngekiObjectViewModel.ReferenceOngekiObject}");
+                    Log.LogDebug($"hitOngekiObjectViewModel = {hitOngekiObjectViewModel.ReferenceOngekiObject}");
                     mouseDownHitObject = hitOngekiObjectViewModel;
                     mouseDownHitObjectPosition = position;
                 }

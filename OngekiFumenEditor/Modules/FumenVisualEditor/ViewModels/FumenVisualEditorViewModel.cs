@@ -4,7 +4,9 @@ using Gemini.Framework;
 using Gemini.Modules.Shell.Commands;
 using Microsoft.Win32;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
@@ -129,6 +131,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnFumenObjectModifiedChanged(OngekiObjectBase sender, PropertyChangedEventArgs e)
         {
+            var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+            var curBrowserObj = objBrowser.OngekiObject;
+
             switch (e.PropertyName)
             {
                 case nameof(ISelectableObject.IsSelected):
@@ -136,8 +141,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     {
                         if (!selectable.IsSelected)
                         {
-                            var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-                            var curBrowserObj = objBrowser.OngekiObject;
                             if (curBrowserObj == sender)
                                 objBrowser.SetCurrentOngekiObject(null, this);
                             CurrentSelectedObjects.Remove(selectable);
@@ -146,13 +149,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         {
                             CurrentSelectedObjects.Add(selectable);
                         }
+                        NotifyOfPropertyChange(() => SelectObjects);
+                    }
+                    break;
+                case nameof(ConnectableChildObjectBase.IsAnyControlSelecting):
+                    foreach (var controlPoint in ((ConnectableChildObjectBase)sender).PathControls)
+                    {
+                        var contains = CurrentSelectedObjects.Contains(controlPoint);
+                        if (controlPoint.IsSelected && !contains)
+                            CurrentSelectedObjects.Add(controlPoint);
+                        else if((!controlPoint.IsSelected) && contains)
+                            CurrentSelectedObjects.Remove(controlPoint);
                     }
                     break;
                 default:
                     IsDirty = true;
                     break;
             }
-            
+
         }
 
         private double canvasWidth = default;
