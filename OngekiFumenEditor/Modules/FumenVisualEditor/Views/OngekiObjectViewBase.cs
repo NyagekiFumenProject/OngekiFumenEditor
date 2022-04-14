@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         public OngekiObjectViewBase()
         {
-            SetBinding(EffectProperty, new Binding("IsSelected")
+            SetBinding(EffectProperty, new Binding("ReferenceOngekiObject.IsSelected")
             {
                 Converter = isSelectConverter
             });

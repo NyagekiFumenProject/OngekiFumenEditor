@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-    public abstract class OngekiTimelineObjectBase : OngekiObjectBase, ITimelineObject, IDisplayableObject
+    public abstract class OngekiTimelineObjectBase : OngekiObjectBase, ITimelineObject, IDisplayableObject, ISelectableObject
     {
         private TGrid tGrid = new TGrid();
         public virtual TGrid TGrid
@@ -22,6 +23,13 @@ namespace OngekiFumenEditor.Base
         }
 
         public abstract Type ModelViewType { get; }
+
+        private bool isSelecting = false;
+        public virtual bool IsSelected
+        {
+            get => isSelecting;
+            set => Set(ref isSelecting, value);
+        }
 
         public virtual bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
         {

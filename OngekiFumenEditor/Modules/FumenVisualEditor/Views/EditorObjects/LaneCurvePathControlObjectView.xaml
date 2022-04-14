@@ -12,7 +12,7 @@
         <MultiBinding Converter="{StaticResource CurvePathControlVisibilityConverter}">
             <MultiBinding.Bindings>
                 <Binding Path="EditorViewModel.EditorObjectVisibility" />
-                <Binding Converter="{StaticResource BoolToVisibilityConverter}" Path="ReferenceOngekiObject.RefCurveObject.IsSelecting" />
+                <Binding Converter="{StaticResource BoolToVisibilityConverter}" Path="ReferenceOngekiObject.RefCurveObject.IsSelected" />
                 <Binding Converter="{StaticResource BoolToVisibilityConverter}" Path="ReferenceOngekiObject.RefCurveObject.IsAnyControlSelecting" />
             </MultiBinding.Bindings>
         </MultiBinding>

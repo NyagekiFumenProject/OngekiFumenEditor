@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
@@ -29,16 +30,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public virtual int RenderOrderZ => 5;
         public bool NeedCanvasPointsBinding => true;
 
-        private bool isSelected;
         public virtual bool IsSelected
         {
             get
             {
-                return isSelected;
+                return (ReferenceOngekiObject as ISelectableObject)?.IsSelected ?? false;
             }
             set
             {
-                isSelected = value;
+                if (ReferenceOngekiObject is ISelectableObject selectable)
+                    selectable.IsSelected = value;
                 NotifyOfPropertyChange(() => IsSelected);
             }
         }
@@ -281,6 +282,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 case nameof(GridBase.Unit):
                 case nameof(GridBase.Grid):
                     RecaulateCanvasXY();
+                    break;
+                case nameof(ISelectableObject.IsSelected):
+                    NotifyOfPropertyChange(() => IsSelected);
                     break;
                 default:
                     break;

@@ -11,13 +11,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
     public abstract class ConnectableChildObjectBase : ConnectableObjectBase
     {
-        private bool isSelecting;
-        public bool IsSelecting
-        {
-            get => isSelecting;
-            set => Set(ref isSelecting, value);
-        }
-
         private float curvePrecision = 0.1f;
         public float CurvePrecision
         {
@@ -25,7 +18,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             set => Set(ref curvePrecision, value <= 0 ? 0.01f : value);
         }
 
-        public bool IsAnyControlSelecting => PathControls.Any(x => x.IsSelecting);
+        public bool IsAnyControlSelecting => PathControls.Any(x => x.IsSelected);
 
         public ConnectableStartObject ReferenceStartObject { get; set; }
         public ConnectableObjectBase PrevObject { get; set; }
@@ -54,7 +47,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         {
             switch (e.PropertyName)
             {
-                case nameof(IsSelecting):
+                case nameof(IsSelected):
                     NotifyOfPropertyChange(() => IsAnyControlSelecting);
                     break;
                 case nameof(TGrid):

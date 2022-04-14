@@ -10,13 +10,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.LaneCurve
 {
     public class LaneCurvePathControlObject : OngekiMovableObjectBase
     {
-        private bool isSelecting;
-        public bool IsSelecting
-        {
-            get => isSelecting;
-            set => Set(ref isSelecting, value);
-        }
-
         public int Index { get; set; } = -1;
 
         private ConnectableChildObjectBase refCurveObject;

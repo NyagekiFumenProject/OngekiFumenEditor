@@ -1,4 +1,6 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Utils;
 using System;
 
 namespace Test
@@ -7,10 +9,22 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            foreach (var subs in new[] { 1, 2, 3, 4, 5, 4, 3, 2, 1, 1, 2, 3, 4, 5 }.SplitByTurningGradient(x => x))
+            var sortList = new SortableCollection<TGrid, TGrid>(x => x, nameof(ITimelineObject.TGrid))
             {
-                Console.WriteLine(string.Join(" ",subs));
+                new TGrid(1,0),
+                new TGrid(3,0),
+                new TGrid(2,0),
+                new TGrid(4,0),
+                new TGrid(6,0),
+                new TGrid(5,0),
+            };
+
+            foreach (var item in sortList)
+            {
+                Console.WriteLine(item);
             }
+
+            Console.WriteLine(sortList.FastContains(new (4,2)));
         }
     }
 }
