@@ -1,11 +1,14 @@
+using AngleSharp.Css.Dom;
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Modules.Shell.Commands;
 using Microsoft.Win32;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
@@ -124,9 +127,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private void OnFumenObjectModifiedChanged(object sender, PropertyChangedEventArgs e)
+        private void OnFumenObjectModifiedChanged(OngekiObjectBase sender, PropertyChangedEventArgs e)
         {
-            IsDirty = true;
+            switch (e.PropertyName)
+            {
+                case nameof(ISelectableObject.IsSelected):
+                    if (sender is ISelectableObject selectable)
+                    {
+                        if (!selectable.IsSelected)
+                        {
+                            var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+                            var curBrowserObj = objBrowser.OngekiObject;
+                            if (curBrowserObj == sender)
+                                objBrowser.SetCurrentOngekiObject(null, this);
+                            CurrentSelectedObjects.Remove(selectable);
+                        }
+                        else
+                        {
+                            CurrentSelectedObjects.Add(selectable);
+                        }
+                    }
+                    break;
+                default:
+                    IsDirty = true;
+                    break;
+            }
+            
         }
 
         private double canvasWidth = default;
@@ -150,7 +176,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
-        public ObservableCollection<IEditorDisplayableViewModel> EditorViewModels { get; } = new();
+        public HashSet<IEditorDisplayableViewModel> EditorViewModels { get; } = new();
+        public ObservableCollection<ISelectableObject> CurrentSelectedObjects { get; } = new();
 
         private bool isDragging;
         private bool isMouseDown;

@@ -602,19 +602,35 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void TryCancelAllObjectSelecting(params DisplayObjectViewModelBase[] expects)
         {
+            var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+            var curBrowserObj = objBrowser.OngekiObject;
+
             if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
             {
                 foreach (var o in SelectObjects.Where(x => !expects.Contains(x)))
+                {
                     o.IsSelected = false;
+                    if (o.ReferenceOngekiObject == curBrowserObj)
+                        objBrowser.SetCurrentOngekiObject(null, this);
+                }
             }
         }
 
         public void NotifyObjectClicked(DisplayObjectViewModelBase obj)
         {
+            var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+            var curBrowserObj = objBrowser.OngekiObject;
+
             if (SelectObjects.Take(2).Count() > 1) //比如你目前有多个已选择的，但你单点了一个
                 obj.IsSelected = true;
             else
+            {
                 obj.IsSelected = !obj.IsSelected;
+                if (obj.IsSelected)
+                    objBrowser.SetCurrentOngekiObject(obj.ReferenceOngekiObject, this);
+                else if (obj.ReferenceOngekiObject == curBrowserObj)
+                    objBrowser.SetCurrentOngekiObject(null, this);
+            }
             TryCancelAllObjectSelecting(obj);
         }
 
@@ -631,7 +647,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             y = y - height + Setting.JudgeLineOffsetY;
 
             SelectionRect = new Rect(x, y, width, height);
-            Log.LogDebug($"SelectionRect = {SelectionRect}");
+            //Log.LogDebug($"SelectionRect = {SelectionRect}");
         }
 
         private void UpdateCurrentCursorPosition(ActionExecutionContext e)

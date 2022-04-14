@@ -83,11 +83,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             using var d3 = ObjectPool<HashSet<IEditorDisplayableViewModel>>.GetWithUsingDisposable(out var removeObjects, out var _);
             removeObjects.Clear();
 
-            Fumen.GetAllDisplayableObjects(min, max).ForEach(x => allDisplayableObjects.Add(x));
-
-            EditorViewModels
-                .OfType<IEditorDisplayableViewModel>()
-                .ForEach(x => currentDisplayingObjects.Add(x.DisplayableObject));
+            Fumen.GetAllDisplayableObjects(min, max)
+                .Concat(CurrentSelectedObjects.OfType<OngekiObjectBase>().Where(x => Fumen.Contains(x))
+                .OfType<IDisplayableObject>())
+                .Distinct()
+                .ForEach(x => allDisplayableObjects.Add(x));
+            EditorViewModels.OfType<IEditorDisplayableViewModel>().ForEach(x => currentDisplayingObjects.Add(x.DisplayableObject));
 
             //检查当前显示的物件是否还在谱面中，不在就删除，在就更新位置
             foreach (var viewModel in EditorViewModels.OfType<IEditorDisplayableViewModel>())
@@ -101,6 +102,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 EditorViewModels.Remove(removeViewModel);
                 CurrentDisplayEditorViewModels.Remove(removeViewModel);
+                if (removeViewModel.DisplayableObject is ISelectableObject selectable)
+                    CurrentSelectedObjects.Remove(selectable);
             }
 
             //将还没显示的都塞进去显示了
@@ -119,14 +122,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             removeObjects.Clear();//复用
             foreach (var currentDisplaying in CurrentDisplayEditorViewModels)
             {
-                if (!currentDisplaying.DisplayableObject.CheckVisiable(min, max))
+                if ((!currentDisplaying.DisplayableObject.CheckVisiable(min, max)) // 在显示范围外
+                    && (currentDisplaying.DisplayableObject is not ISelectableObject selectable || !selectable.IsSelected)) // 并非选择状态
                 {
                     //remove
                     removeObjects.Add(currentDisplaying);
                 }
             }
             removeObjects.ForEach(x => CurrentDisplayEditorViewModels.Remove(x));
-            CurrentDisplayEditorViewModels.AddRange(EditorViewModels.Where(x => x.DisplayableObject.CheckVisiable(min, max) && !CurrentDisplayEditorViewModels.Contains(x)));
+            CurrentDisplayEditorViewModels
+                .AddRange(EditorViewModels.Where(x => x.DisplayableObject.CheckVisiable(min, max) && !CurrentDisplayEditorViewModels.Contains(x)));
 
             foreach (var viewModel in CurrentDisplayEditorViewModels)
             {
