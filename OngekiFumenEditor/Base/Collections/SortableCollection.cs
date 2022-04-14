@@ -90,5 +90,10 @@ namespace OngekiFumenEditor.Base.Collections
 
             return Enumerable.Range(minIndex, maxIndex - minIndex).Select(i => items[i]);
         }
+
+        public bool FastContains(T obj)
+        {
+            return items.BinarySearch(obj, comparer) >= 0;
+        }
     }
 }
