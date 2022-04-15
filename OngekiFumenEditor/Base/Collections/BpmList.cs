@@ -110,7 +110,7 @@ namespace OngekiFumenEditor.Base.Collections
 
             if (hash != cachedBpmContentHash)
             {
-                Log.LogDebug("recalculate all bpm postions.");
+                //Log.LogDebug("recalculate all bpm postions.");
                 UpdateCachedAllBpmUniformPositionList(tUnitLength);
                 cachedBpmContentHash = hash;
             }

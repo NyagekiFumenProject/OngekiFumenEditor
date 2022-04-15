@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Base.Collections
 
             if (cachedBpmListCacheHash != hash)
             {
-                Log.LogDebug("recalculate all time signatures.");
+                //Log.LogDebug("recalculate all time signatures.");
                 UpdateCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
                 cachedBpmListCacheHash = hash;
             }

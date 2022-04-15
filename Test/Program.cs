@@ -1,5 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using System;
 
@@ -9,22 +11,33 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            var sortList = new SortableCollection<TGrid, TGrid>(x => x, nameof(ITimelineObject.TGrid))
+            var bpmList = new BpmList();
+            bpmList.SetFirstBpm(new BPMChange() { BPM = 120 });
+            var meterList = new MeterChangeList()
             {
-                new TGrid(1,0),
-                new TGrid(3,0),
-                new TGrid(2,0),
-                new TGrid(4,0),
-                new TGrid(6,0),
-                new TGrid(5,0),
+                new MeterChange(){
+                    TGrid = new TGrid(0,0),
+                    Bunbo = 4,
+                    BunShi = 4,
+                }
             };
+            var beatSplit = 1;
 
-            foreach (var item in sortList)
+            foreach (var z in TGridCalculator.GetVisbleTimelines(bpmList, meterList, 0, 1920, 0, beatSplit))
+                Console.WriteLine(z);
+
+            void output(float y , float r)
             {
-                Console.WriteLine(item);
+                Console.WriteLine();
+                var result = TGridCalculator.TryPickMagneticBeatTime(y, r, bpmList, meterList, beatSplit);
+                Console.WriteLine($"y={y}±{r}  ->  {result} ({result.y - y})");
             }
 
-            Console.WriteLine(sortList.FastContains(new (4,2)));
+            output(1500, 1000);
+            output(990, 10);
+            output(1430, 10);
+
+            output(1430, 10000);
         }
     }
 }

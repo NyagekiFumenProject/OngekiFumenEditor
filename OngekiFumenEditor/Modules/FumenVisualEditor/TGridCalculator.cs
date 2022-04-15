@@ -54,6 +54,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.MinVisibleCanvasY, editor.MaxVisibleCanvasY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, tUnitLength);
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, int tUnitLength = 240)
         {
+            minVisibleCanvasY = Math.Max(0, minVisibleCanvasY);
+
             //划线的中止位置
             var endTGrid = ConvertYToTGrid(maxVisibleCanvasY, bpmList, tUnitLength);
             //可显示划线的起始位置
@@ -101,6 +103,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                     //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
                     var y = currentStartY + MathUtils.CalculateBPMLength(currentTGridBase, tGrid, currentBpm.BPM, 240);
 
+                    //节奏线在最低可见线的后面
+                    if (tGrid < currentTGridBaseOffset)
+                    {
+                        i++;
+                        continue;
+                    }
                     //节奏线画不了惹,跳过
                     if (beatCount == 0)
                         break;
@@ -121,10 +129,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             }
         }
 
+        public static (TGrid tGrid, double y, int beatIndex) TryPickMagneticBeatTime(float y, float range, BpmList bpmList, MeterChangeList meterChanges, int beatSplit, int tUnitLength = 240)
+            => GetVisbleTimelines(bpmList, meterChanges, y - range, y + range, 0, beatSplit, tUnitLength).MinBy(x => Math.Abs(x.y - y));
         public static (TGrid tGrid, double y, int beatIndex) TryPickMagneticBeatTime(float y, float range, FumenVisualEditorViewModel editor, int tUnitLength = 240)
-        {
-            return GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, y - range, y + range, 0, editor.Setting.BeatSplit, tUnitLength).FirstOrDefault();
-        }
+            => TryPickMagneticBeatTime(y, range, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Setting.BeatSplit, tUnitLength);
 
         /// <summary>
         /// 获取某个时间点上最近的节奏点
@@ -147,7 +155,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var timeSignatures = editor.Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(240, editor.Fumen.BpmList);
 
             (var prevY, _, _, _) = timeSignatures.LastOrDefault(x => x.startY > y);
-            var downFirst =  GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, prevY, y, 0, editor.Setting.BeatSplit, tUnitLength)
+            var downFirst = GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, prevY, y, 0, editor.Setting.BeatSplit, tUnitLength)
                 .LastOrDefault();
             var nextFirst = GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, y, double.MaxValue, 0, editor.Setting.BeatSplit, tUnitLength)
                 .FirstOrDefault();
