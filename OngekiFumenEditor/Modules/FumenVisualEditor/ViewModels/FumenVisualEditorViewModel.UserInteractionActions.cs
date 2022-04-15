@@ -622,7 +622,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var curBrowserObj = objBrowser.OngekiObject;
 
             if (SelectObjects.Take(2).Count() > 1) //比如你目前有多个已选择的，但你单点了一个
+            {
+                TryCancelAllObjectSelecting(obj);
                 obj.IsSelected = true;
+            }
             else
             {
                 obj.IsSelected = !obj.IsSelected;
@@ -630,8 +633,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     objBrowser.SetCurrentOngekiObject(obj.ReferenceOngekiObject, this);
                 else if (obj.ReferenceOngekiObject == curBrowserObj)
                     objBrowser.SetCurrentOngekiObject(null, this);
+                TryCancelAllObjectSelecting(obj);
             }
-            TryCancelAllObjectSelecting(obj);
         }
 
         #endregion

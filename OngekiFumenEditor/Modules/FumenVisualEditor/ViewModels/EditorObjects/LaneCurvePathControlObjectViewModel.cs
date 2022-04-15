@@ -10,10 +10,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 {
     public class LaneCurvePathControlObjectViewModel : DisplayObjectViewModelBase<LaneCurvePathControlObject>
     {
-        public override void OnMouseClick(Point pos)
-        {
-            ((LaneCurvePathControlObject)ReferenceOngekiObject).IsSelected = true;
-            base.OnMouseClick(pos);
-        }
+
     }
 }
