@@ -625,6 +625,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 TryCancelAllObjectSelecting(obj);
                 obj.IsSelected = true;
+                objBrowser.SetCurrentOngekiObject(obj.ReferenceOngekiObject, this);
             }
             else
             {
