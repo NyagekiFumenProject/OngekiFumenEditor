@@ -26,18 +26,18 @@ namespace Test
             foreach (var z in TGridCalculator.GetVisbleTimelines(bpmList, meterList, 0, 1920, 0, beatSplit))
                 Console.WriteLine(z);
 
-            void output(float y , float r)
+            void output(float y)
             {
                 Console.WriteLine();
-                var result = TGridCalculator.TryPickMagneticBeatTime(y, r, bpmList, meterList, beatSplit);
-                Console.WriteLine($"y={y}±{r}  ->  {result} ({result.y - y})");
+                var result = TGridCalculator.TryPickClosestBeatTime(y, bpmList, meterList, beatSplit);
+                Console.WriteLine($"y={y} ->  {result} ({result.y - y})");
             }
 
-            output(1500, 1000);
-            output(990, 10);
-            output(1430, 10);
+            output(1500);
+            output(990);
+            output(1430);
 
-            output(1430, 10000);
+            output(8888);
         }
     }
 }
