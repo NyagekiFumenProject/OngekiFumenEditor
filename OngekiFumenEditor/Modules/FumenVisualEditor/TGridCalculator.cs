@@ -113,12 +113,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                     //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
                     var y = currentStartY + MathUtils.CalculateBPMLength(currentTGridBase, tGrid, currentBpm.BPM, 240);
 
-                    //节奏线在最低可见线的后面
-                    if (tGrid < currentTGridBaseOffset)
-                    {
-                        i++;
-                        continue;
-                    }
                     //节奏线画不了惹,跳过
                     if (beatCount == 0)
                         break;
@@ -128,7 +122,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                     //超过编辑器谱面范围，后面都不用画了
                     if (tGrid > endTGrid)
                         yield break;
-
+                    //节奏线在最低可见线的后面
+                    if (tGrid < currentTGridBaseOffset)
+                    {
+                        i++;
+                        continue;
+                    }
 
                     yield return (tGrid, y, i % beatCount);
                     i++;

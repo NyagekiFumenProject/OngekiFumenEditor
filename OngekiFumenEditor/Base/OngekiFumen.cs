@@ -272,7 +272,7 @@ namespace OngekiFumenEditor.Base
         {
             if (sender is OngekiObjectBase obj)
             {
-                Log.LogDebug($"Modified property name: {e.PropertyName} , Obj : {obj}");
+                //Log.LogDebug($"Modified property name: {e.PropertyName} , Obj : {obj}");
                 ObjectModifiedChanged?.Invoke(obj, e);
             }
         }

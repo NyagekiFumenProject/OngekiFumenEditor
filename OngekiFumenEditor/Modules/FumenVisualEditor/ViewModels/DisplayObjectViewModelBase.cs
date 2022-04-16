@@ -185,23 +185,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public virtual double? CheckAndAdjustY(double y)
         {
             var enableMagneticAdjust = !(editorViewModel?.Setting.DisableTGridMagneticDock ?? false);
+            if (!enableMagneticAdjust)
+                return y;
+
             var forceMagneticAdjust = editorViewModel?.Setting.ForceMagneticDock ?? false;
-            var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
-            using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
-            mid.Clear();
-            mid.AddRange(enableMagneticAdjust ? editorViewModel?.TGridUnitLineLocations?.Select(z =>
-            {
-                var r = ObjectPool<TempCloseLine>.Get();
-                r.distance = Math.Abs(editorViewModel.TotalDurationHeight - z.Y - y);
-                r.value = z.Y;
-                return r;
-            })?.Where(z => z.distance < dockableTriggerDistance)?.OrderBy(x => x.distance) : Enumerable.Empty<TempCloseLine>());
-            var nearestUnitLine = mid?.FirstOrDefault();
-            double? fin = nearestUnitLine != null ? (editorViewModel.TotalDurationHeight - nearestUnitLine.value) : (forceMagneticAdjust ? null : y);
-            //Log.LogInfo($"before y={y:F2} ,select:({nearestUnitLine?.tGrid}) ,fin:{fin:F2}");
-            mid.ForEach(x => ObjectPool<TempCloseLine>.Return(x));
-            mid.Clear();
-            return fin;
+            var fin = forceMagneticAdjust ? TGridCalculator.TryPickClosestBeatTime((float)y, EditorViewModel, 240) : TGridCalculator.TryPickMagneticBeatTime((float)y, 4, EditorViewModel, 240);
+            var ry = fin.y;
+            if (fin.tGrid == null)
+                ry = y;
+            Log.LogDebug($"before y={y:F2} ,select:({fin.tGrid}) ,fin:{ry:F2}");
+            return ry;
         }
 
         public virtual double? CheckAndAdjustX(double x)
