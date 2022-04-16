@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             OnDragMoving(pos);
             //Log.LogInfo($"OnDragEnd");
-            var oldPos = dragViewStartPoint;
+            var oldPos = dragStartPoint;
             var newPos = new Point(CanvasX, CanvasY);
             EditorViewModel?.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("物件拖动",
                 () =>
@@ -108,21 +108,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public virtual void OnDragMoving(Point pos)
         {
             var movePoint = new Point(
-                dragViewStartPoint.X + (pos.X - dragStartPoint.X),
-                dragViewStartPoint.Y - (pos.Y - dragStartPoint.Y)
+                dragStartPoint.X + (pos.X - dragStartPoint.X),
+                dragStartPoint.Y + (pos.Y - dragStartPoint.Y)
                 );
 
             //这里限制一下
             movePoint.X = Math.Max(0, Math.Min(EditorViewModel.TotalDurationHeight, movePoint.X));
             movePoint.Y = Math.Max(0, Math.Min(EditorViewModel.TotalDurationHeight, movePoint.Y));
 
-            MoveCanvas(movePoint);
+            //Log.LogDebug($"movePoint: ({pos.X:F2},{pos.Y:F2}) -> ({movePoint.X:F2},{movePoint.Y:F2})");
 
-            //Log.LogInfo($"OnDragMoving");
-            //Log.LogInfo($"movePoint: {movePoint}");
+            MoveCanvas(movePoint);
         }
 
-        Point dragViewStartPoint = default;
         Point dragStartPoint = default;
 
         public virtual void OnDragStart(Point pos)
@@ -133,8 +131,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 x = default;
             if (double.IsNaN(y))
                 y = default;
-            dragViewStartPoint = new Point(x, y);
-            dragStartPoint = pos;
+            dragStartPoint = new Point(x, y);
 
             //Log.LogInfo($"OnDragStart");
         }
@@ -193,7 +190,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var ry = fin.y;
             if (fin.tGrid == null)
                 ry = y;
-            Log.LogDebug($"before y={y:F2} ,select:({fin.tGrid}) ,fin:{ry:F2}");
+            //Log.LogDebug($"before y={y:F2} ,select:({fin.tGrid}) ,fin:{ry:F2}");
             return ry;
         }
 

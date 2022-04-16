@@ -420,7 +420,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
                 if (isDragging)
                 {
-                    SelectObjects.ToArray().ForEach(x => x.OnDragEnd(pos));
+                    var cp = pos;
+                    cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY;
+                    SelectObjects.ToArray().ForEach(x => x.OnDragEnd(cp));
                 }
                 else
                 {
@@ -558,7 +560,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             //const double dragDist = 0.7;
             const double trigPrecent = 0.15;
-            const double autoScrollSpeed = 30;
+            const double autoScrollSpeed = 7;
 
             var offsetYAcc = 0d;
             if (rp >= (1 - trigPrecent) && dragOutBound)
@@ -568,21 +570,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             else if (rp < 1 - trigPrecent && rp > trigPrecent)
                 dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
             offsetY = offsetYAcc * autoScrollSpeed;
-            pos.Y = pos.Y + offsetY;
 
             var prev = AnimatedScrollViewer.CurrentVerticalOffset;
             var y = MinVisibleCanvasY + Setting.JudgeLineOffsetY + offsetY;
 
             if (offsetY != 0)
+            {
                 ScrollTo(y);
 
-            //Log.LogDebug($"rp:{rp * 100:F2}% offsetYAcc = {offsetYAcc:F2} , offsetY = {offsetY:F2} , sc = {y:F2} , pos.Y = {pos.Y:F2}");
-
+                var pp = (e.EventArgs as MouseEventArgs).GetPosition(parent);
+                Log.LogDebug($"offsetY = {offsetY:F2} , pos.Y = {pos.Y:F2} pp.Y = {pp.Y:F2} sc:{AnimatedScrollViewer.CurrentVerticalOffset:F2}");
+            }
             //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
             if (IsRangeSelecting)
             {
                 //拉框
                 var p = pos;
+                p.Y += offsetY;
                 p.Y -= 2 * offsetY;
                 SelectionCurrentCursorPosition = p;
 
@@ -594,7 +598,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             else
             {
                 //拖动已选物件
-                SelectObjects.ForEach(x => dragCall(x, pos));
+                var cp = pos;
+                cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY;
+                SelectObjects.ForEach(x => dragCall(x, cp));
+                Log.LogDebug($"");
             }
         }
 
