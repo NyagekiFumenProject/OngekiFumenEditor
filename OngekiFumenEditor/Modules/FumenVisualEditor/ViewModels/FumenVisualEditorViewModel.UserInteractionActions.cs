@@ -12,6 +12,7 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -247,6 +248,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /// 表示指针是否出拖动出滚动范围
         /// </summary>
         private bool dragOutBound;
+        private int currentDraggingActionId;
 
         public void MenuItemAction_RememberSelectedObjectAudioTime()
         {
@@ -447,6 +449,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             isMouseDown = false;
             isDragging = false;
             SelectionVisibility = Visibility.Collapsed;
+            currentDraggingActionId = int.MaxValue;
         }
 
         private void TryApplyBrushObject(Point p)
@@ -534,13 +537,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseMove(ActionExecutionContext e)
         {
+            if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
+                return;
+            OnMouseMove((e.EventArgs as MouseEventArgs).GetPosition(parent));
+        }
+        public async void OnMouseMove(Point pos)
+        {
             //show current cursor position in statusbar
-            UpdateCurrentCursorPosition(e);
+            UpdateCurrentCursorPosition(pos);
 
             if (IsLocked)
                 return;
 
-            if (!(isMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
+            if (!isMouseDown)
                 return;
 
             var r = isDragging;
@@ -553,7 +562,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     vm.OnDragStart(pos);
             });
 
-            var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
             var rp = 1 - pos.Y / CanvasHeight;
             var srp = 1 - mouseStartPosition.Y / CanvasHeight;
             var offsetY = 0d;
@@ -575,12 +583,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var y = MinVisibleCanvasY + Setting.JudgeLineOffsetY + offsetY;
 
             if (offsetY != 0)
-            {
                 ScrollTo(y);
 
-                var pp = (e.EventArgs as MouseEventArgs).GetPosition(parent);
-                Log.LogDebug($"offsetY = {offsetY:F2} , pos.Y = {pos.Y:F2} pp.Y = {pp.Y:F2} sc:{AnimatedScrollViewer.CurrentVerticalOffset:F2}");
-            }
             //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
             if (IsRangeSelecting)
             {
@@ -601,7 +605,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var cp = pos;
                 cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY;
                 SelectObjects.ForEach(x => dragCall(x, cp));
-                Log.LogDebug($"");
+            }
+
+            //持续性的
+            if (offsetY != 0)
+            {
+                var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
+                await Task.Delay(1000 / 120);
+                if (currentDraggingActionId == currentid)
+                    OnMouseMove(pos);
             }
         }
 
@@ -663,16 +675,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void UpdateCurrentCursorPosition(ActionExecutionContext e)
         {
-            var view = e.View as FrameworkElement;
             var contentViewModel = IoC.Get<CommonStatusBar>().SubRightMainContentViewModel;
-            if (view.Parent is not IInputElement parent)
+            if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
             {
                 contentViewModel.Message = string.Empty;
                 CurrentCursorPosition = null;
                 return;
             }
+        }
 
-            var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
+        private void UpdateCurrentCursorPosition(Point pos)
+        {
+            var contentViewModel = IoC.Get<CommonStatusBar>().SubRightMainContentViewModel;
+
             var canvasY = MaxVisibleCanvasY - pos.Y;
             var canvasX = pos.X;
 
