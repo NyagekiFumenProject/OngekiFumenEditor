@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -469,7 +470,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             System.Action undo = () =>
             {
-                RemoveObject(newObjViewModel);
+                if (newObjViewModel.ReferenceOngekiObject is ConnectableChildObjectBase childObject)
+                {
+                    (copySouceObj.ReferenceOngekiObject as ConnectableChildObjectBase)?.ReferenceStartObject.RemoveChildObject(childObject);
+                }
+                else
+                {
+                    RemoveObject(newObjViewModel);
+                }
                 Redraw(RedrawTarget.OngekiObjects);
             };
 
@@ -489,7 +497,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    AddObject(newObjViewModel);
+                    if (newObjViewModel.ReferenceOngekiObject is ConnectableChildObjectBase childObject)
+                    {
+                        (copySouceObj.ReferenceOngekiObject as ConnectableChildObjectBase)?.ReferenceStartObject.AddChildObject(childObject);
+                    }
+                    else
+                    {
+                        AddObject(newObjViewModel);
+                    }
                     Redraw(RedrawTarget.OngekiObjects);
                 }
             };
@@ -610,7 +625,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 //拖动已选物件
                 var cp = pos;
-                cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY; 
+                cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY;
                 SelectObjects.ForEach(x => dragCall(x, cp));
             }
 
@@ -618,7 +633,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (offsetY != 0)
             {
                 var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
-                await Task.Delay(1000/60);
+                await Task.Delay(1000 / 60);
                 if (currentDraggingActionId == currentid)
                     OnMouseMove(pos);
             }
