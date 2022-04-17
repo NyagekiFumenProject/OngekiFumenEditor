@@ -473,7 +473,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 Redraw(RedrawTarget.OngekiObjects);
             };
 
-            System.Action redo = () =>
+            System.Action redo = async () =>
             {
                 newObjViewModel.OnObjectCreated(newObjViewModel.ReferenceOngekiObject, this);
                 newObjViewModel.MoveCanvas(p);
@@ -482,6 +482,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     Log.LogDebug($"dist : {dist:F2} > 20 , undo&&discard");
                     undo();
+
+                    Mouse.OverrideCursor = Cursors.No;
+                    await Task.Delay(100);
+                    Mouse.OverrideCursor = Cursors.Arrow;
                 }
                 else
                 {
@@ -539,6 +543,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
                 return;
+            currentDraggingActionId = int.MaxValue;
             OnMouseMove((e.EventArgs as MouseEventArgs).GetPosition(parent));
         }
         public async void OnMouseMove(Point pos)
@@ -582,6 +587,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var prev = AnimatedScrollViewer.CurrentVerticalOffset;
             var y = MinVisibleCanvasY + Setting.JudgeLineOffsetY + offsetY;
 
+            Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
+
             if (offsetY != 0)
                 ScrollTo(y);
 
@@ -603,7 +610,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 //拖动已选物件
                 var cp = pos;
-                cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY;
+                cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY; 
                 SelectObjects.ForEach(x => dragCall(x, cp));
             }
 
@@ -611,7 +618,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (offsetY != 0)
             {
                 var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
-                await Task.Delay(1000 / 120);
+                await Task.Delay(1000/60);
                 if (currentDraggingActionId == currentid)
                     OnMouseMove(pos);
             }
