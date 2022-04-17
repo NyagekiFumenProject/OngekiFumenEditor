@@ -14,13 +14,18 @@ namespace OngekiFumenEditor.Base.Collections
         public IEnumerator<START_TYPE> GetEnumerator() => startObjects.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        public int GetNewRecordId()
+        {
+            return startObjects.Count > 0 ? startObjects.Select(x => x.RecordId).Max() + 1 : 0;
+        }
+
         public void Add(ConnectableObjectBase obj)
         {
             if (obj is START_TYPE startObject)
             {
                 //wallStart.PropertyChanged += OnBeamStartPropertyChanged;
                 if (startObject.RecordId < 0) //如果recordId < 0 ,那么添加到集合里面时会自动分配一个RecordId
-                    startObject.RecordId = startObjects.Count > 0 ? startObjects.Select(x => x.RecordId).Max() + 1 : 0;
+                    startObject.RecordId = GetNewRecordId();
                 startObjects.Add(startObject);
             }
             else if (obj is CHILD_TYPE child)
