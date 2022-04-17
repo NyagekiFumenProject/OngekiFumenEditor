@@ -342,5 +342,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 yield return start;
             }
         }
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+
+            if (fromObj is not ConnectableStartObject from)
+                return;
+
+            RecordId = -Math.Abs(from.RecordId);
+        }
     }
 }

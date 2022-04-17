@@ -22,5 +22,15 @@ namespace OngekiFumenEditor.Base.EditorObjects.LaneCurve
         public override Type ModelViewType => typeof(LaneCurvePathControlObjectViewModel);
 
         public override string IDShortName => "[LCO_CTRL]";
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not LaneCurvePathControlObject from)
+                return;
+
+            Index = from.Index;
+        }
     }
 }

@@ -179,5 +179,24 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         }
 
         public override string ToString() => $"{base.ToString()} {RecordId} Ref:{ReferenceStartObject} {(PathControls.Count > 0 ? $"CurveCount:{PathControls.Count}" : string.Empty)}";
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not ConnectableChildObjectBase from)
+                return;
+
+            RecordId = -Math.Abs(from.RecordId);
+            ReferenceStartObject = null;
+            PrevObject = null;
+            CurvePrecision = from.CurvePrecision;
+            foreach (var cp in PathControls)
+            {
+                var newCP = new LaneCurvePathControlObject();
+                newCP.Copy(cp,fumen);
+                AddControlObject(newCP);
+            }
+        }
     }
 }

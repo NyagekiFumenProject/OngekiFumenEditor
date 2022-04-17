@@ -11,5 +11,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public abstract int RecordId { get; set; }
 
         public override string ToString() => $"id:{RecordId} {base.ToString()}";
+
+        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        {
+            base.Copy(fromObj, fumen);
+
+            if (fromObj is not ConnectableObjectBase from)
+                return;
+
+            RecordId = from.RecordId;
+        }
     }
 }
