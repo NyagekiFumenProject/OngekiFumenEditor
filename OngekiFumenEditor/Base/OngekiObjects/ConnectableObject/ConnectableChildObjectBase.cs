@@ -88,8 +88,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             using var d = GridBasePoints.ToListWithObjectPool(out var points);
             if (points.Count <= 2)
             {
-                yield return (points[0], true);
-                yield return (points[1], true);
+                var fromP = points[0];
+                var toP = points[1];
+                yield return (fromP, true);
+                yield return (toP, toP.Y >= fromP.Y);
                 yield break;
             }
 
