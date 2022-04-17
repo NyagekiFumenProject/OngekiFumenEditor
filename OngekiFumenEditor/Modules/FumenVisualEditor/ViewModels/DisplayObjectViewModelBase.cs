@@ -108,8 +108,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public virtual void OnDragMoving(Point pos)
         {
             var movePoint = new Point(
-                dragStartPoint.X + (pos.X - dragStartPoint.X),
-                dragStartPoint.Y + (pos.Y - dragStartPoint.Y)
+                dragStartCanvasPoint.X + (pos.X - dragStartPoint.X),
+                dragStartCanvasPoint.Y + (pos.Y - dragStartPoint.Y)
                 );
 
             //这里限制一下
@@ -121,6 +121,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             MoveCanvas(movePoint);
         }
 
+        Point dragStartCanvasPoint = default;
         Point dragStartPoint = default;
 
         public virtual void OnDragStart(Point pos)
@@ -131,8 +132,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 x = default;
             if (double.IsNaN(y))
                 y = default;
-            dragStartPoint = new Point(x, y);
 
+            dragStartCanvasPoint = new Point(x, y);
+            dragStartPoint = pos;
             //Log.LogInfo($"OnDragStart");
         }
 
