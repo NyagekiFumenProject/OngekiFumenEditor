@@ -44,5 +44,7 @@ namespace OngekiFumenEditor.Base
 
             return new XGrid(unit, grid);
         }
+
+        public XGrid CopyNew() => new XGrid(Unit, Grid, ResX);
     }
 }
