@@ -5,6 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:common="clr-namespace:Gemini.Framework.Services;assembly=Gemini"
     xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:controls1="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -262,5 +263,15 @@
             Thumb.DragStarted="Thumb_DragStarted"
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
             Value="{Binding ElementName=myScrollViewer, Path=CurrentVerticalOffset, Mode=OneWay}" />
+
+        <StackPanel
+            Margin="0,0,0,50"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal">
+            <controls1:Toast x:Name="mainToast">
+
+            </controls1:Toast>
+        </StackPanel>
     </Grid>
 </UserControl>

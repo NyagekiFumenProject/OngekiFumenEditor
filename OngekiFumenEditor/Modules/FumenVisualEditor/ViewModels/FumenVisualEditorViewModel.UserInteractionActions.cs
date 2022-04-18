@@ -8,6 +8,8 @@ using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
 using System;
@@ -105,6 +107,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set => Set(ref currentCursorPosition, value);
         }
 
+        public Toast Toast => (GetView() as FumenVisualEditorView)?.mainToast;
+
         private HashSet<DisplayObjectViewModelBase> currentCopiedSources = new();
         public IEnumerable<DisplayObjectViewModelBase> CurrentCopiedSources => currentCopiedSources;
 
@@ -136,7 +140,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //复制所选物件
             currentCopiedSources.Clear();
             currentCopiedSources.AddRange(SelectObjects);
-            Log.LogInfo($"钦定 {currentCopiedSources.Count} 个物件作为复制源");
+
+            ToastNotify($"钦定 {currentCopiedSources.Count} 个物件作为复制源");
         }
 
         public enum PasteMirrorOption
@@ -160,7 +165,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (IsLocked)
                 return;
-            //粘贴已被复制物件
+            //先取消选择所有的物件
             TryCancelAllObjectSelecting();
             var count = 0;
             var newObjects = currentCopiedSources.Select(x => x.Copy()).FilterNull().ToArray();
@@ -188,7 +193,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     horizonPositionObject.XGrid = newXGrid;
                 }
             };
-            Log.LogInfo($"已粘贴生成 {count} 个物件.");
+
+            ToastNotify($"已粘贴生成 {count} 个物件.");
+
             Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
         }
 
@@ -259,10 +266,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (obj.ReferenceOngekiObject is ITimelineObject timelineObject)
                     cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this);
                 else
-                    Log.LogInfo($"无法记忆此物件，因为此物件没有实现ITimelineObject : {obj.ReferenceOngekiObject}");
+                    ToastNotify($"无法记忆此物件，因为此物件没有实现ITimelineObject : {obj.ReferenceOngekiObject}");
             }
 
-            Log.LogInfo($"已记忆 {cacheObjectAudioTime.Count} 个物件的音频时间");
+            ToastNotify($"已记忆 {cacheObjectAudioTime.Count} 个物件的音频时间");
         }
 
         public void MenuItemAction_RecoverySelectedObjectToAudioTime()
@@ -283,12 +290,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     Log.LogInfo($"开始恢复物件时间...");
                     foreach ((var timelineObject, var audioTime) in recoverTargets)
                         timelineObject.TGrid = TGridCalculator.ConvertYToTGrid(audioTime, this);
-                    Log.LogInfo($"已恢复 {recoverTargets.Count} 个物件到音频时间...");
+
+                    ToastNotify($"已恢复 {recoverTargets.Count} 个物件到音频时间...");
                 }, () =>
                 {
                     foreach ((var timelineObject, var undoTGrid) in undoTargets)
                         timelineObject.TGrid = undoTGrid;
-                    Log.LogInfo($"已撤回 {recoverTargets.Count} 个物件的音频时间恢复...");
+                    ToastNotify($"已撤回恢复 {recoverTargets.Count} 个物件到音频时间...");
                 }
             ));
         }
@@ -333,7 +341,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     RemoveObject(obj);
 
                 Redraw(RedrawTarget.OngekiObjects);
-                Log.LogInfo($"deleted {selectedObject.Length} objects.");
             }, () =>
             {
                 foreach (var obj in selectedObject)
@@ -342,7 +349,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
 
                 Redraw(RedrawTarget.OngekiObjects);
-                Log.LogInfo($"deleted {selectedObject.Length} objects.");
             }));
         }
 
@@ -461,7 +467,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var newObjViewModel = copySouceObj.Copy();
             if (newObjViewModel is null)
             {
-                Log.LogInfo($"笔刷模式下不支持创建{copySouceObj.ReferenceOngekiObject.Name}");
+                ToastNotify($"笔刷模式下不支持创建{copySouceObj.ReferenceOngekiObject.Name}");
                 return;
             }
 
@@ -602,7 +608,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var prev = AnimatedScrollViewer.CurrentVerticalOffset;
             var y = MinVisibleCanvasY + Setting.JudgeLineOffsetY + offsetY;
 
-            Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
+            //Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
 
             if (offsetY != 0)
                 ScrollTo(y);
@@ -784,7 +790,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             IsLocked = true;
             SelectObjects.ToArray().ForEach(x => x.IsSelected = false);
-            Log.LogInfo($"Editor is locked now.");
+            ToastNotify($"编辑器已锁住");
         }
 
         /// <summary>
@@ -795,9 +801,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!IsLocked)
                 return;
             IsLocked = false;
-            Log.LogInfo($"Editor is unlocked now.");
+            ToastNotify($"编辑器已解锁");
         }
 
         #endregion
+
+        private void ToastNotify(string message)
+        {
+            Toast.ShowMessage(message);
+            Log.LogInfo(message);
+        }
     }
 }

@@ -4,6 +4,8 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Test
 {
@@ -11,6 +13,7 @@ namespace Test
     {
         static void Main(string[] args)
         {
+            /*
             var bpmList = new BpmList();
             bpmList.SetFirstBpm(new BPMChange() { BPM = 120 });
             var meterList = new MeterChangeList()
@@ -38,6 +41,7 @@ namespace Test
             output(1430);
 
             output(8888);
+            */
         }
     }
 }

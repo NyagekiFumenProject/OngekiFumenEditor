@@ -251,6 +251,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
                 var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
                 await Load(projectData);
+                ToastNotify("谱面项目和文件加载成功");
             }
             catch (Exception e)
             {
@@ -292,6 +293,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 EditorProjectData.FumenFilePath = dialog.FileName;
             }
+
+            ToastNotify("谱面项目和文件保存成功");
             await EditorProjectDataUtils.TrySaveToFileAsync(filePath, EditorProjectData);
         }
 
