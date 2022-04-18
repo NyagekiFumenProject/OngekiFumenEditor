@@ -170,12 +170,36 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             //先取消选择所有的物件
             TryCancelAllObjectSelecting();
-            var newObjects = currentCopiedSources.Select(x => x.Copy()).FilterNull().ToArray();
+            var newObjects = currentCopiedSources.Select(x => x.Copy()).FilterNull().ToList();
             var mirrorTGrid = CalculateTGridMirror(newObjects, mirrorOption);
             var mirrorXGrid = CalculateXGridMirror(newObjects, mirrorOption);
 
             var redo = new System.Action(() => { });
             var undo = new System.Action(() => { });
+
+            var idMap = new Dictionary<int, int>();
+
+            var partOfConnectableObjects = newObjects
+                .Select(x => x.ReferenceOngekiObject)
+                .OfType<ConnectableObjectBase>()
+                .GroupBy(x => x.RecordId);
+
+            foreach (var lane in partOfConnectableObjects.Where(x => !x.OfType<ConnectableStartObject>().Any()).ToArray())
+            {
+                var headChildObject = lane.First() as ConnectableChildObjectBase;
+                var refRecordId = -headChildObject.RecordId;
+                var refSourceHeadChildObject = currentCopiedSources.Select(x => x.ReferenceOngekiObject).OfType<ConnectableChildObjectBase>().FirstOrDefault(x => x.RecordId == refRecordId);
+
+                var newStartObjectViewModel = LambdaActivator.CreateInstance(refSourceHeadChildObject.ReferenceStartObject.ModelViewType) as DisplayObjectViewModelBase;
+                var newStartObject = newStartObjectViewModel.ReferenceOngekiObject;
+
+                newStartObject.Copy(headChildObject, Fumen);
+
+                newObjects.RemoveAll(x => x.ReferenceOngekiObject == headChildObject);
+                newObjects.Insert(0,newStartObjectViewModel);
+
+                Log.LogDebug($"detect non-include start object copying , remove head of children and add new start object, headChildObject : {headChildObject}");
+            }
 
             foreach (var displayObjectView in newObjects)
             {
@@ -213,23 +237,62 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var isSelect = displayObjectView.IsSelected;
 
-                redo += () =>
+                switch (displayObjectView.ReferenceOngekiObject)
                 {
-                    AddObject(displayObjectView);
-                    displayObjectView.IsSelected = true;
-                };
+                    case ConnectableStartObject startObject:
+                        var rawId = startObject.RecordId;
+                        redo += () =>
+                        {
+                            AddObject(displayObjectView);
+                            var newId = startObject.RecordId;
+                            idMap[rawId] = newId;
+                            displayObjectView.IsSelected = true;
+                        };
 
-                undo += () =>
-                {
-                    RemoveObject(displayObjectView);
-                    displayObjectView.IsSelected = isSelect;
-                };
+                        undo += () =>
+                        {
+                            RemoveObject(displayObjectView);
+                            startObject.RecordId = rawId;
+                            displayObjectView.IsSelected = isSelect;
+                        };
+                        break;
+                    case ConnectableChildObjectBase childObject:
+                        var rawChildId = childObject.RecordId;
+                        redo += () =>
+                        {
+                            if (idMap.TryGetValue(rawChildId, out var newChildId))
+                                childObject.RecordId = newChildId;
+                            AddObject(displayObjectView);
+                            displayObjectView.IsSelected = true;
+                        };
+
+                        undo += () =>
+                        {
+                            RemoveObject(displayObjectView);
+                            childObject.RecordId = rawChildId;
+                            displayObjectView.IsSelected = isSelect;
+                        };
+                        break;
+                    default:
+                        redo += () =>
+                        {
+                            AddObject(displayObjectView);
+                            displayObjectView.IsSelected = true;
+                        };
+
+                        undo += () =>
+                        {
+                            RemoveObject(displayObjectView);
+                            displayObjectView.IsSelected = isSelect;
+                        };
+                        break;
+                }
             };
 
             redo += () =>
             {
                 Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
-                ToastNotify($"已粘贴生成 {newObjects.Length} 个物件");
+                ToastNotify($"已粘贴生成 {newObjects.Count} 个物件");
             };
 
             undo += () =>
@@ -241,7 +304,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("复制粘贴", redo, undo));
         }
 
-        private XGrid CalculateXGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
+        private XGrid CalculateXGridMirror(IEnumerable<DisplayObjectViewModelBase> newObjects, PasteMirrorOption mirrorOption)
         {
             if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
                 return XGrid.Zero;
@@ -268,7 +331,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return default;
         }
 
-        private TGrid CalculateTGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
+        private TGrid CalculateTGridMirror(IEnumerable<DisplayObjectViewModelBase> newObjects, PasteMirrorOption mirrorOption)
         {
             if (mirrorOption != PasteMirrorOption.SelectedRangeCenterTGridMirror)
                 return default;
