@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             OnDragMoving(pos);
             //Log.LogInfo($"OnDragEnd");
-            var oldPos = dragStartPoint;
+            var oldPos = dragStartCanvasPoint;
             var newPos = new Point(CanvasX, CanvasY);
             EditorViewModel?.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("物件拖动",
                 () =>
