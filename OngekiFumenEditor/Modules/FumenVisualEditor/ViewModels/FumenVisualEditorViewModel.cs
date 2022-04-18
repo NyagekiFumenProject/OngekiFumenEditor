@@ -196,7 +196,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private bool isDragging;
         private bool isMouseDown;
 
-        public bool BrushMode { get; set; }
+        private bool brushMode = false;
+        public bool BrushMode
+        {
+            get => brushMode;
+            set
+            {
+                Set(ref brushMode, value);
+                ToastNotify($"笔刷模式:{(BrushMode?"开启":"关闭")}");
+            }
+        }
 
         public FumenVisualEditorViewModel() : base()
         {

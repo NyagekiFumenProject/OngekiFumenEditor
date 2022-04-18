@@ -141,7 +141,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             currentCopiedSources.Clear();
             currentCopiedSources.AddRange(SelectObjects);
 
-            ToastNotify($"钦定 {currentCopiedSources.Count} 个物件作为复制源");
+            if (currentCopiedSources.Count == 0)
+                ToastNotify($"清空复制列表");
+            else
+                ToastNotify($"钦定 {currentCopiedSources.Count} 个物件作为复制源 {(currentCopiedSources.Count == 1 ? ",并作为刷子模式的批量生成源" : string.Empty)}");
         }
 
         public enum PasteMirrorOption
@@ -167,36 +170,75 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             //先取消选择所有的物件
             TryCancelAllObjectSelecting();
-            var count = 0;
             var newObjects = currentCopiedSources.Select(x => x.Copy()).FilterNull().ToArray();
             var mirrorTGrid = CalculateTGridMirror(newObjects, mirrorOption);
             var mirrorXGrid = CalculateXGridMirror(newObjects, mirrorOption);
+
+            var redo = new System.Action(() => { });
+            var undo = new System.Action(() => { });
+
             foreach (var displayObjectView in newObjects)
             {
-                AddObject(displayObjectView);
-                displayObjectView.IsSelected = true;
-                count++;
-
-                if (mirrorTGrid is not null && displayObjectView.ReferenceOngekiObject is ITimelineObject timelineObject)
+                if (displayObjectView.ReferenceOngekiObject is ITimelineObject timelineObject)
                 {
-                    var tGrid = timelineObject.TGrid;
-                    var offset = mirrorTGrid - tGrid;
-                    var newTGrid = mirrorTGrid + offset;
-                    timelineObject.TGrid = newTGrid;
+                    var tGrid = timelineObject.TGrid.CopyNew();
+                    undo += () => timelineObject.TGrid = tGrid.CopyNew();
+
+                    if (mirrorTGrid is not null)
+                    {
+                        var offset = mirrorTGrid - tGrid;
+                        var newTGrid = mirrorTGrid + offset;
+
+                        redo += () => timelineObject.TGrid = newTGrid.CopyNew();
+                    }
+                    else
+                        redo += () => timelineObject.TGrid = tGrid.CopyNew();
                 }
 
-                if (mirrorXGrid is not null && displayObjectView.ReferenceOngekiObject is IHorizonPositionObject horizonPositionObject)
+                if (displayObjectView.ReferenceOngekiObject is IHorizonPositionObject horizonPositionObject)
                 {
-                    var xGrid = horizonPositionObject.XGrid;
-                    var offset = mirrorXGrid - xGrid;
-                    var newXGrid = mirrorXGrid + offset;
-                    horizonPositionObject.XGrid = newXGrid;
+                    var xGrid = horizonPositionObject.XGrid.CopyNew();
+                    undo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
+
+                    if (mirrorXGrid is not null)
+                    {
+                        var offset = mirrorXGrid - xGrid;
+                        var newXGrid = mirrorXGrid + offset;
+
+                        redo += () => horizonPositionObject.XGrid = newXGrid.CopyNew();
+                    }
+                    else
+                        redo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
                 }
+
+                var isSelect = displayObjectView.IsSelected;
+
+                redo += () =>
+                {
+                    AddObject(displayObjectView);
+                    displayObjectView.IsSelected = true;
+                };
+
+                undo += () =>
+                {
+                    RemoveObject(displayObjectView);
+                    displayObjectView.IsSelected = isSelect;
+                };
             };
 
-            ToastNotify($"已粘贴生成 {count} 个物件.");
+            redo += () =>
+            {
+                Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
+                ToastNotify($"已粘贴生成 {newObjects.Length} 个物件");
+            };
 
-            Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
+            undo += () =>
+            {
+                Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
+                ToastNotify($"已撤销粘贴生成");
+            };
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("复制粘贴", redo, undo));
         }
 
         private XGrid CalculateXGridMirror(DisplayObjectViewModelBase[] newObjects, PasteMirrorOption mirrorOption)
@@ -465,9 +507,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             var newObjViewModel = copySouceObj.Copy();
-            if (newObjViewModel is null)
+            if (newObjViewModel is null
+                //不支持笔刷模式下新建以下玩意
+                || newObjViewModel.ReferenceOngekiObject is ConnectableStartObject
+                || newObjViewModel.ReferenceOngekiObject is ConnectableEndObject)
             {
-                ToastNotify($"笔刷模式下不支持创建{copySouceObj.ReferenceOngekiObject.Name}");
+                ToastNotify($"笔刷模式下不支持{copySouceObj?.ReferenceOngekiObject?.Name}");
                 return;
             }
 
