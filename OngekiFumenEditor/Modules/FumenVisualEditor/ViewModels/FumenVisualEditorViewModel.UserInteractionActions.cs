@@ -186,7 +186,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             foreach (var lane in partOfConnectableObjects.Where(x => !x.OfType<ConnectableStartObject>().Any()).ToArray())
             {
-                var headChildObject = lane.First() as ConnectableChildObjectBase;
+                if (lane.IsOnlyOne(out var headChildObject))
+                {   
+                    //同id组里面只有单个子节点，那就不给它单独转换和复制粘贴了
+                    newObjects.RemoveAll(x => x.ReferenceOngekiObject == headChildObject);
+                    Log.LogDebug($"detect only one child in same recordId ,remove it. headChildObject : {headChildObject}");
+                    continue;
+                }
+
                 var refRecordId = -headChildObject.RecordId;
                 var refSourceHeadChildObject = currentCopiedSources.Select(x => x.ReferenceOngekiObject).OfType<ConnectableChildObjectBase>().FirstOrDefault(x => x.RecordId == refRecordId);
 
@@ -196,7 +203,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 newStartObject.Copy(headChildObject, Fumen);
 
                 newObjects.RemoveAll(x => x.ReferenceOngekiObject == headChildObject);
-                newObjects.Insert(0,newStartObjectViewModel);
+                newObjects.Insert(0, newStartObjectViewModel);
 
                 Log.LogDebug($"detect non-include start object copying , remove head of children and add new start object, headChildObject : {headChildObject}");
             }
