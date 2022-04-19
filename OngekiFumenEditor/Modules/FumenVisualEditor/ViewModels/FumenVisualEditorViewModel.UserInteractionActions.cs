@@ -187,7 +187,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var lane in partOfConnectableObjects.Where(x => !x.OfType<ConnectableStartObject>().Any()).ToArray())
             {
                 if (lane.IsOnlyOne(out var headChildObject))
-                {   
+                {
                     //同id组里面只有单个子节点，那就不给它单独转换和复制粘贴了
                     newObjects.RemoveAll(x => x.ReferenceOngekiObject == headChildObject);
                     Log.LogDebug($"detect only one child in same recordId ,remove it. headChildObject : {headChildObject}");
@@ -419,12 +419,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var selectObjects = EditorViewModels
                 .OfType<DisplayObjectViewModelBase>()
-                .Where(x => selectionRect.Contains(x.ReferenceOngekiObject is not IHorizonPositionObject ? selectionRect.X : x.CanvasX, x.CanvasY + Setting.JudgeLineOffsetY));
+                .Where(x => selectionRect.Contains(x.ReferenceOngekiObject is not IHorizonPositionObject ? selectionRect.X : x.CanvasX, x.CanvasY + Setting.JudgeLineOffsetY)).ToArray();
 
-            foreach (var o in selectObjects)
-            {
-                o.IsSelected = true;
-            }
+            if (selectObjects.Length == 1)
+                NotifyObjectClicked(selectObjects.FirstOrDefault());
+            else
+                foreach (var o in selectObjects)
+                    o.IsSelected = true;
         }
 
         public void OnFocusableChanged(ActionExecutionContext e)
