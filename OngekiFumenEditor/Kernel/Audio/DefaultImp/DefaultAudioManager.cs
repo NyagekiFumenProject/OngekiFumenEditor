@@ -175,7 +175,46 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         public Task<ISoundPlayer> LoadSoundAsync(string filePath)
         {
             var cached = new CachedSound(filePath);
+            if (cached.WaveFormat.SampleRate != 48000)
+            {
+                Log.LogWarn($"Resample sound audio file (sr:{cached.WaveFormat.SampleRate} != 48000) : {filePath}");
+                cached = ResampleCacheSound(cached);
+            }
+
             return Task.FromResult<ISoundPlayer>(new DefaultSoundPlayer(cached, this));
+        }
+
+        private CachedSound ResampleCacheSound(CachedSound cache)
+        {
+            var resampler = new WdlResamplingSampleProvider(new CachedSoundWrappedSampleProvider(cache), 48000);
+            var buffer = ArrayPool<float>.Shared.Rent(1024_000);
+            var outFormat = resampler.WaveFormat;
+            var list = new List<(float[], int)>();
+
+            while (true)
+            {
+                var read = resampler.Read(buffer, 0, buffer.Length);
+                if (read == 0)
+                    break;
+
+                var b = ArrayPool<float>.Shared.Rent(read);
+                buffer.AsSpan()[..read].CopyTo(b);
+                list.Add((b, read));
+            }
+
+            var totalLength = list.Select(x => x.Item2).Sum();
+            var newBuf = new float[totalLength];
+
+            var r = 0;
+            foreach ((var b, var read) in list)
+            {
+                b.AsSpan()[..read].CopyTo(newBuf.AsSpan().Slice(r, read));
+                r += read;
+                ArrayPool<float>.Shared.Return(b);
+            }
+
+            ArrayPool<float>.Shared.Return(buffer);
+            return new CachedSound(newBuf,outFormat);
         }
 
         public void Dispose()

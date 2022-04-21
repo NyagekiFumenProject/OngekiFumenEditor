@@ -32,5 +32,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             AudioData = wholeFile.ToArray();
             ArrayPool<float>.Shared.Return(readBuffer);
         }
+
+        public CachedSound(float[] newBuf, WaveFormat outFormat)
+        {
+            AudioData = newBuf;
+            WaveFormat = outFormat;
+        }
     }
 }
