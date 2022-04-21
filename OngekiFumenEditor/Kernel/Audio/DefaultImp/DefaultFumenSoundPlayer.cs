@@ -3,12 +3,14 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -37,6 +39,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             ExFlick = 512,
 
             HoldEnd = 1024,
+            ClickSE = 2048,
+            HoldTick = 4096,
         }
 
         public class SoundEvent
@@ -84,20 +88,34 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             loadTask = source.Task;
             var audioManager = IoC.Get<IAudioManager>();
 
-            async Task load(Sound sound, string filePath)
+            var soundFolderPath = AudioSetting.Default.SoundFolderPath;
+            Log.LogError($"SoundFolderPath : {soundFolderPath} , fullpath : {Path.GetFullPath(soundFolderPath)}");
+
+            async Task load(Sound sound, string fileName)
             {
-                cacheSounds[sound] = await audioManager.LoadSoundAsync(filePath);
+                var fixFilePath = Path.Combine(soundFolderPath, fileName);
+
+                try
+                {
+                    cacheSounds[sound] = await audioManager.LoadSoundAsync(fixFilePath);
+                }
+                catch (Exception e)
+                {
+                    Log.LogError($"Can't load {sound} sound file : {fixFilePath} , reason : {e.Message}");
+                }
             }
 
-            await load(Sound.Tap, "Resources\\sounds\\tap.wav");
-            await load(Sound.Bell, "Resources\\sounds\\bell.wav");
-            await load(Sound.ExTap, "Resources\\sounds\\extap.wav");
-            await load(Sound.Wall, "Resources\\sounds\\wall.wav");
-            await load(Sound.WallExTap, "Resources\\sounds\\exwall.wav");
-            await load(Sound.Flick, "Resources\\sounds\\flick.wav");
-            await load(Sound.Bullet, "Resources\\sounds\\bullet.wav");
-            await load(Sound.ExFlick, "Resources\\sounds\\exflick.wav");
-            //await load(Sound.HoldEnd, "Resources\\sounds\\exflick.wav");
+            await load(Sound.Tap, "tap.wav");
+            await load(Sound.Bell, "bell.wav");
+            await load(Sound.ExTap, "extap.wav");
+            await load(Sound.Wall, "wall.wav");
+            await load(Sound.WallExTap, "exwall.wav");
+            await load(Sound.Flick, "flick.wav");
+            await load(Sound.Bullet, "bullet.wav");
+            await load(Sound.ExFlick, "exflick.wav");
+            await load(Sound.HoldEnd, "holdend.wav");
+            await load(Sound.ClickSE, "clickse.wav");
+            await load(Sound.HoldTick, "holdtick.wav");
 
             source.SetResult();
         }
@@ -182,7 +200,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                     else
                     {
                         if (ct < -5)
-                            Thread.Sleep(Math.Min(1000,(int)(Math.Abs(ct) - 2)));
+                            Thread.Sleep(Math.Min(1000, (int)(Math.Abs(ct) - 2)));
                         break;
                     }
                 }

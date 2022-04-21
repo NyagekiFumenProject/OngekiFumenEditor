@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace OngekiFumenEditor.Kernel.SettingPages.Audio.Views
+namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views
 {
     /// <summary>
     /// FumenVisualEditorGlobalSettingView.xaml 的交互逻辑
     /// </summary>
-    public partial class AudioSettingView : UserControl
+    public partial class FumenVisualEditorGlobalSettingView : UserControl
     {
-        public AudioSettingView()
+        public FumenVisualEditorGlobalSettingView()
         {
             InitializeComponent();
         }

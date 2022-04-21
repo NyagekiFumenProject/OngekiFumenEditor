@@ -184,6 +184,11 @@
     <Compile Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Properties\AudioSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AudioSetting.settings</DependentUpon>
+    </Compile>
     <Compile Update="Properties\EditorGlobalSetting.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
@@ -197,6 +202,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Properties\AudioSetting.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>AudioSetting.Designer.cs</LastGenOutput>
+    </None>
     <None Update="Properties\EditorGlobalSetting.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>EditorGlobalSetting.Designer.cs</LastGenOutput>
@@ -232,6 +241,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Kernel\SettingPages\Audio\Views\AudioSettingView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
