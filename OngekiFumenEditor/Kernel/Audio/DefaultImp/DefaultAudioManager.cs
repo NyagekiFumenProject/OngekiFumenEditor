@@ -91,7 +91,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 async ValueTask DecodeHca(Stream hcaDataStream, Stream waveStream, DecodeParams decodeParams)
                 {
                     using var hcaStream = new OneWayHcaAudioStream(hcaDataStream, decodeParams, true);
-                    var buffer = ArrayPool<byte>.Shared.Rent(10240);
+                    var buffer = ArrayPool<byte>.Shared.Rent(1_024_000);
                     var read = 1;
 
                     while (read > 0)
