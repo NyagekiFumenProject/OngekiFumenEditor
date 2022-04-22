@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 
         #region Sugar~
 
-        public class AutoDisposable : IDisposable
+        private class AutoDisposable : IDisposable
         {
             public T RefObject { get; set; }
 

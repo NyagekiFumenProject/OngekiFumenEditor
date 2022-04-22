@@ -257,8 +257,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
                 var newDrawing = new GeometryDrawing();
                 newDrawing.Geometry = geometry;
-                newDrawing.Brush = geometryDrawing.Brush;
-                newDrawing.Pen = CalculateRelativePen(geometryDrawing.Pen);
+                newDrawing.Pen = CalculateRelativePen(geometryDrawing.Pen) ?? CalculateRelativePen(newDrawing.Brush);
+                newDrawing.Brush = default;
                 newDrawing.Freeze();
 
                 //append to list
@@ -279,6 +279,13 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             ProcessingDrawingGroup = procDrawingGroup;
 
             Log.LogDebug($"Generate {ProcessingDrawingGroup.Children.Count} geometries from svg file: {SvgFile}.");
+        }
+
+        private Pen CalculateRelativePen(Brush brush)
+        {
+            var pen = new Pen(brush, 2);
+            pen.Freeze();
+            return CalculateRelativePen(pen);
         }
 
         private Pen CalculateRelativePen(Pen pen)

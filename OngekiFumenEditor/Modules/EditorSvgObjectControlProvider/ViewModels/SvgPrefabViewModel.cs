@@ -48,6 +48,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
             switch (arg.PropertyName)
             {
                 case nameof(SvgPrefab.ProcessingDrawingGroup):
+                    RecalculatePoint();
                     RebuildGeometry();
                     break;
                 case nameof(SvgPrefab.OffsetX):
@@ -63,12 +64,13 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
 
         private void RecalculatePoint()
         {
-            var bound = RefSvgPrefab.ProcessingDrawingGroup.Bounds;
-            Point = new Point()
-            {
-                X = -RefSvgPrefab.OffsetX.CurrentValue * bound.Width,
-                Y = -RefSvgPrefab.OffsetY.CurrentValue * bound.Height
-            };
+            if (RefSvgPrefab.ProcessingDrawingGroup?.Bounds is Rect bound) {
+                Point = new Point()
+                {
+                    X = -RefSvgPrefab.OffsetX.CurrentValue * bound.Width,
+                    Y = -RefSvgPrefab.OffsetY.CurrentValue * bound.Height
+                };
+            }
         }
 
         private void RebuildGeometry()
