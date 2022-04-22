@@ -549,8 +549,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 else
                 {
                     //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
-
-                    if (mouseDownHitObject is null)
+                    //if no object clicked or alt is pressing , just to process as brush actions.
+                    if (mouseDownHitObject is null || Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
                     {
                         //for object brush
                         if (BrushMode)
