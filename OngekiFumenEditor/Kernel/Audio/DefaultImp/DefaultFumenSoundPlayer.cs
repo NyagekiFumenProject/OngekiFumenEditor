@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         {
             Tap = 1,
             ExTap = 2,
-            Wall = 4,
+
             WallTap = 8,
             WallExTap = 16,
 
@@ -108,7 +108,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             await load(Sound.Tap, "tap.wav");
             await load(Sound.Bell, "bell.wav");
             await load(Sound.ExTap, "extap.wav");
-            await load(Sound.Wall, "wall.wav");
+            await load(Sound.WallTap, "wall.wav");
             await load(Sound.WallExTap, "exwall.wav");
             await load(Sound.Flick, "flick.wav");
             await load(Sound.Bullet, "bullet.wav");
@@ -210,7 +210,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 {
                     sounds = sounds | obj switch
                     {
-                        WallTap { IsCritical: false } => Sound.WallExTap,
+                        WallTap { IsCritical: false } => Sound.WallTap,
                         WallTap { IsCritical: true } => Sound.WallExTap,
                         Tap { IsCritical: false } or Hold { IsCritical: false } => Sound.Tap,
                         Tap { IsCritical: true } or Hold { IsCritical: true } => Sound.ExTap,
@@ -279,7 +279,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             checkPlay(Sound.Tap, SoundControl.Tap);
             checkPlay(Sound.ExTap, SoundControl.CriticalTap);
             checkPlay(Sound.Bell, SoundControl.Bell);
-            checkPlay(Sound.Wall, SoundControl.WallTap);
+            checkPlay(Sound.WallTap, SoundControl.WallTap);
             checkPlay(Sound.WallExTap, SoundControl.CriticalWallTap);
             checkPlay(Sound.Bullet, SoundControl.Bullet);
             checkPlay(Sound.Flick, SoundControl.Flick);

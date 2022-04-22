@@ -45,6 +45,7 @@
     <None Remove="Resources\empty_ogkr_template.ogkr" />
     <None Remove="Resources\Icons\icons8-paint-brush-16.png" />
     <None Remove="Resources\Images\logo.png" />
+    <None Remove="Resources\sounds\bell.wav" />
   </ItemGroup>
 
   <ItemGroup>
@@ -220,6 +221,9 @@
     <None Update="Resources\sounds\bullet.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\sounds\clickse.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\sounds\exflick.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -230,6 +234,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\sounds\flick.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\holdend.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\holdtick.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\sounds\tap.wav">
