@@ -22,7 +22,10 @@ namespace OngekiFumenEditor.Kernel.Audio
         Bullet = 1024,
         Beam = 2048,
         Bell = 4096,
+        ClickSE = 8192,
+        HoldTick = 16384,
+        HoldEnd = 32768,
 
-        All = Bell | Beam | Bullet | CriticalFlick | Flick | CriticalWallHold | WallHold | CriticalWallTap | WallTap | CriticalHold | Hold | CriticalTap | Tap
+        All = HoldEnd | HoldTick | ClickSE | Bell | Beam | Bullet | CriticalFlick | Flick | CriticalWallHold | WallHold | CriticalWallTap | WallTap | CriticalHold | Hold | CriticalTap | Tap
     }
 }

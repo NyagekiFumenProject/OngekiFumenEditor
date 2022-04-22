@@ -139,16 +139,70 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             thread.Start();
         }
 
+        private static IEnumerable<TGrid> CalculateHoldTicks(Hold x, OngekiFumen fumen)
+        {
+            //calculate stepGrid
+            var met = fumen.MeterChanges.GetMeter(x.TGrid);
+            var bpm = fumen.BpmList.GetBpm(x.TGrid);
+            var resT = bpm.TGrid.ResT;
+            var beatCount = met.BunShi * 1;
+            var lengthPerBeat = (int)(resT / beatCount);
+
+            var stepGrid = new GridOffset(0, lengthPerBeat);
+
+            var curTGrid = x.TGrid + stepGrid;
+            while (curTGrid < x.HoldEnd.TGrid)
+            {
+                yield return curTGrid;
+                curTGrid = curTGrid + stepGrid;
+            }
+        }
+
+        private static IEnumerable<TGrid> CalculateDefaultClickSEs(OngekiFumen fumen)
+        {
+            var tGrid = TGrid.Zero;
+            var endTGrid = new TGrid(1, 0);
+            //calculate stepGrid
+            var met = fumen.MeterChanges.GetMeter(tGrid);
+            var bpm = fumen.BpmList.GetBpm(tGrid);
+            var resT = bpm.TGrid.ResT;
+            var beatCount = met.BunShi * 1;
+            var lengthPerBeat = (int)(resT / beatCount);
+
+            var stepGrid = new GridOffset(0, lengthPerBeat);
+
+            var curTGrid = tGrid + stepGrid;
+            while (curTGrid < endTGrid)
+            {
+                yield return curTGrid;
+                curTGrid = curTGrid + stepGrid;
+            }
+        }
+
         private void RebuildEvents()
         {
             events.ForEach(evt => ObjectPool<SoundEvent>.Return(evt));
             events.Clear();
 
+            var list = new HashSet<SoundEvent>();
+
+            void AddSound(Sound sound,TGrid tGrid)
+            {
+                var evt = ObjectPool<SoundEvent>.Get();
+                evt.Sounds = sound;
+                evt.Time = TGridCalculator.ConvertTGridToY(tGrid, editor);
+                list.Add(evt);
+            }
+
             var fumen = editor.Fumen;
 
             var soundObjects = fumen.GetAllDisplayableObjects().OfType<OngekiTimelineObjectBase>();
 
-            foreach (var group in soundObjects.GroupBy(x => x.TGrid).OrderBy(x => x.Key))
+            //add default clickse objects.
+            foreach (var tGrid in CalculateDefaultClickSEs(fumen))
+                AddSound(Sound.ClickSE, tGrid);
+
+            foreach (var group in soundObjects.GroupBy(x => x.TGrid))
             {
                 var sounds = (Sound)0;
 
@@ -165,18 +219,25 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                         Flick { IsCritical: false } => Sound.Flick,
                         Flick { IsCritical: true } => Sound.ExFlick,
                         HoldEnd => Sound.HoldEnd,
+                        ClickSE => Sound.ClickSE,
                         _ => default
                     };
+
+                    if (obj is Hold hold)
+                    {
+                        //add hold ticks
+                        foreach (var tickTGrid in CalculateHoldTicks(hold, fumen))
+                        {
+                            AddSound(Sound.HoldTick, tickTGrid);
+                        }
+                    }
                 }
 
                 if (sounds != 0)
-                {
-                    var evt = ObjectPool<SoundEvent>.Get();
-                    evt.Sounds = sounds;
-                    evt.Time = TGridCalculator.ConvertTGridToY(group.Key, editor);
-                    events.AddLast(evt);
-                }
+                    AddSound(sounds, group.Key);
             }
+
+            events = new LinkedList<SoundEvent>(list.OrderBy(x => x.Time));
 
             itor = events.First;
         }
@@ -223,6 +284,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             checkPlay(Sound.Bullet, SoundControl.Bullet);
             checkPlay(Sound.Flick, SoundControl.Flick);
             checkPlay(Sound.ExFlick, SoundControl.CriticalFlick);
+            checkPlay(Sound.HoldEnd, SoundControl.HoldEnd);
+            checkPlay(Sound.HoldTick, SoundControl.HoldTick);
+            checkPlay(Sound.ClickSE, SoundControl.ClickSE);
         }
 
         public void Seek(float msec, bool pause)
