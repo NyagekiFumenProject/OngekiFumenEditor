@@ -28,6 +28,11 @@
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
+                Content="强制水平位置轴自动停靠"
+                IsChecked="{Binding Setting.ForceXGridMagneticDock}">
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
                 Content="禁止水平位置轴自动停靠"
                 IsChecked="{Binding Setting.DisableXGridMagneticDock}">
             </CheckBox>

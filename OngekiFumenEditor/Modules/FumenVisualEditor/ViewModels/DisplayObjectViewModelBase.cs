@@ -200,7 +200,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //todo 基于二分法查询最近
             var enableMagneticAdjust = !(editorViewModel?.Setting.DisableXGridMagneticDock ?? false);
-            var forceMagneticAdjust = editorViewModel?.Setting.ForceMagneticDock ?? false;
+            var forceMagneticAdjust = (editorViewModel?.Setting.ForceMagneticDock ?? false) || (editorViewModel?.Setting.ForceXGridMagneticDock ?? false);
             var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
             using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
             mid.Clear();

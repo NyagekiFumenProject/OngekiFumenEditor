@@ -95,8 +95,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
             set
             {
-                tGridUnitLength = value;
-                NotifyOfPropertyChange(() => TGridUnitLength);
+                Set(ref tGridUnitLength, value);
             }
         }
 
@@ -112,8 +111,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
             set
             {
-                beatSplit = value;
-                NotifyOfPropertyChange(() => BeatSplit);
+                Set(ref beatSplit, value);
             }
         }
 
@@ -129,8 +127,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
             set
             {
-                xGridDisplayMaxUnit = value;
-                NotifyOfPropertyChange(() => XGridDisplayMaxUnit);
+                Set(ref xGridDisplayMaxUnit, value);
+            }
+        }
+
+        private bool forceXGridMagneticDock = false;
+        public bool ForceXGridMagneticDock
+        {
+            get { return forceXGridMagneticDock; }
+            set
+            {
+                Set(ref forceXGridMagneticDock, value);
             }
         }
     }
