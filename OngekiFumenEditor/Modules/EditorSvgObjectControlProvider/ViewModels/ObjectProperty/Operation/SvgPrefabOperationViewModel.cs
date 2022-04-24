@@ -6,6 +6,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
@@ -54,7 +55,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
             var bound = drawingGroup.Bounds.Size;
             var offset = drawingGroup.Bounds.Location;
 
-            Log.LogDebug($"({baseCanvasX:F2},{baseCanvasY:F2})");
+            var starts = new List<ConnectableStartObject>();
 
             foreach (var childGeometry in drawingGroup.Children.OfType<GeometryDrawing>())
             {
@@ -69,6 +70,9 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                     LaneType.Colorful => new ColorfulLaneStart(),
                     _ => null
                 };
+
+                if (targetObject is null)
+                    continue;
 
                 void CommomBuildUp(Point relativePoint, ConnectableObjectBase obj)
                 {
@@ -100,7 +104,6 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                         var nextObj = LambdaActivator.CreateInstance(targetObject.NextType) as ConnectableChildObjectBase;
                         CommomBuildUp(childP, nextObj);
                         startObj.AddChildObject(nextObj);
-
                     }
 
                     var lastP = points.LastOrDefault();
@@ -108,15 +111,27 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                     CommomBuildUp(lastP, endObj);
                     startObj.AddChildObject(endObj);
 
-                    editor.Fumen.AddObject(startObj);
+                    starts.Add(startObj);
                 }
             }
+
+            var genStarts = starts.SelectMany(x => x.InterpolateCurve()).ToArray();
+
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Svg原地生成轨道物件", () =>
+            {
+                editor.Fumen.AddObjects(genStarts);
+                editor.Redraw(RedrawTarget.OngekiObjects);
+            }, () =>
+            {
+                editor.Fumen.RemoveObjects(genStarts);
+                editor.Redraw(RedrawTarget.OngekiObjects);
+            }));
         }
 
-        private LaneType GetLaneTypeFromBrush(Brush brush)
+        private LaneType? GetLaneTypeFromBrush(Brush brush)
         {
             if (brush is not SolidColorBrush colorBrush)
-                return LaneType.Colorful;
+                return default;
 
             var color = colorBrush.Color;
             color.A = 255;
