@@ -7,7 +7,7 @@
     mc:Ignorable="d">
     <Grid Name="MainPanel" Margin="5,0,5,0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition>
+            <ColumnDefinition Width="Auto">
             </ColumnDefinition>
             <ColumnDefinition>
             </ColumnDefinition>

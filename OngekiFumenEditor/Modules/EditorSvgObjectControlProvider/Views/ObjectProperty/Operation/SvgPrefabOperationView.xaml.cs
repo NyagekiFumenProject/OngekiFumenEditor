@@ -20,7 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views
+namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.Views.ObjectProperty.Operation
 {
     /// <summary>
     /// BeamStartOperationView.xaml 的交互逻辑

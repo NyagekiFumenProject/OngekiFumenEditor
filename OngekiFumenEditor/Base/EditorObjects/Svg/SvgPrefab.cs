@@ -192,7 +192,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         private void RebuildGeometry()
         {
             ProcessingDrawingGroup = default;
-            var inter = drawingGroup.Children.FirstOrDefault();
+            var inter = drawingGroup?.Children?.FirstOrDefault();
             if (inter is null)
                 return;
 
@@ -214,7 +214,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             {
                 Angle = Rotation.CurrentValue
             });
-            procDrawingGroup.Transform = transform;
+            //procDrawingGroup.Transform = transform;
 
             Geometry GenFlattedGeometry(Geometry geometry)
             {
@@ -246,6 +246,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 flattedGeometry.Figures.Add(fig);
                 /**/
                 var flattedGeometry = geometry.GetFlattenedPathGeometry(Tolerance.CurrentValue, ToleranceType.Absolute);
+                flattedGeometry.Transform = transform;
                 flattedGeometry.Freeze();
                 return flattedGeometry;
             }
@@ -290,16 +291,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
         private Pen CalculateRelativePen(Pen pen)
         {
-            float ColorDistance(Color a, Color b)
-            {
-                byte ra = a.R, rb = b.R, ga = a.G, gb = b.G, ba = a.B, bb = b.B;
-                var rm = (ra + rb) / 2.0f;
-                var R = (ra - rb);
-                var G = (ga - gb);
-                var B = (ba - bb);
-                return MathF.Sqrt((2 + rm / 256.0f) * MathF.Pow(R, 2) + 4 * MathF.Pow(G, 2) + (2 + (255 - rm) / 256.0f) * MathF.Pow(B, 2));
-            }
-
             Color PickColor(Color color)
             {
                 var arr = LaneColor.AllLaneColors;
@@ -307,7 +298,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                     arr = arr.Where(x => x.LaneType != LaneType.Colorful);
 
                 var r = arr
-                    .Select(x => (x.Color, ColorDistance(x.Color, color)))
+                    .Select(x => (x.Color, x.Color.ColorDistance(color)))
                     .OrderByDescending(x => x.Item2)
                     .Where(x => x.Item2 > ColorSimilar.CurrentValue);
 

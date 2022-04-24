@@ -1,24 +1,27 @@
 ﻿<UserControl
-    x:Class="OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views.SvgPrefabOperationView"
+    x:Class="OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.Views.ObjectProperty.Operation.SvgPrefabOperationView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.ObjectProperty.Operation"
     d:Background="White"
-    d:DataContext="{d:DesignInstance Type=vm:SvgPrefabOperationViewModel}"
+    d:DataContext="{d:DesignInstance Type=vm:SvgPrefabOperationViewModel,
+                                     IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
     <StackPanel Margin="21,5,0,0">
+        <ContentControl>
+        </ContentControl>
         <controls:CommonOperationButton
             Width="150"
             HorizontalAlignment="Left"
-            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action GenInterpolatedLanes()];"
+            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnGenerateLaneToEditor()];"
             DecoratorBrush="Green"
-            Text="拖动添加中间点" />
+            Text="原地生成轨道物件" />
     </StackPanel>
 </UserControl>
