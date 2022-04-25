@@ -63,13 +63,23 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private bool enableColorfulLaneSimilar = false;
+        private bool enableColorfulLaneSimilar = true;
         public bool EnableColorfulLaneSimilar
         {
             get => enableColorfulLaneSimilar;
             set
             {
                 Set(ref enableColorfulLaneSimilar, value);
+            }
+        }
+
+        private bool limitXGridUnitSimply = false;
+        public bool LimitXGridUnitSimply
+        {
+            get => limitXGridUnitSimply;
+            set
+            {
+                Set(ref limitXGridUnitSimply, value);
             }
         }
 
@@ -214,7 +224,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             {
                 Angle = Rotation.CurrentValue
             });
-            //procDrawingGroup.Transform = transform;
 
             Geometry GenFlattedGeometry(Geometry geometry)
             {

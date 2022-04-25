@@ -140,6 +140,9 @@ namespace OngekiFumenEditor.Utils
             var by = y2 - y1;
             var bx = x2 - x1;
 
+            if (by == 0)
+                return y1;
+
             return (x - x1) / (by * bx) + y1;
         }
 

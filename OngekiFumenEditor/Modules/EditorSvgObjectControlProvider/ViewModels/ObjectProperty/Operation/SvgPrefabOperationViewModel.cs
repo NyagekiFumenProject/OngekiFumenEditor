@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                         LineSegment ls => Enumerable.Repeat(ls.Point, 0),
                         PolyLineSegment pls => pls.Points,
                         _ => Enumerable.Empty<Point>()
-                    }).Prepend(path.StartPoint).ToArray();
+                    }).Prepend(path.StartPoint).ToList();
 
                     var firstP = points[0];
                     var startObj = (LambdaActivator.CreateInstance(targetObject.ModelViewType) as DisplayObjectViewModelBase).ReferenceOngekiObject as ConnectableStartObject;
@@ -111,11 +111,15 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                     CommomBuildUp(lastP, endObj);
                     startObj.AddChildObject(endObj);
 
+                    var r = startObj.InterpolateCurve().ToArray();
+
                     starts.Add(startObj);
                 }
             }
 
-            var genStarts = starts.SelectMany(x => x.InterpolateCurve()).ToArray();
+            var genStarts = starts
+                .SelectMany(x => x.InterpolateCurve(SvgPrefab.LimitXGridUnitSimply ? new XGridLimitedCurveInterpolaterTraveller(x) : default))
+                .ToArray();
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Svg原地生成轨道物件", () =>
             {
