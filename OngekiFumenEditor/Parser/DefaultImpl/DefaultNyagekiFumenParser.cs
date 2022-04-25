@@ -293,6 +293,10 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                         "LCN" => new LaneCenterNext(),
                         "LCE" => new LaneCenterEnd(),
 
+                        "ENS" => new EnemyLaneStart(),
+                        "ENN" => new EnemyLaneNext(),
+                        "ENE" => new EnemyLaneEnd(),
+
                         "CLS" => new ColorfulLaneStart(),
                         "CLN" => new ColorfulLaneNext(),
                         "CLE" => new ColorfulLaneEnd(),
