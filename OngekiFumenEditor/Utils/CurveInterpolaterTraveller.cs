@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Utils
         public void Reset()
         {
             waiter.Clear();
-            itor = start.Children.SelectMany(x => Interpolate(x)).DistinctBy((a,b) => {
+            itor = start.Children.SelectMany(x => Interpolate(x)).DistinctContinuousBy((a,b) => {
                 return a.TGrid == b.TGrid && a.XGrid == b.XGrid;
             }).GetEnumerator();
         }
