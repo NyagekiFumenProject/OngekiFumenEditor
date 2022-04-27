@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using DereTore.Common;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
@@ -42,10 +43,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         public async Task<byte[]> SerializeAsync(OngekiFumen fumen)
         {
             using var memory = new MemoryStream();
-            using var gzip = new GZipStream(memory, CompressionLevel.Optimal);
-            using var writer = new LoggableBinaryWriter(new BinaryWriter(gzip));
-
-            Log.LogDebug($"-----BeginSerialize----");
+            using var writer = new StreamWriter(memory);
 
             ProcessHEADER(fumen, writer);
 
@@ -55,13 +53,13 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
             ProcessLANE(fumen, writer);
 
-            ProcessLANE_BLOCK(fumen, writer);
-
-            ProcessBULLET(fumen, writer);
-
             ProcessBEAM(fumen, writer);
 
             ProcessBELL(fumen, writer);
+
+            ProcessBULLET(fumen, writer);
+
+            ProcessLANE_BLOCK(fumen, writer);
 
             ProcessFLICK(fumen, writer);
 
@@ -69,286 +67,197 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
             ProcessCURVE(fumen, writer);
 
-            Log.LogDebug($"-----EndSerialize----");
-
-            writer.Flush();
-            await gzip.FlushAsync();
-            gzip.Close();
+            await writer.FlushAsync();
             await memory.FlushAsync();
 
             return memory.ToArray();
         }
 
-        private void ProcessCURVE(OngekiFumen fumen, LoggableBinaryWriter writer)
+        private void ProcessCURVE(OngekiFumen fumen, StreamWriter writer)
         {
-            Log.LogDebug($"-----Begin ProcessCURVE()----");
-
             var childObjects = fumen.Lanes
                 .AsEnumerable<ConnectableStartObject>()
                 .Concat(fumen.Beams)
                 .SelectMany(x => x.Children)
                 .Where(x => x.IsCurvePath).ToList();
-
-            writer.Write(childObjects.Count());
             foreach (var child in childObjects)
             {
+                writer.Write("CurveControlPoint:");
                 writer.Write(child.ReferenceStartObject.RecordId);
+                writer.Write(":");
                 writer.Write(child.ReferenceStartObject.IDShortName);
+                writer.Write(":");
                 writer.Write(child.ReferenceStartObject.Children.FirstIndexOf(x => x == child));
+                writer.Write(":");
                 writer.Write(child.CurvePrecision);
-                writer.Write(child.PathControls.Count);
-                foreach (var control in child.PathControls)
-                {
-                    writer.Write(control.TGrid.Unit);
-                    writer.Write(control.TGrid.Grid);
-                    writer.Write(control.XGrid.Unit);
-                    writer.Write(control.XGrid.Grid);
-                }
+                writer.Write(":");
+                writer.Write(string.Join(" -> ", child.PathControls.Select(x => $"(X[{x.XGrid.Unit},{x.XGrid.Grid}],X[{x.TGrid.Unit},{x.TGrid.Grid}])")));
+                writer.WriteLine();
             }
+            writer.WriteLine();
         }
 
-        private void ProcessLANE_BLOCK(OngekiFumen fumen, LoggableBinaryWriter writer)
+        private void ProcessLANE_BLOCK(OngekiFumen fumen, StreamWriter writer)
         {
-            Log.LogDebug($"-----Begin ProcessLANE_BLOCK()----");
-
-            writer.Write(fumen.LaneBlocks.Count);
-            foreach (var lbk in fumen.LaneBlocks)
-            {
-                var end = lbk.EndIndicator;
-                writer.Write(lbk.TGrid.Unit);
-                writer.Write(lbk.TGrid.Grid);
-                writer.Write(end.TGrid.Unit);
-                writer.Write(end.TGrid.Grid);
-            }
+            foreach (var blk in fumen.LaneBlocks.OrderBy(x => x.TGrid))
+                writer.WriteLine($"LaneBlock:{blk.Direction}:(T[{blk.TGrid.Unit},{blk.TGrid.Grid}]) -> (T[{blk.EndIndicator.TGrid.Unit},{blk.EndIndicator.TGrid.Grid}])");
+            writer.WriteLine();
         }
 
-        public void ProcessHEADER(OngekiFumen fumen, LoggableBinaryWriter sb)
+        public void ProcessHEADER(OngekiFumen fumen, StreamWriter sb)
         {
-            Log.LogDebug($"-----Begin ProcessHEADER()----");
             var metaInfo = fumen.MetaInfo;
 
-            sb.Write(metaInfo.Version.Major);
-            sb.Write(metaInfo.Version.Minor);
-            sb.Write(metaInfo.Version.Build);
-            sb.Write(metaInfo.Creator);
-            sb.Write(metaInfo.BpmDefinition.First);
-            sb.Write(metaInfo.BpmDefinition.Common);
-            sb.Write(metaInfo.BpmDefinition.Maximum);
-            sb.Write(metaInfo.BpmDefinition.Minimum);
-            sb.Write(metaInfo.MeterDefinition.Bunshi);
-            sb.Write(metaInfo.MeterDefinition.Bunbo);
-            sb.Write(metaInfo.TRESOLUTION);
-            sb.Write(metaInfo.XRESOLUTION);
-            sb.Write(metaInfo.ClickDefinition);
-            sb.Write(metaInfo.ProgJudgeBpm);
-            sb.Write(metaInfo.Tutorial);
-            sb.Write(metaInfo.BulletDamage);
-            sb.Write(metaInfo.HardBulletDamage);
-            sb.Write(metaInfo.DangerBulletDamage);
-            sb.Write(metaInfo.BeamDamage);
+            sb.WriteLine($"Header:{nameof(metaInfo.Version)}:{metaInfo.Version}");
+            sb.WriteLine($"Header:{nameof(metaInfo.Creator)}:{metaInfo.Creator}");
+            sb.WriteLine($"Header:{nameof(metaInfo.BpmDefinition.First)}Bpm:{metaInfo.BpmDefinition.First}");
+            sb.WriteLine($"Header:{nameof(metaInfo.BpmDefinition.Common)}Bpm:{metaInfo.BpmDefinition.Common}");
+            sb.WriteLine($"Header:{nameof(metaInfo.BpmDefinition.Maximum)}Bpm:{metaInfo.BpmDefinition.Maximum}");
+            sb.WriteLine($"Header:{nameof(metaInfo.BpmDefinition.Minimum)}Bpm:{metaInfo.BpmDefinition.Minimum}");
+            sb.WriteLine($"Header:Meter:{metaInfo.MeterDefinition.Bunshi}/{metaInfo.MeterDefinition.Bunbo}");
+            sb.WriteLine($"Header:{nameof(metaInfo.TRESOLUTION)}:{metaInfo.TRESOLUTION}");
+            sb.WriteLine($"Header:{nameof(metaInfo.XRESOLUTION)}:{metaInfo.XRESOLUTION}");
+            sb.WriteLine($"Header:{nameof(metaInfo.ClickDefinition)}:{metaInfo.ClickDefinition}");
+            sb.WriteLine($"Header:{nameof(metaInfo.Tutorial)}:{metaInfo.Tutorial}");
+            sb.WriteLine($"Header:{nameof(metaInfo.BeamDamage)}:{metaInfo.BeamDamage}");
+            sb.WriteLine($"Header:{nameof(metaInfo.HardBulletDamage)}:{metaInfo.HardBulletDamage}");
+            sb.WriteLine($"Header:{nameof(metaInfo.DangerBulletDamage)}:{metaInfo.DangerBulletDamage}");
+            sb.WriteLine($"Header:{nameof(metaInfo.BulletDamage)}:{metaInfo.BulletDamage}");
+            sb.WriteLine($"Header:{nameof(metaInfo.ProgJudgeBpm)}:{metaInfo.ProgJudgeBpm}");
+            
+            sb.WriteLine();
         }
 
-        public void ProcessB_PALETTE(OngekiFumen fumen, LoggableBinaryWriter sb)
+        public void ProcessB_PALETTE(OngekiFumen fumen, StreamWriter sb)
         {
-            Log.LogDebug($"-----Begin ProcessB_PALETTE()----");
-            sb.Write(fumen.BulletPalleteList.Count());
-
             foreach (var bpl in fumen.BulletPalleteList.OrderBy(x => x.StrID))
             {
+                sb.Write($"BulletPallete:");
                 sb.Write(bpl.StrID);
-                sb.Write(bpl.ShooterValue);
-                sb.Write(bpl.PlaceOffset);
-                sb.Write(bpl.TargetValue);
-                sb.Write(bpl.Speed);
-                //sb.Write(bpl.BulletTypeValue);
-                sb.Write(bpl.SizeValue);
-                sb.Write(bpl.TypeValue);
+                sb.Write(":");
+                sb.Write($"Target[{bpl.TargetValue}]");
+                sb.Write(",");
+                sb.Write($"Size[{bpl.SizeValue}]");
+                sb.Write(",");
+                sb.Write($"Type[{bpl.TypeValue}]");
+                sb.Write(",");
+                sb.Write($"Speed[{bpl.Speed}]");
+                sb.Write(",");
+                sb.Write($"Offset[{bpl.PlaceOffset}]");
+                sb.Write(",");
+                sb.Write($"Shooter[{bpl.ShooterValue}]");
+                sb.WriteLine();
             }
+            sb.WriteLine();
         }
 
-
-        public void ProcessCOMPOSITION(OngekiFumen fumen, LoggableBinaryWriter sb)
+        public void ProcessCOMPOSITION(OngekiFumen fumen, StreamWriter sb)
         {
-            Log.LogDebug($"-----Begin ProcessCOMPOSITION()----");
-            sb.Write(fumen.BpmList.Count() - 1);
-            foreach (var o in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
-            {
-                sb.Write(o.TGrid.Unit);
-                sb.Write(o.TGrid.Grid);
-                sb.Write(o.BPM);
-            }
-
-            sb.Write(fumen.MeterChanges.Count() - 1);
-            foreach (var o in fumen.MeterChanges.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.MeterChanges.FirstMeter.TGrid))
-            {
-                sb.Write(o.TGrid.Unit);
-                sb.Write(o.TGrid.Grid);
-                sb.Write(o.BunShi);
-                sb.Write(o.Bunbo);
-            }
-
-            sb.Write(fumen.ClickSEs.Count);
-            foreach (var o in fumen.ClickSEs.OrderBy(x => x.TGrid))
-            {
-                sb.Write(o.TGrid.Unit);
-                sb.Write(o.TGrid.Grid);
-            }
-
-            sb.Write(fumen.EnemySets.Count);
-            foreach (var o in fumen.EnemySets.OrderBy(x => x.TGrid))
-            {
-                sb.Write(o.TGrid.Unit);
-                sb.Write(o.TGrid.Grid);
-                sb.Write(o.TagTblValue);
-            }
-
-            sb.Write(fumen.Soflans.Count);
-            foreach (var o in fumen.Soflans)
-            {
-                sb.Write(o.TGrid.Unit);
-                sb.Write(o.TGrid.Grid);
-                sb.Write(o.GridLength);
-                sb.Write(o.Speed);
-            }
+            foreach (var clk in fumen.ClickSEs.OrderBy(x => x.TGrid))
+                sb.WriteLine($"ClickSE:T[{clk.TGrid.Unit},{clk.TGrid.Grid}]");
+            foreach (var est in fumen.EnemySets.OrderBy(x => x.TGrid))
+                sb.WriteLine($"EnemySet:{est.TagTblValue}:T[{est.TGrid.Unit},{est.TGrid.Grid}]");
+            foreach (var met in fumen.MeterChanges.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.MeterChanges.FirstMeter.TGrid))
+                sb.WriteLine($"MeterChange:{met.BunShi}/{met.Bunbo}:T[{met.TGrid.Unit},{met.TGrid.Grid}]");
+            sb.WriteLine();
+            foreach (var bpm in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
+                sb.WriteLine($"BpmChange:{bpm.BPM}:T[{bpm.TGrid.Unit},{bpm.TGrid.Grid}]");
+            sb.WriteLine();
+            foreach (var soflan in fumen.Soflans.OrderBy(x => x.TGrid))
+                sb.WriteLine($"Soflan:{soflan.Speed}:(T[{soflan.TGrid.Unit},{soflan.TGrid.Grid}]) -> (T[{soflan.EndTGrid.Unit},{soflan.EndTGrid.Grid}])");
+            sb.WriteLine();
         }
 
-        public void ProcessLANE(OngekiFumen fumen, LoggableBinaryWriter sb)
+        public void ProcessLANE(OngekiFumen fumen, StreamWriter sb)
         {
-            Log.LogDebug($"-----Begin ProcessLANE()----");
-            void Serialize(ConnectableStartObject laneStart)
+            var builder = new StringBuilder();
+
+            string Serialize(ConnectableStartObject laneStart)
             {
-                void SerializeOutput(ConnectableObjectBase o)
+                builder.Clear();
+                builder.Append($"Lane:{laneStart.RecordId}:");
+
+                string SerializeOutput(ConnectableObjectBase o)
                 {
-                    sb.Write(o.IDShortName);
-                    sb.Write(o.RecordId);
-                    sb.Write(o.TGrid.Unit);
-                    sb.Write(o.TGrid.Grid);
-                    sb.Write(o.XGrid.Unit);
-
-                    if (o is IColorfulLane colorful)
-                    {
-                        sb.Write(colorful.ColorId.Id);
-                        sb.Write(colorful.Brightness);
-                    }
+                    return $"(Type[{o.IDShortName}],X[{o.XGrid.Unit},{o.XGrid.Grid}],T[{o.TGrid.Unit},{o.TGrid.Grid}]{(o is IColorfulLane c ? $",C[{c.ColorId.Name},{c.Brightness}]" : string.Empty)})";
                 }
 
-                sb.Write(laneStart.Children.Count());
-                SerializeOutput(laneStart);
-                foreach (var child in laneStart.Children)
-                    SerializeOutput(child);
+                var r = string.Join(" -> ", laneStart.Children.AsEnumerable<ConnectableObjectBase>().Prepend(laneStart).Select(x => SerializeOutput(x)));
+                builder.Append(r);
+
+                return builder.ToString();
             }
 
             var groups = fumen.Lanes.GroupBy(x => x.LaneType).OrderByDescending(x => x.Key).ToArray();
-            sb.Write(groups.Length);
             foreach (var group in groups)
             {
                 var laneStarts = group.OrderBy(x => x.RecordId).ToArray();
-                sb.Write(laneStarts.Length);
                 foreach (var laneStart in laneStarts)
-                    Serialize(laneStart);
+                    sb.WriteLine(Serialize(laneStart));
+                sb.WriteLine();
             }
         }
 
-        public void ProcessBULLET(OngekiFumen fumen, LoggableBinaryWriter sb)
+        public void ProcessBULLET(OngekiFumen fumen, StreamWriter sb)
         {
-            Log.LogDebug($"-----Begin ProcessBULLET()----");
-            sb.Write(fumen.Bullets.Count);
-            foreach (var u in fumen.Bullets.OrderBy(x => x.TGrid))
-            {
-                sb.Write(u.ReferenceBulletPallete?.StrID);
-                sb.Write(u.TGrid.Unit);
-                sb.Write(u.TGrid.Grid);
-                sb.Write(u.XGrid.Unit);
-            }
+            foreach (var bullet in fumen.Bullets.OrderBy(x => x.TGrid))
+                sb.WriteLine($"Bullet:{bullet.ReferenceBulletPallete?.StrID}:X[{bullet.XGrid.Unit},{bullet.XGrid.Grid}],T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}],D[{bullet.BulletDamageTypeValue}]");
+            sb.WriteLine();
         }
 
-        public void ProcessBEAM(OngekiFumen fumen, LoggableBinaryWriter sb)
+        public void ProcessBEAM(OngekiFumen fumen, StreamWriter sb)
         {
-            Log.LogDebug($"-----Begin ProcessBEAM()----");
-            void SerializeOutput(ConnectableObjectBase o)
-            {
-                sb.Write(o.IDShortName);
-                sb.Write(o.RecordId);
-                sb.Write(o.TGrid.Unit);
-                sb.Write(o.TGrid.Grid);
-                sb.Write(o.XGrid.Unit);
-                sb.Write(((IBeamObject)o).WidthId);
-            }
+            var builder = new StringBuilder();
 
-            sb.Write(fumen.Beams.Count());
-            foreach (var beamStart in fumen.Beams.OrderBy(x => x.RecordId))
+            string Serialize(ConnectableStartObject laneStart)
             {
-                sb.Write(beamStart.Children.Count());
-                SerializeOutput(beamStart);
-                foreach (var child in beamStart.Children)
-                    SerializeOutput(child);
-            }
-        }
+                builder.Clear();
+                builder.Append($"Beam:{laneStart.RecordId}:");
 
-        public void ProcessBELL(OngekiFumen fumen, LoggableBinaryWriter sb)
-        {
-            Log.LogDebug($"-----Begin ProcessBELL()----");
-            sb.Write(fumen.Bells.Count);
-            foreach (var u in fumen.Bells.OrderBy(x => x.TGrid))
-            {
-                sb.Write(u.TGrid.Unit);
-                sb.Write(u.TGrid.Grid);
-                sb.Write(u.XGrid.Unit);
-
-                sb.Write(u.ReferenceBulletPallete?.StrID ?? "");
-            }
-        }
-
-        public void ProcessFLICK(OngekiFumen fumen, LoggableBinaryWriter sb)
-        {
-            Log.LogDebug($"-----Begin ProcessFLICK()----");
-            sb.Write(fumen.Flicks.Count);
-            foreach (var u in fumen.Flicks.OrderBy(x => x.TGrid))
-            {
-                sb.Write(u.TGrid.Unit);
-                sb.Write(u.TGrid.Grid);
-                sb.Write(u.XGrid.Unit);
-                sb.Write((int)u.Direction);
-                sb.Write(u.IsCritical);
-            }
-        }
-
-        public void ProcessNOTES(OngekiFumen fumen, LoggableBinaryWriter sb)
-        {
-            Log.LogDebug($"-----Begin ProcessNOTES()----");
-            var notes = fumen.Taps.OfType<OngekiTimelineObjectBase>().Concat(fumen.Holds).OrderBy(x => x.TGrid).ToArray();
-            sb.Write(notes.Length);
-            foreach (var u in notes)
-            {
-                sb.Write(u is WallTap || u is WallHold);
-                sb.Write(u.IDShortName);
-                switch (u)
+                string SerializeOutput(ConnectableObjectBase o)
                 {
-                    case Tap t:
-                        sb.Write(t.IsCritical);
-                        sb.Write(t.ReferenceLaneStart?.RecordId ?? -1);
-                        sb.Write(t.TGrid.Unit);
-                        sb.Write(t.TGrid.Grid);
-                        sb.Write(t.XGrid.Unit);
-                        sb.Write(t.XGrid.Grid);
-                        break;
-                    case Hold h:
-                        var end = h.Children.LastOrDefault();
-                        sb.Write(h.IsCritical);
-                        sb.Write(h.ReferenceLaneStart?.RecordId ?? -1);
-                        sb.Write(h.TGrid.Unit);
-                        sb.Write(h.TGrid.Grid);
-                        sb.Write(h.XGrid.Unit);
-                        sb.Write(h.XGrid.Grid);
-                        sb.Write(end.TGrid.Unit);
-                        sb.Write(end.TGrid.Grid);
-                        sb.Write(end.XGrid.Unit);
-                        sb.Write(end.XGrid.Grid);
-                        break;
-                    default:
-                        break;
+                    return $"(Type[{o.IDShortName}],X[{o.XGrid.Unit},{o.XGrid.Grid}],T[{o.TGrid.Unit},{o.TGrid.Grid}],W[{((IBeamObject)o).WidthId}])";
                 }
+
+                var r = string.Join(" -> ", laneStart.Children.AsEnumerable<ConnectableObjectBase>().Prepend(laneStart).Select(x => SerializeOutput(x)));
+                builder.Append(r);
+
+                return builder.ToString();
             }
+
+            foreach (var beamStart in fumen.Beams.OrderBy(x => x.RecordId))
+                sb.WriteLine(Serialize(beamStart));
+            sb.WriteLine();
+        }
+
+        public void ProcessBELL(OngekiFumen fumen, StreamWriter sb)
+        {
+
+            foreach (var bell in fumen.Bells.OrderBy(x => x.TGrid))
+                sb.WriteLine($"Bell:{bell.ReferenceBulletPallete?.StrID}:X[{bell.XGrid.Unit},{bell.XGrid.Grid}],T[{bell.TGrid.Unit},{bell.TGrid.Grid}]");
+            sb.WriteLine();
+        }
+
+        public void ProcessFLICK(OngekiFumen fumen, StreamWriter sb)
+        {
+            foreach (var flick in fumen.Flicks.OrderBy(x => x.TGrid))
+                sb.WriteLine($"Flick:X[{flick.XGrid.Unit},{flick.XGrid.Grid}],T[{flick.TGrid.Unit},{flick.TGrid.Grid}],C[{flick.IsCritical}],D[{flick.Direction}]");
+            sb.WriteLine();
+        }
+
+        public void ProcessNOTES(OngekiFumen fumen, StreamWriter sb)
+        {
+            foreach (var tap in fumen.Taps.OrderBy(x => x.TGrid))
+                sb.WriteLine($"Tap:{tap.ReferenceLaneStrId}:X[{tap.XGrid.Unit},{tap.XGrid.Grid}],T[{tap.TGrid.Unit},{tap.TGrid.Grid}],C[{tap.IsCritical}]");
+            sb.WriteLine();
+            foreach (var hold in fumen.Holds.OrderBy(x => x.TGrid))
+            {
+                sb.Write($"Hold:{hold.ReferenceLaneStrId},{hold.IsCritical}:(X[{hold.XGrid.Unit},{hold.XGrid.Grid}],T[{hold.TGrid.Unit},{hold.TGrid.Grid}])");
+                if (hold.HoldEnd is HoldEnd end)
+                    sb.Write($" -> (X[{end.XGrid.Unit},{end.XGrid.Grid}],T[{end.TGrid.Unit},{end.TGrid.Grid}])");
+                sb.WriteLine();
+            }
+            sb.WriteLine();
         }
     }
 }
