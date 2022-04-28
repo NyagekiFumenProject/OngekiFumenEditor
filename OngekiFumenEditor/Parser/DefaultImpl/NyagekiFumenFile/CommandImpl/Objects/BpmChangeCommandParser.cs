@@ -7,22 +7,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl.Objects
+namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Objects
 {
     [Export(typeof(INyagekiCommandParser))]
-    public class EnemySetCommandParser : INyagekiCommandParser
+    public class BpmChangeCommandParser : INyagekiCommandParser
     {
-        public string CommandName => "EnemySet";
+        public string CommandName => "BpmChange";
 
         public void ParseAndApply(OngekiFumen fumen, string[] seg)
         {
-            var eme = new EnemySet();
+            //$"BpmChange:{bpm.BPM}:T[{bpm.TGrid.Unit},{bpm.TGrid.Grid}]"
+            var bpm = new BPMChange();
             var data = seg[1].Split(":");
 
-            eme.TagTblValue = new (data[0]);
-            eme.TGrid = data[1].ParseToTGrid();
+            bpm.BPM = float.Parse(data[0]);
+            bpm.TGrid = data[1].ParseToTGrid();
 
-            fumen.AddObject(eme);
+            fumen.AddObject(bpm);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl.Headers
+namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Headers
 {
     public abstract class HeaderCommandBase : INyagekiCommandParser
     {

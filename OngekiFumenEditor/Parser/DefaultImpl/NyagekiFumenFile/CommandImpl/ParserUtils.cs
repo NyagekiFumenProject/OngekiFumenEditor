@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl
+namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl
 {
     internal static class ParserUtils
     {

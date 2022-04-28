@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl.Objects
+namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Objects
 {
     [Export(typeof(INyagekiCommandParser))]
     public class MeterChangeCommandParser : INyagekiCommandParser
