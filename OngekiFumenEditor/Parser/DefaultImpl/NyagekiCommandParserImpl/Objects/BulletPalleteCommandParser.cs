@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl.Objects
             var data = seg[1].Split(":");
             using var d = data[1].GetValuesMapWithDisposable(out var map);
 
-            bpl.StrID = data[0];
+            bpl.StrID = data[0].Trim();
             bpl.ShooterValue = new(map["Shooter"]);
             bpl.TargetValue = new(map["Target"]);
             bpl.SizeValue = new(map["Size"]);

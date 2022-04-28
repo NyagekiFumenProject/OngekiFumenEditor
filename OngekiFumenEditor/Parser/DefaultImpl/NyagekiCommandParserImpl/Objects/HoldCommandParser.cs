@@ -31,8 +31,14 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl.Objects
             hold.TGrid = notes[0]["T"].ParseToTGrid();
             hold.XGrid = notes[0]["X"].ParseToXGrid();
 
-            hold.HoldEnd.TGrid = notes[1]["T"].ParseToTGrid();
-            hold.HoldEnd.XGrid = notes[1]["X"].ParseToXGrid();
+            if (notes.Length > 1)
+            {
+                var end = new HoldEnd();
+                end.TGrid = notes[1]["T"].ParseToTGrid();
+                end.XGrid = notes[1]["X"].ParseToXGrid();
+
+                hold.AddChildObject(end);
+            }
 
             foreach ((var d, _) in maps)
                 d.Dispose();

@@ -31,6 +31,14 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         public static readonly string[] FumenFileExtensions = new[] { ".nyageki" };
         public string[] SupportFumenFileExtensions => FumenFileExtensions;
 
+        Dictionary<string, INyagekiCommandParser> commandParsers;
+
+        [ImportingConstructor]
+        public DefaultNyagekiFumenParser([ImportMany] IEnumerable<INyagekiCommandParser> commandParsers)
+        {
+            this.commandParsers = commandParsers.ToDictionary(x => x.CommandName.Trim().ToLower(), x => x);
+        }
+
         public async Task<OngekiFumen> DeserializeAsync(Stream stream)
         {
             using var reader = new StreamReader(stream);
@@ -40,18 +48,14 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             while (!reader.EndOfStream)
             {
                 var line = await reader.ReadLineAsync();
-                var seg = line.Split(':', 1);
-                switch (seg[0].ToLower().Trim())
-                {
-                    case "":
-                        break;
-                    default:
-                        break;
-                }
+                var seg = line.Split(':', 2);
+                var commandName = seg[0].ToLower().Trim();
+
+                if (commandParsers.TryGetValue(commandName, out var commandParser))
+                    commandParser.ParseAndApply(fumen, seg);
             }
 
             fumen.Setup();
-
             return fumen;
         }
     }

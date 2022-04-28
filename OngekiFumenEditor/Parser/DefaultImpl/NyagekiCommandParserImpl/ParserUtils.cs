@@ -26,13 +26,13 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl
 
         public static TGrid ParseToTGrid(this string tgridContent)
         {
-            var data = tgridContent.Split(",");
+            var data = tgridContent.Trim().Trim(new char[] { 'T', '[', ']' }).Split(",");
             return new TGrid(float.Parse(data[0]), int.Parse(data[1]));
         }
 
         public static XGrid ParseToXGrid(this string xgridContent)
         {
-            var data = xgridContent.Split(",");
+            var data = xgridContent.Trim(new char[] { 'X', '[', ']' }).Trim().Split(",");
             return new XGrid(float.Parse(data[0]), int.Parse(data[1]));
         }
     }

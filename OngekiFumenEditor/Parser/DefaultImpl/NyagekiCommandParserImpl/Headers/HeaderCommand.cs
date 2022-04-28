@@ -12,15 +12,14 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl.Headers
     {
         public abstract string HeaderName { get; }
 
-        public string CommandName => "Header";
+        public string CommandName => "Header." + HeaderName;
 
         public void ParseAndApply(OngekiFumen fumen, string[] seg)
         {
             var data = seg[1];
             var hdata = data.Split(":", 1);
 
-            if (hdata[0].Equals(HeaderName, StringComparison.InvariantCultureIgnoreCase))
-                ApplyHeaderValue(fumen, hdata[1]);
+            ApplyHeaderValue(fumen, hdata[0].Trim());
         }
 
         protected abstract void ApplyHeaderValue(OngekiFumen fumen, string headerValue);

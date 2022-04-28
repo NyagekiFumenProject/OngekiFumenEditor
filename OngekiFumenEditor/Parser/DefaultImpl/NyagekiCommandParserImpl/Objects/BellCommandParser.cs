@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiCommandParserImpl.Objects
             var bell = new Bell();
             var data = seg[1].Split(":");
 
-            var strId = data[0];
+            var strId = data[0].Trim();
             bell.ReferenceBulletPallete = fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == strId);
 
             using var d = data[1].GetValuesMapWithDisposable(out var map);
