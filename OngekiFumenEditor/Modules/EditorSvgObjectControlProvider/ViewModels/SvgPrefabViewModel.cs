@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
     {
         public SvgPrefab RefSvgPrefab => (SvgPrefab)ReferenceOngekiObject;
 
-        public Rect GeometryBound => ProcessingDrawingGroup?.Bounds ?? Rect.Empty;
+        public Rect GeometryBound => RefSvgPrefab.ProcessingDrawingGroup?.Bounds ?? Rect.Empty;
 
         private Point point;
         public Point Point
@@ -31,25 +31,12 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
             set => Set(ref point, value);
         }
 
-
-        private DrawingGroup processedDrawingGroup = default;
-        public DrawingGroup ProcessingDrawingGroup
-        {
-            get => processedDrawingGroup;
-            set
-            {
-                Set(ref processedDrawingGroup, value);
-                NotifyOfPropertyChange(() => GeometryBound);
-            }
-        }
-
         protected override void OnOngekiObjectPropChanged(object sender, PropertyChangedEventArgs arg)
         {
             switch (arg.PropertyName)
             {
                 case nameof(SvgPrefab.ProcessingDrawingGroup):
                     RecalculatePoint();
-                    RebuildGeometry();
                     break;
                 case nameof(SvgPrefab.OffsetX):
                 case nameof(SvgPrefab.OffsetY):
@@ -62,6 +49,12 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
             }
         }
 
+        public override void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
+        {
+            base.OnObjectCreated(createFrom, editorViewModel);
+            RecalculatePoint();
+        }
+
         private void RecalculatePoint()
         {
             if (RefSvgPrefab.ProcessingDrawingGroup?.Bounds is Rect bound) {
@@ -71,11 +64,6 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
                     Y = -RefSvgPrefab.OffsetY.CurrentValue * bound.Height
                 };
             }
-        }
-
-        private void RebuildGeometry()
-        {
-            ProcessingDrawingGroup = RefSvgPrefab.ProcessingDrawingGroup;
         }
     }
 }

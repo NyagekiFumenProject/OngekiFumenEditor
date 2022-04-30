@@ -67,10 +67,45 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
             ProcessCURVE(fumen, writer);
 
+            ProcessSvgPrefabs(fumen, writer);
+
             await writer.FlushAsync();
             await memory.FlushAsync();
 
             return memory.ToArray();
+        }
+
+        private void ProcessSvgPrefabs(OngekiFumen fumen, StreamWriter writer)
+        {
+            foreach (var svgPrefab in fumen.SvgPrefabs)
+            {
+                writer.Write("SvgPrefab\t:\t");
+                writer.Write($"LimitXGridUnitSimply[{svgPrefab.LimitXGridUnitSimply}]");
+                writer.Write(", ");
+                writer.Write($"ColorSimilar[{svgPrefab.ColorSimilar.CurrentValue}]");
+                writer.Write(", ");
+                writer.Write($"Rotation[{svgPrefab.Rotation.CurrentValue}]");
+                writer.Write(", ");
+                writer.Write($"EnableColorfulLaneSimilar[{svgPrefab.EnableColorfulLaneSimilar}]");
+                writer.Write(", ");
+                writer.Write($"OffsetX[{svgPrefab.OffsetX.CurrentValue}]");
+                writer.Write(", ");
+                writer.Write($"OffsetY[{svgPrefab.OffsetY.CurrentValue}]");
+                writer.Write(", ");
+                writer.Write($"ShowOriginColor[{svgPrefab.ShowOriginColor}]");
+                writer.Write(", ");
+                writer.Write($"Opacity[{svgPrefab.Opacity.CurrentValue}]");
+                writer.Write(", ");
+                writer.Write($"Scale[{svgPrefab.Scale}]");
+                writer.Write(", ");
+                writer.Write($"Tolerance[{svgPrefab.Tolerance.CurrentValue}]");
+                writer.Write(", ");
+                writer.Write($"T[{svgPrefab.TGrid.Unit},{svgPrefab.TGrid.Grid}]");
+                writer.Write(", ");
+                writer.Write($"X[{svgPrefab.XGrid.Unit},{svgPrefab.XGrid.Grid}]");
+                writer.Write("\t:\t");
+                writer.Write(svgPrefab.SvgFile?.FullName);
+            }
         }
 
         private void ProcessCURVE(OngekiFumen fumen, StreamWriter writer)
@@ -124,7 +159,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             sb.WriteLine($"Header.{nameof(metaInfo.DangerBulletDamage)}\t:\t{metaInfo.DangerBulletDamage}");
             sb.WriteLine($"Header.{nameof(metaInfo.BulletDamage)}\t:\t{metaInfo.BulletDamage}");
             sb.WriteLine($"Header.{nameof(metaInfo.ProgJudgeBpm)}\t:\t{metaInfo.ProgJudgeBpm}");
-            
+
             sb.WriteLine();
         }
 

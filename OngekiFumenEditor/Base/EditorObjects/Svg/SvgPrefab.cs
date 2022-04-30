@@ -174,7 +174,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private void ReloadSvgFile()
+        public void ReloadSvgFile()
         {
             CleanGeometry();
 
@@ -199,7 +199,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             ProcessingDrawingGroup = default;
         }
 
-        private void RebuildGeometry()
+        public void RebuildGeometry()
         {
             ProcessingDrawingGroup = default;
             var inter = drawingGroup?.Children?.FirstOrDefault();

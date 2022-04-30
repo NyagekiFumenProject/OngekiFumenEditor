@@ -24,7 +24,7 @@
                 </TranslateTransform>
             </Image.RenderTransform>
             <Image.Source>
-                <DrawingImage Drawing="{Binding ProcessingDrawingGroup}">
+                <DrawingImage Drawing="{Binding RefSvgPrefab.ProcessingDrawingGroup}">
                 </DrawingImage>
             </Image.Source>
         </Image>
