@@ -39,6 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
         {
             var dragTGrid = TGridCalculator.ConvertYToTGrid(dragEndPoint.Y, editor);
             var backupStores = new HashSet<ConnectableChildObjectBase>();
+            var backupIdxStores = new Dictionary<ConnectableChildObjectBase, int>();
             var affactedObjects = new HashSet<ILaneDockable>();
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
@@ -57,6 +58,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 foreach (var item in backupStores)
                 {
                     startObject.RemoveChildObject(item);
+                    backupIdxStores[item] = item.CacheRecoveryChildIndex;
+                    item.CacheRecoveryChildIndex = -1;//force add to end
                     nextStartObject.InsertChildObject(item.TGrid, item);
                 }
 
@@ -82,6 +85,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 foreach (var item in backupStores)
                 {
                     nextStartObject.RemoveChildObject(item);
+                    item.CacheRecoveryChildIndex = backupIdxStores[item];
                     startObject.InsertChildObject(item.TGrid, item);
                 }
 

@@ -69,6 +69,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         nextObj.PrevObject = child;
                         AddConnector(GenerateConnector(nextObj.PrevObject, nextObj));
                     }
+                    insertIdx = Math.Min(insertIdx, children.Count);
                     children.Insert(insertIdx, child);
                 }
                 else
