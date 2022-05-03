@@ -59,7 +59,7 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
             DecoratorBrush="DarkOrchid"
-            Text="插值曲线并清理"
+            Text="插值整个轨道曲线"
             ToolTip="对此轨道所有曲线进行插值成一条条直线,然后删除本轨道并生成新的"
             Visibility="{Binding IsStartObject, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <controls:CommonOperationButton
@@ -71,5 +71,24 @@
             Text="按轨道刷已复制物件"
             ToolTip="对此轨道所有曲线进行插值成一条条直线,然后删除本轨道并生成新的"
             Visibility="{Binding IsStartObject, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <controls:CommonOperationButton
+            Width="150"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnPartChildCurveInterpolateClick()];"
+            DecoratorBrush="DarkGoldenrod"
+            Text="插值这段曲线"
+            ToolTip="对此轨道所有曲线进行插值成一条条直线,然后删除本轨道并生成新的"
+            Visibility="{Binding IsStartObject, Converter={StaticResource ReverseBoolToVisibilityConverter}}" />
+
+        <controls:CommonOperationButton
+            Width="150"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnPartChildCurveInterpolateWithXGridLimitClick()];"
+            DecoratorBrush="Goldenrod"
+            Text="插值这段曲线(X限制)"
+            ToolTip="对此轨道所有曲线进行插值成一条条直线,然后删除本轨道并生成新的"
+            Visibility="{Binding IsStartObject, Converter={StaticResource ReverseBoolToVisibilityConverter}}" />
     </StackPanel>
 </UserControl>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static OngekiFumenEditor.Utils.CurveInterpolaterTraveller;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
@@ -196,8 +197,24 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             foreach (var cp in PathControls)
             {
                 var newCP = new LaneCurvePathControlObject();
-                newCP.Copy(cp,fumen);
+                newCP.Copy(cp, fumen);
                 AddControlObject(newCP);
+            }
+        }
+
+        public IEnumerable<ConnectableChildObjectBase> InterpolateCurveChildren(CurveInterpolaterTraveller traveller = default)
+        {
+            while (true)
+            {
+                if (traveller.Travel() is not CurvePoint point)
+                    break;
+
+                var newNext = LambdaActivator.CreateInstance(ReferenceStartObject.NextType) as ConnectableChildObjectBase;
+
+                newNext.TGrid = point.TGrid;
+                newNext.XGrid = point.XGrid;
+
+                yield return newNext;
             }
         }
     }

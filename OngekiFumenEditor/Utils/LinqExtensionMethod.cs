@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Utils
 
             while (itor.MoveNext())
             {
-                if (prev.Equals(taget))
+                if (taget.Equals(prev))
                     return itor.Current;
                 prev = itor.Current;
             }

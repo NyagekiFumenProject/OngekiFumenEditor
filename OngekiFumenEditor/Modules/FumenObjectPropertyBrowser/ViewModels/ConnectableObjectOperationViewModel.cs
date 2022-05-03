@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog;
@@ -13,6 +14,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -232,6 +234,64 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             undoAction += () => editor.Redraw(RedrawTarget.OngekiObjects);
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("批量粘贴刷子", redoAction, undoAction));
+        }
+
+        public void OnPartChildCurveInterpolateClick()
+        {
+            PartChildCurveInterpolate(false);
+        }
+
+        public void OnPartChildCurveInterpolateWithXGridLimitClick()
+        {
+            PartChildCurveInterpolate(true);
+        }
+
+        public void PartChildCurveInterpolate(bool xGridLimit = false)
+        {
+            var childObj = ConnectableObject as ConnectableChildObjectBase;
+
+            if (!childObj.CheckCurveVaild())
+            {
+                MessageBox.Show("无法对非法的线段进行局部插值");
+                return;
+            }
+
+            var from = childObj;
+            var prev = childObj.PrevObject;
+            var to = childObj.ReferenceStartObject.Children.FindNextOrDefault(childObj);
+
+            var genChildren = childObj.InterpolateCurveChildren(
+                xGridLimit ?
+                new XGridLimitedCurveInterpolaterTraveller(from, to) :
+                new CurveInterpolaterTraveller(from, to)
+                ).ToList();
+
+            genChildren.RemoveAll(x => x.TGrid >= from.TGrid || x.TGrid <= prev.TGrid);
+
+            var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
+            var storeBackupControlPoints = new List<LaneCurvePathControlObject>();
+
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("部分曲线插值", () =>
+            {
+                foreach (var newChild in genChildren)
+                    childObj.ReferenceStartObject.InsertChildObject(newChild.TGrid, newChild);
+
+                storeBackupControlPoints.AddRange(childObj.PathControls);
+                foreach (var cp in storeBackupControlPoints)
+                    childObj.RemoveControlObject(cp);
+
+                editor.Redraw(RedrawTarget.OngekiObjects);
+            }, () =>
+            {
+                foreach (var newChild in genChildren)
+                    childObj.ReferenceStartObject.RemoveChildObject(newChild);
+
+                foreach (var cp in storeBackupControlPoints)
+                    childObj.AddControlObject(cp);
+                storeBackupControlPoints.Clear();
+
+                editor.Redraw(RedrawTarget.OngekiObjects);
+            }));
         }
     }
 }

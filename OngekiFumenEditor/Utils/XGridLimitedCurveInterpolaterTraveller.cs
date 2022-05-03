@@ -14,6 +14,10 @@ namespace OngekiFumenEditor.Utils
         {
         }
 
+        public XGridLimitedCurveInterpolaterTraveller(ConnectableChildObjectBase from, ConnectableChildObjectBase to = null) : base(from, to)
+        {
+        }
+
         protected override IEnumerable<CurvePoint> Interpolate(ConnectableChildObjectBase x)
         {
             var itor = base.Interpolate(x).GetEnumerator();

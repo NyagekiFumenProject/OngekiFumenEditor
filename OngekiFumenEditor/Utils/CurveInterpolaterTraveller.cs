@@ -37,20 +37,35 @@ namespace OngekiFumenEditor.Utils
 
         private LinkedList<CurvePoint> waiter = new LinkedList<CurvePoint>();
         private IEnumerator<CurvePoint> itor;
-        private readonly ConnectableStartObject start;
 
-        public CurveInterpolaterTraveller(ConnectableStartObject start)
+        private readonly ConnectableChildObjectBase from;
+        private readonly ConnectableChildObjectBase to;
+
+        public CurveInterpolaterTraveller(ConnectableStartObject start) : this(start.Children.FirstOrDefault(), default)
         {
-            this.start = start;
+
+        }
+
+        public CurveInterpolaterTraveller(ConnectableChildObjectBase from, ConnectableChildObjectBase to = default)
+        {
+            this.from = from;
+            this.to = to;
             Reset();
         }
 
         public void Reset()
         {
             waiter.Clear();
-            itor = start.Children.SelectMany(x => Interpolate(x)).DistinctContinuousBy((a,b) => {
-                return a.TGrid == b.TGrid && a.XGrid == b.XGrid;
-            }).GetEnumerator();
+
+            var children = from.ReferenceStartObject.Children
+                .SkipWhile(x => x != from)
+                .TakeWhile(x => x != to).ToArray();
+            itor = children
+                .SelectMany(x => Interpolate(x))
+                .DistinctContinuousBy((a, b) =>
+                {
+                    return a.TGrid == b.TGrid && a.XGrid == b.XGrid;
+                }).GetEnumerator();
         }
 
         protected virtual IEnumerable<CurvePoint> Interpolate(ConnectableChildObjectBase x)
