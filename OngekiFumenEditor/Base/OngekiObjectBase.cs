@@ -16,6 +16,16 @@ namespace OngekiFumenEditor.Base
 
         public override string ToString() => IDShortName;
 
+        private string tag = string.Empty;
+        /// <summary>
+        /// 表示用户自定义的标签，一般用于脚本区分
+        /// </summary>
+        public string Tag
+        {
+            get => tag;
+            set => Set(ref tag, value);
+        }
+
         /// <summary>
         /// 复制物件参数和内容
         /// </summary>
