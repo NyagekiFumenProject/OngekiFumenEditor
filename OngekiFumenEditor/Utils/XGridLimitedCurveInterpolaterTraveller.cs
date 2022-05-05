@@ -1,10 +1,8 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -29,7 +27,8 @@ namespace OngekiFumenEditor.Utils
             while (itor.MoveNext())
             {
                 var cur = itor.Current;
-                var prevXunitInt = (int)(prev.XGrid.TotalGrid * 1.0f / prev.XGrid.ResX);
+                var prevXunit = prev.XGrid.TotalGrid * 1.0f / prev.XGrid.ResX;
+                var prevXunitInt = (int)prevXunit;
                 var curXunit = cur.XGrid.TotalGrid * 1.0f / cur.XGrid.ResX;
                 var curXunitInt = (int)curXunit;
                 var prevX = prev.XGrid.TotalGrid;
@@ -40,18 +39,19 @@ namespace OngekiFumenEditor.Utils
                 Log.LogDebug($"--------------");
                 Log.LogDebug($"current ({cur})");
 
+                var isZeroSpecial = prevXunitInt == curXunitInt && curXunitInt == 0 && prevXunit * curXunit < 0;
+
                 if (curXunit == curXunitInt)
                 {
                     Log.LogDebug($"return ({cur}) directly because curXunitInt == curXunit");
                     prevRetY = curY * 1f / cur.TGrid.ResT;
                     yield return cur;
                 }
-                else if (prevXunitInt != curXunitInt)
+                else if (prevXunitInt != curXunitInt || isZeroSpecial)
                 {
-                    var signStep = Math.Sign(curXunitInt - prevXunitInt);
                     Log.LogDebug($"begin interpolate from ({prev}) to ({cur})");
 
-                    for (int i = prevXunitInt + 1; signStep > 0 ? i < curXunit : i > curXunit; i += signStep)
+                    foreach (var i in MathUtils.GetIntegersBetweenTwoValues(prevXunit, curXunit))
                     {
                         /*
                      
@@ -59,16 +59,14 @@ namespace OngekiFumenEditor.Utils
                                   |         |
                                   v         v
                            
-               CurvePoint2(prev)  |         |        X[3.5,0]
+               CurvePoint2(prev)  |         |        X[2.5,0]
                -------------o-----|---------|--------o----------------------
                       X[0.5,0]    |         |          CurvePoint2(cur)
                                   |         |
                          xunitLine1 X[1,0]   xunitLine1 X[2,0] 
                     */
-
-
-                        var ix = new XGrid(i, 0, prev.XGrid.ResX).TotalGrid;
-                        var y = MathUtils.CalculateYFromTwoPointFormFormula(ix, prevX, prevY, curX, curY);
+                        var xGrid = new XGrid(i, 0, prev.XGrid.ResX);
+                        var y = MathUtils.CalculateYFromTwoPointFormFormula(xGrid.TotalGrid, prevX, prevY, curX, curY);
                         var tunit = (float)(y / prev.TGrid.ResT);
                         var tGrid = new TGrid(tunit, 0);
                         Log.LogDebug($"interpolate xunit:{i} from ({prev}) to ({cur})");
@@ -77,7 +75,7 @@ namespace OngekiFumenEditor.Utils
                         {
                             var point = new CurvePoint()
                             {
-                                XGrid = new XGrid(i, 0),
+                                XGrid = xGrid,
                                 TGrid = tGrid,
                             };
                             Log.LogDebug($"return new interpolated point: ({point})");

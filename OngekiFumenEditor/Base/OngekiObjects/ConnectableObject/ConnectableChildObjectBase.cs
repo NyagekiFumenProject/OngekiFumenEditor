@@ -74,6 +74,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             .AsEnumerable<OngekiMovableObjectBase>()
             .Prepend(PrevObject)
             .Append(this)
+            .OfType<OngekiMovableObjectBase>()
             .Select(x => new Vector2(x.XGrid.TotalGrid, x.TGrid.TotalGrid));
 
         public IEnumerable<(Vector2 pos, bool isVaild)> GenPath()

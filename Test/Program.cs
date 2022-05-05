@@ -6,42 +6,40 @@ using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Test
 {
     class Program
     {
-        static void Main(string[] args)
+        static IEnumerable<int> GetInt(double from, double to)
         {
-            /*
-            var bpmList = new BpmList();
-            bpmList.SetFirstBpm(new BPMChange() { BPM = 120 });
-            var meterList = new MeterChangeList()
-            {
-                new MeterChange(){
-                    TGrid = new TGrid(0,0),
-                    Bunbo = 4,
-                    BunShi = 4,
-                }
-            };
-            var beatSplit = 1;
+            var sign = Math.Sign(to - from);
+            var begin = 0;
+            var end = 0;
 
-            foreach (var z in TGridCalculator.GetVisbleTimelines(bpmList, meterList, 0, 1920, 0, beatSplit))
-                Console.WriteLine(z);
-
-            void output(float y)
+            if (sign > 0)
             {
-                Console.WriteLine();
-                var result = TGridCalculator.TryPickClosestBeatTime(y, bpmList, meterList, beatSplit);
-                Console.WriteLine($"y={y} ->  {result} ({result.y - y})");
+                begin = (int)Math.Ceiling(from);
+                end = (int)Math.Floor(to);
+            }
+            if (sign < 0)
+            {
+                begin = (int)Math.Floor(from);
+                end = (int)Math.Ceiling(to);
             }
 
-            output(1500);
-            output(990);
-            output(1430);
+            for (int i = begin; sign > 0 ? i <= end : i >= end; i += sign)
+                yield return i;
+        }
 
-            output(8888);
-            */
+        static void Main(string[] args)
+        {
+            Console.WriteLine(string.Join(" , ", GetInt(0.5, 6.5)));
+            Console.WriteLine(string.Join(" , ", GetInt(-0.5, -6.5)));
+            Console.WriteLine(string.Join(" , ", GetInt(6.5, -6.5)));
+            Console.WriteLine(string.Join(" , ", GetInt(-6.5, 6.5)));
+            Console.WriteLine(string.Join(" , ", GetInt(-0.023129463, 0.5279732)));
         }
     }
 }
