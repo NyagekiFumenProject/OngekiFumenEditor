@@ -143,7 +143,7 @@ namespace OngekiFumenEditor.Utils
             if (by == 0)
                 return y1;
 
-            return (x - x1) / (by * bx) + y1;
+            return ((x - x1) / bx) * by + y1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -194,6 +194,27 @@ namespace OngekiFumenEditor.Utils
 
         public static T Max<T>(T a, T b) where T : GridBase => a > b ? a : b;
         public static T Min<T>(T a, T b) where T : GridBase => a > b ? b : a;
+
+        public static IEnumerable<int> GetIntegersBetweenTwoValues(double from, double to)
+        {
+            var sign = Math.Sign(to - from);
+            var begin = 0;
+            var end = 0;
+
+            if (sign > 0)
+            {
+                begin = (int)Math.Ceiling(from);
+                end = (int)Math.Floor(to);
+            }
+            if (sign < 0)
+            {
+                begin = (int)Math.Floor(from);
+                end = (int)Math.Ceiling(to);
+            }
+
+            for (int i = begin; sign > 0 ? i <= end : i >= end; i += sign)
+                yield return i;
+        }
 
         public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(IEnumerable<T> collection, Func<T, float> valMapFunc)
         {
