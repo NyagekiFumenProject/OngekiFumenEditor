@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Utils
         {
         }
 
-        protected override IEnumerable<CurvePoint> Interpolate(ConnectableChildObjectBase x)
+        private IEnumerable<CurvePoint> InterpolateCore(ConnectableChildObjectBase x)
         {
             var itor = base.Interpolate(x).GetEnumerator();
             if (!itor.MoveNext())
@@ -24,9 +24,12 @@ namespace OngekiFumenEditor.Utils
             yield return itor.Current;
             var prev = itor.Current;
             var prevRetY = (float)prev.TGrid.TotalGrid / prev.TGrid.ResT;
+            var prevAppendNewCornerPointFlag = default(float?);
+
             while (itor.MoveNext())
             {
                 var cur = itor.Current;
+
                 var prevXunit = prev.XGrid.TotalGrid * 1.0f / prev.XGrid.ResX;
                 var prevXunitInt = (int)prevXunit;
                 var curXunit = cur.XGrid.TotalGrid * 1.0f / cur.XGrid.ResX;
@@ -38,6 +41,51 @@ namespace OngekiFumenEditor.Utils
 
                 Log.LogDebug($"--------------");
                 Log.LogDebug($"current ({cur})");
+
+                #region Append New Corner Point
+                //当有个急转角，那么就判断这个转角的点是否也要补充
+                /**
+                        |     /     |
+                        |    /      |
+                        |   /       |
+                        |  <  <-----|-------这里的转角点就判断是否要保留，如果超出1XGridUnit的75%的话就保留吧
+                        |   \       |
+                        |    \      |
+                        |     \     |
+                        |      \    | 
+                        |       \   |
+                        |        \  |
+                        |         \ |
+                        |          \|
+                        |           |\
+                        |           | \ 
+                        |           |  \
+
+                 */
+                var appendNewCornerPointFlag = Math.Sign(curX - prevX);
+                if (prevAppendNewCornerPointFlag is not null)
+                {
+                    //转角判断
+                    if (appendNewCornerPointFlag * prevAppendNewCornerPointFlag < 0)
+                    {
+                        var rawXGridUnit = prev.XGrid.TotalGrid * 1.0 / prev.XGrid.ResX;
+                        var judge = rawXGridUnit - (int)rawXGridUnit;
+                        //转角位置判断是否要补转角点
+                        if (Math.Abs(judge) > 0.75)
+                        {
+                            var newXUnit = (int)rawXGridUnit + (judge > 0 ? 1 : -1);
+                            var newPoint = new CurvePoint()
+                            {
+                                XGrid = new XGrid(newXUnit, 0, prev.XGrid.ResX),
+                                TGrid = prev.TGrid.CopyNew()
+                            };
+                            Log.LogDebug($"return new corner point ({newPoint})");
+                            yield return newPoint;
+                        }
+                    }
+                }
+                prevAppendNewCornerPointFlag = appendNewCornerPointFlag;
+                #endregion
 
                 var isZeroSpecial = prevXunitInt == curXunitInt && curXunitInt == 0 && prevXunit * curXunit < 0;
 
@@ -54,7 +102,10 @@ namespace OngekiFumenEditor.Utils
                     foreach (var i in MathUtils.GetIntegersBetweenTwoValues(prevXunit, curXunit))
                     {
                         /*
-                     
+                            核心思想，存在两个点prev/cur
+                            这两个点之间刚好穿过一个或者多个xunitLine
+                            那么就通过这两个点构造两点式一次函数,插值算出经过XGridUnit对应的点cp并返回
+
                                  calculate there between cp1 and cp2
                                   |         |
                                   v         v
@@ -96,6 +147,11 @@ namespace OngekiFumenEditor.Utils
                 prev = cur;
             }
             yield return prev;
+        }
+
+        protected override IEnumerable<CurvePoint> Interpolate(ConnectableChildObjectBase x)
+        {
+            return InterpolateCore(x);
         }
 
         public override CurvePoint? Travel()

@@ -143,7 +143,7 @@ namespace OngekiFumenEditor.Utils
             if (by == 0)
                 return y1;
 
-            return ((x - x1) / bx) * by + y1;
+            return (x - x1) / bx * by + y1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
