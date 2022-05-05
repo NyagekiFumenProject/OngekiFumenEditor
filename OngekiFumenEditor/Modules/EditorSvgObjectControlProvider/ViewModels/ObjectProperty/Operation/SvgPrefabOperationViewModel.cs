@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -118,7 +119,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
             }
 
             var genStarts = starts
-                .SelectMany(x => x.InterpolateCurve(SvgPrefab.LimitXGridUnitSimply ? new XGridLimitedCurveInterpolaterTraveller(x) : default))
+                .SelectMany(x => x.InterpolateCurve(SvgPrefab.LimitXGridUnitSimply ? XGridLimitedCurveInterpolaterFactory.Default : default))
                 .ToArray();
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Svg原地生成轨道物件", () =>

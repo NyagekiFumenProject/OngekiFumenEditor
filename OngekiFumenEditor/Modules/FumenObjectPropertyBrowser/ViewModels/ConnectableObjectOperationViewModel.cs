@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
@@ -95,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public void Interpolate(ActionExecutionContext e)
         {
-            var genStarts = RefStartObject.InterpolateCurve(new XGridLimitedCurveInterpolaterTraveller(RefStartObject)).ToArray();
+            var genStarts = RefStartObject.InterpolateCurve(XGridLimitedCurveInterpolaterFactory.Default).ToArray();
 
             var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值曲线", () =>
@@ -257,15 +258,15 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             }
 
             var from = childObj;
-            var prev = childObj.PrevObject;
             var to = childObj.ReferenceStartObject.Children.FindNextOrDefault(childObj);
 
             var genChildren = childObj.InterpolateCurveChildren(
                 xGridLimit ?
-                new XGridLimitedCurveInterpolaterTraveller(from, to) :
-                new CurveInterpolaterTraveller(from, to)
+                XGridLimitedCurveInterpolaterFactory.Default :
+                DefaultCurveInterpolaterFactory.Default
                 ).ToList();
 
+            var prev = childObj.PrevObject;
             genChildren.RemoveAll(x => x.TGrid >= from.TGrid || x.TGrid <= prev.TGrid);
 
             var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;

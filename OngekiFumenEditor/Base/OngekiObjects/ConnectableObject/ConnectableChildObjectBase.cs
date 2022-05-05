@@ -1,4 +1,6 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
 using System;
@@ -6,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static OngekiFumenEditor.Utils.CurveInterpolaterTraveller;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
@@ -203,11 +204,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
-        public IEnumerable<ConnectableChildObjectBase> InterpolateCurveChildren(CurveInterpolaterTraveller traveller = default)
+        public IEnumerable<ConnectableChildObjectBase> InterpolateCurveChildren(ICurveInterpolaterFactory factory = default)
         {
+            var to = ReferenceStartObject.Children.FindNextOrDefault(this);
+            var itor = (factory ?? new DefaultCurveInterpolaterFactory()).CreateInterpolaterForRange(this, to);
+
             while (true)
             {
-                if (traveller.Travel() is not CurvePoint point)
+                if (itor.EnumerateNext() is not CurvePoint point)
                     break;
 
                 var newNext = LambdaActivator.CreateInstance(ReferenceStartObject.NextType) as ConnectableChildObjectBase;

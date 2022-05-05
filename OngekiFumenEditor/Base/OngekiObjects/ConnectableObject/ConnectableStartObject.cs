@@ -2,6 +2,8 @@
 using NAudio.Midi;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -15,7 +17,6 @@ using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using static OngekiFumenEditor.Utils.CurveInterpolaterTraveller;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
@@ -255,26 +256,26 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
-        public IEnumerable<ConnectableStartObject> InterpolateCurve(CurveInterpolaterTraveller curveInterpolater = default)
-            => InterpolateCurve(GetType(), NextType, EndType, curveInterpolater).OfType<ConnectableStartObject>();
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(ICurveInterpolaterFactory factory = default)
+            => InterpolateCurve(GetType(), NextType, EndType, factory).OfType<ConnectableStartObject>();
 
-        public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType, CurveInterpolaterTraveller curveInterpolater = default)
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType, ICurveInterpolaterFactory factory = default)
             => InterpolateCurve(
                 () => LambdaActivator.CreateInstance(startType) as ConnectableStartObject,
                 () => LambdaActivator.CreateInstance(nextType) as ConnectableNextObject,
                 () => LambdaActivator.CreateInstance(endType) as ConnectableEndObject,
-                curveInterpolater
+                factory
                 ).OfType<ConnectableStartObject>();
 
-        public IEnumerable<START> InterpolateCurve<START, NEXT, END>(CurveInterpolaterTraveller curveInterpolater = default)
+        public IEnumerable<START> InterpolateCurve<START, NEXT, END>(ICurveInterpolaterFactory factory = default)
             where START : ConnectableStartObject, new()
             where END : ConnectableEndObject, new()
             where NEXT : ConnectableNextObject, new()
-            => InterpolateCurve(() => new START(), () => new NEXT(), () => new END(), curveInterpolater).OfType<START>();
+            => InterpolateCurve(() => new START(), () => new NEXT(), () => new END(), factory).OfType<START>();
 
-        public IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, CurveInterpolaterTraveller curveInterpolater = default)
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, ICurveInterpolaterFactory factory = default)
         {
-            var traveller = curveInterpolater ?? new CurveInterpolaterTraveller(this);
+            var traveller = (factory ?? new DefaultCurveInterpolaterFactory()).CreateInterpolaterForAll(this);
 
             float calcGradient(CurvePoint a, CurvePoint b)
             {
@@ -287,7 +288,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             IEnumerable<List<CurvePoint>> split()
             {
                 var list = new List<CurvePoint>();
-                if (traveller.Travel() is not CurvePoint p)
+                if (traveller.EnumerateNext() is not CurvePoint p)
                     yield break;
                 var prevPoint = p;
                 traveller.PushBack(p);
@@ -295,7 +296,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
                 while (true)
                 {
-                    if (traveller.Travel() is not CurvePoint point)
+                    if (traveller.EnumerateNext() is not CurvePoint point)
                         break;
                     var gradient = calcGradient(prevPoint, point);
                     var sign = MathF.Sign(gradient);

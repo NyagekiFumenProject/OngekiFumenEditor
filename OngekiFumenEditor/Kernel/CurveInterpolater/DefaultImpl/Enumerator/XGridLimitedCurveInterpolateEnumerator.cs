@@ -1,19 +1,24 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Utils.ObjectPool;
+﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator
 {
-    public class XGridLimitedCurveInterpolaterTraveller : CurveInterpolaterTraveller
+    public class XGridLimitedCurveInterpolateEnumerator : DefaultCurveInterpolateEnumerator
     {
-        public XGridLimitedCurveInterpolaterTraveller(ConnectableStartObject start) : base(start)
+        public XGridLimitedCurveInterpolateEnumerator(ConnectableStartObject start) : base(start)
         {
+
         }
 
-        public XGridLimitedCurveInterpolaterTraveller(ConnectableChildObjectBase from, ConnectableChildObjectBase to = null) : base(from, to)
+        public XGridLimitedCurveInterpolateEnumerator(ConnectableChildObjectBase from, ConnectableChildObjectBase to = null) : base(from, to)
         {
+
         }
 
         private IEnumerable<CurvePoint> InterpolateCore(ConnectableChildObjectBase x)
@@ -39,8 +44,8 @@ namespace OngekiFumenEditor.Utils
                 var curX = cur.XGrid.TotalGrid;
                 var curY = cur.TGrid.TotalGrid;
 
-                Log.LogDebug($"--------------");
-                Log.LogDebug($"current ({cur})");
+                //Log.LogDebug($"--------------");
+                //Log.LogDebug($"current ({cur})");
 
                 #region Append New Corner Point
                 //当有个急转角，那么就判断这个转角的点是否也要补充
@@ -71,7 +76,7 @@ namespace OngekiFumenEditor.Utils
                         var rawXGridUnit = prev.XGrid.TotalGrid * 1.0 / prev.XGrid.ResX;
                         var judge = rawXGridUnit - (int)rawXGridUnit;
                         //转角位置判断是否要补转角点
-                        if (Math.Abs(judge) > 0.75)
+                        if (Math.Abs(judge) > 0.50)
                         {
                             var newXUnit = (int)rawXGridUnit + (judge > 0 ? 1 : -1);
                             var newPoint = new CurvePoint()
@@ -79,7 +84,7 @@ namespace OngekiFumenEditor.Utils
                                 XGrid = new XGrid(newXUnit, 0, prev.XGrid.ResX),
                                 TGrid = prev.TGrid.CopyNew()
                             };
-                            Log.LogDebug($"return new corner point ({newPoint})");
+                            //Log.LogDebug($"return new corner point ({newPoint})");
                             yield return newPoint;
                         }
                     }
@@ -91,13 +96,13 @@ namespace OngekiFumenEditor.Utils
 
                 if (curXunit == curXunitInt)
                 {
-                    Log.LogDebug($"return ({cur}) directly because curXunitInt == curXunit");
+                    //Log.LogDebug($"return ({cur}) directly because curXunitInt == curXunit");
                     prevRetY = curY * 1f / cur.TGrid.ResT;
                     yield return cur;
                 }
                 else if (prevXunitInt != curXunitInt || isZeroSpecial)
                 {
-                    Log.LogDebug($"begin interpolate from ({prev}) to ({cur})");
+                    //Log.LogDebug($"begin interpolate from ({prev}) to ({cur})");
 
                     foreach (var i in MathUtils.GetIntegersBetweenTwoValues(prevXunit, curXunit))
                     {
@@ -120,7 +125,7 @@ namespace OngekiFumenEditor.Utils
                         var y = MathUtils.CalculateYFromTwoPointFormFormula(xGrid.TotalGrid, prevX, prevY, curX, curY);
                         var tunit = (float)(y / prev.TGrid.ResT);
                         var tGrid = new TGrid(tunit, 0);
-                        Log.LogDebug($"interpolate xunit:{i} from ({prev}) to ({cur})");
+                        //Log.LogDebug($"interpolate xunit:{i} from ({prev}) to ({cur})");
 
                         if (Math.Abs(prevRetY - tunit) > 0.0001)
                         {
@@ -129,19 +134,19 @@ namespace OngekiFumenEditor.Utils
                                 XGrid = xGrid,
                                 TGrid = tGrid,
                             };
-                            Log.LogDebug($"return new interpolated point: ({point})");
+                            //Log.LogDebug($"return new interpolated point: ({point})");
                             yield return point;
                         }
                         else
                         {
-                            Log.LogDebug($"return Math.Abs(prevRetY({prevRetY}) - tunit({tunit})) < 0.01");
+                            //Log.LogDebug($"return Math.Abs(prevRetY({prevRetY}) - tunit({tunit})) < 0.01");
                         }
                         prevRetY = tunit;
                     }
                 }
                 else
                 {
-                    Log.LogDebug($"return nothing prevXunitInt({prevXunitInt}) == curXunitInt({curXunitInt})");
+                    //Log.LogDebug($"return nothing prevXunitInt({prevXunitInt}) == curXunitInt({curXunitInt})");
                 }
 
                 prev = cur;
@@ -154,9 +159,9 @@ namespace OngekiFumenEditor.Utils
             return InterpolateCore(x);
         }
 
-        public override CurvePoint? Travel()
+        public override CurvePoint? EnumerateNext()
         {
-            if (base.Travel() is not CurvePoint p)
+            if (base.EnumerateNext() is not CurvePoint p)
                 return default;
 
             return new CurvePoint()

@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -7,53 +8,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator
 {
-    public class CurveInterpolaterTraveller
+    public class DefaultCurveInterpolateEnumerator : ICurveInterpolateEnumerator
     {
-        public struct CurvePoint : ITimelineObject, IHorizonPositionObject
-        {
-            public CurvePoint(TGrid t, XGrid x)
-            {
-                TGrid = t;
-                XGrid = x;
-            }
-
-            public TGrid TGrid { get; set; }
-            public XGrid XGrid { get; set; }
-
-            public int CompareTo(ITimelineObject obj)
-            {
-                return TGrid.CompareTo(obj.TGrid);
-            }
-
-            public static explicit operator CurvePoint(OngekiMovableObjectBase e)
-            {
-                return new CurvePoint(e.TGrid, e.XGrid);
-            }
-
-            public override string ToString() => $"{XGrid} {TGrid}";
-        }
-
         private LinkedList<CurvePoint> waiter = new LinkedList<CurvePoint>();
         private IEnumerator<CurvePoint> itor;
 
-        private readonly ConnectableChildObjectBase from;
-        private readonly ConnectableChildObjectBase to;
-
-        public CurveInterpolaterTraveller(ConnectableStartObject start) : this(start.Children.FirstOrDefault(), default)
+        public DefaultCurveInterpolateEnumerator(ConnectableStartObject start) : this(start.Children.FirstOrDefault(), default)
         {
 
         }
 
-        public CurveInterpolaterTraveller(ConnectableChildObjectBase from, ConnectableChildObjectBase to = default)
-        {
-            this.from = from;
-            this.to = to;
-            Reset();
-        }
-
-        public void Reset()
+        public DefaultCurveInterpolateEnumerator(ConnectableChildObjectBase from, ConnectableChildObjectBase to = default)
         {
             waiter.Clear();
 
@@ -83,7 +50,12 @@ namespace OngekiFumenEditor.Utils
             return x.GenPath().Select(x => build(x.pos));
         }
 
-        public virtual CurvePoint? Travel()
+        public void PushBack(CurvePoint point)
+        {
+            waiter.AddFirst(point);
+        }
+
+        public virtual CurvePoint? EnumerateNext()
         {
             if (waiter.Count > 0)
             {
@@ -96,11 +68,6 @@ namespace OngekiFumenEditor.Utils
                 return itor.Current;
 
             return default;
-        }
-
-        public void PushBack(CurvePoint point)
-        {
-            waiter.AddFirst(point);
         }
     }
 }
