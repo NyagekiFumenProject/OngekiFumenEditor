@@ -82,16 +82,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private bool limitXGridUnitSimply = false;
-        public bool LimitXGridUnitSimply
-        {
-            get => limitXGridUnitSimply;
-            set
-            {
-                Set(ref limitXGridUnitSimply, value);
-            }
-        }
-
         private bool showOriginColor = true;
         public bool ShowOriginColor
         {

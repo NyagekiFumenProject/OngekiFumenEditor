@@ -28,7 +28,6 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             svg.OffsetY.CurrentValue = float.Parse(map["OffsetY"]);
             svg.ShowOriginColor = bool.Parse(map["ShowOriginColor"]);
             svg.ColorSimilar.CurrentValue = float.Parse(map["ColorSimilar"]);
-            svg.LimitXGridUnitSimply = bool.Parse(map["LimitXGridUnitSimply"]);
             svg.Rotation.CurrentValue = float.Parse(map["Rotation"]);
             svg.EnableColorfulLaneSimilar = bool.Parse(map["EnableColorfulLaneSimilar"]);
             svg.Opacity.CurrentValue = float.Parse(map["Opacity"]);

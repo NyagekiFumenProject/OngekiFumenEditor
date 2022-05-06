@@ -80,8 +80,6 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             foreach (var svgPrefab in fumen.SvgPrefabs)
             {
                 writer.Write("SvgPrefab\t:\t");
-                writer.Write($"LimitXGridUnitSimply[{svgPrefab.LimitXGridUnitSimply}]");
-                writer.Write(", ");
                 writer.Write($"ColorSimilar[{svgPrefab.ColorSimilar.CurrentValue}]");
                 writer.Write(", ");
                 writer.Write($"Rotation[{svgPrefab.Rotation.CurrentValue}]");
