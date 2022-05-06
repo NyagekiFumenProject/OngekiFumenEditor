@@ -27,7 +27,14 @@
             HorizontalContentAlignment="Stretch"
             VerticalContentAlignment="Center"
             ItemsSource="{Binding EnumValues}"
-            SelectedValue="{Binding FactoryName}">
+            SelectedValue="{Binding PropertyInfo.ProxyValue, StringFormat={}{Name}}"
+            ToolTip="{Binding PropertyInfo.ProxyValue.Name}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}">
+                    </TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
         </ComboBox>
     </Grid>
 </UserControl>
