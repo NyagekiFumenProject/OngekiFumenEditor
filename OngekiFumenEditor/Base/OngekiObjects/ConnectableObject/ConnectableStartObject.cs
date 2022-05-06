@@ -24,6 +24,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
     {
         public event Action<object, PropertyChangedEventArgs> ConnectableObjectsPropertyChanged;
 
+        private ICurveInterpolaterFactory curveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default;
+        public ICurveInterpolaterFactory CurveInterpolaterFactory
+        {
+            get => curveInterpolaterFactory;
+            set => Set(ref curveInterpolaterFactory, value);
+        }
+
         private List<ConnectableChildObjectBase> children = new();
         private List<ConnectorLineBase<ConnectableObjectBase>> connectors = new();
         public IEnumerable<ConnectableChildObjectBase> Children => children;
@@ -275,7 +282,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, ICurveInterpolaterFactory factory = default)
         {
-            var traveller = (factory ?? new DefaultCurveInterpolaterFactory()).CreateInterpolaterForAll(this);
+            var traveller = (factory ?? CurveInterpolaterFactory).CreateInterpolaterForAll(this);
 
             float calcGradient(CurvePoint a, CurvePoint b)
             {

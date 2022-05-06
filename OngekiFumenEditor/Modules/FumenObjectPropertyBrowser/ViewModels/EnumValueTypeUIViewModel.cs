@@ -1,4 +1,7 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using System;
 using System.Collections.Generic;

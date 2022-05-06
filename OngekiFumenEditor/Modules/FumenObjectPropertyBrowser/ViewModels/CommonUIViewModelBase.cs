@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
     {
         public T TypedProxyValue
         {
-            get => (T)PropertyInfo.ProxyValue;
+            get => PropertyInfo.ProxyValue as T;
             set => PropertyInfo.ProxyValue = value;
         }
 

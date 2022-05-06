@@ -119,7 +119,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
             }
 
             var genStarts = starts
-                .SelectMany(x => x.InterpolateCurve(SvgPrefab.LimitXGridUnitSimply ? XGridLimitedCurveInterpolaterFactory.Default : default))
+                .SelectMany(x => x.InterpolateCurve(SvgPrefab.CurveInterpolaterFactory))
                 .ToArray();
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Svg原地生成轨道物件", () =>

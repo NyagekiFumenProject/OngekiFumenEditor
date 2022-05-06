@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public void Interpolate(ActionExecutionContext e)
         {
-            var genStarts = RefStartObject.InterpolateCurve(XGridLimitedCurveInterpolaterFactory.Default).ToArray();
+            var genStarts = RefStartObject.InterpolateCurve(RefStartObject.CurveInterpolaterFactory).ToArray();
 
             var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值曲线", () =>
@@ -239,15 +239,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public void OnPartChildCurveInterpolateClick()
         {
-            PartChildCurveInterpolate(false);
+            PartChildCurveInterpolate();
         }
 
-        public void OnPartChildCurveInterpolateWithXGridLimitClick()
-        {
-            PartChildCurveInterpolate(true);
-        }
-
-        public void PartChildCurveInterpolate(bool xGridLimit = false)
+        public void PartChildCurveInterpolate()
         {
             var childObj = ConnectableObject as ConnectableChildObjectBase;
 
@@ -260,11 +255,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             var from = childObj;
             var to = childObj.ReferenceStartObject.Children.FindNextOrDefault(childObj);
 
-            var genChildren = childObj.InterpolateCurveChildren(
-                xGridLimit ?
-                XGridLimitedCurveInterpolaterFactory.Default :
-                DefaultCurveInterpolaterFactory.Default
-                ).ToList();
+            var genChildren = childObj.InterpolateCurveChildren(childObj.CurveInterpolaterFactory).ToList();
 
             var prev = childObj.PrevObject;
             genChildren.RemoveAll(x => x.TGrid >= from.TGrid || x.TGrid <= prev.TGrid);

@@ -20,6 +20,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             set => Set(ref curvePrecision, value <= 0 ? 0.01f : value);
         }
 
+        private ICurveInterpolaterFactory curveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default;
+        public ICurveInterpolaterFactory CurveInterpolaterFactory
+        {
+            get => curveInterpolaterFactory;
+            set => Set(ref curveInterpolaterFactory, value);
+        }
+
         public bool IsAnyControlSelecting => PathControls.Any(x => x.IsSelected);
 
         public ConnectableStartObject ReferenceStartObject { get; set; }
@@ -207,7 +214,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public IEnumerable<ConnectableChildObjectBase> InterpolateCurveChildren(ICurveInterpolaterFactory factory = default)
         {
             var to = ReferenceStartObject.Children.FindNextOrDefault(this);
-            var itor = (factory ?? new DefaultCurveInterpolaterFactory()).CreateInterpolaterForRange(this, to);
+            var itor = (factory ?? CurveInterpolaterFactory).CreateInterpolaterForRange(this, to);
 
             while (true)
             {

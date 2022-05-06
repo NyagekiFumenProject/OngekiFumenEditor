@@ -1,4 +1,6 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels;
 using OngekiFumenEditor.Utils;
 using SharpVectors.Renderers.Wpf;
@@ -18,6 +20,13 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
     {
         public override string IDShortName => "SVG";
         public override Type ModelViewType => typeof(SvgPrefabViewModel);
+
+        private ICurveInterpolaterFactory curveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default;
+        public ICurveInterpolaterFactory CurveInterpolaterFactory
+        {
+            get => curveInterpolaterFactory;
+            set => Set(ref curveInterpolaterFactory, value);
+        }
 
         private RangeValue rotation = RangeValue.Create(0, 360f, 0f);
         public RangeValue Rotation
