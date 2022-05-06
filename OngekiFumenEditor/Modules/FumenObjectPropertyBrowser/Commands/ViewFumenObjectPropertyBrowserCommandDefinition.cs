@@ -1,4 +1,6 @@
 ﻿using Gemini.Framework.Commands;
+using System.ComponentModel.Composition;
+using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Commands
 {
@@ -21,5 +23,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Commands
         {
             get { return Text; }
         }
+
+        [Export]
+        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<ViewFumenObjectPropertyBrowserCommandDefinition>(new(Key.O, ModifierKeys.Alt | ModifierKeys.Shift));
     }
 }

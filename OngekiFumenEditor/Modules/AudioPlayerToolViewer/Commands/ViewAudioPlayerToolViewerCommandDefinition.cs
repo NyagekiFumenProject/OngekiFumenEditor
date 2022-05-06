@@ -1,4 +1,6 @@
 ﻿using Gemini.Framework.Commands;
+using System.ComponentModel.Composition;
+using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Commands
 {
@@ -21,5 +23,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Commands
         {
             get { return Text; }
         }
+
+        [Export]
+        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<ViewAudioPlayerToolViewerCommandDefinition>(new(Key.A, ModifierKeys.Alt | ModifierKeys.Shift));
     }
 }

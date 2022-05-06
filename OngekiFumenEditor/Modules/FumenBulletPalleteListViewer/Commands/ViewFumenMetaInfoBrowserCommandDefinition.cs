@@ -1,4 +1,7 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Commands;
+using System.ComponentModel.Composition;
+using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Commands
 {
@@ -21,5 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Commands
         {
             get { return Text; }
         }
+
+        [Export]
+        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<ViewFumenBulletPalleteListViewerCommandDefinition>(new(Key.B, ModifierKeys.Alt | ModifierKeys.Shift));
     }
 }
