@@ -162,6 +162,9 @@
             <DataTemplate DataType="{x:Type svg:SvgImageFilePrefabViewModel}">
                 <views2:SvgPrefabView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type svg:SvgStringPrefabViewModel}">
+                <views2:SvgPrefabView />
+            </DataTemplate>
         </views:EditorObjectDataTemplateSelector.DataTemplates>
     </views:EditorObjectDataTemplateSelector>
 </ResourceDictionary>

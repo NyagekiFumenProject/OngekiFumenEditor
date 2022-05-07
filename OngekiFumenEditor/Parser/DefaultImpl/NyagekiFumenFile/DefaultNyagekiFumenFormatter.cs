@@ -110,9 +110,19 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                     case SvgImageFilePrefab svgImageFilePrefab:
                         writer.Write($"FilePathBase64[{Convert.ToBase64String(Encoding.UTF8.GetBytes(svgImageFilePrefab.SvgFile?.FullName ?? ""))}]");
                         break;
+                    case SvgStringPrefab stringPrefab:
+                        writer.Write($"Content[{Convert.ToBase64String(Encoding.UTF8.GetBytes(stringPrefab.Content))}]");
+                        writer.Write(", ");
+                        writer.Write($"FontSize[{stringPrefab.FontSize}]");
+                        writer.Write(", ");
+                        writer.Write($"TypefaceName[{stringPrefab.TypefaceName}]");
+                        writer.Write(", ");
+                        writer.Write($"FontColorId[{stringPrefab.FontColor.Id}]");
+                        break;
                     default:
                         break;
                 }
+                writer.WriteLine();
             }
         }
 

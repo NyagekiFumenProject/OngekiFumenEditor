@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -21,15 +22,24 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             using var d = data[0].GetValuesMapWithDisposable(out var map);
 
             var type = map["Type"];
-            var svg = type switch
+            SvgPrefabBase svg = type switch
             {
                 "SVG_IMG" => new SvgImageFilePrefab(),
+                "SVG_STR" => new SvgStringPrefab(),
                 _ => default
             };
 
-            if (type == "SVG_IMG")
+            if (svg is SvgImageFilePrefab imageFilePrefab)
             {
-                svg.SvgFile = new System.IO.FileInfo(Encoding.UTF8.GetString(Convert.FromBase64String(map["FilePathBase64"])));
+                imageFilePrefab.SvgFile = new System.IO.FileInfo(Encoding.UTF8.GetString(Convert.FromBase64String(map["FilePathBase64"])));
+            }
+            if (svg is SvgStringPrefab stringPrefab)
+            {
+                stringPrefab.Content = Encoding.UTF8.GetString(Convert.FromBase64String(map["Content"]));
+                stringPrefab.TypefaceName = map["TypefaceName"];
+                var colorId = int.Parse(map["FontColorId"]);
+                stringPrefab.FontColor = ColorIdConst.AllColors.FirstOrDefault(x=>x.Id == colorId);
+                stringPrefab.FontSize = double.Parse(map["FontSize"]);
             }
 
             svg.OffsetX.CurrentValue = float.Parse(map["OffsetX"]);

@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private bool showOriginColor = true;
+        private bool showOriginColor = false;
         public bool ShowOriginColor
         {
             get => showOriginColor;
@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private RangeValue tolerance = RangeValue.Create(0, 20f, 1f);
+        private RangeValue tolerance = RangeValue.Create(0.001f, 20f, 0.001f);
         public RangeValue Tolerance
         {
             get => tolerance;
@@ -163,7 +163,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             RebuildGeometry();
         }
 
-        private void CleanGeometry()
+        public void CleanGeometry()
         {
             drawingGroup = null;
             ProcessingDrawingGroup = default;
