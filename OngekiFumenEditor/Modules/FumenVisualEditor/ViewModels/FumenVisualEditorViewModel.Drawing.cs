@@ -129,9 +129,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     removeObjects.Add(currentDisplaying);
                 }
             }
+            /*
             removeObjects.ForEach(x => CurrentDisplayEditorViewModels.Remove(x));
-            CurrentDisplayEditorViewModels
-                .AddRange(EditorViewModels.Where(x => x.DisplayableObject.CheckVisiable(min, max) && !CurrentDisplayEditorViewModels.Contains(x)));
+            using var d4 = CurrentDisplayEditorViewModels
+                .GroupJoin(EditorViewModels.Where(x => x.DisplayableObject.CheckVisiable(min, max)), x => x, x => x, (x, _) => x)
+                .ToListWithObjectPool(out var addList);
+            foreach (var add in addList)
+            {
+                CurrentDisplayEditorViewModels.Add(add);
+            }
+            */
+            using var d4 = EditorViewModels.Where(x => x.DisplayableObject.CheckVisiable(min, max)).ToListWithObjectPool(out var visibleList);
+            using var d5 = visibleList.Except(CurrentDisplayEditorViewModels).ToListWithObjectPool(out var addList);
+            CurrentDisplayEditorViewModels.AddRange(addList);
 
             foreach (var viewModel in CurrentDisplayEditorViewModels)
             {

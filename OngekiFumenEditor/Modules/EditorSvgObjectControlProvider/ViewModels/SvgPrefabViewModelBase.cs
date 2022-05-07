@@ -17,10 +17,9 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
 {
-    [Gemini.Modules.Toolbox.ToolboxItem(typeof(FumenVisualEditorViewModel), "SvgPrefab", "Misc")]
-    public class SvgPrefabViewModel : DisplayObjectViewModelBase<SvgPrefab>
+    public class SvgPrefabViewModelBase<T> : DisplayObjectViewModelBase<T> where T : SvgPrefabBase, new()
     {
-        public SvgPrefab RefSvgPrefab => (SvgPrefab)ReferenceOngekiObject;
+        public T RefSvgPrefab => (T)ReferenceOngekiObject;
 
         public Rect GeometryBound => RefSvgPrefab.ProcessingDrawingGroup?.Bounds ?? Rect.Empty;
 
@@ -35,11 +34,11 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
         {
             switch (arg.PropertyName)
             {
-                case nameof(SvgPrefab.ProcessingDrawingGroup):
+                case nameof(SvgPrefabBase.ProcessingDrawingGroup):
                     RecalculatePoint();
                     break;
-                case nameof(SvgPrefab.OffsetX):
-                case nameof(SvgPrefab.OffsetY):
+                case nameof(SvgPrefabBase.OffsetX):
+                case nameof(SvgPrefabBase.OffsetY):
                 case nameof(RangeValue.CurrentValue):
                     RecalculatePoint();
                     break;
@@ -57,7 +56,8 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
 
         private void RecalculatePoint()
         {
-            if (RefSvgPrefab.ProcessingDrawingGroup?.Bounds is Rect bound) {
+            if (RefSvgPrefab.ProcessingDrawingGroup?.Bounds is Rect bound)
+            {
                 Point = new Point()
                 {
                     X = -RefSvgPrefab.OffsetX.CurrentValue * bound.Width,

@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Base
         public MeterChangeList MeterChanges { get; } = new();
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
-        public List<SvgPrefab> SvgPrefabs { get; } = new();
+        public List<SvgPrefabBase> SvgPrefabs { get; } = new();
         public TGridSortList<Soflan> Soflans { get; } = new();
         public TGridSortList<LaneBlockArea> LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
@@ -164,7 +164,7 @@ namespace OngekiFumenEditor.Base
             {
                 LaneBlocks.Add(laneBlock);
             }
-            else if (obj is SvgPrefab prefab)
+            else if (obj is SvgPrefabBase prefab)
             {
                 SvgPrefabs.Add(prefab);
             }
@@ -239,7 +239,7 @@ namespace OngekiFumenEditor.Base
             {
                 Holds.Remove(holdEnd);
             }
-            else if (obj is SvgPrefab prefab)
+            else if (obj is SvgPrefabBase prefab)
             {
                 SvgPrefabs.Remove(prefab);
             }
@@ -318,7 +318,7 @@ namespace OngekiFumenEditor.Base
             LaneBlockArea.LaneBlockAreaEndIndicator f => LaneBlocks.Any(x => x.EndIndicator == f),
             Hold f => Holds.Contains(f),
             HoldEnd f => Holds.Any(x => x.HoldEnd == f),
-            SvgPrefab f => SvgPrefabs.Contains(f),
+            SvgPrefabBase f => SvgPrefabs.Contains(f),
             Soflan f => Soflans.Contains(f),
             Soflan.SoflanEndIndicator f => Soflans.Any(x => x.EndIndicator == f),
             LaneStartBase f => Lanes.Contains(f),

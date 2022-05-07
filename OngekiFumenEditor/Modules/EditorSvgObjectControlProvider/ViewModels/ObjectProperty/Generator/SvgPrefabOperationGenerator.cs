@@ -17,12 +17,12 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
     public class SvgPrefabOperationGenerator: IOngekiObjectOperationGenerator
     {
         public IEnumerable<Type> SupportOngekiTypes { get; } = new[] {
-            typeof(SvgPrefab)
+            typeof(SvgPrefabBase)
         };
 
         public UIElement Generate(OngekiObjectBase obj)
         {
-            return ViewHelper.CreateViewByViewModelType(() => new SvgPrefabOperationViewModel(obj as SvgPrefab));
+            return ViewHelper.CreateViewByViewModelType(() => new SvgPrefabOperationViewModel(obj as SvgPrefabBase));
         }
     }
 }

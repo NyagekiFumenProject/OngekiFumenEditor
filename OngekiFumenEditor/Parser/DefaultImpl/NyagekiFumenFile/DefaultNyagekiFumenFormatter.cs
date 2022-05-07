@@ -2,6 +2,7 @@
 using DereTore.Common;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
@@ -79,7 +80,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         {
             foreach (var svgPrefab in fumen.SvgPrefabs)
             {
-                writer.Write("SvgPrefab\t:\t");
+                writer.Write($"SvgPrefab\t:\t");
+                writer.Write($"Type[{svgPrefab.IDShortName}]");
+                writer.Write(", ");
                 writer.Write($"ColorSimilar[{svgPrefab.ColorSimilar.CurrentValue}]");
                 writer.Write(", ");
                 writer.Write($"Rotation[{svgPrefab.Rotation.CurrentValue}]");
@@ -101,8 +104,15 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 writer.Write($"T[{svgPrefab.TGrid.Unit},{svgPrefab.TGrid.Grid}]");
                 writer.Write(", ");
                 writer.Write($"X[{svgPrefab.XGrid.Unit},{svgPrefab.XGrid.Grid}]");
-                writer.Write("\t:\t");
-                writer.Write(svgPrefab.SvgFile?.FullName);
+                writer.Write(", ");
+                switch (svgPrefab)
+                {
+                    case SvgImageFilePrefab svgImageFilePrefab:
+                        writer.Write($"FilePathBase64[{Convert.ToBase64String(Encoding.UTF8.GetBytes(svgImageFilePrefab.SvgFile?.FullName ?? ""))}]");
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

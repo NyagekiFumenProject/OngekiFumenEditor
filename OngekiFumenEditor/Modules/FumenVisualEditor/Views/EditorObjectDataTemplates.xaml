@@ -159,7 +159,7 @@
             <DataTemplate DataType="{x:Type fumenOngekiObject:LaneBlockAreaEndIndicatorViewModel}">
                 <views1:DisplayTextLineObjectViewBase />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type svg:SvgPrefabViewModel}">
+            <DataTemplate DataType="{x:Type svg:SvgImageFilePrefabViewModel}">
                 <views2:SvgPrefabView />
             </DataTemplate>
         </views:EditorObjectDataTemplateSelector.DataTemplates>

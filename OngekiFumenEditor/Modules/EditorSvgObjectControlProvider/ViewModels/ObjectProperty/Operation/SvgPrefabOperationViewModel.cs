@@ -24,9 +24,9 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 {
     public class SvgPrefabOperationViewModel : PropertyChangedBase
     {
-        public SvgPrefab SvgPrefab { get; }
+        public SvgPrefabBase SvgPrefab { get; }
 
-        public SvgPrefabOperationViewModel(SvgPrefab svgPrefab)
+        public SvgPrefabOperationViewModel(SvgPrefabBase svgPrefab)
         {
             SvgPrefab = svgPrefab;
         }

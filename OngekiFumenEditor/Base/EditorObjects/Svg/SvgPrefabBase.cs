@@ -1,13 +1,9 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
-using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels;
 using OngekiFumenEditor.Utils;
-using SharpVectors.Renderers.Wpf;
-using SvgConverter;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -16,11 +12,8 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Base.EditorObjects.Svg
 {
-    public class SvgPrefab : OngekiMovableObjectBase
+    public abstract class SvgPrefabBase : OngekiMovableObjectBase
     {
-        public override string IDShortName => "SVG";
-        public override Type ModelViewType => typeof(SvgPrefabViewModel);
-
         private ICurveInterpolaterFactory curveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default;
         public ICurveInterpolaterFactory CurveInterpolaterFactory
         {
@@ -121,7 +114,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private FileInfo svgFile = null;
         private DrawingGroup drawingGroup;
 
         private DrawingGroup processingDrawingGroup;
@@ -131,13 +123,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             set => Set(ref processingDrawingGroup, value);
         }
 
-        public FileInfo SvgFile
-        {
-            get => svgFile;
-            set => Set(ref svgFile, value);
-        }
-
-        public SvgPrefab()
+        public SvgPrefabBase()
         {
             Tolerance = Tolerance;
             Opacity = Opacity;
@@ -153,9 +139,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
             switch (propertyName)
             {
-                case nameof(SvgFile):
-                    ReloadSvgFile();
-                    break;
                 case nameof(EnableColorfulLaneSimilar):
                 case nameof(Rotation):
                 case nameof(Scale):
@@ -173,22 +156,10 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        public void ReloadSvgFile()
+        protected void ApplySvgContent(DrawingGroup svgContent)
         {
             CleanGeometry();
-
-            if (SvgFile is null)
-                return;
-
-            drawingGroup = ConverterLogic.ConvertSvgToObject(SvgFile.FullName, ResultMode.DrawingGroup, new WpfDrawingSettings()
-            {
-                IncludeRuntime = false,
-                TextAsGeometry = true,
-                OptimizePath = true,
-                EnsureViewboxSize = true
-            }, out _, new()) as DrawingGroup;
-            drawingGroup.Freeze();
-
+            drawingGroup = svgContent;
             RebuildGeometry();
         }
 
@@ -226,33 +197,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
             Geometry GenFlattedGeometry(Geometry geometry)
             {
-                /*
-                if (geometry is RectangleGeometry)
-                    return default;
-                */
-                /*
-                var r = geometry.GetFlattenedPathGeometry();
-                var flattedGeometry = new PathGeometry();
-                var fig = new PathFigure();
-                r.GetPointAtFractionLength(0, out var point, out _);
-                fig.StartPoint = point;
-                for (var i = RefSvgPrefab.Tolerance; i < 1; i += RefSvgPrefab.Tolerance)
-                {
-                    r.GetPointAtFractionLength(i, out point, out _);
-                    fig.Segments.Add(new LineSegment()
-                    {
-                        IsStroked = true,
-                        Point = point,
-                    });
-                }
-                r.GetPointAtFractionLength(1, out point, out _);
-                fig.Segments.Add(new LineSegment()
-                {
-                    IsStroked = true,
-                    Point = point,
-                });
-                flattedGeometry.Figures.Add(fig);
-                /**/
                 var flattedGeometry = geometry.GetFlattenedPathGeometry(Tolerance.CurrentValue, ToleranceType.Absolute);
                 flattedGeometry.Transform = transform;
                 flattedGeometry.Freeze();
@@ -287,7 +231,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             procDrawingGroup.Freeze();
             ProcessingDrawingGroup = procDrawingGroup;
 
-            Log.LogDebug($"Generate {ProcessingDrawingGroup.Children.Count} geometries from svg file: {SvgFile}.");
+            Log.LogDebug($"Generate {ProcessingDrawingGroup.Children.Count} geometries.");
         }
 
         private Pen CalculateRelativePen(Brush brush)
@@ -322,6 +266,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             return p;
         }
 
-        public override string ToString() => $"{base.ToString()} R:∠{Rotation}° O:{Opacity.ValuePercent * 100:F2}% S:{Rotation:F2}x File:{Path.GetFileName(SvgFile?.Name)}";
+        public override string ToString() => $"{base.ToString()} R:∠{Rotation}° O:{Opacity.ValuePercent * 100:F2}% S:{Rotation:F2}x";
     }
 }

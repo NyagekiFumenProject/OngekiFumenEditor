@@ -16,13 +16,21 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
 
         public void ParseAndApply(OngekiFumen fumen, string[] seg)
         {
-            var svg = new SvgPrefab();
-
             var data = seg[1].Split(":", 2);
 
-            svg.SvgFile = new System.IO.FileInfo(data[1].Trim());
-
             using var d = data[0].GetValuesMapWithDisposable(out var map);
+
+            var type = map["Type"];
+            var svg = type switch
+            {
+                "SVG_IMG" => new SvgImageFilePrefab(),
+                _ => default
+            };
+
+            if (type == "SVG_IMG")
+            {
+                svg.SvgFile = new System.IO.FileInfo(Encoding.UTF8.GetString(Convert.FromBase64String(map["FilePathBase64"])));
+            }
 
             svg.OffsetX.CurrentValue = float.Parse(map["OffsetX"]);
             svg.OffsetY.CurrentValue = float.Parse(map["OffsetY"]);
