@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Utils
         public static IEnumerable<T> DistinctBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
 
         public static IEnumerable<T> DistinctBy<T>(this IEnumerable<T> collection, Func<T, T, bool> compFunc) => collection.Distinct(new FuncDistinctComparer<T>(compFunc));
-        
+
         /// <summary>
         /// Distinct continuous same values.
         /// example : 1,2,3,3,4,1,1,2,3 -> 1,2,3,4,1,2,3
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Utils
         /// <param name="compFunc"></param>
         /// <returns></returns>
         public static IEnumerable<T> DistinctContinuousBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctContinuousBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
-        
+
         /// <summary>
         /// Distinct continuous same values.
         /// example : 1,2,3,3,4,1,1,2,3 -> 1,2,3,4,1,2,3
@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Utils
                     isFirst = false;
                 }
                 else if (!compFunc(prev, value))
-                        yield return value;
+                    yield return value;
                 prev = value;
             }
         }
@@ -336,5 +336,12 @@ namespace OngekiFumenEditor.Utils
             firstElement = itor.Current;
             return !itor.MoveNext();
         }
+
+        public static bool None<T>(this IEnumerable<T> a)
+        {
+            return !a.GetEnumerator().MoveNext();
+        }
+
+        public static bool None<T>(this IEnumerable<T> a, Predicate<T> predicate) => a.Where(x => predicate(x)).None();
     }
 }
