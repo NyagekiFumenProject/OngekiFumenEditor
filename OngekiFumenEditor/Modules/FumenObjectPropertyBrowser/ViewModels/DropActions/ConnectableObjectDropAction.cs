@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions
 {
@@ -31,11 +32,15 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
         public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
         {
             var dragTGrid = TGridCalculator.ConvertYToTGrid(dragEndPoint.Y, editor);
+            var isAppend = Keyboard.IsKeyDown(Key.LeftAlt);
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
                 childViewModel.OnObjectCreated(childViewModel.ReferenceOngekiObject, editor);
-                startObject.InsertChildObject(dragTGrid, childViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
+                if (isAppend)
+                    startObject.AddChildObject(childViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
+                else
+                    startObject.InsertChildObject(dragTGrid, childViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
                 childViewModel.MoveCanvas(dragEndPoint);
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
