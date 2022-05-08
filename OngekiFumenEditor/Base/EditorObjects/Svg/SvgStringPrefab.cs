@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             set => Set(ref fontSize, value);
         }
 
-        private ColorId fontColor = ColorIdConst.Setsuna;
+        private ColorId fontColor = ColorIdConst.LaneGreen;
         public ColorId FontColor
         {
             get => fontColor;
@@ -70,6 +70,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
             var brush = new SolidColorBrush(FontColor.Color);
             brush.Freeze();
+            var pen = new Pen(brush, 1);
+            pen.Freeze();
             var dpiInfo = VisualTreeHelper.GetDpi(Application.Current.MainWindow);
 
             var text = new FormattedText(
@@ -84,7 +86,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             Geometry geometry = text.BuildGeometry(new Point(0, 0));
 
             var group = new DrawingGroup();
-            group.Children.Add(new GeometryDrawing() { Geometry = geometry, Brush = brush });
+            group.Children.Add(new GeometryDrawing() { Geometry = geometry, Brush = brush, Pen = pen });
 
             ApplySvgContent(group);
         }
