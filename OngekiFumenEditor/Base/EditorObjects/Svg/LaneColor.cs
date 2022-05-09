@@ -22,14 +22,17 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
         public static IEnumerable<LaneColor> AllLaneColors { get; } = (new[]
         {
-            new LaneColor(LaneType.Left,Colors.Red),
-            new LaneColor(LaneType.Center,Colors.Green),
-            new LaneColor(LaneType.Right,Colors.Blue),
             new LaneColor(LaneType.WallLeft,Color.FromRgb(181, 156, 231)),
             new LaneColor(LaneType.WallRight,Color.FromRgb(231, 149, 178))
         }.Concat(ColorIdConst.AllColors.Select(x => new LaneColor()
         {
-            LaneType = LaneType.Colorful,
+            LaneType = x.Name switch
+            {
+                "LaneBlue" => LaneType.Right,
+                "LaneRed" => LaneType.Left,
+                "LaneGreen" => LaneType.Center,
+                _ => LaneType.Colorful
+            },
             Color = Color.FromArgb(x.Color.A, x.Color.R, x.Color.G, x.Color.B)
         }))).ToArray();
     }

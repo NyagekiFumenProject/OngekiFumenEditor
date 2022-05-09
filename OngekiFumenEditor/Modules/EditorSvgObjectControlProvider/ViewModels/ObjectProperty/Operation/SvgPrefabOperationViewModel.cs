@@ -56,14 +56,16 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
             var bound = drawingGroup.Bounds.Size;
             var offset = drawingGroup.Bounds.Location;
 
-            var starts = new List<ConnectableStartObject>();
+            var genStarts = new List<ConnectableStartObject>();
 
             foreach (var childGeometry in drawingGroup.Children.OfType<GeometryDrawing>())
             {
                 var lines = childGeometry.Geometry.GetFlattenedPathGeometry();
-                var brush = childGeometry.Brush ?? childGeometry.Pen?.Brush;
+                var brush = (childGeometry.Brush ?? childGeometry.Pen?.Brush) as SolidColorBrush;
 
-                LaneStartBase targetObject = GetLaneTypeFromBrush(brush) switch
+                var laneColor = SvgPrefab.PickSimilarLaneColor(brush.Color);
+
+                LaneStartBase targetObject = laneColor?.LaneType switch
                 {
                     LaneType.Left => new LaneLeftStart(),
                     LaneType.Center => new LaneCenterStart(),
@@ -114,13 +116,21 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 
                     var r = startObj.InterpolateCurve().ToArray();
 
-                    starts.Add(startObj);
-                }
-            }
 
-            var genStarts = starts
-                .SelectMany(x => x.InterpolateCurve(SvgPrefab.CurveInterpolaterFactory))
-                .ToArray();
+                    var subGenStarts = startObj.InterpolateCurve(SvgPrefab.CurveInterpolaterFactory).ToArray();
+                    if (targetObject is IColorfulLane lane)
+                    {
+                        //染色
+                        var colorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Color == laneColor?.Color);
+                        subGenStarts
+                            .SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>().Append(x))
+                            .OfType<IColorfulLane>()
+                            .ForEach(x => x.ColorId = colorId);
+                    }
+                    genStarts.AddRange(subGenStarts);
+                }
+
+            }
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Svg原地生成轨道物件", () =>
             {
@@ -131,19 +141,6 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                 editor.Fumen.RemoveObjects(genStarts);
                 editor.Redraw(RedrawTarget.OngekiObjects);
             }));
-        }
-
-        private LaneType? GetLaneTypeFromBrush(Brush brush)
-        {
-            if (brush is not SolidColorBrush colorBrush)
-                return default;
-
-            var color = colorBrush.Color;
-            color.A = 255;
-
-            return LaneColor.AllLaneColors
-                 .Select(x => (x.LaneType, x.Color.ColorDistance(color)))
-                 .OrderBy(x => x.Item2).FirstOrDefault().LaneType;
         }
     }
 }

@@ -241,21 +241,26 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             return CalculateRelativePen(pen);
         }
 
+        public LaneColor? PickSimilarLaneColor(Color color)
+        {
+            var arr = LaneColor.AllLaneColors;
+            if (!EnableColorfulLaneSimilar)
+                arr = arr.Where(x => x.LaneType != LaneType.Colorful);
+
+            var r = arr
+                .Select(x => (x, x.Color.ColorDistance(color)))
+                .OrderBy(x => x.Item2);
+
+            return r.Where(x => x.Item2 < ColorSimilar.CurrentValue).Select(x => x.x).FirstOrDefault();
+        }
+
         private Pen CalculateRelativePen(Pen pen)
         {
             Color PickColor(Color color)
             {
-                var arr = LaneColor.AllLaneColors;
-                if (!EnableColorfulLaneSimilar)
-                    arr = arr.Where(x => x.LaneType != LaneType.Colorful);
-
-                var r = arr
-                    .Select(x => (x.Color, x.Color.ColorDistance(color)))
-                    .OrderByDescending(x => x.Item2)
-                    .Where(x => x.Item2 > ColorSimilar.CurrentValue);
-
-                return r.Select(x => x.Color).FirstOrDefault();
+                return PickSimilarLaneColor(color)?.Color ?? Colors.Transparent;
             }
+
             if (ShowOriginColor)
                 return pen;
             var color = pen?.Brush is SolidColorBrush b ? PickColor(b.Color) : Colors.Green;
