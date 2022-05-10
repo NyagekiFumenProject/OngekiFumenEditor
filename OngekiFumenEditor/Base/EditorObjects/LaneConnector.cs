@@ -67,10 +67,11 @@ namespace OngekiFumenEditor.Base.EditorObjects
             if (propertyName == nameof(From))
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(oldValue as INotifyPropertyChanged, newValue as INotifyPropertyChanged, OnLanePropChanged);
-                UpdateLineColor();
             }
 
-            return base.Set(ref oldValue, newValue, propertyName);
+            var r = base.Set(ref oldValue, newValue, propertyName);
+            UpdateLineColor();
+            return r;
         }
 
         private void OnLanePropChanged(object sender, PropertyChangedEventArgs e)

@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private RangeValue rotation = RangeValue.Create(0, 360f, 0f);
+        private RangeValue rotation = RangeValue.Create(-180, 180f, 0f);
         public RangeValue Rotation
         {
             get => rotation;

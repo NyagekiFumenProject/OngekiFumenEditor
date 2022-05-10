@@ -122,11 +122,15 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                     {
                         //染色
                         var colorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Color == laneColor?.Color);
+                        var brightness = (int)SvgPrefab.ColorfulLaneBrightness.CurrentValue;
                         subGenStarts
                             .SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>().Append(x))
                             .OfType<IColorfulLane>()
-                            .ForEach(x => x.ColorId = colorId);
-                        lane.Brightness = (int)SvgPrefab.ColorfulLaneBrightness.CurrentValue;
+                            .ForEach(x =>
+                            {
+                                x.ColorId = colorId;
+                                x.Brightness = brightness;
+                            });
                     }
                     genStarts.AddRange(subGenStarts);
                 }
