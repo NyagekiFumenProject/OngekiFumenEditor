@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
             set
             {
                 var valType = value?.GetType() ?? default;
-                if (PropertyInfo.PropertyType == valType || valType.IsAssignableTo(PropertyInfo.PropertyType))
+                if (PropertyInfo.PropertyType == valType || (valType?.IsAssignableTo(PropertyInfo.PropertyType) ?? false))
                 {
                     PropertyInfo.SetValue(OwnerObject, value);
                 }

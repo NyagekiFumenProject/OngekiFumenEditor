@@ -108,9 +108,13 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 switch (svgPrefab)
                 {
                     case SvgImageFilePrefab svgImageFilePrefab:
+                        if (string.IsNullOrWhiteSpace(svgImageFilePrefab.SvgFile?.FullName))
+                            throw new Exception($"at {svgPrefab.TGrid}, SvgImageFilePrefab.SvgFile is empty or null");
                         writer.Write($"FilePathBase64[{Convert.ToBase64String(Encoding.UTF8.GetBytes(svgImageFilePrefab.SvgFile?.FullName ?? ""))}]");
                         break;
                     case SvgStringPrefab stringPrefab:
+                        if (string.IsNullOrWhiteSpace(stringPrefab.Content) || string.IsNullOrWhiteSpace(stringPrefab.TypefaceName))
+                            throw new Exception($"at {svgPrefab.TGrid}, SvgStringPrefab.Content/TypefaceName is empty or null");
                         writer.Write($"Content[{Convert.ToBase64String(Encoding.UTF8.GetBytes(stringPrefab.Content))}]");
                         writer.Write(", ");
                         writer.Write($"FontSize[{stringPrefab.FontSize}]");
