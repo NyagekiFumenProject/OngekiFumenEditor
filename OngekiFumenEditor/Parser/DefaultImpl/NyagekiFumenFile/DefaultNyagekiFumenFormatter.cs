@@ -122,6 +122,10 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                         writer.Write($"TypefaceName[{stringPrefab.TypefaceName}]");
                         writer.Write(", ");
                         writer.Write($"FontColorId[{stringPrefab.FontColor.Id}]");
+                        writer.Write(", ");
+                        writer.Write($"ContentFlowDirection[{stringPrefab.ContentFlowDirection}]");
+                        writer.Write(", ");
+                        writer.Write($"ContentLineHeight[{stringPrefab.ContentLineHeight}]");
                         break;
                     default:
                         break;

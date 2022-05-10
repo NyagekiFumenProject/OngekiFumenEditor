@@ -40,6 +40,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
                 var colorId = int.Parse(map["FontColorId"]);
                 stringPrefab.FontColor = ColorIdConst.AllColors.FirstOrDefault(x=>x.Id == colorId);
                 stringPrefab.FontSize = double.Parse(map["FontSize"]);
+                stringPrefab.ContentFlowDirection = Enum.Parse<SvgStringPrefab.FlowDirection>(map["ContentFlowDirection"]);
+                stringPrefab.ContentLineHeight = double.Parse(map["ContentLineHeight"]);
             }
 
             svg.OffsetX.CurrentValue = float.Parse(map["OffsetX"]);

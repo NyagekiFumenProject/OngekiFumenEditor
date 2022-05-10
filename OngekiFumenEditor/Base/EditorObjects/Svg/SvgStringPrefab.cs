@@ -14,6 +14,14 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 {
     public class SvgStringPrefab : SvgPrefabBase
     {
+        public enum FlowDirection
+        {
+            LeftToRight,
+            RightToLeft,
+            TopToBottom,
+            BottomToTop
+        }
+
         public override Type ModelViewType => typeof(SvgStringPrefabViewModel);
         public override string IDShortName => $"SVG_STR";
 
@@ -24,11 +32,25 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             set => Set(ref content, value);
         }
 
+        private FlowDirection contentFlowDirection = FlowDirection.LeftToRight;
+        public FlowDirection ContentFlowDirection
+        {
+            get => contentFlowDirection;
+            set => Set(ref contentFlowDirection, value);
+        }
+
         private double fontSize = 16;
         public double FontSize
         {
             get => fontSize;
             set => Set(ref fontSize, value);
+        }
+
+        private double contentLineHeight = 16;
+        public double ContentLineHeight
+        {
+            get => contentLineHeight;
+            set => Set(ref contentLineHeight, value);
         }
 
         private ColorId fontColor = ColorIdConst.LaneGreen;
@@ -52,6 +74,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 case nameof(Content):
                 case nameof(FontSize):
                 case nameof(FontColor):
+                case nameof(ContentLineHeight):
+                case nameof(ContentFlowDirection):
                 case nameof(TypefaceName):
                     RebuildSvgContent();
                     break;
@@ -74,15 +98,39 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             pen.Freeze();
             var dpiInfo = VisualTreeHelper.GetDpi(Application.Current.MainWindow);
 
+            var direction = ContentFlowDirection switch
+            {
+                FlowDirection.RightToLeft => System.Windows.FlowDirection.RightToLeft,
+                _ => System.Windows.FlowDirection.LeftToRight
+            };
+
+            var content = Content;
+            switch (ContentFlowDirection)
+            {
+                case FlowDirection.RightToLeft:
+                    content = new string(content.Reverse().ToArray());
+                    break;
+                case FlowDirection.TopToBottom:
+                    content = string.Join(Environment.NewLine, content.Select(x => x));
+                    break;
+                case FlowDirection.BottomToTop:
+                    content = string.Join(Environment.NewLine, content.Reverse());
+                    break;
+                default:
+                    break;
+            }
+
             var text = new FormattedText(
-                Content,
+                content,
                 CultureInfo.CurrentCulture,
-                FlowDirection.LeftToRight,
+                direction,
                 new Typeface(TypefaceName),
                 FontSize,
                 brush,
                 dpiInfo.PixelsPerDip
             );
+            text.LineHeight = ContentLineHeight;
+
             Geometry geometry = text.BuildGeometry(new Point(0, 0));
 
             var group = new DrawingGroup();
