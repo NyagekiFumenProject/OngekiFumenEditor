@@ -21,6 +21,17 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             set => Set(ref curveInterpolaterFactory, value);
         }
 
+        private RangeValue colorfulLaneBrightness = RangeValue.Create(-3, 3, 0);
+        public RangeValue ColorfulLaneBrightness
+        {
+            get => colorfulLaneBrightness;
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(colorfulLaneBrightness, value);
+                Set(ref colorfulLaneBrightness, value);
+            }
+        }
+
         private RangeValue rotation = RangeValue.Create(0, 360f, 0f);
         public RangeValue Rotation
         {
@@ -131,6 +142,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             OffsetX = OffsetX;
             OffsetY = OffsetY;
             ColorSimilar = ColorSimilar;
+            ColorfulLaneBrightness = ColorfulLaneBrightness;
         }
 
         public override void NotifyOfPropertyChange([CallerMemberName] string propertyName = null)

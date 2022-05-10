@@ -46,6 +46,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
 
             svg.OffsetX.CurrentValue = float.Parse(map["OffsetX"]);
             svg.OffsetY.CurrentValue = float.Parse(map["OffsetY"]);
+            svg.ColorfulLaneBrightness.CurrentValue = float.Parse(map["Brightness"]);
             svg.ShowOriginColor = bool.Parse(map["ShowOriginColor"]);
             svg.ColorSimilar.CurrentValue = float.Parse(map["ColorSimilar"]);
             svg.Rotation.CurrentValue = float.Parse(map["Rotation"]);

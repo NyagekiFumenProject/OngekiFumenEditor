@@ -97,6 +97,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 writer.Write(", ");
                 writer.Write($"Opacity[{svgPrefab.Opacity.CurrentValue}]");
                 writer.Write(", ");
+                writer.Write($"Brightness[{svgPrefab.ColorfulLaneBrightness.CurrentValue}]");
+                writer.Write(", ");
                 writer.Write($"Scale[{svgPrefab.Scale}]");
                 writer.Write(", ");
                 writer.Write($"Tolerance[{svgPrefab.Tolerance.CurrentValue}]");

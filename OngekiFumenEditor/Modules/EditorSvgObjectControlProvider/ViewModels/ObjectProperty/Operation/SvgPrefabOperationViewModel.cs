@@ -126,6 +126,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                             .SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>().Append(x))
                             .OfType<IColorfulLane>()
                             .ForEach(x => x.ColorId = colorId);
+                        lane.Brightness = (int)SvgPrefab.ColorfulLaneBrightness.CurrentValue;
                     }
                     genStarts.AddRange(subGenStarts);
                 }
