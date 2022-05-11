@@ -2,11 +2,13 @@ using Caliburn.Micro;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.LocatorOverride;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.IO;
@@ -14,6 +16,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -25,6 +28,19 @@ namespace OngekiFumenEditor
         protected async Task InitKernels()
         {
             await IoC.Get<ISchedulerManager>().Init();
+
+            //overwrite ViewLocator
+            var locateForModel = ViewLocator.LocateForModel;
+            ViewLocator.LocateForModel = (model, hostControl, ctx) =>
+            {
+                var r = locateForModel(model, hostControl, ctx);
+                if (r is not null)
+                    if (r is not TextBlock t || !t.Text.StartsWith("Cannot find"))
+                        return r;
+                return ViewHelper.CreateView(model);
+            };
+            foreach (var locatorOverrider in IoC.GetAll<ILocatorOverride>())
+                locatorOverrider.Override();
         }
 
         protected override void BindServices(CompositionBatch batch)
@@ -94,6 +110,11 @@ namespace OngekiFumenEditor
 
                 return defaultCreateTrigger(target, triggerText);
             };
+        }
+
+        protected override IEnumerable<Assembly> SelectAssemblies()
+        {
+            return base.SelectAssemblies();
         }
 
         protected async override void OnStartup(object sender, StartupEventArgs e)
