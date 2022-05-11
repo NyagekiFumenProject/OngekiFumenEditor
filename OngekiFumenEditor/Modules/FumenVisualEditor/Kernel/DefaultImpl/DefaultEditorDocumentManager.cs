@@ -21,6 +21,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
     {
         private HashSet<FumenVisualEditorViewModel> currentEditor = new();
         public event ActivateEditorChangedFunc OnActivateEditorChanged;
+        public event NotifyCreateFunc OnNotifyCreated;
+        public event NotifyDestoryFunc OnNotifyDestoryed;
 
         public string SchedulerName => "DefaultEditorDocumentManager.AutoSaveScheduler";
 
@@ -62,6 +64,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
         {
             Log.LogInfo($"editor created: {editor.GetHashCode()} {editor.DisplayName}");
             currentEditor.Add(editor);
+            OnNotifyCreated?.Invoke(editor);
         }
 
         public void NotifyDestory(FumenVisualEditorViewModel editor)
@@ -70,6 +73,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             currentEditor.Remove(editor);
             if (CurrentActivatedEditor == editor)
                 NotifyDeactivate(editor);
+            OnNotifyDestoryed?.Invoke(editor);
         }
 
         public void OnSchedulerTerm()
@@ -113,6 +117,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 schedulerManager.AddScheduler(this);
             else
                 schedulerManager.RemoveScheduler(this);
+        }
+
+        public IEnumerable<FumenVisualEditorViewModel> GetCurrentEditors()
+        {
+            return currentEditor;
         }
     }
 }

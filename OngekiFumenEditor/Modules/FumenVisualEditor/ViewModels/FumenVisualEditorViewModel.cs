@@ -332,7 +332,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public override async Task TryCloseAsync(bool? dialogResult = null)
         {
             await base.TryCloseAsync(dialogResult);
-            if (dialogResult == true)
+            if (dialogResult != false)
                 EditorManager.NotifyDestory(this);
         }
 
