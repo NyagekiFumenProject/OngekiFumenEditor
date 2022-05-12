@@ -31,9 +31,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
     /// </summary>
     public partial class FumenVisualEditorView : UserControl
     {
-#pragma warning disable IDE0052 // 删除未读的私有成员
-        private bool _dragging;
-#pragma warning restore IDE0052 // 删除未读的私有成员
         private readonly Binding _scrollBinding;
 
         public FumenVisualEditorView()
@@ -61,7 +58,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         {
             var scrollBar = (ScrollBar)sender;
             scrollBar.Value = scrollBar.Value;
-            _dragging = true;
         }
 
         private void Thumb_DragDelta(object sender, DragDeltaEventArgs e)
@@ -75,7 +71,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             var scrollBar = (ScrollBar)sender;
             myScrollViewer.ScrollToVerticalOffsetWithAnimation(scrollBar.Value);
             scrollBar.SetBinding(RangeBase.ValueProperty, _scrollBinding);
-            _dragging = false;
         }
 
         private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
