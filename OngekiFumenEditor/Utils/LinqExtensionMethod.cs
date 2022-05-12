@@ -20,6 +20,13 @@ namespace OngekiFumenEditor.Utils
                 fun(item);
         }
 
+        public static void DistinctSelf<T>(this ICollection<T> collection)
+        {
+            using var d = collection.Except(collection.Distinct()).ToListWithObjectPool(out var removes);
+            foreach (var rm in removes)
+                collection.Remove(rm);
+        }
+
         public static void RemoveRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Remove(x));
 
         public static void RemoveRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Remove(x));
