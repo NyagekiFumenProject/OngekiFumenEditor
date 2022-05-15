@@ -203,6 +203,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             ReferenceStartObject = null;
             PrevObject = null;
             CurvePrecision = from.CurvePrecision;
+            CurveInterpolaterFactory = from.CurveInterpolaterFactory;
             foreach (var cp in PathControls)
             {
                 var newCP = new LaneCurvePathControlObject();
