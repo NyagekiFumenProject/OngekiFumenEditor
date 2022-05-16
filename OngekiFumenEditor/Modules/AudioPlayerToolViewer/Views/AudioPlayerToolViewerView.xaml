@@ -148,6 +148,9 @@
                         <CheckBox Content="Bell" IsChecked="{Binding SoundControls[12]}" />
                         <CheckBox Content="Beam" IsChecked="{Binding SoundControls[11]}" />
                         <CheckBox Content="Bullet" IsChecked="{Binding SoundControls[10]}" />
+                        <CheckBox Content="ClickSE" IsChecked="{Binding SoundControls[13]}" />
+                        <CheckBox Content="HoldTick" IsChecked="{Binding SoundControls[14]}" />
+                        <CheckBox Content="HoldEnd" IsChecked="{Binding SoundControls[15]}" />
                     </WrapPanel>
                 </GroupBox>
             </StackPanel>

@@ -77,6 +77,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
+        const int SoundControlLength = 16;
+
         private IFumenSoundPlayer fumenSoundPlayer = default;
         public IFumenSoundPlayer FumenSoundPlayer
         {
@@ -85,13 +87,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             {
                 Set(ref fumenSoundPlayer, value);
                 var soundControl = FumenSoundPlayer.SoundControl;
-                for (int i = 0; i < 12; i++)
+                for (int i = 0; i < SoundControlLength; i++)
                     SoundControls[i] = soundControl.HasFlag((SoundControl)(1 << i));
                 NotifyOfPropertyChange(() => SoundControls);
             }
         }
 
-        public bool[] SoundControls { get; set; } = new bool[13];
+        public bool[] SoundControls { get; set; } = new bool[SoundControlLength];
 
         public float SoundVolume
         {
@@ -290,7 +292,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public void OnSoundControlSwitchChanged(FrameworkElement sender)
         {
             var sc = 0;
-            for (int i = 0; i < 13; i++)
+            for (int i = 0; i < SoundControlLength; i++)
                 sc = sc | (SoundControls[i] ? (1 << i) : 0);
             if (FumenSoundPlayer is IFumenSoundPlayer player)
                 player.SoundControl = (SoundControl)sc;
