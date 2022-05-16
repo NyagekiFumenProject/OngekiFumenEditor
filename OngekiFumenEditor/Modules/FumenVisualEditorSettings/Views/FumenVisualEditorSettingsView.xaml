@@ -58,7 +58,6 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <TextBlock
                     Margin="0,0,10,0"
@@ -132,23 +131,6 @@
                     Maximum="500"
                     Minimum="0"
                     Value="{Binding Setting.JudgeLineOffsetY, Mode=TwoWay}">
-                </Slider>
-                <TextBlock
-                    Grid.Row="6"
-                    Margin="0,0,10,0"
-                    VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}">
-                    音效播放延迟:<LineBreak>
-                    </LineBreak><Run Text="{Binding Setting.SoundOffset}">
-                    </Run>
-                </TextBlock>
-                <Slider
-                    Grid.Row="6"
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Maximum="500"
-                    Minimum="-500"
-                    Value="{Binding Setting.SoundOffset, Mode=TwoWay}">
                 </Slider>
             </Grid>
         </StackPanel>

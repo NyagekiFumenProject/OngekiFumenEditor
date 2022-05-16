@@ -62,8 +62,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public SoundControl SoundControl { get; set; } = SoundControl.All;
 
-        public double CurrentTime => player.CurrentTime + editor.Setting.SoundOffset;
-
         private float volume = 1;
         public float Volume
         {
@@ -251,7 +249,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
                 while (itor is not null)
                 {
-                    var ct = CurrentTime - itor.Value.Time;
+                    var ct = player.CurrentTime - itor.Value.Time;
                     if (ct >= 0)
                     {
                         //Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");

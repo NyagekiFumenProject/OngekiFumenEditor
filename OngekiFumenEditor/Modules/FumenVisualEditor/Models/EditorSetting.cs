@@ -10,13 +10,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 {
     public class EditorSetting : PropertyChangedBase
     {
-        private double soundOffset = 200;
-        public double SoundOffset
-        {
-            get => soundOffset;
-            set => Set(ref soundOffset, value);
-        }
-
         private double judgeLineOffsetY = 0;
         public double JudgeLineOffsetY
         {
