@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using DereTore.Exchange.Archive.ACB;
 using DereTore.Exchange.Audio.HCA;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Utils;
@@ -37,7 +38,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public DefaultAudioManager()
         {
-            soundOutputDevice = new WasapiOut();
+            soundOutputDevice = new WasapiOut(AudioClientShareMode.Shared, 0);
             soundMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
             soundMixer.ReadFully = true;
             soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
@@ -214,7 +215,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             }
 
             ArrayPool<float>.Shared.Return(buffer);
-            return new CachedSound(newBuf,outFormat);
+            return new CachedSound(newBuf, outFormat);
         }
 
         public void Dispose()
