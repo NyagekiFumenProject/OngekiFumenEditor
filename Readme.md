@@ -1,7 +1,7 @@
 ## 音击谱面编辑器
 ----
 ## 简介
-![image](https://user-images.githubusercontent.com/7549173/148975306-6d95b2ab-0556-405d-ab3f-fef399d66a97.png)
+![](https://user-images.githubusercontent.com/7549173/168480352-d30e2a0e-9365-4312-9d40-37133eede3ff.png)
 
 当前进度&roadmap:
 * Tap实现 
