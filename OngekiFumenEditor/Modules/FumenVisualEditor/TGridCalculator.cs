@@ -14,9 +14,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
     public static class TGridCalculator
     {
-        public static TGrid ConvertYToTGrid(double pickY, FumenVisualEditorViewModel editor) => ConvertYToTGrid(pickY, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
-        public static TGrid ConvertYToTGrid(double pickY, BpmList bpmList, int tUnitLength = 240)
+        public static TGrid ConvertYToTGrid(double pickY, FumenVisualEditorViewModel editor)
+            => ConvertYToTGrid(pickY, editor.Fumen.BpmList, editor.Setting.Scale, editor.Setting.TGridUnitLength);
+        public static TGrid ConvertYToTGrid(double pickY, BpmList bpmList, double scale, int tUnitLength)
         {
+            pickY = pickY / scale;
             var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
 
             //获取pickY对应的bpm和bpm起始位置
@@ -29,23 +31,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return pickTGrid;
         }
 
+        public static double ConvertAudioTimeToY(TimeSpan audioTime, FumenVisualEditorViewModel editor)
+            => ConvertTGridToY(ConvertAudioTimeToTGrid(audioTime, editor), editor);
+
         public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor) => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, BpmList bpmList, int tUnitLength = 240)
-        {
-            var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
-            var audioTimeMsec = audioTime.TotalMilliseconds;
-            //获取pickY对应的bpm和bpm起始位置
-            (var pickStartY, var pickBpm) = positionBpmList.LastOrDefault(x => x.startY <= audioTimeMsec);
-            if (pickBpm is null)
-                return default;
-            var relativeBpmLenOffset = pickBpm.LengthConvertToOffset(audioTimeMsec - pickStartY, tUnitLength);
+            => ConvertYToTGrid(audioTime.TotalMilliseconds, bpmList, 1, tUnitLength);
 
-            var pickTGrid = pickBpm.TGrid + relativeBpmLenOffset;
-            return pickTGrid;
-        }
-
-        public static double ConvertTGridToY(TGrid tGrid, FumenVisualEditorViewModel editor) => ConvertTGridToY(tGrid, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
-        public static double ConvertTGridToY(TGrid tGrid, BpmList bpmList, int tUnitLength = 240)
+        public static double ConvertTGridToY(TGrid tGrid, FumenVisualEditorViewModel editor)
+            => ConvertTGridToY(tGrid, editor.Fumen.BpmList, editor.Setting.Scale, editor.Setting.TGridUnitLength);
+        public static double ConvertTGridToY(TGrid tGrid, BpmList bpmList, double scale, int tUnitLength)
         {
             var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
 
@@ -58,7 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                     return default;
             var relativeBpmLenOffset = MathUtils.CalculateBPMLength(pickBpm, tGrid, tUnitLength);
 
-            var pickTGrid = pickStartY + relativeBpmLenOffset;
+            var pickTGrid = (pickStartY + relativeBpmLenOffset) * scale;
             return pickTGrid;
         }
 
@@ -94,15 +89,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         }
 
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(FumenVisualEditorViewModel editor, int tUnitLength = 240)
-            => GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.MinVisibleCanvasY, editor.MaxVisibleCanvasY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, tUnitLength);
-        public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, int tUnitLength = 240)
+            => GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.MinVisibleCanvasY, editor.MaxVisibleCanvasY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.Scale, tUnitLength);
+        public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
         {
             minVisibleCanvasY = Math.Max(0, minVisibleCanvasY);
 
             //划线的中止位置
-            var endTGrid = ConvertYToTGrid(maxVisibleCanvasY, bpmList, tUnitLength);
+            var endTGrid = ConvertYToTGrid(maxVisibleCanvasY, bpmList, scale, tUnitLength);
             //可显示划线的起始位置
-            var currentTGridBaseOffset = ConvertYToTGrid(minVisibleCanvasY, bpmList, tUnitLength) ?? ConvertYToTGrid(minVisibleCanvasY + judgeLineOffsetY, bpmList, tUnitLength);
+            var currentTGridBaseOffset = ConvertYToTGrid(minVisibleCanvasY, bpmList, scale, tUnitLength) ?? ConvertYToTGrid(minVisibleCanvasY + judgeLineOffsetY, bpmList, 1, tUnitLength);
 
             var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(240, bpmList);
             var currentTimeSignatureIndex = 0;
@@ -162,7 +157,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                         continue;
                     }
 
-                    yield return (tGrid, y, i % beatCount);
+                    yield return (tGrid, y * scale, i % beatCount);
                     i++;
                 }
                 currentTGridBaseOffset = nextTGridBase;

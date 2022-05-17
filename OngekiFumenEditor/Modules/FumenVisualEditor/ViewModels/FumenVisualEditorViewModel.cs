@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref editorProjectData, value);
-                TotalDurationHeight = value.AudioDuration.TotalMilliseconds;
+                RecalculateTotalDurationHeight();
                 Setting = EditorProjectData.EditorSetting;
                 Fumen = EditorProjectData.Fumen;
             }
@@ -71,6 +71,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             switch (e.PropertyName)
             {
+                case nameof(EditorSetting.Scale):
+                    var beforeHeight = TotalDurationHeight;
+                    RecalculateTotalDurationHeight();
+                    var offset = TotalDurationHeight - beforeHeight;
+                    Log.LogDebug($"offset = {offset:F2}");
+                    //ScrollViewerVerticalOffset = Math.Max(0, ScrollViewerVerticalOffset - offset);
+                    break;
                 case nameof(EditorSetting.JudgeLineOffsetY):
                     NotifyOfPropertyChange(() => MinVisibleCanvasY);
                     NotifyOfPropertyChange(() => MaxVisibleCanvasY);
@@ -96,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private void ClearDisplayingObjectCache()
+        public void ClearDisplayingObjectCache()
         {
             CurrentDisplayEditorViewModels.Clear();
             EditorViewModels.Clear();
@@ -158,7 +165,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         var contains = CurrentSelectedObjects.Contains(controlPoint);
                         if (controlPoint.IsSelected && !contains)
                             CurrentSelectedObjects.Add(controlPoint);
-                        else if((!controlPoint.IsSelected) && contains)
+                        else if ((!controlPoint.IsSelected) && contains)
                             CurrentSelectedObjects.Remove(controlPoint);
                     }
                     break;
@@ -169,9 +176,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         }
 
+        public void RecalculateTotalDurationHeight()
+        {
+            if (EditorProjectData?.AudioDuration is TimeSpan timeSpan)
+            {
+                TotalDurationHeight = TGridCalculator.ConvertTGridToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this), this);
+            }
+            else
+            {
+                //todo warning
+                TotalDurationHeight = 0;
+            }
+        }
+
         public double CalculateYFromAudioTime(TimeSpan audioTime)
         {
-            return TotalDurationHeight - audioTime.TotalMilliseconds - CanvasHeight;
+            var y = TGridCalculator.ConvertAudioTimeToY(audioTime, this);
+            return TotalDurationHeight - y - CanvasHeight;
         }
 
         private double canvasWidth = default;
@@ -208,7 +229,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref brushMode, value);
-                ToastNotify($"笔刷模式:{(BrushMode?"开启":"关闭")}");
+                ToastNotify($"笔刷模式:{(BrushMode ? "开启" : "关闭")}");
             }
         }
 

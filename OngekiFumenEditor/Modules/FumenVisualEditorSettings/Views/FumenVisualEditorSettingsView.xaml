@@ -2,9 +2,11 @@
     x:Class="OngekiFumenEditor.Modules.FumenVisualEditorSettings.Views.FumenVisualEditorSettingsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:converters1="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:Background="White"
@@ -52,6 +54,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
@@ -132,6 +135,26 @@
                     Minimum="0"
                     Value="{Binding Setting.JudgeLineOffsetY, Mode=TwoWay}">
                 </Slider>
+                <TextBlock
+                    Grid.Row="6"
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}">
+                    水平显示缩放:<LineBreak>
+                    </LineBreak><Run Text="{Binding Setting.Scale}">
+                    </Run>
+                </TextBlock>
+                <gemini:SliderEx
+                    Grid.Row="6"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    cal:Message.Attach="[Event ThumbDragCompleted] = [Action OnSliderValueChanged()];"
+                    IsSnapToTickEnabled="True"
+                    Maximum="3"
+                    Minimum="0.1"
+                    TickFrequency="0.1"
+                    Value="{Binding Setting.Scale, Mode=TwoWay}">
+                </gemini:SliderEx>
             </Grid>
         </StackPanel>
     </ScrollViewer>

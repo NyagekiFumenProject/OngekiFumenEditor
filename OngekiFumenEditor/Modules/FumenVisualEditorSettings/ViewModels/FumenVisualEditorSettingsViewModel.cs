@@ -35,43 +35,48 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
 
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
-        private EditorSetting setting = default;
-        public EditorSetting Setting
+        private FumenVisualEditorViewModel editor = default;
+        public FumenVisualEditorViewModel Editor
         {
-            get
-            {
-                return setting;
-            }
+            get => editor;
             set
             {
-                var prev = setting;
-                setting = value;
+                Set(ref editor, value);
                 NotifyOfPropertyChange(() => Setting);
 
-                if (value is null)
+
+                if (Editor is null)
                     DisplayName = "编辑器设置";
                 else
-                    DisplayName = "编辑器设置 - " + value.EditorDisplayName;
+                    DisplayName = "编辑器设置 - " + Editor.FileName;
             }
         }
+
+        public EditorSetting Setting => Editor?.Setting;
 
         public FumenVisualEditorSettingsViewModel()
         {
             DisplayName = "编辑器设置";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
-            Setting = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor?.Setting;
+            Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
         {
-            Setting = @new?.Setting;
+            Editor = @new;
             this.RegisterOrUnregisterPropertyChangeEvent(old, @new, OnEditorPropertyChanged);
         }
 
         private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FumenVisualEditorViewModel.Setting))
-                Setting = (sender as FumenVisualEditorViewModel).Setting;
+                NotifyOfPropertyChange(() => Setting);
+        }
+
+        public void OnSliderValueChanged()
+        {
+            Editor?.ClearDisplayingObjectCache();
+            Editor?.Redraw(FumenVisualEditor.Base.RedrawTarget.All);
         }
     }
 }

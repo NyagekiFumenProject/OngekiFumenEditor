@@ -96,5 +96,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         #endregion
+
+        public TGrid GetCurrentJudgeLineTGrid()
+        {
+            var y = Setting.JudgeLineOffsetY + MinVisibleCanvasY;
+            return TGridCalculator.ConvertYToTGrid(y, this);
+        }
     }
 }

@@ -4,6 +4,7 @@ using Gemini.Framework.Services;
 using Microsoft.Win32;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Utils;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.UI.Controls;
@@ -164,6 +165,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             await fumenSoundPlayer.Init(Editor, AudioPlayer);
             var scrollViewer = Editor.AnimatedScrollViewer;
             //var stopwatch = new Stopwatch();
+            var prev = 0d;
             EventHandler func = (e, d) =>
             {
                 if (AudioPlayer is null || Editor is null)
@@ -171,7 +173,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var audioTime = AudioPlayer.CurrentTime;
                 NotifyOfPropertyChange(() => SliderValue);
                 var scrollOffset = Editor.CalculateYFromAudioTime(audioTime);
-                //var scrollOffset = Editor.TotalDurationHeight - audioTime - Editor.CanvasHeight;
+                Log.LogDebug($"diff : {prev - scrollOffset}");
+                prev = scrollOffset;
                 scrollViewer.CurrentVerticalOffset = Math.Max(0, scrollOffset);
             };
             CompositionTarget.Rendering += func;
@@ -284,7 +287,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 if (scrollAnimationClearFunc is null)
                     InitPreviewActions();
                 Log.LogDebug($"seek by RequestPlayOrPause()");
-                var seekTo = TimeSpan.FromMilliseconds(Editor.MinVisibleCanvasY);
+                var tgrid = Editor.GetCurrentJudgeLineTGrid();
+                var seekTo = TGridCalculator.ConvertTGridToAudioTime(tgrid, Editor);
                 AudioPlayer.Seek(seekTo, false);
                 fumenSoundPlayer.Seek(seekTo, false);
             }

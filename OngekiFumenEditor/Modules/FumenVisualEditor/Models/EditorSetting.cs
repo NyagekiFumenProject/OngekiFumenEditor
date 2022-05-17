@@ -133,5 +133,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                 Set(ref forceXGridMagneticDock, value);
             }
         }
+
+        private double scale = 1;
+        public double Scale
+        {
+            get { return scale; }
+            set
+            {
+                Set(ref scale, value);
+            }
+        }
     }
 }

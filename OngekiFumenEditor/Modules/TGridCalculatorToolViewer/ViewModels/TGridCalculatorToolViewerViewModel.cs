@@ -64,10 +64,10 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
 
         public void UpdateToTGrid()
         {
-            TGrid = TGridCalculator.ConvertYToTGrid(ParseMsecStr(), Editor);
+            TGrid = TGridCalculator.ConvertAudioTimeToTGrid(ParseMsecStr(), Editor);
         }
 
-        private double ParseMsecStr()
+        private TimeSpan ParseMsecStr()
         {
             if (MsecStr.Contains(":"))
             {
@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
                     return (TimeSpan.FromSeconds(revArr.ElementAtOrDefault(0)) +
                         TimeSpan.FromMinutes(revArr.ElementAtOrDefault(1)) +
                         TimeSpan.FromHours(revArr.ElementAtOrDefault(2))
-                        ).TotalMilliseconds;
+                        );
                 }
                 else
                 {
@@ -88,12 +88,12 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
                     return (TimeSpan.FromMilliseconds(revArr.ElementAtOrDefault(0)) +
                         TimeSpan.FromSeconds(revArr.ElementAtOrDefault(1)) +
                         TimeSpan.FromMinutes(revArr.ElementAtOrDefault(2))
-                        ).TotalMilliseconds;
+                        );
                 }
             }
             else
             {
-                return float.Parse(MsecStr);
+                return TimeSpan.FromMilliseconds(float.Parse(MsecStr));
             }
         }
 
