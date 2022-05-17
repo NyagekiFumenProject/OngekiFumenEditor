@@ -165,7 +165,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             await fumenSoundPlayer.Init(Editor, AudioPlayer);
             var scrollViewer = Editor.AnimatedScrollViewer;
             //var stopwatch = new Stopwatch();
-            var prev = 0d;
             EventHandler func = (e, d) =>
             {
                 if (AudioPlayer is null || Editor is null)
@@ -173,8 +172,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var audioTime = AudioPlayer.CurrentTime;
                 NotifyOfPropertyChange(() => SliderValue);
                 var scrollOffset = Editor.CalculateYFromAudioTime(audioTime);
-                Log.LogDebug($"diff : {prev - scrollOffset}");
-                prev = scrollOffset;
                 scrollViewer.CurrentVerticalOffset = Math.Max(0, scrollOffset);
             };
             CompositionTarget.Rendering += func;

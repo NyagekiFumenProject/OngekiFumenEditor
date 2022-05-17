@@ -37,9 +37,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             void buildColorfulLane(IColorfulLane obj, Dictionary<string, string> map)
             {
                 var colorfulData = map["C"].Split(",");
-                var colorId = int.Parse(colorfulData[0]);
+                var colorId = colorfulData[0];
                 var brightness = int.Parse(colorfulData[1]);
-                obj.ColorId = ColorIdConst.AllColors.FirstOrDefault(x => colorId == x.Id);
+                obj.ColorId = ColorIdConst.AllColors.FirstOrDefault(x => colorId == x.Name);
                 obj.Brightness = brightness;
             }
 
