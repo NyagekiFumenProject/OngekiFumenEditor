@@ -44,7 +44,7 @@
                         <TextBlock Foreground="{DynamicResource EnvironmentToolWindowText}">
                             <Run Text="音频长度:">
                             </Run>
-                            <Run Text="{Binding EditorProjectData.AudioDuration, StringFormat={}{0}ms}">
+                            <Run Text="{Binding EditorProjectData.AudioDuration, StringFormat={}{0}}">
                             </Run>
                         </TextBlock>
                     </StackPanel>

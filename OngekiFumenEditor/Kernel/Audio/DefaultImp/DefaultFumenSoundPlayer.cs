@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         public class SoundEvent
         {
             public Sound Sounds { get; set; }
-            public double Time { get; set; }
+            public TimeSpan Time { get; set; }
 
             public override string ToString() => $"{Time:F2} {Sounds}";
         }
@@ -188,7 +188,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             {
                 var evt = ObjectPool<SoundEvent>.Get();
                 evt.Sounds = sound;
-                evt.Time = TGridCalculator.ConvertTGridToY(tGrid, editor);
+                evt.Time = TGridCalculator.ConvertTGridToAudioTime(tGrid, editor);
                 list.Add(evt);
             }
 
@@ -249,7 +249,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
                 while (itor is not null)
                 {
-                    var ct = player.CurrentTime - itor.Value.Time;
+                    var ct = (player.CurrentTime - itor.Value.Time).TotalMilliseconds;
                     if (ct >= 0)
                     {
                         //Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");
@@ -287,7 +287,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             checkPlay(Sound.ClickSE, SoundControl.ClickSE);
         }
 
-        public void Seek(float msec, bool pause)
+        public void Seek(TimeSpan msec, bool pause)
         {
             Pause();
             itor = events.Find(events.FirstOrDefault(x => msec < x.Time));

@@ -195,6 +195,9 @@ namespace OngekiFumenEditor.Utils
         public static T Max<T>(T a, T b) where T : GridBase => a > b ? a : b;
         public static T Min<T>(T a, T b) where T : GridBase => a > b ? b : a;
 
+        public static TimeSpan Max(TimeSpan a, TimeSpan b) => a > b ? a : b;
+        public static TimeSpan Min(TimeSpan a, TimeSpan b) => a > b ? b : a;
+
         public static IEnumerable<int> GetIntegersBetweenTwoValues(double from, double to)
         {
             var sign = Math.Sign(to - from);

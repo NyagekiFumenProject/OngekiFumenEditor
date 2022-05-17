@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Utils
 
         protected override TimeSpan GetCurrentTimeCore()
         {
-            return TimeSpan.FromMilliseconds(audioPlayer.CurrentTime);
+            return audioPlayer.CurrentTime;
         }
     }
 }

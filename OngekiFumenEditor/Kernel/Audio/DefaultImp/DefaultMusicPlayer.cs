@@ -18,13 +18,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
     {
         private AudioFileReader audioFileReader;
         private WaveOut currentOut;
-        private float baseOffset = 0;
+        private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
         private DateTime startTime;
-        private float pauseTime;
+        private TimeSpan pauseTime;
 
-        public float Duration { get => (float)audioFileReader.TotalTime.TotalMilliseconds; }
+        public TimeSpan Duration { get => audioFileReader.TotalTime; }
 
-        public float CurrentTime { get => GetTime(); }
+        public TimeSpan CurrentTime { get => GetTime(); }
 
         public float PlaybackSpeed { get => 1; set { } }
 
@@ -57,9 +57,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             return Task.CompletedTask;
         }
 
-        public void Seek(float time, bool pause)
+        public void Seek(TimeSpan time, bool pause)
         {
-            time = Math.Max(0, Math.Min(time, Duration));
+            time = MathUtils.Max(TimeSpan.FromMilliseconds(0), MathUtils.Min(time, Duration));
 
             currentOut?.Stop();
             currentOut?.Dispose();
@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             audioFileReader.Seek(0, System.IO.SeekOrigin.Begin);
             var provider = new OffsetSampleProvider(audioFileReader)
             {
-                SkipOver = TimeSpan.FromMilliseconds(time)
+                SkipOver = time
             };
 
             baseOffset = time;
@@ -89,11 +89,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             await IoC.Get<ISchedulerManager>().AddScheduler(this);
         }
 
-        private float GetTime()
+        private TimeSpan GetTime()
         {
             if (!IsPlaying)
                 return pauseTime;
-            var coreTime = (float)(DateTime.Now - startTime).TotalMilliseconds;
+            var coreTime = DateTime.Now - startTime;
             var actualTime = coreTime/* * currentOutPositionWeight*/ + baseOffset;
             return actualTime;
         }
@@ -101,7 +101,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         public async void Stop()
         {
             await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
-            Seek(0, true);
+            Seek(TimeSpan.FromMilliseconds(0), true);
         }
 
         public async void Pause()

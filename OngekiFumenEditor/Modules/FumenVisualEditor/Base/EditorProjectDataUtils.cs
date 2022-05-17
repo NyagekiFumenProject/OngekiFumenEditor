@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -15,17 +16,55 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public class EditorProjectDataUtils
     {
-        private static JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
+        private static JsonSerializerOptions JsonSerializerOptions;
+
+        private class TimeSpanJsonConverter : JsonConverter<TimeSpan>
         {
-            WriteIndented = true
-        };
+            public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                var result = default(TimeSpan);
+                if (reader.TokenType == JsonTokenType.StartObject)
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType == JsonTokenType.EndObject)
+                            break;
+                        if (reader.GetString() == "Ticks")
+                        {
+                            if (!reader.Read())
+                                throw new Exception("Json parse TimeSpan rrror");
+                            var ticks = reader.GetInt64();
+                            result =  TimeSpan.FromTicks(ticks);
+                        }
+                    }
+                }
+                return result;
+            }
+
+            public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
+            {
+                writer.WriteStartObject();
+                writer.WriteNumber("Ticks", value.Ticks);
+                writer.WriteEndObject();
+            }
+        }
+
+        static EditorProjectDataUtils()
+        {
+            JsonSerializerOptions = new JsonSerializerOptions()
+            {
+                WriteIndented = true
+            };
+
+            JsonSerializerOptions.Converters.Add(new TimeSpanJsonConverter());
+        }
 
         public static string GetRelativeOngekiFumenFilePath(string editorProjectFilePath) => Path.Combine(Path.GetDirectoryName(editorProjectFilePath), Path.GetFileNameWithoutExtension(editorProjectFilePath) + ".ogkr");
 
         public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(string filePath)
         {
             using var fileStream = File.OpenRead(filePath);
-            var projectData = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(fileStream);
+            var projectData = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(fileStream, JsonSerializerOptions);
 
             var fumenFilePath = projectData.FumenFilePath ?? GetRelativeOngekiFumenFilePath(filePath);
             if (projectData.FumenFilePath is null)

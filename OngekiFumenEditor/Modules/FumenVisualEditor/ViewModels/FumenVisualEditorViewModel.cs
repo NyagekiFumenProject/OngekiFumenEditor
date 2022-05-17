@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref editorProjectData, value);
-                TotalDurationHeight = value.AudioDuration;
+                TotalDurationHeight = value.AudioDuration.TotalMilliseconds;
                 Setting = EditorProjectData.EditorSetting;
                 Fumen = EditorProjectData.Fumen;
             }
@@ -167,6 +167,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
             }
 
+        }
+
+        public double CalculateYFromAudioTime(TimeSpan audioTime)
+        {
+            return TotalDurationHeight - audioTime.TotalMilliseconds - CanvasHeight;
         }
 
         private double canvasWidth = default;

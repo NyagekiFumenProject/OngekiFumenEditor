@@ -14,10 +14,10 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 {
     public class DummyAudioPlayer : PropertyChangedBase, IAudioPlayer
     {
-        private float baseTime = 0;
+        private TimeSpan baseTime = TimeSpan.FromMilliseconds(0);
         private Stopwatch stopwatch = new();
 
-        public float CurrentTime => baseTime + stopwatch.ElapsedMilliseconds;
+        public TimeSpan CurrentTime => baseTime + TimeSpan.FromMilliseconds(stopwatch.ElapsedMilliseconds);
 
         private float volume;
         public float Volume
@@ -26,8 +26,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             set => Set(ref volume, value);
         }
 
-        private float duration;
-        public float Duration
+        private TimeSpan duration;
+        public TimeSpan Duration
         {
             get => duration;
             set => Set(ref duration, value);
@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             try
             {
                 using var audioFileReader = new AudioFileReader(audio_file);
-                Duration = (float)audioFileReader.TotalTime.TotalMilliseconds;
+                Duration = audioFileReader.TotalTime;
             }
             catch (Exception e)
             {
@@ -76,7 +76,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             IsPlaying = true;
         }
 
-        public void Seek(float time, bool pause)
+        public void Seek(TimeSpan time, bool pause)
         {
             baseTime = time;
             stopwatch.Reset();
@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public void Stop()
         {
-            baseTime = 0;
+            baseTime = TimeSpan.FromMilliseconds(0);
             stopwatch.Reset();
             stopwatch.Stop();
         }

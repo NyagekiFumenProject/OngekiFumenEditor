@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             {
                 var time = isSliderDragging ?
                 sliderDraggingValue :
-                (AudioPlayer?.CurrentTime ?? 0);
+                (float)(AudioPlayer?.CurrentTime.TotalMilliseconds ?? 0);
                 return time;
             }
             set
@@ -170,7 +170,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                     return;
                 var audioTime = AudioPlayer.CurrentTime;
                 NotifyOfPropertyChange(() => SliderValue);
-                var scrollOffset = Editor.TotalDurationHeight - audioTime - Editor.CanvasHeight;
+                var scrollOffset = Editor.CalculateYFromAudioTime(audioTime);
+                //var scrollOffset = Editor.TotalDurationHeight - audioTime - Editor.CanvasHeight;
                 scrollViewer.CurrentVerticalOffset = Math.Max(0, scrollOffset);
             };
             CompositionTarget.Rendering += func;
@@ -249,7 +250,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             if (scrollAnimationClearFunc is null)
                 InitPreviewActions();
-            var seekTo = SliderValue;
+            var seekTo = TimeSpan.FromMilliseconds(SliderValue);
             AudioPlayer.Seek(seekTo, true);
             fumenSoundPlayer.Seek(seekTo, true);
 
@@ -283,7 +284,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 if (scrollAnimationClearFunc is null)
                     InitPreviewActions();
                 Log.LogDebug($"seek by RequestPlayOrPause()");
-                var seekTo = (float)Editor.MinVisibleCanvasY;
+                var seekTo = TimeSpan.FromMilliseconds(Editor.MinVisibleCanvasY);
                 AudioPlayer.Seek(seekTo, false);
                 fumenSoundPlayer.Seek(seekTo, false);
             }

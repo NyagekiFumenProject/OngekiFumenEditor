@@ -21,9 +21,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set => Set(ref audioFilePath, value);
         }
 
-        private double audioDuration = default;
+        private TimeSpan audioDuration = default;
         [JsonInclude]
-        public double AudioDuration
+        public TimeSpan AudioDuration
         {
             get => audioDuration;
             set => Set(ref audioDuration, value);

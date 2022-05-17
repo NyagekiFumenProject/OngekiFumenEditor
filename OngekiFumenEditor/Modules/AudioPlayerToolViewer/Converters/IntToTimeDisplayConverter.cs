@@ -12,8 +12,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var time = (float)value;
-            var timeSpan = TimeSpan.FromMilliseconds(time);
+            var timeSpan = (TimeSpan)(value is float f ? TimeSpan.FromMilliseconds(f) : value);
             return $"{timeSpan.Minutes}:{timeSpan.Seconds}.{timeSpan.Milliseconds}";
         }
 

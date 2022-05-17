@@ -29,6 +29,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return pickTGrid;
         }
 
+        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor) => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
+        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, BpmList bpmList, int tUnitLength = 240)
+        {
+            var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
+            var audioTimeMsec = audioTime.TotalMilliseconds;
+            //获取pickY对应的bpm和bpm起始位置
+            (var pickStartY, var pickBpm) = positionBpmList.LastOrDefault(x => x.startY <= audioTimeMsec);
+            if (pickBpm is null)
+                return default;
+            var relativeBpmLenOffset = pickBpm.LengthConvertToOffset(audioTimeMsec - pickStartY, tUnitLength);
+
+            var pickTGrid = pickBpm.TGrid + relativeBpmLenOffset;
+            return pickTGrid;
+        }
+
         public static double ConvertTGridToY(TGrid tGrid, FumenVisualEditorViewModel editor) => ConvertTGridToY(tGrid, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         public static double ConvertTGridToY(TGrid tGrid, BpmList bpmList, int tUnitLength = 240)
         {
@@ -45,6 +60,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
             var pickTGrid = pickStartY + relativeBpmLenOffset;
             return pickTGrid;
+        }
+
+        public static TimeSpan ConvertTGridToAudioTime(TGrid tGrid, FumenVisualEditorViewModel editor) => ConvertTGridToAudioTime(tGrid, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
+        public static TimeSpan ConvertTGridToAudioTime(TGrid tGrid, BpmList bpmList, int tUnitLength = 240)
+        {
+            var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
+
+            //获取pickY对应的bpm和bpm起始位置
+            (var audioTimeMsecBase, var pickBpm) = positionBpmList.LastOrDefault(x => x.bpm.TGrid <= tGrid);
+            if (pickBpm is null)
+                if (positionBpmList.FirstOrDefault().bpm?.TGrid is TGrid first && tGrid < first)
+                    return TimeSpan.FromMilliseconds(0);
+                else
+                    return default;
+            var relativeBpmLenOffset = MathUtils.CalculateBPMLength(pickBpm, tGrid, tUnitLength);
+
+            var audioTimeMsec = audioTimeMsecBase + relativeBpmLenOffset;
+            return TimeSpan.FromMilliseconds(audioTimeMsec);
         }
 
         public static List<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor) => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.TGridUnitLength);

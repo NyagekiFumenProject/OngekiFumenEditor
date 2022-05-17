@@ -36,7 +36,7 @@
                 <gemini:SliderEx
                     Margin="0,0,0,5"
                     cal:Message.Attach="[Event ThumbDragCompleted] = [Action OnSliderValueChanged()];[Event ThumbDragStarted] = [Action OnSliderValueStartChanged()];"
-                    Maximum="{Binding AudioPlayer.Duration, Mode=OneWay}"
+                    Maximum="{Binding AudioPlayer.Duration.TotalMilliseconds, Mode=OneWay}"
                     Value="{Binding SliderValue, Mode=TwoWay}">
                 </gemini:SliderEx>
                 <TextBlock Margin="0,0,0,5" HorizontalAlignment="Right">
