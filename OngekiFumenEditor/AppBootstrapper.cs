@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -129,6 +130,9 @@ namespace OngekiFumenEditor
             logo.UriSource = new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/logo.png");
             logo.EndInit();
             IoC.Get<WindowTitleHelper>().Icon = logo;
+
+            //cultureInfo
+            Log.LogInfo($"User current CultureInfo : {CultureInfo.CurrentCulture} , UI CultureInfo : {CultureInfo.CurrentUICulture}");
 
             await InitKernels();
 
