@@ -650,6 +650,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var hitInputElement = (view.Parent as FrameworkElement)?.InputHitTest(position);
                 var hitOngekiObjectViewModel = (hitInputElement as FrameworkElement)?.DataContext as DisplayObjectViewModelBase;
 
+
+                Log.LogDebug($"mousePos = ги{position.X:F0},{position.Y:F0}) , hitOngekiObjectViewModel = {hitOngekiObjectViewModel?.ReferenceOngekiObject}");
+
                 mouseDownHitObject = null;
                 mouseDownHitObjectPosition = default;
                 mouseStartPosition = position;
@@ -667,7 +670,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 else
                 {
                     SelectionVisibility = Visibility.Collapsed;
-                    //Log.LogDebug($"hitOngekiObjectViewModel = {hitOngekiObjectViewModel.ReferenceOngekiObject}");
                     mouseDownHitObject = hitOngekiObjectViewModel;
                     mouseDownHitObjectPosition = position;
                 }
@@ -710,7 +712,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             //const double dragDist = 0.7;
             const double trigPrecent = 0.15;
-            const double autoScrollSpeed = 7;
+            const double autoScrollSpeed = 70;
 
             var offsetYAcc = 0d;
             if (rp >= (1 - trigPrecent) && dragOutBound)

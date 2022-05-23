@@ -94,7 +94,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             set => Set(ref lineDashArray, value);
         }
 
-        public virtual int LineThickness { get; } = 1;
+        public virtual int LineThickness { get; } = 2;
         public PathSegmentCollection Lines { get; set; } = new PathSegmentCollection();
 
         public override void OnObjectCreated(object createFrom, FumenVisualEditorViewModel editorViewModel)
@@ -138,6 +138,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
             }
 
             LineDashArray = isVaild ? DefaultLineDashArray : InvaildCurveLineDashArray;
+            /*
+             
+             */
+            //Log.LogDebug($"Lines.Count = {Lines.Count} diff : {(Lines[0] as LineSegment)?.Point.Y - (Lines[1] as LineSegment)?.Point.Y}");
             NotifyOfPropertyChange(() => Lines);
         }
     }
