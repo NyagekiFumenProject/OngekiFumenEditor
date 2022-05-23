@@ -141,8 +141,9 @@ namespace OngekiFumenEditor
         {
             IoC.Get<IAudioManager>().Dispose();
             await IoC.Get<ISchedulerManager>().Term();
+            FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
+            FileLogOutput.Term();
             base.OnExit(sender, e);
-            await FileLogOutput.Term();
         }
     }
 }

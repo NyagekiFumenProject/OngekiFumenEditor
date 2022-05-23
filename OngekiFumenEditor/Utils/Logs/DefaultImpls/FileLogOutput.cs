@@ -29,6 +29,8 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
                     filePath = Path.Combine(logDir, FileNameHelper.FilterFileName(DateTime.Now.ToString() + ".log"));
                 } while (File.Exists(filePath));
                 writer = new StreamWriter(File.OpenWrite(filePath));
+
+                WriteLog("----------BEGIN FILE LOG OUTPUT----------\n");
             }
             catch (Exception e)
             {
@@ -37,14 +39,13 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
             }
         }
 
-        public static async Task Term()
+        public static void Term()
         {
-            while (writing)
-                await Task.Delay(10);
+            while (writing);
             if (writer is null)
                 return;
-            await writer.FlushAsync();
-            await writer.DisposeAsync();
+            writer.Flush();
+            writer.Dispose();
             writer = null;
         }
 
@@ -54,21 +55,23 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
                 return;
             contents.Enqueue(content);
 
-            if (writing)
-                return;
-
             NotifyWrite();
         }
 
         private static async void NotifyWrite()
         {
-            writing = true;
-            while (contents.Count > 0 && writer is not null)
+            if (writing)
+                return;
+            await Task.Run(() =>
             {
-                var msg = contents.Dequeue();
-                await writer.WriteLineAsync(msg);
-            }
-            writing = false;
+                writing = true;
+                while (contents.Count > 0 && writer is not null)
+                {
+                    var msg = contents.Dequeue();
+                    writer.Write(msg);
+                }
+                writing = false;
+            });
         }
     }
 
