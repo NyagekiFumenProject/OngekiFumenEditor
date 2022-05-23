@@ -78,14 +78,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public static List<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor) => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         public static List<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(BpmList bpmList, int tUnitLength = 240) => bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
 
-        public static double CalculateOffsetYPerBeat(BPMChange bpm, MeterChange meter, int beatSplit, int tUnitLength = 240)
+        public static double CalculateOffsetYPerBeat(BPMChange bpm, MeterChange meter, int beatSplit, double scale, int tUnitLength = 240)
         {
             //计算每一拍的(grid)长度
             var resT = bpm.TGrid.ResT;
             var beatCount = meter.BunShi * beatSplit;
-            var lengthPerBeat = resT * 1.0d / beatCount;
+            var lengthPerBeat = (resT * 1.0d / beatCount);
 
-            return MathUtils.CalculateBPMLength(bpm, bpm.TGrid + new GridOffset(0, (int)lengthPerBeat), tUnitLength);
+            return MathUtils.CalculateBPMLength(bpm, bpm.TGrid + new GridOffset(0, (int)lengthPerBeat), tUnitLength) * scale;
         }
 
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(FumenVisualEditorViewModel editor, int tUnitLength = 240)
@@ -176,8 +176,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         /// <param name="beatSplit"></param>
         /// <param name="tUnitLength"></param>
         /// <returns></returns>
-        public static (TGrid tGrid, double y, int beatIndex) TryPickMagneticBeatTime(float y, float range, BpmList bpmList, MeterChangeList meterChanges, int beatSplit, int tUnitLength = 240)
-            => GetVisbleTimelines(bpmList, meterChanges, y - range, y + range, 0, beatSplit, tUnitLength).MinBy(x => Math.Abs(x.y - y));
+        public static (TGrid tGrid, double y, int beatIndex) TryPickMagneticBeatTime(float y, float range, BpmList bpmList, MeterChangeList meterChanges, int beatSplit, double scale, int tUnitLength = 240)
+            => GetVisbleTimelines(bpmList, meterChanges, y - range, y + range, 0, beatSplit, scale, tUnitLength).MinBy(x => Math.Abs(x.y - y));
         /// <summary>
         /// 计算在y±range内，最近的节奏线
         /// </summary>
@@ -187,10 +187,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         /// <param name="tUnitLength"></param>
         /// <returns></returns>
         public static (TGrid tGrid, double y, int beatIndex) TryPickMagneticBeatTime(float y, float range, FumenVisualEditorViewModel editor, int tUnitLength = 240)
-            => TryPickMagneticBeatTime(y, range, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Setting.BeatSplit, tUnitLength);
+            => TryPickMagneticBeatTime(y, range, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Setting.BeatSplit, editor.Setting.Scale, tUnitLength);
 
         public static (TGrid tGrid, double y, int beatIndex) TryPickClosestBeatTime(float y, FumenVisualEditorViewModel editor, int tUnitLength = 240)
-            => TryPickClosestBeatTime(y, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Setting.BeatSplit, tUnitLength);
+            => TryPickClosestBeatTime(y, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Setting.BeatSplit, editor.Setting.Scale, tUnitLength);
         /// <summary>
         /// 获取某个时间点上最近的节奏点
         /// </summary>
@@ -198,7 +198,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         /// <param name="editor"></param>
         /// <param name="tUnitLength"></param>
         /// <returns></returns>
-        public static (TGrid tGrid, double y, int beatIndex) TryPickClosestBeatTime(float y, BpmList bpmList, MeterChangeList meterChanges, int beatSplit, int tUnitLength = 240)
+        public static (TGrid tGrid, double y, int beatIndex) TryPickClosestBeatTime(float y, BpmList bpmList, MeterChangeList meterChanges, int beatSplit, double scale, int tUnitLength = 240)
         {
             /**
              ...
@@ -212,9 +212,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var timeSignatures = meterChanges.GetCachedAllTimeSignatureUniformPositionList(240, bpmList);
 
             (var prevY, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.startY <= y);
-            var downFirst = GetVisbleTimelines(bpmList, meterChanges, prevY, y, 0, beatSplit, tUnitLength)
+            var downFirst = GetVisbleTimelines(bpmList, meterChanges, prevY, y, 0, beatSplit, scale, tUnitLength)
                 .LastOrDefault();
-            var nextFirst = GetVisbleTimelines(bpmList, meterChanges, y, y + CalculateOffsetYPerBeat(bpm, meter, beatSplit, tUnitLength), 0, beatSplit, tUnitLength)
+            var nextFirst = GetVisbleTimelines(bpmList, meterChanges, y, y + CalculateOffsetYPerBeat(bpm, meter, beatSplit, scale, tUnitLength), 0, beatSplit, scale, tUnitLength)
                 .FirstOrDefault();
 
             if (Math.Abs(downFirst.y - y) < Math.Abs(nextFirst.y - y))
