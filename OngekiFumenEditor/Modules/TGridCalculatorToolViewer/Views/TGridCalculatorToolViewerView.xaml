@@ -13,46 +13,69 @@
     d:DataContext="{d:DesignInstance Type=vm:TGridCalculatorToolViewerViewModel,
                                      IsDesignTimeCreatable=True}"
     mc:Ignorable="d">
-    <StackPanel IsEnabled="{Binding IsEnabled}">
-        <StackPanel Margin="15">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="TGrid.Unit:" />
-                <TextBox
-                    Width="80"
-                    Margin="10,0,0,0"
-                    Text="{Binding TGrid.Unit}" />
+    <ScrollViewer>
+        <StackPanel IsEnabled="{Binding IsEnabled}">
+            <StackPanel Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="TGrid.Unit:" />
+                    <TextBox
+                        Width="80"
+                        Margin="10,0,0,0"
+                        Text="{Binding Unit}" />
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                    <TextBlock Text="TGrid.Grid:" />
+                    <TextBox
+                        Width="80"
+                        Margin="10,0,0,0"
+                        Text="{Binding Grid}" />
+                </StackPanel>
             </StackPanel>
-            <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                <TextBlock Text="TGrid.Grid:" />
-                <TextBox
-                    Width="80"
-                    Margin="10,0,0,0"
-                    Text="{Binding TGrid.Grid}" />
+            <Grid Height="20" Margin="10,0,10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Margin="0,0,20,0" cal:Message.Attach="[Event Click] = [Action UpdateToTGrid()];">
+                    ↑
+                </Button>
+                <Button
+                    Grid.Column="1"
+                    Margin="20,0,0,0"
+                    cal:Message.Attach="[Event Click] = [Action UpdateToMsec()];">
+                    ↓
+                </Button>
+            </Grid>
+            <StackPanel Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Mesc:" />
+                    <TextBox
+                        Width="80"
+                        Margin="10,0,0,0"
+                        Text="{Binding MsecStr}" />
+                </StackPanel>
             </StackPanel>
+
+            <GroupBox Header="操作">
+                <StackPanel>
+                    <Button
+                        Margin="5,5,0,5"
+                        Padding="2,5,2,5"
+                        HorizontalAlignment="Left"
+                        cal:Message.Attach="[Event Click] = [Action OnRequestEditorScrollTo()];">
+                        编辑器跳转到指定的TGrid
+                    </Button>
+                    <CheckBox Margin="10,0,0,0" IsChecked="{Binding IsAutoUpdateTimeIfSelectedObject}">自动显示当前物件时间</CheckBox>
+                    <Button
+                        Margin="5,5,0,5"
+                        Padding="2,5,2,5"
+                        HorizontalAlignment="Left"
+                        cal:Message.Attach="[Event Click] = [Action OnRequestApplyTGridToObject()];"
+                        Visibility="{Binding IsSelectedObject, Converter={StaticResource BoolToVisibilityConverter}}">
+                        将此TGrid赋值给当前已选物件
+                    </Button>
+                </StackPanel>
+            </GroupBox>
         </StackPanel>
-        <Grid Height="20" Margin="20,0,20,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <Button Margin="0,0,20,0" cal:Message.Attach="[Event Click] = [Action UpdateToTGrid()];">
-                ↑
-            </Button>
-            <Button
-                Grid.Column="1"
-                Margin="20,0,0,0"
-                cal:Message.Attach="[Event Click] = [Action UpdateToMsec()];">
-                ↓
-            </Button>
-        </Grid>
-        <StackPanel Margin="15">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Mesc:" />
-                <TextBox
-                    Width="80"
-                    Margin="10,0,0,0"
-                    Text="{Binding MsecStr}" />
-            </StackPanel>
-        </StackPanel>
-    </StackPanel>
+    </ScrollViewer>
 </UserControl>
