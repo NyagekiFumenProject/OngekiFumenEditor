@@ -47,13 +47,18 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                         UpdateStatus();
                     }
 
+                    if (obj.TGrid.Unit == 82 && obj.TGrid.Grid == 499)
+                    {
+
+                    }
+
                     var diff = obj.TGrid - currentStartTGrid;
                     var totalGrid = diff.TotalGrid(obj.TGrid.ResT);
                     var div = totalGrid / lengthPerBeat;
                     var trck = div - Math.Truncate(div);
-                    trck = Math.Abs(trck - Math.Floor(0.5 + trck));
+                    var subBeat = trck != 0 ? (1 / (1 - trck)) : 0;
 
-                    if (trck > 0.0021)
+                    if (!(subBeat == (int)subBeat))
                     {
                         yield return new CommonCheckResult()
                         {
