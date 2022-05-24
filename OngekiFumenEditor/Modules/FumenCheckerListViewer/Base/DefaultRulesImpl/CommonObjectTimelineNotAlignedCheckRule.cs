@@ -47,11 +47,6 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                         UpdateStatus();
                     }
 
-                    if (obj.TGrid.Unit == 82 && obj.TGrid.Grid == 499)
-                    {
-
-                    }
-
                     var diff = obj.TGrid - currentStartTGrid;
                     var totalGrid = diff.TotalGrid(obj.TGrid.ResT);
                     var div = totalGrid / lengthPerBeat;
