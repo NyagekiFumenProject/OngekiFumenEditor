@@ -25,7 +25,10 @@ namespace OngekiFumenEditor.Utils.ObjectPool
             if (pool == null)
                 return;
 
-            object_pools.Add(pool);
+            lock (this)
+            {
+                object_pools.Add(pool);
+            }
             Log.LogDebug($"Register new object pool :{pool.GetType().GetTypeName()}");
         }
 
@@ -36,10 +39,13 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 
         public Task OnScheduleCall(CancellationToken cancellationToken)
         {
-            foreach (var pool in object_pools)
-                pool.OnPreReduceSchedule();
+            lock (this)
+            {
+                foreach (var pool in object_pools)
+                    pool.OnPreReduceSchedule();
 
-            return Task.CompletedTask;
+                return Task.CompletedTask;
+            }
         }
     }
 }

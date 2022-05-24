@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
             var p = totalGrid / TGrid.ResT;
             var unit = (int)p;
-            var grid = (int)((p - unit)  * TGrid.ResT);
+            var grid = (int)Math.Round((p - unit) * TGrid.ResT);
 
             return new GridOffset(unit, grid);
         }
