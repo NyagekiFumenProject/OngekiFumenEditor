@@ -785,8 +785,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             var curBrowserObj = objBrowser.OngekiObject;
+            var count = SelectObjects.Take(2).Count();
+            var first = SelectObjects.FirstOrDefault();
 
-            if (SelectObjects.Take(2).Count() > 1) //比如你目前有多个已选择的，但你单点了一个
+            if ((count > 1) || (count == 1 && first != obj)) //比如你目前有多个已选择的，但你单点了一个
             {
                 TryCancelAllObjectSelecting(obj);
                 obj.IsSelected = true;
@@ -802,6 +804,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 TryCancelAllObjectSelecting(obj);
             }
         }
+
 
         #endregion
 
