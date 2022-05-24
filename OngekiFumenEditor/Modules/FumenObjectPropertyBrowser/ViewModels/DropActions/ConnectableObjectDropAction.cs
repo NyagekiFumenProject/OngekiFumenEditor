@@ -33,6 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
         {
             var dragTGrid = TGridCalculator.ConvertYToTGrid(dragEndPoint.Y, editor);
             var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) && startObject.Children.OfType<ConnectableEndObject>().None();
+            var isFirst = true;
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
@@ -44,12 +45,19 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 childViewModel.MoveCanvas(dragEndPoint);
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
+                if (isFirst)
+                {
+                    editor.NotifyObjectClicked(childViewModel);
+                    isFirst = false;
+                }
             }, () =>
             {
                 startObject.RemoveChildObject(childViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
             }));
+
+
         }
     }
 }

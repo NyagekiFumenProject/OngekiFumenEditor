@@ -28,6 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
         {
             var dragTGrid = TGridCalculator.ConvertYToTGrid(dragEndPoint.Y, editor);
             var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
+            var isFirst = true;
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加曲线控制点", () =>
             {
@@ -35,6 +36,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 cachePathControl.XGrid = dragXGrid;
                 curveObject.AddControlObject(cachePathControl);
                 editor.Redraw(RedrawTarget.OngekiObjects);
+                if (isFirst)
+                {
+                    editor.NotifyObjectClicked(editor.EditorViewModels.FirstOrDefault(x=>x.DisplayableObject == cachePathControl) as DisplayObjectViewModelBase);
+                    isFirst = false;
+                }
             }, () =>
             {
                 curveObject.RemoveControlObject(cachePathControl);
