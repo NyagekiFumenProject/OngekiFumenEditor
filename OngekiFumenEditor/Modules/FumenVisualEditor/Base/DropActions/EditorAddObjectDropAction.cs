@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
         public void Drop(FumenVisualEditorViewModel editor, Point mousePosition)
         {
             var displayObject = GetDisplayObject();
+            var isFirst = true;
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
                 editor.AddObject(displayObject);
                 displayObject.MoveCanvas(mousePosition);
                 editor.Redraw(RedrawTarget.OngekiObjects);
+
+                if (isFirst)
+                {
+                    editor.NotifyObjectClicked(displayObject);
+                    isFirst = false;
+                }
             }, () =>
             {
                 editor.RemoveObject(displayObject);
