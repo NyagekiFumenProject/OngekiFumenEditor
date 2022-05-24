@@ -207,6 +207,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 TGridCalculator.ConvertTGridToY(endTGrid, editor),
                 0,
                 editor.Setting.BeatSplit,
+                editor.Setting.Scale,
                 240))
             {
                 var objViewModel = copiedObjectViewModel.Copy();
