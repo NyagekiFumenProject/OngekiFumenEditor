@@ -650,7 +650,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var hitInputElement = (view.Parent as FrameworkElement)?.InputHitTest(position);
                 var hitOngekiObjectViewModel = (hitInputElement as FrameworkElement)?.DataContext as DisplayObjectViewModelBase;
 
-
                 Log.LogDebug($"mousePos = ги{position.X:F0},{position.Y:F0}) , hitOngekiObjectViewModel = {hitOngekiObjectViewModel?.ReferenceOngekiObject}");
 
                 mouseDownHitObject = null;
@@ -841,8 +840,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var canvasX = pos.X;
 
             var tGrid = TGridCalculator.ConvertYToTGrid(canvasY, this);
+            TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
             var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
-            contentViewModel.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}]";
+            contentViewModel.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff")}]";
             CurrentCursorPosition = new(canvasX, canvasY);
         }
 
