@@ -46,19 +46,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             set
             {
-                this.RegisterOrUnregisterPropertyChangeEvent(editorProjectData?.EditorSetting, value?.EditorSetting, OnSettingPropertyChanged);
                 Set(ref editorProjectData, value);
                 RecalculateTotalDurationHeight();
                 Fumen = EditorProjectData.Fumen;
             }
         }
 
-        public EditorSetting Setting => EditorProjectData.EditorSetting;
-
         private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
+                case nameof(Properties.EditorGlobalSetting.IsEnableUndoActionSavingLimit):
+                case nameof(Properties.EditorGlobalSetting.UndoActionSavingLimit):
+                    UndoRedoManager.UndoCountLimit = Properties.EditorGlobalSetting.Default.IsEnableUndoActionSavingLimit ? Properties.EditorGlobalSetting.Default.UndoActionSavingLimit : null;
+                    break;
                 case nameof(EditorSetting.VerticalDisplayScale):
                     var beforeHeight = TotalDurationHeight;
                     RecalculateTotalDurationHeight();
@@ -217,10 +218,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public EditorSetting Setting { get; } = new EditorSetting();
+
         public FumenVisualEditorViewModel() : base()
         {
-            var editorSetting = Properties.EditorGlobalSetting.Default;
-            UndoRedoManager.UndoCountLimit = editorSetting.IsEnableUndoActionSavingLimit ? editorSetting.UndoActionSavingLimit : null;
+            Properties.EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
             Log.LogDebug($"UndoRedoManager.UndoCountLimit: {UndoRedoManager.UndoCountLimit}");
         }
 
