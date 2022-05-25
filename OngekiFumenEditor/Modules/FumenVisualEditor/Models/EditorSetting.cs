@@ -10,137 +10,148 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 {
     public class EditorSetting : PropertyChangedBase
     {
-        private double judgeLineOffsetY = 0;
+        private void Save()
+        {
+            Properties.EditorGlobalSetting.Default.Save();
+        }
+
         public double JudgeLineOffsetY
         {
-            get => judgeLineOffsetY;
-            set => Set(ref judgeLineOffsetY, value);
-        }
-
-        public string editorDisplayName;
-        public string EditorDisplayName
-        {
-            get
-            {
-                return
-                  editorDisplayName;
-            }
+            get => Properties.EditorGlobalSetting.Default.JudgeLineOffsetY;
             set
             {
-                editorDisplayName = value;
-                NotifyOfPropertyChange(() => EditorDisplayName);
+                Properties.EditorGlobalSetting.Default.JudgeLineOffsetY = value;
+                Save();
+                NotifyOfPropertyChange(() => JudgeLineOffsetY);
             }
         }
 
-        private bool disableXGridMagneticDock;
         /// <summary>
         /// 表示物件或者其他在X轴上移动时，是否可以自动吸附到最近的单位线上
         /// </summary>
         public bool DisableXGridMagneticDock
         {
-            get => disableXGridMagneticDock;
-            set => Set(ref disableXGridMagneticDock, value);
+            get => Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock;
+            set
+            {
+                Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock = value;
+                Save();
+                NotifyOfPropertyChange(() => DisableXGridMagneticDock);
+            }
         }
 
-        private bool forceMagneticDock = false;
         public bool ForceMagneticDock
         {
-            get => forceMagneticDock;
-            set => Set(ref forceMagneticDock, value);
+            get => Properties.EditorGlobalSetting.Default.ForceMagneticDock;
+            set
+            {
+                Properties.EditorGlobalSetting.Default.ForceMagneticDock = value;
+                Save();
+                NotifyOfPropertyChange(() => ForceMagneticDock);
+            }
         }
 
-        private bool forceTapHoldMagneticDockToLane = false;
         public bool ForceTapHoldMagneticDockToLane
         {
-            get => forceTapHoldMagneticDockToLane;
-            set => Set(ref forceTapHoldMagneticDockToLane, value);
+            get => Properties.EditorGlobalSetting.Default.ForceTapHoldMagneticDockToLane;
+            set
+            {
+                Properties.EditorGlobalSetting.Default.ForceTapHoldMagneticDockToLane = value;
+                Save();
+                NotifyOfPropertyChange(() => ForceTapHoldMagneticDockToLane);
+            }
         }
 
-        private bool disableTGridMagneticDock;
         /// <summary>
         /// 表示物件或者其他在时间轴上移动时，是否可以自动吸附到最近的单位线上
         /// </summary>
         public bool DisableTGridMagneticDock
         {
-            get => disableTGridMagneticDock;
-            set => Set(ref disableTGridMagneticDock, value);
+            get => Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock;
+            set
+            {
+                Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock = value;
+                Save();
+                NotifyOfPropertyChange(() => DisableTGridMagneticDock);
+            }
         }
 
-        private double xGridUnitSpace = 4;
         /// <summary>
         /// X轴上单位线间距大小
         /// </summary>
         public double XGridUnitSpace
         {
-            get => xGridUnitSpace;
-            set => Set(ref xGridUnitSpace, value);
+            get => Properties.EditorGlobalSetting.Default.XGridUnitSpace;
+            set
+            {
+                Properties.EditorGlobalSetting.Default.XGridUnitSpace = value;
+                Save();
+                NotifyOfPropertyChange(() => XGridUnitSpace);
+            }
         }
 
-        private int tGridUnitLength = 240;
         /// <summary>
         /// 时间轴上单位线间距大小
         /// </summary>
         public int TGridUnitLength
         {
-            get
-            {
-                return tGridUnitLength;
-            }
+            get => Properties.EditorGlobalSetting.Default.TGridUnitLength;
             set
             {
-                Set(ref tGridUnitLength, value);
+                Properties.EditorGlobalSetting.Default.TGridUnitLength = value;
+                Save();
+                NotifyOfPropertyChange(() => TGridUnitLength);
             }
         }
 
-        private int beatSplit = 1;
+
         /// <summary>
         /// 时间轴上单位线划分密度
         /// </summary>
         public int BeatSplit
         {
-            get
-            {
-                return beatSplit;
-            }
+            get => Properties.EditorGlobalSetting.Default.BeatSplit;
             set
             {
-                Set(ref beatSplit, value);
+                Properties.EditorGlobalSetting.Default.BeatSplit = value;
+                Save();
+                NotifyOfPropertyChange(() => BeatSplit);
             }
         }
 
-        private int xGridDisplayMaxUnit = 28;
         /// <summary>
         /// 横轴长度
         /// </summary>
         public int XGridDisplayMaxUnit
         {
-            get
-            {
-                return xGridDisplayMaxUnit;
-            }
+            get => Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit;
             set
             {
-                Set(ref xGridDisplayMaxUnit, value);
+                Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit = value;
+                Save();
+                NotifyOfPropertyChange(() => XGridDisplayMaxUnit);
             }
         }
 
-        private bool forceXGridMagneticDock = false;
         public bool ForceXGridMagneticDock
         {
-            get { return forceXGridMagneticDock; }
+            get => Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock;
             set
             {
-                Set(ref forceXGridMagneticDock, value);
+                Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value;
+                Save();
+                NotifyOfPropertyChange(() => ForceXGridMagneticDock);
             }
         }
 
-        private double scale = 1;
-        public double Scale
+        public double VerticalDisplayScale
         {
-            get { return scale; }
+            get => Properties.EditorGlobalSetting.Default.VerticalDisplayScale;
             set
             {
-                Set(ref scale, value);
+                Properties.EditorGlobalSetting.Default.VerticalDisplayScale = value;
+                Save();
+                NotifyOfPropertyChange(() => VerticalDisplayScale);
             }
         }
     }

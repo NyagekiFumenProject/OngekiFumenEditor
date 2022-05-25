@@ -29,13 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set => Set(ref audioDuration, value);
         }
 
-        private EditorSetting editorSetting = new();
-        [JsonInclude]
-        public EditorSetting EditorSetting
-        {
-            get => editorSetting;
-            set => Set(ref editorSetting, value);
-        }
+        public EditorSetting EditorSetting { get; } = new EditorSetting();
 
         private string fumenFilePath = default;
         [JsonInclude]

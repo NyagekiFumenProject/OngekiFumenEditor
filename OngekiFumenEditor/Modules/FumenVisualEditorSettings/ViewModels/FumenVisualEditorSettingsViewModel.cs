@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
             set
             {
                 Set(ref editor, value);
-                NotifyOfPropertyChange(() => Setting);
+                Setting = Editor?.Setting;
 
 
                 if (Editor is null)
@@ -52,7 +52,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
             }
         }
 
-        public EditorSetting Setting => Editor?.Setting;
+        private EditorSetting setting;
+        public EditorSetting Setting
+        {
+            get => setting;
+            set => Set(ref setting, value);
+        }
 
         public FumenVisualEditorSettingsViewModel()
         {
@@ -70,7 +75,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
         private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FumenVisualEditorViewModel.Setting))
-                NotifyOfPropertyChange(() => Setting);
+            {
+                Setting = Editor?.Setting;
+            }
         }
 
         public void OnSliderValueChanged()

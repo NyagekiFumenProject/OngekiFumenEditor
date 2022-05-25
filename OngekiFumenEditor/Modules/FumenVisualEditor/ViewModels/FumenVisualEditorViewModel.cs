@@ -46,32 +46,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             set
             {
+                this.RegisterOrUnregisterPropertyChangeEvent(editorProjectData?.EditorSetting, value?.EditorSetting, OnSettingPropertyChanged);
                 Set(ref editorProjectData, value);
                 RecalculateTotalDurationHeight();
-                Setting = EditorProjectData.EditorSetting;
                 Fumen = EditorProjectData.Fumen;
             }
         }
 
-        public EditorSetting Setting
-        {
-            get
-            {
-                return EditorProjectData.EditorSetting;
-            }
-            set
-            {
-                this.RegisterOrUnregisterPropertyChangeEvent(EditorProjectData.EditorSetting, value, OnSettingPropertyChanged);
-                EditorProjectData.EditorSetting = value;
-                NotifyOfPropertyChange(() => Setting);
-            }
-        }
+        public EditorSetting Setting => EditorProjectData.EditorSetting;
 
         private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
-                case nameof(EditorSetting.Scale):
+                case nameof(EditorSetting.VerticalDisplayScale):
                     var beforeHeight = TotalDurationHeight;
                     RecalculateTotalDurationHeight();
                     var offset = TotalDurationHeight - beforeHeight;
@@ -89,10 +77,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 case nameof(EditorSetting.BeatSplit):
                     //case nameof(EditorSetting.BaseLineY):
                     Redraw(RedrawTarget.TGridUnitLines | RedrawTarget.ScrollBar);
-                    break;
-                case nameof(EditorSetting.EditorDisplayName):
-                    if (IoC.Get<WindowTitleHelper>() is WindowTitleHelper title)
-                        title.TitleContent = base.DisplayName;
                     break;
                 case nameof(EditorSetting.XGridDisplayMaxUnit):
                     ClearDisplayingObjectCache();

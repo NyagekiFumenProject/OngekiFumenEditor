@@ -70,5 +70,137 @@ namespace OngekiFumenEditor.Properties {
                 this["IsEnableUndoActionSavingLimit"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public double JudgeLineOffsetY {
+            get {
+                return ((double)(this["JudgeLineOffsetY"]));
+            }
+            set {
+                this["JudgeLineOffsetY"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DisableXGridMagneticDock {
+            get {
+                return ((bool)(this["DisableXGridMagneticDock"]));
+            }
+            set {
+                this["DisableXGridMagneticDock"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ForceMagneticDock {
+            get {
+                return ((bool)(this["ForceMagneticDock"]));
+            }
+            set {
+                this["ForceMagneticDock"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ForceTapHoldMagneticDockToLane {
+            get {
+                return ((bool)(this["ForceTapHoldMagneticDockToLane"]));
+            }
+            set {
+                this["ForceTapHoldMagneticDockToLane"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DisableTGridMagneticDock {
+            get {
+                return ((bool)(this["DisableTGridMagneticDock"]));
+            }
+            set {
+                this["DisableTGridMagneticDock"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public double XGridUnitSpace {
+            get {
+                return ((double)(this["XGridUnitSpace"]));
+            }
+            set {
+                this["XGridUnitSpace"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("240")]
+        public int TGridUnitLength {
+            get {
+                return ((int)(this["TGridUnitLength"]));
+            }
+            set {
+                this["TGridUnitLength"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int BeatSplit {
+            get {
+                return ((int)(this["BeatSplit"]));
+            }
+            set {
+                this["BeatSplit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("24")]
+        public int XGridDisplayMaxUnit {
+            get {
+                return ((int)(this["XGridDisplayMaxUnit"]));
+            }
+            set {
+                this["XGridDisplayMaxUnit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ForceXGridMagneticDock {
+            get {
+                return ((bool)(this["ForceXGridMagneticDock"]));
+            }
+            set {
+                this["ForceXGridMagneticDock"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double VerticalDisplayScale {
+            get {
+                return ((double)(this["VerticalDisplayScale"]));
+            }
+            set {
+                this["VerticalDisplayScale"] = value;
+            }
+        }
     }
 }

@@ -141,7 +141,7 @@
                     VerticalAlignment="Center"
                     Foreground="{DynamicResource EnvironmentToolWindowText}">
                     水平显示缩放:<LineBreak>
-                    </LineBreak><Run Text="{Binding Setting.Scale}">
+                    </LineBreak><Run Text="{Binding Setting.VerticalDisplayScale}">
                     </Run>
                 </TextBlock>
                 <gemini:SliderEx
@@ -153,7 +153,7 @@
                     Maximum="3"
                     Minimum="0.1"
                     TickFrequency="0.1"
-                    Value="{Binding Setting.Scale, Mode=TwoWay}">
+                    Value="{Binding Setting.VerticalDisplayScale, Mode=TwoWay}">
                 </gemini:SliderEx>
             </Grid>
         </StackPanel>
