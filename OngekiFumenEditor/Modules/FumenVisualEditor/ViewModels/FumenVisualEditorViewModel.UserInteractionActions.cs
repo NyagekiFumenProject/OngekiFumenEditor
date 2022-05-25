@@ -711,7 +711,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             //const double dragDist = 0.7;
             const double trigPrecent = 0.15;
-            const double autoScrollSpeed = 70;
+            const double autoScrollSpeed = 7;
 
             var offsetYAcc = 0d;
             if (rp >= (1 - trigPrecent) && dragOutBound)
