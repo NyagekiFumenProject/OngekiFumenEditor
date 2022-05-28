@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             bpl.ShooterValue = new(map["Shooter"]);
             bpl.TargetValue = new(map["Target"]);
             bpl.SizeValue = new(map["Size"]);
-            bpl.SizeValue = new(map["Size"]);
+            bpl.TypeValue = new(map["Type"]);
             bpl.Speed = float.Parse(map["Speed"]);
             bpl.PlaceOffset = int.Parse(map["PlaceOffset"]);
 
