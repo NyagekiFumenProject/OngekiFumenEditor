@@ -20,10 +20,12 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Converters
                     .Select(x => new
                     {
                         Name = x.Name,
-                        Value = x.GetValue(null)
+                        Value = x.GetValue(null) as string
                     });
 
-            var r = e.FirstOrDefault(x => x.Value == value).Name;
+            var valueStr = value is FadeStringEnum k ? k.Value : value?.ToString();
+
+            var r = e.FirstOrDefault(x => x.Value == valueStr).Name;
             return r;
         }
 
