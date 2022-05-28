@@ -149,6 +149,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             var stepGrid = new GridOffset(0, lengthPerBeat);
 
             var curTGrid = x.TGrid + stepGrid;
+            if (x.HoldEnd is null)
+                yield break;
             while (curTGrid < x.HoldEnd.TGrid)
             {
                 yield return curTGrid;
