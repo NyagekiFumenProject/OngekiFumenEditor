@@ -17,13 +17,18 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
         public void ParseAndApply(OngekiFumen fumen, string[] seg)
         {
             //$"Hold:{hold.ReferenceLaneStrId},{hold.IsCritical}:(X[{hold.XGrid.Unit},{hold.XGrid.Grid}],T[{hold.TGrid.Unit},{hold.TGrid.Grid}]) -> (X[{end.XGrid.Unit},{end.XGrid.Grid}],T[{end.TGrid.Unit},{end.TGrid.Grid}])"
-            var hold = new Hold();
+
             var data = seg[1].Split(":");
 
             var commData = data[0].Split(",");
             var refRecordId = int.Parse(commData[0]);
+            var refLane = fumen.Lanes.FirstOrDefault(x => x.RecordId == refRecordId);
+            if (refLane is null)
+                throw new Exception($"Can't parse line as Hold/WallHold because reference lane ({refRecordId}) is not found.");
+
+            var hold = refLane.IsWallLane ? new WallHold() : new Hold();
+            hold.ReferenceLaneStart = refLane;
             hold.IsCritical = bool.Parse(commData[1]);
-            hold.ReferenceLaneStart = fumen.Lanes.FirstOrDefault(x => x.RecordId == refRecordId);
 
             var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
             var notes = maps.Select(x => x.d).ToArray();
