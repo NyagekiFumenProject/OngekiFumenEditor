@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
 
             if (notes.Length > 1)
             {
-                var end = new HoldEnd();
+                var end = refLane.IsWallLane ? new WallHoldEnd() : new HoldEnd();
                 end.TGrid = notes[1]["T"].ParseToTGrid();
                 end.XGrid = notes[1]["X"].ParseToXGrid();
 
