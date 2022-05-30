@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             using var d = data[1].GetValuesMapWithDisposable(out var map);
             bullet.TGrid = map["T"].ParseToTGrid();
             bullet.XGrid = map["X"].ParseToXGrid();
-            bullet.BulletDamageTypeValue = new(map["D"]);
+            bullet.BulletDamageTypeValue = Enum.Parse<Bullet.BulletDamageType>(map["D"]);
 
             fumen.AddObject(bullet);
         }

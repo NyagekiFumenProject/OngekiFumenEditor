@@ -11,7 +11,7 @@
         <Grid.Style>
             <Style TargetType="Grid">
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="CIR">
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Circle">
                         <Setter Property="Width" Value="40" />
                         <Setter Property="RenderTransform">
                             <Setter.Value>
@@ -20,7 +20,7 @@
                         </Setter>
                     </DataTrigger>
 
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NDL">
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Needle">
                         <Setter Property="Width" Value="30" />
                         <Setter Property="RenderTransform">
                             <Setter.Value>
@@ -29,7 +29,7 @@
                         </Setter>
                     </DataTrigger>
 
-                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="SQR">
+                    <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Square">
                         <Setter Property="Width" Value="30" />
                         <Setter Property="RenderTransform">
                             <Setter.Value>
@@ -46,24 +46,24 @@
                     <Style.Triggers>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="CIR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Normal" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Circle" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_red.png" />
                             <Setter Property="Width" Value="40" />
                         </MultiDataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="CIR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Hard" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Circle" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_pur.png" />
                             <Setter Property="Width" Value="40" />
                         </MultiDataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="CIR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Danger" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Circle" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Width" Value="40" />
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/nt_mine_blk.png" />
@@ -71,24 +71,24 @@
 
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NDL" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Normal" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Needle" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Width" Value="30" />
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/tri_bullet0.png" />
                         </MultiDataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NDL" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Hard" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Needle" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Width" Value="30" />
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/tri_bullet1.png" />
                         </MultiDataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NDL" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Danger" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Needle" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Width" Value="30" />
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/tri_bullet2.png" />
@@ -96,24 +96,24 @@
 
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="NML" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="SQR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Normal" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Square" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Width" Value="30" />
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/sqrt_bullet0.png" />
                         </MultiDataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="STR" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="SQR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Hard" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Square" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Width" Value="30" />
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/sqrt_bullet1.png" />
                         </MultiDataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="DNG" />
-                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="SQR" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.BulletDamageTypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Danger" />
+                                <Condition Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TypeValue, Converter={StaticResource EnumToStringConverter}}" Value="Square" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Width" Value="30" />
                             <Setter Property="Source" Value="/Modules/FumenVisualEditor/Views/OngekiObjects/sqrt_bullet2.png" />
@@ -131,11 +131,11 @@
             <TextBlock.Style>
                 <Style TargetType="TextBlock">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TargetValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="PLR">
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TargetValue, Converter={StaticResource EnumToStringConverter}}" Value="Player">
                             <Setter Property="TextDecorations" Value="Baseline">
                             </Setter>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.ShooterValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="UPS">
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.ShooterValue, Converter={StaticResource EnumToStringConverter}}" Value="TargetHead">
                             <Setter Property="TextDecorations" Value="OverLine">
                             </Setter>
                         </DataTrigger>

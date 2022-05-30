@@ -18,8 +18,8 @@
             </valueconverters:ReverseBoolToVisibilityConverter>
             <converters:CurvePathControlVisibilityConverter x:Key="CurvePathControlVisibilityConverter">
             </converters:CurvePathControlVisibilityConverter>
-            <converters:FadeStringEnumToStringConverter x:Key="FadeStringEnumToStringConverter">
-            </converters:FadeStringEnumToStringConverter>
+            <valueconverters:EnumToStringConverter x:Key="EnumToStringConverter">
+            </valueconverters:EnumToStringConverter>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <local:AppBootstrapper x:Key="bootstrapper" />

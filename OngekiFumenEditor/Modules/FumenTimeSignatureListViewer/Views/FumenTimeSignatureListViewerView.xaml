@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
-    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Converters"
     xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Converters"
     xmlns:converters2="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"

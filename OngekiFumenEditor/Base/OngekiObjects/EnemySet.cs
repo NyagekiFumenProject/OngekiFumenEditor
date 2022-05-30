@@ -11,18 +11,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     {
         public override Type ModelViewType => typeof(EnemySetViewModel);
 
-        public class WaveChangeConst : FadeStringEnum
+        public enum WaveChangeConst
         {
-            public static WaveChangeConst Wave1 { get; } = new WaveChangeConst("WAVE1");
-
-            public static WaveChangeConst Wave2 { get; } = new WaveChangeConst("WAVE2");
-
-            public static WaveChangeConst Boss { get; } = new WaveChangeConst("BOSS");
-
-            public WaveChangeConst(string value) : base(value)
-            {
-
-            }
+            Wave1 = 0,
+            Wave2 = 1,
+            Boss = 2,
         }
 
         private WaveChangeConst tagTblValue = WaveChangeConst.Boss;

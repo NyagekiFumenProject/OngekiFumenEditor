@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             var eme = new EnemySet();
             var data = seg[1].Split(":");
 
-            eme.TagTblValue = new (data[0]);
+            eme.TagTblValue = Enum.Parse<EnemySet.WaveChangeConst>(data[0]);
             eme.TGrid = data[1].ParseToTGrid();
 
             fumen.AddObject(eme);

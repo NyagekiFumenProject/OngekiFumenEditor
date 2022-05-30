@@ -21,11 +21,11 @@
             <TextBlock.Style>
                 <Style TargetType="TextBlock">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TargetValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="PLR">
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.TargetValue, Converter={StaticResource EnumToStringConverter}}" Value="Player">
                             <Setter Property="TextDecorations" Value="Baseline">
                             </Setter>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.ShooterValue, Converter={StaticResource FadeStringEnumToStringConverter}}" Value="UPS">
+                        <DataTrigger Binding="{Binding ReferenceOngekiObject.ReferenceBulletPallete.ShooterValue, Converter={StaticResource EnumToStringConverter}}" Value="TargetHead">
                             <Setter Property="TextDecorations" Value="OverLine">
                             </Setter>
                         </DataTrigger>

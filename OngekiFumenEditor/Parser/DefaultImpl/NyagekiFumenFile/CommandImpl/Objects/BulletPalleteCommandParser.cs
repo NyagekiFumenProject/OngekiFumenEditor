@@ -6,6 +6,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Objects
 {
@@ -22,10 +23,10 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             using var d = data[1].GetValuesMapWithDisposable(out var map);
 
             bpl.StrID = data[0].Trim();
-            bpl.ShooterValue = new(map["Shooter"]);
-            bpl.TargetValue = new(map["Target"]);
-            bpl.SizeValue = new(map["Size"]);
-            bpl.TypeValue = new(map["Type"]);
+            bpl.ShooterValue = Enum.Parse<Shooter>(map["Shooter"]);
+            bpl.TargetValue = Enum.Parse<Target>(map["Target"]);
+            bpl.SizeValue = Enum.Parse<BulletSize>(map["Size"]);
+            bpl.TypeValue = Enum.Parse<BulletType>(map["Type"]);
             bpl.Speed = float.Parse(map["Speed"]);
             bpl.PlaceOffset = int.Parse(map["PlaceOffset"]);
 

@@ -20,6 +20,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        public enum BulletDamageType
+        {
+            Normal = 0,
+            Hard = 1,
+            Danger = 2
+        }
+
+        /*
         public class BulletDamageType : FadeStringEnum
         {
             public BulletDamageType(string value) : base(value)
@@ -40,6 +48,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             /// </summary>
             public static BulletDamageType Danger { get; } = new BulletDamageType("DNG");
         }
+        */
 
         private BulletPalleteAuxiliaryLine line;
 
@@ -71,7 +80,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public const string CommandName = "BLT";
 
-        public override string ToString() => $"{base.ToString()} Pallete:({ReferenceBulletPallete})";
+        public override string ToString() => $"{base.ToString()} Pallete:({ReferenceBulletPallete}) DamageType:({BulletDamageTypeValue})";
 
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {

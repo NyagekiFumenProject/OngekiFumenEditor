@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
-    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -12,10 +11,6 @@
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <converters:FadeStringEnumValuesConverter x:Key="FadeStringEnumValuesConverter">
-        </converters:FadeStringEnumValuesConverter>
-    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -71,7 +66,7 @@
                     <GridViewColumn Width="100" Header="发射来源">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding ShooterValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                <ComboBox SelectedValue="{Binding ShooterValue, Converter={StaticResource EnumToStringConverter}}">
                                     <system:String>TargetHead</system:String>
                                     <system:String>Enemy</system:String>
                                     <system:String>Center</system:String>
@@ -92,7 +87,7 @@
                     <GridViewColumn Width="100" Header="发射目标">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding TargetValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                <ComboBox SelectedValue="{Binding TargetValue, Converter={StaticResource EnumToStringConverter}}">
                                     <system:String>Player</system:String>
                                     <system:String>FixField</system:String>
                                 </ComboBox>
@@ -112,7 +107,7 @@
                     <GridViewColumn Width="100" Header="子弹大小">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding SizeValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                <ComboBox SelectedValue="{Binding SizeValue, Converter={StaticResource EnumToStringConverter}}">
                                     <system:String>Normal</system:String>
                                     <system:String>Large</system:String>
                                 </ComboBox>
@@ -123,7 +118,7 @@
                     <GridViewColumn Width="75" Header="子弹形状">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding TypeValue, Converter={StaticResource FadeStringEnumValuesConverter}}">
+                                <ComboBox SelectedValue="{Binding TypeValue, Converter={StaticResource EnumToStringConverter}}">
                                     <system:String>Circle</system:String>
                                     <system:String>Needle</system:String>
                                     <system:String>Square</system:String>
