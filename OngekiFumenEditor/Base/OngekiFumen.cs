@@ -182,7 +182,10 @@ namespace OngekiFumenEditor.Base
                 return;
             }
 
-            obj.PropertyChanged += OnOngekiObjectModify;
+            if (obj is ConnectableStartObject start)
+                start.ConnectableObjectsPropertyChanged += OnOngekiObjectModify;
+            else
+                obj.PropertyChanged += OnOngekiObjectModify;
         }
 
         public void RemoveObject(OngekiObjectBase obj)
@@ -265,7 +268,10 @@ namespace OngekiFumenEditor.Base
                 return;
             }
 
-            obj.PropertyChanged -= OnOngekiObjectModify;
+            if (obj is ConnectableStartObject start)
+                start.ConnectableObjectsPropertyChanged -= OnOngekiObjectModify;
+            else
+                obj.PropertyChanged -= OnOngekiObjectModify;
         }
 
         private void OnOngekiObjectModify(object sender, PropertyChangedEventArgs e)
@@ -322,10 +328,10 @@ namespace OngekiFumenEditor.Base
             Soflan f => Soflans.Contains(f),
             Soflan.SoflanEndIndicator f => Soflans.Any(x => x.EndIndicator == f),
             LaneStartBase f => Lanes.Contains(f),
-            (LaneNextBase or LaneEndBase) => Lanes.SelectMany(x=>x.Children).Any(x=>x == obj),
+            (LaneNextBase or LaneEndBase) => Lanes.SelectMany(x => x.Children).Any(x => x == obj),
             BeamStart f => Beams.Contains(f),
             (BeamEnd or BeamNext) => Beams.SelectMany(x => x.Children).Any(x => x == obj),
-            LaneCurvePathControlObject f => Beams.SelectMany(x => x.Children).SelectMany(x=>x.PathControls).Contains(f),
+            LaneCurvePathControlObject f => Beams.SelectMany(x => x.Children).SelectMany(x => x.PathControls).Contains(f),
             _ => false
         };
 
