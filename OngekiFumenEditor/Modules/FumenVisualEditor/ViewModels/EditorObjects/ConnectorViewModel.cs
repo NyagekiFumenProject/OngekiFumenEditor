@@ -68,6 +68,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                     break;
                 case nameof(TGrid):
                 case nameof(XGrid):
+                case nameof(TGrid.Grid):
+                case nameof(TGrid.Unit):
                 case nameof(ConnectableChildObjectBase.CurvePrecision):
                 case nameof(ConnectableChildObjectBase.PathControls):
                     RebuildLines();
