@@ -32,13 +32,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         private void OnObjectChanged()
         {
             PropertyInfoWrappers.Clear();
-            var propertyWrappers = (ongekiObject?.GetType()
+            var propertyWrappers = (OngekiObject?.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 ?? Array.Empty<PropertyInfo>())?
                 .Where(x => x.CanWrite && x.CanRead)
                 .Select(x => new UndoablePropertyInfoWrapper(new PropertyInfoWrapper()
                 {
-                    OwnerObject = ongekiObject,
+                    OwnerObject = OngekiObject,
                     PropertyInfo = x
                 }, referenceEditor)).OrderBy(x => x.DisplayPropertyName).ToArray();
 
@@ -46,6 +46,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             {
                 PropertyInfoWrappers.Add(wrapper);
             }
+
+            UpdateDisplayName();
+        }
+
+        private void UpdateDisplayName()
+        {
+            DisplayName = "物件属性" + (OngekiObject is null ? string.Empty : $" - {OngekiObject.Name}");
         }
 
         public void SetCurrentOngekiObject(OngekiObjectBase ongekiObject, FumenVisualEditorViewModel referenceEditor)
@@ -59,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public FumenObjectPropertyBrowserViewModel()
         {
-            DisplayName = "物件属性";
+            UpdateDisplayName();
         }
     }
 }
