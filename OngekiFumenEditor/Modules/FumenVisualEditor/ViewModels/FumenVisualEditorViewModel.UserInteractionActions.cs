@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -650,7 +651,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var hitInputElement = (view.Parent as FrameworkElement)?.InputHitTest(position);
                 var hitOngekiObjectViewModel = (hitInputElement as FrameworkElement)?.DataContext as DisplayObjectViewModelBase;
 
-                Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObjectViewModel = {hitOngekiObjectViewModel?.ReferenceOngekiObject}");
+                //Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObjectViewModel = {hitOngekiObjectViewModel?.ReferenceOngekiObject}");
 
                 mouseDownHitObject = null;
                 mouseDownHitObjectPosition = default;
@@ -768,6 +769,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             var curBrowserObj = objBrowser.OngekiObject;
+            expects = expects ?? new DisplayObjectViewModelBase[0];
 
             if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
             {
@@ -780,30 +782,38 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public void NotifyObjectClicked(DisplayObjectViewModelBase obj)
+        public void NotifyObjectClicked(OngekiObjectBase obj)
         {
+            if (obj is not ISelectableObject selectable)
+                return;
+
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             var curBrowserObj = objBrowser.OngekiObject;
             var count = SelectObjects.Take(2).Count();
-            var first = SelectObjects.FirstOrDefault();
+            var first = SelectObjects.FirstOrDefault()?.ReferenceOngekiObject as ISelectableObject;
+            var refViewModel = EditorViewModels.FirstOrDefault(x=>x.DisplayableObject == obj) as DisplayObjectViewModelBase;
 
             if ((count > 1) || (count == 1 && first != obj)) //比如你目前有多个已选择的，但你单点了一个
             {
-                TryCancelAllObjectSelecting(obj);
-                obj.IsSelected = true;
-                objBrowser.SetCurrentOngekiObject(obj.ReferenceOngekiObject, this);
+                TryCancelAllObjectSelecting(refViewModel);
+                selectable.IsSelected = true;
+                objBrowser.SetCurrentOngekiObject(obj, this);
             }
             else
             {
-                obj.IsSelected = !obj.IsSelected;
-                if (obj.IsSelected)
-                    objBrowser.SetCurrentOngekiObject(obj.ReferenceOngekiObject, this);
-                else if (obj.ReferenceOngekiObject == curBrowserObj)
+                selectable.IsSelected = !selectable.IsSelected;
+                if (selectable.IsSelected)
+                    objBrowser.SetCurrentOngekiObject(obj, this);
+                else if (obj == curBrowserObj)
                     objBrowser.SetCurrentOngekiObject(null, this);
-                TryCancelAllObjectSelecting(obj);
+                TryCancelAllObjectSelecting(refViewModel);
             }
         }
 
+        public void NotifyObjectClicked(DisplayObjectViewModelBase obj)
+        {
+            NotifyObjectClicked(obj.ReferenceOngekiObject);
+        }
 
         #endregion
 
