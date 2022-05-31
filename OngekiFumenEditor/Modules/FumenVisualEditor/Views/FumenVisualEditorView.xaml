@@ -12,7 +12,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
-    cal:Message.Attach="     [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];     [Key Space] = [Action KeyboardAction_PlayOrPause];     [Key Q] = [Action KeyboardAction_HideOrShow]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];    "
+    cal:Message.Attach="     [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];      [Key Q] = [Action KeyboardAction_HideOrShow]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];    "
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
