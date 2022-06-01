@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
     public class FastPickRightLaneCommandDefinition : FastPickLaneCommandDefinition<LaneRightStart>
     {
         [Export]
-        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<FastPickRightLaneCommandDefinition>(new(Key.D1, ModifierKeys.Alt));
+        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<FastPickRightLaneCommandDefinition>(new(Key.D3, ModifierKeys.Alt));
     }
 
     [CommandDefinition]
@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
     public class FastPickLeftLaneCommandDefinition : FastPickLaneCommandDefinition<LaneLeftStart>
     {
         [Export]
-        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<FastPickLeftLaneCommandDefinition>(new(Key.D3, ModifierKeys.Alt));
+        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<FastPickLeftLaneCommandDefinition>(new(Key.D1, ModifierKeys.Alt));
     }
 
     [CommandDefinition]
