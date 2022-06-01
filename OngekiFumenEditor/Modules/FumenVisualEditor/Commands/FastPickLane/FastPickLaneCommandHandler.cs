@@ -8,6 +8,7 @@ using Gemini.Framework.Threading;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -33,6 +34,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
             return TaskUtility.Completed;
         }
     }
+
+    [CommandHandler]
+    public class FastPickWallLeftLaneCommandHandler : FastPickLaneCommandHandler<WallLeftStart, FastPickWallLeftLaneCommandDefinition>
+    { }
+
+    [CommandHandler]
+    public class FastPickWallRightLaneCommandHandler : FastPickLaneCommandHandler<WallRightStart, FastPickWallRightLaneCommandDefinition>
+    { }
 
     [CommandHandler]
     public class FastPickRightLaneCommandHandler : FastPickLaneCommandHandler<LaneRightStart, FastPickRightLaneCommandDefinition>
