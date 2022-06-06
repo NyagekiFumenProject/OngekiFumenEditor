@@ -45,87 +45,16 @@
                 </TextBlock>
             </StackPanel>
 
-            <StackPanel
+            <Grid
                 Grid.Row="1"
                 Margin="10,0,10,10"
                 VerticalAlignment="Center"
-                IsEnabled="{Binding IsAudioButtonEnabled}"
-                Orientation="Horizontal">
-                <Button Padding="30,5,30,5" cal:Message.Attach="[Event Click] = [Action OnPlayOrPauseButtonClicked()];">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding AudioPlayer.IsPlaying}" Value="True">
-                                    <Setter Property="Content" Value="暂停" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding AudioPlayer.IsPlaying}" Value="{x:Null}">
-                                    <Setter Property="Content" Value="播放" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding AudioPlayer.IsPlaying}" Value="False">
-                                    <Setter Property="Content" Value="播放" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button
-                    Margin="10,0,0,0"
-                    Padding="30,5,30,5"
-                    cal:Message.Attach="[Event Click] = [Action OnStopButtonClicked()];"
-                    Content="停止" />
-                <Button
-                    Margin="10,0,0,0"
-                    Padding="30,5,30,5"
-                    cal:Message.Attach="[Event Click] = [Action OnJumpButtonClicked()];"
-                    Content="跳转" />
-            </StackPanel>
+                IsEnabled="{Binding IsAudioButtonEnabled}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="1">
-                <StackPanel
-                    Margin="10,0,10,10"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">音乐音量</TextBlock>
-                    <Slider
-                        Width="150"
-                        Margin="0,0,0,5"
-                        VerticalAlignment="Center"
-                        VerticalContentAlignment="Center"
-                        LargeChange="0.2"
-                        Maximum="1"
-                        SmallChange="0.2"
-                        Value="{Binding AudioPlayer.Volume}">
-                    </Slider>
-                    <Button
-                        Padding="30,5,30,5"
-                        cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
-                        Content="加载音频文件"
-                        Visibility="Collapsed" />
-                </StackPanel>
-                <StackPanel
-                    Margin="10,0,10,10"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">音效音量</TextBlock>
-                    <Slider
-                        Width="150"
-                        Margin="0,0,0,5"
-                        VerticalAlignment="Center"
-                        VerticalContentAlignment="Center"
-                        LargeChange="0.2"
-                        Maximum="1"
-                        SmallChange="0.2"
-                        Value="{Binding SoundVolume}">
-                    </Slider>
-                    <Button
-                        Padding="30,5,30,5"
-                        cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
-                        Content="加载音频文件"
-                        Visibility="Collapsed" />
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel Grid.Row="2">
                 <GroupBox Header="音效开关控制">
                     <WrapPanel>
                         <WrapPanel.Resources>
@@ -152,6 +81,49 @@
                         <CheckBox Content="HoldEnd" IsChecked="{Binding SoundControls[15]}" />
                     </WrapPanel>
                 </GroupBox>
+
+
+                <StackPanel Grid.Column="1" Margin="10">
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center">音乐音量</TextBlock>
+                        <Slider
+                            Width="150"
+                            Margin="0,0,0,5"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            LargeChange="0.2"
+                            Maximum="1"
+                            SmallChange="0.2"
+                            Value="{Binding AudioPlayer.Volume}">
+                        </Slider>
+                        <Button
+                            Padding="30,5,30,5"
+                            cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
+                            Content="加载音频文件"
+                            Visibility="Collapsed" />
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center">音效音量</TextBlock>
+                        <Slider
+                            Width="150"
+                            Margin="0,0,0,5"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            LargeChange="0.2"
+                            Maximum="1"
+                            SmallChange="0.2"
+                            Value="{Binding SoundVolume}">
+                        </Slider>
+                        <Button
+                            Padding="30,5,30,5"
+                            cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
+                            Content="加载音频文件"
+                            Visibility="Collapsed" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="2">
             </StackPanel>
         </Grid>
     </ScrollViewer>
