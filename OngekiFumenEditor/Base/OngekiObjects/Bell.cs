@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             base.Copy(fromObj, fumen);
 
-            if (fromObj is not Bullet from)
+            if (fromObj is not Bell from)
                 return;
 
             ReferenceBulletPallete = from.ReferenceBulletPallete;

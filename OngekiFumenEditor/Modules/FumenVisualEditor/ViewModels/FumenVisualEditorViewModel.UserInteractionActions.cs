@@ -622,6 +622,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     if (newObjViewModel.ReferenceOngekiObject is ConnectableChildObjectBase childObject)
                     {
+                        //todo there is a bug.
                         (copySouceObj.ReferenceOngekiObject as ConnectableChildObjectBase)?.ReferenceStartObject.AddChildObject(childObject);
                     }
                     else
