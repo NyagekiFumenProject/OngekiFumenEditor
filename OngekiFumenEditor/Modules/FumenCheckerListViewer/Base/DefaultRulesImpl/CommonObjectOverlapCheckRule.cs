@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,11 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 {
                     yield return new CommonCheckResult()
                     {
-                        Severity = RuleSeverity.Error,
+                        Severity = conflict.FirstOrDefault() switch
+                        {
+                            Bell => RuleSeverity.Problem,
+                            _ => RuleSeverity.Error
+                        },
                         Description = $"多个同类{conflict.FirstOrDefault().IDShortName}物件重叠",
                         LocationDescription = $"{conflict.Key.XGrid} {conflict.Key.TGrid}",
                         NavigateTGridLocation = conflict.Key.TGrid,

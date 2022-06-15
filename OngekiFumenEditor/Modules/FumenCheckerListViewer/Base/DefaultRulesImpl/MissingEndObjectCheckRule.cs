@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                         Severity = RuleSeverity.Error,
                         Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
                         LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
-                        NavigateTGridLocation = missingObject.TGrid,
+                        NavigateTGridLocation = missingObject.MaxTGrid,
                         RuleName = RuleName,
                     };
                 }
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                         Severity = RuleSeverity.Error,
                         Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
                         LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
-                        NavigateTGridLocation = missingObject.TGrid,
+                        NavigateTGridLocation = missingObject.MaxTGrid,
                         RuleName = RuleName,
                     };
                 }
