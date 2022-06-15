@@ -52,8 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
                 if (closestLaneObject.startObject is not null && closestLaneObject.Item1 < magneticDockDistance)
                 {
                     relativePoint.X = closestLaneObject.Value;
-                    var tap = ReferenceOngekiObject as T;
-                    tap.ReferenceLaneStart = closestLaneObject.startObject;
+                    ((T)ReferenceOngekiObject).ReferenceLaneStart = closestLaneObject.startObject;
                     //Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
 
                     enableMoveTo = true;
@@ -63,6 +62,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
             //如果ForceTapHoldMagneticDockToLane=true,则不需要这里钦定位置
             if (enableMoveTo)
                 base.MoveCanvas(relativePoint);
+        }
+
+        public override double? CheckAndAdjustX(double x)
+        {
+            if (((T)ReferenceOngekiObject).ReferenceLaneStart is ConnectableStartObject start)
+                return x;
+            return base.CheckAndAdjustX(x);
         }
 
         protected override void OnOngekiObjectPropChanged(object sender, PropertyChangedEventArgs arg)
