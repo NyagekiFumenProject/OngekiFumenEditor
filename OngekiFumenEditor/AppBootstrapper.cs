@@ -121,6 +121,7 @@ namespace OngekiFumenEditor
         protected async override void OnStartup(object sender, StartupEventArgs e)
         {
             base.OnStartup(sender, e);
+            Log.LogInfo($"Application verison : {GetType().Assembly.GetName().Version} , Product Version+CommitHash : {FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).ProductVersion}");
 
             IoC.Get<IShell>().ToolBars.Visible = true;
             IoC.Get<WindowTitleHelper>().TitleContent = "";

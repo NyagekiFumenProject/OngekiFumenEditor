@@ -4,7 +4,6 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Version>0.4.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -58,6 +57,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="NAudio" Version="2.0.1" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.5.107">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="OpenTK" Version="4.3.0" />
     <PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.2.0" />
@@ -410,6 +413,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Kernel\MiscMenu\Commands\About\" />
     <Folder Include="Modules\FumenBulletPalleteListViewer\Converters\" />
   </ItemGroup>
 
