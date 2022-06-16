@@ -21,6 +21,8 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 
                 foreach (var conflict in objs.GroupBy(x => (x.TGrid, x.XGrid)).Where(x => x.Count() > 1))
                 {
+                    if (conflict.FirstOrDefault() is Bullet)
+                        continue;
                     yield return new CommonCheckResult()
                     {
                         Severity = conflict.FirstOrDefault() switch
