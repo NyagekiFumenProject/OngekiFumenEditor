@@ -7,7 +7,7 @@ using Gemini.Framework.Services;
 using Gemini.Framework.Threading;
 using OngekiFumenEditor.Utils;
 
-namespace OngekiFumenEditor.Kernel.MiscMenu.Commands
+namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.CallFullGC
 {
     [CommandHandler]
     public class CallFullGCCommandHandler : CommandHandlerBase<CallFullGCCommandDefinition>

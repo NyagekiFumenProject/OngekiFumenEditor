@@ -413,7 +413,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Kernel\MiscMenu\Commands\About\" />
     <Folder Include="Modules\FumenBulletPalleteListViewer\Converters\" />
   </ItemGroup>
 

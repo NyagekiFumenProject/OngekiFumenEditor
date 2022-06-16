@@ -1,11 +1,11 @@
 ﻿using Gemini.Framework.Commands;
 
-namespace OngekiFumenEditor.Kernel.MiscMenu.Commands
+namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.About
 {
     [CommandDefinition]
-    public class CallFullGCCommandDefinition : CommandDefinition
+    public class AboutCommandDefinition : CommandDefinition
     {
-        public const string CommandName = "File.CallFullGC";
+        public const string CommandName = "Help.About";
 
         public override string Name
         {
@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands
 
         public override string Text
         {
-            get { return "垃圾回收"; }
+            get { return "关于"; }
         }
 
         public override string ToolTip
