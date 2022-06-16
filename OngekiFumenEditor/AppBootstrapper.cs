@@ -118,10 +118,17 @@ namespace OngekiFumenEditor
             return base.SelectAssemblies();
         }
 
+        protected void LogBaseInfos()
+        {
+            Log.LogInfo($"Application verison : {GetType().Assembly.GetName().Version} , Product Version+CommitHash : {FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).ProductVersion}");
+            Log.LogInfo($"User current CultureInfo : {CultureInfo.CurrentCulture} , UI CultureInfo : {CultureInfo.CurrentUICulture}");
+        }
+
         protected async override void OnStartup(object sender, StartupEventArgs e)
         {
             base.OnStartup(sender, e);
-            Log.LogInfo($"Application verison : {GetType().Assembly.GetName().Version} , Product Version+CommitHash : {FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).ProductVersion}");
+            InitExceptionCatcher();
+            LogBaseInfos();
 
             IoC.Get<IShell>().ToolBars.Visible = true;
             IoC.Get<WindowTitleHelper>().TitleContent = "";
@@ -132,14 +139,28 @@ namespace OngekiFumenEditor
             logo.EndInit();
             IoC.Get<WindowTitleHelper>().Icon = logo;
 
-            //cultureInfo
-            Log.LogInfo($"User current CultureInfo : {CultureInfo.CurrentCulture} , UI CultureInfo : {CultureInfo.CurrentUICulture}");
-
             await InitKernels();
+            await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
 
             Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
+        }
 
-            await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
+        private void InitExceptionCatcher()
+        {
+            void LogException(object sender, Exception exception)
+            {
+                Log.LogError($"----------Exception Catcher----------\n" +
+                    $"Program notice a (unhandled) exception from object: {sender}({sender?.GetType().FullName}) \n" +
+                    $"Exception : {exception.Message} \n" +
+                    $"InnerException: {exception.InnerException?.Message} \n" +
+                    $"Stack : {exception.StackTrace}\n" +
+                    $"----------------------------");
+                FileLogOutput.WaitForWriteDone();
+            }
+
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) => LogException(sender, e.ExceptionObject as Exception);
+            Application.Current.DispatcherUnhandledException += (sender, e) => LogException(sender, e.Exception);
+            TaskScheduler.UnobservedTaskException += (sender, e) => LogException(sender, e.Exception);
         }
 
         protected override async void OnExit(object sender, EventArgs e)

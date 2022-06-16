@@ -49,6 +49,12 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
             writer = null;
         }
 
+        public static void WaitForWriteDone()
+        {
+            while (writing)
+                Thread.Sleep(0);
+        }
+
         public static void WriteLog(string content)
         {
             if (writer is null)
