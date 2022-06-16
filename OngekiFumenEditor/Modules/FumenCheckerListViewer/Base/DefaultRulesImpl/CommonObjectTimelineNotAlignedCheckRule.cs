@@ -51,9 +51,10 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                     var totalGrid = diff.TotalGrid(obj.TGrid.ResT);
                     var div = totalGrid / lengthPerBeat;
                     var trck = div - Math.Truncate(div);
-                    var subBeat = trck != 0 ? (1 / (1 - trck)) : 0;
+                    var beat = trck != 0 ? (1 / trck) : 0;
+                    var revBeat = trck != 0 ? (1 / (1 - trck)) : 0;
 
-                    if (!(subBeat == (int)subBeat))
+                    if ((!(revBeat == (int)revBeat))&&(!(beat == (int)beat)))
                     {
                         yield return new CommonCheckResult()
                         {
