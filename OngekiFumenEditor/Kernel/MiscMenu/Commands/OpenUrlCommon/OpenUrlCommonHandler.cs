@@ -1,0 +1,25 @@
+﻿using Gemini.Framework.Commands;
+using Gemini.Framework.Threading;
+using OngekiFumenEditor.Utils;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon
+{
+    public class OpenUrlCommonHandler<T> : CommandHandlerBase<T> where T : OpenUrlCommonCommandDefinition
+    {
+        public override Task Run(Command command)
+        {
+            var def = (T)command.CommandDefinition;
+            ProcessUtils.OpenUrl(def.Url);
+            return TaskUtility.Completed;
+        }
+    }
+
+    [CommandHandler]
+    public class OpenProjectUrlCommonHandler : OpenUrlCommonHandler<OpenProjectUrlCommandDefinition> { }
+}
