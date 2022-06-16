@@ -149,7 +149,7 @@ namespace OngekiFumenEditor
         {
             void LogException(object sender, Exception exception)
             {
-                Log.LogError($"----------Exception Catcher----------\n" +
+                FileLogOutput.WriteLog($"----------Exception Catcher----------\n" +
                     $"Program notice a (unhandled) exception from object: {sender}({sender?.GetType().FullName}) \n" +
                     $"Exception : {exception.Message} \n" +
                     $"InnerException: {exception.InnerException?.Message} \n" +
