@@ -46,6 +46,12 @@ https://pastebin.com/hyNyvdwt
 * [如何解决问题?](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-debugger?view=vs-2022)
 * [如何提交建议?](https://github.com/MikiraSora/OngekiFumenEditor/pulls)
 
+## 技术栈
+* 应用为基于WPF桌面开发框架制作
+* 插件机制依赖于MEF框架
+* 应用VisualStudio IDE风格由UI框架提供实现:Gemini
+* 编辑器物件更新基于WPF的DataBinding , 渲染全依赖于WPF提供的控件组合实现
+
 ## 声明
 ----
 * 本项目无任何利益相关，均因兴趣爱好驱动开发，属于**个人合作业余项目**，因开源精神而开源项目
