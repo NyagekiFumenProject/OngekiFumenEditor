@@ -21,5 +21,14 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon
     }
 
     [CommandHandler]
+    public class UsageWikiUrlCommonHandler : OpenUrlCommonHandler<UsageWikiCommandDefinition> { }
+
+    [CommandHandler]
     public class OpenProjectUrlCommonHandler : OpenUrlCommonHandler<OpenProjectUrlCommandDefinition> { }
+
+    [CommandHandler]
+    public class RequestIssueHelpCommonHandler : OpenUrlCommonHandler<RequestIssueHelpCommandDefinition> { }
+
+    [CommandHandler]
+    public class PostSuggestCommonHandler : OpenUrlCommonHandler<PostSuggestCommandDefinition> { }
 }
