@@ -139,13 +139,45 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         private static IEnumerable<TGrid> CalculateHoldTicks(Hold x, OngekiFumen fumen)
         {
-            //calculate stepGrid
-            var met = fumen.MeterChanges.GetMeter(x.TGrid);
-            var bpm = fumen.BpmList.GetBpm(x.TGrid);
-            var resT = bpm.TGrid.ResT;
-            var beatCount = met.BunShi * 1;
-            var lengthPerBeat = (int)(resT / beatCount);
+            int? CalcHoldTickStepSizeA()
+            {
+                //calculate stepGrid
+                var met = fumen.MeterChanges.GetMeter(x.TGrid);
+                var bpm = fumen.BpmList.GetBpm(x.TGrid);
+                var resT = bpm.TGrid.ResT;
+                var beatCount = met.BunShi * 1;
+                if (beatCount == 0)
+                    return null;
+                return (int)(resT / beatCount);
+            }
+            /*
+            int? CalcHoldTickStepSizeB()
+            {
+                var bpm = fumen.BpmList.GetBpm(x.TGrid).BPM;
+                var progressJudgeBPM = fumen.MetaInfo.ProgJudgeBpm;
+                var standardBeatLen = fumen.MetaInfo.TRESOLUTION >> 2; //取1/4切片长度
 
+                if (bpm < progressJudgeBPM)
+                {
+                    while (bpm < progressJudgeBPM)
+                    {
+                        standardBeatLen >>= 1;
+                        bpm *= 2f;
+                    }
+                }
+                else
+                {
+                    for (progressJudgeBPM *= 2f; progressJudgeBPM <= bpm; progressJudgeBPM *= 2f)
+                    {
+                        standardBeatLen <<= 1;
+                    }
+                }
+                return standardBeatLen;
+            }
+            */
+
+            if (CalcHoldTickStepSizeA() is not int lengthPerBeat)
+                yield break;
             var stepGrid = new GridOffset(0, lengthPerBeat);
 
             var curTGrid = x.TGrid + stepGrid;
@@ -186,7 +218,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
             var list = new HashSet<SoundEvent>();
 
-            void AddSound(Sound sound,TGrid tGrid)
+            void AddSound(Sound sound, TGrid tGrid)
             {
                 var evt = ObjectPool<SoundEvent>.Get();
                 evt.Sounds = sound;
