@@ -59,3 +59,8 @@ https://pastebin.com/hyNyvdwt
 * 本项目一切相关文档以及代码均只能是为了个人学习用途
 * 因使用本项目者做坏事，所产生的相关纠纷和问题，后果自负，不关我事 ^ ^
 * **另外本项目不是Phixxos编辑器**
+
+
+
+![image](https://user-images.githubusercontent.com/7549173/181236295-b182013a-5394-40e6-a749-66375d7affcb.png)
+
