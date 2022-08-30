@@ -41,7 +41,7 @@ jobs:
     - name: get-version-action
       uses: bbonkr/get-version-action@v1.0.4
       with:
-        project: .\OngekiFumenEditor\version.json
+        project: '.\OngekiFumenEditor\version.json'
     - name: logging
       run: echo "Version=${{ steps.get_version.outputs.version }}"
     - name: Restore dependencies
