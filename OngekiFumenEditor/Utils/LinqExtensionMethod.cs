@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.Utils
 {
     public static class LinqExtensionMethod
     {
+        public static IEnumerable<T> Repeat<T>(this T o, int repeatCount) => Enumerable.Repeat(o, repeatCount);
+
         public static void ForEach<T>(this IEnumerable<T> list, Action<T> fun)
         {
             if (list is null)
