@@ -20,7 +20,6 @@ on:
 env:
   Configuration: ${{ github.event.inputs.BuildConfiguration || 'Release' }} 
   Branch: ${{ github.event.inputs.BuildBranch || github.ref_name }}
-  Version: 0.4.5
 
 jobs:
   build:
@@ -35,6 +34,12 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
+    - name: get-version-action
+      uses: bbonkr/get-version-action@v1.0.4
+      with:
+        project: D:\a\OngekiFumenEditor\OngekiFumenEditor\version.json
+    - name: logging
+      run: echo "Version=${{ steps.get_version.outputs.version }}"
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish
@@ -43,6 +48,6 @@ jobs:
     #  run: Get-ChildItem -Recurse
     - uses: actions/upload-artifact@v3
       with:
-        name: OngekiFumenEditor_${{env.Branch}}_${{env.Configuration}}_${{env.Version}}
+        name: OngekiFumenEditor_${{steps.get_version.outputs.version}}_${{env.Configuration}}_${{env.Version}}
         path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
