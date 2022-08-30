@@ -51,6 +51,6 @@ jobs:
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o ./bin/githubActions/
     - uses: actions/upload-artifact@v3
       with:
-        name: OngekiFumenEditor_${{steps.get_version.outputs.version}}_${{env.Configuration}}_${{env.Version}}
+        name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Configuration}}_${{env.Version}}
         path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
