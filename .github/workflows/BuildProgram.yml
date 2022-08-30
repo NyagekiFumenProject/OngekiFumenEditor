@@ -39,11 +39,12 @@ jobs:
     - name: show version.json
       run: cat .\OngekiFumenEditor\version.json
     - name: get-version-action
-      uses: bbonkr/get-version-action@v1.0.4
+      id: project-version
+      uses: euberdeveloper/ga-project-version@main
       with:
-        project: '.\OngekiFumenEditor\version.json'
+        path: .\OngekiFumenEditor\version.json
     - name: logging
-      run: echo "Version=${{ steps.get_version.outputs.version }}"
+      run: echo "Version=${{ steps.project-version.outputs.version }}"
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish
