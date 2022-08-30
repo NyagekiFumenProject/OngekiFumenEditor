@@ -9,6 +9,7 @@ using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Utils;
@@ -112,6 +113,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private HashSet<DisplayObjectViewModelBase> currentCopiedSources = new();
         public IEnumerable<DisplayObjectViewModelBase> CurrentCopiedSources => currentCopiedSources;
+
+        #region provide extra MenuItem by plugins
+
+        public void InitExtraMenuItems()
+        {
+            var ctxMenu = (GetView() as FumenVisualEditorView).EditorContextMenu;
+
+            var extMenuItems = IoC.Get<IEditorExtraContextMenuBuilder>().BuildMenuItems(IoC.GetAll<IFumenVisualEditorExtraMenuItemHandler>(), this);
+            foreach (var extMenuItem in extMenuItems)
+                ctxMenu.Items.Add(extMenuItem);
+        }
+
+        #endregion
 
         #region Selection Actions
 
@@ -792,7 +806,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var curBrowserObj = objBrowser.OngekiObject;
             var count = SelectObjects.Take(2).Count();
             var first = SelectObjects.FirstOrDefault()?.ReferenceOngekiObject as ISelectableObject;
-            var refViewModel = EditorViewModels.FirstOrDefault(x=>x.DisplayableObject == obj) as DisplayObjectViewModelBase;
+            var refViewModel = EditorViewModels.FirstOrDefault(x => x.DisplayableObject == obj) as DisplayObjectViewModelBase;
 
             if ((count > 1) || (count == 1 && first != obj)) //比如你目前有多个已选择的，但你单点了一个
             {

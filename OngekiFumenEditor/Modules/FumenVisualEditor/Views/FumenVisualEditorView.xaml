@@ -42,7 +42,7 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid.ContextMenu>
-            <ContextMenu>
+            <ContextMenu x:Name="EditorContextMenu">
                 <MenuItem Header="选取...">
                     <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()" Header="选所有物件" />
                     <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="反向选取所有物件" />

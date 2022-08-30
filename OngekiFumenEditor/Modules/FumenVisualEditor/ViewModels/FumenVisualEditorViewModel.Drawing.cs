@@ -22,6 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             base.OnViewLoaded(v);
             RedrawUnitCloseXLines();
+            InitExtraMenuItems();
         }
 
         private void RedrawTimeline()
