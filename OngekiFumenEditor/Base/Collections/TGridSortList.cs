@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Base.Collections.Base
 {
     public class TGridSortList<T> : SortableCollection<T, TGrid> where T : ITimelineObject, INotifyPropertyChanged
     {
