@@ -1,9 +1,6 @@
 [submodule "gemini"]
 	path = Dependences/gemini
 	url = https://github.com/NyagekiFumenProject/gemini
-[submodule "RangeTree"]
-	path = Dependences/RangeTree
-	url = https://github.com/NyagekiFumenProject/RangeTree
 [submodule "SvgToXaml"]
 	path = Dependences/SvgToXaml
 	url = https://github.com/NyagekiFumenProject/SvgToXaml

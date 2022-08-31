@@ -66,6 +66,10 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
         public bool Contains(T obj)
         {
+#if DEBUG
+            if (IsBatching)
+                throw new Exception("Collection is in batching....");
+#endif
             var index = items.BinarySearch(obj, comparer);
             return index >= 0;
         }
@@ -83,6 +87,11 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
         public IEnumerable<T> BinaryFindRange(X min, X max)
         {
+#if DEBUG
+            if (IsBatching)
+                throw new Exception("Collection is in batching....");
+#endif
+
             var minIndex = items.BinarySearch(min, sortKeySelector);
             minIndex = minIndex < 0 ? ~minIndex : minIndex;
             var maxIndex = items.BinarySearch(max, sortKeySelector, minIndex);
