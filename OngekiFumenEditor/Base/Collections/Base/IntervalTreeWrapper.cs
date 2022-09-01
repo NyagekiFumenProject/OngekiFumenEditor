@@ -15,6 +15,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
         private readonly string sortMaxKeyPropertyName;
 
         public bool IsBatching { get; private set; }
+        public int Count => tree.Count;
 
         public struct KeyRange
         {
