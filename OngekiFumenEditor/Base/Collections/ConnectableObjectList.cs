@@ -10,7 +10,10 @@ namespace OngekiFumenEditor.Base.Collections
 {
     public class ConnectableObjectList<START_TYPE, CHILD_TYPE> : IEnumerable<START_TYPE> where START_TYPE : ConnectableStartObject where CHILD_TYPE : ConnectableChildObjectBase
     {
-        private TGridSortList<START_TYPE> startObjects = new();
+        private IntervalTreeWrapper<TGrid, START_TYPE> startObjects = new(
+            x => new() { Min = x.MinTGrid, Max = x.MaxTGrid },
+            nameof(ConnectableStartObject.MinTGrid),
+            nameof(ConnectableStartObject.MaxTGrid));
 
         public IEnumerator<START_TYPE> GetEnumerator() => startObjects.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -75,8 +78,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         public IEnumerable<START_TYPE> GetVisibleStartObjects(TGrid min, TGrid max)
         {
-            //todo 理论上还能更优化一点但想不出就暂时咕了
-            return startObjects.Where(x => x.CheckVisiable(min, max));
+            return startObjects.QueryInRange(min, max);
         }
     }
 }

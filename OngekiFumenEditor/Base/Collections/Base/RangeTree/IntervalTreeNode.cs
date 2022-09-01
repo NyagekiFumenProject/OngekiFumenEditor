@@ -156,25 +156,23 @@ namespace IntervalTree
         /// </summary>
         public IEnumerable<TValue> Query(TKey value)
         {
-            var results = new List<TValue>();
-
             // If the node has items, check for leaves containing the value.
             if (items != null)
                 foreach (var o in items)
                     if (comparer.Compare(o.From, value) > 0)
                         break;
                     else if (comparer.Compare(value, o.From) >= 0 && comparer.Compare(value, o.To) <= 0)
-                        results.Add(o.Value);
+                        yield return o.Value;
 
             // go to the left or go to the right of the tree, depending
             // where the query value lies compared to the center
             var centerComp = comparer.Compare(value, center);
             if (leftNode != null && centerComp < 0)
-                results.AddRange(leftNode.Query(value));
+                foreach (var item in leftNode.Query(value))
+                    yield return item;
             else if (rightNode != null && centerComp > 0)
-                results.AddRange(rightNode.Query(value));
-
-            return results;
+                foreach (var item in rightNode.Query(value))
+                    yield return item;
         }
 
         /// <summary>
@@ -183,24 +181,22 @@ namespace IntervalTree
         /// </summary>
         public IEnumerable<TValue> Query(TKey from, TKey to)
         {
-            var results = new List<TValue>();
-
             // If the node has items, check for leaves intersecting the range.
             if (items != null)
                 foreach (var o in items)
                     if (comparer.Compare(o.From, to) > 0)
                         break;
                     else if (comparer.Compare(to, o.From) >= 0 && comparer.Compare(from, o.To) <= 0)
-                        results.Add(o.Value);
+                        yield return o.Value;
 
             // go to the left or go to the right of the tree, depending
             // where the query value lies compared to the center
             if (leftNode != null && comparer.Compare(from, center) < 0)
-                results.AddRange(leftNode.Query(from, to));
+                foreach (var item in leftNode.Query(from, to))
+                    yield return item;
             if (rightNode != null && comparer.Compare(to, center) > 0)
-                results.AddRange(rightNode.Query(from, to));
-
-            return results;
+                foreach (var item in rightNode.Query(from, to))
+                    yield return item;
         }
     }
 }
