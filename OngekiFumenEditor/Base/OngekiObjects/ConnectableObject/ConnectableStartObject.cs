@@ -85,12 +85,19 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     child.PrevObject = Children.LastOrDefault() ?? this as ConnectableObjectBase;
                     children.Add(child);
                 }
-                NotifyOfPropertyChange(() => Children);
                 AddConnector(GenerateConnector(child.PrevObject, child));
                 child.PropertyChanged += OnPropertyChanged;
+                NotifyWhenChildrenChanged();
             }
             child.ReferenceStartObject = this;
             child.RecordId = RecordId;
+        }
+
+        private void NotifyWhenChildrenChanged()
+        {
+            NotifyOfPropertyChange(() => Children);
+            NotifyOfPropertyChange(() => MinTGrid);
+            NotifyOfPropertyChange(() => MaxTGrid);
         }
 
         private void RemoveConnector(ConnectorLineBase<ConnectableObjectBase> connector)
@@ -142,7 +149,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         AddConnector(GenerateConnector(child.PrevObject, child));
                         AddConnector(GenerateConnector(next.PrevObject, next));
 
-                        NotifyOfPropertyChange(() => Children);
                         child.PropertyChanged += OnPropertyChanged;
                         child.RecordId = RecordId;
                         break;
@@ -151,6 +157,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
                 if (child.PrevObject is null)
                     AddChildObject(child);
+                else
+                    NotifyWhenChildrenChanged();
             }
 
             child.ReferenceStartObject = this;
@@ -175,12 +183,22 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             child.ReferenceStartObject = default;
             child.PropertyChanged -= OnPropertyChanged;
             child.CacheRecoveryChildIndex = idx;
-            NotifyOfPropertyChange(() => Children);
+
+            NotifyWhenChildrenChanged();
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             ConnectableObjectsPropertyChanged?.Invoke(sender, e);
+            switch (e.PropertyName)
+            {
+                case nameof(TGrid):
+                    NotifyOfPropertyChange(() => MinTGrid);
+                    NotifyOfPropertyChange(() => MaxTGrid);
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
