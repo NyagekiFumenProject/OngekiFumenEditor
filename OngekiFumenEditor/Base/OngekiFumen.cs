@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Base
         public BeamList Beams { get; } = new();
         public List<SvgPrefabBase> SvgPrefabs { get; } = new();
         public TGridSortList<Soflan> Soflans { get; } = new();
-        public TGridSortList<LaneBlockArea> LaneBlocks { get; } = new();
+        public LaneBlockAreaList LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
 
@@ -297,7 +297,7 @@ namespace OngekiFumenEditor.Base
                    .Concat(MeterChanges.Skip(1)) //not show first meter
                    .Concat(BpmList.Skip(1)) //not show first bpm
                    .Concat(ClickSEs.BinaryFindRange(min, max))
-                   .Concat(LaneBlocks)
+                   .Concat(LaneBlocks.GetVisibleStartObjects(min, max))
                    .Concat(Soflans)
                    .Concat(EnemySets.BinaryFindRange(min, max))
                    .Concat(Bullets.BinaryFindRange(min, max))

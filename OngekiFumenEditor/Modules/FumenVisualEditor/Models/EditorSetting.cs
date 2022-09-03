@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,151 +9,215 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 {
-    public class EditorSetting : PropertyChangedBase
+    public class EditorSetting : PropertyChangedBase, IDisposable
     {
+        public EditorSetting()
+        {
+            Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
+        }
+
         private void Save()
         {
             Properties.EditorGlobalSetting.Default.Save();
         }
 
+        private double judgeLineOffsetY = Properties.EditorGlobalSetting.Default.JudgeLineOffsetY;
         public double JudgeLineOffsetY
         {
-            get => Properties.EditorGlobalSetting.Default.JudgeLineOffsetY;
+            get => judgeLineOffsetY;
             set
             {
-                Properties.EditorGlobalSetting.Default.JudgeLineOffsetY = value;
+                judgeLineOffsetY = Properties.EditorGlobalSetting.Default.JudgeLineOffsetY = value;
                 Save();
                 NotifyOfPropertyChange(() => JudgeLineOffsetY);
             }
         }
 
+        private bool disableXGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock;
         /// <summary>
         /// 表示物件或者其他在X轴上移动时，是否可以自动吸附到最近的单位线上
         /// </summary>
         public bool DisableXGridMagneticDock
         {
-            get => Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock;
+            get => disableXGridMagneticDock;
             set
             {
-                Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock = value;
+                disableXGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock = value;
                 Save();
                 NotifyOfPropertyChange(() => DisableXGridMagneticDock);
             }
         }
 
+        private bool forceMagneticDock = Properties.EditorGlobalSetting.Default.ForceMagneticDock;
         public bool ForceMagneticDock
         {
-            get => Properties.EditorGlobalSetting.Default.ForceMagneticDock;
+            get => forceMagneticDock;
             set
             {
-                Properties.EditorGlobalSetting.Default.ForceMagneticDock = value;
+                forceMagneticDock = Properties.EditorGlobalSetting.Default.ForceMagneticDock = value;
                 Save();
                 NotifyOfPropertyChange(() => ForceMagneticDock);
             }
         }
 
+        private bool forceTapHoldMagneticDockToLane = Properties.EditorGlobalSetting.Default.ForceTapHoldMagneticDockToLane;
         public bool ForceTapHoldMagneticDockToLane
         {
-            get => Properties.EditorGlobalSetting.Default.ForceTapHoldMagneticDockToLane;
+            get => forceTapHoldMagneticDockToLane;
             set
             {
-                Properties.EditorGlobalSetting.Default.ForceTapHoldMagneticDockToLane = value;
+                forceTapHoldMagneticDockToLane = Properties.EditorGlobalSetting.Default.ForceTapHoldMagneticDockToLane = value;
                 Save();
                 NotifyOfPropertyChange(() => ForceTapHoldMagneticDockToLane);
             }
         }
 
+        private bool disableTGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock;
         /// <summary>
         /// 表示物件或者其他在时间轴上移动时，是否可以自动吸附到最近的单位线上
         /// </summary>
         public bool DisableTGridMagneticDock
         {
-            get => Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock;
+            get => disableTGridMagneticDock;
             set
             {
-                Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock = value;
+                disableTGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock = value;
                 Save();
                 NotifyOfPropertyChange(() => DisableTGridMagneticDock);
             }
         }
 
+        private double xGridUnitSpace = Properties.EditorGlobalSetting.Default.XGridUnitSpace;
         /// <summary>
         /// X轴上单位线间距大小
         /// </summary>
         public double XGridUnitSpace
         {
-            get => Properties.EditorGlobalSetting.Default.XGridUnitSpace;
+            get => xGridUnitSpace;
             set
             {
-                Properties.EditorGlobalSetting.Default.XGridUnitSpace = value;
+                xGridUnitSpace = Properties.EditorGlobalSetting.Default.XGridUnitSpace = value;
                 Save();
                 NotifyOfPropertyChange(() => XGridUnitSpace);
             }
         }
 
+        private int tGridUnitLength = Properties.EditorGlobalSetting.Default.TGridUnitLength;
         /// <summary>
         /// 时间轴上单位线间距大小
         /// </summary>
         public int TGridUnitLength
         {
-            get => Properties.EditorGlobalSetting.Default.TGridUnitLength;
+            get => tGridUnitLength;
             set
             {
-                Properties.EditorGlobalSetting.Default.TGridUnitLength = value;
+                tGridUnitLength = Properties.EditorGlobalSetting.Default.TGridUnitLength = value;
                 Save();
                 NotifyOfPropertyChange(() => TGridUnitLength);
             }
         }
 
 
+        private int beatSplit = Properties.EditorGlobalSetting.Default.BeatSplit;
         /// <summary>
         /// 时间轴上单位线划分密度
         /// </summary>
         public int BeatSplit
         {
-            get => Properties.EditorGlobalSetting.Default.BeatSplit;
+            get => beatSplit;
             set
             {
-                Properties.EditorGlobalSetting.Default.BeatSplit = value;
+                beatSplit = Properties.EditorGlobalSetting.Default.BeatSplit = value;
                 Save();
                 NotifyOfPropertyChange(() => BeatSplit);
             }
         }
 
+        private int xGridDisplayMaxUnit = Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit;
         /// <summary>
         /// 横轴长度
         /// </summary>
         public int XGridDisplayMaxUnit
         {
-            get => Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit;
+            get => xGridDisplayMaxUnit;
             set
             {
-                Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit = value;
+                xGridDisplayMaxUnit = Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit = value;
                 Save();
                 NotifyOfPropertyChange(() => XGridDisplayMaxUnit);
             }
         }
 
+        private bool forceXGridMagneticDock = Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock;
         public bool ForceXGridMagneticDock
         {
-            get => Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock;
+            get => forceXGridMagneticDock;
             set
             {
-                Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value;
+                forceXGridMagneticDock = Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value;
                 Save();
                 NotifyOfPropertyChange(() => ForceXGridMagneticDock);
             }
         }
 
+        private double verticalDisplayScale = Properties.EditorGlobalSetting.Default.VerticalDisplayScale;
         public double VerticalDisplayScale
         {
-            get => Properties.EditorGlobalSetting.Default.VerticalDisplayScale;
+            get => verticalDisplayScale;
             set
             {
-                Properties.EditorGlobalSetting.Default.VerticalDisplayScale = value;
+                verticalDisplayScale = Properties.EditorGlobalSetting.Default.VerticalDisplayScale = value;
                 Save();
                 NotifyOfPropertyChange(() => VerticalDisplayScale);
             }
+        }
+
+        private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Properties.EditorGlobalSetting.JudgeLineOffsetY):
+                    judgeLineOffsetY = Properties.EditorGlobalSetting.Default.JudgeLineOffsetY;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.DisableXGridMagneticDock):
+                    disableXGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.ForceMagneticDock):
+                    forceMagneticDock = Properties.EditorGlobalSetting.Default.ForceMagneticDock;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.ForceTapHoldMagneticDockToLane):
+                    forceTapHoldMagneticDockToLane = Properties.EditorGlobalSetting.Default.ForceTapHoldMagneticDockToLane;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.DisableTGridMagneticDock):
+                    disableTGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.XGridUnitSpace):
+                    xGridUnitSpace = Properties.EditorGlobalSetting.Default.XGridUnitSpace;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.TGridUnitLength):
+                    tGridUnitLength = Properties.EditorGlobalSetting.Default.TGridUnitLength;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.BeatSplit):
+                    beatSplit = Properties.EditorGlobalSetting.Default.BeatSplit;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.XGridDisplayMaxUnit):
+                    xGridDisplayMaxUnit = Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.ForceXGridMagneticDock):
+                    forceXGridMagneticDock = Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.VerticalDisplayScale):
+                    verticalDisplayScale = Properties.EditorGlobalSetting.Default.VerticalDisplayScale;
+                    break;
+                default:
+                    Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");
+                    break;
+            }
+        }
+
+        public void Dispose()
+        {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
         }
     }
 }

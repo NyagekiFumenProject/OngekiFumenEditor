@@ -366,5 +366,28 @@ namespace OngekiFumenEditor.Utils
         }
 
         public static bool None<T>(this IEnumerable<T> a, Predicate<T> predicate) => a.Where(x => predicate(x)).None();
+
+        public delegate OUT IntervalByProcFunc<IN, OUT>(IN prev, IN cur);
+        /// <summary>
+        /// e.g IntervalBy([1,5,10,20] , (a,b)=>b-a) return [4,5,10]
+        /// </summary>
+        /// <typeparam name="IN"></typeparam>
+        /// <typeparam name="OUT"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="proc"></param>
+        /// <returns></returns>
+        public static IEnumerable<OUT> IntervalBy<IN, OUT>(this IEnumerable<IN> list, IntervalByProcFunc<IN, OUT> proc)
+        {
+            var itor = list.GetEnumerator();
+            if (!itor.MoveNext())
+                yield break;
+            var prev = itor.Current;
+            while (itor.MoveNext())
+            {
+                var cur = itor.Current;
+                yield return proc(prev, cur);
+                prev = cur;
+            }
+        }
     }
 }

@@ -42,8 +42,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public LaneBlockArea()
         {
             EndIndicator = new LaneBlockAreaEndIndicator() { RefLaneBlockArea = this };
+            EndIndicator.PropertyChanged += EndIndicator_PropertyChanged;
             connector = new LaneBlockLaneDecoration() { From = this, To = EndIndicator };
             displayables = new IDisplayableObject[] { connector, this, EndIndicator };
+        }
+
+        private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            NotifyOfPropertyChange(() => e.PropertyName);
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => displayables;
