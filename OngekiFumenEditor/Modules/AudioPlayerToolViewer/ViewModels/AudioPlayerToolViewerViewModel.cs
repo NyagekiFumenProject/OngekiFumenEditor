@@ -7,6 +7,8 @@ using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Utils;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Modules.ProgramProfile;
+using OngekiFumenEditor.Modules.ProgramProfile.Base;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using System;
@@ -113,6 +115,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         }
 
         private System.Action scrollAnimationClearFunc = default;
+
+        private IEditorProfile profile = IoC.Get<IEditorProfile>();
+        private IProfileHandle profileHandle;
+
         public bool IsAudioButtonEnabled => AudioPlayer is not null;
 
         public AudioPlayerToolViewerViewModel()
@@ -163,16 +169,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             scrollAnimationClearFunc?.Invoke();
             await fumenSoundPlayer.Init(Editor, AudioPlayer);
-            var scrollViewer = Editor.AnimatedScrollViewer;
-            //var stopwatch = new Stopwatch();
             EventHandler func = (e, d) =>
             {
-                if (AudioPlayer is null || Editor is null)
+                if (AudioPlayer is null)
                     return;
-                var audioTime = AudioPlayer.CurrentTime;
-                NotifyOfPropertyChange(() => SliderValue);
-                var scrollOffset = Editor.CalculateYFromAudioTime(audioTime);
-                scrollViewer.CurrentVerticalOffset = Math.Max(0, scrollOffset);
+                Process(AudioPlayer.CurrentTime);
             };
             CompositionTarget.Rendering += func;
             scrollAnimationClearFunc = () =>
@@ -180,6 +181,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 CompositionTarget.Rendering -= func;
                 scrollAnimationClearFunc = default;
             };
+        }
+
+        private void Process(TimeSpan time)
+        {
+            if (Editor is null)
+                return;
+            NotifyOfPropertyChange(() => SliderValue);
+            var scrollOffset = Editor.CalculateYFromAudioTime(time);
+            Editor.AnimatedScrollViewer.CurrentVerticalOffset = Math.Max(0, scrollOffset);
+            profile.Tick(profileHandle);
         }
 
         private void OnPauseButtonClicked()
@@ -278,6 +289,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 scrollAnimationClearFunc?.Invoke();
                 fumenSoundPlayer.Pause();
                 AudioPlayer.Pause();
+                profile.EndEditorPlayProfile(profileHandle);
             }
             else
             {
@@ -288,6 +300,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var seekTo = TGridCalculator.ConvertTGridToAudioTime(tgrid, Editor);
                 AudioPlayer.Seek(seekTo, false);
                 fumenSoundPlayer.Seek(seekTo, false);
+
+                profileHandle = profile.BeginEditorPlayProfile(Editor);
             }
         }
 
