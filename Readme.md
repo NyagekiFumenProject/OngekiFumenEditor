@@ -31,8 +31,8 @@
 * 自制谱面，正式公布  
 * 垂直显示缩放 ([有明显问题，但能用](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E7%BC%96%E8%BE%91%E5%99%A8-%E5%9E%82%E7%9B%B4%E6%98%BE%E7%A4%BA%E7%BC%A9%E6%94%BE-%E5%8A%9F%E8%83%BD))
 * ~~快捷键~~ (暂时没必要,跳过)
-* ~~星咲あかり心灵控制计划~~  **<--- we are here? ---**
-* 优化性能
+* ~~星咲あかり心灵控制计划~~  
+* 优化性能 **<--- we are here? ---**
 ....
 
 https://pastebin.com/hyNyvdwt
