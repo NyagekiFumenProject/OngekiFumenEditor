@@ -15,6 +15,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -82,6 +84,7 @@ namespace OngekiFumenEditor
         protected override void Configure()
         {
             FileLogOutput.Init();
+            DumpFileHelper.Init();
             base.Configure();
             var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
 
@@ -147,15 +150,34 @@ namespace OngekiFumenEditor
 
         private void InitExceptionCatcher()
         {
+            var recHandle = new HashSet<IntPtr>();
             void LogException(object sender, Exception exception)
             {
-                FileLogOutput.WriteLog($"----------Exception Catcher----------\n" +
-                    $"Program notice a (unhandled) exception from object: {sender}({sender?.GetType().FullName}) \n" +
-                    $"Exception : {exception.Message} \n" +
-                    $"InnerException: {exception.InnerException?.Message} \n" +
-                    $"Stack : {exception.StackTrace}\n" +
-                    $"----------------------------");
+                var sb = new StringBuilder();
+                void exceptionDump(Exception e, int level = 0)
+                {
+                    if (e is null)
+                        return;
+                    var tab = string.Concat(" ".Repeat(2 * level));
+
+                    sb.AppendLine();
+                    sb.AppendLine(tab + $"Exception lv.{level} : {e.Message}");
+                    sb.AppendLine(tab + $"Stack : {e.StackTrace}");
+
+                    exceptionDump(e.InnerException, level + 1);
+                }
+                sb.AppendLine($"----------Exception Catcher----------");
+                sb.AppendLine($"Program notice a (unhandled) exception from object: {sender}({sender?.GetType().FullName})");
+                exceptionDump(exception);
+                sb.AppendLine($"----------------------------");
+                FileLogOutput.WriteLog(sb.ToString());
                 FileLogOutput.WaitForWriteDone();
+                var exceptionHandle = Marshal.GetExceptionPointers();
+                if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
+                {
+                    DumpFileHelper.WriteMiniDump(exceptionHandle);
+                    recHandle.Add(exceptionHandle);
+                }
             }
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) => LogException(sender, e.ExceptionObject as Exception);

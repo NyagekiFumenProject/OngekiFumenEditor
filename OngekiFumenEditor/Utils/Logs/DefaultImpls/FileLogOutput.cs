@@ -76,6 +76,7 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
                     var msg = contents.Dequeue();
                     writer.Write(msg);
                 }
+                writer.Flush();
                 writing = false;
             });
         }
