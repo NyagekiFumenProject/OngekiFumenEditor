@@ -11,8 +11,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
     {
         private IIntervalTree<TKey, TValue> tree;
         private readonly Func<TValue, KeyRange> rangeKeySelector;
-        private readonly string sortMinKeyPropertyName;
-        private readonly string sortMaxKeyPropertyName;
+        private readonly HashSet<string> rebuildProperties;
 
         public bool IsBatching { get; private set; }
         public int Count => tree.Count;
@@ -26,13 +25,11 @@ namespace OngekiFumenEditor.Base.Collections.Base
         public IEnumerator<TValue> GetEnumerator() => tree.Values.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public IntervalTreeWrapper(Func<TValue, KeyRange> rangeKeySelector, string sortMinKeyPropertyName = default, string sortMaxKeyPropertyName = default)
+        public IntervalTreeWrapper(Func<TValue, KeyRange> rangeKeySelector, bool enableSwap, params string[] rebuildProperties)
         {
             this.rangeKeySelector = rangeKeySelector;
-            this.sortMinKeyPropertyName = sortMinKeyPropertyName;
-            this.sortMaxKeyPropertyName = sortMaxKeyPropertyName;
-
-            tree = new IntervalTree<TKey, TValue>();
+            this.rebuildProperties = rebuildProperties.ToHashSet();
+            tree = new IntervalTree<TKey, TValue>() { EnableAutoSwapMinMax = enableSwap };
         }
 
         public void Add(TValue obj)
@@ -45,7 +42,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
         private void OnItemPropChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == sortMinKeyPropertyName || e.PropertyName == sortMaxKeyPropertyName)
+            if (rebuildProperties.Contains(e.PropertyName))
             {
                 if (IsBatching)
                     return; //not to process dirty data yet.

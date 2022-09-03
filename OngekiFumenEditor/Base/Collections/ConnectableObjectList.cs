@@ -12,8 +12,10 @@ namespace OngekiFumenEditor.Base.Collections
     {
         private IntervalTreeWrapper<TGrid, START_TYPE> startObjects = new(
             x => new() { Min = x.MinTGrid, Max = x.MaxTGrid },
+            true,
             nameof(ConnectableStartObject.MinTGrid),
-            nameof(ConnectableStartObject.MaxTGrid));
+            nameof(ConnectableStartObject.MaxTGrid)
+            );
 
         public IEnumerator<START_TYPE> GetEnumerator() => startObjects.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -79,6 +81,11 @@ namespace OngekiFumenEditor.Base.Collections
         public IEnumerable<START_TYPE> GetVisibleStartObjects(TGrid min, TGrid max)
         {
             return startObjects.QueryInRange(min, max);
+        }
+
+        public bool Contains(START_TYPE o)
+        {
+            return startObjects.FastContains(o);
         }
     }
 }

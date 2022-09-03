@@ -15,6 +15,8 @@ namespace IntervalTree
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        public bool EnableAutoSwapMinMax { get; set; } = false;
+
         public TKey Max
         {
             get
@@ -76,7 +78,12 @@ namespace IntervalTree
         public void Add(TKey from, TKey to, TValue value)
         {
             if (comparer.Compare(from, to) > 0)
-                throw new ArgumentOutOfRangeException($"{nameof(from)} cannot be larger than {nameof(to)}");
+            {
+                if (EnableAutoSwapMinMax)
+                    (to, from) = (from, to);
+                else
+                    throw new ArgumentOutOfRangeException($"{nameof(from)} cannot be larger than {nameof(to)}");
+            }
 
             NotifyDirty();
             items.Add(new RangeValuePair<TKey, TValue>(from, to, value));
