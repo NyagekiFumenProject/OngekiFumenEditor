@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     [Export(typeof(IDrawingTarget))]
     public class BulletDrawingTarget : CommonSpriteDrawTargetBase<Bullet>
     {
-        Dictionary<string, Dictionary<string, Texture>> spritesMap = new();
+        Dictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap = new();
         Dictionary<Texture, Vector2> spritesSize = new();
         Dictionary<Texture, Vector> spritesOriginOffset = new();
 
@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             {
                 if (!spritesMap.TryGetValue(k1, out var dic))
                 {
-                    dic = new Dictionary<string, Texture>();
+                    dic = new Dictionary<BulletType, Texture>();
                     spritesMap[k1] = dic;
                 }
 
@@ -102,7 +102,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, fumen) ?? obj.XGrid, 30, Previewer.ViewWidth, 1);
 
             //计算向量化的物件运动时间
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 240);
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 1, 240);
             var fromTime = toTime - appearOffsetTime;
             var currentTime = MathUtils.Limit(Previewer.CurrentPlayTime, toTime, fromTime);
             var precent = (currentTime - fromTime) / appearOffsetTime;

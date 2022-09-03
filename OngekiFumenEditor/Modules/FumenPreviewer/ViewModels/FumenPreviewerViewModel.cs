@@ -2,6 +2,7 @@
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl;
@@ -18,10 +19,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -30,7 +33,7 @@ using System.Windows.Media;
 namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 {
     [Export(typeof(IFumenPreviewer))]
-    public class FumenPreviewerViewModel : Tool, IFumenPreviewer
+    public class FumenPreviewerViewModel : Tool, IFumenPreviewer, ISchedulable
     {
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
@@ -99,8 +102,31 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             }
         }
 
+        private bool isDisplayFPS = false;
+        public bool IsDisplayFPS
+        {
+            get => isDisplayFPS;
+            set
+            {
+                Set(ref isDisplayFPS, value);
+            }
+        }
+
+        private string displayFPS = "";
+        public string DisplayFPS
+        {
+            get => displayFPS;
+            set
+            {
+                Set(ref displayFPS, value);
+            }
+        }
 
         public Matrix4 ViewProjectionMatrix { get; private set; }
+
+        public string SchedulerName => "Fumen Previewer Performance Statictis";
+
+        public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromSeconds(1);
 
         private static Dictionary<string, IDrawingTarget> drawTargets = new();
 
@@ -109,6 +135,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             DisplayName = "谱面预览";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
+
+
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -133,6 +161,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            IoC.Get<ISchedulerManager>().AddScheduler(this);
         }
 
         private void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
@@ -194,12 +224,15 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             if (IsFollowCurrentEditorTime)
                 CurrentPlayTime = (float)Editor.ScrollViewerVerticalOffset;
 
-            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 240);
-            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 240);
+            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
+            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
 
             timeSignatureHelper.Draw(fumen);
-            var drawCall = 0;
-
+            drawCall = 0;
+#if DEBUG
+            stopwatch.Restart();
+            var prevTime = 0L;
+#endif
             foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiObjectBase>().GroupBy(x => x.IDShortName))
             {
                 if (drawTargets.TryGetValue(objGroup.Key, out var drawingTarget))
@@ -212,10 +245,58 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                     }
                     drawingTarget.EndDraw();
                 }
+
+#if DEBUG
+                var time = stopwatch.ElapsedTicks;
+                var costTicks = time - prevTime;
+                if (costTicks > castTime.Tick)
+                    castTime = (objGroup.Key, costTicks);
+                prevTime = time;
+#endif
             }
 
             //Log.LogDebug($"drawcall : {drawCall}");
+            SmoothFPSArray[SmoothFPSUpdateIdx] = 1 / (float)ts.TotalSeconds;
+            SmoothFPSUpdateIdx++;
+            if (SmoothFPSUpdateIdx == SmoothFPSArray.Length)
+                SmoothFPSUpdateIdx = 0;
+#if DEBUG
+            SmoothFPS2Array[SmoothFPS2UpdateIdx] = 1.0f / (stopwatch.ElapsedMilliseconds / 1000.0f);
+            SmoothFPS2UpdateIdx++;
+            if (SmoothFPS2UpdateIdx == SmoothFPS2Array.Length)
+                SmoothFPS2UpdateIdx = 0;
+#endif
         }
+
+        #region Performence Statictis
+
+        private int SmoothFPSUpdateIdx = 0;
+        private int SmoothFPS2UpdateIdx = 0;
+        private int drawCall = 0;
+        private Stopwatch stopwatch = new Stopwatch();
+        private float[] SmoothFPSArray = new float[10];
+        private float[] SmoothFPS2Array = new float[10];
+        private (string Name, long Tick) castTime = new();
+        private StringBuilder stringBuilder = new StringBuilder();
+
+        public void OnSchedulerTerm()
+        {
+
+        }
+
+        public Task OnScheduleCall(CancellationToken cancellationToken)
+        {
+            stringBuilder.Clear();
+            stringBuilder.AppendLine($"FPS:{(int)SmoothFPSArray.Average(),3}/{(int)SmoothFPS2Array.Average(),-3}");
+            stringBuilder.AppendLine($"DC:{drawCall}");
+            stringBuilder.AppendLine($"TOP:{castTime.Name} ({(new TimeSpan(castTime.Tick).TotalMilliseconds):F2})ms ({castTime.Tick:F2}ticks)");
+
+            DisplayFPS = stringBuilder.ToString();
+            castTime = default;
+            return Task.CompletedTask;
+        }
+
+        #endregion
 
         #region UserActions
 

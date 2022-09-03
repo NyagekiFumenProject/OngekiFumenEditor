@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, fumen) ?? obj.XGrid, 30, Previewer.ViewWidth, 1);
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, fumen) ?? obj.XGrid, 30, Previewer.ViewWidth, 1);
 
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 240);
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 1, 240);
             var fromTime = toTime - appearOffsetTime;
             var currentTime = MathUtils.Limit(Previewer.CurrentPlayTime, toTime, fromTime);
             if (Previewer.CurrentPlayTime < fromTime)

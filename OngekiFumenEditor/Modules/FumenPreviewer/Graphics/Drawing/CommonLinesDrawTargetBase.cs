@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
                 {
                     GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * LINE_DRAW_MAX * 6),
-                        IntPtr.Zero, BufferUsageHint.StreamDraw);
+                        IntPtr.Zero, BufferUsageHint.DynamicCopy);
 
                     GL.EnableVertexAttribArray(0);
                     GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, sizeof(float) * 6, 0);
@@ -82,11 +82,24 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             shader.PassUniform("Model", Matrix4.CreateTranslation(-Previewer.ViewWidth / 2, -Previewer.ViewHeight / 2, 0));
             shader.PassUniform("ViewProjection", Previewer.ViewProjectionMatrix);
             GL.BindVertexArray(vao);
-            int i = 0;
 
-            void FlushDraw()
+            var i = 0;
+            var isMapBufferOpen = false;
+
+            unsafe float* TryMapBuffer()
             {
-                GL.DrawArrays(PrimitiveType.LineStrip, 0, i);
+                if (isMapBufferOpen)
+                    return default;
+                isMapBufferOpen = true;
+                return (float*)GL.MapBuffer(BufferTarget.ArrayBuffer, BufferAccess.WriteOnly).ToPointer();
+            }
+
+            void TryUnmapBuffer()
+            {
+                if (!isMapBufferOpen)
+                    return;
+                isMapBufferOpen = false;
+                GL.UnmapBuffer(BufferTarget.ArrayBuffer);
             }
 
             unsafe void Copy(LinePoint lp, float* p)
@@ -103,13 +116,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             {
                 unsafe
                 {
-                    var ptr = GL.MapBuffer(BufferTarget.ArrayBuffer, BufferAccess.WriteOnly);
-                    var p = (float*)ptr.ToPointer();
 
                     var prevLinePoint = list[0];
 
                     foreach (var item in list.SequenceWrap(LINE_DRAW_MAX - 1))
                     {
+                        var p = TryMapBuffer();
                         Copy(prevLinePoint, p);
                         p += 6;
                         i++;
@@ -121,14 +133,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                             i++;
                         }
 
-                        GL.UnmapBuffer(BufferTarget.ArrayBuffer);
-                        FlushDraw();
+                        TryUnmapBuffer();
+                        GL.DrawArrays(PrimitiveType.LineStrip, 0, i);
                         i = 0;
-                        ptr = GL.MapBuffer(BufferTarget.ArrayBuffer, BufferAccess.WriteOnly);
-                        p = (float*)ptr.ToPointer();
                     }
-
-                    GL.UnmapBuffer(BufferTarget.ArrayBuffer);
                 }
             }
             GL.BindVertexArray(0);

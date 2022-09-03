@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             LinePoint calc(ConnectableObjectBase o)
             {
                 return new(
-                    new((float)XGridCalculator.ConvertXGridToX(o.XGrid, 30, Previewer.ViewWidth, 1), (float)TGridCalculator.ConvertTGridToY(o.TGrid, fumen.BpmList, 240)),
+                    new((float)XGridCalculator.ConvertXGridToX(o.XGrid, 30, Previewer.ViewWidth, 1), (float)TGridCalculator.ConvertTGridToY(o.TGrid, fumen.BpmList, 1.0, 240)),
                     GetLanePointColor(o, fumen)
                     );
             }

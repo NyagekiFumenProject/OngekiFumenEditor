@@ -14,13 +14,27 @@
     <UserControl.ContextMenu>
         <ContextMenu>
             <MenuItem
+                Header="显示FPS"
+                IsCheckable="True"
+                IsChecked="{Binding IsDisplayFPS}" />
+            <MenuItem
                 Header="跟随当前编辑器"
                 IsCheckable="True"
                 IsChecked="{Binding IsFollowCurrentEditorTime}" />
         </ContextMenu>
     </UserControl.ContextMenu>
-    <opentkcontrol:GLWpfControl
-        x:Name="glView"
-        Ready="glView_Ready"
-        SizeChanged="glView_SizeChanged" />
+    <Grid>
+        <opentkcontrol:GLWpfControl
+            x:Name="glView"
+            Ready="glView_Ready"
+            SizeChanged="glView_SizeChanged" />
+        <TextBlock
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            FontWeight="Bold"
+            Foreground="White"
+            Opacity="0.25"
+            Text="{Binding DisplayFPS}"
+            Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
+    </Grid>
 </UserControl>

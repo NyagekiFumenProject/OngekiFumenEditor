@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             };
 
             var x = XGridCalculator.ConvertXGridToX(xGrid, 30, Previewer.ViewWidth, 1);
-            var y = TGridCalculator.ConvertTGridToY(tGrid, fumen.BpmList, 240);
+            var y = TGridCalculator.ConvertTGridToY(tGrid, fumen.BpmList, 1.0, 240);
 
             var pos = new Vector((float)x, (float)y);
 

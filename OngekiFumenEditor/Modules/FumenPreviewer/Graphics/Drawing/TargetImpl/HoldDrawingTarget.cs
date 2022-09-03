@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
             void Upsert<T>(T obj) where T : IHorizonPositionObject, ITimelineObject
             {
-                var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 240);
+                var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 1.0, 240);
                 var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, 30, previewer.ViewWidth, 1);
                 list.Add(new(new(x, y), color));
             }

@@ -48,7 +48,8 @@ namespace OngekiFumenEditor.Modules.ProgramProfile.Kernel
 
             handle.Stopwatch.Stop();
             var sp = handle.CallTicks.IntervalBy((prev, cur) => cur - prev).ToArray();
-
+            if (sp.Length == 0)
+                return;
             var aveTick = sp.Average();
             (var minTick, var maxTick) = sp.MaxMinBy(x => x);
             var group = sp.GroupBy(x => (int)x).OrderByDescending(x => x.Count()).Select(x => x.Key);

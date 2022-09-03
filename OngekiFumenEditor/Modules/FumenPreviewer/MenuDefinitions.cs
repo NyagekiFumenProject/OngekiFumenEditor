@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer
 {
     public static class MenuDefinitions
     {
-        //[Export] 暂时屏蔽此功能捏
+        [Export]
         public static MenuItemDefinition ViewFumenPreviewerMenuItem = new CommandMenuItemDefinition<ViewFumenPreviewerCommandDefinition>(
             Gemini.Modules.MainMenu.MenuDefinitions.ViewToolsMenuGroup, 2);
     }
