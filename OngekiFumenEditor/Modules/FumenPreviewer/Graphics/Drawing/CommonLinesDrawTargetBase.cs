@@ -6,6 +6,7 @@ using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +32,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             shader = CommonLineShader.Shared;
 
             vbo = GL.GenBuffer();
-
             vao = GL.GenVertexArray();
 
             Previewer = IoC.Get<IFumenPreviewer>();
@@ -83,33 +83,34 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             shader.PassUniform("ViewProjection", Previewer.ViewProjectionMatrix);
             GL.BindVertexArray(vao);
 
-            var i = 0;
-            var isMapBufferOpen = false;
+            var arrBuffer = ArrayPool<float>.Shared.Rent(LINE_DRAW_MAX * 6);
+            var arrBufferIdx = 0;
 
-            unsafe float* TryMapBuffer()
+            void Copy(LinePoint lp)
             {
-                if (isMapBufferOpen)
-                    return default;
-                isMapBufferOpen = true;
-                return (float*)GL.MapBuffer(BufferTarget.ArrayBuffer, BufferAccess.WriteOnly).ToPointer();
-            }
-
-            void TryUnmapBuffer()
-            {
-                if (!isMapBufferOpen)
-                    return;
-                isMapBufferOpen = false;
-                GL.UnmapBuffer(BufferTarget.ArrayBuffer);
-            }
-
-            unsafe void Copy(LinePoint lp, float* p)
-            {
+                arrBuffer[(6 * arrBufferIdx) + 0] = lp.Point.X;
+                arrBuffer[(6 * arrBufferIdx) + 1] = lp.Point.Y;
+                arrBuffer[(6 * arrBufferIdx) + 2] = lp.Color.X;
+                arrBuffer[(6 * arrBufferIdx) + 3] = lp.Color.Y;
+                arrBuffer[(6 * arrBufferIdx) + 4] = lp.Color.Z;
+                arrBuffer[(6 * arrBufferIdx) + 5] = lp.Color.W;
+                /*
                 p[0] = lp.Point.X;
                 p[1] = lp.Point.Y;
                 p[2] = lp.Color.X;
                 p[3] = lp.Color.Y;
                 p[4] = lp.Color.Z;
                 p[5] = lp.Color.W;
+                */
+                arrBufferIdx++;
+            }
+
+            void FlushDraw()
+            {
+                //GL.InvalidateBufferData(vbo);
+                GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, arrBufferIdx * sizeof(float) * 6, arrBuffer);
+                GL.DrawArrays(PrimitiveType.LineStrip, 0, arrBufferIdx);
+                arrBufferIdx = 0;
             }
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
@@ -121,24 +122,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
                     foreach (var item in list.SequenceWrap(LINE_DRAW_MAX - 1))
                     {
-                        var p = TryMapBuffer();
-                        Copy(prevLinePoint, p);
-                        p += 6;
-                        i++;
+                        Copy(prevLinePoint);
                         foreach (var q in item)
                         {
-                            Copy(q, p);
-                            p += 6;
+                            Copy(q);
                             prevLinePoint = q;
-                            i++;
                         }
 
-                        TryUnmapBuffer();
-                        GL.DrawArrays(PrimitiveType.LineStrip, 0, i);
-                        i = 0;
+                        FlushDraw();
                     }
                 }
             }
+
+            ArrayPool<float>.Shared.Return(arrBuffer);
             GL.BindVertexArray(0);
             shader.End();
         }
