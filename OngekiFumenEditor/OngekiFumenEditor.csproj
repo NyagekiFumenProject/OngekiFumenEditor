@@ -63,6 +63,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj" >
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
     <ProjectReference Include="..\Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj">
       <PrivateAssets>all</PrivateAssets>
     </ProjectReference>

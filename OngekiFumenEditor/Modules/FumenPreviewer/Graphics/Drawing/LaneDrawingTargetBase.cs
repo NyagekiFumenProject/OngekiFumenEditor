@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
-    public abstract class LaneDrawingTargetBase<T> : CommonLinesDrawTargetBase<T> where T : LaneStartBase
+    public abstract class LaneDrawingTargetBase<T> : CommonCapLinesDrawTargetBase<T> where T : LaneStartBase
     {
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj, OngekiFumen fumen);
 

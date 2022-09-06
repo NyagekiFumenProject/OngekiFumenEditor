@@ -24,7 +24,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
         public const int LINE_DRAW_MAX = 100;
 
-        public IFumenPreviewer Previewer { get; }
         public int LineWidth { get; set; } = 2;
 
         public CommonLinesDrawTargetBase()
@@ -33,8 +32,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
             vbo = GL.GenBuffer();
             vao = GL.GenVertexArray();
-
-            Previewer = IoC.Get<IFumenPreviewer>();
 
             Init();
 

@@ -135,8 +135,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             DisplayName = "谱面预览";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
-
-
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -160,6 +158,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PolygonSmooth);
+            //GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             IoC.Get<ISchedulerManager>().AddScheduler(this);
@@ -208,6 +209,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             openGLView.Render += (ts) => OnRender(openGLView, ts);
         }
 
+        public IDrawingTarget GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
+
         public void OnRender(GLWpfControl openGLView, TimeSpan ts)
         {
 #if DEBUG
@@ -216,56 +219,63 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 Log.LogDebug($"OpenGL ERROR!! : {error}");
 #endif
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            var fumen = Editor?.Fumen;
-            if (fumen is null)
-                return;
-
-            if (IsFollowCurrentEditorTime)
-                CurrentPlayTime = (float)Editor.ScrollViewerVerticalOffset;
-
-            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
-            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
-
-            timeSignatureHelper.Draw(fumen);
-            drawCall = 0;
-#if DEBUG
-            stopwatch.Restart();
-            var prevTime = 0L;
-#endif
-            foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiObjectBase>().GroupBy(x => x.IDShortName))
+            lock (hits)
             {
-                if (drawTargets.TryGetValue(objGroup.Key, out var drawingTarget))
+                hits.Clear();
+
+                var fumen = Editor?.Fumen;
+                if (fumen is null)
+                    return;
+
+                if (IsFollowCurrentEditorTime)
+                    CurrentPlayTime = (float)Editor.ScrollViewerVerticalOffset;
+
+                var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
+                var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
+
+                timeSignatureHelper.BeginDraw(this);
+                timeSignatureHelper.Draw(fumen);
+                timeSignatureHelper.EndDraw();
+                drawCall = 0;
+#if DEBUG
+                stopwatch.Restart();
+                var prevTime = 0L;
+#endif
+                foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
                 {
-                    drawingTarget.BeginDraw();
-                    foreach (var obj in objGroup)
+                    var drawingTarget = GetDrawingTarget(objGroup.Key);
+                    if (drawingTarget is not null)
                     {
-                        drawingTarget.Draw(obj, fumen);
-                        drawCall++;
+                        drawingTarget.BeginDraw(this);
+                        foreach (var obj in objGroup.OrderBy(x => x.TGrid))
+                        {
+                            drawingTarget.Draw(obj, fumen);
+                            drawCall++;
+                        }
+                        drawingTarget.EndDraw();
                     }
-                    drawingTarget.EndDraw();
+
+#if DEBUG
+                    var time = stopwatch.ElapsedTicks;
+                    var costTicks = time - prevTime;
+                    if (costTicks > castTime.Tick)
+                        castTime = (objGroup.Key, costTicks);
+                    prevTime = time;
+#endif
                 }
 
+                //Log.LogDebug($"drawcall : {drawCall}");
+                SmoothFPSArray[SmoothFPSUpdateIdx] = 1 / (float)ts.TotalSeconds;
+                SmoothFPSUpdateIdx++;
+                if (SmoothFPSUpdateIdx == SmoothFPSArray.Length)
+                    SmoothFPSUpdateIdx = 0;
 #if DEBUG
-                var time = stopwatch.ElapsedTicks;
-                var costTicks = time - prevTime;
-                if (costTicks > castTime.Tick)
-                    castTime = (objGroup.Key, costTicks);
-                prevTime = time;
+                SmoothFPS2Array[SmoothFPS2UpdateIdx] = 1.0f / (stopwatch.ElapsedMilliseconds / 1000.0f);
+                SmoothFPS2UpdateIdx++;
+                if (SmoothFPS2UpdateIdx == SmoothFPS2Array.Length)
+                    SmoothFPS2UpdateIdx = 0;
 #endif
             }
-
-            //Log.LogDebug($"drawcall : {drawCall}");
-            SmoothFPSArray[SmoothFPSUpdateIdx] = 1 / (float)ts.TotalSeconds;
-            SmoothFPSUpdateIdx++;
-            if (SmoothFPSUpdateIdx == SmoothFPSArray.Length)
-                SmoothFPSUpdateIdx = 0;
-#if DEBUG
-            SmoothFPS2Array[SmoothFPS2UpdateIdx] = 1.0f / (stopwatch.ElapsedMilliseconds / 1000.0f);
-            SmoothFPS2UpdateIdx++;
-            if (SmoothFPS2UpdateIdx == SmoothFPS2Array.Length)
-                SmoothFPS2UpdateIdx = 0;
-#endif
         }
 
         #region Performence Statictis
@@ -298,12 +308,38 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         #endregion
 
+        #region Selectable Objects Register
+
+        private Dictionary<OngekiObjectBase, Rect> hits = new();
+
+        public void RegisterSelectableObject(OngekiObjectBase obj, Rect rect)
+        {
+            //rect.Y = rect.Y - CurrentPlayTime;
+            hits[obj] = rect;
+        }
+
+        #endregion
+
         #region UserActions
 
         public void OnMouseWheel(MouseWheelEventArgs args)
         {
             CurrentPlayTime += (args.Delta > 0 ? 2 : -2) * (Keyboard.IsKeyDown(Key.LeftShift) ? 10 : 1);
             Log.LogDebug($"CurrentPlayTime = {CurrentPlayTime}");
+        }
+
+        public void OnMouseDown(ActionExecutionContext e)
+        {
+            var arg = e.EventArgs as MouseEventArgs;
+            var hitPoint = arg.GetPosition(e.Source);
+            hitPoint.Y = (e.Source.ActualHeight - hitPoint.Y) + CurrentPlayTime;
+            var hitResult = Enumerable.Empty<KeyValuePair<OngekiObjectBase, Rect>>();
+
+            lock (hits)
+            {
+                hitResult = hits.AsParallel().Where(x => x.Value.Contains(hitPoint)).ToArray();
+                Log.LogDebug($"hit result = {hitResult.FirstOrDefault().Key}");
+            }
         }
 
         #endregion

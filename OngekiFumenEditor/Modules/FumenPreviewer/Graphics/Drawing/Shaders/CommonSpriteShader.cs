@@ -15,7 +15,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders
         {
             VertexProgram = @"
                 #version 330
-
 out vec2 varying_texPos;
 
 uniform mat4 Model;
@@ -33,7 +32,6 @@ void main(){
                 ";
             FragmentProgram = @"
                 #version 330
-
 uniform sampler2D diffuse;
 in vec2 varying_texPos;
 out vec4 out_color;

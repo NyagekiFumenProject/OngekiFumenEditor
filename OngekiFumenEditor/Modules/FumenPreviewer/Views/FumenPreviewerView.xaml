@@ -23,7 +23,7 @@
                 IsChecked="{Binding IsFollowCurrentEditorTime}" />
         </ContextMenu>
     </UserControl.ContextMenu>
-    <Grid>
+    <Grid cal:Message.Attach="[Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];">
         <opentkcontrol:GLWpfControl
             x:Name="glView"
             Ready="glView_Ready"

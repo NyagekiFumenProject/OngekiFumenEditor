@@ -78,6 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var pos = new Vector((float)timeX, (float)timeY);
 
             Draw(texture, size, pos, 0);
+            RegisterHitTest(obj, new() { X = pos.X - (size.X / 2), Y = pos.Y - (size.Y / 2), Width = size.X, Height = size.Y });
         }
 
         public override void Dispose()

@@ -18,9 +18,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
-        private readonly IFumenPreviewer previewer;
-
-        public IFumenPreviewer Previewer => previewer;
 
         protected CommonSpriteDrawTargetBase()
         {
@@ -30,8 +27,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             textureVBO = GL.GenBuffer();
 
             vao = GL.GenVertexArray();
-
-            previewer = IoC.Get<IFumenPreviewer>();
 
             Init();
         }
@@ -83,12 +78,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
                 Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
                 Matrix4.CreateRotationZ(rotation) *
-                Matrix4.CreateTranslation(position.X - previewer.ViewWidth / 2, position.Y - previewer.ViewHeight / 2, 0);
+                Matrix4.CreateTranslation(position.X - Previewer.ViewWidth / 2, position.Y - Previewer.ViewHeight / 2, 0);
             //var mvpMatrix = previewer.ViewProjectionMatrix * modelMatrix;
 
             shader.Begin();
             shader.PassUniform("Model", modelMatrix);
-            shader.PassUniform("ViewProjection", previewer.ViewProjectionMatrix);
+            shader.PassUniform("ViewProjection", Previewer.ViewProjectionMatrix);
             shader.PassUniform("TextureSize", size);
             shader.PassUniform("diffuse", texture);
 
@@ -99,6 +94,16 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             GL.BindVertexArray(0);
 
             shader.End();
+        }
+
+        public override void BeginDraw()
+        {
+
+        }
+
+        public override void EndDraw()
+        {
+            base.EndDraw();
         }
 
         public virtual void Dispose()

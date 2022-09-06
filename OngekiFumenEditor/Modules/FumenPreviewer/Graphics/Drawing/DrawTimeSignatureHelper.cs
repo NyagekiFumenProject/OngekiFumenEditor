@@ -41,9 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
         public void Draw(OngekiFumen fumen)
         {
-            BeginDraw();
             Draw(default, fumen);
-            EndDraw();
         }
     }
 }
