@@ -1,4 +1,4 @@
-﻿namespace ReOsuStoryboardPlayer.Core.PrimitiveValue
+﻿namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue
 {
     public struct Vec4
     {

@@ -1,7 +1,7 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
+using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
-using ReOsuStoryboardPlayer.Core.PrimitiveValue;
 using System;
 using System.Collections.Generic;
 
