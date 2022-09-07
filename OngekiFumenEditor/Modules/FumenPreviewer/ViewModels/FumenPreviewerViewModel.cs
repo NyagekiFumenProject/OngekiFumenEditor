@@ -11,6 +11,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -23,6 +24,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -131,6 +133,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         private static Dictionary<string, IDrawingTarget> drawTargets = new();
 
+        private Dictionary<IDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
+
         public FumenPreviewerViewModel()
         {
             DisplayName = "谱面预览";
@@ -237,17 +241,30 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 timeSignatureHelper.EndDraw();
 
                 drawCall = 0;
+
+                foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
+                {
+                    if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget drawingTarget)
+                        continue;
+
+                    if (!drawMap.TryGetValue(drawingTarget, out var enums))
+                        drawMap[drawingTarget] = objGroup;
+                    else
+                        drawMap[drawingTarget] = enums.Concat(objGroup);
+                }
 #if DEBUG
                 stopwatch.Restart();
                 var prevTime = 0L;
 #endif
-                foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
+                foreach (var renderPair in drawMap)
                 {
-                    var drawingTarget = GetDrawingTarget(objGroup.Key);
+                    var drawingTarget = renderPair.Key;
+                    var drawingObjs = renderPair.Value;
+
                     if (drawingTarget is not null)
                     {
                         drawingTarget.BeginDraw(this);
-                        foreach (var obj in objGroup.OrderBy(x => x.TGrid))
+                        foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))
                         {
                             drawingTarget.Draw(obj, fumen);
                             drawCall++;
@@ -259,10 +276,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                     var time = stopwatch.ElapsedTicks;
                     var costTicks = time - prevTime;
                     if (costTicks > castTime.Tick)
-                        castTime = (objGroup.Key, costTicks);
+                        castTime = (drawingTarget.GetType().Name, costTicks);
                     prevTime = time;
 #endif
                 }
+
+                drawMap.Clear();
 
                 timeSignatureHelper.BeginDraw(this);
                 timeSignatureHelper.DrawTimeSigntureText(stringHelper);

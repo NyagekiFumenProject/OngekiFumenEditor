@@ -16,6 +16,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Vector2 = System.Numerics.Vector2;
+using Vector4 = System.Numerics.Vector4;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
@@ -54,14 +55,17 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             renderer = null;
         }
 
-        public void Draw(string text, Vector2 pos, Vector2 scale, float rotate, int fontSize, Vector2? norigin = default)
+        public Vector2 Draw(string text, Vector2 pos, Vector2 scale, float rotate, int fontSize, Vector4? color = default, Vector2? norigin = default)
+            => Draw(text, pos, scale, rotate, fontSize, color, norigin);
+        public Vector2 Draw(string text, Vector2 pos, Vector2 scale, float rotate, int fontSize, FSColor? color = default, Vector2? norigin = default)
         {
             var font = fontSystem.GetFont(fontSize);
             var size = font.MeasureString(text, scale);
-            var origin = (norigin ?? new Vector2(0.5f, 0.5f)) * new Vector2(size.X, size.Y);
+            var origin = (norigin ?? new Vector2(0.5f, 0.5f)) * size;
             scale.Y = -scale.Y;
 
-            font.DrawText(renderer, text, pos, FSColor.LightCoral, scale, rotate, origin);
+            font.DrawText(renderer, text, pos, color ?? FSColor.White, scale, rotate, origin);
+            return size;
         }
 
         public void End()

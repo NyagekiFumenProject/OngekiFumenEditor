@@ -1,4 +1,6 @@
-﻿using OngekiFumenEditor.Base;
+﻿using FontStashSharp;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using System;
 using System.Collections.Generic;
@@ -64,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         {
             stringHelper.Begin(Previewer);
             foreach (var pair in drawLines)
-                stringHelper.Draw(pair.TGrid.ToString(), new(-Previewer.ViewWidth / 2, (float)pair.Y + 10), System.Numerics.Vector2.One, 0, 12, new(0, 0.5f));
+                stringHelper.Draw(pair.TGrid.ToString(), new(-Previewer.ViewWidth / 2, (float)pair.Y + 10), System.Numerics.Vector2.One, 0, 12, FSColor.White, new(0, 0.5f));
             stringHelper.End();
         }
     }
