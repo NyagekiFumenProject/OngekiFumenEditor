@@ -4,3 +4,6 @@
 [submodule "SvgToXaml"]
 	path = Dependences/SvgToXaml
 	url = https://github.com/NyagekiFumenProject/SvgToXaml
+[submodule "Polyline2D.CSharp"]
+	path = Dependences/Polyline2D.CSharp
+	url = https://github.com/NyagekiFumenProject/Polyline2D.CSharp
