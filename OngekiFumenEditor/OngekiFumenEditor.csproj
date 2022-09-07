@@ -49,6 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FontStashSharp" Version="1.2.5" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.5.107">
@@ -63,7 +64,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj" >
+    <ProjectReference Include="..\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj">
       <PrivateAssets>all</PrivateAssets>
     </ProjectReference>
     <ProjectReference Include="..\Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj">
