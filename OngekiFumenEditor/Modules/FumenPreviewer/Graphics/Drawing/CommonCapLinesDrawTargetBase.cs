@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -17,8 +18,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public abstract class CommonCapLinesDrawTargetBase<T> : CommonDrawTargetBase<T>, IDisposable where T : OngekiObjectBase
     {
-        public record LinePoint(Vector2 Point, Vector4 Color);
-
         private readonly Shader shader;
         private readonly int vbo;
         private readonly int vao;
