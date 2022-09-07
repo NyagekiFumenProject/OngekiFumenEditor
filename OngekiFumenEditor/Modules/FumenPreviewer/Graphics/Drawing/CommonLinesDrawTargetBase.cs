@@ -91,14 +91,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 arrBuffer[(6 * arrBufferIdx) + 3] = lp.Color.Y;
                 arrBuffer[(6 * arrBufferIdx) + 4] = lp.Color.Z;
                 arrBuffer[(6 * arrBufferIdx) + 5] = lp.Color.W;
-                /*
-                p[0] = lp.Point.X;
-                p[1] = lp.Point.Y;
-                p[2] = lp.Color.X;
-                p[3] = lp.Color.Y;
-                p[4] = lp.Color.Z;
-                p[5] = lp.Color.W;
-                */
                 arrBufferIdx++;
             }
 

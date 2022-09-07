@@ -40,6 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         private FumenVisualEditorViewModel editor = default;
 
         public DrawTimeSignatureHelper timeSignatureHelper;
+        public DrawStringHelper stringHelper;
 
         public FumenVisualEditorViewModel Editor
         {
@@ -158,9 +159,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.Blend);
-            GL.Enable(EnableCap.LineSmooth);
-            GL.Enable(EnableCap.PolygonSmooth);
-            //GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             IoC.Get<ISchedulerManager>().AddScheduler(this);
@@ -197,13 +195,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             ViewWidth = (float)openGLView.ActualWidth;
             ViewHeight = (float)openGLView.ActualHeight;
 
-            GL.ClearColor(System.Drawing.Color.Black);
+            GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
             GL.Viewport(0, 0, (int)ViewWidth, (int)ViewHeight);
 
             drawTargets = IoC.GetAll<IDrawingTarget>()
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .ToDictionary(x => x.supportId, x => x.target);
 
+            stringHelper = new DrawStringHelper();
             timeSignatureHelper = new DrawTimeSignatureHelper();
 
             openGLView.Render += (ts) => OnRender(openGLView, ts);
@@ -236,6 +235,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 timeSignatureHelper.BeginDraw(this);
                 timeSignatureHelper.Draw(fumen);
                 timeSignatureHelper.EndDraw();
+
                 drawCall = 0;
 #if DEBUG
                 stopwatch.Restart();
@@ -263,6 +263,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                     prevTime = time;
 #endif
                 }
+
+                timeSignatureHelper.BeginDraw(this);
+                timeSignatureHelper.DrawTimeSigntureText(stringHelper);
+                timeSignatureHelper.EndDraw();
 
                 //Log.LogDebug($"drawcall : {drawCall}");
                 SmoothFPSArray[SmoothFPSUpdateIdx] = 1 / (float)ts.TotalSeconds;
