@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     [Export(typeof(IDrawingTarget))]
-    public class BeamDrawingTarget : CommonSpriteDrawTargetBase<BeamStart>
+    public class BeamDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
         private Texture texture;
 
@@ -52,9 +52,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             //Draw(texture, size, pos, 0);
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
-            base.Dispose();
             texture?.Dispose();
             texture = null;
         }

@@ -20,11 +20,13 @@ using Vector2 = System.Numerics.Vector2;
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     [Export(typeof(IDrawingTarget))]
-    public class BellDrawingTarget : CommonSpriteDrawTargetBase<Bell>
+    public class BellDrawingTarget : CommonDrawTargetBase<Bell>, IDisposable
     {
         private Texture texture;
         private OpenTK.Mathematics.Vector2 size;
+
         private IStringDrawing stringDrawing;
+        private ITextureDrawing textureDrawing;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { Bell.CommandName };
 
@@ -35,6 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             texture = new Texture(bitmap);
             size = new(40, 40);
             stringDrawing = IoC.Get<IStringDrawing>();
+            textureDrawing = IoC.Get<ITextureDrawing>();
         }
 
         public float CalculateBulletMsecTime(Bell obj, float userSpeed = 2.35f)
@@ -83,7 +86,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
             var pos = new Vector((float)timeX, (float)timeY);
 
-            Draw(texture, size, pos, 0);
+            textureDrawing.Draw(Previewer, texture, new (Vector2, Vector2, float)[] { (new(size.X, size.Y), new(pos.X, pos.Y), 0f) });
+
             DrawPallateStr(obj, pos);
             RegisterHitTest(obj, new() { X = pos.X - (size.X / 2), Y = pos.Y - (size.Y / 2), Width = size.X, Height = size.Y });
         }
@@ -95,9 +99,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - Previewer.ViewWidth / 2, pos.Y + 5), Vector2.One, 16, 0, new(1, 0, 0, 1), new(0.5f, 0.5f), IStringDrawing.StringStyle.Normal, Previewer, default, out _);
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
-            base.Dispose();
             texture?.Dispose();
             texture = null;
         }

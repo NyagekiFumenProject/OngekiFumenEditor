@@ -1,25 +1,32 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base;
+﻿using MahApps.Metro.Controls;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System.Windows.Media.Imaging;
+using Vector2 = System.Numerics.Vector2;
+using Vector3 = OpenTK.Mathematics.Vector3;
+using Shader = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders.Shader;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
-    public abstract class CommonSpriteDrawTargetBase<T> : CommonDrawTargetBase<T>, IDisposable where T : OngekiObjectBase
+    [Export(typeof(ITextureDrawing))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    internal class DefaultTextureDrawing : ITextureDrawing, IDisposable
     {
         private readonly Shader shader;
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
 
-        protected CommonSpriteDrawTargetBase()
+        protected DefaultTextureDrawing()
         {
             shader = CommonSpriteShader.Shared;
 
@@ -72,45 +79,42 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             GL.BindVertexArray(0);
         }
 
-        public void Draw(Texture texture, Vector2 size, Vector position, float rotation)
+        public void Dispose()
+        {
+            GL.DeleteVertexArray(vao);
+            GL.DeleteBuffer(vertexVBO);
+            GL.DeleteBuffer(textureVBO);
+        }
+
+        public void Draw(IFumenPreviewer target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
+        {
+            foreach ((var size, var position, var rotation) in instances)
+                Draw(target, texture, size, position, rotation);
+        }
+
+        private void Draw(IFumenPreviewer target, Texture texture, Vector2 size, Vector2 position, float rotation)
         {
             var modelMatrix =
                 Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
                 Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
                 Matrix4.CreateRotationZ(rotation) *
-                Matrix4.CreateTranslation(position.X - Previewer.ViewWidth / 2, position.Y - Previewer.ViewHeight / 2, 0);
+                Matrix4.CreateTranslation(position.X - target.ViewWidth / 2, position.Y - target.ViewHeight / 2, 0);
             //var mvpMatrix = previewer.ViewProjectionMatrix * modelMatrix;
 
             shader.Begin();
-            shader.PassUniform("Model", modelMatrix);
-            shader.PassUniform("ViewProjection", Previewer.ViewProjectionMatrix);
-            shader.PassUniform("TextureSize", size);
-            shader.PassUniform("diffuse", texture);
-
-            GL.BindVertexArray(vao);
             {
-                GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
+                shader.PassUniform("Model", modelMatrix);
+                shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
+                shader.PassUniform("TextureSize", new OpenTK.Mathematics.Vector2(size.X, size.Y));
+                shader.PassUniform("diffuse", texture);
+
+                GL.BindVertexArray(vao);
+                {
+                    GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
+                }
+                GL.BindVertexArray(0);
             }
-            GL.BindVertexArray(0);
-
             shader.End();
-        }
-
-        public override void BeginDraw()
-        {
-
-        }
-
-        public override void EndDraw()
-        {
-            base.EndDraw();
-        }
-
-        public virtual void Dispose()
-        {
-            GL.DeleteVertexArray(vao);
-            GL.DeleteBuffer(vertexVBO);
-            GL.DeleteBuffer(textureVBO);
         }
     }
 }

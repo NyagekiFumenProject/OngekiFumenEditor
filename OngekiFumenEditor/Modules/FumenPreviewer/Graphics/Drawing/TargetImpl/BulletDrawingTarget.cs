@@ -5,26 +5,29 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
+using Vector = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue.Vector;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     [Export(typeof(IDrawingTarget))]
-    public class BulletDrawingTarget : CommonSpriteDrawTargetBase<Bullet>
+    public class BulletDrawingTarget : CommonDrawTargetBase<Bullet>, IDisposable
     {
         Dictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap = new();
         Dictionary<Texture, Vector2> spritesSize = new();
         Dictionary<Texture, Vector> spritesOriginOffset = new();
+
         private IStringDrawing stringDrawing;
+        private ITextureDrawing textureDrawing;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { Bullet.CommandName };
 
@@ -71,6 +74,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             SetTexture(BulletDamageType.Danger, BulletType.Square, "sqrt_bullet2.png", size, origOffset);
 
             stringDrawing = IoC.Get<IStringDrawing>();
+            textureDrawing = IoC.Get<ITextureDrawing>();
         }
 
         public float CalculateBulletMsecTime(Bullet obj, float userSpeed = 2.35f)
@@ -126,8 +130,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var origOffset = spritesOriginOffset[texture];
 
             var rotate = Math.Atan((toX - fromX) / (toTime - fromTime));
-            //Log.LogDebug($"rotate : {rotate:F2}");
-            Draw(texture, size, pos + origOffset, (float)rotate);
+            var offsetPos = pos + origOffset;
+            textureDrawing.Draw(Previewer, texture, new (Vector2, Vector2, float)[] { (new(size.X, size.Y), new(offsetPos.X, offsetPos.Y), (float)rotate) });
             DrawPallateStr(obj, pos + origOffset);
         }
 
@@ -138,9 +142,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - Previewer.ViewWidth / 2, pos.Y + 5), System.Numerics.Vector2.One, 16, 0, System.Numerics.Vector4.One, new(0.5f, 0.5f), default, Previewer, default, out _);
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
-            base.Dispose();
             spritesMap.SelectMany(x => x.Value.Values).ForEach(x => x.Dispose());
             spritesMap.Clear();
         }

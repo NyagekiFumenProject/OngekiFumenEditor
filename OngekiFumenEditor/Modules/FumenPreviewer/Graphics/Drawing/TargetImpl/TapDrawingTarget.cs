@@ -4,12 +4,12 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,7 +17,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     [Export(typeof(IDrawingTarget))]
     [Export(typeof(TapDrawingTarget))]
-    public class TapDrawingTarget : CommonSpriteDrawTargetBase<Tap>
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    public class TapDrawingTarget : CommonDrawTargetBase<Tap>, IDisposable
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };
 
@@ -29,6 +30,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         private Vector2 tapSize = new Vector2(40, 16);
         private Vector2 leftWallSize = new Vector2(40, 40);
         private Vector2 rightWallSize = new Vector2(-40, 40);
+
+        private ITextureDrawing textureDrawing;
 
         public TapDrawingTarget() : base()
         {
@@ -48,6 +51,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png", UriKind.Relative));
             using var bitmap3 = Image.FromStream(info.Stream) as Bitmap;
             wallTexture = new Texture(bitmap3);
+
+            textureDrawing = IoC.Get<ITextureDrawing>();
         }
 
         public override void Draw(Tap ongekiObject, OngekiFumen fumen)
@@ -80,14 +85,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var x = XGridCalculator.ConvertXGridToX(xGrid, 30, Previewer.ViewWidth, 1);
             var y = TGridCalculator.ConvertTGridToY(tGrid, fumen.BpmList, 1.0, 240);
 
-            var pos = new Vector((float)x, (float)y);
+            var pos = new Vector2((float)x, (float)y);
 
-            Draw(texture, size, pos, 0);
+            textureDrawing.Draw(Previewer, texture, new[] { (size, pos, 0f) });
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
-            base.Dispose();
             redTexture?.Dispose();
             greenTexture?.Dispose();
             blueTexture?.Dispose();
