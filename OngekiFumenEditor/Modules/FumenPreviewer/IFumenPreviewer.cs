@@ -18,6 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer
         float ViewWidth { get; }
         float ViewHeight { get; }
         float CurrentPlayTime { get; set; }
+        bool IsPreviewPlaying { get; }
         Matrix4 ViewProjectionMatrix { get; }
 
         void PrepareOpenGLView(GLWpfControl glView);

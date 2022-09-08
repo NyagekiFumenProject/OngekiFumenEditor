@@ -1,4 +1,5 @@
-﻿using FontStashSharp;
+﻿using Caliburn.Micro;
+using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
@@ -35,7 +36,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         private readonly int vbo;
         private readonly int vao;
         private HashSet<RegisterDrawingInfo> registeredObjects = new();
-        private DrawStringHelper stringHelper;
         private OngekiFumen fumen;
 
         public const int LINE_DRAW_MAX = 100;
@@ -43,7 +43,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public HorizonalDrawingTarget()
         {
-            stringHelper = new DrawStringHelper();
             shader = CommonLineShader.Shared;
 
             vbo = GL.GenBuffer();
@@ -72,6 +71,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             }
             GL.BindVertexArray(0);
+
+            stringDrawing = IoC.Get<IStringDrawing>();
         }
 
         public override void BeginDraw()
@@ -174,6 +175,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             {"[LBK_End]", FSColor.HotPink },
             {"[SFL_End]", FSColor.LightCyan },
         };
+        private IStringDrawing stringDrawing;
 
         public override void Draw(OngekiTimelineObjectBase ongekiObject, OngekiFumen fumen)
         {
@@ -370,16 +372,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 _ => string.Empty
             };
 
-            stringHelper.Begin(Previewer);
             var x = -Previewer.ViewWidth / 2;
             var i = 0;
             foreach ((var obj, var c) in group.Select(x => (x.TimelineObject, colors[x.TimelineObject.IDShortName])).OrderBy(x => x.Item2.PackedValue))
             {
-                var size = stringHelper.Draw((i == 0 ? string.Empty : " / ") + formatObj(obj), new Vector2(x, y + 12), Vector2.One, 0, 16, c, new(0, 0.5f));
-                x += size.X;
+                stringDrawing.Draw((i == 0 ? string.Empty : " / ") + formatObj(obj), new Vector2(x, y + 12), Vector2.One, 16, 0, new (c.R, c.G, c.B, c.A), new(0, 0.5f), IStringDrawing.StringStyle.Normal, Previewer, default, out var size);
+                x += size.Value.X;
                 i++;
             }
-            stringHelper.End();
         }
     }
 }

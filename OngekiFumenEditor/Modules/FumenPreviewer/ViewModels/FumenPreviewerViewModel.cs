@@ -42,7 +42,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         private FumenVisualEditorViewModel editor = default;
 
         public DrawTimeSignatureHelper timeSignatureHelper;
-        public DrawStringHelper stringHelper;
 
         public FumenVisualEditorViewModel Editor
         {
@@ -102,6 +101,16 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 Set(ref isFollowCurrentEditorTime, value);
                 if (value)
                     CurrentPlayTime = (float)Editor.ScrollViewerVerticalOffset;
+            }
+        }
+
+        private bool isPreviewPlaying = false;
+        public bool IsPreviewPlaying
+        {
+            get => isPreviewPlaying;
+            set
+            {
+                Set(ref isPreviewPlaying, value);
             }
         }
 
@@ -206,7 +215,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .ToDictionary(x => x.supportId, x => x.target);
 
-            stringHelper = new DrawStringHelper();
             timeSignatureHelper = new DrawTimeSignatureHelper();
 
             openGLView.Render += (ts) => OnRender(openGLView, ts);
@@ -284,7 +292,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 drawMap.Clear();
 
                 timeSignatureHelper.BeginDraw(this);
-                timeSignatureHelper.DrawTimeSigntureText(stringHelper);
+                timeSignatureHelper.DrawTimeSigntureText();
                 timeSignatureHelper.EndDraw();
 
                 //Log.LogDebug($"drawcall : {drawCall}");

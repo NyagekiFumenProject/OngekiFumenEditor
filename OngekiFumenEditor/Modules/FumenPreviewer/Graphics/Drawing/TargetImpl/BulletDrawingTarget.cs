@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
@@ -23,6 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         Dictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap = new();
         Dictionary<Texture, Vector2> spritesSize = new();
         Dictionary<Texture, Vector> spritesOriginOffset = new();
+        private IStringDrawing stringDrawing;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { Bullet.CommandName };
 
@@ -67,6 +69,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             SetTexture(BulletDamageType.Normal, BulletType.Square, "sqrt_bullet0.png", size, origOffset);
             SetTexture(BulletDamageType.Hard, BulletType.Square, "sqrt_bullet1.png", size, origOffset);
             SetTexture(BulletDamageType.Danger, BulletType.Square, "sqrt_bullet2.png", size, origOffset);
+
+            stringDrawing = IoC.Get<IStringDrawing>();
         }
 
         public float CalculateBulletMsecTime(Bullet obj, float userSpeed = 2.35f)
@@ -123,8 +127,15 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
             var rotate = Math.Atan((toX - fromX) / (toTime - fromTime));
             //Log.LogDebug($"rotate : {rotate:F2}");
-
             Draw(texture, size, pos + origOffset, (float)rotate);
+            DrawPallateStr(obj, pos + origOffset);
+        }
+
+        private void DrawPallateStr(IBulletPalleteReferencable obj, Vector pos)
+        {
+            if (obj.ReferenceBulletPallete is null)
+                return;
+            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - Previewer.ViewWidth / 2, pos.Y + 5), System.Numerics.Vector2.One, 16, 0, System.Numerics.Vector4.One, new(0.5f, 0.5f), default, Previewer, default, out _);
         }
 
         public override void Dispose()

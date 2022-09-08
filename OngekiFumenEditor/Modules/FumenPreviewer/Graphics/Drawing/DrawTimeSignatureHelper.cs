@@ -1,10 +1,12 @@
-﻿using FontStashSharp;
+﻿using Caliburn.Micro;
+using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +23,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         public override IEnumerable<string> DrawTargetID => throw new NotImplementedException();
 
         private List<CacheDrawLineResult> drawLines = new();
+        private IStringDrawing stringDrawing;
+
+        public DrawTimeSignatureHelper()
+        {
+            stringDrawing = IoC.Get<IStringDrawing>();
+        }
 
         public override void FillLine(List<LinePoint> list, OngekiObjectBase obj, OngekiFumen fumen)
         {
@@ -62,12 +70,23 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             Draw(default, fumen);
         }
 
-        public void DrawTimeSigntureText(DrawStringHelper stringHelper)
+        public void DrawTimeSigntureText()
         {
-            stringHelper.Begin(Previewer);
             foreach (var pair in drawLines)
-                stringHelper.Draw(pair.TGrid.ToString(), new(Previewer.ViewWidth / 2, (float)pair.Y + 10), System.Numerics.Vector2.One, 0, 12, FSColor.White, new(1, 0.5f));
-            stringHelper.End();
+                stringDrawing.Draw(
+                    pair.TGrid.ToString(),
+                    new(Previewer.ViewWidth / 2,
+                    (float)pair.Y + 10),
+                    Vector2.One,
+                    12,
+                    0,
+                    Vector4.One,
+                    new(1, 0.5f),
+                    IStringDrawing.StringStyle.Normal,
+                    Previewer,
+                    default,
+                    out _
+            );
         }
     }
 }
