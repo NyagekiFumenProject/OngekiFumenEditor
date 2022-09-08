@@ -2,7 +2,6 @@
 using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using System;
@@ -15,7 +14,6 @@ using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
-using Vector = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue.Vector;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
@@ -24,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
     {
         Dictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap = new();
         Dictionary<Texture, Vector2> spritesSize = new();
-        Dictionary<Texture, Vector> spritesOriginOffset = new();
+        Dictionary<Texture, Vector2> spritesOriginOffset = new();
 
         private IStringDrawing stringDrawing;
         private ITextureDrawing textureDrawing;
@@ -40,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                 return new Texture(bitmap);
             }
 
-            void SetTexture(BulletDamageType k1, BulletType k2, string rPath, Vector2 size, Vector origOffset)
+            void SetTexture(BulletDamageType k1, BulletType k2, string rPath, Vector2 size, Vector2 origOffset)
             {
                 if (!spritesMap.TryGetValue(k1, out var dic))
                 {
@@ -56,19 +54,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             }
 
             var size = new Vector2(40, 40);
-            var origOffset = new Vector(0, 0);
+            var origOffset = new Vector2(0, 0);
             SetTexture(BulletDamageType.Normal, BulletType.Circle, "nt_mine_red.png", size, origOffset);
             SetTexture(BulletDamageType.Hard, BulletType.Circle, "nt_mine_pur.png", size, origOffset);
             SetTexture(BulletDamageType.Danger, BulletType.Circle, "nt_mine_blk.png", size, origOffset);
 
             size = new(30, 80);
-            origOffset = new Vector(0, 35);
+            origOffset = new Vector2(0, 35);
             SetTexture(BulletDamageType.Normal, BulletType.Needle, "tri_bullet0.png", size, origOffset);
             SetTexture(BulletDamageType.Hard, BulletType.Needle, "tri_bullet1.png", size, origOffset);
             SetTexture(BulletDamageType.Danger, BulletType.Needle, "tri_bullet2.png", size, origOffset);
 
             size = new(30, 80);
-            origOffset = new Vector(0, 35);
+            origOffset = new Vector2(0, 35);
             SetTexture(BulletDamageType.Normal, BulletType.Square, "sqrt_bullet0.png", size, origOffset);
             SetTexture(BulletDamageType.Hard, BulletType.Square, "sqrt_bullet1.png", size, origOffset);
             SetTexture(BulletDamageType.Danger, BulletType.Square, "sqrt_bullet2.png", size, origOffset);
@@ -123,7 +121,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             timeX = MathUtils.Limit(timeX, fromX, toX);
             var timeY = target.CurrentPlayTime + target.ViewHeight * (1 - precent);
 
-            var pos = new Vector((float)timeX, (float)timeY);
+            var pos = new Vector2((float)timeX, (float)timeY);
 
             var texture = spritesMap[obj.BulletDamageTypeValue][obj.ReferenceBulletPallete.TypeValue];
             var size = spritesSize[texture];
@@ -135,7 +133,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             DrawPallateStr(target, obj, pos + origOffset);
         }
 
-        private void DrawPallateStr(IFumenPreviewer target, IBulletPalleteReferencable obj, Vector pos)
+        private void DrawPallateStr(IFumenPreviewer target, IBulletPalleteReferencable obj, Vector2 pos)
         {
             if (obj.ReferenceBulletPallete is null)
                 return;

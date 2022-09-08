@@ -1,5 +1,4 @@
-﻿using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
@@ -99,12 +98,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders
         public void PassNullTexUniform(string name)
         {
             GL.BindTexture(TextureTarget.Texture2D, 0);
-        }
-
-        public void PassUniform(string name, Vec4 vec)
-        {
-            int l = GetUniformLocation(name);
-            GL.Uniform4(l, vec.x, vec.y, vec.z, vec.w);
         }
 
         public void PassUniform(string name, float val)

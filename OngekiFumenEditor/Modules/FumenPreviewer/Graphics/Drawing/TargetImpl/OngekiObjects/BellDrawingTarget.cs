@@ -2,7 +2,6 @@
 using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
@@ -14,7 +13,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using Vector = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue.Vector;
 using Vector2 = System.Numerics.Vector2;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
@@ -84,7 +82,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             timeX = MathUtils.Limit(timeX, fromX, toX);
             var timeY = target.CurrentPlayTime + target.ViewHeight * (1 - precent);
 
-            var pos = new Vector((float)timeX, (float)timeY);
+            var pos = new Vector2((float)timeX, (float)timeY);
 
             textureDrawing.Draw(target, texture, new (Vector2, Vector2, float)[] { (new(size.X, size.Y), new(pos.X, pos.Y), 0f) });
 
@@ -92,7 +90,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             //RegisterHitTest(obj, new() { X = pos.X - (size.X / 2), Y = pos.Y - (size.Y / 2), Width = size.X, Height = size.Y });
         }
 
-        private void DrawPallateStr(IFumenPreviewer target, IBulletPalleteReferencable obj, Vector pos)
+        private void DrawPallateStr(IFumenPreviewer target, IBulletPalleteReferencable obj, Vector2 pos)
         {
             if (obj.ReferenceBulletPallete is null)
                 return;

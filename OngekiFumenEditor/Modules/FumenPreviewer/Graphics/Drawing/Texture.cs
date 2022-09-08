@@ -1,10 +1,10 @@
-﻿using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         [Browsable(false)]
         public int ID { get { return _id; } }
 
-        private Vector _textureSize;
+        private Vector2 _textureSize;
 
         private string name;
 
@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
-            _textureSize = new Vector(bmp.Width, bmp.Height);
+            _textureSize = new Vector2(bmp.Width, bmp.Height);
 
             BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
                 GL.BindTexture(TextureTarget.Texture2D, _id);
 
-                _textureSize = new Vector(width, height);
+                _textureSize = new Vector2(width, height);
 
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
