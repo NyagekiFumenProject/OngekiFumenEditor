@@ -4,7 +4,7 @@ using OpenTK.Mathematics;
 using System;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String.Platform
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String.Platform
 {
     internal class Renderer : IFontStashRenderer2, IDisposable
     {

@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String
 {
     public class Shader : IDisposable
     {

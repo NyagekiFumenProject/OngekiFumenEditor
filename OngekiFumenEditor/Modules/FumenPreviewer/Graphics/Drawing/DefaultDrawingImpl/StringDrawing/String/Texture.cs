@@ -2,7 +2,7 @@ using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Drawing;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String
 {
 	public unsafe class Texture : IDisposable
 	{

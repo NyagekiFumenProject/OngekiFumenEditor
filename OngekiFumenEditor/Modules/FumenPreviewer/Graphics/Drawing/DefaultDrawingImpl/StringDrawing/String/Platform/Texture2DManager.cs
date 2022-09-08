@@ -1,7 +1,7 @@
 ﻿using FontStashSharp.Interfaces;
 using System.Drawing;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String.Platform
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String.Platform
 {
 	internal class Texture2DManager : ITexture2DManager
 	{

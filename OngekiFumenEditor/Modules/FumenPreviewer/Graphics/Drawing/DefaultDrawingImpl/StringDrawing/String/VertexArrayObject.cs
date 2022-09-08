@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String
 {
 	public class VertexArrayObject: IDisposable
 	{

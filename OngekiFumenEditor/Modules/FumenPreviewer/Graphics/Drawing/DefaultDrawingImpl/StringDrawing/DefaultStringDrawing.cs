@@ -1,5 +1,5 @@
 ﻿using FontStashSharp;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String.Platform;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String.Platform;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -9,7 +9,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing
 {
     [Export(typeof(IStringDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
