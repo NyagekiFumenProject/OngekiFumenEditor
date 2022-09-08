@@ -61,10 +61,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String.Platf
         private readonly VertexPositionColorTexture[] _vertexData = new VertexPositionColorTexture[MAX_VERTICES];
         private object _lastTexture;
         private int _vertexIndex = 0;
-        private bool _backup_depthTest;
-        private bool _backup_blend;
-        private int _backup_blend_s;
-        private int _backup_blend_d;
         private readonly Texture2DManager _textureManager;
 
         public ITexture2DManager TextureManager => _textureManager;

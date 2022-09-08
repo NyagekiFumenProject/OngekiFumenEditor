@@ -25,13 +25,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
         public int LineWidth { get; set; } = 2;
 
-        private static StateStack DefaultRenderStateStack { get; } = new StateStack(() =>
+        public static StateStack DefaultRenderStateStack { get; } = new StateStack(() =>
         {
             var list = ObjectPool<List<int>>.Get();
             list.Clear();
 
             list.Add(GL.IsEnabled(EnableCap.LineSmooth) ? 1 : 0);
-            list.Add(GL.GetInteger(GetPName.LineSmoothHint));
 
             return list;
         }, (l) =>
@@ -42,8 +41,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 GL.Enable(EnableCap.LineSmooth);
             else
                 GL.Disable(EnableCap.LineSmooth);
-
-            GL.Hint(HintTarget.LineSmoothHint, (HintMode)list[1]);
 
             ObjectPool<List<int>>.Return(list);
         });

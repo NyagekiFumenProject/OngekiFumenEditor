@@ -15,8 +15,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.L
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "WLS", "WRS" };
 
-        private Vector4 LeftWallColor = new Vector4(35 / 255.0f, 4 / 255.0f, 117 / 255.0f, 255 / 255.0f);
-        private Vector4 RightWallColor = new Vector4(136 / 255.0f, 3 / 255.0f, 152 / 255.0f, 255 / 255.0f);
+        public static Vector4 LeftWallColor { get; }  = new Vector4(35 / 255.0f, 4 / 255.0f, 117 / 255.0f, 255 / 255.0f);
+        public static Vector4 RightWallColor { get; } = new Vector4(136 / 255.0f, 3 / 255.0f, 152 / 255.0f, 255 / 255.0f);
 
         public WallLaneDrawTarget()
         {
