@@ -27,6 +27,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png", UriKind.Relative));
             using var bitmap = Image.FromStream(info.Stream) as Bitmap;
             texture = new Texture(bitmap);
+
+
         }
 
         public override void Draw(IFumenPreviewer target, BeamStart obj)

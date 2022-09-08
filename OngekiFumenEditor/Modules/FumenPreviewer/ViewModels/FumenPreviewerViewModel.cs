@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -32,6 +33,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 {
@@ -144,7 +147,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         public OngekiFumen Fumen => Editor.Fumen;
 
-        private static Dictionary<string, IDrawingTarget> drawTargets = new();
+        private static Dictionary<string, IDrawingTarget[]> drawTargets = new();
 
         private Dictionary<IDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
 
@@ -217,14 +220,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
             drawTargets = IoC.GetAll<IDrawingTarget>()
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
-                .ToDictionary(x => x.supportId, x => x.target);
+                .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
 
             timeSignatureHelper = new DrawTimeSignatureHelper();
 
             openGLView.Render += (ts) => OnRender(openGLView, ts);
         }
 
-        public IDrawingTarget GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
+        public IDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
 
         public void OnRender(GLWpfControl openGLView, TimeSpan ts)
         {
@@ -254,13 +257,16 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
                 foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
                 {
-                    if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget drawingTarget)
+                    if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget[] drawingTargets)
                         continue;
 
-                    if (!drawMap.TryGetValue(drawingTarget, out var enums))
-                        drawMap[drawingTarget] = objGroup;
-                    else
-                        drawMap[drawingTarget] = enums.Concat(objGroup);
+                    foreach (var drawingTarget in drawingTargets)
+                    {
+                        if (!drawMap.TryGetValue(drawingTarget, out var enums))
+                            drawMap[drawingTarget] = objGroup;
+                        else
+                            drawMap[drawingTarget] = enums.Concat(objGroup);
+                    }
                 }
 #if DEBUG
                 stopwatch.Restart();

@@ -6,6 +6,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -13,22 +14,39 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.Lane
 {
+    public abstract class NormalLaneDrawingTarget : LaneDrawingTargetBase
+    {
+        public NormalLaneDrawingTarget() : base()
+        {
+            Texture LoadTex(string rPath)
+            {
+                var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + rPath, UriKind.Relative));
+                using var bitmap = Image.FromStream(info.Stream) as Bitmap;
+                return new Texture(bitmap);
+            }
+
+            StartEditorTexture = LoadTex("NS.png");
+            NextEditorTexture = LoadTex("NN.png");
+            EndEditorTexture = LoadTex("NE.png");
+        }
+    }
+
     [Export(typeof(IDrawingTarget))]
-    public class LeftLaneDrawTarget : LaneDrawingTargetBase
+    public class LeftLaneDrawTarget : NormalLaneDrawingTarget
     {
         public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => new(1, 0, 0, 1);
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "LLS" };
     }
 
     [Export(typeof(IDrawingTarget))]
-    public class CenterLaneDrawTarget : LaneDrawingTargetBase
+    public class CenterLaneDrawTarget : NormalLaneDrawingTarget
     {
         public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => new(0, 1, 0, 1);
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "LCS" };
     }
 
     [Export(typeof(IDrawingTarget))]
-    public class RightLaneDrawTarget : LaneDrawingTargetBase
+    public class RightLaneDrawTarget : NormalLaneDrawingTarget
     {
         public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => new(0, 0, 1, 1);
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "LRS" };

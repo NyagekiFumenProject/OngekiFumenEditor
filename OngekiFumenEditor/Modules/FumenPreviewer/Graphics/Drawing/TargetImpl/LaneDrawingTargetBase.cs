@@ -1,10 +1,14 @@
-﻿using OngekiFumenEditor.Base;
+﻿using Caliburn.Micro;
+using Microsoft.VisualBasic;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -13,23 +17,44 @@ using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDraw
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
-    public abstract class LaneDrawingTargetBase<T> : CommonLinesDrawTargetBase<T> where T : LaneStartBase
+    public abstract class LaneDrawingTargetBase<T> : CommonLinesDrawTargetBase<T> where T : ConnectableStartObject
     {
-        public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
+        private ITextureDrawing textureDrawing;
 
-        public override void FillLine(IFumenPreviewer target, List<LineVertex> list, T obj)
+        public Texture StartEditorTexture { get; protected set; }
+        public Texture NextEditorTexture { get; protected set; }
+        public Texture EndEditorTexture { get; protected set; }
+
+        private Vector2 editorSize = new(16, 16);
+
+        public LaneDrawingTargetBase()
         {
-            LineVertex calc(ConnectableObjectBase o)
+            textureDrawing = IoC.Get<ITextureDrawing>();
+        }
+
+        public override void DrawBatch(IFumenPreviewer target, IEnumerable<T> objs)
+        {
+            base.DrawBatch(target, objs);
+
+            var cacheCalcMap = GetCurrentFrameCalculatedGridResult();
+
+            void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
             {
-                return new(
-                    new((float)XGridCalculator.ConvertXGridToX(o.XGrid, 30, target.ViewWidth, 1), (float)TGridCalculator.ConvertTGridToY(o.TGrid, target.Fumen.BpmList, 1.0, 240)),
-                    GetLanePointColor(o)
-                    );
+                using var d = o.Select(x => new
+                {
+                    Obj = x,
+                    Pos = new Vector2(
+                        cacheCalcMap.TryGetValue(x.XGrid, out var cx) ? cx : (float)XGridCalculator.ConvertXGridToX(x.XGrid, 30, target.ViewWidth, 1),
+                        cacheCalcMap.TryGetValue(x.TGrid, out var cy) ? cy : (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Fumen.BpmList, 1.0, 240)
+                    )
+                }).ToListWithObjectPool(out var list);
+
+                textureDrawing.Draw(target, texture, list.Select(x => (size, x.Pos, 0f)));
             }
 
-            list.Add(calc(obj));
-            foreach (var child in obj.Children)
-                list.Add(calc(child));
+            drawEditorTap(StartEditorTexture, editorSize, objs);
+            drawEditorTap(NextEditorTexture, editorSize, objs.SelectMany(x => x.Children.OfType<ConnectableNextObject>()));
+            drawEditorTap(EndEditorTexture, editorSize, objs.Select(x => x.Children.LastOrDefault()).OfType<ConnectableEndObject>());
         }
     }
 

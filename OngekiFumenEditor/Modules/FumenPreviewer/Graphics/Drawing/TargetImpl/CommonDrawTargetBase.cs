@@ -14,14 +14,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         private IFumenPreviewer target;
 
-        public void Begin(IFumenPreviewer target)
+        public virtual void Begin(IFumenPreviewer target)
         {
             this.target = target;
         }
 
         public abstract void Draw(IFumenPreviewer target, T obj);
 
-        public void End()
+        public virtual void End()
         {
             target = default;
         }
@@ -39,14 +39,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         private IFumenPreviewer target;
         private List<T> drawObjects = new();
 
-        public void Begin(IFumenPreviewer target)
+        public virtual void Begin(IFumenPreviewer target)
         {
             this.target = target;
         }
 
         public abstract void DrawBatch(IFumenPreviewer target, IEnumerable<T> objs);
 
-        public void End()
+        public virtual void End()
         {
             DrawBatch(target, drawObjects);
 
