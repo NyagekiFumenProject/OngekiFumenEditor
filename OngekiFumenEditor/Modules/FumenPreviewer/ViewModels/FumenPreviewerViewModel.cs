@@ -54,6 +54,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 Set(ref editor, value);
                 if (IsFollowCurrentEditorTime)
                     CurrentPlayTime = (float)(Editor?.ScrollViewerVerticalOffset ?? 0f);
+                NotifyOfPropertyChange(() => Fumen);
             }
         }
 
@@ -139,6 +140,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         public string SchedulerName => "Fumen Previewer Performance Statictis";
 
         public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromSeconds(1);
+
+        public OngekiFumen Fumen => Editor.Fumen;
 
         private static Dictionary<string, IDrawingTarget> drawTargets = new();
 
@@ -244,9 +247,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
                 var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
 
-                timeSignatureHelper.BeginDraw(this);
-                timeSignatureHelper.Draw(fumen);
-                timeSignatureHelper.EndDraw();
+                timeSignatureHelper.DrawLines(this);
 
                 drawCall = 0;
 
@@ -271,13 +272,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
                     if (drawingTarget is not null)
                     {
-                        drawingTarget.BeginDraw(this);
+                        drawingTarget.Begin(this);
                         foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))
                         {
-                            drawingTarget.Draw(obj, fumen);
+                            drawingTarget.Post(obj);
                             drawCall++;
                         }
-                        drawingTarget.EndDraw();
+                        drawingTarget.End();
                     }
 
 #if DEBUG
@@ -291,9 +292,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
                 drawMap.Clear();
 
-                timeSignatureHelper.BeginDraw(this);
-                timeSignatureHelper.DrawTimeSigntureText();
-                timeSignatureHelper.EndDraw();
+                timeSignatureHelper.DrawTimeSigntureText(this);
 
                 //Log.LogDebug($"drawcall : {drawCall}");
                 SmoothFPSArray[SmoothFPSUpdateIdx] = 1 / (float)ts.TotalSeconds;

@@ -37,14 +37,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             textureDrawing = IoC.Get<ITextureDrawing>();
         }
 
-        public override void Draw(Flick obj, OngekiFumen fumen)
+        public override void Draw(IFumenPreviewer target, Flick obj)
         {
-            var x = XGridCalculator.ConvertXGridToX(obj.XGrid, 30, Previewer.ViewWidth, 1);
-            var y = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 1.0, 240) + 24;
+            var x = XGridCalculator.ConvertXGridToX(obj.XGrid, 30, target.ViewWidth, 1);
+            var y = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1.0, 240) + 24;
             var pos = new Vector2((float)x, (float)y);
             var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
 
-            textureDrawing.Draw(Previewer, texture, new[] { (size, pos, 0f) });
+            textureDrawing.Draw(target, texture, new[] { (size, pos, 0f) });
         }
 
         public void Dispose()

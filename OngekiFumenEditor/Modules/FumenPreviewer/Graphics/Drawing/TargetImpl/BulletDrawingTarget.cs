@@ -77,17 +77,17 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             textureDrawing = IoC.Get<ITextureDrawing>();
         }
 
-        public float CalculateBulletMsecTime(Bullet obj, float userSpeed = 2.35f)
+        public float CalculateBulletMsecTime(IFumenPreviewer target, Bullet obj, float userSpeed = 2.35f)
         {
             //const float fat = 3.95f;
             //var time =  32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
-            var time = (float)Previewer.ViewHeight / (obj.ReferenceBulletPallete?.Speed ?? 1f);
+            var time = (float)target.ViewHeight / (obj.ReferenceBulletPallete?.Speed ?? 1f);
             return time;
         }
 
-        public override void Draw(Bullet obj, OngekiFumen fumen)
+        public override void Draw(IFumenPreviewer target, Bullet obj)
         {
-            var appearOffsetTime = CalculateBulletMsecTime(obj);
+            var appearOffsetTime = CalculateBulletMsecTime(target, obj);
 
             /*
             --------------------------- toTime 
@@ -106,22 +106,22 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             ---------------------------- fromTime = toTime - appearOffsetTime
              */
 
-            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, fumen) ?? obj.XGrid, 30, Previewer.ViewWidth, 1);
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, fumen) ?? obj.XGrid, 30, Previewer.ViewWidth, 1);
+            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, target.Fumen) ?? obj.XGrid, 30, target.ViewWidth, 1);
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Fumen) ?? obj.XGrid, 30, target.ViewWidth, 1);
 
             //计算向量化的物件运动时间
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 1, 240);
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1, 240);
             var fromTime = toTime - appearOffsetTime;
-            var currentTime = MathUtils.Limit(Previewer.CurrentPlayTime, toTime, fromTime);
+            var currentTime = MathUtils.Limit(target.CurrentPlayTime, toTime, fromTime);
             var precent = (currentTime - fromTime) / appearOffsetTime;
             //Log.LogDebug($"precent : {precent * 100:F2}");
-            if (Previewer.CurrentPlayTime < fromTime)
+            if (target.CurrentPlayTime < fromTime)
                 return;
 
             var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
             timeX = MathUtils.Limit(timeX, fromX, toX);
-            var timeY = Previewer.CurrentPlayTime + Previewer.ViewHeight * (1 - precent);
+            var timeY = target.CurrentPlayTime + target.ViewHeight * (1 - precent);
 
             var pos = new Vector((float)timeX, (float)timeY);
 
@@ -131,15 +131,15 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
             var rotate = Math.Atan((toX - fromX) / (toTime - fromTime));
             var offsetPos = pos + origOffset;
-            textureDrawing.Draw(Previewer, texture, new (Vector2, Vector2, float)[] { (new(size.X, size.Y), new(offsetPos.X, offsetPos.Y), (float)rotate) });
-            DrawPallateStr(obj, pos + origOffset);
+            textureDrawing.Draw(target, texture, new (Vector2, Vector2, float)[] { (new(size.X, size.Y), new(offsetPos.X, offsetPos.Y), (float)rotate) });
+            DrawPallateStr(target, obj, pos + origOffset);
         }
 
-        private void DrawPallateStr(IBulletPalleteReferencable obj, Vector pos)
+        private void DrawPallateStr(IFumenPreviewer target, IBulletPalleteReferencable obj, Vector pos)
         {
             if (obj.ReferenceBulletPallete is null)
                 return;
-            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - Previewer.ViewWidth / 2, pos.Y + 5), System.Numerics.Vector2.One, 16, 0, System.Numerics.Vector4.One, new(0.5f, 0.5f), default, Previewer, default, out _);
+            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - target.ViewWidth / 2, pos.Y + 5), System.Numerics.Vector2.One, 16, 0, System.Numerics.Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
         }
 
         public void Dispose()

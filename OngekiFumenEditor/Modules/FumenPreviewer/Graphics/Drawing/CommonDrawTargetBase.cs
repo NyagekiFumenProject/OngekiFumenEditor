@@ -8,39 +8,55 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
-    public abstract class CommonDrawTargetBase : IDrawingTarget
+    public abstract class CommonDrawTargetBase<T> : IDrawingTarget where T : OngekiObjectBase
     {
         public abstract IEnumerable<string> DrawTargetID { get; }
-        public IFumenPreviewer Previewer { get; set; }
 
-        public void BeginDraw(IFumenPreviewer previewer)
+        private IFumenPreviewer target;
+
+        public void Begin(IFumenPreviewer target)
         {
-            Previewer = previewer;
-            BeginDraw();
+            this.target = target;
         }
 
-        public virtual void BeginDraw()
-        {
+        public abstract void Draw(IFumenPreviewer target, T obj);
 
+        public void End()
+        {
+            target = default;
         }
 
-        public abstract void Draw(OngekiObjectBase ongekiObject, OngekiFumen fumen);
-
-        public virtual void EndDraw()
+        public void Post(OngekiObjectBase ongekiObject)
         {
-            Previewer = default;
-        }
-
-        public void RegisterHitTest(OngekiObjectBase ongekiObject, Rect rect)
-        {
-            Previewer?.RegisterSelectableObject(ongekiObject, rect);
+            Draw(target, (T)ongekiObject);
         }
     }
 
-    public abstract class CommonDrawTargetBase<T> : CommonDrawTargetBase where T : OngekiObjectBase
+    public abstract class CommonBatchDrawTargetBase<T> : IDrawingTarget where T : OngekiObjectBase
     {
-        public override void Draw(OngekiObjectBase ongekiObject, OngekiFumen fumen) => Draw((T)ongekiObject, fumen);
+        public abstract IEnumerable<string> DrawTargetID { get; }
 
-        public abstract void Draw(T ongekiObject, OngekiFumen fumen);
+        private IFumenPreviewer target;
+        private List<T> drawObjects = new();
+
+        public void Begin(IFumenPreviewer target)
+        {
+            this.target = target;
+        }
+
+        public abstract void DrawBatch(IFumenPreviewer target, IEnumerable<T> objs);
+
+        public void End()
+        {
+            DrawBatch(target, drawObjects);
+
+            target = default;
+            drawObjects.Clear();
+        }
+
+        public void Post(OngekiObjectBase ongekiObject)
+        {
+            drawObjects.Add((T)ongekiObject);
+        }
     }
 }

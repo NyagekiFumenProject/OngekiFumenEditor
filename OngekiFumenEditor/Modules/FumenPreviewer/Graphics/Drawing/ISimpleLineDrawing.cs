@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
-    public interface ILineDrawing
+    public interface ISimpleLineDrawing : ILineDrawing
     {
-        public record LineVertex(Vector2 Point, Vector4 Color);
-        void Draw(IFumenPreviewer target, IEnumerable<LineVertex> points, float lineWidth);
+
     }
 }

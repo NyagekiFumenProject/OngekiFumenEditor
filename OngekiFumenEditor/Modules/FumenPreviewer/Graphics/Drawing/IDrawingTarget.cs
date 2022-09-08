@@ -13,9 +13,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
     {
         IEnumerable<string> DrawTargetID { get; }
 
-        void BeginDraw(IFumenPreviewer previewer);
-        void Draw(OngekiObjectBase ongekiObject, OngekiFumen fumen);
-        void RegisterHitTest(OngekiObjectBase ongekiObject, Rect rect);
-        void EndDraw();
+        void Begin(IFumenPreviewer target);
+        void Post(OngekiObjectBase ongekiObject);
+        void End();
     }
 }

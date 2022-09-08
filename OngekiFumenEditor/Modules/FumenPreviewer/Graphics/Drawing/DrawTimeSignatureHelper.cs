@@ -3,16 +3,19 @@ using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
+using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
-    public class DrawTimeSignatureHelper : CommonLinesDrawTargetBase<OngekiObjectBase>
+    public class DrawTimeSignatureHelper
     {
         public struct CacheDrawLineResult
         {
@@ -20,33 +23,39 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             public TGrid TGrid { get; set; }
         }
 
-        public override IEnumerable<string> DrawTargetID => throw new NotImplementedException();
-
         private List<CacheDrawLineResult> drawLines = new();
+
         private IStringDrawing stringDrawing;
+        private ILineDrawing lineDrawing;
 
         public DrawTimeSignatureHelper()
         {
             stringDrawing = IoC.Get<IStringDrawing>();
+            lineDrawing = IoC.Get<ISimpleLineDrawing>();
         }
 
-        public override void FillLine(List<LinePoint> list, OngekiObjectBase obj, OngekiFumen fumen)
+        public void DrawLines(IFumenPreviewer target)
         {
             drawLines.Clear();
+
+            var fumen = target.Fumen;
 
             var timelines = TGridCalculator.GetVisbleTimelines(
                 fumen.BpmList,
                 fumen.MeterChanges,
-                Previewer.CurrentPlayTime,
-                Previewer.CurrentPlayTime + Previewer.ViewHeight,
+                target.CurrentPlayTime,
+                target.CurrentPlayTime + target.ViewHeight,
                 0,
                 1,
                 1
             );
 
-            var transDisp = Previewer.ViewWidth * 0.4f;
+            var transDisp = target.ViewWidth * 0.4f;
             var maxDispAlpha = 0.3f;
-            var eDisp = Previewer.ViewWidth - transDisp;
+            var eDisp = target.ViewWidth - transDisp;
+
+            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
+            list.Clear();
 
             foreach ((var t, var y, _) in timelines.Where(x => x.beatIndex == 0))
             {
@@ -60,22 +69,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 list.Add(new(new(0, (float)y), new(1, 1, 1, maxDispAlpha)));
                 list.Add(new(new(transDisp, (float)y), new(1, 1, 1, 0f)));
                 list.Add(new(new(eDisp, (float)y), new(1, 1, 1, 0f)));
-                list.Add(new(new(Previewer.ViewWidth, (float)y), new(1, 1, 1, maxDispAlpha)));
-                list.Add(new(new(Previewer.ViewWidth, (float)y), new(1, 1, 1, 0f)));
+                list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, maxDispAlpha)));
+                list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, 0f)));
             }
+
+            lineDrawing.Draw(target, list, 1);
         }
 
-        public void Draw(OngekiFumen fumen)
-        {
-            Draw(default, fumen);
-        }
-
-        public void DrawTimeSigntureText()
+        public void DrawTimeSigntureText(IFumenPreviewer target)
         {
             foreach (var pair in drawLines)
                 stringDrawing.Draw(
                     pair.TGrid.ToString(),
-                    new(Previewer.ViewWidth / 2,
+                    new(target.ViewWidth / 2,
                     (float)pair.Y + 10),
                     Vector2.One,
                     12,
@@ -83,7 +89,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                     Vector4.One,
                     new(1, 0.5f),
                     IStringDrawing.StringStyle.Normal,
-                    Previewer,
+                    target,
                     default,
                     out _
             );

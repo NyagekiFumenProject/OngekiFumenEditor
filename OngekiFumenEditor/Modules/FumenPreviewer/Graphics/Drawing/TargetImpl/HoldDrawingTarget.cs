@@ -8,15 +8,16 @@ using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.CommonLinesDrawTargetBase<OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase>;
+using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
@@ -25,22 +26,16 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     {
         public override IEnumerable<string> DrawTargetID { get; } = new string[] { "HLD", "CHD", "XHD" };
 
-        private class HoldLinesDrawHelper : CommonLinesDrawTargetBase<LaneStartBase>
-        {
-            public override IEnumerable<string> DrawTargetID => default;
-            public override void FillLine(List<LinePoint> list, LaneStartBase obj, OngekiFumen fumen)
-            { }
-        }
-
-        private HoldLinesDrawHelper lineDraw = new();
         private TapDrawingTarget tapDraw;
+        private ILineDrawing lineDrawing;
 
         public HoldDrawingTarget() : base()
         {
             tapDraw = IoC.Get<TapDrawingTarget>();
+            lineDrawing = IoC.Get<ILineDrawing>();
         }
 
-        public override void Draw(Hold hold, OngekiFumen fumen)
+        public override void Draw(IFumenPreviewer target, Hold hold)
         {
             if (hold.Children.FirstOrDefault() is not HoldEnd holdEnd || hold.ReferenceLaneStart is not LaneStartBase start)
                 return;
@@ -56,13 +51,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             };
 
             //draw line
-            using var d = ObjectPool<List<LinePoint>>.GetWithUsingDisposable(out var list, out _);
+            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();
 
             void Upsert<T>(T obj) where T : IHorizonPositionObject, ITimelineObject
             {
-                var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, fumen.BpmList, 1.0, 240);
-                var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, 30, Previewer.ViewWidth, 1);
+                var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1.0, 240);
+                var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, 30, target.ViewWidth, 1);
                 list.Add(new(new(x, y), color));
             }
 
@@ -71,15 +66,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 Upsert(node);
             Upsert(holdEnd);
 
-            lineDraw.BeginDraw(Previewer);
-            lineDraw.Draw(list, 13);
-            lineDraw.EndDraw();
+            lineDrawing.Draw(target, list, 13);
 
             //draw taps
-            tapDraw.BeginDraw(Previewer);
-            tapDraw.Draw(start.LaneType, hold.TGrid, hold.XGrid, fumen);
-            tapDraw.Draw(start.LaneType, holdEnd.TGrid, holdEnd.XGrid, fumen);
-            tapDraw.EndDraw();
+            tapDraw.Draw(target, start.LaneType, hold.TGrid, hold.XGrid);
+            tapDraw.Draw(target, start.LaneType, holdEnd.TGrid, holdEnd.XGrid);
         }
     }
 }

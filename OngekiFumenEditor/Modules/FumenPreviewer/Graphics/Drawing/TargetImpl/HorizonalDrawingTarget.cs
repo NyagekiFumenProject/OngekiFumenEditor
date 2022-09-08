@@ -11,7 +11,6 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using Polyline2DCSharp;
 using System;
 using System.Buffers;
@@ -22,141 +21,24 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using Vector2 = System.Numerics.Vector2;
-using Vector4 = OpenTK.Mathematics.Vector4;
+using System.Windows.Documents;
+using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     [Export(typeof(IDrawingTarget))]
-    public class HorizonalDrawingTarget : CommonDrawTargetBase<OngekiTimelineObjectBase>, IDisposable
+    public class HorizonalDrawingTarget : CommonBatchDrawTargetBase<OngekiTimelineObjectBase>
     {
         public record RegisterDrawingInfo(OngekiTimelineObjectBase TimelineObject, double Y);
 
-        private readonly Shader shader;
-        private readonly int vbo;
-        private readonly int vao;
         private HashSet<RegisterDrawingInfo> registeredObjects = new();
-        private OngekiFumen fumen;
-
-        public const int LINE_DRAW_MAX = 100;
-        public int LineWidth { get; set; } = 2;
+        private IStringDrawing stringDrawing;
+        private ILineDrawing lineDrawing;
 
         public HorizonalDrawingTarget()
         {
-            shader = CommonLineShader.Shared;
-
-            vbo = GL.GenBuffer();
-            vao = GL.GenVertexArray();
-
-            Init();
-        }
-
-        public static StateStack DefaultRenderStateStack { get; } = CommonLinesDrawTargetBase<OngekiObjectBase>.DefaultRenderStateStack;
-
-        private void Init()
-        {
-            GL.BindVertexArray(vao);
-            {
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-                {
-                    GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * LINE_DRAW_MAX * 6),
-                        IntPtr.Zero, BufferUsageHint.DynamicCopy);
-
-                    GL.EnableVertexAttribArray(0);
-                    GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, sizeof(float) * 6, 0);
-
-                    GL.EnableVertexAttribArray(1);
-                    GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, sizeof(float) * 6, sizeof(float) * 2);
-                }
-                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            }
-            GL.BindVertexArray(0);
-
+            lineDrawing = IoC.Get<ISimpleLineDrawing>();
             stringDrawing = IoC.Get<IStringDrawing>();
-        }
-
-        public override void BeginDraw()
-        {
-            registeredObjects.Clear();
-            base.BeginDraw();
-        }
-
-        public override void EndDraw()
-        {
-            DrawInternal(registeredObjects);
-
-            base.EndDraw();
-        }
-
-        public void Draw(List<LinePoint> list, int lineWidth, bool drawDash = false)
-        {
-            if (list.Count < 2)
-                return;
-
-            GL.LineWidth(lineWidth);
-            shader.Begin();
-            shader.PassUniform("Model", Matrix4.CreateTranslation(-Previewer.ViewWidth / 2, -Previewer.ViewHeight / 2, 0));
-            shader.PassUniform("ViewProjection", Previewer.ViewProjectionMatrix);
-            GL.BindVertexArray(vao);
-
-            var arrBuffer = ArrayPool<float>.Shared.Rent(LINE_DRAW_MAX * 6);
-            var arrBufferIdx = 0;
-
-            void Copy(LinePoint lp)
-            {
-                arrBuffer[(6 * arrBufferIdx) + 0] = lp.Point.X;
-                arrBuffer[(6 * arrBufferIdx) + 1] = lp.Point.Y;
-                arrBuffer[(6 * arrBufferIdx) + 2] = lp.Color.X;
-                arrBuffer[(6 * arrBufferIdx) + 3] = lp.Color.Y;
-                arrBuffer[(6 * arrBufferIdx) + 4] = lp.Color.Z;
-                arrBuffer[(6 * arrBufferIdx) + 5] = lp.Color.W;
-                arrBufferIdx++;
-            }
-
-            void FlushDraw()
-            {
-                //GL.InvalidateBufferData(vbo);
-                GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, arrBufferIdx * sizeof(float) * 6, arrBuffer);
-                DefaultRenderStateStack.PushState();
-                {
-                    GL.Enable(EnableCap.LineSmooth);
-                    GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
-                    GL.DrawArrays(PrimitiveType.LineStrip, 0, arrBufferIdx);
-                }
-                DefaultRenderStateStack.PopState();
-                arrBufferIdx = 0;
-            }
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            {
-                unsafe
-                {
-
-                    var prevLinePoint = list[0];
-
-                    foreach (var item in list.SequenceWrap(LINE_DRAW_MAX - 1))
-                    {
-                        Copy(prevLinePoint);
-                        foreach (var q in item)
-                        {
-                            Copy(q);
-                            prevLinePoint = q;
-                        }
-
-                        FlushDraw();
-                    }
-                }
-            }
-
-            ArrayPool<float>.Shared.Return(arrBuffer);
-            GL.BindVertexArray(0);
-            shader.End();
-        }
-
-        public virtual void Dispose()
-        {
-            GL.DeleteVertexArray(vao);
-            GL.DeleteBuffer(vbo);
         }
 
         public override IEnumerable<string> DrawTargetID { get; } = new[]
@@ -175,21 +57,17 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             {"[LBK_End]", FSColor.HotPink },
             {"[SFL_End]", FSColor.LightCyan },
         };
-        private IStringDrawing stringDrawing;
 
-        public override void Draw(OngekiTimelineObjectBase ongekiObject, OngekiFumen fumen)
+        public override void DrawBatch(IFumenPreviewer target, IEnumerable<OngekiTimelineObjectBase> objs)
         {
-            registeredObjects.Add(new(ongekiObject, TGridCalculator.ConvertTGridToY(ongekiObject.TGrid, fumen.BpmList, 1.0, 240)));
-            this.fumen = fumen;
-        }
+            var fumen = target.Fumen;
+            using var d4 = objs.Select(x => new RegisterDrawingInfo(x, TGridCalculator.ConvertTGridToY(x.TGrid, fumen.BpmList, 1.0, 240))).ToListWithObjectPool(out var objects);
 
-        private void DrawInternal(IEnumerable<RegisterDrawingInfo> objects)
-        {
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
             {
                 var y = (float)g.FirstOrDefault().Y;
                 using var d3 = g.ToListWithObjectPool(out var actualItems);
-                if ((y < Previewer.CurrentPlayTime) || y > (Previewer.CurrentPlayTime + Previewer.ViewHeight))
+                if ((y < target.CurrentPlayTime) || y > (target.CurrentPlayTime + target.ViewHeight))
                 {
                     actualItems.RemoveAll(x => x.TimelineObject switch
                     {
@@ -201,17 +79,17 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 }
 
                 using var d = actualItems.Select(x => colors[x.TimelineObject.IDShortName]).OrderBy(x => x.PackedValue).ToListWithObjectPool(out var regColors);
-                var per = 1.0f * Previewer.ViewWidth / regColors.Count;
-                using var d2 = ObjectPool<List<LinePoint>>.GetWithUsingDisposable(out var segList, out _);
+                var per = 1.0f * target.ViewWidth / regColors.Count;
+                using var d2 = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var segList, out _);
                 segList.Clear();
                 for (int i = 0; i < regColors.Count; i++)
                 {
                     var c = regColors[i];
-                    segList.Add(new LinePoint(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f)));
-                    segList.Add(new LinePoint(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f)));
+                    segList.Add(new(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f)));
+                    segList.Add(new(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f)));
                 }
 
-                Draw(segList, LineWidth);
+                lineDrawing.Draw(target, segList, 2);
 
                 //draw range line if need
                 foreach (var obj in actualItems)
@@ -219,28 +97,30 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                     switch (obj.TimelineObject)
                     {
                         case LaneBlockArea.LaneBlockAreaEndIndicator laneBlockEnd:
-                            DrawLaneBlockArea(laneBlockEnd.RefLaneBlockArea);
+                            DrawLaneBlockArea(target, laneBlockEnd.RefLaneBlockArea);
                             break;
                         case LaneBlockArea laneBlock:
-                            DrawLaneBlockArea(laneBlock);
+                            DrawLaneBlockArea(target, laneBlock);
                             break;
                         default:
                             break;
                     }
                 }
 
-                DrawDescText(y, actualItems);
+                DrawDescText(target, y, actualItems);
             }
         }
 
-        private void DrawLaneBlockArea(LaneBlockArea lbk)
+        private void DrawLaneBlockArea(IFumenPreviewer target, LaneBlockArea lbk)
         {
-            using var d2 = ObjectPool<List<LinePoint>>.GetWithUsingDisposable(out var segList, out _);
+            var fumen = target.Fumen;
+
+            using var d2 = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var segList, out _);
             segList.Clear();
 
             var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 10;
             var color = lbk.Direction == LaneBlockArea.BlockDirection.Left ? WallLaneDrawTarget.LeftWallColor : WallLaneDrawTarget.RightWallColor;
-            var lastP = new OpenTK.Mathematics.Vector2(int.MinValue, int.MinValue);
+            var lastP = new Vector2(int.MinValue, int.MinValue);
 
             #region Generate LBK lines
 
@@ -248,10 +128,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             {
                 if (xGrid is null)
                     return;
-                var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, Previewer.ViewWidth, 1) + offsetX;
+                var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1) + offsetX;
                 var y = (float)TGridCalculator.ConvertTGridToY(tGrid, fumen.BpmList, 1.0, 240);
 
-                var p = new OpenTK.Mathematics.Vector2(x, y);
+                var p = new Vector2(x, y);
                 if (lastP != p)
                 {
                     segList.Add(new(p, color));
@@ -337,7 +217,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 var y = a.Point.Y + Math.Min((b.Point.Y - a.Point.Y) * 0.1f, 20);
                 var x = (float)MathUtils.CalculateXFromTwoPointFormFormula(y, a.Point.X, a.Point.Y, b.Point.X, b.Point.Y);
 
-                var c = new LinePoint(new(x, y), a.Color);
+                var c = new LineVertex(new(x, y), a.Color);
                 segList.Insert(1, c);
                 segList[0] = a with { Color = Vector4.Zero };
 
@@ -348,16 +228,16 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 y = b.Point.Y - Math.Min((b.Point.Y - a.Point.Y) * 0.1f, 20);
                 x = (float)MathUtils.CalculateXFromTwoPointFormFormula(y, a.Point.X, a.Point.Y, b.Point.X, b.Point.Y);
 
-                c = new LinePoint(new(x, y), a.Color);
+                c = new LineVertex(new(x, y), a.Color);
                 segList.Insert(segList.Count - 1, c);
                 segList[segList.Count - 1] = b with { Color = Vector4.Zero };
             }
 
             //todo 换个表达形式
-            Draw(segList, 10, true);
+            lineDrawing.Draw(target, segList, 10);
         }
 
-        private void DrawDescText(float y, IEnumerable<RegisterDrawingInfo> group)
+        private void DrawDescText(IFumenPreviewer target, float y, IEnumerable<RegisterDrawingInfo> group)
         {
             string formatObj(OngekiObjectBase s) => s switch
             {
@@ -372,11 +252,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 _ => string.Empty
             };
 
-            var x = -Previewer.ViewWidth / 2;
+            var x = -target.ViewWidth / 2;
             var i = 0;
             foreach ((var obj, var c) in group.Select(x => (x.TimelineObject, colors[x.TimelineObject.IDShortName])).OrderBy(x => x.Item2.PackedValue))
             {
-                stringDrawing.Draw((i == 0 ? string.Empty : " / ") + formatObj(obj), new Vector2(x, y + 12), Vector2.One, 16, 0, new (c.R, c.G, c.B, c.A), new(0, 0.5f), IStringDrawing.StringStyle.Normal, Previewer, default, out var size);
+                stringDrawing.Draw((i == 0 ? string.Empty : " / ") + formatObj(obj), new Vector2(x, y + 12), Vector2.One, 16, 0, new(c.R, c.G, c.B, c.A), new(0, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out var size);
                 x += size.Value.X;
                 i++;
             }

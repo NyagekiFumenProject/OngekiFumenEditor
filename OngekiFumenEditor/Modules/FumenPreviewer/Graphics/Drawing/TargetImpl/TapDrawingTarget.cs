@@ -55,13 +55,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             textureDrawing = IoC.Get<ITextureDrawing>();
         }
 
-        public override void Draw(Tap ongekiObject, OngekiFumen fumen)
+        public override void Draw(IFumenPreviewer target, Tap ongekiObject)
         {
             var type = ongekiObject.ReferenceLaneStart?.LaneType;
-            Draw(type, ongekiObject.TGrid, ongekiObject.XGrid, fumen);
+            Draw(target, type, ongekiObject.TGrid, ongekiObject.XGrid);
         }
 
-        public void Draw(LaneType? laneType, TGrid tGrid, XGrid xGrid, OngekiFumen fumen)
+        public void Draw(IFumenPreviewer target, LaneType? laneType, TGrid tGrid, XGrid xGrid)
         {
             var texture = laneType switch
             {
@@ -82,12 +82,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 _ => tapSize
             };
 
-            var x = XGridCalculator.ConvertXGridToX(xGrid, 30, Previewer.ViewWidth, 1);
-            var y = TGridCalculator.ConvertTGridToY(tGrid, fumen.BpmList, 1.0, 240);
+            var x = XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1);
+            var y = TGridCalculator.ConvertTGridToY(tGrid, target.Fumen.BpmList, 1.0, 240);
 
             var pos = new Vector2((float)x, (float)y);
 
-            textureDrawing.Draw(Previewer, texture, new[] { (size, pos, 0f) });
+            textureDrawing.Draw(target, texture, new[] { (size, pos, 0f) });
         }
 
         public void Dispose()

@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             texture = new Texture(bitmap);
         }
 
-        public override void Draw(BeamStart obj, OngekiFumen fumen)
+        public override void Draw(IFumenPreviewer target, BeamStart obj)
         {
             /*
             (var fromBeam, var fromY) = obj.Children.AsEnumerable<BeamBase>()
