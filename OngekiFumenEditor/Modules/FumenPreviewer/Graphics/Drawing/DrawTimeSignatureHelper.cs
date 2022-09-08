@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         {
             stringHelper.Begin(Previewer);
             foreach (var pair in drawLines)
-                stringHelper.Draw(pair.TGrid.ToString(), new(-Previewer.ViewWidth / 2, (float)pair.Y + 10), System.Numerics.Vector2.One, 0, 12, FSColor.White, new(0, 0.5f));
+                stringHelper.Draw(pair.TGrid.ToString(), new(Previewer.ViewWidth / 2, (float)pair.Y + 10), System.Numerics.Vector2.One, 0, 12, FSColor.White, new(1, 0.5f));
             stringHelper.End();
         }
     }

@@ -73,11 +73,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         {
             registeredObjects.Clear();
             base.BeginDraw();
-            backup_ps = GL.IsEnabled(EnableCap.PolygonSmooth);
-            backup_ps_hint = GL.GetInteger(GetPName.PolygonSmoothHint);
-
-            GL.Enable(EnableCap.PolygonSmooth);
-            GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
         }
 
         public override void EndDraw()
@@ -85,11 +80,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             DrawInternal(registeredObjects);
 
             base.EndDraw();
-            if (backup_ps)
-                GL.Enable(EnableCap.PolygonSmooth);
-            else
-                GL.Disable(EnableCap.PolygonSmooth);
-            GL.Hint(HintTarget.PolygonSmoothHint, (HintMode)backup_ps_hint);
         }
 
         public void Draw(List<LinePoint> list, int lineWidth)
@@ -159,7 +149,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public override IEnumerable<string> DrawTargetID { get; } = new[]
         {
-            "MET","SFL","BPM","EST","CLK"
+            "MET","SFL","BPM","EST","CLK","LBK","[LBK_End]","[SFL_End]"
         };
 
         private static Dictionary<string, FSColor> colors = new()
@@ -169,6 +159,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             {"BPM", FSColor.Pink },
             {"EST", FSColor.Yellow },
             {"CLK", FSColor.CadetBlue },
+            {"LBK", FSColor.HotPink },
+            {"[LBK_End]", FSColor.HotPink },
+            {"[SFL_End]", FSColor.LightCyan },
         };
 
         public override void Draw(OngekiTimelineObjectBase ongekiObject, OngekiFumen fumen)
@@ -198,28 +191,35 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
                 Draw(segList, LineWidth);
 
+                //draw range line if need
+
+
                 DrawDescText(y, group);
             }
         }
 
         private void DrawDescText(float y, IGrouping<int, RegisterDrawingInfo> group)
         {
+            string formatObj(OngekiObjectBase s) => s switch
+            {
+                BPMChange o => $"BPM:{(int)o.BPM}",
+                MeterChange o => $"MET:{o.Bunbo}/{o.BunShi}",
+                Soflan o => $"SPD:{(int)o.Speed:F2}x",
+                Soflan.SoflanEndIndicator o => $"{formatObj(o.RefSoflan)}_End",
+                LaneBlockArea o => $"LBK:{o.Direction}",
+                LaneBlockArea.LaneBlockAreaEndIndicator o => $"{formatObj(o.RefLaneBlockArea)}_End",
+                EnemySet o => $"EST:{o.TagTblValue}",
+                ClickSE o => $"CLK",
+                _ => string.Empty
+            };
+
             stringHelper.Begin(Previewer);
             var x = -Previewer.ViewWidth / 2;
             var i = 0;
             foreach ((var obj, var c) in group.Select(x => (x.TimelineObject, colors[x.TimelineObject.IDShortName])).OrderBy(x => x.Item2.PackedValue))
             {
-                var w = stringHelper.Draw((i == 0 ? string.Empty : " / ") + (obj switch
-                {
-                    BPMChange o => $"BPM:{(int)o.BPM}",
-                    MeterChange o => $"MET:{o.Bunbo}/{o.BunShi}",
-                    Soflan o => $"SPD:{(int)o.Speed:F2}x",
-                    EnemySet o => $"EST:{o.TagTblValue}",
-                    ClickSE o => $"CLK",
-                    _ => string.Empty
-                }), new Vector2(x, y + 12), Vector2.One, 0, 16, c, new(0, 0.5f)).X;
-
-                x += w;
+                var size = stringHelper.Draw((i == 0 ? string.Empty : " / ") + formatObj(obj), new Vector2(x, y + 12), Vector2.One, 0, 16, c, new(0, 0.5f));
+                x += size.X;
                 i++;
             }
             stringHelper.End();

@@ -113,17 +113,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String.Platf
 
         public void Begin(Matrix4 mvp)
         {
-            _backup_depthTest = GL.IsEnabled(EnableCap.DepthTest);
-            GL.Disable(EnableCap.DepthTest);
-            GLUtility.CheckError();
-            _backup_blend = GL.IsEnabled(EnableCap.Blend);
-            GL.Enable(EnableCap.Blend);
-            GLUtility.CheckError();
-            _backup_blend_s = GL.GetInteger(GetPName.BlendSrcAlpha);
-            _backup_blend_d = GL.GetInteger(GetPName.BlendDstAlpha);
-            GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
-            GLUtility.CheckError();
-
             _shader.Use();
             _shader.SetUniform("TextureSampler", 0);
 
@@ -152,18 +141,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String.Platf
         public void End()
         {
             FlushBuffer();
-
-            if (_backup_depthTest)
-                GL.Enable(EnableCap.DepthTest);
-            else
-                GL.Disable(EnableCap.DepthTest);
-
-            if (_backup_blend)
-                GL.Enable(EnableCap.Blend);
-            else
-                GL.Disable(EnableCap.Blend);
-
-            GL.BlendFunc((BlendingFactor)_backup_blend_s, (BlendingFactor)_backup_blend_d);
         }
 
         private unsafe void FlushBuffer()

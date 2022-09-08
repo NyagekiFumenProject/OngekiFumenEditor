@@ -21,10 +21,31 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         private readonly Shader shader;
         private readonly int vbo;
         private readonly int vao;
-        private bool backup_ps;
-        private int backup_ps_hint;
 
         public int LineWidth { get; set; } = 2;
+
+        private static StateStack DefaultRenderStateStack { get; } = new StateStack(() =>
+        {
+            var list = ObjectPool<List<int>>.Get();
+            list.Clear();
+
+            list.Add(GL.IsEnabled(EnableCap.PolygonSmooth) ? 1 : 0);
+            list.Add(GL.GetInteger(GetPName.PolygonSmoothHint));
+
+            return list;
+        }, (l) =>
+        {
+            var list = l as List<int>;
+
+            if (list[0] is 1)
+                GL.Enable(EnableCap.PolygonSmooth);
+            else
+                GL.Disable(EnableCap.PolygonSmooth);
+
+            GL.Hint(HintTarget.PolygonSmoothHint, (HintMode)list[1]);
+
+            ObjectPool<List<int>>.Return(list);
+        });
 
         public CommonCapLinesDrawTargetBase()
         {
@@ -51,27 +72,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             }
             GL.BindVertexArray(0);
-        }
-
-        public override void BeginDraw()
-        {
-            base.BeginDraw();
-
-            backup_ps = GL.IsEnabled(EnableCap.PolygonSmooth);
-            backup_ps_hint = GL.GetInteger(GetPName.PolygonSmoothHint);
-
-            GL.Enable(EnableCap.PolygonSmooth);
-            GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
-        }
-
-        public override void EndDraw()
-        {
-            base.EndDraw();
-            if (backup_ps)
-                GL.Enable(EnableCap.PolygonSmooth);
-            else
-                GL.Disable(EnableCap.PolygonSmooth);
-            GL.Hint(HintTarget.PolygonSmoothHint, (HintMode)backup_ps_hint);
         }
 
         public abstract void FillLine(List<LinePoint> list, T obj, OngekiFumen fumen);
@@ -127,7 +127,16 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
                 GL.InvalidateBufferData(vbo);
                 GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * arrBufferIdx2 * 6), arrBuffer2, BufferUsageHint.DynamicDraw);
-                GL.DrawArrays(PrimitiveType.Triangles, 0, arrBufferIdx2);
+
+
+                DefaultRenderStateStack.PushState();
+                {
+                    GL.Enable(EnableCap.PolygonSmooth);
+                    GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
+
+                    GL.DrawArrays(PrimitiveType.Triangles, 0, arrBufferIdx2);
+                }
+                DefaultRenderStateStack.PopState();
 
                 ArrayPool<float>.Shared.Return(arrBuffer2);
             }

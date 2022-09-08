@@ -5,6 +5,7 @@ using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.String.Platform;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenPreviewer.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
@@ -61,7 +62,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         {
             var font = fontSystem.GetFont(fontSize);
             var size = font.MeasureString(text, scale);
-            var origin = (norigin ?? new Vector2(0.5f, 0.5f)) * size;
+            var no = (norigin ?? new Vector2(0.5f, 0.5f));
+            no.X = no.X * 2;
+            var origin = no * size;
             scale.Y = -scale.Y;
 
             font.DrawText(renderer, text, pos, color ?? FSColor.White, scale, rotate, origin);

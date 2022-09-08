@@ -25,6 +25,29 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
         public int LineWidth { get; set; } = 2;
 
+        private static StateStack DefaultRenderStateStack { get; } = new StateStack(() =>
+        {
+            var list = ObjectPool<List<int>>.Get();
+            list.Clear();
+
+            list.Add(GL.IsEnabled(EnableCap.LineSmooth) ? 1 : 0);
+            list.Add(GL.GetInteger(GetPName.LineSmoothHint));
+
+            return list;
+        }, (l) =>
+        {
+            var list = l as List<int>;
+
+            if (list[0] is 1)
+                GL.Enable(EnableCap.LineSmooth);
+            else
+                GL.Disable(EnableCap.LineSmooth);
+
+            GL.Hint(HintTarget.LineSmoothHint, (HintMode)list[1]);
+
+            ObjectPool<List<int>>.Return(list);
+        });
+
         public CommonLinesDrawTargetBase()
         {
             shader = CommonLineShader.Shared;
@@ -95,7 +118,15 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             {
                 //GL.InvalidateBufferData(vbo);
                 GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, arrBufferIdx * sizeof(float) * 6, arrBuffer);
-                GL.DrawArrays(PrimitiveType.LineStrip, 0, arrBufferIdx);
+
+                DefaultRenderStateStack.PushState();
+                {
+                    GL.Enable(EnableCap.LineSmooth);
+                    GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
+                    GL.DrawArrays(PrimitiveType.LineStrip, 0, arrBufferIdx);
+                }
+                DefaultRenderStateStack.PopState();
+
                 arrBufferIdx = 0;
             }
 
