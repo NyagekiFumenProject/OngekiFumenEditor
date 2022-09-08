@@ -191,8 +191,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 {
                     actualItems.RemoveAll(x => x.TimelineObject switch
                     {
-                        LaneBlockArea or LaneBlockArea.LaneBlockAreaEndIndicator or Soflan or Soflan.SoflanEndIndicator => true,
-                        _ => false
+                        LaneBlockArea or LaneBlockArea.LaneBlockAreaEndIndicator or Soflan or Soflan.SoflanEndIndicator => false,
+                        _ => true
                     });
                     if (actualItems.Count == 0)
                         continue;
