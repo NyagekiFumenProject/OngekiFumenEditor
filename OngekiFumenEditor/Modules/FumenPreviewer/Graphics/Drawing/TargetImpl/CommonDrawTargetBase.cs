@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     public abstract class CommonDrawTargetBase<T> : IDrawingTarget where T : OngekiObjectBase
     {

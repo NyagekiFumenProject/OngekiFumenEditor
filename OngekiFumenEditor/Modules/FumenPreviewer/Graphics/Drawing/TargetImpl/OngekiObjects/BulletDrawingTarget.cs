@@ -17,7 +17,7 @@ using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 using Vector = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue.Vector;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
     public class BulletDrawingTarget : CommonDrawTargetBase<Bullet>, IDisposable
@@ -139,7 +139,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         {
             if (obj.ReferenceBulletPallete is null)
                 return;
-            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - target.ViewWidth / 2, pos.Y + 5), System.Numerics.Vector2.One, 16, 0, System.Numerics.Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
+            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - target.ViewWidth / 2, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
         }
 
         public void Dispose()

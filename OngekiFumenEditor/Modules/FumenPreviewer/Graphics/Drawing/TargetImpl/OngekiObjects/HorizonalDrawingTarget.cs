@@ -4,7 +4,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
+
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.Lane;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
     public class HorizonalDrawingTarget : CommonBatchDrawTargetBase<OngekiTimelineObjectBase>
@@ -67,7 +67,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             {
                 var y = (float)g.FirstOrDefault().Y;
                 using var d3 = g.ToListWithObjectPool(out var actualItems);
-                if ((y < target.CurrentPlayTime) || y > (target.CurrentPlayTime + target.ViewHeight))
+                if (y < target.CurrentPlayTime || y > target.CurrentPlayTime + target.ViewHeight)
                 {
                     actualItems.RemoveAll(x => x.TimelineObject switch
                     {

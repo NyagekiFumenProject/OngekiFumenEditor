@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 using Vector = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue.Vector;
 using Vector2 = System.Numerics.Vector2;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
     public class BellDrawingTarget : CommonDrawTargetBase<Bell>, IDisposable

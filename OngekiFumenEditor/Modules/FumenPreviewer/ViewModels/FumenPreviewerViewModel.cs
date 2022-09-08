@@ -5,6 +5,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Editors;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl;
 using OngekiFumenEditor.Modules.FumenPreviewer.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor;

@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
     public class BeamDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable

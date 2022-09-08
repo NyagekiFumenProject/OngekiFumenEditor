@@ -1,7 +1,7 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
+
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Editors
 {
     public class DrawTimeSignatureHelper
     {

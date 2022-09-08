@@ -13,7 +13,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
     public class FlickDrawingTarget : CommonDrawTargetBase<Flick>, IDisposable

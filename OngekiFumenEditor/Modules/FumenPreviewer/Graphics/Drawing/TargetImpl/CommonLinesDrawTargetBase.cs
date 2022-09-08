@@ -1,6 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
+
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     public abstract class CommonLinesDrawTargetBase<T> : CommonDrawTargetBase<T> where T : OngekiObjectBase
     {

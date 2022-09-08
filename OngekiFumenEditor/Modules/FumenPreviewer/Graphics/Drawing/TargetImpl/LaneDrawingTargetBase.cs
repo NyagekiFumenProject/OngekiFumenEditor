@@ -1,7 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
+
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     public abstract class LaneDrawingTargetBase<T> : CommonLinesDrawTargetBase<T> where T : LaneStartBase
     {

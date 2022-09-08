@@ -3,7 +3,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Base;
+
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.PrimitiveValue;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
@@ -16,10 +16,10 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.CommonLinesDrawTargetBase<OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase>;
+using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.CommonLinesDrawTargetBase<OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase>;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
     public class HoldDrawingTarget : CommonDrawTargetBase<Hold>
