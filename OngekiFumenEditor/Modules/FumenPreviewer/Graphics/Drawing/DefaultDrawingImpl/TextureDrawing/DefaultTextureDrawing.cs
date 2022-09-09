@@ -1,5 +1,4 @@
 ﻿using MahApps.Metro.Controls;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
@@ -13,7 +12,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Windows.Media.Imaging;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = OpenTK.Mathematics.Vector3;
-using Shader = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders.Shader;
+using Shader = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Shader;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {

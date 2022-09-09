@@ -4,7 +4,7 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
 {
     public class Shader
     {

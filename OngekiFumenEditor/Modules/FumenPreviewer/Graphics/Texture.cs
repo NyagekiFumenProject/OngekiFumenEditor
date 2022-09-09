@@ -6,7 +6,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
 {
     [Serializable]
     public class Texture : IDisposable

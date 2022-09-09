@@ -1,6 +1,4 @@
-﻿
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Shaders;
-using OngekiFumenEditor.Utils.ObjectPool;
+﻿using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
