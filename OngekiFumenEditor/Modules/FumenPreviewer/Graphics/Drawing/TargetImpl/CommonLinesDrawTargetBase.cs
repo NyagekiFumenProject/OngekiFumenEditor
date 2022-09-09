@@ -39,10 +39,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             LineVertex calc(ConnectableObjectBase o)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(o.XGrid, 30, target.ViewWidth, 1);
-                cacheCalc[o.XGrid] = x;
+                //cacheCalc[o.XGrid] = x;
 
                 var y = (float)TGridCalculator.ConvertTGridToY(o.TGrid, target.Fumen.BpmList, 1.0, 240);
-                cacheCalc[o.TGrid] = y;
+                //cacheCalc[o.TGrid] = y;
 
                 return new(new(x, y), color);
             }

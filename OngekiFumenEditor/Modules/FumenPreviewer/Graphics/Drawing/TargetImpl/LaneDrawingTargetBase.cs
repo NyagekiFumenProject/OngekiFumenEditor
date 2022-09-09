@@ -51,10 +51,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
                 textureDrawing.Draw(target, texture, list.Select(x => (size, x.Pos, 0f)));
             }
-
+            /*
             drawEditorTap(StartEditorTexture, editorSize, objs);
             drawEditorTap(NextEditorTexture, editorSize, objs.SelectMany(x => x.Children.OfType<ConnectableNextObject>()));
             drawEditorTap(EndEditorTexture, editorSize, objs.Select(x => x.Children.LastOrDefault()).OfType<ConnectableEndObject>());
+            */
         }
     }
 
