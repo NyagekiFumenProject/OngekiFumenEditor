@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                         cacheCalcMap.TryGetValue(x.XGrid, out var cx) ? cx : (float)XGridCalculator.ConvertXGridToX(x.XGrid, 30, target.ViewWidth, 1),
                         cacheCalcMap.TryGetValue(x.TGrid, out var cy) ? cy : (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Fumen.BpmList, 1.0, 240)
                     )
-                }).ToListWithObjectPool(out var list);
+                }).Where(x => !(x.Pos.Y < target.CurrentPlayTime || x.Pos.Y > target.CurrentPlayTime + target.ViewHeight)).ToListWithObjectPool(out var list);
 
                 textureDrawing.Draw(target, texture, list.Select(x => (size, x.Pos, 0f)));
             }
