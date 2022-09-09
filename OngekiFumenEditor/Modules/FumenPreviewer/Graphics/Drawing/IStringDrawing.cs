@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
-    public interface IStringDrawing
+    public interface IStringDrawing : IDrawing
     {
         public enum StringStyle
         {
