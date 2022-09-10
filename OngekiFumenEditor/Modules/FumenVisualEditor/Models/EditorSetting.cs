@@ -172,6 +172,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        public enum TimeFormat
+        {
+            TGrid,
+            AudioTime
+        }
+
+        private TimeFormat displayTimeFormat;
+        public TimeFormat DisplayTimeFormat
+        {
+            get => displayTimeFormat;
+            set
+            {
+                Properties.EditorGlobalSetting.Default.DisplayTimeFormat = (int)value;
+                displayTimeFormat = value;
+                Save();
+                NotifyOfPropertyChange(() => DisplayTimeFormat);
+            }
+        }
+
         private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -208,6 +227,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.VerticalDisplayScale):
                     verticalDisplayScale = Properties.EditorGlobalSetting.Default.VerticalDisplayScale;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.DisplayTimeFormat):
+                    displayTimeFormat = (TimeFormat)Properties.EditorGlobalSetting.Default.DisplayTimeFormat;
                     break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");

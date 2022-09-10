@@ -13,6 +13,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorSetting;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
 {
@@ -31,6 +32,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
             8,
             9,
             12,
+        };
+
+        public string[] SupportTimeFormats { get; } = new[]
+        {
+            nameof(TimeFormat.TGrid),
+            nameof(TimeFormat.AudioTime)
         };
 
         public override PaneLocation PreferredLocation => PaneLocation.Right;

@@ -75,6 +75,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     ClearDisplayingObjectCache();
                     Redraw(RedrawTarget.XGridUnitLines);
                     break;
+                case nameof(EditorSetting.DisplayTimeFormat):
+                    TGridUnitLineLocations.Clear();
+                    Redraw(RedrawTarget.TGridUnitLines);
+                    NotifyOfPropertyChange(() => MinVisibleCanvasY);
+                    break;
                 case nameof(EditorSetting.BeatSplit):
                     //case nameof(EditorSetting.BaseLineY):
                     Redraw(RedrawTarget.TGridUnitLines | RedrawTarget.ScrollBar);
