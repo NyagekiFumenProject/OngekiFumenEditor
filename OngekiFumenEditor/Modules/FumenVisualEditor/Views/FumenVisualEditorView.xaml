@@ -28,9 +28,11 @@
             <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
             <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
             <converters:BeatRhythmToBrushConverter x:Key="BeatRhythmToBrushConverter" />
+            <converters:TGridDisplayConverter x:Key="TGridDisplayConverter">
+            </converters:TGridDisplayConverter>
             <converters:ReverseDoubleConverter x:Key="ReverseDoubleConverter" />
             <converters:BeatRhythmToVisibleConverter x:Key="BeatRhythmToVisibleConverter" />
-            <converters:TGridDisplayConverter x:Key="TGridDisplayConverter" />
+            <converters:JudgeLineDisplayConverter x:Key="JudgeLineDisplayConverter" />
             <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter" />
             <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
@@ -152,8 +154,15 @@
                                 <TextBlock
                                     FontSize="10"
                                     Foreground="White"
-                                    Opacity="0.35"
-                                    Text="{Binding TGrid}">
+                                    Opacity="0.35">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource TGridDisplayConverter}">
+                                            <MultiBinding.Bindings>
+                                                <Binding ElementName="myScrollViewer" Path="DataContext" />
+                                                <Binding Path="TGrid" />
+                                            </MultiBinding.Bindings>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
                                     <TextBlock.RenderTransformOrigin>
                                         <Point Y="0.5" />
                                     </TextBlock.RenderTransformOrigin>
@@ -212,7 +221,7 @@
             Foreground="Yellow"
             IsHitTestVisible="False">
             <TextBlock.Text>
-                <MultiBinding Converter="{StaticResource TGridDisplayConverter}">
+                <MultiBinding Converter="{StaticResource JudgeLineDisplayConverter}">
                     <MultiBinding.Bindings>
                         <Binding Path="." />
                         <Binding Path="Setting.JudgeLineOffsetY" />

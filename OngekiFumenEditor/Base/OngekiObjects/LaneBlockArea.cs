@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            NotifyOfPropertyChange(() => e.PropertyName);
+            NotifyOfPropertyChange(e.PropertyName);
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => displayables;

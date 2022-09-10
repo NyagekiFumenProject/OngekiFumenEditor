@@ -211,10 +211,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnSizeChanged(ActionExecutionContext e)
         {
             var scrollViewer = e.Source as AnimatedScrollViewer;
-            var arg = e.EventArgs as SizeChangedEventArgs;
-            scrollViewer.InvalidateMeasure();
-            CanvasWidth = Math.Min(scrollViewer.ActualWidth, scrollViewer.ViewportWidth);
-            CanvasHeight = arg.NewSize.Height;
+            scrollViewer?.InvalidateMeasure();
+
+            var view = GetView() as FrameworkElement;
+
+            CanvasWidth = view.ActualWidth;
+            CanvasHeight = view.ActualHeight;
+
+            ClearDisplayingObjectCache();
             Redraw(RedrawTarget.All);
         }
     }

@@ -63,6 +63,7 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <TextBlock
                     Margin="0,0,10,0"
@@ -138,6 +139,19 @@
                     MinValue="0.1"
                     Step="0.1">
                 </controls:RangeValue>
+                <TextBlock
+                    Grid.Row="8"
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}">
+                    显示时间格式
+                </TextBlock>
+                <ComboBox
+                    Grid.Row="8"
+                    Grid.Column="1"
+                    ItemsSource="{Binding SupportTimeFormats}"
+                    SelectedValue="{Binding Setting.DisplayTimeFormat, Converter={StaticResource EnumToStringConverter}}">
+                </ComboBox>
             </Grid>
         </StackPanel>
     </ScrollViewer>
