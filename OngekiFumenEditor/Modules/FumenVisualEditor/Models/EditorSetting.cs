@@ -178,7 +178,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             AudioTime
         }
 
-        private TimeFormat displayTimeFormat;
+        private TimeFormat displayTimeFormat = (TimeFormat)Properties.EditorGlobalSetting.Default.DisplayTimeFormat;
         public TimeFormat DisplayTimeFormat
         {
             get => displayTimeFormat;
