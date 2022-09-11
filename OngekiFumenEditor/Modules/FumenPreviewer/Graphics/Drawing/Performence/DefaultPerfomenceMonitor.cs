@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.IPerfomenceMonitor;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.IPerfomenceMonitor.IDrawingPerformenceStatisticsData;
 
@@ -51,11 +52,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
         private FixedSizeCycleCollection<long> RenderSpendTicks { get; } = new(RECORD_LENGTH);
         private FixedSizeCycleCollection<long> TotalDrawCall { get; } = new(RECORD_LENGTH);
         private long currentDrawCall = 0;
+        private long currentBeginRenderTick = 0;
 
         public void OnBeforeRender()
         {
             currentDrawCall = 0;
-            timer.Start();
+            timer.Restart();
+            //currentBeginRenderTick = timer.ElapsedTicks;
         }
 
         public void OnBeginTargetDrawing(IDrawingTarget drawingTarget)
@@ -95,8 +98,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
         public void OnAfterRender()
         {
             timer.Stop();
-            RenderSpendTicks.Enqueue(timer.ElapsedTicks);
-            RenderSpendTicks.Enqueue(currentDrawCall);
+            RenderSpendTicks.Enqueue(timer.ElapsedTicks - currentBeginRenderTick);
+            TotalDrawCall.Enqueue(currentDrawCall);
         }
 
         public void Clear()
@@ -128,7 +131,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
         private IDrawingPerformenceStatisticsData StatisticsPerformenceData(IEnumerable<DrawingPerformenceData> dataList)
         {
             if (dataList.Count() == 0)
-                return default;
+                return default(IDrawingPerformenceStatisticsData);
 
             var ave = dataList.Select(x => x.DrawingSpendTicks.Average()).Average();
             var most = dataList.SelectMany(x => x.DrawingSpendTicks).GroupBy(x => (int)x).OrderByDescending(x => x.Key).SelectMany(x => x).Average();

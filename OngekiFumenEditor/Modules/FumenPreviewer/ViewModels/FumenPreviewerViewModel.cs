@@ -26,6 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -305,22 +306,41 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         public Task OnScheduleCall(CancellationToken cancellationToken)
         {
+            var drawing = performenceMonitor.GetDrawingPerformenceData();
+            var drawingTarget = performenceMonitor.GetDrawingTargetPerformenceData();
+
+            if (drawing is null || drawingTarget is null)
+                return Task.CompletedTask;
+
+            var drawingTop = drawing.PerformenceRanks.FirstOrDefault();
             var render = performenceMonitor.GetRenderPerformenceData();
 
-            var drawing = performenceMonitor.GetDrawingPerformenceData();
-            var drawingTop = drawing.PerformenceRanks.FirstOrDefault();
-
-            var drawingTarget = performenceMonitor.GetDrawingTargetPerformenceData();
-            var drawingTargetTop = drawingTarget.PerformenceRanks.FirstOrDefault();
-
-            string formatFPS(double ticks) => $"{1.0 / TimeSpan.FromTicks((int)ticks).TotalSeconds,7:0.000}";
+            string formatFPS(double ticks) => $"{1.0 / TimeSpan.FromTicks((int)ticks).TotalSeconds,7:0.00}";
             string formatMSec(double ticks) => $"{TimeSpan.FromTicks((int)ticks).TotalMilliseconds:F2}";
+            void dip(IPerfomenceMonitor.IDrawingPerformenceStatisticsData.PerformenceItem p, int i)
+            {
+                if (p is null)
+                    return;
+                stringBuilder.AppendLine($"D.TOP{i}:{p.Name} {p.AveDrawCall}drawcall {formatMSec(p.AveSpendTicks)}ms ");
+            }
+            void dipt(IPerfomenceMonitor.IDrawingPerformenceStatisticsData.PerformenceItem p, int i)
+            {
+                if (p is null)
+                    return;
+                stringBuilder.AppendLine($"DT.TOP{i}:{p.Name} {formatMSec(p.AveSpendTicks)}ms ");
+            }
 
             stringBuilder.Clear();
             stringBuilder.AppendLine($"FPS:{0,3} / R.FPS {formatFPS(render.AveSpendTicks)}({formatFPS(render.MostSpendTicks)}) D.FPS:{formatFPS(drawing.AveSpendTicks)}({formatFPS(drawing.MostSpendTicks)})");
-            stringBuilder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{drawingTop.AveDrawCall,6} DT.Top.DC:{drawingTargetTop.AveDrawCall,6}");
-            stringBuilder.AppendLine($"D.TOP:{drawingTop.Name} {formatMSec(drawingTop.AveSpendTicks)}ms ");
-            stringBuilder.AppendLine($"D.TOP:{drawingTargetTop.Name} {formatMSec(drawingTargetTop.AveSpendTicks)}ms ");
+            stringBuilder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{drawingTop.AveDrawCall,6}");
+            stringBuilder.AppendLine();
+            dip(drawing.PerformenceRanks.ElementAtOrDefault(0), 1);
+            dip(drawing.PerformenceRanks.ElementAtOrDefault(1), 2);
+            dip(drawing.PerformenceRanks.ElementAtOrDefault(2), 3);
+            stringBuilder.AppendLine();
+            dipt(drawingTarget.PerformenceRanks.ElementAtOrDefault(0), 1);
+            dipt(drawingTarget.PerformenceRanks.ElementAtOrDefault(1), 2);
+            dipt(drawingTarget.PerformenceRanks.ElementAtOrDefault(2), 3);
 
             DisplayFPS = stringBuilder.ToString();
 
