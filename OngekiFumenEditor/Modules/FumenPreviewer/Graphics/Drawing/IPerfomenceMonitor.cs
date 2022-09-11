@@ -8,16 +8,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public interface IPerfomenceMonitor
     {
-        public interface IPerformenceData
+        public interface IRenderPerformenceStatisticsData
         {
-            public float AveSpendTicks { get; }
-            public float MostSpendTicks { get; }
+            public double AveSpendTicks { get; }
+            public double MostSpendTicks { get; }
+            public int AveDrawCall { get; }
         }
 
-        public interface IDrawingPerformenceData : IPerformenceData
+        public interface IDrawingPerformenceStatisticsData
         {
-            public record PerformenceItem(string Name, float AveSpendTicks);
+            public record PerformenceItem(string Name, double AveSpendTicks, int AveDrawCall);
             public IEnumerable<PerformenceItem> PerformenceRanks { get; }
+            public double AveSpendTicks { get; }
+            public double MostSpendTicks { get; }
         }
 
         void OnBeforeRender();
@@ -30,9 +33,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         void OnAfterDrawing(IDrawing drawing);
         void OnAfterRender();
 
-        IDrawingPerformenceData GetDrawingPerformenceData();
-        IDrawingPerformenceData GetDrawingTargetPerformenceData();
-        IPerformenceData GetRenderPerformenceData();
+        IDrawingPerformenceStatisticsData GetDrawingPerformenceData();
+        IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData();
+        IRenderPerformenceStatisticsData GetRenderPerformenceData();
 
         void Clear();
     }

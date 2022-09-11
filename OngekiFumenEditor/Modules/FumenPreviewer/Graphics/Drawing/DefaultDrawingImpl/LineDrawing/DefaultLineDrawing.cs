@@ -12,6 +12,7 @@ using System.Windows.Documents;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 using Polyline2DCSharp;
+using Caliburn.Micro;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
@@ -22,9 +23,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         private readonly Shader shader;
         private readonly int vbo;
         private readonly int vao;
+        private IPerfomenceMonitor performenceMonitor;
 
         public DefaultLineDrawing()
         {
+            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
             shader = CommonLineShader.Shared;
 
             vbo = GL.GenBuffer();
@@ -52,57 +55,62 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
         public void Draw(IFumenPreviewer target, IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
         {
-            shader.Begin();
+            performenceMonitor.OnBeginDrawing(this);
             {
-                shader.PassUniform("Model", Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0));
-                shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
-                GL.BindVertexArray(vao);
-
-                using var d = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var vecList, out _);
-                vecList.Clear();
-
-                var color = points.FirstOrDefault().Color;
-
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+                shader.Begin();
                 {
-                    using var d2 = points.Select(x => new Vec2() { x = x.Point.X, y = x.Point.Y }).ToListWithObjectPool(out var inputVecList);
+                    shader.PassUniform("Model", Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0));
+                    shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
+                    GL.BindVertexArray(vao);
 
-                    var genVertices = Polyline2D.Create(vecList, inputVecList, lineWidth,
-                        Polyline2D.JointStyle.ROUND,
-                        Polyline2D.EndCapStyle.ROUND
-                        );
+                    using var d = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var vecList, out _);
+                    vecList.Clear();
 
+                    var color = points.FirstOrDefault().Color;
 
-                    var arrBuffer2 = ArrayPool<float>.Shared.Rent(genVertices.Count * 6);
-                    var arrBufferIdx2 = 0;
-
-                    foreach (var p in genVertices)
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
                     {
-                        arrBuffer2[(6 * arrBufferIdx2) + 0] = p.x;
-                        arrBuffer2[(6 * arrBufferIdx2) + 1] = p.y;
-                        arrBuffer2[(6 * arrBufferIdx2) + 2] = color.X;
-                        arrBuffer2[(6 * arrBufferIdx2) + 3] = color.Y;
-                        arrBuffer2[(6 * arrBufferIdx2) + 4] = color.Z;
-                        arrBuffer2[(6 * arrBufferIdx2) + 5] = color.W;
+                        using var d2 = points.Select(x => new Vec2() { x = x.Point.X, y = x.Point.Y }).ToListWithObjectPool(out var inputVecList);
 
-                        arrBufferIdx2++;
+                        var genVertices = Polyline2D.Create(vecList, inputVecList, lineWidth,
+                            Polyline2D.JointStyle.ROUND,
+                            Polyline2D.EndCapStyle.ROUND
+                            );
+
+
+                        var arrBuffer2 = ArrayPool<float>.Shared.Rent(genVertices.Count * 6);
+                        var arrBufferIdx2 = 0;
+
+                        foreach (var p in genVertices)
+                        {
+                            arrBuffer2[(6 * arrBufferIdx2) + 0] = p.x;
+                            arrBuffer2[(6 * arrBufferIdx2) + 1] = p.y;
+                            arrBuffer2[(6 * arrBufferIdx2) + 2] = color.X;
+                            arrBuffer2[(6 * arrBufferIdx2) + 3] = color.Y;
+                            arrBuffer2[(6 * arrBufferIdx2) + 4] = color.Z;
+                            arrBuffer2[(6 * arrBufferIdx2) + 5] = color.W;
+
+                            arrBufferIdx2++;
+                        }
+
+                        GL.InvalidateBufferData(vbo);
+                        GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * arrBufferIdx2 * 6), arrBuffer2, BufferUsageHint.DynamicDraw);
+
+                        GL.Enable(EnableCap.PolygonSmooth);
+
+                        GL.DrawArrays(PrimitiveType.Triangles, 0, arrBufferIdx2);
+                        performenceMonitor.CountDrawCall(this);
+
+                        GL.Disable(EnableCap.PolygonSmooth);
+
+                        ArrayPool<float>.Shared.Return(arrBuffer2);
                     }
 
-                    GL.InvalidateBufferData(vbo);
-                    GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * arrBufferIdx2 * 6), arrBuffer2, BufferUsageHint.DynamicDraw);
-
-                    GL.Enable(EnableCap.PolygonSmooth);
-
-                    GL.DrawArrays(PrimitiveType.Triangles, 0, arrBufferIdx2);
-
-                    GL.Disable(EnableCap.PolygonSmooth);
-
-                    ArrayPool<float>.Shared.Return(arrBuffer2);
+                    GL.BindVertexArray(0);
                 }
-
-                GL.BindVertexArray(0);
+                shader.End();
             }
-            shader.End();
+            performenceMonitor.OnAfterDrawing(this);
         }
 
         public void Dispose()

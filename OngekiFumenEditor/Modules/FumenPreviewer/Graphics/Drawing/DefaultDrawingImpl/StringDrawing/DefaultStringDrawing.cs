@@ -1,4 +1,5 @@
-﻿using FontStashSharp;
+﻿using Caliburn.Micro;
+using FontStashSharp;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String.Platform;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultStringDrawing : IStringDrawing, IDisposable
     {
+        private IPerfomenceMonitor performenceMonitor;
         private Renderer renderer;
 
         private class FontHandle : IStringDrawing.FontHandle
@@ -39,7 +41,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
         public DefaultStringDrawing()
         {
-            renderer = new Renderer();
+            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
+            renderer = new Renderer(this);
         }
 
         Dictionary<IStringDrawing.FontHandle, FontSystem> cacheFonts = new Dictionary<IStringDrawing.FontHandle, FontSystem>();
@@ -64,23 +67,27 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
         public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IFumenPreviewer target, IStringDrawing.FontHandle handle, out Vector2? measureTextSize)
         {
-            measureTextSize = default;
+            performenceMonitor.OnBeginDrawing(this);
+            {
+                measureTextSize = default;
 
-            handle = handle ?? DefaultFont;
+                handle = handle ?? DefaultFont;
 
-            if (style != 0)
-                throw new NotSupportedException($"DefaultStringDrawing.Draw().style must be Normal only.");
+                if (style != 0)
+                    throw new NotSupportedException($"DefaultStringDrawing.Draw().style must be Normal only.");
 
-            renderer.Begin(OpenTK.Mathematics.Matrix4.CreateTranslation(new(0, -target.ViewHeight / 2, 0)) * target.ViewProjectionMatrix);
-            var font = GetFontSystem(handle).GetFont(fontSize);
-            var size = font.MeasureString(text, scale);
-            origin.X = origin.X * 2;
-            origin = origin * size;
-            scale.Y = -scale.Y;
+                renderer.Begin(OpenTK.Mathematics.Matrix4.CreateTranslation(new(0, -target.ViewHeight / 2, 0)) * target.ViewProjectionMatrix);
+                var font = GetFontSystem(handle).GetFont(fontSize);
+                var size = font.MeasureString(text, scale);
+                origin.X = origin.X * 2;
+                origin = origin * size;
+                scale.Y = -scale.Y;
 
-            font.DrawText(renderer, text, pos, new FSColor(color.X, color.Y, color.Z, color.W), scale, rotate, origin);
-            measureTextSize = size;
-            renderer.End();
+                font.DrawText(renderer, text, pos, new FSColor(color.X, color.Y, color.Z, color.W), scale, rotate, origin);
+                measureTextSize = size;
+                renderer.End();
+            }
+            performenceMonitor.OnAfterDrawing(this);
         }
 
         public void Dispose()

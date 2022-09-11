@@ -62,6 +62,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             }
         }
 
+        private IPerfomenceMonitor performenceMonitor;
         private float viewWidth = 0;
         public float ViewWidth
         {
@@ -156,6 +157,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             DisplayName = "谱面预览";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
+            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -231,6 +233,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         public void OnRender(GLWpfControl openGLView, TimeSpan ts)
         {
+            performenceMonitor.OnBeforeRender();
 #if DEBUG
             var error = GL.GetError();
             if (error != OpenTK.Graphics.OpenGL.ErrorCode.NoError)
@@ -253,8 +256,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
                 timeSignatureHelper.DrawLines(this);
 
-                drawCall = 0;
-
                 foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
                 {
                     if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget[] drawingTargets)
@@ -268,10 +269,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                             drawMap[drawingTarget] = enums.Concat(objGroup);
                     }
                 }
-#if DEBUG
-                stopwatch.Restart();
-                var prevTime = 0L;
-#endif
+
                 foreach (var renderPair in drawMap)
                 {
                     var drawingTarget = renderPair.Key;
@@ -283,47 +281,21 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                         foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))
                         {
                             drawingTarget.Post(obj);
-                            drawCall++;
                         }
                         drawingTarget.End();
                     }
-
-#if DEBUG
-                    var time = stopwatch.ElapsedTicks;
-                    var costTicks = time - prevTime;
-                    if (costTicks > castTime.Tick)
-                        castTime = (drawingTarget.GetType().Name, costTicks);
-                    prevTime = time;
-#endif
                 }
 
                 drawMap.Clear();
 
                 timeSignatureHelper.DrawTimeSigntureText(this);
 
-                //Log.LogDebug($"drawcall : {drawCall}");
-                SmoothFPSArray[SmoothFPSUpdateIdx] = 1 / (float)ts.TotalSeconds;
-                SmoothFPSUpdateIdx++;
-                if (SmoothFPSUpdateIdx == SmoothFPSArray.Length)
-                    SmoothFPSUpdateIdx = 0;
-#if DEBUG
-                SmoothFPS2Array[SmoothFPS2UpdateIdx] = 1.0f / (stopwatch.ElapsedMilliseconds / 1000.0f);
-                SmoothFPS2UpdateIdx++;
-                if (SmoothFPS2UpdateIdx == SmoothFPS2Array.Length)
-                    SmoothFPS2UpdateIdx = 0;
-#endif
+                performenceMonitor.OnAfterRender();
             }
         }
 
         #region Performence Statictis
 
-        private int SmoothFPSUpdateIdx = 0;
-        private int SmoothFPS2UpdateIdx = 0;
-        private int drawCall = 0;
-        private Stopwatch stopwatch = new Stopwatch();
-        private float[] SmoothFPSArray = new float[10];
-        private float[] SmoothFPS2Array = new float[10];
-        private (string Name, long Tick) castTime = new();
         private StringBuilder stringBuilder = new StringBuilder();
 
         public void OnSchedulerTerm()
@@ -333,13 +305,27 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         public Task OnScheduleCall(CancellationToken cancellationToken)
         {
+            var render = performenceMonitor.GetRenderPerformenceData();
+
+            var drawing = performenceMonitor.GetDrawingPerformenceData();
+            var drawingTop = drawing.PerformenceRanks.FirstOrDefault();
+
+            var drawingTarget = performenceMonitor.GetDrawingTargetPerformenceData();
+            var drawingTargetTop = drawingTarget.PerformenceRanks.FirstOrDefault();
+
+            string formatFPS(double ticks) => $"{1.0 / TimeSpan.FromTicks((int)ticks).TotalSeconds,7:0.000}";
+            string formatMSec(double ticks) => $"{TimeSpan.FromTicks((int)ticks).TotalMilliseconds:F2}";
+
             stringBuilder.Clear();
-            stringBuilder.AppendLine($"FPS:{(int)SmoothFPSArray.Average(),3}/{(int)SmoothFPS2Array.Average(),-3}");
-            stringBuilder.AppendLine($"DC:{drawCall}");
-            stringBuilder.AppendLine($"TOP:{castTime.Name} ({(new TimeSpan(castTime.Tick).TotalMilliseconds):F2})ms ({castTime.Tick:F2}ticks)");
+            stringBuilder.AppendLine($"FPS:{0,3} / R.FPS {formatFPS(render.AveSpendTicks)}({formatFPS(render.MostSpendTicks)}) D.FPS:{formatFPS(drawing.AveSpendTicks)}({formatFPS(drawing.MostSpendTicks)})");
+            stringBuilder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{drawingTop.AveDrawCall,6} DT.Top.DC:{drawingTargetTop.AveDrawCall,6}");
+            stringBuilder.AppendLine($"D.TOP:{drawingTop.Name} {formatMSec(drawingTop.AveSpendTicks)}ms ");
+            stringBuilder.AppendLine($"D.TOP:{drawingTargetTop.Name} {formatMSec(drawingTargetTop.AveSpendTicks)}ms ");
 
             DisplayFPS = stringBuilder.ToString();
-            castTime = default;
+
+            performenceMonitor.Clear();
+
             return Task.CompletedTask;
         }
 

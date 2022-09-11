@@ -1,4 +1,5 @@
-﻿using FontStashSharp.Interfaces;
+﻿using Caliburn.Micro;
+using FontStashSharp.Interfaces;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
@@ -62,13 +63,17 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         private object _lastTexture;
         private int _vertexIndex = 0;
         private readonly Texture2DManager _textureManager;
+        private IPerfomenceMonitor performenceMonitor;
 
         public ITexture2DManager TextureManager => _textureManager;
 
         private static readonly short[] indexData = GenerateIndexArray();
+        private readonly IDrawing refDrawing;
 
-        public unsafe Renderer()
+        public unsafe Renderer(IDrawing refDrawing)
         {
+            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
+
             _textureManager = new Texture2DManager();
 
             _vertexBuffer = new BufferObject<VertexPositionColorTexture>(MAX_VERTICES, BufferTarget.ArrayBuffer, true);
@@ -89,6 +94,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
             location = _shader.GetAttribLocation("a_texCoords0");
             _vao.VertexAttribPointer(location, 2, VertexAttribPointerType.Float, false, 16);
+            this.refDrawing = refDrawing;
         }
 
         ~Renderer() => Dispose(false);
@@ -152,6 +158,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             texture.Bind();
 
             GL.DrawElements(PrimitiveType.Triangles, _vertexIndex * 6 / 4, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            performenceMonitor.CountDrawCall(refDrawing);
+
             _vertexIndex = 0;
         }
 

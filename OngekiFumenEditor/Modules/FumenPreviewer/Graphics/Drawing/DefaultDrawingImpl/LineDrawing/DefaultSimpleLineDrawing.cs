@@ -11,6 +11,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.Windows.Documents;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
+using Caliburn.Micro;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
@@ -23,9 +24,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         private readonly int vao;
 
         public const int LINE_DRAW_MAX = 100;
+        private IPerfomenceMonitor performenceMonitor;
+
 
         public DefaultSimpleLineDrawing()
         {
+            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
             shader = CommonLineShader.Shared;
 
             vbo = GL.GenBuffer();
@@ -57,61 +61,65 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
         public void Draw(IFumenPreviewer target, IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
         {
-            GL.LineWidth(lineWidth);
-            shader.Begin();
+            performenceMonitor.OnBeginDrawing(this);
             {
-                shader.PassUniform("Model", Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0));
-                shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
-                GL.BindVertexArray(vao);
-
-                var arrBuffer = ArrayPool<float>.Shared.Rent(LINE_DRAW_MAX * 6);
-                var arrBufferIdx = 0;
-
-                void Copy(ILineDrawing.LineVertex lp)
+                GL.LineWidth(lineWidth);
+                shader.Begin();
                 {
-                    arrBuffer[(6 * arrBufferIdx) + 0] = lp.Point.X;
-                    arrBuffer[(6 * arrBufferIdx) + 1] = lp.Point.Y;
-                    arrBuffer[(6 * arrBufferIdx) + 2] = lp.Color.X;
-                    arrBuffer[(6 * arrBufferIdx) + 3] = lp.Color.Y;
-                    arrBuffer[(6 * arrBufferIdx) + 4] = lp.Color.Z;
-                    arrBuffer[(6 * arrBufferIdx) + 5] = lp.Color.W;
-                    arrBufferIdx++;
-                }
+                    shader.PassUniform("Model", Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0));
+                    shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
+                    GL.BindVertexArray(vao);
 
-                void FlushDraw()
-                {
-                    //GL.InvalidateBufferData(vbo);
-                    GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, arrBufferIdx * sizeof(float) * 6, arrBuffer);
+                    var arrBuffer = ArrayPool<float>.Shared.Rent(LINE_DRAW_MAX * 6);
+                    var arrBufferIdx = 0;
 
-                    GL.DrawArrays(PrimitiveType.LineStrip, 0, arrBufferIdx);
-
-                    arrBufferIdx = 0;
-                }
-
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-                {
-                    unsafe
+                    void Copy(ILineDrawing.LineVertex lp)
                     {
-                        var prevLinePoint = points.FirstOrDefault();
+                        arrBuffer[(6 * arrBufferIdx) + 0] = lp.Point.X;
+                        arrBuffer[(6 * arrBufferIdx) + 1] = lp.Point.Y;
+                        arrBuffer[(6 * arrBufferIdx) + 2] = lp.Color.X;
+                        arrBuffer[(6 * arrBufferIdx) + 3] = lp.Color.Y;
+                        arrBuffer[(6 * arrBufferIdx) + 4] = lp.Color.Z;
+                        arrBuffer[(6 * arrBufferIdx) + 5] = lp.Color.W;
+                        arrBufferIdx++;
+                    }
 
-                        foreach (var item in points.SequenceWrap(LINE_DRAW_MAX - 1))
+                    void FlushDraw()
+                    {
+                        //GL.InvalidateBufferData(vbo);
+                        GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, arrBufferIdx * sizeof(float) * 6, arrBuffer);
+                        GL.DrawArrays(PrimitiveType.LineStrip, 0, arrBufferIdx);
+                        performenceMonitor.CountDrawCall(this);
+
+                        arrBufferIdx = 0;
+                    }
+
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+                    {
+                        unsafe
                         {
-                            Copy(prevLinePoint);
-                            foreach (var q in item)
-                            {
-                                Copy(q);
-                                prevLinePoint = q;
-                            }
+                            var prevLinePoint = points.FirstOrDefault();
 
-                            FlushDraw();
+                            foreach (var item in points.SequenceWrap(LINE_DRAW_MAX - 1))
+                            {
+                                Copy(prevLinePoint);
+                                foreach (var q in item)
+                                {
+                                    Copy(q);
+                                    prevLinePoint = q;
+                                }
+
+                                FlushDraw();
+                            }
                         }
                     }
-                }
 
-                ArrayPool<float>.Shared.Return(arrBuffer);
-                GL.BindVertexArray(0);
+                    ArrayPool<float>.Shared.Return(arrBuffer);
+                    GL.BindVertexArray(0);
+                }
+                shader.End();
             }
-            shader.End();
+            performenceMonitor.OnAfterDrawing(this);
         }
 
         public void Dispose()

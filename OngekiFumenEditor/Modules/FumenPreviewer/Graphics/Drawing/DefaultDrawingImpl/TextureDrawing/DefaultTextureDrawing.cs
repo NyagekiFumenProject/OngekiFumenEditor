@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = OpenTK.Mathematics.Vector3;
 using Shader = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Shader;
+using Caliburn.Micro;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
@@ -24,9 +25,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
+        private IPerfomenceMonitor performenceMonitor;
 
         protected DefaultTextureDrawing()
         {
+            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
             shader = CommonSpriteShader.Shared;
 
             vertexVBO = GL.GenBuffer();
@@ -93,27 +96,32 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
         private void Draw(IFumenPreviewer target, Texture texture, Vector2 size, Vector2 position, float rotation)
         {
-            var modelMatrix =
-                Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
-                Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
-                Matrix4.CreateRotationZ(rotation) *
-                Matrix4.CreateTranslation(position.X - target.ViewWidth / 2, position.Y - target.ViewHeight / 2, 0);
-            //var mvpMatrix = previewer.ViewProjectionMatrix * modelMatrix;
-
-            shader.Begin();
+            performenceMonitor.OnBeginDrawing(this);
             {
-                shader.PassUniform("Model", modelMatrix);
-                shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
-                shader.PassUniform("TextureSize", new OpenTK.Mathematics.Vector2(size.X, size.Y));
-                shader.PassUniform("diffuse", texture);
+                var modelMatrix =
+                    Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
+                    Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
+                    Matrix4.CreateRotationZ(rotation) *
+                    Matrix4.CreateTranslation(position.X - target.ViewWidth / 2, position.Y - target.ViewHeight / 2, 0);
+                //var mvpMatrix = previewer.ViewProjectionMatrix * modelMatrix;
 
-                GL.BindVertexArray(vao);
+                shader.Begin();
                 {
-                    GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
+                    shader.PassUniform("Model", modelMatrix);
+                    shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
+                    shader.PassUniform("TextureSize", new OpenTK.Mathematics.Vector2(size.X, size.Y));
+                    shader.PassUniform("diffuse", texture);
+
+                    GL.BindVertexArray(vao);
+                    {
+                        GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
+                        performenceMonitor.CountDrawCall(this);
+                    }
+                    GL.BindVertexArray(0);
                 }
-                GL.BindVertexArray(0);
+                shader.End();
             }
-            shader.End();
+            performenceMonitor.OnAfterDrawing(this);
         }
     }
 }
