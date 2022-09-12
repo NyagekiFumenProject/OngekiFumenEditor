@@ -109,7 +109,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 {
                     shader.PassUniform("Model", modelMatrix);
                     shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
-                    shader.PassUniform("TextureSize", new OpenTK.Mathematics.Vector2(size.X, size.Y));
                     shader.PassUniform("diffuse", texture);
 
                     GL.BindVertexArray(vao);

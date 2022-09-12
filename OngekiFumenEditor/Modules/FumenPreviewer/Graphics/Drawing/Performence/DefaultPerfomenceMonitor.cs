@@ -50,6 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
         private DrawingTargetPerformenceData GetDrawingTargetPerformenceData(IDrawingTarget d) => drawTargetDataMap.TryGetValue(d, out var data) ? data : (drawTargetDataMap[d] = new DrawingTargetPerformenceData() { Name = d.GetType().Name });
 
         private FixedSizeCycleCollection<long> RenderSpendTicks { get; } = new(RECORD_LENGTH);
+        private FixedSizeCycleCollection<long> UIRenderSpendTicks { get; } = new(RECORD_LENGTH);
         private FixedSizeCycleCollection<long> TotalDrawCall { get; } = new(RECORD_LENGTH);
         private long currentDrawCall = 0;
         private long currentBeginRenderTick = 0;
@@ -115,6 +116,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
             public double MostSpendTicks { get; set; }
 
             public int AveDrawCall { get; set; }
+
+            public long MostUIRenderSpendTicks { get; set; }
+
+            public double AveUIRenderSpendTicks { get; set; }
         }
 
         public struct DrawingPerformenceStatisticsData : IDrawingPerformenceStatisticsData
@@ -165,9 +170,16 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
             return new RenderPerformenceStatisticsData()
             {
                 AveSpendTicks = RenderSpendTicks.Average(),
+                AveUIRenderSpendTicks = UIRenderSpendTicks.Average(),
+                MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Key).FirstOrDefault().Key,
                 MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Key).FirstOrDefault().Key,
                 AveDrawCall = (int)TotalDrawCall.Average()
             };
+        }
+
+        public void PostUIRenderTime(TimeSpan ts)
+        {
+            UIRenderSpendTicks.Enqueue(ts.Ticks);
         }
     }
 }

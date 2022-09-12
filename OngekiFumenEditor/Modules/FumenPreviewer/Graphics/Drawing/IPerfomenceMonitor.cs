@@ -13,6 +13,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
             public double AveSpendTicks { get; }
             public double MostSpendTicks { get; }
             public int AveDrawCall { get; }
+            public long MostUIRenderSpendTicks { get; }
+            public double AveUIRenderSpendTicks { get; }
         }
 
         public interface IDrawingPerformenceStatisticsData
@@ -38,5 +40,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         IRenderPerformenceStatisticsData GetRenderPerformenceData();
 
         void Clear();
+        void PostUIRenderTime(TimeSpan ts);
     }
 }

@@ -234,6 +234,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         public void OnRender(GLWpfControl openGLView, TimeSpan ts)
         {
+            performenceMonitor.PostUIRenderTime(ts);
             performenceMonitor.OnBeforeRender();
 #if DEBUG
             var error = GL.GetError();
@@ -331,7 +332,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             }
 
             stringBuilder.Clear();
-            stringBuilder.AppendLine($"FPS:{0,3} / R.FPS {formatFPS(render.AveSpendTicks)}({formatFPS(render.MostSpendTicks)}) D.FPS:{formatFPS(drawing.AveSpendTicks)}({formatFPS(drawing.MostSpendTicks)})");
+            stringBuilder.AppendLine($"UI.FPS:{formatFPS(render.AveUIRenderSpendTicks)}({formatFPS(render.MostUIRenderSpendTicks)}) / R.FPS {formatFPS(render.AveSpendTicks)}({formatFPS(render.MostSpendTicks)}) D.FPS:{formatFPS(drawing.AveSpendTicks)}({formatFPS(drawing.MostSpendTicks)})");
             stringBuilder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{drawingTop.AveDrawCall,6}");
             stringBuilder.AppendLine();
             dip(drawing.PerformenceRanks.ElementAtOrDefault(0), 1);
