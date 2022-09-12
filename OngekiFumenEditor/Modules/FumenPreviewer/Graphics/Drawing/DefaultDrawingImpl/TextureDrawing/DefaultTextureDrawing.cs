@@ -17,7 +17,6 @@ using Caliburn.Micro;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
-    [Export(typeof(ITextureDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal class DefaultTextureDrawing : ITextureDrawing, IDisposable
     {

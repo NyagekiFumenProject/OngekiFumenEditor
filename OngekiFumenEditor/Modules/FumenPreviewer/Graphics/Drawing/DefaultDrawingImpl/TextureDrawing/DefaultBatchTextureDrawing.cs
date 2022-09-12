@@ -11,13 +11,14 @@ using System.Windows.Media.Imaging;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
+    [Export(typeof(ITextureDrawing))]
     [Export(typeof(IBatchTextureDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal class DefaultBatchTextureDrawing : IBatchTextureDrawing, IDisposable
     {
         private IPerfomenceMonitor performenceMonitor;
         private BatchShader s_shader;
-        public uint Capacity { get; protected set; } = 0;
+        public uint Capacity => _DrawCallInstanceCountMax;
         private static byte[] PostData;
         private static int s_vbo_vertexBase, s_vbo_texPosBase;
         private const int BUFFER_COUNT = 3;
@@ -72,18 +73,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         {
             GL.BindVertexArray(vao);
             {
-                GL.BindBuffer(BufferTarget.ArrayBuffer, s_vbo_vertexBase);
-                {
-                    //绑定基本顶点
-                    GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * _cacheBaseVertex.Length),
-                        _cacheBaseVertex, BufferUsageHint.StaticDraw);
-
-                    GL.EnableVertexAttribArray(1);
-                    GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, sizeof(float) * (2), 0);
-                    GL.VertexAttribDivisor(1, 0);
-                }
-                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-
                 GL.BindBuffer(BufferTarget.ArrayBuffer, s_vbo_texPosBase);
                 {
                     //绑定基本顶点
@@ -93,6 +82,18 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                     GL.EnableVertexAttribArray(0);
                     GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, sizeof(float) * (2), 0);
                     GL.VertexAttribDivisor(0, 0);
+                }
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+
+                GL.BindBuffer(BufferTarget.ArrayBuffer, s_vbo_vertexBase);
+                {
+                    //绑定基本顶点
+                    GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(sizeof(float) * _cacheBaseVertex.Length),
+                        _cacheBaseVertex, BufferUsageHint.StaticDraw);
+
+                    GL.EnableVertexAttribArray(1);
+                    GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, sizeof(float) * (2), 0);
+                    GL.VertexAttribDivisor(1, 0);
                 }
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             }
@@ -106,26 +107,26 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
                 {
                     GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(_VertexSize * _DrawCallInstanceCountMax), IntPtr.Zero, BufferUsageHint.DynamicDraw);
-                    
+
                     //ModelMatrix
                     GL.EnableVertexAttribArray(2);
                     var strip = 0;
-                    GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, _VertexSize, strip);
+                    GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, _VertexSize, strip);
                     GL.VertexAttribDivisor(2, 1);
 
                     GL.EnableVertexAttribArray(3);
                     strip += 4 * sizeof(float);
-                    GL.VertexAttribPointer(3, 2, VertexAttribPointerType.Float, false, _VertexSize, strip);
+                    GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, _VertexSize, strip);
                     GL.VertexAttribDivisor(3, 1);
 
                     GL.EnableVertexAttribArray(4);
                     strip += 4 * sizeof(float);
-                    GL.VertexAttribPointer(4, 2, VertexAttribPointerType.Float, false, _VertexSize, strip);
+                    GL.VertexAttribPointer(4, 4, VertexAttribPointerType.Float, false, _VertexSize, strip);
                     GL.VertexAttribDivisor(4, 1);
 
                     GL.EnableVertexAttribArray(5);
                     strip += 4 * sizeof(float);
-                    GL.VertexAttribPointer(5, 2, VertexAttribPointerType.Float, false, _VertexSize, strip);
+                    GL.VertexAttribPointer(5, 4, VertexAttribPointerType.Float, false, _VertexSize, strip);
                     GL.VertexAttribDivisor(5, 1);
                 }
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
