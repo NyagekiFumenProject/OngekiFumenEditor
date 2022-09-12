@@ -177,11 +177,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             s_shader.PassUniform("ViewProjection", VP);
             s_shader.PassUniform("diffuse", texture);
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, s_vbos[_current_buffer_index]);
-            {
-                GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)(0), (IntPtr)(_VertexSize * CurrentPostCount), PostData);
-            }
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.NamedBufferSubData(s_vbos[_current_buffer_index], (IntPtr)(0), (IntPtr)(_VertexSize * CurrentPostCount), PostData);
 
             GL.BindVertexArray(s_vaos[_current_buffer_index]);
             {
