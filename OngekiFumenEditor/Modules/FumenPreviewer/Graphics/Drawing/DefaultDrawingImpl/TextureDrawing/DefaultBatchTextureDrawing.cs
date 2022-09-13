@@ -149,7 +149,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
             unsafe
             {
-                //Anchor write
+                //copy matrix4 to buffer
                 fixed (byte* ptr = &PostData[_currentPostBaseIndex])
                 {
                     var copyLen = 4 * 4 * sizeof(float);

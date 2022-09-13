@@ -3,12 +3,14 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
 {
-    public class Shader
+    public class Shader : IDisposable
     {
-        private int vertexShader, fragmentShader, program;
+        private int vertexShader, fragmentShader, program = -1;
 
         private bool compiled = false;
 
@@ -24,17 +26,17 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
 
         public Dictionary<string, object> Uniforms { get { return _uniforms; } internal set { _uniforms = value; } }
 
+        private string vertError;
+        private string fragError;
+        public string Error => $"vertex shader compile error :\n{vertError}\n\nfragment shader compile error :\n{fragError}";
+
         public void Compile()
         {
             if (compiled == false)
             {
-                compiled = true;
+                Dispose();
 
                 Uniforms = new Dictionary<string, object>();
-
-                GL.DeleteShader(vertexShader);
-                GL.DeleteShader(fragmentShader);
-                GL.DeleteProgram(program);
 
                 vertexShader = GL.CreateShader(ShaderType.VertexShader);
                 fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
@@ -49,13 +51,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
                 if (!GL.IsShader(fragmentShader))
                     throw new Exception("Fragment shader compile failed.");
 
-                var info = GL.GetShaderInfoLog(vertexShader);
-                if (!string.IsNullOrEmpty(info))
-                    Log.LogDebug("[Vertex Shader]:" + info);
+                vertError = GL.GetShaderInfoLog(vertexShader);
+                if (!string.IsNullOrEmpty(vertError))
+                    Log.LogDebug("[Vertex Shader]:" + vertError);
 
-                info = GL.GetShaderInfoLog(fragmentShader);
-                if (!string.IsNullOrEmpty(info))
-                    Log.LogDebug("[Fragment Shader]:" + info);
+                fragError = GL.GetShaderInfoLog(fragmentShader);
+                if (!string.IsNullOrEmpty(fragError))
+                    Log.LogDebug("[Fragment Shader]:" + fragError);
 
                 program = GL.CreateProgram();
 
@@ -71,19 +73,24 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
 
                 for (int i = 0; i < total; i++)
                     GL.GetActiveUniform(program, i, 16, out _, out _, out _, out var _);
+
+                compiled = true;
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin()
         {
             GL.UseProgram(program);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void End()
         {
             GL.UseProgram(0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, Texture tex)
         {
             if (tex == null)
@@ -95,47 +102,83 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
             GL.BindTexture(TextureTarget.Texture2D, tex.ID);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassNullTexUniform(string name)
         {
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(int l, float v) => GL.Uniform1(l, v);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, float val)
         {
             int l = GetUniformLocation(name);
-            GL.Uniform1(l, val);
+            PassUniform(l, val);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(int l, int v) => GL.Uniform1(l, v);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, int val)
         {
             int l = GetUniformLocation(name);
-            GL.Uniform1(l, val);
+            PassUniform(l, val);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(int l, Vector2 v) => GL.Uniform2(l, v);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, Vector2 val)
         {
             int l = GetUniformLocation(name);
-            GL.Uniform2(l, val);
+            PassUniform(l, val);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(int l, Matrix4 v) => GL.UniformMatrix4(l, false, ref v);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, Matrix4 matrix4)
         {
             int l = GetUniformLocation(name);
-            GL.UniformMatrix4(l, false, ref matrix4);
+            PassUniform(l, matrix4);
         }
 
         private Dictionary<string, int> _uniformDictionary = new Dictionary<string, int>();
+        private Dictionary<string, int> _attrbDictionary = new Dictionary<string, int>();
 
-        private int GetUniformLocation(string name)
+        public int GetUniformLocation(string name)
         {
-            if (_uniformDictionary.ContainsKey(name))
+            if (!_uniformDictionary.TryGetValue(name, out var l))
             {
-                return _uniformDictionary[name];
+                l = GL.GetUniformLocation(program, name);
+                _uniformDictionary[name] = l;
             }
-            int l = GL.GetUniformLocation(program, name);
-            _uniformDictionary.Add(name, l);
 
             return l;
+        }
+
+        public int GetAttribLocation(string name)
+        {
+            if (!_attrbDictionary.TryGetValue(name, out var l))
+            {
+                l = GL.GetAttribLocation(program, name);
+                _attrbDictionary[name] = l;
+            }
+
+            return l;
+        }
+
+        public void Dispose()
+        {
+            if (program < 0)
+                return;
+            GL.DeleteShader(vertexShader);
+            GL.DeleteShader(fragmentShader);
+            GL.DeleteProgram(program);
+            program = -1;
         }
 
         public int ShaderProgram => program;

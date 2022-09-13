@@ -36,6 +36,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 {
@@ -185,12 +186,15 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             IoC.Get<ISchedulerManager>().AddScheduler(this);
+            Log.LogInfo($"Init OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
         }
 
         private void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
         {
             var str = Marshal.PtrToStringAnsi(message, length);
             Log.LogDebug($"{id}\t:\t{str}");
+            if (str.Contains("error generated"))
+                throw new Exception(str);
         }
 
         private void RecalcViewProjectionMatrix()
@@ -355,6 +359,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         #region Selectable Objects Register
 
         private Dictionary<OngekiObjectBase, Rect> hits = new();
+        private ISpecialLineDrawing lineDrawing;
 
         public void RegisterSelectableObject(OngekiObjectBase obj, Rect rect)
         {

@@ -28,8 +28,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Views
 
             glView.Start(new()
             {
-                MajorVersion = 3,
-                MinorVersion = 3,
+                MajorVersion = 4,
+                MinorVersion = 5,
                 GraphicsProfile = OpenTK.Windowing.Common.ContextProfile.Core
             });
         }
