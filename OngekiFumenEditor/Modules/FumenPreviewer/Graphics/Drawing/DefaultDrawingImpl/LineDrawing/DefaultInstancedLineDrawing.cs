@@ -11,10 +11,10 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
-    [Export(typeof(ILineDrawing))]
-    //[Export(typeof(ISimpleLineDrawing))]
+    //[Export(typeof(ILineDrawing))]
+    [Export(typeof(ISimpleLineDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    internal class DefaultInstancedLineDrawing : /*ISimpleLineDrawing,*/ ILineDrawing, IDisposable
+    internal class DefaultInstancedLineDrawing : ISimpleLineDrawing,/* ILineDrawing,*/ IDisposable
     {
         public const int MAX_VERTS = 3 * 12 * 1024;
         /*
