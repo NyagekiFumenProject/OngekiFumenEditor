@@ -18,7 +18,9 @@ using OngekiFumenEditor.Utils;
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
     [Export(typeof(ILineDrawing))]
-    internal class DefaultInstancedLineDrawing : ILineDrawing, IDisposable
+    [Export(typeof(ISimpleLineDrawing))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    internal class DefaultInstancedLineDrawing : ISimpleLineDrawing, IDisposable
     {
         public const int MAX_VERTS = 3 * 12 * 1024;
         public const int VertexTBytesSize = sizeof(float) * (3 + 1 + 4);
@@ -73,7 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 {
                     GL.NamedBufferStorage(line_vbo, PostData.Length * sizeof(float), IntPtr.Zero, BufferStorageFlags.DynamicStorageBit);
                 }
-                GL.VertexArrayVertexBuffer(vao, binding_idx, line_vbo, IntPtr.Zero, 2 * VertexTBytesSize);
+                GL.VertexArrayVertexBuffer(vao, binding_idx, line_vbo, IntPtr.Zero, VertexTBytesSize);
                 GL.VertexArrayBindingDivisor(vao, binding_idx, 1);
 
                 GL.EnableVertexArrayAttrib(vao, line_pos_width_a);
@@ -85,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 GL.VertexArrayAttribBinding(vao, line_col_a, binding_idx);
 
                 GL.EnableVertexArrayAttrib(vao, line_pos_width_b);
-                GL.VertexArrayAttribFormat(vao, line_pos_width_b, 4, VertexAttribType.Float, false, VertexTBytesSize + 0);
+                GL.VertexArrayAttribFormat(vao, line_pos_width_b, 4, VertexAttribType.Float, false, VertexTBytesSize);
                 GL.VertexArrayAttribBinding(vao, line_pos_width_b, binding_idx);
 
                 GL.EnableVertexArrayAttrib(vao, line_col_b);
@@ -147,9 +149,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         {
             GL.NamedBufferSubData(line_vbo, IntPtr.Zero, postDataFillIndex, PostData);
 
-            GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount >> 1);
+            GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
             perfomenceMonitor.CountDrawCall(this);
-            Log.LogDebug($"postDataFillCount = {postDataFillCount}");
 
             postDataFillIndex = postDataFillCount = 0;
         }
@@ -158,43 +159,43 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         {
             perfomenceMonitor.OnBeginDrawing(this);
 
-            shader.Begin();
+            if (points.Count() > 1)
             {
-                var mvpMatrix = OpenTK.Mathematics.Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0) * target.ViewProjectionMatrix;
-                shader.PassUniform(mvp, mvpMatrix);
-                shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
-                shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));
-
-                var itor = points.GetEnumerator();
-                itor.MoveNext();
-                var prevPoint = itor.Current;
-
-                void appendCore(ILineDrawing.LineVertex point)
+                shader.Begin();
                 {
-                    if (postDataFillIndex + VertexTBytesSize >= MAX_VERTS)
+                    var mvpMatrix = OpenTK.Mathematics.Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0) * target.ViewProjectionMatrix;
+                    shader.PassUniform(mvp, mvpMatrix);
+                    shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
+                    shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));
+
+                    var prevPoint = default(ILineDrawing.LineVertex);
+
+                    void appendPoint(ILineDrawing.LineVertex point)
                     {
+                        if (postDataFillIndex + VertexTBytesSize >= MAX_VERTS)
+                        {
+                            FlushDraw();
+                            AppendPoint(prevPoint, lineWidth);
+                        }
+
+                        AppendPoint(point, lineWidth);
+                    }
+
+                    GL.BindVertexArray(vao);
+                    {
+                        foreach (var point in points)
+                        {
+                            appendPoint(point);
+                            prevPoint = point;
+                        }
+
                         FlushDraw();
-                        AppendPoint(prevPoint, lineWidth);
                     }
 
-                    AppendPoint(point, lineWidth);
+                    GL.BindVertexArray(0);
                 }
-
-                GL.BindVertexArray(vao);
-                {
-                    while (itor.MoveNext())
-                    {
-                        var point = itor.Current;
-                        appendCore(prevPoint);
-                        appendCore(point);
-                        prevPoint = point;
-                    }
-
-                    FlushDraw();
-                }
-                GL.BindVertexArray(0);
+                shader.End();
             }
-            shader.End();
 
             perfomenceMonitor.OnAfterDrawing(this);
         }

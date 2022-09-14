@@ -15,7 +15,7 @@ using Caliburn.Micro;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
-    [Export(typeof(ISimpleLineDrawing))]
+    //[Export(typeof(ISimpleLineDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultSimpleLineDrawing : ISimpleLineDrawing, IDisposable
     {
