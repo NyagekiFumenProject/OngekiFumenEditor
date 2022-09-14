@@ -359,7 +359,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         #region Selectable Objects Register
 
         private Dictionary<OngekiObjectBase, Rect> hits = new();
-        private ISpecialLineDrawing lineDrawing;
 
         public void RegisterSelectableObject(OngekiObjectBase obj, Rect rect)
         {

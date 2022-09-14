@@ -13,6 +13,7 @@ using System.Windows.Markup;
 using static System.Windows.Forms.AxHost;
 using System.Windows.Media.TextFormatting;
 using ControlzEx.Standard;
+using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
@@ -123,8 +124,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             GL.BindVertexArray(0);
         }
 
-        private ILineDrawing.LineVertex? prevPoint = default;
-
         private unsafe void AppendPoint(ILineDrawing.LineVertex point, float lineWidth)
         {
             var buffer = PostData.AsSpan().Slice(postDataFillIndex / sizeof(float), VertexTBytesSize / sizeof(float));
@@ -150,6 +149,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
             GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount >> 1);
             perfomenceMonitor.CountDrawCall(this);
+            Log.LogDebug($"postDataFillCount = {postDataFillCount}");
 
             postDataFillIndex = postDataFillCount = 0;
         }
@@ -165,6 +165,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
                 shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));
 
+                var itor = points.GetEnumerator();
+                itor.MoveNext();
+                var prevPoint = itor.Current;
+
                 void appendCore(ILineDrawing.LineVertex point)
                 {
                     if (postDataFillIndex + VertexTBytesSize >= MAX_VERTS)
@@ -178,12 +182,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 
                 GL.BindVertexArray(vao);
                 {
-                    prevPoint = default;
-
-                    foreach (var point in points)
+                    while (itor.MoveNext())
                     {
-                        if (prevPoint is ILineDrawing.LineVertex prevP)
-                            appendCore(prevP);
+                        var point = itor.Current;
+                        appendCore(prevPoint);
                         appendCore(point);
                         prevPoint = point;
                     }
