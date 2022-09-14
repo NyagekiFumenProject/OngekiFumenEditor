@@ -1,28 +1,33 @@
-﻿using Caliburn.Micro;
-using MahApps.Metro.Controls;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
-using OpenTK.Compute.OpenCL;
+﻿/*
+Code copied and modified from https://github.com/mhalber/Lines/blob/master/instancing_lines.h
+*/
+
+using Caliburn.Micro;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Markup;
-using static System.Windows.Forms.AxHost;
-using System.Windows.Media.TextFormatting;
-using ControlzEx.Standard;
-using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
     [Export(typeof(ILineDrawing))]
-    [Export(typeof(ISimpleLineDrawing))]
+    //[Export(typeof(ISimpleLineDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    internal class DefaultInstancedLineDrawing : ISimpleLineDrawing, IDisposable
+    internal class DefaultInstancedLineDrawing : /*ISimpleLineDrawing,*/ ILineDrawing, IDisposable
     {
         public const int MAX_VERTS = 3 * 12 * 1024;
+        /*
+            typedef struct vertex
+            {
+                union
+                {
+                    struct { msh_vec3_t pos; float width; };
+                    msh_vec4_t pos_width;
+                };
+                msh_vec4_t col;
+            } vertex_t;
+         */
         public const int VertexTBytesSize = sizeof(float) * (3 + 1 + 4);
 
         private int vao;
