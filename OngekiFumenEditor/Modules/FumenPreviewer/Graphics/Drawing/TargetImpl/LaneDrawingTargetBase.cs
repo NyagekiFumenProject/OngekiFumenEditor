@@ -36,16 +36,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         {
             base.DrawBatch(target, objs);
 
-            var cacheCalcMap = GetCurrentFrameCalculatedGridResult();
-
             void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
             {
                 using var d = o.Select(x => new
                 {
                     Obj = x,
                     Pos = new Vector2(
-                        cacheCalcMap.TryGetValue(x.XGrid, out var cx) ? cx : (float)XGridCalculator.ConvertXGridToX(x.XGrid, 30, target.ViewWidth, 1),
-                        cacheCalcMap.TryGetValue(x.TGrid, out var cy) ? cy : (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Fumen.BpmList, 1.0, 240)
+                        (float)XGridCalculator.ConvertXGridToX(x.XGrid, 30, target.ViewWidth, 1),
+                        (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Fumen.BpmList, 1.0, 240)
                     )
                 }).Where(x => !(x.Pos.Y < target.CurrentPlayTime || x.Pos.Y > target.CurrentPlayTime + target.ViewHeight)).ToListWithObjectPool(out var list);
 

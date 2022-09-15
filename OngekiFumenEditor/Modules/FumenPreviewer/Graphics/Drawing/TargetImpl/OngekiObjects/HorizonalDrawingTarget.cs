@@ -250,7 +250,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                 _ => string.Empty
             };
 
-            var x = -target.ViewWidth / 2;
+            var x = 0f;
             var i = 0;
             foreach ((var obj, var c) in group.Select(x => (x.TimelineObject, colors[x.TimelineObject.IDShortName])).OrderBy(x => x.Item2.PackedValue))
             {

@@ -137,7 +137,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         {
             if (obj.ReferenceBulletPallete is null)
                 return;
-            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - target.ViewWidth / 2, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
+            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
         }
 
         public void Dispose()

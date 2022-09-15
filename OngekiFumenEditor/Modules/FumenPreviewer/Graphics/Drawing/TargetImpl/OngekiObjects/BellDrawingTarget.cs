@@ -30,9 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
         public BellDrawingTarget() : base()
         {
-            var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\bell.png", UriKind.Relative));
-            using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-            texture = new Texture(bitmap);
+            texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\bell.png");
             size = new(40, 40);
             stringDrawing = IoC.Get<IStringDrawing>();
             textureDrawing = IoC.Get<ITextureDrawing>();
@@ -94,7 +92,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         {
             if (obj.ReferenceBulletPallete is null)
                 return;
-            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X - target.ViewWidth / 2, pos.Y + 5), Vector2.One, 16, 0, new(1, 0, 0, 1), new(0.5f, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out _);
+            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, new(1, 0, 0, 1), new(0.5f, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out _);
         }
 
         public void Dispose()

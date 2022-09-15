@@ -69,21 +69,23 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         {
             performenceMonitor.OnBeginDrawing(this);
             {
-                measureTextSize = default;
-
                 handle = handle ?? DefaultFont;
 
-                if (style != 0)
-                    throw new NotSupportedException($"DefaultStringDrawing.Draw().style must be Normal only.");
+                var fontStyle = TextStyle.None;
 
-                renderer.Begin(OpenTK.Mathematics.Matrix4.CreateTranslation(new(0, -target.ViewHeight / 2, 0)) * target.ViewProjectionMatrix);
+                if (style == IStringDrawing.StringStyle.Underline)
+                    fontStyle = TextStyle.Underline;
+                if (style == IStringDrawing.StringStyle.Strike)
+                    fontStyle = TextStyle.Strikethrough;
+
+                renderer.Begin(OpenTK.Mathematics.Matrix4.CreateTranslation(new(-target.ViewWidth / 2, -target.ViewHeight / 2, 0)) * target.ViewProjectionMatrix);
                 var font = GetFontSystem(handle).GetFont(fontSize);
                 var size = font.MeasureString(text, scale);
                 origin.X = origin.X * 2;
                 origin = origin * size;
                 scale.Y = -scale.Y;
 
-                font.DrawText(renderer, text, pos, new FSColor(color.X, color.Y, color.Z, color.W), scale, rotate, origin);
+                font.DrawText(renderer, text, pos, new FSColor(color.X, color.Y, color.Z, color.W), scale, rotate, origin, textStyle: fontStyle);
                 measureTextSize = size;
                 renderer.End();
             }

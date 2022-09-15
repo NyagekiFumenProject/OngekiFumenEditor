@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     {
         public virtual int LineWidth { get; } = 2;
         private ILineDrawing lineDrawing;
-        private Dictionary<GridBase, float> cacheCalc = new();
+        private Dictionary<int, float> cacheCalc = new();
 
         public CommonLinesDrawTargetBase()
         {
@@ -30,25 +30,29 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
 
-        public IReadOnlyDictionary<GridBase, float> GetCurrentFrameCalculatedGridResult() => cacheCalc;
-
         public (LineVertex begin, LineVertex end) FillLine(IFumenPreviewer target, List<LineVertex> list, T obj)
         {
             var color = GetLanePointColor(obj);
-            LineVertex calc(ConnectableObjectBase o)
-            {
-                var x = (float)XGridCalculator.ConvertXGridToX(o.XGrid, 30, target.ViewWidth, 1);
-                cacheCalc[o.XGrid] = x;
+            var resT = obj.TGrid.ResT;
+            var resX = obj.XGrid.ResX;
 
-                var y = (float)TGridCalculator.ConvertTGridToY(o.TGrid, target.Fumen.BpmList, 1.0, 240);
-                cacheCalc[o.TGrid] = y;
+            LineVertex calc(TGrid tGrid, XGrid xGrid)
+            {
+                var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1);
+                cacheCalc[xGrid.TotalGrid] = x;
+
+                var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Fumen.BpmList, 1.0, 240);
+                cacheCalc[tGrid.TotalGrid] = y;
 
                 return new(new(x, y), color);
             }
 
-            list.Add(calc(obj));
+            list.Add(calc(obj.TGrid, obj.XGrid));
             foreach (var child in obj.Children)
-                list.Add(calc(child));
+            {
+                foreach (var item in child.GenPath())
+                    list.Add(calc(new TGrid(item.pos.Y / resT), new XGrid(item.pos.X / resX)));
+            }
 
             return (list.FirstOrDefault(), list.LastOrDefault());
         }

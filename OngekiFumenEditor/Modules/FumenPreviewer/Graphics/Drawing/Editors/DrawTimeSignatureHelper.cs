@@ -81,7 +81,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Editors
             foreach (var pair in drawLines)
                 stringDrawing.Draw(
                     pair.TGrid.ToString(),
-                    new(target.ViewWidth / 2,
+                    new(target.ViewWidth,
                     (float)pair.Y + 10),
                     Vector2.One,
                     12,
