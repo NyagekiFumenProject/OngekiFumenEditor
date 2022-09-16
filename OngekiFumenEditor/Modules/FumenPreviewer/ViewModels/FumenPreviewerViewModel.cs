@@ -200,7 +200,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         private void RecalcViewProjectionMatrix()
         {
             var projection = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
-            var view = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, -CurrentPlayTime, 0));
+            var view = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, -CurrentPlayTime, 0)) * Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2, -ViewHeight / 2, 0));
 
             ViewProjectionMatrix = view * projection;
         }

@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 {
     [Export(typeof(IStringDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DefaultStringDrawing : IStringDrawing, IDisposable
+    public class DefaultStringDrawing : CommonDrawingBase, IStringDrawing, IDisposable
     {
         private IPerfomenceMonitor performenceMonitor;
         private Renderer renderer;
@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 if (style == IStringDrawing.StringStyle.Strike)
                     fontStyle = TextStyle.Strikethrough;
 
-                renderer.Begin(OpenTK.Mathematics.Matrix4.CreateTranslation(new(-target.ViewWidth / 2, -target.ViewHeight / 2, 0)) * target.ViewProjectionMatrix);
+                renderer.Begin(GetOverrideModelMatrix() * target.ViewProjectionMatrix);
                 var font = GetFontSystem(handle).GetFont(fontSize);
                 var size = font.MeasureString(text, scale);
                 origin.X = origin.X * 2;

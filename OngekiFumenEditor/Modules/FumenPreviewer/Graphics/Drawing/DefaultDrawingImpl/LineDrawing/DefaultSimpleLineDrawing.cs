@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
 {
     //[Export(typeof(ISimpleLineDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DefaultSimpleLineDrawing : ISimpleLineDrawing, IDisposable
+    public class DefaultSimpleLineDrawing : CommonDrawingBase, ISimpleLineDrawing, IDisposable
     {
         private readonly Shader shader;
         private readonly int vbo;
@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 GL.LineWidth(lineWidth);
                 shader.Begin();
                 {
-                    shader.PassUniform("Model", Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0));
+                    shader.PassUniform("Model", GetOverrideModelMatrix());
                     shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
                     GL.BindVertexArray(vao);
 

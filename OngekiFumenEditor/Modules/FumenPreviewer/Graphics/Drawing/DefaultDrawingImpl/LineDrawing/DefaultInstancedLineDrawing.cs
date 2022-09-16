@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
     //[Export(typeof(ILineDrawing))]
     [Export(typeof(ISimpleLineDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    internal class DefaultInstancedLineDrawing : ISimpleLineDrawing,/* ILineDrawing,*/ IDisposable
+    internal class DefaultInstancedLineDrawing : CommonDrawingBase, ISimpleLineDrawing,/* ILineDrawing,*/ IDisposable
     {
         public const int MAX_VERTS = 3 * 12 * 1024;
         /*
@@ -168,7 +168,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             {
                 shader.Begin();
                 {
-                    var mvpMatrix = OpenTK.Mathematics.Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0) * target.ViewProjectionMatrix;
+                    var mvpMatrix = GetOverrideModelMatrix() * target.ViewProjectionMatrix;
                     shader.PassUniform(mvp, mvpMatrix);
                     shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
                     shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));

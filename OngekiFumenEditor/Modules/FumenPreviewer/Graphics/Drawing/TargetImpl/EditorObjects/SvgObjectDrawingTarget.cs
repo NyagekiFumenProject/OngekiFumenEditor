@@ -12,6 +12,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OpenTK.Mathematics;
+using System.Windows.Media;
+using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.EditorObjects
 {
@@ -31,8 +35,22 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
 
         public override void Draw(IFumenPreviewer target, SvgPrefabBase obj)
         {
+            if (obj.ProcessingDrawingGroup?.Bounds is not Rect bound)
+                return;
+
+            var w = bound.Width;
+            var h = bound.Height;
+
+            var x = (float)(XGridCalculator.ConvertXGridToX(obj.XGrid, 30, target.ViewWidth, 1) + w / 2);
+            var y = (float)(TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1.0, 240) - h / 2);
+
             var data = cachedSvgRenderDataManager.GetRenderData(target, obj);
-            lineDrawing.Draw(target, data, 1);
+
+            lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4.CreateTranslation(x, y, 0));
+            {
+                lineDrawing.Draw(target, data, 1);
+            }
+            lineDrawing.PopOverrideModelMatrix(out _);
         }
     }
 }

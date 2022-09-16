@@ -18,7 +18,7 @@ using Caliburn.Micro;
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
-    internal class DefaultTextureDrawing : ITextureDrawing, IDisposable
+    internal class DefaultTextureDrawing : CommonDrawingBase, ITextureDrawing, IDisposable
     {
         private readonly Shader shader;
         private readonly int vertexVBO;
@@ -98,11 +98,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             performenceMonitor.OnBeginDrawing(this);
             {
                 var modelMatrix =
+                    GetOverrideModelMatrix() *
                     Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
                     Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
                     Matrix4.CreateRotationZ(rotation) *
-                    Matrix4.CreateTranslation(position.X - target.ViewWidth / 2, position.Y - target.ViewHeight / 2, 0);
-                //var mvpMatrix = previewer.ViewProjectionMatrix * modelMatrix;
+                    Matrix4.CreateTranslation(position.X, position.Y, 0);
 
                 shader.Begin();
                 {

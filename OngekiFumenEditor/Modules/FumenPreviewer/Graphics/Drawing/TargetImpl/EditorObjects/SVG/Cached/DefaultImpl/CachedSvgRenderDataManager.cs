@@ -72,15 +72,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
 
         }
 
-        private List<LineVertex> GenerateLineVertexData(IFumenPreviewer target, SvgPrefabBase svgPrefab)
+        private List<LineVertex> GenerateLineVertexData(SvgPrefabBase svgPrefab)
         {
             var list = ObjectPool<List<LineVertex>>.Get();
             list.Clear();
 
             var segments = svgPrefab.GenerateLineSegments();
-            var baseX = (float)XGridCalculator.ConvertXGridToX(svgPrefab.XGrid, 30, target.ViewWidth, 1);
-            var baseY = (float)TGridCalculator.ConvertTGridToY(svgPrefab.TGrid, target.Fumen.BpmList, 1, 240);
-            var basePos = new Vector2(baseX, baseY);
 
             foreach (var seg in segments)
             {
@@ -90,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
 
                 foreach (var point in seg.RelativePoints)
                 {
-                    var fixPos = point + basePos;
+                    var fixPos = point;
 
                     if (addFirst)
                     {
@@ -120,9 +117,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
 
             if (!CheckCachedDataVailed(target, cachedItem))
             {
-                var genData = GenerateLineVertexData(target, svgPrefab);
+                cachedItem.CleanPoints();
+                var genData = GenerateLineVertexData(svgPrefab);
                 cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingDrawingGroup?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
                 cachedItem.GeneratedPoints = genData;
+                cachedItem.ViewSize = new Vector2(target.ViewWidth, target.ViewHeight);
             }
 
             //update hashcode and access time

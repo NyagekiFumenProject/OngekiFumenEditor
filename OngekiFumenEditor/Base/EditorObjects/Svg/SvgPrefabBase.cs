@@ -251,7 +251,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             procDrawingGroup.Freeze();
             ProcessingDrawingGroup = procDrawingGroup;
 
-            Log.LogDebug($"Generate {ProcessingDrawingGroup.Children.Count} geometries.");
+            Log.LogDebug($"Generate {ProcessingDrawingGroup.Children.Count} geometries. hashCode:{ProcessingDrawingGroup?.GetHashCode()}");
         }
 
         private Pen CalculateRelativePen(Brush brush)
@@ -304,12 +304,10 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             if (drawingGroup is null)
                 return outputSegments;
 
-            var baseCanvasX = 0;
-            var baseCanvasY = 0;
             var bound = drawingGroup.Bounds.Size;
             var offset = drawingGroup.Bounds.Location;
 
-            foreach (var childGeometry in drawingGroup.Children.OfType<GeometryDrawing>())
+            foreach (var childGeometry in ProcessingDrawingGroup.Children.OfType<GeometryDrawing>())
             {
                 var lines = childGeometry.Geometry.GetFlattenedPathGeometry();
                 var brush = (childGeometry.Brush ?? childGeometry.Pen?.Brush) as SolidColorBrush;
@@ -323,8 +321,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
                 Vector2 CalculateRelativePoint(Point relativePoint)
                 {
-                    var rx = baseCanvasX - (bound.Width - relativePoint.X) - offset.X + bound.Width * (1 - OffsetX.ValuePercent);
-                    var ry = baseCanvasY - relativePoint.Y + offset.Y + bound.Height * OffsetY.ValuePercent;
+                    var rx = - (bound.Width - relativePoint.X) - offset.X + bound.Width * (1 - OffsetX.ValuePercent);
+                    var ry = - relativePoint.Y + offset.Y + bound.Height * OffsetY.ValuePercent;
 
                     return new((float)rx, (float)ry);
                 }

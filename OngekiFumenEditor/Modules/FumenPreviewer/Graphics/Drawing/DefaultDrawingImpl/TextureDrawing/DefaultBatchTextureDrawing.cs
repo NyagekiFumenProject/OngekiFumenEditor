@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
     [Export(typeof(ITextureDrawing))]
     [Export(typeof(IBatchTextureDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    internal class DefaultBatchTextureDrawing : IBatchTextureDrawing, IDisposable
+    internal class DefaultBatchTextureDrawing : CommonDrawingBase, IBatchTextureDrawing, IDisposable
     {
         private IPerfomenceMonitor performenceMonitor;
         private BatchShader s_shader;
@@ -145,7 +145,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                     OpenTK.Mathematics.Matrix4.CreateScale(new OpenTK.Mathematics.Vector3(texture.Width, texture.Height, 1)) *
                     OpenTK.Mathematics.Matrix4.CreateScale(new OpenTK.Mathematics.Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
                     OpenTK.Mathematics.Matrix4.CreateRotationZ(rotate) *
-                    OpenTK.Mathematics.Matrix4.CreateTranslation(position.X - target.ViewWidth / 2, position.Y - target.ViewHeight / 2, 0);
+                    OpenTK.Mathematics.Matrix4.CreateTranslation(position.X, position.Y, 0);
 
             unsafe
             {
@@ -173,8 +173,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 return;
             s_shader.Begin();
 
-            var VP = target.ViewProjectionMatrix;
-            s_shader.PassUniform("ViewProjection", VP);
+            var MVP =
+                    GetOverrideModelMatrix() * target.ViewProjectionMatrix;
+            s_shader.PassUniform("ViewProjection", MVP);
             s_shader.PassUniform("diffuse", texture);
 
             GL.NamedBufferSubData(s_vbos[_current_buffer_index], (IntPtr)(0), (IntPtr)(_VertexSize * CurrentPostCount), PostData);
