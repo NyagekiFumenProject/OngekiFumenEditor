@@ -24,8 +24,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             var type = map["Type"];
             SvgPrefabBase svg = type switch
             {
-                "SVG_IMG" => new SvgImageFilePrefab(),
-                "SVG_STR" => new SvgStringPrefab(),
+                SvgImageFilePrefab.CommandName => new SvgImageFilePrefab(),
+                SvgStringPrefab.CommandName => new SvgStringPrefab(),
                 _ => default
             };
 

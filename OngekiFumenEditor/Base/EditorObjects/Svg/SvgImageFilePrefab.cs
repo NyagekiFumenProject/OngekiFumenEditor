@@ -18,7 +18,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 {
     public class SvgImageFilePrefab : SvgPrefabBase
     {
-        public override string IDShortName => "SVG_IMG";
+        public const string CommandName = "[SVG_IMG]";
+        public override string IDShortName => CommandName;
         public override Type ModelViewType => typeof(SvgImageFilePrefabViewModel);
 
         private FileInfo svgFile = null;

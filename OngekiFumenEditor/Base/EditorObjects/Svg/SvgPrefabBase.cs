@@ -1,14 +1,22 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
+using OpenTK.Graphics.ES20;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Windows;
 
 namespace OngekiFumenEditor.Base.EditorObjects.Svg
 {
@@ -281,6 +289,71 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             var p = new Pen(brush, 2);
             p.Freeze();
             return p;
+        }
+
+        public class LineSegment
+        {
+            public List<Vector2> RelativePoints { get; set; } = new List<Vector2>();
+            public Color Color { get; set; }
+        }
+
+        public List<LineSegment> GenerateLineSegments()
+        {
+            var outputSegments = new List<LineSegment>();
+
+            if (drawingGroup is null)
+                return outputSegments;
+
+            var baseCanvasX = 0;
+            var baseCanvasY = 0;
+            var bound = drawingGroup.Bounds.Size;
+            var offset = drawingGroup.Bounds.Location;
+
+            foreach (var childGeometry in drawingGroup.Children.OfType<GeometryDrawing>())
+            {
+                var lines = childGeometry.Geometry.GetFlattenedPathGeometry();
+                var brush = (childGeometry.Brush ?? childGeometry.Pen?.Brush) as SolidColorBrush;
+
+                var segment = new LineSegment();
+
+                if (PickSimilarLaneColor(brush.Color) is not LaneColor laneColor)
+                    continue;
+
+                segment.Color = laneColor.Color;
+
+                Vector2 CalculateRelativePoint(Point relativePoint)
+                {
+                    var rx = baseCanvasX - (bound.Width - relativePoint.X) - offset.X + bound.Width * (1 - OffsetX.ValuePercent);
+                    var ry = baseCanvasY - relativePoint.Y + offset.Y + bound.Height * OffsetY.ValuePercent;
+
+                    return new((float)rx, (float)ry);
+                }
+
+                foreach (var path in lines.Figures.OfType<PathFigure>())
+                {
+                    var points = path.Segments.SelectMany(x => x switch
+                    {
+                        System.Windows.Media.LineSegment ls => Enumerable.Repeat(ls.Point, 0),
+                        PolyLineSegment pls => pls.Points,
+                        _ => Enumerable.Empty<Point>()
+                    }).Prepend(path.StartPoint).ToList();
+
+                    var firstP = points[0];
+                    segment.RelativePoints.Add(CalculateRelativePoint(firstP));
+
+                    foreach (var childP in points.Skip(1).SkipLast(1))
+                    {
+                        segment.RelativePoints.Add(CalculateRelativePoint(childP));
+                    }
+
+                    var lastP = points.LastOrDefault();
+                    segment.RelativePoints.Add(CalculateRelativePoint(lastP));
+
+                    outputSegments.Add(segment);
+                }
+            }
+
+            return outputSegments;
         }
 
         public override string ToString() => $"{base.ToString()} R:∠{Rotation}° O:{Opacity.ValuePercent * 100:F2}% S:{Rotation:F2}x";
