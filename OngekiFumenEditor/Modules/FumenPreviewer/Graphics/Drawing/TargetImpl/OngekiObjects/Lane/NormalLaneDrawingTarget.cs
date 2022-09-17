@@ -34,21 +34,27 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.L
     [Export(typeof(IDrawingTarget))]
     public class LeftLaneDrawTarget : NormalLaneDrawingTarget
     {
-        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => new(1, 0, 0, 1);
+        public static Vector4 LaneColor { get; } = new(1, 0, 0, 1);
+
+        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "LLS" };
     }
 
     [Export(typeof(IDrawingTarget))]
     public class CenterLaneDrawTarget : NormalLaneDrawingTarget
     {
-        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => new(0, 1, 0, 1);
+        public static Vector4 LaneColor { get; } = new(0, 1, 0, 1);
+
+        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "LCS" };
     }
 
     [Export(typeof(IDrawingTarget))]
     public class RightLaneDrawTarget : NormalLaneDrawingTarget
     {
-        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => new(0, 0, 1, 1);
+        public static Vector4 LaneColor { get; } = new(0, 0, 1, 1);
+
+        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "LRS" };
     }
 }

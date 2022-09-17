@@ -27,7 +27,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             EndEditorTexture = LoadTex("NE.png");
         }
 
-        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => new(1, 1, 0, 1);
+        public static Vector4 LaneColor { get; } = new(1, 1, 0, 1);
+
+        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS" };
     }
 }

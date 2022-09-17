@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
         private HashSet<RegisterDrawingInfo> registeredObjects = new();
         private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
+        private ISimpleLineDrawing lineDrawing;
 
         public HorizonalDrawingTarget()
         {
@@ -111,10 +111,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
         private void DrawLaneBlockArea(IFumenPreviewer target, LaneBlockArea lbk)
         {
+            lineDrawing.Begin(target, 10);
             var fumen = target.Fumen;
-
-            using var d2 = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var segList, out _);
-            segList.Clear();
 
             var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 10;
             var color = lbk.Direction == LaneBlockArea.BlockDirection.Left ? WallLaneDrawTarget.LeftWallColor : WallLaneDrawTarget.RightWallColor;
@@ -132,7 +130,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                 var p = new Vector2(x, y);
                 if (lastP != p)
                 {
-                    segList.Add(new(p, color));
+                    lineDrawing.PostPoint(p, color);
                     lastP = p;
                 }
             }
@@ -205,34 +203,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                 isNext = true;
             }
 
-            //postprocess segments
-            if (segList.Count >= 2)
-            {
-                //start
-                var a = segList[0];
-                var b = segList[1];
-
-                var y = a.Point.Y + Math.Min((b.Point.Y - a.Point.Y) * 0.1f, 20);
-                var x = (float)MathUtils.CalculateXFromTwoPointFormFormula(y, a.Point.X, a.Point.Y, b.Point.X, b.Point.Y);
-
-                var c = new LineVertex(new(x, y), a.Color);
-                segList.Insert(1, c);
-                segList[0] = a with { Color = Vector4.Zero };
-
-                //end
-                a = segList[segList.Count - 2];
-                b = segList[segList.Count - 1];
-
-                y = b.Point.Y - Math.Min((b.Point.Y - a.Point.Y) * 0.1f, 20);
-                x = (float)MathUtils.CalculateXFromTwoPointFormFormula(y, a.Point.X, a.Point.Y, b.Point.X, b.Point.Y);
-
-                c = new LineVertex(new(x, y), a.Color);
-                segList.Insert(segList.Count - 1, c);
-                segList[segList.Count - 1] = b with { Color = Vector4.Zero };
-            }
-
-            //todo 换个表达形式
-            lineDrawing.Draw(target, segList, 10);
+            lineDrawing.End();
         }
 
         private void DrawDescText(IFumenPreviewer target, float y, IEnumerable<RegisterDrawingInfo> group)

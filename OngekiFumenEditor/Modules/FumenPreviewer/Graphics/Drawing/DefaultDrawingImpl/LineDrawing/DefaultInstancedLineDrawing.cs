@@ -4,19 +4,22 @@ Code copied and modified from https://github.com/mhalber/Lines/blob/master/insta
 
 using Caliburn.Micro;
 using OpenTK.Graphics.OpenGL;
+using SharpVectors.Dom.Svg;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Numerics;
+using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
     //[Export(typeof(ILineDrawing))]
     [Export(typeof(ISimpleLineDrawing))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    internal class DefaultInstancedLineDrawing : CommonDrawingBase, ISimpleLineDrawing,/* ILineDrawing,*/ IDisposable
+    internal class DefaultInstancedLineDrawing : CommonDrawingBase, ISimpleLineDrawing, IDisposable
     {
-        public const int MAX_VERTS = 3 * 12 * 1024;
+        public const int MAX_VERTS = 300000;
         /*
             typedef struct vertex
             {
@@ -51,6 +54,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         private float[] PostData { get; } = new float[MAX_VERTS];
         private int postDataFillIndex = 0;
         private int postDataFillCount = 0;
+        private IFumenPreviewer target;
+        private float lineWidth;
 
         public DefaultInstancedLineDrawing()
         {
@@ -131,70 +136,24 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             GL.BindVertexArray(0);
         }
 
-        private unsafe void AppendPoint(ILineDrawing.LineVertex point, float lineWidth)
-        {
-            var buffer = PostData.AsSpan().Slice(postDataFillIndex / sizeof(float), VertexTBytesSize / sizeof(float));
-
-            buffer[0] = point.Point.X;
-            buffer[1] = point.Point.Y;
-            buffer[2] = 0;
-
-            buffer[3] = lineWidth;
-
-            buffer[4] = point.Color.X;
-            buffer[5] = point.Color.Y;
-            buffer[6] = point.Color.Z;
-            buffer[7] = point.Color.W;
-
-            postDataFillIndex += VertexTBytesSize;
-            postDataFillCount++;
-        }
-
         private void FlushDraw()
         {
-            GL.NamedBufferSubData(line_vbo, IntPtr.Zero, postDataFillIndex, PostData);
-
-            GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
-            perfomenceMonitor.CountDrawCall(this);
-
-            postDataFillIndex = postDataFillCount = 0;
-        }
-
-        public void Draw(IFumenPreviewer target, IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
-        {
-            perfomenceMonitor.OnBeginDrawing(this);
-
-            if (points.Count() > 1)
+            if (postDataFillCount > 1)
             {
+
                 shader.Begin();
                 {
-                    var mvpMatrix = GetOverrideModelMatrix() * target.ViewProjectionMatrix;
-                    shader.PassUniform(mvp, mvpMatrix);
-                    shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
-                    shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));
-
-                    var prevPoint = default(ILineDrawing.LineVertex);
-
-                    void appendPoint(ILineDrawing.LineVertex point)
-                    {
-                        if (postDataFillIndex + VertexTBytesSize >= MAX_VERTS)
-                        {
-                            FlushDraw();
-                            AppendPoint(prevPoint, lineWidth);
-                        }
-
-                        AppendPoint(point, lineWidth);
-                    }
-
                     GL.BindVertexArray(vao);
                     {
-                        foreach (var point in points)
-                        {
-                            appendPoint(point);
-                            prevPoint = point;
-                        }
+                        var mvpMatrix = GetOverrideModelMatrix() * target.ViewProjectionMatrix;
+                        shader.PassUniform(mvp, mvpMatrix);
+                        shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
+                        shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));
 
-                        FlushDraw();
+                        GL.NamedBufferSubData(line_vbo, IntPtr.Zero, postDataFillIndex, PostData);
+
+                        GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
+                        perfomenceMonitor.CountDrawCall(this);
                     }
 
                     GL.BindVertexArray(0);
@@ -202,7 +161,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                 shader.End();
             }
 
-            perfomenceMonitor.OnAfterDrawing(this);
+            postDataFillIndex = postDataFillCount = 0;
         }
 
         public void Dispose()
@@ -213,6 +172,60 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             GL.DeleteBuffer(quad_vbo);
             GL.DeleteBuffer(quad_ebo);
             GL.DeleteVertexArray(vao);
+        }
+
+        public void Begin(IFumenPreviewer target, float lineWidth)
+        {
+            perfomenceMonitor.OnBeginDrawing(this);
+            this.target = target;
+            this.lineWidth = lineWidth;
+        }
+
+        private void PostPointInternal(Vector2 Point, Vector4 Color)
+        {
+            var buffer = PostData.AsSpan().Slice(postDataFillIndex / sizeof(float), VertexTBytesSize / sizeof(float));
+
+            buffer[0] = Point.X;
+            buffer[1] = Point.Y;
+            buffer[2] = 0;
+
+            buffer[3] = lineWidth;
+
+            buffer[4] = Color.X;
+            buffer[5] = Color.Y;
+            buffer[6] = Color.Z;
+            buffer[7] = Color.W;
+
+            postDataFillIndex += VertexTBytesSize;
+            postDataFillCount++;
+        }
+
+        Vector2 prevPoint = default;
+        Vector4 prevColor = default;
+
+        public void PostPoint(Vector2 Point, Vector4 Color)
+        {
+            if (postDataFillIndex + VertexTBytesSize >= MAX_VERTS)
+            {
+                FlushDraw();
+                PostPointInternal(prevPoint, prevColor);
+            }
+
+            PostPointInternal(Point, Color);
+        }
+
+        public void End()
+        {
+            FlushDraw();
+            perfomenceMonitor.OnAfterDrawing(this);
+        }
+
+        public void Draw(IFumenPreviewer target, IEnumerable<LineVertex> points, float lineWidth)
+        {
+            Begin(target, lineWidth);
+            foreach (var point in points)
+                PostPoint(point.Point, point.Color);
+            End();
         }
     }
 }

@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     public abstract class LaneDrawingTargetBase<T> : CommonLinesDrawTargetBase<T> where T : ConnectableStartObject
     {
-        private ITextureDrawing textureDrawing;
+        private IBatchTextureDrawing textureDrawing;
         private IPerfomenceMonitor perfomenceMonitor;
 
         public Texture StartEditorTexture { get; protected set; }
@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public LaneDrawingTargetBase()
         {
-            textureDrawing = IoC.Get<ITextureDrawing>();
+            textureDrawing = IoC.Get<IBatchTextureDrawing>();
             perfomenceMonitor = IoC.Get<IPerfomenceMonitor>();
         }
 
@@ -39,18 +39,25 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             base.DrawBatch(target, objs);
             perfomenceMonitor.OnBeginTargetDrawing(this);
             {
+                var previewMinTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime, target.Fumen.BpmList, 1, 240);
+                var previewMaxTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime + target.ViewHeight, target.Fumen.BpmList, 1, 240);
+
                 void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {
-                    using var d = o.Select(x => new
-                    {
-                        Obj = x,
-                        Pos = new Vector2(
-                            (float)XGridCalculator.ConvertXGridToX(x.XGrid, 30, target.ViewWidth, 1),
-                            (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Fumen.BpmList, 1.0, 240)
-                        )
-                    }).Where(x => !(x.Pos.Y < target.CurrentPlayTime || x.Pos.Y > target.CurrentPlayTime + target.ViewHeight)).ToListWithObjectPool(out var list);
+                    textureDrawing.Begin(target, texture);
 
-                    textureDrawing.Draw(target, texture, list.Select(x => (size, x.Pos, 0f)));
+                    foreach (var item in o)
+                    {
+                        if (item.TGrid < previewMinTGrid || item.TGrid > previewMaxTGrid)
+                            continue;
+
+                        var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, 30, target.ViewWidth, 1);
+                        var y = (float)TGridCalculator.ConvertTGridToY(item.TGrid, target.Fumen.BpmList, 1.0, 240);
+
+                        textureDrawing.PostSprite(size, new(x, y), 0f);
+                    }
+
+                    textureDrawing.End();
                 }
 
                 drawEditorTap(StartEditorTexture, editorSize, objs);

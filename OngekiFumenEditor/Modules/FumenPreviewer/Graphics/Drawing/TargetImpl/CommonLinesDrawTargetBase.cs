@@ -22,9 +22,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     public abstract class CommonLinesDrawTargetBase<T> : CommonBatchDrawTargetBase<T> where T : ConnectableStartObject
     {
         public virtual int LineWidth { get; } = 2;
-        private ILineDrawing lineDrawing;
+        private ISimpleLineDrawing lineDrawing;
         TGrid shareTGrid = new TGrid();
         XGrid shareXGrid = new XGrid();
+        private TGrid previewMinTGrid;
+        private TGrid previewMaxTGrid;
 
         public CommonLinesDrawTargetBase()
         {
@@ -33,30 +35,31 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
 
-        public (LineVertex begin, LineVertex end) FillLine(IFumenPreviewer target, List<LineVertex> list, T obj)
+        public void FillLine(IFumenPreviewer target, T obj)
         {
             var color = GetLanePointColor(obj);
             var resT = obj.TGrid.ResT;
             var resX = obj.XGrid.ResX;
 
             [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-            LineVertex calc(TGrid tGrid, XGrid xGrid)
+            void PostPoint(TGrid tGrid, XGrid xGrid)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1);
                 var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Fumen.BpmList, 1.0, 240);
 
-                return new(new(x, y), color);
+                lineDrawing.PostPoint(new(x, y), color);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             bool isVisible(TGrid tGrid)
             {
-                var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Fumen.BpmList, 1.0, 240);
-                return target.CurrentPlayTime <= y || y <= target.CurrentPlayTime + target.ViewHeight;
+                return previewMinTGrid <= tGrid || tGrid <= previewMaxTGrid;
             }
 
             var prevVisible = isVisible(obj.TGrid);
             var alwaysDrawing = isVisible(obj.MinTGrid) && isVisible(obj.MaxTGrid);
+
+            PostPoint(obj.TGrid, obj.XGrid);
 
             foreach (var childObj in obj.Children)
             {
@@ -64,41 +67,34 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
                 if (visible || prevVisible)
                 {
-                    if (childObj.PathControls.Count != 0)
+                    if (childObj.IsCurvePath)
                     {
                         foreach (var item in childObj.GenPath())
                         {
                             shareTGrid.Unit = item.pos.Y / resT;
                             shareXGrid.Unit = item.pos.X / resX;
-                            list.Add(calc(shareTGrid, shareXGrid));
+                            PostPoint(shareTGrid, shareXGrid);
                         }
                     }
                     else
-                        list.Add(calc(childObj.TGrid, childObj.XGrid));
+                        PostPoint(childObj.TGrid, childObj.XGrid);
                 }
 
                 prevVisible = visible;
             }
-
-            return (list.FirstOrDefault(), list.LastOrDefault());
-        }
-
-        public override void End()
-        {
-            base.End();
         }
 
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<T> starts)
         {
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-            list.Clear();
+            previewMinTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime, target.Fumen.BpmList, 1, 240);
+            previewMaxTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime + target.ViewHeight, target.Fumen.BpmList, 1, 240);
 
             foreach (var laneStart in starts)
             {
-                (var start, var end) = FillLine(target, list, laneStart);
+                lineDrawing.Begin(target, LineWidth);
+                FillLine(target, laneStart);
+                lineDrawing.End();
             }
-
-            lineDrawing.Draw(target, list, LineWidth);
         }
     }
 }

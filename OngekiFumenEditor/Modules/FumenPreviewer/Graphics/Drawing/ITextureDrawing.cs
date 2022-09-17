@@ -9,7 +9,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public interface IBatchTextureDrawing : ITextureDrawing
     {
-
+        void Begin(IFumenPreviewer target, Texture texture);
+        void PostSprite(Vector2 size, Vector2 position, float rotation);
+        void End();
     }
 
     public interface ITextureDrawing : IDrawing
