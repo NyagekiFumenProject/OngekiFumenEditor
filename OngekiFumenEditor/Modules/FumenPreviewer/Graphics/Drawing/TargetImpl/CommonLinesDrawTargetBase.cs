@@ -21,11 +21,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     {
         public virtual int LineWidth { get; } = 2;
         private ILineDrawing lineDrawing;
-        private Dictionary<int, float> cacheCalc = new();
+        TGrid shareTGrid = new TGrid();
+        XGrid shareXGrid = new XGrid();
 
         public CommonLinesDrawTargetBase()
         {
-            lineDrawing = IoC.Get<ILineDrawing>();
+            lineDrawing = IoC.Get<ISimpleLineDrawing>();
         }
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
@@ -39,10 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             LineVertex calc(TGrid tGrid, XGrid xGrid)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1);
-                cacheCalc[xGrid.TotalGrid] = x;
-
                 var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Fumen.BpmList, 1.0, 240);
-                cacheCalc[tGrid.TotalGrid] = y;
 
                 return new(new(x, y), color);
             }
@@ -50,8 +48,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             list.Add(calc(obj.TGrid, obj.XGrid));
             foreach (var child in obj.Children)
             {
-                foreach (var item in child.GenPath())
-                    list.Add(calc(new TGrid(item.pos.Y / resT), new XGrid(item.pos.X / resX)));
+                if (child.PathControls.Any())
+                {
+                    foreach (var item in child.GenPath())
+                    {
+                        shareTGrid.Unit = item.pos.Y / resT;
+                        shareXGrid.Unit = item.pos.X / resX;
+                        list.Add(calc(shareTGrid, shareXGrid));
+                    }
+                }
+                else
+                {
+                    list.Add(calc(child.TGrid, child.XGrid));
+                }
             }
 
             return (list.FirstOrDefault(), list.LastOrDefault());
@@ -59,7 +68,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public override void End()
         {
-            cacheCalc.Clear();
             base.End();
         }
 

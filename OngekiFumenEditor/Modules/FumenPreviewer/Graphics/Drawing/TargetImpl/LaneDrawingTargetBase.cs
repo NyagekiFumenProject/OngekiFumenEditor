@@ -20,6 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     public abstract class LaneDrawingTargetBase<T> : CommonLinesDrawTargetBase<T> where T : ConnectableStartObject
     {
         private ITextureDrawing textureDrawing;
+        private IPerfomenceMonitor perfomenceMonitor;
 
         public Texture StartEditorTexture { get; protected set; }
         public Texture NextEditorTexture { get; protected set; }
@@ -30,29 +31,33 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         public LaneDrawingTargetBase()
         {
             textureDrawing = IoC.Get<ITextureDrawing>();
+            perfomenceMonitor = IoC.Get<IPerfomenceMonitor>();
         }
 
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<T> objs)
         {
             base.DrawBatch(target, objs);
-
-            void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
+            perfomenceMonitor.OnBeginTargetDrawing(this);
             {
-                using var d = o.Select(x => new
+                void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {
-                    Obj = x,
-                    Pos = new Vector2(
-                        (float)XGridCalculator.ConvertXGridToX(x.XGrid, 30, target.ViewWidth, 1),
-                        (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Fumen.BpmList, 1.0, 240)
-                    )
-                }).Where(x => !(x.Pos.Y < target.CurrentPlayTime || x.Pos.Y > target.CurrentPlayTime + target.ViewHeight)).ToListWithObjectPool(out var list);
+                    using var d = o.Select(x => new
+                    {
+                        Obj = x,
+                        Pos = new Vector2(
+                            (float)XGridCalculator.ConvertXGridToX(x.XGrid, 30, target.ViewWidth, 1),
+                            (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Fumen.BpmList, 1.0, 240)
+                        )
+                    }).Where(x => !(x.Pos.Y < target.CurrentPlayTime || x.Pos.Y > target.CurrentPlayTime + target.ViewHeight)).ToListWithObjectPool(out var list);
 
-                textureDrawing.Draw(target, texture, list.Select(x => (size, x.Pos, 0f)));
+                    textureDrawing.Draw(target, texture, list.Select(x => (size, x.Pos, 0f)));
+                }
+
+                drawEditorTap(StartEditorTexture, editorSize, objs);
+                drawEditorTap(NextEditorTexture, editorSize, objs.SelectMany(x => x.Children.OfType<ConnectableNextObject>()));
+                drawEditorTap(EndEditorTexture, editorSize, objs.Select(x => x.Children.LastOrDefault()).OfType<ConnectableEndObject>());
             }
-
-            drawEditorTap(StartEditorTexture, editorSize, objs);
-            drawEditorTap(NextEditorTexture, editorSize, objs.SelectMany(x => x.Children.OfType<ConnectableNextObject>()));
-            drawEditorTap(EndEditorTexture, editorSize, objs.Select(x => x.Children.LastOrDefault()).OfType<ConnectableEndObject>());
+            perfomenceMonitor.OnAfterTargetDrawing(this);
         }
     }
 

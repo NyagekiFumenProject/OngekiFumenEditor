@@ -360,6 +360,11 @@ namespace OngekiFumenEditor.Utils
             return !itor.MoveNext();
         }
 
+        public static bool AtLeastCount<T>(this IEnumerable<T> a, int minCount)
+        {
+            return a.Take(minCount).Count() == minCount;
+        }
+
         public static bool None<T>(this IEnumerable<T> a)
         {
             return !a.GetEnumerator().MoveNext();

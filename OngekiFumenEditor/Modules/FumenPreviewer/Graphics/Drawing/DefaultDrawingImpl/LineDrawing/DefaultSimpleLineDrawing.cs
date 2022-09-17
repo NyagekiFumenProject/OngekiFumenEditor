@@ -26,7 +26,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         public const int LINE_DRAW_MAX = 100;
         private IPerfomenceMonitor performenceMonitor;
 
-
         public DefaultSimpleLineDrawing()
         {
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
