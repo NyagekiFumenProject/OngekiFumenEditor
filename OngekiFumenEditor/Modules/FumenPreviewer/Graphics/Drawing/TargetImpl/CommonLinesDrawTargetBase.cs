@@ -11,8 +11,10 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
@@ -37,6 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             var resT = obj.TGrid.ResT;
             var resX = obj.XGrid.ResX;
 
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             LineVertex calc(TGrid tGrid, XGrid xGrid)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1);
@@ -45,22 +48,36 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 return new(new(x, y), color);
             }
 
-            list.Add(calc(obj.TGrid, obj.XGrid));
-            foreach (var child in obj.Children)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            bool isVisible(TGrid tGrid)
             {
-                if (child.PathControls.Any())
+                var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Fumen.BpmList, 1.0, 240);
+                return target.CurrentPlayTime <= y || y <= target.CurrentPlayTime + target.ViewHeight;
+            }
+
+            var prevVisible = isVisible(obj.TGrid);
+            var alwaysDrawing = isVisible(obj.MinTGrid) && isVisible(obj.MaxTGrid);
+
+            foreach (var childObj in obj.Children)
+            {
+                var visible = alwaysDrawing || isVisible(childObj.TGrid);
+
+                if (visible || prevVisible)
                 {
-                    foreach (var item in child.GenPath())
+                    if (childObj.PathControls.Count != 0)
                     {
-                        shareTGrid.Unit = item.pos.Y / resT;
-                        shareXGrid.Unit = item.pos.X / resX;
-                        list.Add(calc(shareTGrid, shareXGrid));
+                        foreach (var item in childObj.GenPath())
+                        {
+                            shareTGrid.Unit = item.pos.Y / resT;
+                            shareXGrid.Unit = item.pos.X / resX;
+                            list.Add(calc(shareTGrid, shareXGrid));
+                        }
                     }
+                    else
+                        list.Add(calc(childObj.TGrid, childObj.XGrid));
                 }
-                else
-                {
-                    list.Add(calc(child.TGrid, child.XGrid));
-                }
+
+                prevVisible = visible;
             }
 
             return (list.FirstOrDefault(), list.LastOrDefault());
@@ -74,13 +91,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<T> starts)
         {
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
+            list.Clear();
 
-            foreach (var start in starts)
+            foreach (var laneStart in starts)
             {
-                list.Clear();
-                FillLine(target, list, start);
-                lineDrawing.Draw(target, list, LineWidth);
+                (var start, var end) = FillLine(target, list, laneStart);
             }
+
+            lineDrawing.Draw(target, list, LineWidth);
         }
     }
 }
