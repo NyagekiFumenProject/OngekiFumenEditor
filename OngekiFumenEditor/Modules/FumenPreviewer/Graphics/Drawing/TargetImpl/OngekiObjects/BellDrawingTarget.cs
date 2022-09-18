@@ -4,7 +4,6 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -18,13 +17,13 @@ using Vector2 = System.Numerics.Vector2;
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
-    public class BellDrawingTarget : CommonDrawTargetBase<Bell>, IDisposable
+    public class BellDrawingTarget : CommonBatchDrawTargetBase<Bell>, IDisposable
     {
         private Texture texture;
-        private OpenTK.Mathematics.Vector2 size;
+        private Vector2 size;
 
         private IStringDrawing stringDrawing;
-        private ITextureDrawing textureDrawing;
+        private IBatchTextureDrawing textureDrawing;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { Bell.CommandName };
 
@@ -33,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\bell.png");
             size = new(40, 40);
             stringDrawing = IoC.Get<IStringDrawing>();
-            textureDrawing = IoC.Get<ITextureDrawing>();
+            textureDrawing = IoC.Get<IBatchTextureDrawing>();
         }
 
         public float CalculateBulletMsecTime(IFumenPreviewer target, Bell obj, float userSpeed = 2.35f)
@@ -44,10 +43,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             return time;
         }
 
-        public override void Draw(IFumenPreviewer target, Bell obj)
+        public void PostDraw(IFumenPreviewer target, Bell obj)
         {
-            var appearOffsetTime = CalculateBulletMsecTime(target, obj);
-
             /*
             --------------------------- toTime 
                     \
@@ -63,16 +60,20 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                               \
                                \
             ---------------------------- fromTime = toTime - appearOffsetTime
-             */
+            */
+            var appearOffsetTime = CalculateBulletMsecTime(target, obj);
+            
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1, 240);
+            var fromTime = toTime - appearOffsetTime;
+
+            if (target.CurrentPlayTime < fromTime)
+                return;
 
             var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, target.Fumen) ?? obj.XGrid, 30, target.ViewWidth, 1);
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Fumen) ?? obj.XGrid, 30, target.ViewWidth, 1);
-
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1, 240);
-            var fromTime = toTime - appearOffsetTime;
+           
             var currentTime = MathUtils.Limit(target.CurrentPlayTime, toTime, fromTime);
-            if (target.CurrentPlayTime < fromTime)
-                return;
+            
             var precent = (currentTime - fromTime) / appearOffsetTime;
 
             var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
@@ -81,10 +82,17 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var timeY = target.CurrentPlayTime + target.ViewHeight * (1 - precent);
 
             var pos = new Vector2((float)timeX, (float)timeY);
-
-            textureDrawing.Draw(target, texture, new (Vector2, Vector2, float)[] { (new(size.X, size.Y), new(pos.X, pos.Y), 0f) });
-
+            textureDrawing.PostSprite(size, pos, 0f);
             DrawPallateStr(target, obj, pos);
+        }
+
+        public override void DrawBatch(IFumenPreviewer target, IEnumerable<Bell> objs)
+        {
+            textureDrawing.Begin(target, texture);
+            foreach (var obj in objs)
+                PostDraw(target, obj);
+            textureDrawing.End();
+
             //RegisterHitTest(obj, new() { X = pos.X - (size.X / 2), Y = pos.Y - (size.Y / 2), Width = size.X, Height = size.Y });
         }
 

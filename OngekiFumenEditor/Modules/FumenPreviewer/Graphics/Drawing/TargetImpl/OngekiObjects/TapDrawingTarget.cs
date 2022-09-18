@@ -51,7 +51,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             using var bitmap3 = Image.FromStream(info.Stream) as Bitmap;
             wallTexture = new Texture(bitmap3);
 
-            textureDrawing = IoC.Get<IBatchTextureDrawing>();
+            textureDrawing = IoC.Get<ITextureDrawing>();
         }
 
         public override void Draw(IFumenPreviewer target, Tap ongekiObject)
