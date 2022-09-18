@@ -140,25 +140,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         {
             if (postDataFillCount > 1)
             {
+                GL.NamedBufferSubData(line_vbo, IntPtr.Zero, postDataFillIndex, PostData);
 
-                shader.Begin();
-                {
-                    GL.BindVertexArray(vao);
-                    {
-                        var mvpMatrix = GetOverrideModelMatrix() * target.ViewProjectionMatrix;
-                        shader.PassUniform(mvp, mvpMatrix);
-                        shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
-                        shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));
-
-                        GL.NamedBufferSubData(line_vbo, IntPtr.Zero, postDataFillIndex, PostData);
-
-                        GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
-                        perfomenceMonitor.CountDrawCall(this);
-                    }
-
-                    GL.BindVertexArray(0);
-                }
-                shader.End();
+                GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
+                perfomenceMonitor.CountDrawCall(this);
             }
 
             postDataFillIndex = postDataFillCount = 0;
@@ -179,6 +164,15 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             perfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
             this.lineWidth = lineWidth;
+
+
+            shader.Begin();
+            GL.BindVertexArray(vao);
+            var mvpMatrix = GetOverrideModelMatrix() * target.ViewProjectionMatrix;
+            shader.PassUniform(mvp, mvpMatrix);
+            shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
+            shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));
+
         }
 
         private void PostPointInternal(Vector2 Point, Vector4 Color)
@@ -217,6 +211,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         public void End()
         {
             FlushDraw();
+
+            GL.BindVertexArray(0);
+            shader.End();
+
             perfomenceMonitor.OnAfterDrawing(this);
         }
 

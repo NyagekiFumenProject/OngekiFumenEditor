@@ -19,13 +19,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
     {
         private IPerfomenceMonitor performenceMonitor;
         private BatchShader shader;
-        private static byte[] postData;
-        private static int vboVertexBase, vboTexPosBase;
+        private byte[] postData;
+        private int vboVertexBase, vboTexPosBase;
         private int currentPostBaseIndex = 0;
-        public int currentPostCount  = 0;
-        private static int[] vaoArr = new int[BUFFER_COUNT];
-        private static int[] vboArr = new int[BUFFER_COUNT];
-        private int curBufferIdx = 0;
+        public int currentPostCount = 0;
+        private int vao;
+        private int vbo;
         private static float[] cacheBaseVertex = new float[] {
                 -0.5f, 0.5f,
                  0.5f, 0.5f,
@@ -61,17 +60,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             vboVertexBase = GL.GenBuffer();
             vboTexPosBase = GL.GenBuffer();
 
-            GL.GenVertexArrays(BUFFER_COUNT, vaoArr);
-            GL.GenBuffers(BUFFER_COUNT, vboArr);
+            vao = GL.GenVertexArray();
+            vbo = GL.GenBuffer();
 
-            for (int i = 0; i < BUFFER_COUNT; i++)
-            {
-                _InitVertexBase(vaoArr[i]);
-                _InitBuffer(vaoArr[i], vboArr[i]);
-            }
+            _InitVertexBase(vao);
+            _InitBuffer(vao, vbo);
         }
 
-        private static void _InitVertexBase(int vao)
+        private void _InitVertexBase(int vao)
         {
             GL.BindVertexArray(vao);
             {
@@ -140,22 +136,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         {
             if (currentPostCount == 0)
                 return;
-            shader.Begin();
 
-            var MVP =
-                    GetOverrideModelMatrix() * target.ViewProjectionMatrix;
-            shader.PassUniform("ViewProjection", MVP);
-            shader.PassUniform("diffuse", texture);
+            GL.NamedBufferSubData(vbo, (IntPtr)0, (IntPtr)(VertexSize * currentPostCount), postData);
 
-            GL.NamedBufferSubData(vboArr[curBufferIdx], (IntPtr)(0), (IntPtr)(VertexSize * currentPostCount), postData);
-
-            GL.BindVertexArray(vaoArr[curBufferIdx]);
-            {
-                GL.DrawArraysInstanced(PrimitiveType.TriangleFan, 0, 4, currentPostCount);
-                performenceMonitor.CountDrawCall(this);
-            }
-            GL.BindVertexArray(0);
-            curBufferIdx = (curBufferIdx + 1) % vboArr.Length;
+            GL.DrawArraysInstanced(PrimitiveType.TriangleFan, 0, 4, currentPostCount);
+            performenceMonitor.CountDrawCall(this);
         }
 
         private void FlushDraw()
@@ -174,8 +159,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         {
             GL.DeleteBuffer(vboVertexBase);
             GL.DeleteBuffer(vboTexPosBase);
-            GL.DeleteBuffers(BUFFER_COUNT, vboArr);
-            GL.DeleteVertexArrays(BUFFER_COUNT, vaoArr);
+            GL.DeleteBuffer(vbo);
+            GL.DeleteVertexArray(vao);
         }
 
         public void Draw(IFumenPreviewer target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
@@ -192,6 +177,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             performenceMonitor.OnBeginDrawing(this);
             this.target = target;
             this.texture = texture;
+
+            shader.Begin();
+
+            GL.BindVertexArray(vao);
+            var MVP = GetOverrideModelMatrix() * target.ViewProjectionMatrix;
+            shader.PassUniform("ViewProjection", MVP);
+            shader.PassUniform("diffuse", texture);
         }
 
         public void PostSprite(Vector2 size, Vector2 position, float rotation)
@@ -230,6 +222,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             FlushDraw();
             target = default;
             texture = default;
+            GL.BindVertexArray(0);
+            shader.End();
             performenceMonitor.OnAfterDrawing(this);
         }
     }

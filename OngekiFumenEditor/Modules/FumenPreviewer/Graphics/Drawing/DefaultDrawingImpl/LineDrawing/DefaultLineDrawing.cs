@@ -122,20 +122,5 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             GL.DeleteVertexArray(vao);
             GL.DeleteBuffer(vbo);
         }
-
-        public void Begin(IFumenPreviewer target, float lineWidth)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void PostPoint(System.Numerics.Vector2 Point, System.Numerics.Vector4 Color)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void End()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

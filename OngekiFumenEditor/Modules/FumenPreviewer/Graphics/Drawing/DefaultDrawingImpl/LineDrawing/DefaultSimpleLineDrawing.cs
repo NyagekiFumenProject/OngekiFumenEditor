@@ -81,24 +81,18 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             performenceMonitor.OnBeginDrawing(this);
             this.target = target;
             this.lineWidth = lineWidth;
+            GL.LineWidth(lineWidth);
+            shader.Begin();
+            shader.PassUniform("Model", GetOverrideModelMatrix());
+            shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
+            GL.BindVertexArray(vao);
         }
 
         void FlushDraw()
         {
-            GL.LineWidth(lineWidth);
-            shader.Begin();
-            {
-                shader.PassUniform("Model", GetOverrideModelMatrix());
-                shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
-                GL.BindVertexArray(vao);
-                {
-                    GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, postDataFillCount * sizeof(float) * 6, postData);
-                    GL.DrawArrays(PrimitiveType.LineStrip, 0, postDataFillCount);
-                    performenceMonitor.CountDrawCall(this);
-                }
-                GL.BindVertexArray(0);
-            }
-            shader.End();
+            GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, postDataFillCount * sizeof(float) * 6, postData);
+            GL.DrawArrays(PrimitiveType.LineStrip, 0, postDataFillCount);
+            performenceMonitor.CountDrawCall(this);
             postDataFillCount = 0;
         }
 
@@ -132,6 +126,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         public void End()
         {
             FlushDraw();
+            GL.BindVertexArray(0);
+            shader.End();
             target = default;
             performenceMonitor.OnAfterDrawing(this);
         }
