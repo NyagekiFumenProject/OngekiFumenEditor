@@ -116,29 +116,26 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
             var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 10;
             var color = lbk.Direction == LaneBlockArea.BlockDirection.Left ? WallLaneDrawTarget.LeftWallColor : WallLaneDrawTarget.RightWallColor;
-            var lastP = new Vector2(int.MinValue, int.MinValue);
+            (TGrid, XGrid)? lastP = null;
 
             #region Generate LBK lines
 
-            void PostPointByXTGrid(XGrid xGrid, TGrid tGrid, bool isStroke = true)
+            void PostPointByXTGrid(XGrid xGrid, TGrid tGrid, Vector4? specifyColor = default)
             {
                 if (xGrid is null)
                     return;
+
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1) + offsetX;
                 var y = (float)TGridCalculator.ConvertTGridToY(tGrid, fumen.BpmList, 1.0, 240);
 
-                var p = new Vector2(x, y);
-                if (lastP != p)
-                {
-                    lineDrawing.PostPoint(p, color);
-                    lastP = p;
-                }
+                lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
+                lastP = (tGrid, xGrid);
             }
 
-            void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid grid, bool isStroke = true)
+            void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid grid, Vector4? specifyColor = default)
             {
                 var xGrid = obj.CalulateXGrid(grid);
-                PostPointByXTGrid(xGrid, grid, isStroke);
+                PostPointByXTGrid(xGrid, grid, specifyColor);
             }
 
             void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid)
@@ -162,8 +159,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                     {
                         if (!isVaild)
                         {
-                            PostPointByXTGrid(obj.PrevObject.XGrid, minTGrid, false);
-                            PostPointByXTGrid(obj.XGrid, maxTGrid, false);
+                            PostPointByXTGrid(obj.PrevObject.XGrid, minTGrid);
+                            PostPointByXTGrid(obj.XGrid, maxTGrid);
                             return;
                         }
                         list.Add(new(gridVec2.X, gridVec2.Y));
@@ -191,14 +188,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
             #endregion
 
-            using var d = lbk.GetAffactableWallLanes(fumen).ToListWithObjectPool(out var list);
+            using var d = lbk.GetAffactableWallLanes(fumen).OrderBy(x => x.TGrid).ToListWithObjectPool(out var list);
             var beginTGrid = lbk.TGrid;
             var endTGrid = lbk.EndIndicator.TGrid;
             var isNext = false;
             foreach (var start in list)
             {
                 if (isNext)
-                    PostPointByXTGrid(start.XGrid, start.TGrid, false);
+                {
+                    (var prevTGrid, var prevXGrid) = lastP ?? default;
+                    PostPointByXTGrid(prevXGrid, prevTGrid,Vector4.Zero);
+                    PostPointByXTGrid(start.XGrid, start.TGrid, Vector4.Zero);
+                    PostPointByXTGrid(start.XGrid, start.TGrid);
+                }
                 ProcessWallLane(start, beginTGrid, endTGrid);
                 isNext = true;
             }

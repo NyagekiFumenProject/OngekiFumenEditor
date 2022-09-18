@@ -88,12 +88,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             var blockStartTGrid = TGrid;
             var blockEndTGrid = EndIndicator.TGrid;
             var wallType = Direction == BlockDirection.Left ? LaneType.WallLeft : LaneType.WallRight;
-
-            return fumen.Lanes.Where(x =>
-                x.LaneType == wallType &&
-                x.MaxTGrid > blockStartTGrid &&
-                x.MinTGrid < blockEndTGrid
-            );
+            return fumen.Lanes.GetVisibleStartObjects(blockStartTGrid, blockEndTGrid).Where(x => x.LaneType == wallType);
         }
 
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
