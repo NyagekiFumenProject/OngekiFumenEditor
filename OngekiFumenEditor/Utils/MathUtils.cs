@@ -50,33 +50,36 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float RadianToAngle(float radian)
-        {
-            return radian * 180 / MathF.PI;
-        }
+            => radian * 180 / MathF.PI;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float AngleToRadian(float angle)
-        {
-            return angle * MathF.PI / 180;
-        }
+            => angle * MathF.PI / 180;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateLength(XGrid from, XGrid to, double unitLen)
-        {
-            var diff = to - from;
-            return (diff.Unit + diff.Grid / from.ResX) * unitLen;
-        }
+            => (to.TotalUnit - from.TotalUnit) * unitLen;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateBPMLength(BPMChange from, BPMChange to, double timeGridSize)
-        {
-            return CalculateBPMLength(from, to.TGrid, timeGridSize);
-        }
+            => CalculateBPMLength(from, to.TGrid, timeGridSize);
 
-        public static double CalculateBPMLength(BPMChange from, TGrid to, double timeGridSize) => CalculateBPMLength(from.TGrid, to, from.BPM, timeGridSize);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double CalculateBPMLength(BPMChange from, TGrid to, double timeGridSize)
+            => CalculateBPMLength(from.TGrid, to, from.BPM, timeGridSize);
 
         public static double CalculateBPMLength(TGrid from, TGrid to, double bpm, double timeGridSize)
         {
             if (to is null)
                 return double.PositiveInfinity;
+            var msec = CalculateBPMLength(from.TotalUnit, to.TotalUnit, bpm, timeGridSize);
+            return msec;
+        }
+
+        public static double CalculateBPMLength(double fromTGridUnit, double toTGridUnit, double bpm, double timeGridSize, uint resT = TGrid.DEFAULT_RES_T)
+        {
             /*
             var size = bpm / 240 * timeGridSize;
 
@@ -94,9 +97,9 @@ namespace OngekiFumenEditor.Utils
             return (diff.Unit + diff.Grid * 1.0 / from.ResT) * size;
             */
 
-            var diff = to - from;
-            var totalGrid = diff.Unit * from.ResT + diff.Grid;
-            var msec = 240_000 * totalGrid / (from.ResT * bpm);
+            var diffGridUnit = toTGridUnit - fromTGridUnit;
+            var totalGrid = diffGridUnit * resT;
+            var msec = 240_000 * totalGrid / (resT * bpm);
             return msec;
         }
 
@@ -151,14 +154,7 @@ namespace OngekiFumenEditor.Utils
 
         public static XGrid CalculateXGridFromBetweenObjects(TGrid fromTGrid, XGrid fromXGrid, TGrid toTGrid, XGrid toXGrid, TGrid tGrid)
         {
-            var prevX = fromXGrid.TotalGrid;
-            var prevY = fromTGrid.TotalGrid;
-            var curX = toXGrid.TotalGrid;
-            var curY = toTGrid.TotalGrid;
-
-            var timeY = tGrid.TotalGrid;
-
-            var timeX = CalculateXFromTwoPointFormFormula(timeY, prevX, prevY, curX, curY);
+            var timeX = CalculateXFromTwoPointFormFormula(tGrid.TotalGrid, fromXGrid.TotalGrid, fromTGrid.TotalGrid, toXGrid.TotalGrid, toTGrid.TotalGrid);
             var xGrid = new XGrid((float)(timeX / fromXGrid.ResX), 0, fromXGrid.ResX);
             xGrid.NormalizeSelf();
 
@@ -180,10 +176,14 @@ namespace OngekiFumenEditor.Utils
             return (y1 - y2) / (x1 - x2);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Max<T>(T a, T b) where T : GridBase => a > b ? a : b;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Min<T>(T a, T b) where T : GridBase => a > b ? b : a;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TimeSpan Max(TimeSpan a, TimeSpan b) => a > b ? a : b;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TimeSpan Min(TimeSpan a, TimeSpan b) => a > b ? b : a;
 
         public static IEnumerable<int> GetIntegersBetweenTwoValues(double from, double to)
