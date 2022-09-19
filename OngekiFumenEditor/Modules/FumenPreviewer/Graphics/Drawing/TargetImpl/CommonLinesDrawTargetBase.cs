@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                 {
                     if (childObj.IsCurvePath)
                     {
-                        foreach (var item in childObj.GenPath())
+                        foreach (var item in childObj.GetConnectionPaths())
                         {
                             shareTGrid.Unit = item.pos.Y / resT;
                             shareXGrid.Unit = item.pos.X / resX;

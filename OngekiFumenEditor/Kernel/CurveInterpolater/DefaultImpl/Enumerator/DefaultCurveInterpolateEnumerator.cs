@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator
                 return new(tGrid, xGrid);
             }
 
-            return x.GenPath().Select(x => build(x.pos));
+            return x.GetConnectionPaths().Select(x => build(x.pos));
         }
 
         public void PushBack(CurvePoint point)

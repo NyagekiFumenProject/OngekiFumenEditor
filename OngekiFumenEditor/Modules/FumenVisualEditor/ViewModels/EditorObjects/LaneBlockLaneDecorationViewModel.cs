@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
                     using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var list, out _);
                     list.Clear();
 
-                    foreach ((var gridVec2, var isVaild) in obj.GenPath().Where(x => x.pos.Y <= maxTotalGrid && x.pos.Y >= minTotalGrid))
+                    foreach ((var gridVec2, var isVaild) in obj.GetConnectionPaths().Where(x => x.pos.Y <= maxTotalGrid && x.pos.Y >= minTotalGrid))
                     {
                         if (!isVaild)
                         {

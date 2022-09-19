@@ -267,7 +267,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
             foreach (var child in Children)
             {
-                foreach (var cg in child.GenPath())
+                foreach (var cg in child.GetConnectionPaths())
                 {
                     if (cg.pos == prevP && filterSamePointSameSeq)
                         continue;

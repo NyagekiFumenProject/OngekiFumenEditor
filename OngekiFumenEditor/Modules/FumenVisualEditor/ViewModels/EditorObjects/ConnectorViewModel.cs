@@ -127,7 +127,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 
             if (Connector.To is ConnectableChildObjectBase childObject)
             {
-                foreach ((var gridVec2, var iv) in childObject.GenPath())
+                foreach ((var gridVec2, var iv) in childObject.GetConnectionPaths())
                 {
                     isVaild = isVaild && iv;
                     addPoint(gridVec2);
