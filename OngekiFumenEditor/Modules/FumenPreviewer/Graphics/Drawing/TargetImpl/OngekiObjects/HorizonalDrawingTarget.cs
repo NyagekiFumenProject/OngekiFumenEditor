@@ -29,9 +29,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
     {
         public record RegisterDrawingInfo(OngekiTimelineObjectBase TimelineObject, double Y);
 
-        private HashSet<RegisterDrawingInfo> registeredObjects = new();
         private IStringDrawing stringDrawing;
         private ISimpleLineDrawing lineDrawing;
+        private HashSet<int> overdrawingDefferSet = new HashSet<int>();
 
         public HorizonalDrawingTarget()
         {
@@ -59,8 +59,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<OngekiTimelineObjectBase> objs)
         {
             var fumen = target.Fumen;
+            overdrawingDefferSet.Clear();
             using var d4 = objs.Select(x => new RegisterDrawingInfo(x, TGridCalculator.ConvertTGridToY(x.TGrid, fumen.BpmList, 1.0, 240))).ToListWithObjectPool(out var objects);
-
+            
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
             {
                 var y = (float)g.FirstOrDefault().Y;
@@ -78,16 +79,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
                 using var d = actualItems.Select(x => colors[x.TimelineObject.IDShortName]).OrderBy(x => x.PackedValue).ToListWithObjectPool(out var regColors);
                 var per = 1.0f * target.ViewWidth / regColors.Count;
-                using var d2 = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var segList, out _);
-                segList.Clear();
+                lineDrawing.Begin(target, 2);
                 for (int i = 0; i < regColors.Count; i++)
                 {
                     var c = regColors[i];
-                    segList.Add(new(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f)));
-                    segList.Add(new(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f)));
+                    lineDrawing.PostPoint(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f));
+                    lineDrawing.PostPoint(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f));
                 }
-
-                lineDrawing.Draw(target, segList, 2);
+                lineDrawing.End();
 
                 //draw range line if need
                 foreach (var obj in actualItems)
@@ -111,31 +110,35 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
         private void DrawLaneBlockArea(IFumenPreviewer target, LaneBlockArea lbk)
         {
+            var hashCode = lbk.GetHashCode();
+            if (overdrawingDefferSet.Contains(hashCode))
+                return;
+            else
+                overdrawingDefferSet.Add(hashCode);
+
             lineDrawing.Begin(target, 10);
             var fumen = target.Fumen;
 
             var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 10;
             var color = lbk.Direction == LaneBlockArea.BlockDirection.Left ? WallLaneDrawTarget.LeftWallColor : WallLaneDrawTarget.RightWallColor;
-            (double, double)? lastP = null;
+            (double, double) lastP = default;
 
             #region Generate LBK lines
 
-            void PostPointByXTGrid(double? xGridOpt, double tGridUnit, Vector4? specifyColor = default)
+            void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, Vector4? specifyColor = default)
             {
-                if (xGridOpt is not double xGrid)
-                    return;
-
-                var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1) + offsetX;
-                var y = (float)TGridCalculator.ConvertTGridUnitToY(tGridUnit, fumen.BpmList, 1.0, 240);
+                var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, 30, target.ViewWidth, 1) + offsetX;
+                var y = (float)TGridCalculator.ConvertTGridUnitToY(tGridTotalUnit, fumen.BpmList, 1.0, 240);
 
                 lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
-                lastP = (tGridUnit, xGrid);
+                lastP = (tGridTotalUnit, xGridTotalUnit);
             }
 
             void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid grid, Vector4? specifyColor = default)
             {
-                var xGrid = obj.CalulateXGridTotalGrid(grid.TotalGrid) / XGrid.DEFAULT_RES_X;
-                PostPointByXTGrid(xGrid, grid.TotalUnit, specifyColor);
+                var xGridTotalGridOpt = obj.CalulateXGridTotalGrid(grid.TotalGrid);
+                if (xGridTotalGridOpt is double xGridTotalGrid)
+                    PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, grid.TotalUnit, specifyColor);
             }
 
             void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid)
@@ -151,7 +154,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                 }
                 else
                 {
-                    //PostPointByXTGrid(obj.CalulateXGrid(minTGrid), minTGrid);
                     using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var list, out _);
                     list.Clear();
 
@@ -188,21 +190,26 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
             #endregion
 
-            using var d = lbk.GetAffactableWallLanes(fumen).OrderBy(x => x.TGrid).ToListWithObjectPool(out var list);
+            var itor = lbk.GetAffactableWallLanes(fumen).OrderBy(x => x.TGrid).GetEnumerator();
+
             var beginTGrid = lbk.TGrid;
             var endTGrid = lbk.EndIndicator.TGrid;
-            var isNext = false;
-            foreach (var start in list)
+
+            if (itor.MoveNext())
             {
-                if (isNext)
+                ProcessWallLane(itor.Current, beginTGrid, endTGrid);
+
+                while (itor.MoveNext())
                 {
-                    (var prevTGrid, var prevXGrid) = lastP ?? default;
+                    var start = itor.Current;
+
+                    (var prevTGrid, var prevXGrid) = lastP;
                     PostPointByXTGrid(prevXGrid, prevTGrid, Vector4.Zero);
                     PostPointByXTGrid(start.XGrid.TotalUnit, start.TGrid.TotalUnit, Vector4.Zero);
                     PostPointByXTGrid(start.XGrid.TotalUnit, start.TGrid.TotalUnit);
+
+                    ProcessWallLane(start, beginTGrid, endTGrid);
                 }
-                ProcessWallLane(start, beginTGrid, endTGrid);
-                isNext = true;
             }
 
             lineDrawing.End();
