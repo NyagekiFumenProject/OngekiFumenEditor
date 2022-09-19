@@ -12,8 +12,10 @@ using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.IPerfomen
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
 {
+#if DEBUG
     [Export(typeof(IPerfomenceMonitor))]
-    public class DefaultPerfomenceMonitor : IPerfomenceMonitor
+#endif
+    public class DefaultDebugPerfomenceMonitor : IPerfomenceMonitor
     {
         const int RECORD_LENGTH = 10;
 
@@ -109,19 +111,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
             drawTargetDataMap.Clear();
         }
 
-        public struct RenderPerformenceStatisticsData : IRenderPerformenceStatisticsData
-        {
-            public double AveSpendTicks { get; set; }
-
-            public double MostSpendTicks { get; set; }
-
-            public int AveDrawCall { get; set; }
-
-            public long MostUIRenderSpendTicks { get; set; }
-
-            public double AveUIRenderSpendTicks { get; set; }
-        }
-
         public struct DrawingPerformenceStatisticsData : IDrawingPerformenceStatisticsData
         {
             public List<PerformenceItem> PerformenceRankList { get; set; }
@@ -180,6 +169,43 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
         public void PostUIRenderTime(TimeSpan ts)
         {
             UIRenderSpendTicks.Enqueue(ts.Ticks);
+        }
+
+        public void FormatStatistics(StringBuilder builder)
+        {
+            var drawing = GetDrawingPerformenceData();
+            var drawingTarget = GetDrawingTargetPerformenceData();
+
+            var drawingTop = drawing.PerformenceRanks.FirstOrDefault();
+            var render = GetRenderPerformenceData();
+
+            string formatFPS(double ticks) => $"{1.0 / TimeSpan.FromTicks((int)ticks).TotalSeconds,7:0.00}";
+            string formatMSec(double ticks) => $"{TimeSpan.FromTicks((int)ticks).TotalMilliseconds:F2}";
+
+            void dip(PerformenceItem p, int i)
+            {
+                if (p is null)
+                    return;
+                builder.AppendLine($"D.TOP{i}:{p.Name} {p.AveDrawCall}drawcall {formatMSec(p.AveSpendTicks)}ms ");
+            }
+
+            void dipt(PerformenceItem p, int i)
+            {
+                if (p is null)
+                    return;
+                builder.AppendLine($"DT.TOP{i}:{p.Name} {formatMSec(p.AveSpendTicks)}ms ");
+            }
+
+            builder.AppendLine($"UI.FPS:{formatFPS(render.AveUIRenderSpendTicks)}({formatFPS(render.MostUIRenderSpendTicks)}) / R.FPS {formatFPS(render.AveSpendTicks)}({formatFPS(render.MostSpendTicks)}) D.FPS:{formatFPS(drawing.AveSpendTicks)}({formatFPS(drawing.MostSpendTicks)})");
+            builder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{(drawingTop.AveDrawCall, 6)}");
+            builder.AppendLine();
+            dip(drawing.PerformenceRanks.ElementAtOrDefault(0), 1);
+            dip(drawing.PerformenceRanks.ElementAtOrDefault(1), 2);
+            dip(drawing.PerformenceRanks.ElementAtOrDefault(2), 3);
+            builder.AppendLine();
+            dipt(drawingTarget.PerformenceRanks.ElementAtOrDefault(0), 1);
+            dipt(drawingTarget.PerformenceRanks.ElementAtOrDefault(1), 2);
+            dipt(drawingTarget.PerformenceRanks.ElementAtOrDefault(2), 3);
         }
     }
 }

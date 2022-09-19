@@ -39,6 +39,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData();
         IRenderPerformenceStatisticsData GetRenderPerformenceData();
 
+        void FormatStatistics(StringBuilder builder);
+
         void Clear();
         void PostUIRenderTime(TimeSpan ts);
     }
