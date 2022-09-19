@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var fumen = target.Fumen;
             overdrawingDefferSet.Clear();
             using var d4 = objs.Select(x => new RegisterDrawingInfo(x, TGridCalculator.ConvertTGridToY(x.TGrid, fumen.BpmList, 1.0, 240))).ToListWithObjectPool(out var objects);
-            
+
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
             {
                 var y = (float)g.FirstOrDefault().Y;
@@ -234,7 +234,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var i = 0;
             foreach ((var obj, var c) in group.Select(x => (x.TimelineObject, colors[x.TimelineObject.IDShortName])).OrderBy(x => x.Item2.PackedValue))
             {
-                stringDrawing.Draw((i == 0 ? string.Empty : " / ") + formatObj(obj), new Vector2(x, y + 12), Vector2.One, 16, 0, new(c.R, c.G, c.B, c.A), new(0, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out var size);
+                stringDrawing.Draw((i == 0 ? string.Empty : " / ") + formatObj(obj), new Vector2(x, y + 12), Vector2.One, 16, 0, new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), new(0, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out var size);
                 x += size.Value.X;
                 i++;
             }
