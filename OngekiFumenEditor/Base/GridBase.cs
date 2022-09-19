@@ -23,14 +23,19 @@ namespace OngekiFumenEditor.Base
             protected set
             {
                 gridRadix = value;
-                RecalculateTotalGrid();
+                RecalculateTotalValues();
             }
         }
 
         public int TotalGrid { get; private set; }
+        public double TotalUnit { get; private set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void RecalculateTotalGrid() => TotalGrid = (int)(Unit * GridRadix + Grid);
+        private void RecalculateTotalValues()
+        {
+            TotalGrid = (int)(Unit * GridRadix + Grid);
+            TotalUnit = Unit + Grid * 1.0 / GridRadix;
+        }
 
         public GridBase(float unit = default, int grid = default)
         {
@@ -47,7 +52,7 @@ namespace OngekiFumenEditor.Base
             set
             {
                 grid = value;
-                RecalculateTotalGrid();
+                RecalculateTotalValues();
                 NotifyOfPropertyChange(() => Grid);
             }
         }
@@ -61,7 +66,7 @@ namespace OngekiFumenEditor.Base
             set
             {
                 unit = value;
-                RecalculateTotalGrid();
+                RecalculateTotalValues();
                 NotifyOfPropertyChange(() => Unit);
             }
         }
