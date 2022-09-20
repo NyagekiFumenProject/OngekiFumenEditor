@@ -176,6 +176,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
             var drawing = GetDrawingPerformenceData();
             var drawingTarget = GetDrawingTargetPerformenceData();
 
+            if (drawing is null || drawingTarget is null)
+                return;
+
             var drawingTop = drawing.PerformenceRanks.FirstOrDefault();
             var render = GetRenderPerformenceData();
 
