@@ -13,6 +13,7 @@ using System.Runtime.Caching;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached.DefaultImpl
@@ -29,6 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             public Vector2 ViewSize { get; set; } = new(int.MinValue);
             public DateTime LastAccessTime { get; set; }
             public IFumenPreviewer Target { get; set; }
+            public Rect Bound { get; set; }
 
             public void CleanPoints()
             {
@@ -104,15 +106,18 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             return list;
         }
 
-        public List<LineVertex> GetRenderData(IFumenPreviewer target, SvgPrefabBase svgPrefab)
+        public List<LineVertex> GetRenderData(IFumenPreviewer target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
         {
             var curTime = DateTime.Now;
+            isCached = true;
+
             if (!cachedDataMap.TryGetValue(svgPrefab, out var cachedItem))
             {
                 cachedItem = new CachedSvgGeneratedData();
                 cachedItem.SvgPrefab = svgPrefab;
                 cachedItem.Target = target;
                 cachedDataMap[svgPrefab] = cachedItem;
+                isCached = false;
             }
 
             if (!CheckCachedDataVailed(target, cachedItem))
@@ -122,10 +127,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
                 cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingDrawingGroup?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
                 cachedItem.GeneratedPoints = genData;
                 cachedItem.ViewSize = new Vector2(target.ViewWidth, target.ViewHeight);
+                cachedItem.Bound = svgPrefab.ProcessingDrawingGroup?.Bounds ?? default;
+                isCached = false;
             }
 
             //update hashcode and access time
             cachedItem.LastAccessTime = curTime;
+            bound = cachedItem.Bound;
 
             return cachedItem.GeneratedPoints;
         }

@@ -1,29 +1,23 @@
 ﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
-using OngekiFumenEditor.Kernel.Scheduler;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached.DefaultImpl;
 using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ILineDrawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OpenTK.Mathematics;
-using System.Windows.Media;
 using System.Windows;
+using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ISimpleLineDrawing;
+using System;
+using System.Net.Sockets;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.EditorObjects
 {
     [Export(typeof(IDrawingTarget))]
-    public class SvgObjectDrawingTarget : CommonDrawTargetBase<SvgPrefabBase>
+    public class SvgObjectDrawingTarget : CommonDrawTargetBase<SvgPrefabBase>, IDisposable
     {
         private ICachedSvgRenderDataManager cachedSvgRenderDataManager;
-        private ILineDrawing lineDrawing;
+        private ISimpleLineDrawing lineDrawing;
+        private Dictionary<SvgPrefabBase, IVBOHandle> vboHolder = new();
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { SvgStringPrefab.CommandName, SvgImageFilePrefab.CommandName };
 
@@ -35,8 +29,21 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
 
         public override void Draw(IFumenPreviewer target, SvgPrefabBase obj)
         {
-            if (obj.ProcessingDrawingGroup?.Bounds is not Rect bound)
+            var vertics = cachedSvgRenderDataManager.GetRenderData(target, obj, out var isCached, out var bound);
+            if (vertics.Count == 0)
                 return;
+            var isCachedVBO = vboHolder.TryGetValue(obj, out var handle);
+
+            if (isCached)
+            {
+                if (!isCachedVBO)
+                    handle = vboHolder[obj] = lineDrawing.GenerateVBOWithPresetPoints(vertics, 1);
+            }
+            else
+            {
+                handle?.Dispose();
+                handle = vboHolder[obj] = lineDrawing.GenerateVBOWithPresetPoints(vertics, 1);
+            }
 
             var w = bound.Width;
             var h = bound.Height;
@@ -44,13 +51,21 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             var x = (float)(XGridCalculator.ConvertXGridToX(obj.XGrid, 30, target.ViewWidth, 1) + w / 2);
             var y = (float)(TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1.0, 240) - h / 2);
 
-            var data = cachedSvgRenderDataManager.GetRenderData(target, obj);
 
             lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4.CreateTranslation(x, y, 0));
             {
-                lineDrawing.Draw(target, data, 1);
+                //lineDrawing.Draw(target, vertics, 1);
+                lineDrawing.DrawVBO(target, handle);
             }
             lineDrawing.PopOverrideModelMatrix(out _);
+        }
+
+        public void Dispose()
+        {
+            foreach (var item in vboHolder.Values)
+                item.Dispose();
+
+            vboHolder.Clear();
         }
     }
 }
