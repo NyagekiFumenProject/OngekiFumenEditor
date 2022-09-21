@@ -10,7 +10,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public interface IPolygonDrawing : IDrawing
     {
-        public record PolygonVertex(Vector2 Point, Vector2 Color);
-        void Draw(IFumenPreviewer target, IEnumerable<PolygonVertex> vertices, bool isFill);
+        int AvailablePostableVertexCount { get; }
+        void Begin(IFumenPreviewer target);
+        void PostPoint(Vector2 Point, Vector4 Color);
+        void End();
     }
 }
