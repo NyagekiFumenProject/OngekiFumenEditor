@@ -140,6 +140,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         private Dictionary<IDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
 
+        private IPolygonDrawing polygonDrawing;
+
         public FumenPreviewerViewModel()
         {
             DisplayName = "谱面预览";
@@ -218,6 +220,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             timeSignatureHelper = new DrawTimeSignatureHelper();
 
             openGLView.Render += (ts) => OnRender(openGLView, ts);
+
+            polygonDrawing = IoC.Get<IPolygonDrawing>();
         }
 
         public IDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
@@ -277,6 +281,15 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                         drawingTarget.End();
                     }
                 }
+
+                polygonDrawing.Begin(this);
+                polygonDrawing.PostPoint(new(0, 0), new(1, 1, 0, 1));
+                polygonDrawing.PostPoint(new(100, 0), new(0, 1, 1, -0.5f));
+                polygonDrawing.PostPoint(new(0, 100), new(1, 1, 0, 1));
+                polygonDrawing.PostPoint(new(100, 100), new(0, 1, 1, -0.5f));
+                polygonDrawing.PostPoint(new(0, 200), new(1, 1, 0, 1));
+                polygonDrawing.PostPoint(new(100, 200), new(0, 1, 1, -0.5f));
+                polygonDrawing.End();
 
                 drawMap.Clear();
 

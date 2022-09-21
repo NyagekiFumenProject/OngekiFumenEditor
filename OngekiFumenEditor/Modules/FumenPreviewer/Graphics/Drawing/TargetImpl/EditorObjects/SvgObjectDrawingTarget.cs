@@ -9,6 +9,7 @@ using System.Windows;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ISimpleLineDrawing;
 using System;
 using System.Net.Sockets;
+using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.IStaticVBODrawing;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.EditorObjects
 {
@@ -54,7 +55,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
 
             lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4.CreateTranslation(x, y, 0));
             {
-                //lineDrawing.Draw(target, vertics, 1);
                 lineDrawing.DrawVBO(target, handle);
             }
             lineDrawing.PopOverrideModelMatrix(out _);
