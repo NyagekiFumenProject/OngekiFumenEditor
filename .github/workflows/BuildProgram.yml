@@ -33,7 +33,7 @@ jobs:
     - name: Setup .NET5
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
     - name: display current work dir
       run: pwd
     - name: show version.json
