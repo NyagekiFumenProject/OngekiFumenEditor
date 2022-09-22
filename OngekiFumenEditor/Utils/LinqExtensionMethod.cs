@@ -36,13 +36,6 @@ namespace OngekiFumenEditor.Utils
                 collection.Remove(rm);
         }
 
-        public static void DistinctBySelf<T, Y>(this ICollection<T> collection, Func<T, T, bool> keySelect)
-        {
-            using var d = collection.Except(collection.DistinctBy(keySelect)).ToListWithObjectPool(out var removes);
-            foreach (var rm in removes)
-                collection.Remove(rm);
-        }
-
         public static void RemoveRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Remove(x));
 
         public static void RemoveRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Remove(x));
@@ -50,11 +43,11 @@ namespace OngekiFumenEditor.Utils
         public static void AddRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
 
         public static void AddRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
-
+        /*
         public static IEnumerable<T> DistinctBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
 
         public static IEnumerable<T> DistinctBy<T>(this IEnumerable<T> collection, Func<T, T, bool> compFunc) => collection.Distinct(new FuncDistinctComparer<T>(compFunc));
-
+        */
         /// <summary>
         /// Distinct continuous same values.
         /// example : 1,2,3,3,4,1,1,2,3 -> 1,2,3,4,1,2,3
@@ -219,57 +212,6 @@ namespace OngekiFumenEditor.Utils
             }
 
             return (min, max);
-        }
-
-        public static T MinBy<T>(this IEnumerable<T> collection)
-            => collection.MinBy(x => x, (a, b) => Comparer<T>.Default.Compare(a, b));
-        public static T MinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
-            => collection.MinBy((a, b) => keySelector(a).CompareTo(keySelector(b)));
-        public static T MinBy<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
-            => collection.MinBy(x => x, comparer);
-        public static T MinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
-        {
-            var first = collection.FirstOrDefault();
-            X min = keySelector(first);
-            T minValue = first;
-
-            foreach (var item in collection)
-            {
-                var v = keySelector(item);
-                if (comparer(min, v) > 0)
-                {
-                    min = v;
-                    minValue = item;
-                }
-            }
-
-            return minValue;
-        }
-
-
-        public static T MaxBy<T>(this IEnumerable<T> collection)
-            => collection.MaxBy(x => x, (a, b) => Comparer<T>.Default.Compare(a, b));
-        public static T MaxBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
-            => collection.MaxBy((a, b) => keySelector(a).CompareTo(keySelector(b)));
-        public static T MaxBy<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
-            => collection.MaxBy(x => x, comparer);
-        public static T MaxBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
-        {
-            var first = collection.FirstOrDefault();
-            X max = keySelector(first);
-            T maxValue = first;
-
-            foreach (var item in collection)
-            {
-                var v = keySelector(item);
-                if (comparer(max, v) < 0)
-                {
-                    max = v;
-                    maxValue = item;
-                }
-            }
-
-            return maxValue;
         }
 
         public static IEnumerable<IEnumerable<T>> SequenceWrap<T>(this IEnumerable<T> collection, int wrapCount)
