@@ -18,14 +18,17 @@ using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
-    public class BulletDrawingTarget : CommonDrawTargetBase<Bullet>, IDisposable
+    public class BulletDrawingTarget : CommonBatchDrawTargetBase<Bullet>, IDisposable
     {
         Dictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap = new();
         Dictionary<Texture, Vector2> spritesSize = new();
         Dictionary<Texture, Vector2> spritesOriginOffset = new();
 
+        private Texture prevTexture;
+        private List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
         private IStringDrawing stringDrawing;
         private ITextureDrawing textureDrawing;
+        private IBatchTextureDrawing batchTextureDrawing;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { Bullet.CommandName };
 
@@ -73,6 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
             stringDrawing = IoC.Get<IStringDrawing>();
             textureDrawing = IoC.Get<ITextureDrawing>();
+            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
         }
 
         public float CalculateBulletMsecTime(IFumenPreviewer target, Bullet obj, float userSpeed = 2.35f)
@@ -83,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             return time;
         }
 
-        public override void Draw(IFumenPreviewer target, Bullet obj)
+        private void Draw(IFumenPreviewer target, Bullet obj)
         {
             var appearOffsetTime = CalculateBulletMsecTime(target, obj);
 
@@ -127,23 +131,47 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var size = spritesSize[texture];
             var origOffset = spritesOriginOffset[texture];
 
-            var rotate = Math.Atan((toX - fromX) / (toTime - fromTime));
+            var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
             var offsetPos = pos + origOffset;
-            textureDrawing.Draw(target, texture, new (Vector2, Vector2, float)[] { (new(size.X, size.Y), new(offsetPos.X, offsetPos.Y), (float)rotate) });
-            DrawPallateStr(target, obj, pos + origOffset);
+            SyncTextureChange(target, texture);
+            batchTextureDrawing.PostSprite(size, offsetPos, rotate);
+            drawStrList.Add((offsetPos, obj));
         }
 
-        private void DrawPallateStr(IFumenPreviewer target, IBulletPalleteReferencable obj, Vector2 pos)
+        private void SyncTextureChange(IFumenPreviewer target, Texture texture)
         {
-            if (obj.ReferenceBulletPallete is null)
+            if (prevTexture == texture)
                 return;
-            stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
+            if (prevTexture is not null)
+                batchTextureDrawing.End();
+            batchTextureDrawing.Begin(target, texture);
+            prevTexture = texture;
+        }
+
+        private void DrawPallateStr(IFumenPreviewer target)
+        {
+            foreach ((var pos, var obj) in drawStrList)
+            {
+                if (obj.ReferenceBulletPallete is null)
+                    return;
+                stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
+            }
         }
 
         public void Dispose()
         {
             spritesMap.SelectMany(x => x.Value.Values).ForEach(x => x.Dispose());
             spritesMap.Clear();
+        }
+
+        public override void DrawBatch(IFumenPreviewer target, IEnumerable<Bullet> objs)
+        {
+            prevTexture = default;
+            drawStrList.Clear();
+            foreach (var obj in objs)
+                Draw(target, obj);
+            batchTextureDrawing.End();
+            DrawPallateStr(target);
         }
     }
 }
