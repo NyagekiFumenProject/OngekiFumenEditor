@@ -45,6 +45,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 Set(ref prevObject, value);
                 if (prevObject is not null)
                     prevObject.NextObject = this;
+                NotifyRefreshPaths();
             }
         }
 
@@ -80,7 +81,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             controlObj.Index = PathControls.Count;
             controlObj.PropertyChanged += ControlObj_PropertyChanged;
             controlObj.RefCurveObject = this;
-            ClearCachePaths();
+            NotifyRefreshPaths();
             NotifyOfPropertyChange(() => PathControls);
         }
 
@@ -93,8 +94,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     break;
                 case nameof(TGrid):
                 case nameof(XGrid):
-                    ClearCachePaths();
-                    NextObject?.ClearCachePaths();
+                    NotifyRefreshPaths();
                     NotifyOfPropertyChange(e.PropertyName);
                     break;
                 default:
@@ -102,7 +102,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
-        internal void ClearCachePaths()
+        internal void NotifyRefreshPaths()
         {
             ObjectPool<List<(Vector2 pos, bool isVaild)>>.Return(cacheGeneratedPath);
             cacheGeneratedPath = default;
@@ -131,7 +131,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             {
                 controlObj.RefCurveObject = null;
                 controlObj.PropertyChanged -= ControlObj_PropertyChanged;
-                ClearCachePaths();
+                NotifyRefreshPaths();
                 NotifyOfPropertyChange(() => PathControls);
             }
         }

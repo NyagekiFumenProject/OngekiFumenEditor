@@ -193,6 +193,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             switch (e.PropertyName)
             {
                 case nameof(TGrid):
+                    if (sender is ConnectableChildObjectBase child)
+                    {
+                        child.NotifyRefreshPaths();
+                        child.NextObject?.NotifyRefreshPaths();
+                    }
+                    else
+                        NextObject?.NotifyRefreshPaths();
                     NotifyOfPropertyChange(() => MinTGrid);
                     NotifyOfPropertyChange(() => MaxTGrid);
                     break;
