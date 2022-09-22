@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
@@ -65,14 +66,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Square = 2,
         }
 
-        public XGrid CalculateToXGrid(XGrid xGrid, OngekiFumen fumen)
+        public double CalculateToXGrid(double xGridTotalUnit, OngekiFumen fumen)
         {
-            var xUnit = 0f;
+            var xUnit = 0d;
 
             //暂时实现Target.FixField的
             if (TargetValue == Target.FixField)
             {
-                xUnit = xGrid.Unit;
+                xUnit = xGridTotalUnit;
             }
             else if (TargetValue == Target.Player)
             {
@@ -80,24 +81,34 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 xUnit = 0;
             }
 
-            xGrid = new XGrid(xUnit);
+            return xUnit;
+        }
+
+        public XGrid CalculateToXGrid(XGrid xGrid, OngekiFumen fumen)
+        {
+            xGrid = new XGrid((float)CalculateToXGrid(xGrid.TotalUnit,fumen));
             xGrid.NormalizeSelf();
             return xGrid;
         }
 
-        public XGrid CalculateFromXGrid(XGrid xGrid, OngekiFumen fumen)
+        public double CalculateFromXGrid(double xGridTotalUnit, OngekiFumen fumen)
         {
-            var xUnit = 0f;
+            var xUnit = 0d;
 
             //暂时实现Shooter.TargetHead && Target.FixField的
             if (ShooterValue == Shooter.TargetHead &
                 TargetValue == Target.FixField)
             {
-                xUnit = xGrid.Unit;
+                xUnit = xGridTotalUnit;
             }
 
             xUnit += PlaceOffset;
-            xGrid = new XGrid(xUnit);
+            return xUnit;
+        }
+
+        public XGrid CalculateFromXGrid(XGrid xGrid, OngekiFumen fumen)
+        {
+            xGrid = new XGrid((float)CalculateFromXGrid(xGrid.TotalUnit, fumen));
             xGrid.NormalizeSelf();
             return xGrid;
         }
