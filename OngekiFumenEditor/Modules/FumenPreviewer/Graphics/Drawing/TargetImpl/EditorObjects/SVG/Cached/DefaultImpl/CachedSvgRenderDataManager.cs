@@ -85,22 +85,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             {
                 var color = new Vector4(seg.Color.R / 255.0f, seg.Color.G / 255.0f, seg.Color.B / 255.0f, seg.Color.A / 255.0f);
 
-                var addFirst = true;
-
-                foreach (var point in seg.RelativePoints)
+                var itor = seg.RelativePoints.GetEnumerator();
+                if (itor.MoveNext())
                 {
-                    var fixPos = point;
-
-                    if (addFirst)
+                    var point = itor.Current;
+                    list.Add(new(point, Vector4.Zero));
+                    list.Add(new(point, color));
+                    while (itor.MoveNext())
                     {
-                        list.Add(new(fixPos, Vector4.Zero));
-                        addFirst = false;
+                        point = itor.Current;
+                        list.Add(new(point, color));
                     }
-                    list.Add(new(fixPos, color));
+                    list.Add(new(point, Vector4.Zero));
                 }
-
-                if (list.Count != 0)
-                    list.Add(list.LastOrDefault() with { Color = Vector4.Zero });
             }
 
             return list;

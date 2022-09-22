@@ -312,12 +312,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 var lines = childGeometry.Geometry.GetFlattenedPathGeometry();
                 var brush = (childGeometry.Brush ?? childGeometry.Pen?.Brush) as SolidColorBrush;
 
-                var segment = new LineSegment();
-
                 if (PickSimilarLaneColor(brush.Color) is not LaneColor laneColor)
                     continue;
-
-                segment.Color = laneColor.Color;
 
                 Vector2 CalculateRelativePoint(Point relativePoint)
                 {
@@ -329,6 +325,9 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
                 foreach (var path in lines.Figures.OfType<PathFigure>())
                 {
+                    var segment = new LineSegment();
+                    segment.Color = laneColor.Color;
+
                     var points = path.Segments.SelectMany(x => x switch
                     {
                         System.Windows.Media.LineSegment ls => Enumerable.Repeat(ls.Point, 0),
