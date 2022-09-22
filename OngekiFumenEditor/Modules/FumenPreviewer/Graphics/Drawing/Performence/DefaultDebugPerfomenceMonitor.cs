@@ -103,6 +103,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
             timer.Stop();
             RenderSpendTicks.Enqueue(timer.ElapsedTicks - currentBeginRenderTick);
             TotalDrawCall.Enqueue(currentDrawCall);
+            foreach (var data in drawDataMap.Values)
+                data.DrawCallCount = 0;
         }
 
         public void Clear()
@@ -200,7 +202,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Performence
             }
 
             builder.AppendLine($"UI.FPS:{formatFPS(render.AveUIRenderSpendTicks)}({formatFPS(render.MostUIRenderSpendTicks)}) / R.FPS {formatFPS(render.AveSpendTicks)}({formatFPS(render.MostSpendTicks)}) D.FPS:{formatFPS(drawing.AveSpendTicks)}({formatFPS(drawing.MostSpendTicks)})");
-            builder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{(drawingTop.AveDrawCall, 6)}");
+            builder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{drawingTop.AveDrawCall, 6}");
             builder.AppendLine();
             dip(drawing.PerformenceRanks.ElementAtOrDefault(0), 1);
             dip(drawing.PerformenceRanks.ElementAtOrDefault(1), 2);
