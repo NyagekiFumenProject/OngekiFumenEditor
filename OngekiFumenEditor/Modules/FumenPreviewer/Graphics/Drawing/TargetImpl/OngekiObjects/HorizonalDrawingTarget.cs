@@ -31,11 +31,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
         private IStringDrawing stringDrawing;
         private ISimpleLineDrawing lineDrawing;
+        private IPolygonDrawing polygonDrawing;
         private HashSet<int> overdrawingDefferSet = new HashSet<int>();
 
         public HorizonalDrawingTarget()
         {
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
+            polygonDrawing = IoC.Get<IPolygonDrawing>();
             stringDrawing = IoC.Get<IStringDrawing>();
         }
 
@@ -116,21 +118,25 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             else
                 overdrawingDefferSet.Add(hashCode);
 
-            lineDrawing.Begin(target, 10);
             var fumen = target.Fumen;
 
-            var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 10;
+            var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 60;
             var color = lbk.Direction == LaneBlockArea.BlockDirection.Left ? WallLaneDrawTarget.LeftWallColor : WallLaneDrawTarget.RightWallColor;
+            var colorF = color;
+            colorF.W = -0.25f;
             (double, double) lastP = default;
 
             #region Generate LBK lines
 
             void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, Vector4? specifyColor = default)
             {
-                var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, 30, target.ViewWidth, 1) + offsetX;
+                var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, 30, target.ViewWidth, 1);
                 var y = (float)TGridCalculator.ConvertTGridUnitToY(tGridTotalUnit, fumen.BpmList, 1.0, 240);
 
-                lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
+                //lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
+                polygonDrawing.PostPoint(new(x, y), Vector4.One);
+                polygonDrawing.PostPoint(new(x + offsetX, y), colorF);
+
                 lastP = (tGridTotalUnit, xGridTotalUnit);
             }
 
@@ -174,6 +180,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
             void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
             {
+                polygonDrawing.Begin(target);
                 foreach (var child in wallStartLane.Children)
                 {
                     if (child.TGrid < minTGrid)
@@ -186,6 +193,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
                     ProcessConnectable(child, childMinTGrid, childMaxTGrid);
                 }
+                polygonDrawing.End();
             }
 
             #endregion
@@ -204,15 +212,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                     var start = itor.Current;
 
                     (var prevTGrid, var prevXGrid) = lastP;
-                    PostPointByXTGrid(prevXGrid, prevTGrid, Vector4.Zero);
-                    PostPointByXTGrid(start.XGrid.TotalUnit, start.TGrid.TotalUnit, Vector4.Zero);
-                    PostPointByXTGrid(start.XGrid.TotalUnit, start.TGrid.TotalUnit);
-
                     ProcessWallLane(start, beginTGrid, endTGrid);
                 }
             }
 
-            lineDrawing.End();
+            //lineDrawing.End();
         }
 
         private void DrawDescText(IFumenPreviewer target, float y, IEnumerable<RegisterDrawingInfo> group)

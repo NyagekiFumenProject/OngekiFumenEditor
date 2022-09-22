@@ -30,8 +30,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.L
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "WLS", "WRS" };
 
-        public static Vector4 LeftWallColor { get; } = new(35 / 255.0f, 4 / 255.0f, 117 / 255.0f, 255 / 255.0f);
-        public static Vector4 RightWallColor { get; } = new(136 / 255.0f, 3 / 255.0f, 152 / 255.0f, 255 / 255.0f);
+        public static Vector4 LeftWallColor { get; } = new(181 / 255.0f, 156 / 255.0f, 231 / 255.0f, 255 / 255.0f);
+        public static Vector4 RightWallColor { get; } = new(231 / 255.0f, 149 / 255.0f, 178 / 255.0f, 255 / 255.0f);
 
         public override int LineWidth => 6;
 
