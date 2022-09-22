@@ -21,5 +21,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
             RecordId = from.RecordId;
         }
+
+        public ConnectableChildObjectBase NextObject { get; set; }
     }
 }

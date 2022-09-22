@@ -282,15 +282,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                     }
                 }
 
-                polygonDrawing.Begin(this);
-                polygonDrawing.PostPoint(new(0, 0), new(1, 1, 0, 1));
-                polygonDrawing.PostPoint(new(100, 0), new(0, 1, 1, -0.5f));
-                polygonDrawing.PostPoint(new(0, 100), new(1, 1, 0, 1));
-                polygonDrawing.PostPoint(new(100, 100), new(0, 1, 1, -0.5f));
-                polygonDrawing.PostPoint(new(0, 200), new(1, 1, 0, 1));
-                polygonDrawing.PostPoint(new(100, 200), new(0, 1, 1, -0.5f));
-                polygonDrawing.End();
-
                 drawMap.Clear();
 
                 timeSignatureHelper.DrawTimeSigntureText(this);

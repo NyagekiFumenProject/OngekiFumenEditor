@@ -7,6 +7,7 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -32,8 +33,22 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public bool IsAnyControlSelecting => PathControls.Any(x => x.IsSelected);
 
+
+        private ConnectableObjectBase prevObject;
+        public ConnectableObjectBase PrevObject
+        {
+            get => prevObject;
+            set
+            {
+                if (prevObject is not null)
+                    prevObject.NextObject = default;
+                Set(ref prevObject, value);
+                if (prevObject is not null)
+                    prevObject.NextObject = this;
+            }
+        }
+
         public ConnectableStartObject ReferenceStartObject { get; set; }
-        public ConnectableObjectBase PrevObject { get; set; }
         private int recordId = int.MinValue;
         internal int CacheRecoveryChildIndex { get; set; } = -1;
         public override int RecordId { get => ReferenceStartObject?.RecordId ?? recordId; set => Set(ref recordId, value); }
@@ -79,6 +94,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 case nameof(TGrid):
                 case nameof(XGrid):
                     ClearCachePaths();
+                    NextObject?.ClearCachePaths();
                     NotifyOfPropertyChange(e.PropertyName);
                     break;
                 default:
@@ -86,7 +102,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
-        private void ClearCachePaths()
+        internal void ClearCachePaths()
         {
             ObjectPool<List<(Vector2 pos, bool isVaild)>>.Return(cacheGeneratedPath);
             cacheGeneratedPath = default;
