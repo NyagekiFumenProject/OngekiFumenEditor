@@ -275,9 +275,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                     {
                         drawingTarget.Begin(this);
                         foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))
-                        {
                             drawingTarget.Post(obj);
-                        }
                         drawingTarget.End();
                     }
                 }

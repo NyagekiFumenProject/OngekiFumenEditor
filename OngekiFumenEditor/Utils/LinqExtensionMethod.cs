@@ -103,6 +103,68 @@ namespace OngekiFumenEditor.Utils
             return default;
         }
 
+        public static T MinByOrDefault<T>(this IEnumerable<T> collection)
+            => collection.MinByOrDefault(x => x, (a, b) => Comparer<T>.Default.Compare(a, b));
+        public static T MinByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
+            => collection.MinByOrDefault((a, b) => keySelector(a).CompareTo(keySelector(b)));
+        public static T MinByOrDefault<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
+            => collection.MinByOrDefault(x => x, comparer);
+        public static T MinByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
+        {
+            var itor = collection.GetEnumerator();
+            if (!itor.MoveNext())
+                return default;
+
+            var first = itor.Current;
+            X min = keySelector(first);
+            T minValue = first;
+
+            while (itor.MoveNext())
+            {
+                var item = itor.Current;
+
+                var v = keySelector(item);
+                if (comparer(min, v) > 0)
+                {
+                    min = v;
+                    minValue = item;
+                }
+            }
+
+            return minValue;
+        }
+
+        public static T MaxByOrDefault<T>(this IEnumerable<T> collection)
+            => collection.MaxByOrDefault(x => x, (a, b) => Comparer<T>.Default.Compare(a, b));
+        public static T MaxByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
+            => collection.MaxByOrDefault((a, b) => keySelector(a).CompareTo(keySelector(b)));
+        public static T MaxByOrDefault<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
+            => collection.MaxByOrDefault(x => x, comparer);
+        public static T MaxByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
+        {
+            var itor = collection.GetEnumerator();
+            if (!itor.MoveNext())
+                return default;
+
+            var first = itor.Current;
+            X max = keySelector(first);
+            T maxValue = first;
+
+            while (itor.MoveNext())
+            {
+                var item = itor.Current;
+
+                var v = keySelector(item);
+                if (comparer(max, v) < 0)
+                {
+                    max = v;
+                    maxValue = item;
+                }
+            }
+
+            return maxValue;
+        }
+
         public static T FindPreviousOrDefault<T>(this IEnumerable<T> collection, T taget)
         {
             var itor = collection.GetEnumerator();

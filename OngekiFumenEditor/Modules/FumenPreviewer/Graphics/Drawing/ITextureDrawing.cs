@@ -16,7 +16,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
     public interface ITextureDrawing : IDrawing
     {
-        [Obsolete("Use IBatchTextureDrawing.Begin()/PostSprite()/End()")]
         void Draw(IFumenPreviewer target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances);
     }
 }

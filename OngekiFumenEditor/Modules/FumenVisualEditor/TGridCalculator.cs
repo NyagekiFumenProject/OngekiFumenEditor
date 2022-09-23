@@ -196,7 +196,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (TGrid tGrid, double y, int beatIndex) TryPickMagneticBeatTime(float y, float range, BpmList bpmList, MeterChangeList meterChanges, int beatSplit, double scale, int tUnitLength = 240)
-            => GetVisbleTimelines(bpmList, meterChanges, y - range, y + range, 0, beatSplit, scale, tUnitLength).MinBy(x => Math.Abs(x.y - y));
+            => GetVisbleTimelines(bpmList, meterChanges, y - range, y + range, 0, beatSplit, scale, tUnitLength).MinByOrDefault(x => Math.Abs(x.y - y));
         /// <summary>
         /// 计算在y±range内，最近的节奏线
         /// </summary>

@@ -37,6 +37,7 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
@@ -128,6 +129,7 @@
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />

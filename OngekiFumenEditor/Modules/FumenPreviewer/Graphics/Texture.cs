@@ -18,22 +18,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
 
         private Vector2 _textureSize;
 
-        private string name;
+        public string Name { get; set; }
 
         public int Width { get { return (int)_textureSize.X; } }
         public int Height { get { return (int)_textureSize.Y; } }
 
-        public Texture()
+        public Texture(string name = "Texture")
         {
-            name = "Texture";
+            Name = name;
             _id = 0;
         }
 
-        public Texture(Bitmap bmp)
+        public Texture(Bitmap bmp, string name = "Texture") : this(name)
         {
-            name = "Texture";
-            _id = 0;
-
             LoadFromFile(bmp);
         }
 
@@ -78,7 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
 
         public override string ToString()
         {
-            return name;
+            return Name;
         }
 
         public void Dispose()

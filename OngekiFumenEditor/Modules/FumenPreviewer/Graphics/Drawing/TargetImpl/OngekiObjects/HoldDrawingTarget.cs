@@ -67,8 +67,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             lineDrawing.Draw(target, list, 13);
 
             //draw taps
-            tapDraw.Draw(target, start.LaneType, hold.TGrid, hold.XGrid);
-            tapDraw.Draw(target, start.LaneType, holdEnd.TGrid, holdEnd.XGrid);
+            tapDraw.Begin(target);
+            tapDraw.Draw(target, start.LaneType, hold.TGrid, hold.XGrid, hold.IsCritical);
+            tapDraw.Draw(target, start.LaneType, holdEnd.TGrid, holdEnd.XGrid, false);
+            tapDraw.End();
         }
     }
 }
