@@ -21,6 +21,7 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
@@ -43,6 +44,7 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
@@ -113,6 +115,7 @@
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
@@ -135,6 +138,7 @@
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />

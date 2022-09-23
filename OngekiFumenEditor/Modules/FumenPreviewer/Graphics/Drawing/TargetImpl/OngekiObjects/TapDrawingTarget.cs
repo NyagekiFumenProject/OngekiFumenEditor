@@ -36,7 +36,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         private Vector2 rightWallSize = new Vector2(-40, 40);
 
         private List<(Vector2 size, Vector2 pos, float rotate)> exTapList = new();
-
+        private List<(Vector2 size, Vector2 pos, float rotate)> exWallTapList = new();
+        private Texture wallExTexture;
         private IBatchTextureDrawing batchTextureDrawing;
         private IFumenPreviewer target;
 
@@ -50,7 +51,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             using var bitmap1 = Image.FromStream(info.Stream) as Bitmap;
             greenTexture = new Texture(bitmap1, "mu3_nt_extap_02.png");
 
-
             info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png", UriKind.Relative));
             using var bitmap2 = Image.FromStream(info.Stream) as Bitmap;
             blueTexture = new Texture(bitmap2, "mu3_nt_hold_02.png");
@@ -62,6 +62,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png", UriKind.Relative));
             using var bitmap4 = Image.FromStream(info.Stream) as Bitmap;
             tapExTexture = new Texture(bitmap4, "tap_exEff.png");
+
+            info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png", UriKind.Relative));
+            using var bitmap5 = Image.FromStream(info.Stream) as Bitmap;
+            wallExTexture = new Texture(bitmap5, "walltap_Eff.png");
 
             batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
         }
@@ -105,7 +109,18 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             SyncTapTexture(target, texture);
             batchTextureDrawing.PostSprite(size, pos, 0f);
             if (isExTap)
-                exTapList.Add((new(68, 30), pos, 0f));
+            {
+                if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
+                {
+                    size.Y = 39;
+                    size.X = Math.Sign(size.X) * 39;
+                    exWallTapList.Add((size, pos, 0f));
+                }
+                else
+                {
+                    exTapList.Add((new(68, 30), pos, 0f));
+                }
+            }
         }
 
         public void Dispose()
@@ -120,7 +135,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         {
             base.Begin(target);
             this.target = target;
-            prevTexture = default;
         }
 
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<Tap> objs)
@@ -136,9 +150,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         {
             base.End();
             batchTextureDrawing.End();
-            //draw extap
+
             batchTextureDrawing.Draw(target, tapExTexture, exTapList);
+            batchTextureDrawing.Draw(target, wallExTexture, exWallTapList);
+
             exTapList.Clear();
+            exWallTapList.Clear();
+
             prevTexture = default;
         }
     }
