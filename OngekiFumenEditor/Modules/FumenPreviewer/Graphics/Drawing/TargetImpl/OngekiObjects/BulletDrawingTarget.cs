@@ -136,6 +136,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             SyncTextureChange(target, texture);
             batchTextureDrawing.PostSprite(size, offsetPos, rotate);
             drawStrList.Add((offsetPos, obj));
+            target.RegisterSelectableObject(obj, offsetPos, size);
         }
 
         private void SyncTextureChange(IFumenPreviewer target, Texture texture)

@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Microsoft.VisualBasic;
+using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
@@ -54,7 +55,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, 30, target.ViewWidth, 1);
                         var y = (float)TGridCalculator.ConvertTGridToY(item.TGrid, target.Fumen.BpmList, 1.0, 240);
 
-                        textureDrawing.PostSprite(size, new(x, y), 0f);
+                        var pos = new Vector2(x, y);
+                        textureDrawing.PostSprite(size, pos, 0f);
+                        target.RegisterSelectableObject(item, pos, size);
                     }
 
                     textureDrawing.End();

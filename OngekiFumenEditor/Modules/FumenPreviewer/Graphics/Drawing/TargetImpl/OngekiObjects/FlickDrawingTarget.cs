@@ -52,6 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                 var pos = new Vector2((float)x, (float)y);
                 var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
                 batchTextureDrawing.PostSprite(size, pos, 0f);
+                target.RegisterSelectableObject(obj, pos, size);
 
                 if (obj.IsCritical)
                 {

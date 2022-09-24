@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -236,56 +237,53 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 Log.LogDebug($"OpenGL ERROR!! : {error}");
 #endif
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            lock (hits)
+            hits.Clear();
+
+            var fumen = Editor?.Fumen;
+            if (fumen is null)
+                return;
+
+            if (IsFollowCurrentEditorTime)
+                CurrentPlayTime = (float)Editor.ScrollViewerVerticalOffset;
+
+            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
+            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
+
+            timeSignatureHelper.DrawLines(this);
+
+            foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
             {
-                hits.Clear();
+                if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget[] drawingTargets)
+                    continue;
 
-                var fumen = Editor?.Fumen;
-                if (fumen is null)
-                    return;
-
-                if (IsFollowCurrentEditorTime)
-                    CurrentPlayTime = (float)Editor.ScrollViewerVerticalOffset;
-
-                var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
-                var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
-
-                timeSignatureHelper.DrawLines(this);
-
-                foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
+                foreach (var drawingTarget in drawingTargets)
                 {
-                    if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget[] drawingTargets)
-                        continue;
-
-                    foreach (var drawingTarget in drawingTargets)
-                    {
-                        if (!drawMap.TryGetValue(drawingTarget, out var enums))
-                            drawMap[drawingTarget] = objGroup;
-                        else
-                            drawMap[drawingTarget] = enums.Concat(objGroup);
-                    }
+                    if (!drawMap.TryGetValue(drawingTarget, out var enums))
+                        drawMap[drawingTarget] = objGroup;
+                    else
+                        drawMap[drawingTarget] = enums.Concat(objGroup);
                 }
-
-                foreach (var renderPair in drawMap)
-                {
-                    var drawingTarget = renderPair.Key;
-                    var drawingObjs = renderPair.Value;
-
-                    if (drawingTarget is not null)
-                    {
-                        drawingTarget.Begin(this);
-                        foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))
-                            drawingTarget.Post(obj);
-                        drawingTarget.End();
-                    }
-                }
-
-                drawMap.Clear();
-
-                timeSignatureHelper.DrawTimeSigntureText(this);
-
-                performenceMonitor.OnAfterRender();
             }
+
+            foreach (var renderPair in drawMap)
+            {
+                var drawingTarget = renderPair.Key;
+                var drawingObjs = renderPair.Value;
+
+                if (drawingTarget is not null)
+                {
+                    drawingTarget.Begin(this);
+                    foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))
+                        drawingTarget.Post(obj);
+                    drawingTarget.End();
+                }
+            }
+
+            drawMap.Clear();
+
+            timeSignatureHelper.DrawTimeSigntureText(this);
+
+            performenceMonitor.OnAfterRender();
         }
 
         #region Performence Statictis
@@ -316,10 +314,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         private Dictionary<OngekiObjectBase, Rect> hits = new();
 
-        public void RegisterSelectableObject(OngekiObjectBase obj, Rect rect)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RegisterSelectableObject(OngekiObjectBase obj, System.Numerics.Vector2 centerPos, System.Numerics.Vector2 size)
         {
             //rect.Y = rect.Y - CurrentPlayTime;
-            hits[obj] = rect;
+            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
         }
 
         #endregion
@@ -339,11 +338,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             hitPoint.Y = (e.Source.ActualHeight - hitPoint.Y) + CurrentPlayTime;
             var hitResult = Enumerable.Empty<KeyValuePair<OngekiObjectBase, Rect>>();
 
-            lock (hits)
-            {
-                hitResult = hits.AsParallel().Where(x => x.Value.Contains(hitPoint)).ToArray();
-                Log.LogDebug($"hit result = {hitResult.FirstOrDefault().Key}");
-            }
+            hitResult = hits.AsParallel().Where(x => x.Value.Contains(hitPoint)).ToArray();
+            Log.LogDebug($"hit result = {hitResult.FirstOrDefault().Key}");
         }
 
         #endregion

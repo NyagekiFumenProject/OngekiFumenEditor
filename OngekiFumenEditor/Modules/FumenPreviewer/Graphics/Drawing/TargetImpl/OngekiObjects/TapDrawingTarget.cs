@@ -80,7 +80,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             prevTexture = texture;
         }
 
-        public void Draw(IFumenPreviewer target, LaneType? laneType, TGrid tGrid, XGrid xGrid, bool isExTap)
+        public void Draw(IFumenPreviewer target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical)
         {
             var texture = laneType switch
             {
@@ -101,14 +101,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                 _ => tapSize
             };
 
-            var x = XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1);
-            var y = TGridCalculator.ConvertTGridToY(tGrid, target.Fumen.BpmList, 1.0, 240);
+            var x = XGridCalculator.ConvertXGridToX(tap.XGrid, 30, target.ViewWidth, 1);
+            var y = TGridCalculator.ConvertTGridToY(tap.TGrid, target.Fumen.BpmList, 1.0, 240);
 
             var pos = new Vector2((float)x, (float)y);
 
             SyncTapTexture(target, texture);
             batchTextureDrawing.PostSprite(size, pos, 0f);
-            if (isExTap)
+            if (isCritical)
             {
                 if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
                 {
@@ -121,6 +121,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                     exTapList.Add((new(68, 30), pos, 0f));
                 }
             }
+
+            target.RegisterSelectableObject(tap, pos, size);
         }
 
         public void Dispose()
@@ -140,10 +142,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<Tap> objs)
         {
             foreach (var tap in objs)
-            {
-                var type = tap.ReferenceLaneStart?.LaneType;
-                Draw(target, type, tap.TGrid, tap.XGrid, tap.IsCritical);
-            }
+                Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
         }
 
         public override void End()

@@ -84,6 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var pos = new Vector2((float)timeX, (float)timeY);
             textureDrawing.PostSprite(size, pos, 0f);
             DrawPallateStr(target, obj, pos);
+            target.RegisterSelectableObject(obj, pos, size);
         }
 
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<Bell> objs)

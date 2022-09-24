@@ -1,15 +1,9 @@
 ﻿using Gemini.Framework;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OpenTK.Mathematics;
 using OpenTK.Wpf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using Vector2 = System.Numerics.Vector2;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer
 {
@@ -24,6 +18,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer
 
         void PrepareOpenGLView(GLWpfControl glView);
         void OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs e);
-        void RegisterSelectableObject(OngekiObjectBase obj, Rect rect);
+        void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos,Vector2 size);
     }
 }
