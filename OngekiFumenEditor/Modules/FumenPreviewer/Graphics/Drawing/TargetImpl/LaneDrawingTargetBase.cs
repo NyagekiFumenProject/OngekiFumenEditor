@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     public abstract class LaneDrawingTargetBase<T> : CommonLinesDrawTargetBase<T> where T : ConnectableStartObject
     {
         private IBatchTextureDrawing textureDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
         private IPerfomenceMonitor perfomenceMonitor;
 
         public Texture StartEditorTexture { get; protected set; }
@@ -28,10 +29,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         public Texture EndEditorTexture { get; protected set; }
 
         private Vector2 editorSize = new(16, 16);
+        private List<(Vector2, Vector2, float)> selectList = new();
+        private List<(Vector2, Vector2, float)> drawList = new();
 
         public LaneDrawingTargetBase()
         {
             textureDrawing = IoC.Get<IBatchTextureDrawing>();
+            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
             perfomenceMonitor = IoC.Get<IPerfomenceMonitor>();
         }
 
@@ -45,8 +49,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
                 void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {
-                    textureDrawing.Begin(target, texture);
-
                     foreach (var item in o)
                     {
                         if (item.TGrid < previewMinTGrid || item.TGrid > previewMaxTGrid)
@@ -56,16 +58,24 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
                         var y = (float)TGridCalculator.ConvertTGridToY(item.TGrid, target.Fumen.BpmList, 1.0, 240);
 
                         var pos = new Vector2(x, y);
-                        textureDrawing.PostSprite(size, pos, 0f);
+                        drawList.Add((size, pos, 0f));
                         target.RegisterSelectableObject(item, pos, size);
+                        if (item.IsSelected) 
+                            selectList.Add((size * 1.5f, pos, 0f));
                     }
 
-                    textureDrawing.End();
+                    highlightDrawing.Draw(target, texture, selectList);
+                    textureDrawing.Draw(target, texture, drawList);
+
+                    selectList.Clear();
+                    drawList.Clear();
                 }
 
                 drawEditorTap(StartEditorTexture, editorSize, objs);
                 drawEditorTap(NextEditorTexture, editorSize, objs.SelectMany(x => x.Children.OfType<ConnectableNextObject>()));
                 drawEditorTap(EndEditorTexture, editorSize, objs.Select(x => x.Children.LastOrDefault()).OfType<ConnectableEndObject>());
+
+
             }
             perfomenceMonitor.OnAfterTargetDrawing(this);
         }

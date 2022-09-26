@@ -238,7 +238,52 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var i = 0;
             foreach ((var obj, var c) in group.Select(x => (x.TimelineObject, colors[x.TimelineObject.IDShortName])).OrderBy(x => x.Item2.PackedValue))
             {
-                stringDrawing.Draw((i == 0 ? string.Empty : " / ") + formatObj(obj), new Vector2(x, y + 12), Vector2.One, 16, 0, new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), new(0, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out var size);
+                if (i != 0)
+                {
+                    stringDrawing.Draw(
+                    "/",
+                    new Vector2(x, y + 12),
+                    Vector2.One, 16, 0,
+                    Vector4.One,
+                    new(0, 0.5f),
+                    IStringDrawing.StringStyle.Normal,
+                    target,
+                    default,
+                    out var s);
+
+                    x += s.Value.X;
+                }
+
+                var text =" " + formatObj(obj) + " ";
+                var fontColor = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
+                stringDrawing.Draw(
+                    text,
+                    new Vector2(x, y + 12),
+                    Vector2.One, 16, 0,
+                    fontColor,
+                    new(0, 0.5f),
+                    IStringDrawing.StringStyle.Normal,
+                    target,
+                    default,
+                    out var size);
+                var borderPos = new Vector2(x + size.Value.X / 2, y + size.Value.Y / 2 + 1);
+
+                target.RegisterSelectableObject(obj, borderPos, size ?? default);
+                if (obj.IsSelected)
+                {
+                    var bx = borderPos.X;
+                    var by = borderPos.Y;
+                    var hw = size.Value.X / 2;
+                    var hh = size.Value.Y / 2;
+
+                    lineDrawing.Begin(target, 1);
+                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1));
+                    lineDrawing.PostPoint(new(bx + hw, by + hh), new(1, 1, 0, 1));
+                    lineDrawing.PostPoint(new(bx + hw, by - hh), new(1, 1, 0, 1));
+                    lineDrawing.PostPoint(new(bx - hw, by - hh), new(1, 1, 0, 1));
+                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1));
+                    lineDrawing.End();
+                }
                 x += size.Value.X;
                 i++;
             }

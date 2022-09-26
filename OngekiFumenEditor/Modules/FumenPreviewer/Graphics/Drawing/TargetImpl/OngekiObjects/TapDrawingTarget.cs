@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using System;
@@ -9,6 +10,7 @@ using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
@@ -28,18 +30,18 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         private Texture wallTexture;
         private Texture tapExTexture;
 
-        private Texture prevTexture = default;
-
         private Vector2 tapSize = new Vector2(40, 16);
         private Vector2 exTapEffSize = new Vector2(40, 16);
         private Vector2 leftWallSize = new Vector2(40, 40);
         private Vector2 rightWallSize = new Vector2(-40, 40);
 
-        private List<(Vector2 size, Vector2 pos, float rotate)> exTapList = new();
-        private List<(Vector2 size, Vector2 pos, float rotate)> exWallTapList = new();
+        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> normalList = new();
+        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> exList = new();
+        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> selectTapList = new();
+
         private Texture wallExTexture;
         private IBatchTextureDrawing batchTextureDrawing;
-        private IFumenPreviewer target;
+        private IHighlightBatchTextureDrawing highlightDrawing;
 
         public TapDrawingTarget() : base()
         {
@@ -67,17 +69,22 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             using var bitmap5 = Image.FromStream(info.Stream) as Bitmap;
             wallExTexture = new Texture(bitmap5, "walltap_Eff.png");
 
-            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
-        }
+            void init(Texture texture)
+            {
+                normalList[texture] = new();
+                selectTapList[texture] = new();
+            }
 
-        void SyncTapTexture(IFumenPreviewer target, Texture texture)
-        {
-            if (prevTexture == texture)
-                return;
-            if (prevTexture is not null)
-                batchTextureDrawing.End();
-            batchTextureDrawing.Begin(target, texture);
-            prevTexture = texture;
+            init(redTexture);
+            init(greenTexture);
+            init(blueTexture);
+            init(wallTexture);
+
+            exList[tapExTexture] = new();
+            exList[wallExTexture] = new();
+
+            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
+            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
         public void Draw(IFumenPreviewer target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical)
@@ -106,23 +113,51 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
             var pos = new Vector2((float)x, (float)y);
 
-            SyncTapTexture(target, texture);
-            batchTextureDrawing.PostSprite(size, pos, 0f);
+            normalList[texture].Add((size, pos, 0f));
+            if (tap.IsSelected)
+            {
+                if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
+                {
+                    size = new(Math.Sign(size.X) * 42, 42);
+                }
+                else
+                {
+                    size = tapSize * new Vector2(1.5f,1.5f);
+                }
+
+                selectTapList[texture].Add((size, pos, 0f));
+            }
             if (isCritical)
             {
                 if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
                 {
-                    size.Y = 39;
-                    size.X = Math.Sign(size.X) * 39;
-                    exWallTapList.Add((size, pos, 0f));
+                    size = new(Math.Sign(size.X) * 39, 39);
+                    texture = wallExTexture;
                 }
                 else
                 {
-                    exTapList.Add((new(68, 30), pos, 0f));
+                    size = new(68, 30);
+                    texture = tapExTexture;
                 }
+
+                exList[texture].Add((size, pos, 0f));
             }
 
             target.RegisterSelectableObject(tap, pos, size);
+        }
+
+        private void ClearList()
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void clear(Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> map)
+            {
+                foreach (var list in map.Values)
+                    list.Clear();
+            }
+
+            clear(normalList);
+            clear(exList);
+            clear(selectTapList);
         }
 
         public void Dispose()
@@ -133,30 +168,25 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             wallTexture?.Dispose();
         }
 
-        public override void Begin(IFumenPreviewer target)
-        {
-            base.Begin(target);
-            this.target = target;
-        }
 
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<Tap> objs)
         {
             foreach (var tap in objs)
                 Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
-        }
 
-        public override void End()
-        {
-            base.End();
-            batchTextureDrawing.End();
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void draw(Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> map)
+            {
+                foreach (var item in map)
+                    batchTextureDrawing.Draw(target, item.Key, item.Value);
+            }
 
-            batchTextureDrawing.Draw(target, tapExTexture, exTapList);
-            batchTextureDrawing.Draw(target, wallExTexture, exWallTapList);
+            foreach (var item in selectTapList)
+                highlightDrawing.Draw(target, item.Key, item.Value);
+            draw(exList);
+            draw(normalList);
 
-            exTapList.Clear();
-            exWallTapList.Clear();
-
-            prevTexture = default;
+            ClearList();
         }
     }
 }

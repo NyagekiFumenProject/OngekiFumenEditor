@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
+    public interface IHighlightBatchTextureDrawing : ITextureDrawing
+    {
+        void Begin(IFumenPreviewer target, Texture texture);
+        void PostSprite(Vector2 size, Vector2 position, float rotation);
+        void End();
+    }
+
     public interface IBatchTextureDrawing : ITextureDrawing
     {
         void Begin(IFumenPreviewer target, Texture texture);

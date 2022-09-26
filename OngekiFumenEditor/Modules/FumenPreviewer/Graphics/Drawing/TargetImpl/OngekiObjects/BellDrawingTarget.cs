@@ -21,9 +21,14 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
     {
         private Texture texture;
         private Vector2 size;
+        private Vector2 selectSize;
 
         private IStringDrawing stringDrawing;
         private IBatchTextureDrawing textureDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
+
+        private List<(Vector2, Vector2, float)> selectedFlickList = new();
+        private List<(Vector2, Vector2, float)> normalFlichList = new();
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { Bell.CommandName };
 
@@ -31,8 +36,10 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         {
             texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\bell.png");
             size = new(40, 40);
+            selectSize = new(50, 50);
             stringDrawing = IoC.Get<IStringDrawing>();
             textureDrawing = IoC.Get<IBatchTextureDrawing>();
+            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
         public float CalculateBulletMsecTime(IFumenPreviewer target, Bell obj, float userSpeed = 2.35f)
@@ -82,19 +89,22 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var timeY = target.CurrentPlayTime + target.ViewHeight * (1 - precent);
 
             var pos = new Vector2((float)timeX, (float)timeY);
-            textureDrawing.PostSprite(size, pos, 0f);
+            normalFlichList.Add((size, pos, 0f));
+            if (obj.IsSelected)
+                selectedFlickList.Add((selectSize, pos, 0f));
             DrawPallateStr(target, obj, pos);
             target.RegisterSelectableObject(obj, pos, size);
         }
 
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<Bell> objs)
         {
-            textureDrawing.Begin(target, texture);
             foreach (var obj in objs)
                 PostDraw(target, obj);
-            textureDrawing.End();
+            highlightDrawing.Draw(target, texture, selectedFlickList);
+            textureDrawing.Draw(target, texture, normalFlichList);
 
-            //RegisterHitTest(obj, new() { X = pos.X - (size.X / 2), Y = pos.Y - (size.Y / 2), Width = size.X, Height = size.Y });
+            normalFlichList.Clear();
+            selectedFlickList.Clear();
         }
 
         private void DrawPallateStr(IFumenPreviewer target, IBulletPalleteReferencable obj, Vector2 pos)

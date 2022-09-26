@@ -126,11 +126,19 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics
             PassUniform(l, val);
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(int l, Vector2 v) => GL.Uniform2(l, v);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, Vector2 val)
+        {
+            int l = GetUniformLocation(name);
+            PassUniform(l, val);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(int l, System.Numerics.Vector2 v) => PassUniform(l, new Vector2(v.X, v.Y));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(string name, System.Numerics.Vector2 val)
         {
             int l = GetUniformLocation(name);
             PassUniform(l, val);
