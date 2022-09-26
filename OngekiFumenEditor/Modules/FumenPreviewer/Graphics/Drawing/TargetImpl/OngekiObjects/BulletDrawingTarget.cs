@@ -2,6 +2,7 @@
 using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using System;
@@ -14,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
+using static System.Windows.Forms.AxHost;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.OngekiObjects
 {
@@ -24,10 +26,12 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         Dictionary<Texture, Vector2> spritesSize = new();
         Dictionary<Texture, Vector2> spritesOriginOffset = new();
 
-        private Texture prevTexture;
+        Dictionary<Texture, List<(Vector2, Vector2, float)>> normalDrawList = new();
+        Dictionary<Texture, List<(Vector2, Vector2, float)>> selectedDrawList = new();
+
         private List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
         private IStringDrawing stringDrawing;
-        private ITextureDrawing textureDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
         private IBatchTextureDrawing batchTextureDrawing;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { Bullet.CommandName };
@@ -51,6 +55,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
                 var tex = LoadTex(rPath);
                 dic[k2] = tex;
+                normalDrawList[tex] = new();
+                selectedDrawList[tex] = new();
 
                 spritesSize[tex] = size;
                 spritesOriginOffset[tex] = origOffset;
@@ -75,8 +81,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             SetTexture(BulletDamageType.Danger, BulletType.Square, "sqrt_bullet2.png", size, origOffset);
 
             stringDrawing = IoC.Get<IStringDrawing>();
-            textureDrawing = IoC.Get<ITextureDrawing>();
             batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
+            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
         public float CalculateBulletMsecTime(IFumenPreviewer target, Bullet obj, float userSpeed = 2.35f)
@@ -133,20 +139,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
             var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
             var offsetPos = pos + origOffset;
-            SyncTextureChange(target, texture);
-            batchTextureDrawing.PostSprite(size, offsetPos, rotate);
+            normalDrawList[texture].Add((size, offsetPos, rotate));
+            if (obj.IsSelected)
+                selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate));
             drawStrList.Add((offsetPos, obj));
             target.RegisterSelectableObject(obj, offsetPos, size);
-        }
-
-        private void SyncTextureChange(IFumenPreviewer target, Texture texture)
-        {
-            if (prevTexture == texture)
-                return;
-            if (prevTexture is not null)
-                batchTextureDrawing.End();
-            batchTextureDrawing.Begin(target, texture);
-            prevTexture = texture;
         }
 
         private void DrawPallateStr(IFumenPreviewer target)
@@ -163,16 +160,28 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         {
             spritesMap.SelectMany(x => x.Value.Values).ForEach(x => x.Dispose());
             spritesMap.Clear();
+            ClearDrawList();
+        }
+
+        private void ClearDrawList()
+        {
+            foreach (var l in normalDrawList.Values)
+                l.Clear();
+            foreach (var l in selectedDrawList.Values)
+                l.Clear();
+            drawStrList.Clear();
         }
 
         public override void DrawBatch(IFumenPreviewer target, IEnumerable<Bullet> objs)
         {
-            prevTexture = default;
-            drawStrList.Clear();
             foreach (var obj in objs)
                 Draw(target, obj);
-            batchTextureDrawing.End();
+            foreach (var item in selectedDrawList)
+                highlightDrawing.Draw(target, item.Key, item.Value);
+            foreach (var item in normalDrawList)
+                batchTextureDrawing.Draw(target, item.Key, item.Value);
             DrawPallateStr(target);
+            ClearDrawList();
         }
     }
 }
