@@ -216,7 +216,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
 
-            drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderByDescending(x => x.DefaultRenderOrder).Distinct().ToArray();
+            drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderBy(x => x.DefaultRenderOrder).Distinct().ToArray();
 
             timeSignatureHelper = new DrawTimeSignatureHelper();
 
