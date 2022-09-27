@@ -112,8 +112,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             var y = TGridCalculator.ConvertTGridToY(tap.TGrid, target.Fumen.BpmList, 1.0, 240);
 
             var pos = new Vector2((float)x, (float)y);
-
             normalList[texture].Add((size, pos, 0f));
+
             if (tap.IsSelected)
             {
                 if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
@@ -127,6 +127,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
 
                 selectTapList[texture].Add((size, pos, 0f));
             }
+
             if (isCritical)
             {
                 if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
@@ -143,6 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
                 exList[texture].Add((size, pos, 0f));
             }
 
+            size.X = Math.Abs(size.X);
             target.RegisterSelectableObject(tap, pos, size);
         }
 
