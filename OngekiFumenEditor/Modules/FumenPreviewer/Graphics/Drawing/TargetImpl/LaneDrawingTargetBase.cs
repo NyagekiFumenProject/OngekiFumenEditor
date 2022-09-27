@@ -20,6 +20,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 {
     public abstract class LaneDrawingTargetBase<T> : CommonLinesDrawTargetBase<T> where T : ConnectableStartObject
     {
+        public override int DefaultRenderOrder => 100;
+
         private IBatchTextureDrawing textureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
         private IPerfomenceMonitor perfomenceMonitor;

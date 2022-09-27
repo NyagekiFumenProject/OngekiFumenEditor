@@ -12,6 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     public abstract class CommonDrawTargetBase<T> : IDrawingTarget where T : OngekiObjectBase
     {
         public abstract IEnumerable<string> DrawTargetID { get; }
+        public abstract int DefaultRenderOrder { get; }
 
         private IFumenPreviewer target;
         private IPerfomenceMonitor performenceMonitor;
@@ -44,6 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
     public abstract class CommonBatchDrawTargetBase<T> : IDrawingTarget where T : OngekiObjectBase
     {
         public abstract IEnumerable<string> DrawTargetID { get; }
+        public abstract int DefaultRenderOrder { get; }
 
         private IFumenPreviewer target;
         private List<T> drawObjects = new();

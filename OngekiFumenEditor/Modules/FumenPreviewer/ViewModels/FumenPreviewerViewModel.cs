@@ -138,10 +138,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
         public OngekiFumen Fumen => Editor.Fumen;
 
         private static Dictionary<string, IDrawingTarget[]> drawTargets = new();
-
+        private IDrawingTarget[] drawTargetOrder;
         private Dictionary<IDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
-
-        private IPolygonDrawing polygonDrawing;
 
         public FumenPreviewerViewModel()
         {
@@ -218,11 +216,11 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
 
+            drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderByDescending(x => x.DefaultRenderOrder).Distinct().ToArray();
+
             timeSignatureHelper = new DrawTimeSignatureHelper();
 
             openGLView.Render += (ts) => OnRender(openGLView, ts);
-
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
         }
 
         public IDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
@@ -233,7 +231,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             performenceMonitor.OnBeforeRender();
 #if DEBUG
             var error = GL.GetError();
-            if (error != OpenTK.Graphics.OpenGL.ErrorCode.NoError)
+            if (error != ErrorCode.NoError)
                 Log.LogDebug($"OpenGL ERROR!! : {error}");
 #endif
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -265,12 +263,9 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
                 }
             }
 
-            foreach (var renderPair in drawMap)
+            foreach (var drawingTarget in drawTargetOrder)
             {
-                var drawingTarget = renderPair.Key;
-                var drawingObjs = renderPair.Value;
-
-                if (drawingTarget is not null)
+                if (drawMap.TryGetValue(drawingTarget,out var drawingObjs))
                 {
                     drawingTarget.Begin(this);
                     foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))

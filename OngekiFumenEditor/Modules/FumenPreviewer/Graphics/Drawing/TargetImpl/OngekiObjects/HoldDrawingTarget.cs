@@ -24,6 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
     {
         public override IEnumerable<string> DrawTargetID { get; } = new string[] { "HLD", "CHD", "XHD" };
 
+        public override int DefaultRenderOrder => 500;
+
         private TapDrawingTarget tapDraw;
         private ILineDrawing lineDrawing;
 

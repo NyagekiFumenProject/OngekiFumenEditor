@@ -19,6 +19,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
     [Export(typeof(IDrawingTarget))]
     public class BellDrawingTarget : CommonBatchDrawTargetBase<Bell>, IDisposable
     {
+        public override int DefaultRenderOrder => 1200;
+
         private Texture texture;
         private Vector2 size;
         private Vector2 selectSize;

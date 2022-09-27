@@ -27,6 +27,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { SvgStringPrefab.CommandName, SvgImageFilePrefab.CommandName };
 
+        public override int DefaultRenderOrder => 1000 + 0;
+
         public SvgObjectDrawingTarget()
         {
             texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\WN.png");

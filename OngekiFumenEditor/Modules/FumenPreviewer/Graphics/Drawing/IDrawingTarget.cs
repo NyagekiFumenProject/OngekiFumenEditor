@@ -12,6 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
     public interface IDrawingTarget
     {
         IEnumerable<string> DrawTargetID { get; }
+        int DefaultRenderOrder { get; }
 
         void Begin(IFumenPreviewer target);
         void Post(OngekiObjectBase ongekiObject);

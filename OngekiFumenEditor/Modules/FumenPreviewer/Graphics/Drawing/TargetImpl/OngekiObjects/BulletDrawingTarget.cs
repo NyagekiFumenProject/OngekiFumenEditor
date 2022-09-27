@@ -22,6 +22,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
     [Export(typeof(IDrawingTarget))]
     public class BulletDrawingTarget : CommonBatchDrawTargetBase<Bullet>, IDisposable
     {
+        public override int DefaultRenderOrder => 1200;
+
         Dictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap = new();
         Dictionary<Texture, Vector2> spritesSize = new();
         Dictionary<Texture, Vector2> spritesOriginOffset = new();

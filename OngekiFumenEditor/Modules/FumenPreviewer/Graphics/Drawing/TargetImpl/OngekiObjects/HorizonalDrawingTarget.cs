@@ -29,6 +29,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
     {
         public record RegisterDrawingInfo(OngekiTimelineObjectBase TimelineObject, double Y);
 
+        public override int DefaultRenderOrder => 1500;
+
         private IStringDrawing stringDrawing;
         private ISimpleLineDrawing lineDrawing;
         private IPolygonDrawing polygonDrawing;

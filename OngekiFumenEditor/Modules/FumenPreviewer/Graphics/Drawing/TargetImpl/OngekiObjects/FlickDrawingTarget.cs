@@ -17,6 +17,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
     [Export(typeof(IDrawingTarget))]
     public class FlickDrawingTarget : CommonBatchDrawTargetBase<Flick>, IDisposable
     {
+        public override int DefaultRenderOrder => 1000;
+
         private Texture texture;
         private Texture exFlickEffTexture;
 
