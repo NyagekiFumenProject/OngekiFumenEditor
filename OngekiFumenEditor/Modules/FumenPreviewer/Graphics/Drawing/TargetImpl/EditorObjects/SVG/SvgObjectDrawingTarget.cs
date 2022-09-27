@@ -4,28 +4,37 @@ using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.Edito
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
-using OpenTK.Mathematics;
 using System.Windows;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.ISimpleLineDrawing;
 using System;
 using System.Net.Sockets;
 using static OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.IStaticVBODrawing;
+using System.Drawing;
+using OngekiFumenEditor.Utils;
+using System.Numerics;
 
-namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.EditorObjects
+namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.EditorObjects.SVG
 {
     [Export(typeof(IDrawingTarget))]
     public class SvgObjectDrawingTarget : CommonDrawTargetBase<SvgPrefabBase>, IDisposable
     {
+        private Texture texture;
         private ICachedSvgRenderDataManager cachedSvgRenderDataManager;
         private ISimpleLineDrawing lineDrawing;
+        private ITextureDrawing textureDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
         private Dictionary<SvgPrefabBase, IVBOHandle> vboHolder = new();
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { SvgStringPrefab.CommandName, SvgImageFilePrefab.CommandName };
 
         public SvgObjectDrawingTarget()
         {
+            texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\WN.png");
+
             cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
+            textureDrawing = IoC.Get<ITextureDrawing>();
+            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
         public override void Draw(IFumenPreviewer target, SvgPrefabBase obj)
@@ -49,15 +58,23 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             var w = bound.Width;
             var h = bound.Height;
 
-            var x = (float)(XGridCalculator.ConvertXGridToX(obj.XGrid, 30, target.ViewWidth, 1) + w / 2);
-            var y = (float)(TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1.0, 240) - h / 2);
+            var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, 30, target.ViewWidth, 1);
+            var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1.0, 240);
 
-
-            lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4.CreateTranslation(x, y, 0));
+            var dx = x + w / 2;
+            var dy = y - h / 2;
+            lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * OpenTK.Mathematics.Matrix4.CreateTranslation((float)dx, (float)dy, 0));
             {
                 lineDrawing.DrawVBO(target, handle);
             }
             lineDrawing.PopOverrideModelMatrix(out _);
+
+            var pos = new Vector2(x, y);
+
+            if (obj.IsSelected)
+                highlightDrawing.Draw(target, texture, new[] { (new Vector2(20, 20), pos, 0f) });
+            textureDrawing.Draw(target, texture, new[] { (new Vector2(16, 16), pos, 0f) });
+            target.RegisterSelectableObject(obj, pos, new(16, 16));
         }
 
         public void Dispose()

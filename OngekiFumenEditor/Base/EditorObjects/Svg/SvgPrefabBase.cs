@@ -317,8 +317,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
                 Vector2 CalculateRelativePoint(Point relativePoint)
                 {
-                    var rx = - (bound.Width - relativePoint.X) - offset.X + bound.Width * (1 - OffsetX.ValuePercent);
-                    var ry = - relativePoint.Y + offset.Y + bound.Height * OffsetY.ValuePercent;
+                    var rx = relativePoint.X - offset.X - bound.Width * 0.5f;
+                    var ry = -relativePoint.Y + offset.Y + bound.Height * 0.5f;
 
                     return new((float)rx, (float)ry);
                 }
