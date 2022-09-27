@@ -7,8 +7,6 @@ using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Utils;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Modules.ProgramProfile;
-using OngekiFumenEditor.Modules.ProgramProfile.Base;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using System;
@@ -116,9 +114,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private System.Action scrollAnimationClearFunc = default;
 
-        private IEditorProfile profile = IoC.Get<IEditorProfile>();
-        private IProfileHandle profileHandle;
-
         public bool IsAudioButtonEnabled => AudioPlayer is not null;
 
         public AudioPlayerToolViewerViewModel()
@@ -190,7 +185,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             NotifyOfPropertyChange(() => SliderValue);
             var scrollOffset = Editor.CalculateYFromAudioTime(time);
             Editor.AnimatedScrollViewer.CurrentVerticalOffset = Math.Max(0, scrollOffset);
-            profile.Tick(profileHandle);
         }
 
         private void OnPauseButtonClicked()
@@ -289,7 +283,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 scrollAnimationClearFunc?.Invoke();
                 fumenSoundPlayer.Pause();
                 AudioPlayer.Pause();
-                profile.EndEditorPlayProfile(profileHandle);
             }
             else
             {
@@ -300,8 +293,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var seekTo = TGridCalculator.ConvertTGridToAudioTime(tgrid, Editor);
                 AudioPlayer.Seek(seekTo, false);
                 fumenSoundPlayer.Seek(seekTo, false);
-
-                profileHandle = profile.BeginEditorPlayProfile(Editor);
             }
         }
 
