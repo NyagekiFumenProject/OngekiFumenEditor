@@ -34,7 +34,8 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
         private FumenVisualEditorViewModel editor = default;
 
-        public DrawTimeSignatureHelper timeSignatureHelper;
+        private DrawTimeSignatureHelper timeSignatureHelper;
+        private DrawXGridHelper xGridHelper;
 
         public FumenVisualEditorViewModel Editor
         {
@@ -219,6 +220,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderBy(x => x.DefaultRenderOrder).Distinct().ToArray();
 
             timeSignatureHelper = new DrawTimeSignatureHelper();
+            xGridHelper = new DrawXGridHelper();
 
             openGLView.Render += (ts) => OnRender(openGLView, ts);
         }
@@ -248,6 +250,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
 
             timeSignatureHelper.DrawLines(this);
+            xGridHelper.DrawLines(this);
 
             foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
             {
@@ -277,6 +280,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             drawMap.Clear();
 
             timeSignatureHelper.DrawTimeSigntureText(this);
+            xGridHelper.DrawXGridText(this);
 
             performenceMonitor.OnAfterRender();
         }
