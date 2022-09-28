@@ -11,6 +11,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
 {
     public interface ICachedSvgRenderDataManager
     {
-        public List<LineVertex> GetRenderData(IFumenPreviewer target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound);
+        public List<LineVertex> GetRenderData(IFumenEditorDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound);
     }
 }

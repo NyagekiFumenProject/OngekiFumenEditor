@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             GL.DeleteBuffer(vbo);
         }
 
-        public void Begin(IFumenPreviewer target)
+        public void Begin(IFumenEditorDrawingContext target)
         {
             performenceMonitor.OnBeginDrawing(this);
 

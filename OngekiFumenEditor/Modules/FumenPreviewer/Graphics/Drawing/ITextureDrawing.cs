@@ -9,20 +9,20 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public interface IHighlightBatchTextureDrawing : ITextureDrawing
     {
-        void Begin(IFumenPreviewer target, Texture texture);
+        void Begin(IFumenEditorDrawingContext target, Texture texture);
         void PostSprite(Vector2 size, Vector2 position, float rotation);
         void End();
     }
 
     public interface IBatchTextureDrawing : ITextureDrawing
     {
-        void Begin(IFumenPreviewer target, Texture texture);
+        void Begin(IFumenEditorDrawingContext target, Texture texture);
         void PostSprite(Vector2 size, Vector2 position, float rotation);
         void End();
     }
 
     public interface ITextureDrawing : IDrawing
     {
-        void Draw(IFumenPreviewer target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances);
+        void Draw(IFumenEditorDrawingContext target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances);
     }
 }

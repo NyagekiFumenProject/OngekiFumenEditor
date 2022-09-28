@@ -485,7 +485,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             obj.IsSelected = false;
             EditorViewModels.Remove(obj);
             Fumen.RemoveObject(obj.ReferenceOngekiObject);
-            CurrentDisplayEditorViewModels.Clear();
 
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
@@ -738,7 +737,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
             offsetY = offsetYAcc * autoScrollSpeed;
 
-            var prev = AnimatedScrollViewer.CurrentVerticalOffset;
+            var prev = CurrentPlayTime;
             var y = MinVisibleCanvasY + Setting.JudgeLineOffsetY + offsetY;
 
             //Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
@@ -756,7 +755,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 SelectionCurrentCursorPosition = p;
 
                 var p2 = SelectionStartPosition;
-                p2.Y += prev - AnimatedScrollViewer.CurrentVerticalOffset;
+                p2.Y += prev - CurrentPlayTime;
                 SelectionStartPosition = p2;
                 //Log.LogDebug($"prevY:{-AnimatedScrollViewer.CurrentVerticalOffset + prev:F2} offsetY:{offsetY:F2}");
             }
@@ -920,9 +919,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as MouseWheelEventArgs;
             arg.Handled = true;
 
-            var delta = Math.Sign(arg.Delta) * AnimatedScrollViewer.VerticalScrollingDistance;
-            var _totalVerticalOffset = Math.Min(Math.Max(0, AnimatedScrollViewer.VerticalOffset - delta), AnimatedScrollViewer.ScrollableHeight);
-            AnimatedScrollViewer.ScrollToVerticalOffsetWithAnimation(_totalVerticalOffset);
+            CurrentPlayTime = CurrentPlayTime + Math.Sign(arg.Delta) * 100;
         }
 
         #region Lock/Unlock User Interaction

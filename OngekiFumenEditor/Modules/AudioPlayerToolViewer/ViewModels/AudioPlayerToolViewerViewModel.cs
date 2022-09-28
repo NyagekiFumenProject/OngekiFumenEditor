@@ -184,7 +184,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 return;
             NotifyOfPropertyChange(() => SliderValue);
             var scrollOffset = Editor.CalculateYFromAudioTime(time);
-            Editor.AnimatedScrollViewer.CurrentVerticalOffset = Math.Max(0, scrollOffset);
+            Editor.CurrentPlayTime = (float)Math.Max(0, scrollOffset);
         }
 
         private void OnPauseButtonClicked()

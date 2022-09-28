@@ -27,8 +27,8 @@ using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 {
-    [Export(typeof(IFumenPreviewer))]
-    public class FumenPreviewerViewModel : Tool, IFumenPreviewer, ISchedulable
+    [Export(typeof(IFumenEditorDrawingContext))]
+    public class FumenPreviewerViewModel : Tool, IFumenEditorDrawingContext, ISchedulable, ITool
     {
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
@@ -193,7 +193,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             ViewProjectionMatrix = view * projection;
         }
 
-        void IFumenPreviewer.OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
+        void IFumenEditorDrawingContext.OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
         {
             Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
 
@@ -201,7 +201,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
             ViewHeight = (float)sizeArg.NewSize.Height;
         }
 
-        void IFumenPreviewer.PrepareOpenGLView(GLWpfControl openGLView)
+        void IFumenEditorDrawingContext.PrepareOpenGLView(GLWpfControl openGLView)
         {
             Log.LogDebug($"ready.");
 
@@ -268,7 +268,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.ViewModels
 
             foreach (var drawingTarget in drawTargetOrder)
             {
-                if (drawMap.TryGetValue(drawingTarget,out var drawingObjs))
+                if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
                 {
                     drawingTarget.Begin(this);
                     foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))

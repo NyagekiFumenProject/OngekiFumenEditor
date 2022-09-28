@@ -89,7 +89,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
-        public void Draw(IFumenPreviewer target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical)
+        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical)
         {
             var texture = laneType switch
             {
@@ -173,7 +173,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
         }
 
 
-        public override void DrawBatch(IFumenPreviewer target, IEnumerable<Tap> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Tap> objs)
         {
             foreach (var tap in objs)
                 Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);

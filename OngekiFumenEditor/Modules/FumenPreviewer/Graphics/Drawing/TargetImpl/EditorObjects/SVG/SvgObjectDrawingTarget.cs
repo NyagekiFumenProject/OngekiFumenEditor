@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
-        public override void Draw(IFumenPreviewer target, SvgPrefabBase obj)
+        public override void Draw(IFumenEditorDrawingContext target, SvgPrefabBase obj)
         {
             var vertics = cachedSvgRenderDataManager.GetRenderData(target, obj, out var isCached, out var bound);
             if (vertics.Count == 0)

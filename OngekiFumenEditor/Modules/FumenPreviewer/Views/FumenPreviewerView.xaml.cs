@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Views
         {
             Dispatcher.InvokeAsync(() =>
             {
-                if (DataContext is IFumenPreviewer fumenPreviewer)
+                if (DataContext is IFumenEditorDrawingContext fumenPreviewer)
                 {
                     fumenPreviewer.PrepareOpenGLView(glView);
                 }
@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Views
 
         private void glView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (DataContext is IFumenPreviewer fumenPreviewer)
+            if (DataContext is IFumenEditorDrawingContext fumenPreviewer)
             {
                 fumenPreviewer.OnOpenGLViewSizeChanged(glView,e);
             }

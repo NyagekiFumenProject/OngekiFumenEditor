@@ -12,6 +12,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         {
 
         }
-        void DrawVBO(IFumenPreviewer target, IVBOHandle vbo);
+        void DrawVBO(IFumenEditorDrawingContext target, IVBOHandle vbo);
     }
 }

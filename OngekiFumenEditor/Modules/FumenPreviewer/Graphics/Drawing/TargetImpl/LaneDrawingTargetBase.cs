@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             perfomenceMonitor = IoC.Get<IPerfomenceMonitor>();
         }
 
-        public override void DrawBatch(IFumenPreviewer target, IEnumerable<T> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> objs)
         {
             base.DrawBatch(target, objs);
             perfomenceMonitor.OnBeginTargetDrawing(this);

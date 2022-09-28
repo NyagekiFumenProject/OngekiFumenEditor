@@ -57,7 +57,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         private float[] PostData { get; } = new float[MAX_VERTS];
         private int postDataFillIndex = 0;
         private int postDataFillCount = 0;
-        private IFumenPreviewer target;
+        private IFumenEditorDrawingContext target;
         private float lineWidth;
 
         public DefaultInstancedLineDrawing()
@@ -188,7 +188,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             perfomenceMonitor.OnAfterDrawing(this);
         }
 
-        public void Begin(IFumenPreviewer target, float lineWidth)
+        public void Begin(IFumenEditorDrawingContext target, float lineWidth)
         {
             perfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
@@ -204,7 +204,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
         }
 
 
-        public void Draw(IFumenPreviewer target, IEnumerable<LineVertex> points, float lineWidth)
+        public void Draw(IFumenEditorDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
         {
             Begin(target, lineWidth);
             foreach (var point in points)
@@ -227,7 +227,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             }
         }
 
-        public void DrawVBO(IFumenPreviewer target, ISimpleLineDrawing.IVBOHandle h)
+        public void DrawVBO(IFumenEditorDrawingContext target, ISimpleLineDrawing.IVBOHandle h)
         {
             Begin(target, 1);
             {

@@ -58,12 +58,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //Log.LogDebug($"ScrollViewerVerticalOffset = {ScrollViewerVerticalOffset}");
         }
 
-        #region ScrollViewer Animations
-
-        public AnimatedScrollViewer AnimatedScrollViewer => (GetView() as FumenVisualEditorView)?.myScrollViewer;
-
-        #endregion
-
         #region ScrollTo
 
         public void ScrollTo(IEditorDisplayableViewModel objViewModel)
@@ -91,7 +85,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void ScrollTo(double y)
         {
-            AnimatedScrollViewer.CurrentVerticalOffset = TotalDurationHeight - y - CanvasHeight;
+            CurrentPlayTime = (float)(TotalDurationHeight - y - CanvasHeight);
             //Log.LogInfo($"Scroll to AnimatedScrollViewer.CurrentVerticalOffset = {AnimatedScrollViewer.CurrentVerticalOffset:F2}, ScrollViewerVerticalOffset = {ScrollViewerVerticalOffset:F2}");
         }
 

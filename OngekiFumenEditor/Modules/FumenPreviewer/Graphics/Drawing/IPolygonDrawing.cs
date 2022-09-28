@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
     public interface IPolygonDrawing : IDrawing
     {
         int AvailablePostableVertexCount { get; }
-        void Begin(IFumenPreviewer target);
+        void Begin(IFumenEditorDrawingContext target);
         void PostPoint(Vector2 Point, Vector4 Color);
         void End();
     }

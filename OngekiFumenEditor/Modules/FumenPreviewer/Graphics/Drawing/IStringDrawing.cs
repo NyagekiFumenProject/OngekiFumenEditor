@@ -26,6 +26,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 
         IEnumerable<FontHandle> SupportFonts { get; }
 
-        void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, StringStyle style, IFumenPreviewer target, FontHandle handle, out Vector2? measureTextSize);
+        void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, StringStyle style, IFumenEditorDrawingContext target, FontHandle handle, out Vector2? measureTextSize);
     }
 }

@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         public abstract IEnumerable<string> DrawTargetID { get; }
         public abstract int DefaultRenderOrder { get; }
 
-        private IFumenPreviewer target;
+        private IFumenEditorDrawingContext target;
         private IPerfomenceMonitor performenceMonitor;
 
         public CommonDrawTargetBase()
@@ -22,13 +22,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
         }
 
-        public virtual void Begin(IFumenPreviewer target)
+        public virtual void Begin(IFumenEditorDrawingContext target)
         {
             performenceMonitor.OnBeginTargetDrawing(this);
             this.target = target;
         }
 
-        public abstract void Draw(IFumenPreviewer target, T obj);
+        public abstract void Draw(IFumenEditorDrawingContext target, T obj);
 
         public virtual void End()
         {
@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
         public abstract IEnumerable<string> DrawTargetID { get; }
         public abstract int DefaultRenderOrder { get; }
 
-        private IFumenPreviewer target;
+        private IFumenEditorDrawingContext target;
         private List<T> drawObjects = new();
         private IPerfomenceMonitor performenceMonitor;
 
@@ -56,13 +56,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
         }
 
-        public virtual void Begin(IFumenPreviewer target)
+        public virtual void Begin(IFumenEditorDrawingContext target)
         {
             performenceMonitor.OnBeginTargetDrawing(this);
             this.target = target;
         }
 
-        public abstract void DrawBatch(IFumenPreviewer target, IEnumerable<T> objs);
+        public abstract void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> objs);
 
         public virtual void End()
         {

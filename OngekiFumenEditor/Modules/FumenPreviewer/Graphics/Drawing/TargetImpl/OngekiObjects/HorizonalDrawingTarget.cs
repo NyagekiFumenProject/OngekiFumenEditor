@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             {"[SFL_End]", FSColor.LightCyan },
         };
 
-        public override void DrawBatch(IFumenPreviewer target, IEnumerable<OngekiTimelineObjectBase> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiTimelineObjectBase> objs)
         {
             var fumen = target.Fumen;
             overdrawingDefferSet.Clear();
@@ -112,7 +112,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             }
         }
 
-        private void DrawLaneBlockArea(IFumenPreviewer target, LaneBlockArea lbk)
+        private void DrawLaneBlockArea(IFumenEditorDrawingContext target, LaneBlockArea lbk)
         {
             var hashCode = lbk.GetHashCode();
             if (overdrawingDefferSet.Contains(hashCode))
@@ -221,7 +221,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             //lineDrawing.End();
         }
 
-        private void DrawDescText(IFumenPreviewer target, float y, IEnumerable<RegisterDrawingInfo> group)
+        private void DrawDescText(IFumenEditorDrawingContext target, float y, IEnumerable<RegisterDrawingInfo> group)
         {
             string formatObj(OngekiObjectBase s) => s switch
             {

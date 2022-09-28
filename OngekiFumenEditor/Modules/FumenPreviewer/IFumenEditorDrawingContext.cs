@@ -7,12 +7,11 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer
 {
-    public interface IFumenPreviewer : ITool
+    public interface IFumenEditorDrawingContext 
     {
         float ViewWidth { get; }
         float ViewHeight { get; }
         float CurrentPlayTime { get; set; }
-        bool IsPreviewPlaying { get; }
         Matrix4 ViewProjectionMatrix { get; }
         OngekiFumen Fumen { get; }
 

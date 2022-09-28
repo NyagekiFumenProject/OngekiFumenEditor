@@ -10,6 +10,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
     cal:Message.Attach="     [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];      [Key Q] = [Action KeyboardAction_HideOrShow]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];    "
@@ -66,152 +67,11 @@
                 </MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>
-        <ItemsControl
-            x:Name="XGridUnitLineLocations"
-            ItemsSource="{Binding XGridUnitLineLocations}"
-            Visibility="{Binding EditorObjectVisibility}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Line
-                            Stroke="#30FFFFFF"
-                            X1="{Binding X}"
-                            X2="{Binding X}"
-                            Y1="0"
-                            Y2="{Binding ActualHeight, ElementName=XGridUnitLineLocations}" />
-                        <TextBlock
-                            FontSize="10"
-                            Foreground="White"
-                            Opacity="0.35"
-                            Text="{Binding Unit}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsCenterLine}" Value="True">
-                                            <Setter Property="Visibility" Value="Hidden" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                            <TextBlock.RenderTransformOrigin>
-                                <Point X="1" />
-                            </TextBlock.RenderTransformOrigin>
-                            <TextBlock.RenderTransform>
-                                <TranslateTransform X="{Binding X}" />
-                            </TextBlock.RenderTransform>
-                        </TextBlock>
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <!--  CanMouseWheel="{Binding IsLocked, Converter={StaticResource ReverseBoolConverter}}"  -->
-        <controls:AnimatedScrollViewer
-            x:Name="myScrollViewer"
-            Grid.Column="0"
-            cal:Message.Attach="  [Event MouseWheel]=[Action OnMouseWheel($executionContext)];           [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];              [Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)];             "
-            CanMouseWheel="False"
-            HorizontalScrollBarVisibility="Disabled"
-            VerticalScrollBarVisibility="Hidden">
-            <Grid cal:Message.Attach="[Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];" Background="#01000000">
-                <ItemsControl Height="{Binding TotalDurationHeight}" ItemsSource="{Binding TGridUnitLineLocations}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas>
-                                <Canvas.RenderTransform>
-                                    <TranslateTransform Y="{Binding Setting.JudgeLineOffsetY, Converter={StaticResource ReverseDoubleConverter}}" />
-                                </Canvas.RenderTransform>
-                            </Canvas>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Setter Property="Visibility">
-                                <Setter.Value>
-                                    <MultiBinding Converter="{StaticResource BeatRhythmToVisibleConverter}">
-                                        <MultiBinding.Bindings>
-                                            <Binding Path="BeatRhythm" />
-                                            <Binding ElementName="XGridUnitLineLocations" Path="DataContext.EditorObjectVisibility" />
-                                        </MultiBinding.Bindings>
-                                    </MultiBinding>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Line
-                                    Stroke="#30FFFFFF"
-                                    X1="{Binding ElementName=myScrollViewer, Path=ActualWidth}"
-                                    X2="0"
-                                    Y1="{Binding Y}"
-                                    Y2="{Binding Y}" />
-                                <TextBlock
-                                    FontSize="10"
-                                    Foreground="White"
-                                    Opacity="0.35">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource TGridDisplayConverter}">
-                                            <MultiBinding.Bindings>
-                                                <Binding ElementName="myScrollViewer" Path="DataContext" />
-                                                <Binding Path="TGrid" />
-                                            </MultiBinding.Bindings>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                    <TextBlock.RenderTransformOrigin>
-                                        <Point Y="0.5" />
-                                    </TextBlock.RenderTransformOrigin>
-                                    <TextBlock.RenderTransform>
-                                        <TranslateTransform Y="{Binding Y}" />
-                                    </TextBlock.RenderTransform>
-                                </TextBlock>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <controls:ObjectPoolItemsControl
-                    Height="{Binding TotalDurationHeight}"
-                    ItemTemplateSelector="{StaticResource EditorObjectDataTemplateSelector}"
-                    ItemsSource="{Binding CurrentDisplayEditorViewModels}">
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding NeedCanvasPointsBinding}" Value="True">
-                                    <Setter Property="Canvas.Left" Value="{Binding CanvasX}" />
-                                    <Setter Property="Canvas.Bottom" Value="{Binding CanvasY}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                            <Setter Property="Panel.ZIndex" Value="{Binding RenderOrderZ}" />
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas>
-                                <Canvas.RenderTransform>
-                                    <TranslateTransform Y="{Binding Setting.JudgeLineOffsetY, Converter={StaticResource ReverseDoubleConverter}}" />
-                                </Canvas.RenderTransform>
-                            </Canvas>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </controls:ObjectPoolItemsControl>
-                <Canvas Height="{Binding TotalDurationHeight}">
-                    <Rectangle
-                        Canvas.Left="{Binding SelectionRect.Left}"
-                        Canvas.Bottom="{Binding SelectionRect.Y}"
-                        Width="{Binding SelectionRect.Width}"
-                        Height="{Binding SelectionRect.Height}"
-                        Fill="#406095F0"
-                        IsHitTestVisible="False"
-                        Stroke="#99FFFFFF"
-                        Visibility="{Binding SelectionVisibility}" />
-                </Canvas>
-            </Grid>
-        </controls:AnimatedScrollViewer>
+        <opentkcontrol:GLWpfControl
+            x:Name="glView"
+            cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];           [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];              [Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)]; [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
+            Ready="glView_Ready"
+            SizeChanged="glView_SizeChanged" />
         <TextBlock
             Grid.Column="0"
             Height="30"
@@ -260,19 +120,22 @@
                 </TranslateTransform>
             </Rectangle.RenderTransform>
         </Rectangle>
+        <TextBlock
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            FontWeight="Bold"
+            Foreground="White"
+            Opacity="0.25"
+            Text="{Binding DisplayFPS}"
+            Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
         <ScrollBar
             Grid.Column="1"
-            ButtonBase.Click="ButtonBase_OnClick"
             ContextMenu="{x:Null}"
             Maximum="{Binding ElementName=myScrollViewer, Path=ScrollableHeight}"
             Minimum="0"
             Orientation="Vertical"
-            Thumb.DragCompleted="Thumb_DragCompleted"
-            Thumb.DragDelta="Thumb_DragDelta"
-            Thumb.DragStarted="Thumb_DragStarted"
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
             Value="{Binding ElementName=myScrollViewer, Path=CurrentVerticalOffset, Mode=OneWay}" />
-
         <StackPanel
             Margin="0,0,0,50"
             HorizontalAlignment="Center"

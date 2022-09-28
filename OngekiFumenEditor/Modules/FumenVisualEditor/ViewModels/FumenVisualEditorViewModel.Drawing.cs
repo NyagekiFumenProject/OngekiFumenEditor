@@ -2,208 +2,243 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Kernel.Scheduler;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Editors;
+using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing;
+using OngekiFumenEditor.Modules.FumenPreviewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
+using OpenTK.Mathematics;
+using OpenTK.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
+using OpenTK.Graphics.OpenGL;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
-    public partial class FumenVisualEditorViewModel : PersistedDocument
+    public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulable, IFumenEditorDrawingContext
     {
-        public ObservableCollection<IEditorDisplayableViewModel> CurrentDisplayEditorViewModels { get; } = new();
+        private IPerfomenceMonitor performenceMonitor;
+        private DrawTimeSignatureHelper timeSignatureHelper;
+        private DrawXGridHelper xGridHelper;
+        private Dictionary<OngekiObjectBase, Rect> hits = new();
+        private StringBuilder stringBuilder = new StringBuilder();
+
+        private float viewWidth = 0;
+        public float ViewWidth
+        {
+            get => viewWidth;
+            set
+            {
+                Set(ref viewWidth, value);
+                RecalcViewProjectionMatrix();
+            }
+        }
+
+        private float viewHeight = 0;
+        public float ViewHeight
+        {
+            get => viewHeight;
+            set
+            {
+                Set(ref viewHeight, value);
+                RecalcViewProjectionMatrix();
+            }
+        }
+
+        private float currentPlayTime;
+        public float CurrentPlayTime
+        {
+            get => currentPlayTime;
+            set
+            {
+                //limit 
+                value = Math.Max(value, 0);
+                Set(ref currentPlayTime, value);
+                RecalcViewProjectionMatrix();
+            }
+        }
+
+        private bool isDisplayFPS = false;
+        public bool IsDisplayFPS
+        {
+            get => isDisplayFPS;
+            set
+            {
+                Set(ref isDisplayFPS, value);
+            }
+        }
+
+        private string displayFPS = "";
+        public string DisplayFPS
+        {
+            get => displayFPS;
+            set
+            {
+                Set(ref displayFPS, value);
+            }
+        }
+
+        public Matrix4 ViewProjectionMatrix { get; private set; }
+
+        public string SchedulerName => "Fumen Previewer Performance Statictis";
+
+        public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromSeconds(1);
+
+        private static Dictionary<string, IDrawingTarget[]> drawTargets = new();
+        private IDrawingTarget[] drawTargetOrder;
+        private Dictionary<IDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
+
+        private void InitOpenGL()
+        {
+            //GL.Enable(EnableCap.DebugOutput);
+            //GL.Enable(EnableCap.DebugOutputSynchronous);
+            GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
+
+            GL.ClearColor(System.Drawing.Color.Black);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            IoC.Get<ISchedulerManager>().AddScheduler(this);
+            Log.LogInfo($"Init OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
+        }
 
         protected override void OnViewLoaded(object v)
         {
             base.OnViewLoaded(v);
-            RedrawUnitCloseXLines();
             InitExtraMenuItems();
         }
 
-        private void RedrawTimeline()
+        private void RecalcViewProjectionMatrix()
         {
-            using var __ = TGridUnitLineLocations.ToHashSetWithObjectPool(out var removeUnusedSet);
-            var reuse = 0;
-            var addnew = 0;
-            void TryAddUnitLine(TGrid tGrid, double y, int i)
-            {
-                //Log.LogDebug($"add to {tGrid} {y:F2} {i}");
-                if (removeUnusedSet.FirstOrDefault(x => x.Y == y) is TGridUnitLineViewModel lineModel)
-                {
-                    removeUnusedSet.Remove(lineModel);
-                    lineModel.TGrid = tGrid;
-                    lineModel.BeatRhythm = i;
-                    reuse++;
-                }
-                else
-                {
-                    var newLineModel = ObjectPool<TGridUnitLineViewModel>.Get();
-                    newLineModel.TGrid = tGrid;
-                    newLineModel.BeatRhythm = i;
-                    newLineModel.Y = y;
+            var projection = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+            var view = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, -CurrentPlayTime, 0)) * Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2, -ViewHeight / 2, 0));
 
-                    TGridUnitLineLocations.InsertBySortBy(newLineModel, x => x.Y);
-                    addnew++;
-                }
-            }
-
-            foreach ((TGrid tGrid, double y, int i) in TGridCalculator.GetVisbleTimelines(this, 240))
-            {
-                TryAddUnitLine(tGrid, TotalDurationHeight - y, i);
-            }
-
-            //删除不用的
-            foreach (var unusedLine in removeUnusedSet)
-            {
-                ObjectPool<TGridUnitLineViewModel>.Return(unusedLine);
-                TGridUnitLineLocations.Remove(unusedLine);
-            }
-
-            //Log.LogDebug($"AddCount:{reuse + addnew} , reuse ({reuse * 1.0 / (reuse + addnew) * 100:F2}%): {reuse} , addnew: {addnew} ,unused: {removeUnusedSet.Count}");
-            removeUnusedSet.Clear();
+            ViewProjectionMatrix = view * projection;
         }
 
-        private void RedrawEditorObjects()
+        public void OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
         {
-            if (Fumen is null || CanvasHeight == 0)
+            Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
+
+            ViewWidth = (float)sizeArg.NewSize.Width;
+            ViewHeight = (float)sizeArg.NewSize.Height;
+        }
+
+        public void PrepareOpenGLView(GLWpfControl openGLView)
+        {
+            Log.LogDebug($"ready.");
+
+            InitOpenGL();
+
+            ViewWidth = (float)openGLView.ActualWidth;
+            ViewHeight = (float)openGLView.ActualHeight;
+
+            GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
+            GL.Viewport(0, 0, (int)ViewWidth, (int)ViewHeight);
+
+            drawTargets = IoC.GetAll<IDrawingTarget>()
+                .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
+                .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
+
+            drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderBy(x => x.DefaultRenderOrder).Distinct().ToArray();
+
+            timeSignatureHelper = new DrawTimeSignatureHelper();
+            xGridHelper = new DrawXGridHelper();
+
+            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
+
+            openGLView.Render += (ts) => OnRender(openGLView, ts);
+        }
+
+        public IDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
+
+        public void OnRender(GLWpfControl openGLView, TimeSpan ts)
+        {
+            performenceMonitor.PostUIRenderTime(ts);
+            performenceMonitor.OnBeforeRender();
+#if DEBUG
+            var error = GL.GetError();
+            if (error != ErrorCode.NoError)
+                Log.LogDebug($"OpenGL ERROR!! : {error}");
+#endif
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            hits.Clear();
+
+            var fumen = Fumen;
+            if (fumen is null)
                 return;
-            //Log.LogDebug($"begin");
-            var min = TGridCalculator.ConvertYToTGrid(MinVisibleCanvasY, this) ?? new TGrid(0, 0);
-            var max = TGridCalculator.ConvertYToTGrid(MaxVisibleCanvasY, this);
 
-            //Log.LogDebug($"begin:({begin})  end:({end})  base:({Setting.CurrentDisplayTimePosition})");
-            using var d = ObjectPool<HashSet<IDisplayableObject>>.GetWithUsingDisposable(out var currentDisplayingObjects, out var _);
-            currentDisplayingObjects.Clear();
-            using var d2 = ObjectPool<HashSet<IDisplayableObject>>.GetWithUsingDisposable(out var allDisplayableObjects, out var _);
-            allDisplayableObjects.Clear();
-            using var d3 = ObjectPool<HashSet<IEditorDisplayableViewModel>>.GetWithUsingDisposable(out var removeObjects, out var _);
-            removeObjects.Clear();
+            CurrentPlayTime = (float)ScrollViewerVerticalOffset;
 
-            Fumen.GetAllDisplayableObjects(min, max)
-                .Concat(CurrentSelectedObjects.OfType<OngekiObjectBase>().Where(x => Fumen.Contains(x))
-                .OfType<IDisplayableObject>())
-                .Distinct()
-                .ForEach(x => allDisplayableObjects.Add(x));
-            EditorViewModels.OfType<IEditorDisplayableViewModel>().ForEach(x => currentDisplayingObjects.Add(x.DisplayableObject));
+            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
+            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
 
-            //检查当前显示的物件是否还在谱面中，不在就删除，在就更新位置
-            foreach (var viewModel in EditorViewModels.OfType<IEditorDisplayableViewModel>())
+            timeSignatureHelper.DrawLines(this);
+            xGridHelper.DrawLines(this);
+
+            foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
             {
-                var refObject = viewModel.DisplayableObject;
-                //检查是否还存在
-                if (!allDisplayableObjects.Contains(refObject))
-                    removeObjects.Add(viewModel);
-            }
-            foreach (var removeViewModel in removeObjects)
-            {
-                EditorViewModels.Remove(removeViewModel);
-                CurrentDisplayEditorViewModels.Remove(removeViewModel);
-                if (removeViewModel.DisplayableObject is ISelectableObject selectable)
-                    CurrentSelectedObjects.Remove(selectable);
-            }
+                if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget[] drawingTargets)
+                    continue;
 
-            //将还没显示的都塞进去显示了
-            var c = 0;
-            foreach (var add in allDisplayableObjects
-                .Where(x => !currentDisplayingObjects.Contains(x)))
-            {
-                currentDisplayingObjects.Add(add);
-                var viewModel = CacheLambdaActivator.CreateInstance(add.ModelViewType) as IEditorDisplayableViewModel;
-                viewModel.OnObjectCreated(add, this);
-                EditorViewModels.Add(viewModel);
-                //odLog.LogDebug($"add viewmodel : {add}");
-                c++;
-            }
-
-            removeObjects.Clear();//复用
-            foreach (var currentDisplaying in CurrentDisplayEditorViewModels)
-            {
-                if ((!currentDisplaying.DisplayableObject.CheckVisiable(min, max)) // 在显示范围外
-                    && (currentDisplaying.DisplayableObject is not ISelectableObject selectable || !selectable.IsSelected)) // 并非选择状态
+                foreach (var drawingTarget in drawingTargets)
                 {
-                    //remove
-                    removeObjects.Add(currentDisplaying);
+                    if (!drawMap.TryGetValue(drawingTarget, out var enums))
+                        drawMap[drawingTarget] = objGroup;
+                    else
+                        drawMap[drawingTarget] = enums.Concat(objGroup);
                 }
             }
-            /*
-            removeObjects.ForEach(x => CurrentDisplayEditorViewModels.Remove(x));
-            using var d4 = CurrentDisplayEditorViewModels
-                .GroupJoin(EditorViewModels.Where(x => x.DisplayableObject.CheckVisiable(min, max)), x => x, x => x, (x, _) => x)
-                .ToListWithObjectPool(out var addList);
-            foreach (var add in addList)
-            {
-                CurrentDisplayEditorViewModels.Add(add);
-            }
-            */
-            using var d4 = EditorViewModels.Where(x => x.DisplayableObject.CheckVisiable(min, max)).ToListWithObjectPool(out var visibleList);
-            using var d5 = visibleList.Except(CurrentDisplayEditorViewModels).ToListWithObjectPool(out var addList);
-            CurrentDisplayEditorViewModels.AddRange(addList);
 
-            foreach (var viewModel in CurrentDisplayEditorViewModels)
+            foreach (var drawingTarget in drawTargetOrder)
             {
-                if (viewModel is IEditorDisplayableViewModel editorViewModel)
-                    editorViewModel.OnEditorRedrawObjects();
+                if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
+                {
+                    drawingTarget.Begin(this);
+                    foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))
+                        drawingTarget.Post(obj);
+                    drawingTarget.End();
+                }
             }
 
-            //Log.LogDebug($"removed {removeObjects.Count} objects , added {c} objects, displaying {CurrentDisplayEditorViewModels.Count} objects.");
+            drawMap.Clear();
+
+            timeSignatureHelper.DrawTimeSigntureText(this);
+            xGridHelper.DrawXGridText(this);
+
+            performenceMonitor.OnAfterRender();
         }
 
-        private void RedrawUnitCloseXLines()
+        private void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
         {
-            foreach (var item in XGridUnitLineLocations)
-                ObjectPool<XGridUnitLineViewModel>.Return(item);
-            XGridUnitLineLocations.Clear();
-
-            var width = CanvasWidth;
-            var unitSize = XGridCalculator.CalculateXUnitSize(this);
-            var totalUnitValue = 0d;
-            var line = default(XGridUnitLineViewModel);
-
-            for (double totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
-            {
-                totalUnitValue += Setting.XGridUnitSpace;
-
-                line = ObjectPool<XGridUnitLineViewModel>.Get();
-                line.X = totalLength;
-                line.Unit = totalUnitValue;
-                line.IsCenterLine = false;
-                XGridUnitLineLocations.Add(line);
-
-                line = ObjectPool<XGridUnitLineViewModel>.Get();
-                line.X = (width / 2) - (totalLength - (width / 2));
-                line.Unit = -totalUnitValue;
-                line.IsCenterLine = false;
-                XGridUnitLineLocations.Add(line);
-            }
-
-            line = ObjectPool<XGridUnitLineViewModel>.Get();
-            line.X = width / 2;
-            line.IsCenterLine = true;
-            XGridUnitLineLocations.Add(line);
+            var str = Marshal.PtrToStringAnsi(message, length);
+            Log.LogDebug($"{id}\t:\t{str}");
+            if (str.Contains("error generated"))
+                throw new Exception(str);
         }
 
         public void Redraw(RedrawTarget target)
         {
-            if (target.HasFlag(RedrawTarget.TGridUnitLines))
-                RedrawTimeline();
-            if (target.HasFlag(RedrawTarget.XGridUnitLines))
-                RedrawUnitCloseXLines();
-            if (target.HasFlag(RedrawTarget.OngekiObjects))
-                RedrawEditorObjects();
             if (target.HasFlag(RedrawTarget.ScrollBar))
                 RecalculateScrollBar();
         }
 
         public void OnLoaded(ActionExecutionContext e)
         {
-            var scrollViewer = e.Source as AnimatedScrollViewer;
+            var scrollViewer = e.Source as FrameworkElement;
             var view = e.View as FrameworkElement;
-            CanvasWidth = scrollViewer.ViewportWidth;
+            CanvasWidth = scrollViewer.ActualWidth;
             CanvasHeight = view.ActualHeight;
             Redraw(RedrawTarget.All);
         }
@@ -218,8 +253,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             CanvasWidth = view.ActualWidth;
             CanvasHeight = view.ActualHeight;
 
-            ClearDisplayingObjectCache();
             Redraw(RedrawTarget.All);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RegisterSelectableObject(OngekiObjectBase obj, System.Numerics.Vector2 centerPos, System.Numerics.Vector2 size)
+        {
+            //rect.Y = rect.Y - CurrentPlayTime;
+            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
+        }
+
+        public void OnSchedulerTerm()
+        {
+
+        }
+
+        public Task OnScheduleCall(CancellationToken cancellationToken)
+        {
+            stringBuilder.Clear();
+
+            performenceMonitor?.FormatStatistics(stringBuilder);
+
+            DisplayFPS = stringBuilder.ToString();
+
+            performenceMonitor?.Clear();
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             texture.Dispose();
         }
 
-        public override void DrawBatch(IFumenPreviewer target, IEnumerable<LaneCurvePathControlObject> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<LaneCurvePathControlObject> objs)
         {
             var size = new Vector2(16, 16);
 

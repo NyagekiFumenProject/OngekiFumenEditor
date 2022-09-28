@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             return fontSystem;
         }
 
-        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IFumenPreviewer target, IStringDrawing.FontHandle handle, out Vector2? measureTextSize)
+        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IFumenEditorDrawingContext target, IStringDrawing.FontHandle handle, out Vector2? measureTextSize)
         {
             performenceMonitor.OnBeginDrawing(this);
             {

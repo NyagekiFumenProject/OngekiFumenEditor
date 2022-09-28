@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
-        public override void DrawBatch(IFumenPreviewer target, IEnumerable<Flick> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)
         {
             foreach (var obj in objs)
             {

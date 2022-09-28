@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Editors
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
         }
 
-        public void DrawLines(IFumenPreviewer target)
+        public void DrawLines(IFumenEditorDrawingContext target)
         {
             drawLines.Clear();
 
@@ -80,7 +80,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.Editors
             lineDrawing.Draw(target, list, 1);
         }
 
-        public void DrawXGridText(IFumenPreviewer target)
+        public void DrawXGridText(IFumenEditorDrawingContext target)
         {
             foreach (var pair in drawLines)
                 stringDrawing.Draw(

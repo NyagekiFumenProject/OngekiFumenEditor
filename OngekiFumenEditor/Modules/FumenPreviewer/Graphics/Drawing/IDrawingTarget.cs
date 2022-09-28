@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
         IEnumerable<string> DrawTargetID { get; }
         int DefaultRenderOrder { get; }
 
-        void Begin(IFumenPreviewer target);
+        void Begin(IFumenEditorDrawingContext target);
         void Post(OngekiObjectBase ongekiObject);
         void End();
     }

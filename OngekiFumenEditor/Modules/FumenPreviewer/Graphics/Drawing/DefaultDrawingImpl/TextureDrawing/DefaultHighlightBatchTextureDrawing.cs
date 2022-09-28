@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
                  1,1,
                  0,1
         };
-        private IFumenPreviewer target;
+        private IFumenEditorDrawingContext target;
         private Texture texture;
 
         /*-----------------CURRENT VERSION------------------ -
@@ -162,7 +162,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             GL.DeleteVertexArray(vao);
         }
 
-        public void Draw(IFumenPreviewer target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
+        public void Draw(IFumenEditorDrawingContext target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
         {
             Begin(target, texture);
             foreach ((Vector2 size, Vector2 position, float rotation) in instances)
@@ -171,7 +171,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             End();
         }
 
-        public void Begin(IFumenPreviewer target, Texture texture)
+        public void Begin(IFumenEditorDrawingContext target, Texture texture)
         {
             performenceMonitor.OnBeginDrawing(this);
             this.target = target;

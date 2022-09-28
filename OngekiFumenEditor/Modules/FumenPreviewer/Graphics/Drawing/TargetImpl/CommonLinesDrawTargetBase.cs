@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
 
-        public void FillLine(IFumenPreviewer target, T obj)
+        public void FillLine(IFumenEditorDrawingContext target, T obj)
         {
             var color = GetLanePointColor(obj);
             var resT = obj.TGrid.ResT;
@@ -84,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl
             }
         }
 
-        public override void DrawBatch(IFumenPreviewer target, IEnumerable<T> starts)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> starts)
         {
             previewMinTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime, target.Fumen.BpmList, 1, 240);
             previewMaxTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime + target.ViewHeight, target.Fumen.BpmList, 1, 240);

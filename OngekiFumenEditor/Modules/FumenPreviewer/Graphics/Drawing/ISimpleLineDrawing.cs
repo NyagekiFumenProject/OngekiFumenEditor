@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public interface ISimpleLineDrawing : ILineDrawing, IStaticVBODrawing
     {
-        void Begin(IFumenPreviewer target, float lineWidth);
+        void Begin(IFumenEditorDrawingContext target, float lineWidth);
         void PostPoint(Vector2 Point, Vector4 Color);
         void End();
 

@@ -87,13 +87,13 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             GL.DeleteBuffer(textureVBO);
         }
 
-        public void Draw(IFumenPreviewer target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
+        public void Draw(IFumenEditorDrawingContext target, Texture texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
         {
             foreach ((var size, var position, var rotation) in instances)
                 Draw(target, texture, size, position, rotation);
         }
 
-        private void Draw(IFumenPreviewer target, Texture texture, Vector2 size, Vector2 position, float rotation)
+        private void Draw(IFumenEditorDrawingContext target, Texture texture, Vector2 size, Vector2 position, float rotation)
         {
             performenceMonitor.OnBeginDrawing(this);
             {

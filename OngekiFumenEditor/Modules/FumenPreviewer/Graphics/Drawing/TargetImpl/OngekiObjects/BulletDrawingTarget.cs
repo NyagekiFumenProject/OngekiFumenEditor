@@ -87,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
-        public float CalculateBulletMsecTime(IFumenPreviewer target, Bullet obj, float userSpeed = 2.35f)
+        public float CalculateBulletMsecTime(IFumenEditorDrawingContext target, Bullet obj, float userSpeed = 2.35f)
         {
             //const float fat = 3.95f;
             //var time =  32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
@@ -95,7 +95,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             return time;
         }
 
-        private void Draw(IFumenPreviewer target, Bullet obj)
+        private void Draw(IFumenEditorDrawingContext target, Bullet obj)
         {
             var appearOffsetTime = CalculateBulletMsecTime(target, obj);
 
@@ -148,7 +148,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             target.RegisterSelectableObject(obj, offsetPos, size);
         }
 
-        private void DrawPallateStr(IFumenPreviewer target)
+        private void DrawPallateStr(IFumenEditorDrawingContext target)
         {
             foreach ((var pos, var obj) in drawStrList)
             {
@@ -174,7 +174,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             drawStrList.Clear();
         }
 
-        public override void DrawBatch(IFumenPreviewer target, IEnumerable<Bullet> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Bullet> objs)
         {
             foreach (var obj in objs)
                 Draw(target, obj);

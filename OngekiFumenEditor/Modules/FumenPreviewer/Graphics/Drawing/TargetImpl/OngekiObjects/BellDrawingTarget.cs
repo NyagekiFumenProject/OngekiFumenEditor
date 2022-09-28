@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
-        public float CalculateBulletMsecTime(IFumenPreviewer target, Bell obj, float userSpeed = 2.35f)
+        public float CalculateBulletMsecTime(IFumenEditorDrawingContext target, Bell obj, float userSpeed = 2.35f)
         {
             //const float fat = 3.95f;
             //var time =  32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             return time;
         }
 
-        public void PostDraw(IFumenPreviewer target, Bell obj)
+        public void PostDraw(IFumenEditorDrawingContext target, Bell obj)
         {
             /*
             --------------------------- toTime 
@@ -98,7 +98,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             target.RegisterSelectableObject(obj, pos, size);
         }
 
-        public override void DrawBatch(IFumenPreviewer target, IEnumerable<Bell> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Bell> objs)
         {
             foreach (var obj in objs)
                 PostDraw(target, obj);
@@ -109,7 +109,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             selectedFlickList.Clear();
         }
 
-        private void DrawPallateStr(IFumenPreviewer target, IBulletPalleteReferencable obj, Vector2 pos)
+        private void DrawPallateStr(IFumenEditorDrawingContext target, IBulletPalleteReferencable obj, Vector2 pos)
         {
             if (obj.ReferenceBulletPallete is null)
                 return;

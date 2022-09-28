@@ -2,6 +2,7 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
+using OngekiFumenEditor.Modules.FumenPreviewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -31,17 +32,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
     /// </summary>
     public partial class FumenVisualEditorView : UserControl
     {
-        private readonly Binding _scrollBinding;
-
         public FumenVisualEditorView()
         {
             InitializeComponent();
-            _scrollBinding = new Binding
+            glView.Start(new()
             {
-                Source = myScrollViewer,
-                Path = new PropertyPath("CurrentVerticalOffset"),
-                Mode = BindingMode.OneWay
-            };
+                MajorVersion = 4,
+                MinorVersion = 5,
+                GraphicsProfile = OpenTK.Windowing.Common.ContextProfile.Core
+            });
+        }
+
+        private void glView_Ready()
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (DataContext is IFumenEditorDrawingContext fumenPreviewer)
+                {
+                    fumenPreviewer.PrepareOpenGLView(glView);
+                }
+            });
+        }
+
+        private void glView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (DataContext is IFumenEditorDrawingContext fumenPreviewer)
+            {
+                fumenPreviewer.OnOpenGLViewSizeChanged(glView, e);
+            }
         }
 
         private void Grid_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -52,58 +70,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
             (DataContext as FumenVisualEditorViewModel)?.OnLoaded(new ActionExecutionContext() { View = this });
-        }
-
-        private void Thumb_DragStarted(object sender, DragStartedEventArgs e)
-        {
-            var scrollBar = (ScrollBar)sender;
-            scrollBar.Value = scrollBar.Value;
-        }
-
-        private void Thumb_DragDelta(object sender, DragDeltaEventArgs e)
-        {
-            var scrollBar = (ScrollBar)sender;
-            myScrollViewer.ScrollToVerticalOffsetWithAnimation(scrollBar.Value);
-        }
-
-        private void Thumb_DragCompleted(object sender, DragCompletedEventArgs e)
-        {
-            var scrollBar = (ScrollBar)sender;
-            myScrollViewer.ScrollToVerticalOffsetWithAnimation(scrollBar.Value);
-            scrollBar.SetBinding(RangeBase.ValueProperty, _scrollBinding);
-        }
-
-        private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-        {
-            var scrollBar = (ScrollBar)sender;
-            if (e.OriginalSource is not RepeatButton { Command: RoutedCommand rc }) return;
-            if (rc.Name == "PageDown")
-            {
-                myScrollViewer.ScrollToVerticalOffsetWithAnimation(
-                    myScrollViewer.CurrentVerticalOffset + myScrollViewer.ViewportHeight);
-                // todo: fit the grid x 4 (4/4 Beat)
-            }
-            else if (rc.Name == "PageUp")
-            {
-                myScrollViewer.ScrollToVerticalOffsetWithAnimation(
-                    myScrollViewer.CurrentVerticalOffset - myScrollViewer.ViewportHeight);
-                // todo: fit the grid x 4 (4/4 Beat)
-            }
-            else if (rc.Name == "LineDown")
-            {
-                myScrollViewer.ScrollToVerticalOffsetWithAnimation(
-                    myScrollViewer.CurrentVerticalOffset + myScrollViewer.VerticalScrollingDistance);
-                // todo: fit the grid
-            }
-            else if (rc.Name == "LineUp")
-            {
-                myScrollViewer.ScrollToVerticalOffsetWithAnimation(
-                    myScrollViewer.CurrentVerticalOffset - myScrollViewer.VerticalScrollingDistance);
-                // todo: fit the grid
-            }
-
-            await Task.Delay(1);
-            scrollBar.SetBinding(RangeBase.ValueProperty, _scrollBinding);
         }
     }
 }

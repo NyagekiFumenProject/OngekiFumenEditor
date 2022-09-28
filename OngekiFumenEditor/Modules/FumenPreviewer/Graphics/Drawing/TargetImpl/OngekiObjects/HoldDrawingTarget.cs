@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.O
             lineDrawing = IoC.Get<ILineDrawing>();
         }
 
-        public override void Draw(IFumenPreviewer target, Hold hold)
+        public override void Draw(IFumenEditorDrawingContext target, Hold hold)
         {
             if (hold.Children.FirstOrDefault() is not HoldEnd holdEnd || hold.ReferenceLaneStart is not LaneStartBase start)
                 return;

@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             public int SvgGeometryHashCode { get; set; } = int.MaxValue;
             public Vector2 ViewSize { get; set; } = new(int.MinValue);
             public DateTime LastAccessTime { get; set; }
-            public IFumenPreviewer Target { get; set; }
+            public IFumenEditorDrawingContext Target { get; set; }
             public Rect Bound { get; set; }
 
             public void CleanPoints()
@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             return Task.CompletedTask;
         }
 
-        private bool CheckCachedDataVailed(IFumenPreviewer target, CachedSvgGeneratedData data)
+        private bool CheckCachedDataVailed(IFumenEditorDrawingContext target, CachedSvgGeneratedData data)
         {
             if (!(data.SvgPrefab?.ProcessingDrawingGroup?.GetHashCode() is int curHash && curHash == data.SvgGeometryHashCode))
                 return false;
@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.TargetImpl.E
             return list;
         }
 
-        public List<LineVertex> GetRenderData(IFumenPreviewer target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
+        public List<LineVertex> GetRenderData(IFumenEditorDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
         {
             var curTime = DateTime.Now;
             isCached = true;

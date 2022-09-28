@@ -11,6 +11,6 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing
 {
     public interface ISvgDrawing : IDrawing
     {
-        void Draw(IFumenPreviewer target, SvgPrefabBase svg, Vector2 position);
+        void Draw(IFumenEditorDrawingContext target, SvgPrefabBase svg, Vector2 position);
     }
 }

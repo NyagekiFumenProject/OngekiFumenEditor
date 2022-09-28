@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
     [Export(typeof(ISvgDrawing))]
     internal class DefaultSvgDrawing : CommonDrawingBase, ISvgDrawing
     {
-        public void Draw(IFumenPreviewer target, SvgPrefabBase svg, Vector2 position)
+        public void Draw(IFumenEditorDrawingContext target, SvgPrefabBase svg, Vector2 position)
         {
 
         }

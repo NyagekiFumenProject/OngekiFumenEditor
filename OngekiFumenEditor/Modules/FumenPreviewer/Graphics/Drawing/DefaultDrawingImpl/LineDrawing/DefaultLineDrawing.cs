@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawi
             GL.BindVertexArray(0);
         }
 
-        public void Draw(IFumenPreviewer target, IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
+        public void Draw(IFumenEditorDrawingContext target, IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
         {
             performenceMonitor.OnBeginDrawing(this);
             {
