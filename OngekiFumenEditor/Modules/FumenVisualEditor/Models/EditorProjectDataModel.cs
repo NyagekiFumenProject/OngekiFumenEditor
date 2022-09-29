@@ -39,6 +39,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set => Set(ref fumenFilePath, value);
         }
 
+        private TimeSpan rememberLastDisplayTime = TimeSpan.FromMilliseconds(0);
+        [JsonInclude]
+        public TimeSpan RememberLastDisplayTime
+        {
+            get => rememberLastDisplayTime;
+            set => Set(ref rememberLastDisplayTime, value);
+        }
+
         private OngekiFumen fumen = new();
         [JsonIgnore]
         public OngekiFumen Fumen

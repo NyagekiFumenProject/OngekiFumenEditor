@@ -56,18 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private float currentPlayTime;
-        public float CurrentPlayTime
-        {
-            get => currentPlayTime;
-            set
-            {
-                //limit 
-                value = Math.Max(value, 0);
-                Set(ref currentPlayTime, value);
-                RecalcViewProjectionMatrix();
-            }
-        }
+        public float CurrentPlayTime => (float)(ScrollViewerVerticalOffset);
 
         private bool isDisplayFPS = false;
         public bool IsDisplayFPS
@@ -178,8 +167,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var fumen = Fumen;
             if (fumen is null)
                 return;
-
-            CurrentPlayTime = (float)ScrollViewerVerticalOffset;
 
             var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
             var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);

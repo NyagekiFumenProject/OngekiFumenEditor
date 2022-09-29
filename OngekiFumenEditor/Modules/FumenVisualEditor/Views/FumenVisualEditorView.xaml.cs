@@ -74,7 +74,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void ScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
-            //(DataContext as FumenVisualEditorViewModel)?.OnScrollBarScroll(new ActionExecutionContext() { View = this, EventArgs = e });
+            (DataContext as FumenVisualEditorViewModel)?.OnScrollBarScroll(new ActionExecutionContext() { View = this, EventArgs = e });
         }
     }
 }

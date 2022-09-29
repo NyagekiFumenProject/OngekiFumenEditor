@@ -919,7 +919,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as MouseWheelEventArgs;
             arg.Handled = true;
 
-            CurrentPlayTime = CurrentPlayTime + Math.Sign(arg.Delta) * 100;
+            ScrollViewerVerticalOffset = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * 100;
         }
 
         #region Lock/Unlock User Interaction

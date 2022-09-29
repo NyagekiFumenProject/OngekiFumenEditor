@@ -135,7 +135,8 @@
             Orientation="Vertical"
             ScrollBar.Scroll="ScrollBar_Scroll"
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
-            Value="{Binding ScrollViewerVerticalOffset, Mode=OneWay}" />
+            Value="{Binding ReverseScrollViewerVerticalOffset}">
+        </ScrollBar>
         <StackPanel
             Margin="0,0,0,50"
             HorizontalAlignment="Center"

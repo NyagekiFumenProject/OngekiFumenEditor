@@ -9,6 +9,7 @@ using System;
 using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media.Animation;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -36,26 +37,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get => scrollViewerVerticalOffset;
             set
             {
-                Set(ref scrollViewerVerticalOffset, value);
-                NotifyOfPropertyChange(() => MaxVisibleCanvasY);
-                NotifyOfPropertyChange(() => MinVisibleCanvasY);
+                var val = Math.Min(TotalDurationHeight, Math.Max(0, value));
 
-                Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
+                Set(ref scrollViewerVerticalOffset, val);
+                NotifyOfPropertyChange(() => MinVisibleCanvasY);
+                NotifyOfPropertyChange(() => MinVisibleCanvasY);
+                NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
+                RecalcViewProjectionMatrix();
             }
+        }
+
+        public double ReverseScrollViewerVerticalOffset
+        {
+            get => TotalDurationHeight - ScrollViewerVerticalOffset;
+            set => ScrollViewerVerticalOffset = TotalDurationHeight - value;
         }
 
         private void RecalculateScrollBar()
         {
             Setting.NotifyOfPropertyChange(nameof(Setting.JudgeLineOffsetY));
-        }
-
-        public void ScrollViewer_OnScrollChanged(ActionExecutionContext e)
-        {
-            var arg = e.EventArgs as ScrollChangedEventArgs;
-            var scrollViewer = e.Source as AnimatedScrollViewer;
-
-            ScrollViewerVerticalOffset = scrollViewer.ScrollableHeight - arg.VerticalOffset;
-            //Log.LogDebug($"ScrollViewerVerticalOffset = {ScrollViewerVerticalOffset}");
         }
 
         #region ScrollTo
@@ -85,11 +85,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void ScrollTo(double y)
         {
-            CurrentPlayTime = (float)(TotalDurationHeight - y - CanvasHeight);
+            ScrollViewerVerticalOffset = (float)y;
             //Log.LogInfo($"Scroll to AnimatedScrollViewer.CurrentVerticalOffset = {AnimatedScrollViewer.CurrentVerticalOffset:F2}, ScrollViewerVerticalOffset = {ScrollViewerVerticalOffset:F2}");
         }
 
         #endregion
+
+        public void OnScrollBarScroll(ActionExecutionContext e)
+        {
+            if (IsLocked)
+                return;
+
+            var arg = e.EventArgs as ScrollEventArgs;
+            arg.Handled = true;
+
+            ScrollViewerVerticalOffset = TotalDurationHeight - arg.NewValue;
+        }
 
         public TGrid GetCurrentJudgeLineTGrid()
         {

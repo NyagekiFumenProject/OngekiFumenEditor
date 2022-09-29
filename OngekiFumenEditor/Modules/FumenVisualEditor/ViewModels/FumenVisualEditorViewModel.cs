@@ -173,7 +173,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public double CalculateYFromAudioTime(TimeSpan audioTime)
         {
             var y = TGridCalculator.ConvertAudioTimeToY(audioTime, this);
-            return TotalDurationHeight - y - CanvasHeight;
+            return y;
         }
 
         private double canvasWidth = default;
@@ -279,11 +279,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public Task Load(EditorProjectDataModel projModel)
+        public async Task Load(EditorProjectDataModel projModel)
         {
             EditorProjectData = projModel;
             Redraw(RedrawTarget.All);
-            return Task.CompletedTask;
+            var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
+            ScrollTo(dispTGrid);
         }
 
         protected override async Task DoSave(string filePath)
@@ -295,6 +296,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
+            EditorProjectData.RememberLastDisplayTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentJudgeLineTGrid(), this);
             if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
             {
                 //ask fumen file save path before save project.

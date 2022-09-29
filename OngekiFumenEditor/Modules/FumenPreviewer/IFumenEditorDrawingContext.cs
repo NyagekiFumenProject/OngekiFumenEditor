@@ -7,16 +7,16 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace OngekiFumenEditor.Modules.FumenPreviewer
 {
-    public interface IFumenEditorDrawingContext 
+    public interface IFumenEditorDrawingContext
     {
         float ViewWidth { get; }
         float ViewHeight { get; }
-        float CurrentPlayTime { get; set; }
+        float CurrentPlayTime { get; }
         Matrix4 ViewProjectionMatrix { get; }
         OngekiFumen Fumen { get; }
 
         void PrepareOpenGLView(GLWpfControl glView);
         void OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs e);
-        void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos,Vector2 size);
+        void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size);
     }
 }
