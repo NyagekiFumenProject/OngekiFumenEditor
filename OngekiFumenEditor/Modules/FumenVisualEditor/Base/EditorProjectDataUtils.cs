@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                             if (!reader.Read())
                                 throw new Exception("Json parse TimeSpan rrror");
                             var ticks = reader.GetInt64();
-                            result =  TimeSpan.FromTicks(ticks);
+                            result = TimeSpan.FromTicks(ticks);
                         }
                     }
                 }
@@ -59,20 +59,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             JsonSerializerOptions.Converters.Add(new TimeSpanJsonConverter());
         }
 
-        public static string GetRelativeOngekiFumenFilePath(string editorProjectFilePath) => Path.Combine(Path.GetDirectoryName(editorProjectFilePath), Path.GetFileNameWithoutExtension(editorProjectFilePath) + ".ogkr");
+        public static string GetDefaultFumenFilePathForAutoGenerate(string editorProjectFilePath) 
+            => Path.Combine(Path.GetDirectoryName(editorProjectFilePath), Path.GetFileNameWithoutExtension(editorProjectFilePath) + ".ogkr");
 
         public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(string filePath)
         {
             using var fileStream = File.OpenRead(filePath);
             var projectData = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(fileStream, JsonSerializerOptions);
 
-            var fumenFilePath = projectData.FumenFilePath ?? GetRelativeOngekiFumenFilePath(filePath);
-            if (projectData.FumenFilePath is null)
-                projectData.FumenFilePath = fumenFilePath;
-            using var fumenFileStream = File.OpenRead(fumenFilePath);
-            var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(fumenFilePath);
+            projectData.FumenFilePath = projectData.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(filePath);
+
+            //always make full path
+            var fileFolder = Path.GetDirectoryName(filePath);
+            projectData.FumenFilePath = Path.Combine(fileFolder, projectData.FumenFilePath);
+            projectData.AudioFilePath = Path.Combine(fileFolder, projectData.AudioFilePath);
+
+            using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
+            var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
             if (fumenDeserializer is null)
-                throw new NotSupportedException($"不支持此谱面文件的解析:{fumenFilePath}");
+                throw new NotSupportedException($"不支持此谱面文件的解析:{projectData.FumenFilePath}");
             var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
             projectData.Fumen = fumen;
 
@@ -120,9 +125,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 using var fileStream = File.Open(filePath, FileMode.Create);
                 StoreBulletPalleteListEditorData(editorProject);
 
-                var fumenFilePath = editorProject.FumenFilePath ?? GetRelativeOngekiFumenFilePath(filePath);
+                var fumenFilePath = editorProject.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(filePath);
                 if (editorProject.FumenFilePath is null)
                     editorProject.FumenFilePath = fumenFilePath;
+
+                //always make relative path
+                var fileFolder = Path.GetDirectoryName(filePath);
+                editorProject.FumenFilePath = Path.GetRelativePath(fileFolder, editorProject.FumenFilePath);
+                editorProject.AudioFilePath = Path.GetRelativePath(fileFolder, editorProject.AudioFilePath);
 
                 var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFilePath);
                 if (serializer is null)

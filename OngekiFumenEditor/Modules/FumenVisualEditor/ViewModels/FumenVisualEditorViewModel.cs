@@ -279,12 +279,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public async Task Load(EditorProjectDataModel projModel)
+        public Task Load(EditorProjectDataModel projModel)
         {
             EditorProjectData = projModel;
             Redraw(RedrawTarget.All);
             var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
             ScrollTo(dispTGrid);
+
+            return Task.CompletedTask;
         }
 
         protected override async Task DoSave(string filePath)

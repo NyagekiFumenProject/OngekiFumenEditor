@@ -13,6 +13,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 {
     public class EditorProjectDataModel : PropertyChangedBase
     {
+        public readonly static Version VERSION = new(0, 5, 2);
+
+        public Version version = VERSION;
+        [JsonInclude]
+        public Version Version
+        {
+            get => version;
+            init => Set(ref version, value);
+        }
+
+        public Guid guid = Guid.NewGuid();
+
+        [JsonInclude]
+        public Guid Id
+        {
+            get => guid;
+            init => Set(ref guid, value);
+        }
+
         private string audioFilePath = default;
         [JsonInclude]
         public string AudioFilePath
