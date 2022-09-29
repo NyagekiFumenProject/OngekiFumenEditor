@@ -130,12 +130,12 @@
             Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
         <ScrollBar
             Grid.Column="1"
-            ContextMenu="{x:Null}"
-            Maximum="{Binding ElementName=myScrollViewer, Path=ScrollableHeight}"
+            Maximum="{Binding TotalDurationHeight}"
             Minimum="0"
             Orientation="Vertical"
+            ScrollBar.Scroll="ScrollBar_Scroll"
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
-            Value="{Binding ElementName=myScrollViewer, Path=CurrentVerticalOffset, Mode=OneWay}" />
+            Value="{Binding ScrollViewerVerticalOffset, Mode=OneWay}" />
         <StackPanel
             Margin="0,0,0,50"
             HorizontalAlignment="Center"
