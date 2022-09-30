@@ -138,7 +138,6 @@
             Maximum="{Binding TotalDurationHeight}"
             Minimum="0"
             Orientation="Vertical"
-            ScrollBar.Scroll="ScrollBar_Scroll"
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
             Value="{Binding ReverseScrollViewerVerticalOffset}">
         </ScrollBar>

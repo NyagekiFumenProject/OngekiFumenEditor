@@ -118,8 +118,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RecalcViewProjectionMatrix()
         {
-            ProjectionMatrix = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
-            ViewMatrix = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, -CurrentPlayTime, 0)) * Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2, -ViewHeight / 2, 0));
+            ProjectionMatrix =
+                Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+            ViewMatrix =
+                Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2, -CurrentPlayTime - ViewHeight / 2 + (float)Setting.JudgeLineOffsetY, 0));
 
             ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
         }
@@ -176,11 +178,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (fumen is null)
                 return;
 
-            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, this);
-            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, this);
+            var minY = (float)(CurrentPlayTime - Setting.JudgeLineOffsetY);
+            var minTGrid = TGridCalculator.ConvertYToTGrid(minY, this) ?? TGrid.Zero;
+            var maxTGrid = TGridCalculator.ConvertYToTGrid(minY + ViewHeight, this);
 
             //todo 这里就要计算可视区域了
-            Rect = new VisibleRect(new(ViewWidth, CurrentPlayTime), new(0, CurrentPlayTime + ViewHeight), minTGrid, maxTGrid);
+            Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight), minTGrid, maxTGrid);
 
             timeSignatureHelper.DrawLines(this);
             xGridHelper.DrawLines(this);
