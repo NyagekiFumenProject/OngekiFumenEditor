@@ -91,17 +91,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
-        public void OnScrollBarScroll(ActionExecutionContext e)
-        {
-            if (IsLocked)
-                return;
-
-            var arg = e.EventArgs as ScrollEventArgs;
-            arg.Handled = true;
-
-            ScrollViewerVerticalOffset = TotalDurationHeight - arg.NewValue;
-        }
-
         public TGrid GetCurrentJudgeLineTGrid()
         {
             var y = Setting.JudgeLineOffsetY + MinVisibleCanvasY;
