@@ -122,7 +122,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             //计算向量化的物件运动时间
             var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor.Fumen.BpmList, 1, 240);
             var fromTime = toTime - appearOffsetTime;
-            var currentTime = MathUtils.Limit(target.CurrentPlayTime, toTime, fromTime);
+            var currentTime = target.CurrentPlayTime;
             var precent = (currentTime - fromTime) / appearOffsetTime;
             //Log.LogDebug($"precent : {precent * 100:F2}");
             if (target.CurrentPlayTime < fromTime)
@@ -130,8 +130,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
-            timeX = MathUtils.Limit(timeX, fromX, toX);
-            var timeY = target.Rect.MinY + target.Rect.Height * (1 - precent);
+            var timeY = target.Rect.MinY + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
 
             var pos = new Vector2((float)timeX, (float)timeY);
 

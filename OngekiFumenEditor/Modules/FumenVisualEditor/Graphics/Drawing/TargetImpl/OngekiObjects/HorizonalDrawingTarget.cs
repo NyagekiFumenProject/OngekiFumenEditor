@@ -68,9 +68,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
             {
-                var y = (float)g.FirstOrDefault().Y;
+                var tGrid = g.FirstOrDefault().TimelineObject.TGrid;
                 using var d3 = g.ToListWithObjectPool(out var actualItems);
-                if (y < target.Rect.MinY || y > target.Rect.MaxY)
+                if (tGrid < target.Rect.VisiableMinTGrid || tGrid > target.Rect.VisiableMaxTGrid)
                 {
                     actualItems.RemoveAll(x => x.TimelineObject switch
                     {
@@ -81,6 +81,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         continue;
                 }
 
+                var y = (float)g.FirstOrDefault().Y;
                 using var d = actualItems.Select(x => colors[x.TimelineObject.IDShortName]).OrderBy(x => x.PackedValue).ToListWithObjectPool(out var regColors);
                 var per = 1.0f * target.ViewWidth / regColors.Count;
                 lineDrawing.Begin(target, 2);
