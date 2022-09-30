@@ -15,6 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Performen
 #if DEBUG
     [Export(typeof(IPerfomenceMonitor))]
 #endif
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class DefaultDebugPerfomenceMonitor : IPerfomenceMonitor
     {
         const int RECORD_LENGTH = 10;
@@ -202,7 +203,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Performen
             }
 
             builder.AppendLine($"UI.FPS:{formatFPS(render.AveUIRenderSpendTicks)}({formatFPS(render.MostUIRenderSpendTicks)}) / R.FPS {formatFPS(render.AveSpendTicks)}({formatFPS(render.MostSpendTicks)}) D.FPS:{formatFPS(drawing.AveSpendTicks)}({formatFPS(drawing.MostSpendTicks)})");
-            builder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{drawingTop.AveDrawCall, 6}");
+            builder.AppendLine($"DC:{render.AveDrawCall,6} D.Top.DC:{drawingTop.AveDrawCall,6}");
             builder.AppendLine();
             dip(drawing.PerformenceRanks.ElementAtOrDefault(0), 1);
             dip(drawing.PerformenceRanks.ElementAtOrDefault(1), 2);

@@ -11,6 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Performen
 #if !DEBUG
     [Export(typeof(IPerfomenceMonitor))]
 #endif
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class DefaultReleasePerfomenceMonitor : IPerfomenceMonitor
     {
         const int RECORD_LENGTH = 10;

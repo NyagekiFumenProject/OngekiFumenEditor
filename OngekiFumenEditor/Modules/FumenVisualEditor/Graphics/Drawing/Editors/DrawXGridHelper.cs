@@ -37,11 +37,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void DrawLines(IFumenEditorDrawingContext target)
         {
+            if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
+                return;
+
             drawLines.Clear();
 
             var width = target.ViewWidth;
-            var xUnitSpace = 4;
-            var unitSize = (float)XGridCalculator.CalculateXUnitSize(30, width, xUnitSpace);
+            var xUnitSpace = (float)target.Editor.Setting.XGridUnitSpace;
+            var maxDisplayXUnit = target.Editor.Setting.XGridDisplayMaxUnit;
+
+            var unitSize = (float)XGridCalculator.CalculateXUnitSize(maxDisplayXUnit, width, xUnitSpace);
             var totalUnitValue = 0f;
 
             for (float totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
@@ -83,6 +88,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void DrawXGridText(IFumenEditorDrawingContext target)
         {
+            if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
+                return;
+
             foreach (var pair in drawLines)
                 stringDrawing.Draw(
                     pair.XGridTotalUnitDisplay,

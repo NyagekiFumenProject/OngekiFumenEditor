@@ -65,6 +65,11 @@
                         <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="恢复到音频时间" />
                     </MenuItem>
                 </MenuItem>
+                <Separator />
+                <MenuItem
+                    Header="显示FPS"
+                    IsCheckable="True"
+                    IsChecked="{Binding IsDisplayFPS}" />
             </ContextMenu>
         </Grid.ContextMenu>
         <opentkcontrol:GLWpfControl
@@ -137,6 +142,14 @@
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
             Value="{Binding ReverseScrollViewerVerticalOffset}">
         </ScrollBar>
+        <TextBlock
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            FontWeight="Bold"
+            Foreground="White"
+            Opacity="0.25"
+            Text="{Binding DisplayFPS}"
+            Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
         <StackPanel
             Margin="0,0,0,50"
             HorizontalAlignment="Center"
