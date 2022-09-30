@@ -2,7 +2,6 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
-using OngekiFumenEditor.Modules.FumenPreviewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;

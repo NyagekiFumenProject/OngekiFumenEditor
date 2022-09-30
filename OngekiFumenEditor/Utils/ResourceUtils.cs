@@ -1,5 +1,5 @@
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics;
-using OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Texture = OngekiFumenEditor.Modules.FumenPreviewer.Graphics.Texture;
+using Texture = OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Texture;
 
 namespace OngekiFumenEditor.Utils
 {

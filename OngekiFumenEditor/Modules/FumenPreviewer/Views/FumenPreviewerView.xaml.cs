@@ -1,5 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using OngekiFumenEditor.Modules.FumenPreviewer.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
