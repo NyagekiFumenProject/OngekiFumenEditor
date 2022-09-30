@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {
                 var y = (float)g.FirstOrDefault().Y;
                 using var d3 = g.ToListWithObjectPool(out var actualItems);
-                if (y < target.CurrentPlayTime || y > target.CurrentPlayTime + target.ViewHeight)
+                if (y < target.Rect.MinY || y > target.Rect.MaxY)
                 {
                     actualItems.RemoveAll(x => x.TimelineObject switch
                     {
@@ -256,7 +256,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     x += s.Value.X;
                 }
 
-                var text =" " + formatObj(obj) + " ";
+                var text = " " + formatObj(obj) + " ";
                 var fontColor = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
                 stringDrawing.Draw(
                     text,

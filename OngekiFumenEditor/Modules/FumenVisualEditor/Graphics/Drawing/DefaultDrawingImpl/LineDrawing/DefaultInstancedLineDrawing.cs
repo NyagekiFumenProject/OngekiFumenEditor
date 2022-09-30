@@ -41,7 +41,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
         private int quad_vbo;
         private int quad_ebo;
 
-        private IPerfomenceMonitor perfomenceMonitor;
         private Shader shader;
 
         private int quad_pos;
@@ -62,8 +61,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         public DefaultInstancedLineDrawing()
         {
-            perfomenceMonitor = IoC.Get<IPerfomenceMonitor>();
-
             shader = new InstancedLineShader();
             shader.Compile();
 
@@ -131,7 +128,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 GL.NamedBufferSubData(line_vbo, IntPtr.Zero, postDataFillIndex, PostData);
 
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
-                perfomenceMonitor.CountDrawCall(this);
+                target.PerfomenceMonitor.CountDrawCall(this);
             }
         }
 
@@ -185,12 +182,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             GL.BindVertexArray(0);
             shader.End();
 
-            perfomenceMonitor.OnAfterDrawing(this);
+            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
 
         public void Begin(IFumenEditorDrawingContext target, float lineWidth)
         {
-            perfomenceMonitor.OnBeginDrawing(this);
+            target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
             this.lineWidth = lineWidth;
             postDataFillIndex = postDataFillCount = 0;
@@ -236,7 +233,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 SwitchVertexVBO(handle.vbo);
 
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, handle.verticsCount - 1);
-                perfomenceMonitor.CountDrawCall(this);
+                target.PerfomenceMonitor.CountDrawCall(this);
 
                 SwitchVertexVBO(line_vbo);
             }

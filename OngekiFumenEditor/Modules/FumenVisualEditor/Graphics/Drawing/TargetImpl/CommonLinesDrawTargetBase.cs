@@ -25,8 +25,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private ISimpleLineDrawing lineDrawing;
         TGrid shareTGrid = new TGrid();
         XGrid shareXGrid = new XGrid();
-        private TGrid previewMinTGrid;
-        private TGrid previewMaxTGrid;
 
         public CommonLinesDrawTargetBase()
         {
@@ -53,7 +51,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             bool isVisible(TGrid tGrid)
             {
-                return previewMinTGrid <= tGrid || tGrid <= previewMaxTGrid;
+                return target.Rect.VisiableMinTGrid <= tGrid || tGrid <= target.Rect.VisiableMaxTGrid;
             }
 
             var prevVisible = isVisible(obj.TGrid);
@@ -86,9 +84,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> starts)
         {
-            previewMinTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime, target.Editor.Fumen.BpmList, 1, 240);
-            previewMaxTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime + target.ViewHeight, target.Editor.Fumen.BpmList, 1, 240);
-
             foreach (var laneStart in starts)
             {
                 lineDrawing.Begin(target, LineWidth);

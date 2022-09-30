@@ -24,11 +24,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
-        private IPerfomenceMonitor performenceMonitor;
 
         protected DefaultTextureDrawing()
         {
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
             shader = CommonSpriteShader.Shared;
 
             vertexVBO = GL.GenBuffer();
@@ -95,7 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         private void Draw(IFumenEditorDrawingContext target, Texture texture, Vector2 size, Vector2 position, float rotation)
         {
-            performenceMonitor.OnBeginDrawing(this);
+            target.PerfomenceMonitor.OnBeginDrawing(this);
             {
                 var modelMatrix =
                     GetOverrideModelMatrix() *
@@ -113,13 +111,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                     GL.BindVertexArray(vao);
                     {
                         GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-                        performenceMonitor.CountDrawCall(this);
+                        target.PerfomenceMonitor.CountDrawCall(this);
                     }
                     GL.BindVertexArray(0);
                 }
                 shader.End();
             }
-            performenceMonitor.OnAfterDrawing(this);
+            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
     }
 }

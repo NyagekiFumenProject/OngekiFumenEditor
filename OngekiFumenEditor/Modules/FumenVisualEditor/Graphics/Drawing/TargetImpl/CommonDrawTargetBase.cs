@@ -15,16 +15,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public abstract int DefaultRenderOrder { get; }
 
         private IFumenEditorDrawingContext target;
-        private IPerfomenceMonitor performenceMonitor;
-
-        public CommonDrawTargetBase()
-        {
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
-        }
 
         public virtual void Begin(IFumenEditorDrawingContext target)
         {
-            performenceMonitor.OnBeginTargetDrawing(this);
+            target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             this.target = target;
         }
 
@@ -32,8 +26,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public virtual void End()
         {
+            target.PerfomenceMonitor.OnAfterTargetDrawing(this);
             target = default;
-            performenceMonitor.OnAfterTargetDrawing(this);
         }
 
         public void Post(OngekiObjectBase ongekiObject)
@@ -49,16 +43,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private IFumenEditorDrawingContext target;
         private List<T> drawObjects = new();
-        private IPerfomenceMonitor performenceMonitor;
-
-        public CommonBatchDrawTargetBase()
-        {
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
-        }
 
         public virtual void Begin(IFumenEditorDrawingContext target)
         {
-            performenceMonitor.OnBeginTargetDrawing(this);
+            target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             this.target = target;
         }
 
@@ -68,9 +56,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             DrawBatch(target, drawObjects);
 
-            target = default;
             drawObjects.Clear();
-            performenceMonitor.OnAfterTargetDrawing(this);
+            target.PerfomenceMonitor.OnAfterTargetDrawing(this);
+            target = default;
         }
 
         public void Post(OngekiObjectBase ongekiObject)

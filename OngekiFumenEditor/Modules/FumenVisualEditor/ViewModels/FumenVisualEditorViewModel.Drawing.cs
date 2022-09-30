@@ -90,6 +90,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public VisibleRect Rect { get; set; } = default;
 
+        public IPerfomenceMonitor PerfomenceMonitor => performenceMonitor;
+
         private static Dictionary<string, IDrawingTarget[]> drawTargets = new();
         private IDrawingTarget[] drawTargetOrder;
         private Dictionary<IDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
@@ -178,13 +180,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, this);
 
             //todo 这里就要计算可视区域了
-            Rect = new VisibleRect()
-            {
-                ButtomRight = new(ViewWidth, CurrentPlayTime),
-                TopLeft = new(0, CurrentPlayTime + ViewHeight),
-                VisiableMinTGrid = minTGrid,
-                VisiableMaxTGrid = maxTGrid,
-            };
+            Rect = new VisibleRect(new(ViewWidth, CurrentPlayTime), new(0, CurrentPlayTime + ViewHeight), minTGrid, maxTGrid);
 
             timeSignatureHelper.DrawLines(this);
             xGridHelper.DrawLines(this);

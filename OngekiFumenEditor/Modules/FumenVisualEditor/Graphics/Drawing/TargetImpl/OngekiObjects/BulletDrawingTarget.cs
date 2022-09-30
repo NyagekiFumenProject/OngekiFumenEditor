@@ -131,7 +131,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
             timeX = MathUtils.Limit(timeX, fromX, toX);
-            var timeY = target.CurrentPlayTime + target.ViewHeight * (1 - precent);
+            var timeY = target.Rect.MinY + target.Rect.Height * (1 - precent);
 
             var pos = new Vector2((float)timeX, (float)timeY);
 

@@ -23,11 +23,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
         private readonly Shader shader;
         private readonly int vbo;
         private readonly int vao;
-        private IPerfomenceMonitor performenceMonitor;
 
         public DefaultLineDrawing()
         {
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
             shader = CommonLineShader.Shared;
 
             vbo = GL.GenBuffer();
@@ -55,7 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         public void Draw(IFumenEditorDrawingContext target, IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
         {
-            performenceMonitor.OnBeginDrawing(this);
+            target.PerfomenceMonitor.OnBeginDrawing(this);
             {
                 var count = UpdateBuffer(points, lineWidth);
 
@@ -68,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                         GL.Enable(EnableCap.PolygonSmooth);
 
                         GL.DrawArrays(PrimitiveType.Triangles, 0, count);
-                        performenceMonitor.CountDrawCall(this);
+                        target.PerfomenceMonitor.CountDrawCall(this);
 
                         GL.Disable(EnableCap.PolygonSmooth);
                     }
@@ -76,7 +74,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 }
                 shader.End();
             }
-            performenceMonitor.OnAfterDrawing(this);
+            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
 
         private int UpdateBuffer(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)

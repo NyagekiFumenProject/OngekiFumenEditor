@@ -16,7 +16,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultStringDrawing : CommonDrawingBase, IStringDrawing, IDisposable
     {
-        private IPerfomenceMonitor performenceMonitor;
         private Renderer renderer;
 
         private class FontHandle : IStringDrawing.FontHandle
@@ -41,8 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         public DefaultStringDrawing()
         {
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
-            renderer = new Renderer(this);
+            renderer = new Renderer();
         }
 
         Dictionary<IStringDrawing.FontHandle, FontSystem> cacheFonts = new Dictionary<IStringDrawing.FontHandle, FontSystem>();
@@ -67,7 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IFumenEditorDrawingContext target, IStringDrawing.FontHandle handle, out Vector2? measureTextSize)
         {
-            performenceMonitor.OnBeginDrawing(this);
+            target.PerfomenceMonitor.OnBeginDrawing(this);
             {
                 handle = handle ?? DefaultFont;
 
@@ -78,7 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 if (style == IStringDrawing.StringStyle.Strike)
                     fontStyle = TextStyle.Strikethrough;
 
-                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target));
+                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target), target.PerfomenceMonitor, this);
                 var font = GetFontSystem(handle).GetFont(fontSize);
                 var size = font.MeasureString(text, scale);
                 origin.X = origin.X * 2;
@@ -89,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 measureTextSize = size;
                 renderer.End();
             }
-            performenceMonitor.OnAfterDrawing(this);
+            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
 
         public void Dispose()

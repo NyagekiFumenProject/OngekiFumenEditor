@@ -62,18 +62,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
         private readonly VertexPositionColorTexture[] _vertexData = new VertexPositionColorTexture[MAX_VERTICES];
         private object _lastTexture;
         private int _vertexIndex = 0;
-        private readonly Texture2DManager _textureManager;
         private IPerfomenceMonitor performenceMonitor;
+        private IDrawing refDrawing;
+        private readonly Texture2DManager _textureManager;
 
         public ITexture2DManager TextureManager => _textureManager;
 
         private static readonly short[] indexData = GenerateIndexArray();
-        private readonly IDrawing refDrawing;
 
-        public unsafe Renderer(IDrawing refDrawing)
+        public unsafe Renderer()
         {
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
-
             _textureManager = new Texture2DManager();
 
             _vertexBuffer = new BufferObject<VertexPositionColorTexture>(MAX_VERTICES, BufferTarget.ArrayBuffer, true);
@@ -94,7 +92,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
             location = _shader.GetAttribLocation("a_texCoords0");
             _vao.VertexAttribPointer(location, 2, VertexAttribPointerType.Float, false, 16);
-            this.refDrawing = refDrawing;
         }
 
         ~Renderer() => Dispose(false);
@@ -113,8 +110,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             _shader.Dispose();
         }
 
-        public void Begin(Matrix4 mvp)
+        public void Begin(Matrix4 mvp, IPerfomenceMonitor perfomenceMonitor, IDrawing refDrawing)
         {
+            performenceMonitor = perfomenceMonitor;
+            this.refDrawing = refDrawing;
+
             _shader.Use();
             _shader.SetUniform("TextureSampler", 0);
 
@@ -143,6 +143,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
         public void End()
         {
             FlushBuffer();
+
+            refDrawing = default;
+            performenceMonitor = default;
         }
 
         private unsafe void FlushBuffer()

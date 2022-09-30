@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor.Fumen.BpmList, 1, 240);
             var fromTime = toTime - appearOffsetTime;
 
-            if (target.CurrentPlayTime < fromTime)
+            if (target.Rect.MinY < fromTime)
                 return;
 
             var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, 30, target.ViewWidth, 1);
@@ -88,7 +88,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
             timeX = MathUtils.Limit(timeX, fromX, toX);
-            var timeY = target.CurrentPlayTime + target.ViewHeight * (1 - precent);
+            var timeY = target.Rect.MinY + target.Rect.Height * (1 - precent);
 
             var pos = new Vector2((float)timeX, (float)timeY);
             normalFlichList.Add((size, pos, 0f));

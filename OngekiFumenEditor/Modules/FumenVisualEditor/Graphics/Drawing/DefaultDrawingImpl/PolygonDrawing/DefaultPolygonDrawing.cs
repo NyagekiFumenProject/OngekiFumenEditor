@@ -14,6 +14,7 @@ using System.ComponentModel.Composition;
 using Polyline2DCSharp;
 using Caliburn.Micro;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
+using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
@@ -24,19 +25,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
         private readonly Shader shader;
         private readonly int vbo;
         private readonly int vao;
-        private IPerfomenceMonitor performenceMonitor;
 
         private float[] postData = new float[VertexCount * 6];
         const int VertexByteSize = (2 + 4) * sizeof(float);
         const int VertexCount = 300000;
 
         private int postVertexCount = 0;
+        private IFumenEditorDrawingContext target;
 
         public int AvailablePostableVertexCount => VertexByteSize - postVertexCount;
 
         public DefaultPolygonDrawing()
         {
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
             shader = CommonLineShader.Shared;
 
             vbo = GL.GenBuffer();
@@ -73,8 +73,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         public void Begin(IFumenEditorDrawingContext target)
         {
-            performenceMonitor.OnBeginDrawing(this);
-
+            target.PerfomenceMonitor.OnBeginDrawing(this);
+            this.target = target;
             shader.Begin();
             shader.PassUniform("Model", GetOverrideModelMatrix());
             shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target));
@@ -102,14 +102,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
             GL.BindVertexArray(0);
             shader.End();
-            performenceMonitor.OnAfterDrawing(this);
+            target.PerfomenceMonitor.OnAfterDrawing(this);
+
+            target = default;
         }
 
         private void FlushDraw()
         {
             GL.NamedBufferSubData(vbo, IntPtr.Zero, postVertexCount * VertexByteSize, postData);
             GL.DrawArrays(PrimitiveType.TriangleStrip, 0, postVertexCount);
-            performenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall(this);
             postVertexCount = 0;
         }
     }

@@ -17,7 +17,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal class DefaultBatchTextureDrawing : CommonDrawingBase, IBatchTextureDrawing, IDisposable
     {
-        private IPerfomenceMonitor performenceMonitor;
         private BatchShader shader;
         private byte[] postData;
         private int vboVertexBase, vboTexPosBase;
@@ -50,8 +49,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         public DefaultBatchTextureDrawing()
         {
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
-
             shader = new BatchShader();
             shader.Compile();
 
@@ -140,7 +137,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             GL.NamedBufferSubData(vbo, (IntPtr)0, (IntPtr)(VertexSize * currentPostCount), postData);
 
             GL.DrawArraysInstanced(PrimitiveType.TriangleFan, 0, 4, currentPostCount);
-            performenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall(this);
         }
 
         private void FlushDraw()
@@ -174,7 +171,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         public void Begin(IFumenEditorDrawingContext target, Texture texture)
         {
-            performenceMonitor.OnBeginDrawing(this);
+            target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
             this.texture = texture;
 
@@ -220,11 +217,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
         public void End()
         {
             FlushDraw();
-            target = default;
-            texture = default;
             GL.BindVertexArray(0);
             shader.End();
-            performenceMonitor.OnAfterDrawing(this);
+            texture = default;
+            target.PerfomenceMonitor.OnAfterDrawing(this);
+            target = default;
         }
     }
 }

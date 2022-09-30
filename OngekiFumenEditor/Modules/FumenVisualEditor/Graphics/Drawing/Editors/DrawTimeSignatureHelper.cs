@@ -43,16 +43,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var timelines = TGridCalculator.GetVisbleTimelines(
                 fumen.BpmList,
                 fumen.MeterChanges,
-                target.CurrentPlayTime,
-                target.CurrentPlayTime + target.ViewHeight,
+                target.Rect.MinY,
+                target.Rect.MaxY,
                 0,
                 1,
                 1
             );
 
-            var transDisp = target.ViewWidth * 0.4f;
+            var transDisp = target.Rect.Width * 0.4f;
             var maxDispAlpha = 0.3f;
-            var eDisp = target.ViewWidth - transDisp;
+            var eDisp = target.Rect.Width - transDisp;
 
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();
