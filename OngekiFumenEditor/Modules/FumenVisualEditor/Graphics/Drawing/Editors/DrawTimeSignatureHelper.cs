@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         {
             drawLines.Clear();
 
-            var fumen = target.Fumen;
+            var fumen = target.Editor.Fumen;
 
             var timelines = TGridCalculator.GetVisbleTimelines(
                 fumen.BpmList,

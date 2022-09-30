@@ -107,7 +107,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 shader.Begin();
                 {
                     shader.PassUniform("Model", modelMatrix);
-                    shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
+                    shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target));
                     shader.PassUniform("diffuse", texture);
 
                     GL.BindVertexArray(vao);

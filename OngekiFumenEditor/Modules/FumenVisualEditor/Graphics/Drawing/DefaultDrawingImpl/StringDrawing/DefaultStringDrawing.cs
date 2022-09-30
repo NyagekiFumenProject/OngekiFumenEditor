@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 if (style == IStringDrawing.StringStyle.Strike)
                     fontStyle = TextStyle.Strikethrough;
 
-                renderer.Begin(GetOverrideModelMatrix() * target.ViewProjectionMatrix);
+                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target));
                 var font = GetFontSystem(handle).GetFont(fontSize);
                 var size = font.MeasureString(text, scale);
                 origin.X = origin.X * 2;

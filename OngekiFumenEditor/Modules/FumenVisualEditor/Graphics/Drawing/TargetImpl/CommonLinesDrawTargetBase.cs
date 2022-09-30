@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPoint(TGrid tGrid, XGrid xGrid)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1);
-                var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Fumen.BpmList, 1.0, 240);
+                var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Editor.Fumen.BpmList, 1.0, 240);
 
                 lineDrawing.PostPoint(new(x, y), color);
             }
@@ -86,8 +86,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> starts)
         {
-            previewMinTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime, target.Fumen.BpmList, 1, 240);
-            previewMaxTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime + target.ViewHeight, target.Fumen.BpmList, 1, 240);
+            previewMinTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime, target.Editor.Fumen.BpmList, 1, 240);
+            previewMaxTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime + target.ViewHeight, target.Editor.Fumen.BpmList, 1, 240);
 
             foreach (var laneStart in starts)
             {

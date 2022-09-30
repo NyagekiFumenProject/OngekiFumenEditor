@@ -46,8 +46,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             base.DrawBatch(target, objs);
             perfomenceMonitor.OnBeginTargetDrawing(this);
             {
-                var previewMinTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime, target.Fumen.BpmList, 1, 240);
-                var previewMaxTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime + target.ViewHeight, target.Fumen.BpmList, 1, 240);
+                var previewMinTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime, target.Editor.Fumen.BpmList, 1, 240);
+                var previewMaxTGrid = TGridCalculator.ConvertYToTGrid(target.CurrentPlayTime + target.ViewHeight, target.Editor.Fumen.BpmList, 1, 240);
 
                 void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {
@@ -57,7 +57,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                             continue;
 
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, 30, target.ViewWidth, 1);
-                        var y = (float)TGridCalculator.ConvertTGridToY(item.TGrid, target.Fumen.BpmList, 1.0, 240);
+                        var y = (float)TGridCalculator.ConvertTGridToY(item.TGrid, target.Editor.Fumen.BpmList, 1.0, 240);
 
                         var pos = new Vector2(x, y);
                         drawList.Add((size, pos, 0f));

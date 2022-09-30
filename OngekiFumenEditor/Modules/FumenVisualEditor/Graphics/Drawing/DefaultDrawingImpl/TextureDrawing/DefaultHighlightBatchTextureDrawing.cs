@@ -180,7 +180,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             shader.Begin();
 
             GL.BindVertexArray(vao);
-            var MVP = GetOverrideModelMatrix() * target.ViewProjectionMatrix;
+            var MVP = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target);
             var iResolution = new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight);
             shader.PassUniform("ViewProjection", MVP);
             shader.PassUniform("iResolution", iResolution);

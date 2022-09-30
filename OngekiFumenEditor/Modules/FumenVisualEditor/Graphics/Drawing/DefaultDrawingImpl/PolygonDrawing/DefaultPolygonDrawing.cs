@@ -77,7 +77,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
             shader.Begin();
             shader.PassUniform("Model", GetOverrideModelMatrix());
-            shader.PassUniform("ViewProjection", target.ViewProjectionMatrix);
+            shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target));
             GL.BindVertexArray(vao);
         }
 

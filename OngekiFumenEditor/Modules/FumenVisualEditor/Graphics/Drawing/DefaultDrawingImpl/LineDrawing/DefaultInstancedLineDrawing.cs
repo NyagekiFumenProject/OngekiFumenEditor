@@ -197,7 +197,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
             shader.Begin();
             GL.BindVertexArray(vao);
-            var mvpMatrix = GetOverrideModelMatrix() * target.ViewProjectionMatrix;
+            var mvpMatrix = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target);
             shader.PassUniform(mvp, mvpMatrix);
             shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
             shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));

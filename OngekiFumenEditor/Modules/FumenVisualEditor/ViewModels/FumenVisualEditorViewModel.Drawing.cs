@@ -22,6 +22,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.CompilerServices;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.IFumenEditorDrawingContext;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -77,11 +78,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public Matrix4 ViewMatrix { get; private set; }
+        public Matrix4 ProjectionMatrix { get; private set; }
         public Matrix4 ViewProjectionMatrix { get; private set; }
 
         public string SchedulerName => "Fumen Previewer Performance Statictis";
 
         public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromSeconds(1);
+
+        public FumenVisualEditorViewModel Editor => this;
+
+        public VisibleRect Rect { get; set; } = default;
 
         private static Dictionary<string, IDrawingTarget[]> drawTargets = new();
         private IDrawingTarget[] drawTargetOrder;
@@ -109,10 +116,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RecalcViewProjectionMatrix()
         {
-            var projection = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
-            var view = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, -CurrentPlayTime, 0)) * Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2, -ViewHeight / 2, 0));
+            ProjectionMatrix = Matrix4.Identity * Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+            ViewMatrix = Matrix4.Identity * Matrix4.CreateTranslation(new Vector3(0, -CurrentPlayTime, 0)) * Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2, -ViewHeight / 2, 0));
 
-            ViewProjectionMatrix = view * projection;
+            ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
         }
 
         public void OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
@@ -167,8 +174,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (fumen is null)
                 return;
 
-            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, fumen.BpmList, 1.0, 240);
-            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, fumen.BpmList, 1.0, 240);
+            var minTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime, this);
+            var maxTGrid = TGridCalculator.ConvertYToTGrid(CurrentPlayTime + ViewHeight, this);
+
+            //todo 这里就要计算可视区域了
+            Rect = new VisibleRect()
+            {
+                ButtomRight = new(ViewWidth, CurrentPlayTime),
+                TopLeft = new(0, CurrentPlayTime + ViewHeight),
+                VisiableMinTGrid = minTGrid,
+                VisiableMaxTGrid = maxTGrid,
+            };
 
             timeSignatureHelper.DrawLines(this);
             xGridHelper.DrawLines(this);
@@ -265,6 +281,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             performenceMonitor?.Clear();
 
             return Task.CompletedTask;
+        }
+
+        public void Render(TimeSpan ts)
+        {
+            OnRender(default, ts);
         }
     }
 }

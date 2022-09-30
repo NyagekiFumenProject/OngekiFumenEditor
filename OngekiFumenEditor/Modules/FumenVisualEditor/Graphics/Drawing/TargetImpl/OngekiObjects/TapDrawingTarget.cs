@@ -111,7 +111,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             };
 
             var x = XGridCalculator.ConvertXGridToX(tap.XGrid, 30, target.ViewWidth, 1);
-            var y = TGridCalculator.ConvertTGridToY(tap.TGrid, target.Fumen.BpmList, 1.0, 240);
+            var y = TGridCalculator.ConvertTGridToY(tap.TGrid, target.Editor.Fumen.BpmList, 1.0, 240);
 
             var pos = new Vector2((float)x, (float)y);
             normalList[texture].Add((size, pos, 0f));

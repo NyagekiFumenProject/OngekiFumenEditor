@@ -1,7 +1,6 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
 using OngekiFumenEditor.Base;
-
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -71,13 +70,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             foreach (var result in drawLines)
             {
-                list.Add(new(new(result.X, target.CurrentPlayTime), new(1, 1, 1, 0)));
-                list.Add(new(new(result.X, target.CurrentPlayTime), new(1, 1, 1, 0.25f)));
-                list.Add(new(new(result.X, target.CurrentPlayTime + target.ViewHeight), new(1, 1, 1, 0.25f)));
-                list.Add(new(new(result.X, target.CurrentPlayTime + target.ViewHeight), new(1, 1, 1, 0)));
+                list.Add(new(new(result.X, target.Rect.Height), new(1, 1, 1, 0)));
+                list.Add(new(new(result.X, 0), new(1, 1, 1, 0.25f)));
+                list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, 0.25f)));
+                list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, 0)));
             }
 
+            lineDrawing.PushOverrideViewProjectMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0) * target.ProjectionMatrix);
             lineDrawing.Draw(target, list, 1);
+            lineDrawing.PopOverrideViewProjectMatrix(out _);
         }
 
         public void DrawXGridText(IFumenEditorDrawingContext target)

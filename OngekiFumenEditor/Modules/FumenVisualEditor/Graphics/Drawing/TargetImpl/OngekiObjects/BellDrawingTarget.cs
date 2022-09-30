@@ -72,14 +72,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             */
             var appearOffsetTime = CalculateBulletMsecTime(target, obj);
 
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Fumen.BpmList, 1, 240);
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor.Fumen.BpmList, 1, 240);
             var fromTime = toTime - appearOffsetTime;
 
             if (target.CurrentPlayTime < fromTime)
                 return;
 
-            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid.TotalUnit, target.Fumen) ?? obj.XGrid.TotalUnit, 30, target.ViewWidth, 1);
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid.TotalUnit, target.Fumen) ?? obj.XGrid.TotalUnit, 30, target.ViewWidth, 1);
+            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, 30, target.ViewWidth, 1);
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, 30, target.ViewWidth, 1);
 
             var currentTime = MathUtils.Limit(target.CurrentPlayTime, toTime, fromTime);
 
