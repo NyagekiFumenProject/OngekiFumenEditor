@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             highlightDrawing.Draw(target, texture, list.Where(x => x.obj.IsSelected).Select(x => (size * 1.25f, new Vector2(x.x, x.y), 0f)));
             textureDrawing.Draw(target, texture, list.Select(x => (size, new Vector2(x.x, x.y), 0f)));
-            foreach ((var x, var y, var obj) in list)
+            foreach ((var y, var x, var obj) in list)
                 target.RegisterSelectableObject(obj, new Vector2(x, y), size);
 
             foreach (var item in list)

@@ -667,14 +667,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var arg = e.EventArgs as MouseEventArgs;
                 var hitPoint = arg.GetPosition(e.Source);
-                hitPoint.Y = (e.Source.ActualHeight - hitPoint.Y) + CurrentPlayTime;
+                hitPoint.Y = e.Source.ActualHeight - hitPoint.Y + Rect.MinY;
                 var hitResult = Enumerable.Empty<KeyValuePair<OngekiObjectBase, Rect>>();
                 var position = hitPoint;
 
                 hitResult = hits.AsParallel().Where(x => x.Value.Contains(hitPoint)).ToArray();
                 var hitOngekiObjectViewModel = hitResult.FirstOrDefault().Key;
 
-                //Log.LogDebug($"mousePos = ги{position.X:F0},{position.Y:F0}) , hitOngekiObjectViewModel = {hitOngekiObjectViewModel?.ReferenceOngekiObject}");
+                Log.LogDebug($"mousePos = ги{position.X:F0},{position.Y:F0}) , hitOngekiObjectViewModel = {hitOngekiObjectViewModel}");
 
                 mouseDownHitObject = null;
                 mouseDownHitObjectPosition = default;
