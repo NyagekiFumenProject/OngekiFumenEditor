@@ -46,8 +46,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var timelines = TGridCalculator.GetVisbleTimelines(
                 fumen.BpmList,
                 fumen.MeterChanges,
-                target.CurrentPlayTime,
-                target.CurrentPlayTime + target.ViewHeight,
+                Math.Max(0, target.Rect.MinY),
+                target.Rect.MaxY,
                 target.Editor.Setting.JudgeLineOffsetY,
                 target.Editor.Setting.BeatSplit,
                 target.Editor.Setting.VerticalDisplayScale
