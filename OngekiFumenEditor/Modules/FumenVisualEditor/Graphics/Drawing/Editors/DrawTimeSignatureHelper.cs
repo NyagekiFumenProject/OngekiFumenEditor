@@ -40,24 +40,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             var fumen = target.Editor.Fumen;
 
+            if (target.Editor.Setting.BeatSplit == 0)
+                return;
+
             var timelines = TGridCalculator.GetVisbleTimelines(
                 fumen.BpmList,
                 fumen.MeterChanges,
-                target.Rect.MinY,
-                target.Rect.MaxY,
-                0,
-                1,
-                1
+                target.CurrentPlayTime,
+                target.CurrentPlayTime + target.ViewHeight,
+                target.Editor.Setting.JudgeLineOffsetY,
+                target.Editor.Setting.BeatSplit,
+                target.Editor.Setting.VerticalDisplayScale
             );
 
             var transDisp = target.Rect.Width * 0.4f;
             var maxDispAlpha = 0.3f;
+            var minDispAlpha = 0f;
+
+            if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
+                timelines = timelines.Where(x => x.beatIndex == 0);
+            else
+                minDispAlpha = maxDispAlpha;
             var eDisp = target.Rect.Width - transDisp;
 
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();
 
-            foreach ((var t, var y, _) in timelines.Where(x => x.beatIndex == 0))
+            foreach ((var t, var y, _) in timelines)
             {
                 drawLines.Add(new()
                 {
@@ -65,12 +74,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     Y = y
                 });
 
-                list.Add(new(new(0, (float)y), new(1, 1, 1, 0f)));
+                list.Add(new(new(0, (float)y), new(1, 1, 1, 0)));
                 list.Add(new(new(0, (float)y), new(1, 1, 1, maxDispAlpha)));
-                list.Add(new(new(transDisp, (float)y), new(1, 1, 1, 0f)));
-                list.Add(new(new(eDisp, (float)y), new(1, 1, 1, 0f)));
+                list.Add(new(new(transDisp, (float)y), new(1, 1, 1, minDispAlpha)));
+                list.Add(new(new(eDisp, (float)y), new(1, 1, 1, minDispAlpha)));
                 list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, maxDispAlpha)));
-                list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, 0f)));
+                list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, 0)));
             }
 
             lineDrawing.Draw(target, list, 1);
