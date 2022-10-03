@@ -67,8 +67,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     //ScrollViewerVerticalOffset = Math.Max(0, ScrollViewerVerticalOffset - offset);
                     break;
                 case nameof(EditorSetting.JudgeLineOffsetY):
-                    NotifyOfPropertyChange(() => MinVisibleCanvasY);
-                    NotifyOfPropertyChange(() => MaxVisibleCanvasY);
                     RecalcViewProjectionMatrix();
                     break;
                 case nameof(EditorSetting.XGridUnitSpace):
@@ -77,7 +75,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 case nameof(EditorSetting.DisplayTimeFormat):
                     TGridUnitLineLocations.Clear();
                     Redraw(RedrawTarget.TGridUnitLines);
-                    NotifyOfPropertyChange(() => MinVisibleCanvasY);
                     break;
                 case nameof(EditorSetting.BeatSplit):
                     //case nameof(EditorSetting.BaseLineY):

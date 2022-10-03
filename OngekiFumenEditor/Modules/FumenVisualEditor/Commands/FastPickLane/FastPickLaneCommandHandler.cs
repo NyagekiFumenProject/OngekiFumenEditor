@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
             if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
                 return TaskUtility.Completed;
 
-            var filterTGrid = TGridCalculator.ConvertYToTGrid(editor.MaxVisibleCanvasY, editor);
+            var filterTGrid = TGridCalculator.ConvertYToTGrid(editor.Rect.MaxY, editor);
             var selectLane = editor.Fumen.Lanes.OfType<T>().Where(x => x.MaxTGrid <= filterTGrid).OrderBy(x => x.MaxTGrid).LastOrDefault();
 
             var obj = selectLane?.Children.LastOrDefault() as ConnectableObjectBase;

@@ -31,6 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private IPerfomenceMonitor performenceMonitor;
         private DrawTimeSignatureHelper timeSignatureHelper;
         private DrawXGridHelper xGridHelper;
+        private DrawJudgeLineHelper judgeLineHelper;
         private StringBuilder stringBuilder = new StringBuilder();
 
         private float viewWidth = 0;
@@ -153,6 +154,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             timeSignatureHelper = new DrawTimeSignatureHelper();
             xGridHelper = new DrawXGridHelper();
+            judgeLineHelper = new DrawJudgeLineHelper();
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
 
@@ -216,6 +218,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             timeSignatureHelper.DrawTimeSigntureText(this);
             xGridHelper.DrawXGridText(this);
+            judgeLineHelper.Draw(this);
 
             performenceMonitor.OnAfterRender();
         }

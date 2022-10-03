@@ -16,9 +16,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
-        public double MinVisibleCanvasY => ScrollViewerVerticalOffset - Setting.JudgeLineOffsetY;
-        public double MaxVisibleCanvasY => ScrollViewerVerticalOffset + ViewHeight - Setting.JudgeLineOffsetY;
-
         private double totalDurationHeight;
         public double TotalDurationHeight
         {
@@ -40,8 +37,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var val = Math.Min(TotalDurationHeight, Math.Max(0, value));
 
                 Set(ref scrollViewerVerticalOffset, val);
-                NotifyOfPropertyChange(() => MinVisibleCanvasY);
-                NotifyOfPropertyChange(() => MinVisibleCanvasY);
                 NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
                 RecalcViewProjectionMatrix();
             }
@@ -88,7 +83,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public TGrid GetCurrentJudgeLineTGrid()
         {
-            var y = Setting.JudgeLineOffsetY + MinVisibleCanvasY;
+            var y = Setting.JudgeLineOffsetY + Rect.MinY;
             return TGridCalculator.ConvertYToTGrid(y, this);
         }
     }

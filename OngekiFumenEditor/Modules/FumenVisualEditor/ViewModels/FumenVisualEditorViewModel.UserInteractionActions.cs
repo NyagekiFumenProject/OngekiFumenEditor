@@ -560,7 +560,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (isDragging)
                 {
                     var cp = pos;
-                    cp.Y = ViewHeight - cp.Y + MinVisibleCanvasY;
+                    cp.Y = ViewHeight - cp.Y + Rect.MinY;
                     SelectObjects.ToArray().ForEach(x => OnObjectDragEnd(x as OngekiObjectBase, cp));
                 }
                 else
@@ -604,7 +604,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
 
-            p.Y = ViewHeight - p.Y + MinVisibleCanvasY;
+            p.Y = ViewHeight - p.Y + Rect.MinY;
             var v = new Vector2((float)p.X, (float)p.Y);
 
             System.Action undo = () =>
@@ -878,7 +878,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             offsetY = offsetYAcc * autoScrollSpeed;
 
             var prev = CurrentPlayTime;
-            var y = MinVisibleCanvasY + Setting.JudgeLineOffsetY + offsetY;
+            var y = Rect.MinY + Setting.JudgeLineOffsetY + offsetY;
 
             //Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
 
@@ -903,7 +903,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 //拖动已选物件
                 var cp = pos;
-                cp.Y = ViewHeight - cp.Y + MinVisibleCanvasY;
+                cp.Y = ViewHeight - cp.Y + Rect.MinY;
                 //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
                 SelectObjects.ForEach(x => dragCall(x as OngekiObjectBase, cp));
             }
@@ -969,7 +969,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void RecalculateSelectionRect()
         {
             var x = Math.Min(SelectionStartPosition.X, SelectionCurrentCursorPosition.X);
-            var y = MaxVisibleCanvasY - Math.Min(SelectionStartPosition.Y, SelectionCurrentCursorPosition.Y);
+            var y = Rect.MaxY - Math.Min(SelectionStartPosition.Y, SelectionCurrentCursorPosition.Y);
 
             var width = Math.Abs(SelectionStartPosition.X - SelectionCurrentCursorPosition.X);
             var height = Math.Abs(SelectionStartPosition.Y - SelectionCurrentCursorPosition.Y);
@@ -995,7 +995,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var contentViewModel = IoC.Get<CommonStatusBar>().SubRightMainContentViewModel;
 
-            var canvasY = MaxVisibleCanvasY - pos.Y;
+            var canvasY = Rect.MaxY - pos.Y;
             var canvasX = pos.X;
 
             var tGrid = TGridCalculator.ConvertYToTGrid(canvasY, this);
@@ -1031,7 +1031,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             var mousePosition = arg.GetPosition(e.View as FrameworkElement);
-            mousePosition.Y = ViewHeight - mousePosition.Y + MinVisibleCanvasY;
+            mousePosition.Y = ViewHeight - mousePosition.Y + Rect.MinY;
 
             switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
             {

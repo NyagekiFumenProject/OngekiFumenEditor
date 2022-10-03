@@ -74,7 +74,7 @@
             cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
             Ready="glView_Ready"
             SizeChanged="glView_SizeChanged" />
-        <TextBlock
+        <!--<TextBlock
             Grid.Column="0"
             Height="30"
             Margin="0,0,20,0"
@@ -87,7 +87,7 @@
                     <MultiBinding.Bindings>
                         <Binding Path="." />
                         <Binding Path="Setting.JudgeLineOffsetY" />
-                        <Binding Path="MinVisibleCanvasY" />
+                        <Binding Path="Rect.MinY" />
                     </MultiBinding.Bindings>
                 </MultiBinding>
             </TextBlock.Text>
@@ -103,8 +103,8 @@
                     </TranslateTransform.Y>
                 </TranslateTransform>
             </TextBlock.RenderTransform>
-        </TextBlock>
-        <Rectangle
+        </TextBlock>-->
+        <!--<Rectangle
             Grid.Column="0"
             Height="2"
             IsHitTestVisible="False"
@@ -121,7 +121,7 @@
                     </TranslateTransform.Y>
                 </TranslateTransform>
             </Rectangle.RenderTransform>
-        </Rectangle>
+        </Rectangle>-->
         <TextBlock
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
