@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.CallFullGC
             GC.Collect(0, GCCollectionMode.Forced);
             var after = GC.GetTotalMemory(true);
             var afterPriv = GC.GetTotalAllocatedBytes(false);
-            Log.LogInfo($"GC called, {FileSizeDisplayerHelper.Format(before)}({FileSizeDisplayerHelper.Format(beforePriv)}) -> {FileSizeDisplayerHelper.Format(after)}({FileSizeDisplayerHelper.Format(afterPriv)})");
+            Log.LogInfo($"GC called, {FileHelper.FormatFileSize(before)}({FileHelper.FormatFileSize(beforePriv)}) -> {FileHelper.FormatFileSize(after)}({FileHelper.FormatFileSize(afterPriv)})");
             return TaskUtility.Completed;
         }
     }

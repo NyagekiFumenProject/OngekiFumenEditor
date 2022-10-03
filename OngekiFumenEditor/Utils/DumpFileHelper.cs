@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Utils
         public static int WriteMiniDump(IntPtr exceptionInfo)
         {
             Directory.CreateDirectory(LogSetting.Default.DumpFileDirPath);
-            var filePath = Path.Combine(LogSetting.Default.DumpFileDirPath, FileNameHelper.FilterFileName(DateTime.Now.ToString() + ".dmp"));
+            var filePath = Path.Combine(LogSetting.Default.DumpFileDirPath, FileHelper.FilterFileName(DateTime.Now.ToString() + ".dmp"));
 
             using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 

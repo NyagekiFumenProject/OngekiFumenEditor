@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
                 var filePath = "";
                 do
                 {
-                    filePath = Path.Combine(logDir, FileNameHelper.FilterFileName(DateTime.Now.ToString() + ".log"));
+                    filePath = Path.Combine(logDir, FileHelper.FilterFileName(DateTime.Now.ToString() + ".log"));
                 } while (File.Exists(filePath));
                 writer = new StreamWriter(File.OpenWrite(filePath));
 
