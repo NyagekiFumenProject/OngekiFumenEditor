@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
     {
         private IStringDrawing stringDrawing;
         private ILineDrawing lineDrawing;
-        private Vector4 color = new(0, 1, 1, 1);
+        private Vector4 color = new(1, 1, 0, 1);
 
         LineVertex[] vertices = new LineVertex[2];
 
@@ -31,9 +31,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             vertices[1] = new(new(target.ViewWidth, y), color);
 
             lineDrawing.Draw(target, vertices, 1);
-
-            var str = string.Empty;
             var t = target.Editor.GetCurrentJudgeLineTGrid();
+
+            string str;
             if (target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime)
             {
                 var audioTime = TGridCalculator.ConvertTGridToAudioTime(t, target.Editor);
