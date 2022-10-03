@@ -72,7 +72,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             */
             var appearOffsetTime = CalculateBulletMsecTime(target, obj);
 
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor.Fumen.BpmList, 1, 240);
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
             var fromTime = toTime - appearOffsetTime;
 
             if (target.Rect.MinY < fromTime)
