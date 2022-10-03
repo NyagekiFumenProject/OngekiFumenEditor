@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         public struct CacheDrawLineResult
         {
             public double Y { get; set; }
-            public TGrid TGrid { get; set; }
+            public string Display { get; set; }
         }
 
         private List<CacheDrawLineResult> drawLines = new();
@@ -66,11 +66,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();
 
+            var displayAudioTime = target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime;
+
             foreach ((var t, var y, _) in timelines)
             {
+                var str = string.Empty;
+                if (displayAudioTime)
+                {
+                    var audioTime = TGridCalculator.ConvertTGridToAudioTime(t, target.Editor);
+                    str = $"{audioTime.Minutes,-2}:{audioTime.Seconds,-2}:{audioTime.Milliseconds,-3}";
+                }
+                else
+                    str = t.ToString();
+
                 drawLines.Add(new()
                 {
-                    TGrid = t,
+                    Display = str,
                     Y = y
                 });
 
@@ -89,7 +100,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         {
             foreach (var pair in drawLines)
                 stringDrawing.Draw(
-                    pair.TGrid.ToString(),
+                    pair.Display,
                     new(target.ViewWidth,
                     (float)pair.Y + 10),
                     Vector2.One,
