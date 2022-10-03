@@ -658,7 +658,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //Log.LogInfo("OnMouseDown");
             var view = e.View as FrameworkElement;
 
             if ((e.EventArgs as MouseEventArgs).LeftButton == MouseButtonState.Pressed)
@@ -674,7 +673,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 hitResult = hits.AsParallel().Where(x => x.Value.Contains(hitPoint)).ToArray();
                 var hitOngekiObjectViewModel = hitResult.FirstOrDefault().Key;
-                Log.LogDebug($"hit result = {hitResult.FirstOrDefault().Key}");
 
                 //Log.LogDebug($"mousePos = ги{position.X:F0},{position.Y:F0}) , hitOngekiObjectViewModel = {hitOngekiObjectViewModel?.ReferenceOngekiObject}");
 
@@ -857,9 +855,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var dragCall = new Action<OngekiObjectBase, Point>((vm, pos) =>
             {
                 if (r)
-                    OnObjectDragMoving(vm as OngekiMovableObjectBase, pos);
+                    OnObjectDragMoving(vm, pos);
                 else
-                    OnObjectDragStart(vm as OngekiMovableObjectBase, pos);
+                    OnObjectDragStart(vm, pos);
             });
 
             var rp = 1 - pos.Y / ViewHeight;
