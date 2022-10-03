@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateXUnitSize(FumenVisualEditorViewModel editor)
-            => CalculateXUnitSize(editor.Setting.XGridDisplayMaxUnit, editor.CanvasWidth, editor.Setting.XGridUnitSpace);
+            => CalculateXUnitSize(editor.Setting.XGridDisplayMaxUnit, editor.ViewWidth, editor.Setting.XGridUnitSpace);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateXUnitSize(double xGridDisplayMaxUnit, double viewWidth, double xUnitSpace)
@@ -25,14 +25,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
         public static XGrid ConvertXToXGrid(double x, FumenVisualEditorViewModel editor)
         {
-            var xUnit = (x - editor.CanvasWidth / 2) / (CalculateXUnitSize(editor) / editor.Setting.XGridUnitSpace);
+            var xUnit = (x - editor.ViewWidth / 2) / (CalculateXUnitSize(editor) / editor.Setting.XGridUnitSpace);
             var nearXUnit = xUnit > 0 ? Math.Floor(xUnit + 0.5) : Math.Ceiling(xUnit - 0.5);
             return new XGrid() { Unit = Math.Abs(xUnit - nearXUnit) < 0.00001 ? (int)nearXUnit : (float)xUnit };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ConvertXGridToX(XGrid xGrid, FumenVisualEditorViewModel editor)
-            => ConvertXGridToX(xGrid, editor.Setting.XGridDisplayMaxUnit, editor.CanvasWidth, editor.Setting.XGridUnitSpace);
+            => ConvertXGridToX(xGrid, editor.Setting.XGridDisplayMaxUnit, editor.ViewWidth, editor.Setting.XGridUnitSpace);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ConvertXGridToX(XGrid xGrid, double xGridDisplayMaxUnit, double viewWidth, double xUnitSpace)

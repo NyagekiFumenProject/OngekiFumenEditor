@@ -21,17 +21,14 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
     {
         private readonly ConnectableStartObject startObject;
         private readonly ConnectableStartObject nextStartObject;
-        private readonly DisplayObjectViewModelBase prevEndViewModel;
-        private readonly DisplayObjectViewModelBase nextStartViewModel;
+        private readonly ConnectableChildObjectBase prevEndObject;
         private readonly Action callback;
 
         public ConnectableObjectSplitDropAction(ConnectableStartObject startObject, ConnectableChildObjectBase childObject, Action callback = default)
         {
             this.startObject = startObject;
-            prevEndViewModel = CacheLambdaActivator.CreateInstance(childObject.ModelViewType) as DisplayObjectViewModelBase;
-            prevEndViewModel.ReferenceOngekiObject = childObject;
-            nextStartViewModel = CacheLambdaActivator.CreateInstance(startObject.ModelViewType) as DisplayObjectViewModelBase;
-            nextStartObject = nextStartViewModel.ReferenceOngekiObject as ConnectableStartObject;
+            prevEndObject = CacheLambdaActivator.CreateInstance(childObject.GetType()) as ConnectableChildObjectBase;
+            nextStartObject = CacheLambdaActivator.CreateInstance(startObject.GetType()) as ConnectableStartObject;
             this.callback = callback;
         }
 
@@ -44,10 +41,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
-                //初始化
-                prevEndViewModel.OnObjectCreated(prevEndViewModel.ReferenceOngekiObject, editor);
-                nextStartViewModel.OnObjectCreated(nextStartViewModel.ReferenceOngekiObject, editor);
-
                 //计算出需要划分出来的后边子物件
                 backupStores.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
                 affactedObjects.AddRange(editor.Fumen.Taps.AsEnumerable<ILaneDockable>()
@@ -63,11 +56,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                     nextStartObject.InsertChildObject(item.TGrid, item);
                 }
 
-                startObject.AddChildObject(prevEndViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
-                editor.AddObject(nextStartViewModel);
+                startObject.AddChildObject(prevEndObject);
+                editor.AddObject(nextStartObject);
 
-                prevEndViewModel.MoveCanvas(dragEndPoint);
-                nextStartViewModel.MoveCanvas(dragEndPoint);
+                editor.OnObjectMovingCanvas(prevEndObject, dragEndPoint);
+                editor.OnObjectMovingCanvas(nextStartObject, dragEndPoint);
 
                 foreach (var affactedObj in affactedObjects)
                 {
@@ -79,8 +72,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 callback?.Invoke();
             }, () =>
             {
-                editor.RemoveObject(nextStartViewModel);
-                startObject.RemoveChildObject(prevEndViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
+                editor.RemoveObject(nextStartObject);
+                startObject.RemoveChildObject(prevEndObject);
 
                 foreach (var item in backupStores)
                 {

@@ -22,7 +22,7 @@ using System.Windows.Data;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [MapToView(ViewType = typeof(LaneStartView))]
-    public class LaneStartViewModel<T> : DisplayObjectViewModelBase<T> where T : LaneStartBase, new()
+    public class LaneStartViewModel<T> : ToolboxGenerator<T> where T : LaneStartBase, new()
     {
 
     }

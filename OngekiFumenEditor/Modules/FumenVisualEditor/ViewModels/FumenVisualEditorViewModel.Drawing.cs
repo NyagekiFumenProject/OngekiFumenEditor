@@ -31,7 +31,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private IPerfomenceMonitor performenceMonitor;
         private DrawTimeSignatureHelper timeSignatureHelper;
         private DrawXGridHelper xGridHelper;
-        private Dictionary<OngekiObjectBase, Rect> hits = new();
         private StringBuilder stringBuilder = new StringBuilder();
 
         private float viewWidth = 0;
@@ -239,8 +238,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var scrollViewer = e.Source as FrameworkElement;
             var view = e.View as FrameworkElement;
-            CanvasWidth = scrollViewer.ActualWidth;
-            CanvasHeight = view.ActualHeight;
             Redraw(RedrawTarget.All);
         }
 
@@ -250,18 +247,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             scrollViewer?.InvalidateMeasure();
 
             var view = GetView() as FrameworkElement;
-
-            CanvasWidth = view.ActualWidth;
-            CanvasHeight = view.ActualHeight;
-
             Redraw(RedrawTarget.All);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RegisterSelectableObject(OngekiObjectBase obj, System.Numerics.Vector2 centerPos, System.Numerics.Vector2 size)
-        {
-            //rect.Y = rect.Y - CurrentPlayTime;
-            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
         }
 
         public void OnSchedulerTerm()
@@ -274,6 +260,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             stringBuilder.Clear();
 
             performenceMonitor?.FormatStatistics(stringBuilder);
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine($"View: {ViewWidth}x{ViewHeight}");
 
             DisplayFPS = stringBuilder.ToString();
 

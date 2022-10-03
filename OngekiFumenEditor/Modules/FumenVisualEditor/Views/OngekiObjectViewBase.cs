@@ -23,7 +23,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 {
     public class OngekiObjectViewBase : UserControl
     {
-        public DisplayObjectViewModelBase ViewModel => DataContext as DisplayObjectViewModelBase;
         private static DropShadowEffect SelectEffect = new DropShadowEffect() { ShadowDepth = 0, Color = Colors.Yellow, BlurRadius = 25 };
         private readonly static LambdaConverter<bool, Effect> isSelectConverter = new(o => o ? SelectEffect : default);
 

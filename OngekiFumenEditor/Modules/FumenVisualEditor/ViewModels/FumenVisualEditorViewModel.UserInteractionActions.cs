@@ -3,7 +3,6 @@ using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -13,12 +12,15 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -100,7 +102,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
-        public IEnumerable<DisplayObjectViewModelBase> SelectObjects => EditorViewModels.OfType<DisplayObjectViewModelBase>().Where(x => x.IsSelected);
+        public IEnumerable<ISelectableObject> SelectObjects => Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().Where(x => x.IsSelected).Distinct();
 
         private Point? currentCursorPosition;
         public Point? CurrentCursorPosition
@@ -111,8 +113,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public Toast Toast => (GetView() as FumenVisualEditorView)?.mainToast;
 
-        private HashSet<DisplayObjectViewModelBase> currentCopiedSources = new();
-        public IEnumerable<DisplayObjectViewModelBase> CurrentCopiedSources => currentCopiedSources;
+        private HashSet<ISelectableObject> currentCopiedSources = new();
+        public IEnumerable<ISelectableObject> CurrentCopiedSources => currentCopiedSources;
 
         #region provide extra MenuItem by plugins
 
@@ -133,7 +135,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             IsPreventMutualExclusionSelecting = true;
 
-            EditorViewModels.OfType<DisplayObjectViewModelBase>().ForEach(x => x.IsSelected = true);
+            Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
 
             IsPreventMutualExclusionSelecting = false;
         }
@@ -142,8 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             IsPreventMutualExclusionSelecting = true;
 
-            var selected = SelectObjects.ToArray();
-            EditorViewModels.OfType<DisplayObjectViewModelBase>().ForEach(x => x.IsSelected = !selected.Contains(x));
+            Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = !x.IsSelected);
 
             IsPreventMutualExclusionSelecting = false;
         }
@@ -185,7 +186,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             //先取消选择所有的物件
             TryCancelAllObjectSelecting();
-            var newObjects = currentCopiedSources.Select(x => x.Copy()).FilterNull().ToList();
+            var newObjects = currentCopiedSources.OfType<OngekiObjectBase>().Select(x => x.CopyNew(Fumen)).FilterNull().ToList();
             var mirrorTGrid = CalculateTGridMirror(newObjects, mirrorOption);
             var mirrorXGrid = CalculateXGridMirror(newObjects, mirrorOption);
 
@@ -195,7 +196,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var idMap = new Dictionary<int, int>();
 
             var partOfConnectableObjects = newObjects
-                .Select(x => x.ReferenceOngekiObject)
+                .Select(x => x)
                 .OfType<ConnectableObjectBase>()
                 .GroupBy(x => x.RecordId);
 
@@ -204,28 +205,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (lane.IsOnlyOne(out var headChildObject))
                 {
                     //同id组里面只有单个子节点，那就不给它单独转换和复制粘贴了
-                    newObjects.RemoveAll(x => x.ReferenceOngekiObject == headChildObject);
+                    newObjects.RemoveAll(x => x == headChildObject);
                     Log.LogDebug($"detect only one child in same recordId ,remove it. headChildObject : {headChildObject}");
                     continue;
                 }
 
                 var refRecordId = -headChildObject.RecordId;
-                var refSourceHeadChildObject = currentCopiedSources.Select(x => x.ReferenceOngekiObject).OfType<ConnectableChildObjectBase>().FirstOrDefault(x => x.RecordId == refRecordId);
+                var refSourceHeadChildObject = currentCopiedSources.Select(x => x).OfType<ConnectableChildObjectBase>().FirstOrDefault(x => x.RecordId == refRecordId);
 
-                var newStartObjectViewModel = LambdaActivator.CreateInstance(refSourceHeadChildObject.ReferenceStartObject.ModelViewType) as DisplayObjectViewModelBase;
-                var newStartObject = newStartObjectViewModel.ReferenceOngekiObject;
+                var newStartObject = LambdaActivator.CreateInstance(refSourceHeadChildObject.ReferenceStartObject.GetType()) as OngekiObjectBase;
 
                 newStartObject.Copy(headChildObject, Fumen);
 
-                newObjects.RemoveAll(x => x.ReferenceOngekiObject == headChildObject);
-                newObjects.Insert(0, newStartObjectViewModel);
+                newObjects.RemoveAll(x => x == headChildObject);
+                newObjects.Insert(0, newStartObject);
 
                 Log.LogDebug($"detect non-include start object copying , remove head of children and add new start object, headChildObject : {headChildObject}");
             }
 
             foreach (var displayObjectView in newObjects)
             {
-                if (displayObjectView.ReferenceOngekiObject is ITimelineObject timelineObject)
+                if (displayObjectView is ITimelineObject timelineObject)
                 {
                     var tGrid = timelineObject.TGrid.CopyNew();
                     undo += () => timelineObject.TGrid = tGrid.CopyNew();
@@ -241,7 +241,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         redo += () => timelineObject.TGrid = tGrid.CopyNew();
                 }
 
-                if (displayObjectView.ReferenceOngekiObject is IHorizonPositionObject horizonPositionObject)
+                if (displayObjectView is IHorizonPositionObject horizonPositionObject)
                 {
                     var xGrid = horizonPositionObject.XGrid.CopyNew();
                     undo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
@@ -257,9 +257,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         redo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
                 }
 
-                var isSelect = displayObjectView.IsSelected;
+                var selectObj = displayObjectView as ISelectableObject;
+                var isSelect = selectObj.IsSelected;
 
-                switch (displayObjectView.ReferenceOngekiObject)
+                switch (displayObjectView)
                 {
                     case ConnectableStartObject startObject:
                         var rawId = startObject.RecordId;
@@ -268,14 +269,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             AddObject(displayObjectView);
                             var newId = startObject.RecordId;
                             idMap[rawId] = newId;
-                            displayObjectView.IsSelected = true;
+                            selectObj.IsSelected = true;
                         };
 
                         undo += () =>
                         {
                             RemoveObject(displayObjectView);
                             startObject.RecordId = rawId;
-                            displayObjectView.IsSelected = isSelect;
+                            selectObj.IsSelected = isSelect;
                         };
                         break;
                     case ConnectableChildObjectBase childObject:
@@ -285,27 +286,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             if (idMap.TryGetValue(rawChildId, out var newChildId))
                                 childObject.RecordId = newChildId;
                             AddObject(displayObjectView);
-                            displayObjectView.IsSelected = true;
+                            selectObj.IsSelected = true;
                         };
 
                         undo += () =>
                         {
                             RemoveObject(displayObjectView);
                             childObject.RecordId = rawChildId;
-                            displayObjectView.IsSelected = isSelect;
+                            selectObj.IsSelected = isSelect;
                         };
                         break;
                     default:
                         redo += () =>
                         {
                             AddObject(displayObjectView);
-                            displayObjectView.IsSelected = true;
+                            selectObj.IsSelected = true;
                         };
 
                         undo += () =>
                         {
                             RemoveObject(displayObjectView);
-                            displayObjectView.IsSelected = isSelect;
+                            selectObj.IsSelected = isSelect;
                         };
                         break;
                 }
@@ -326,7 +327,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("复制粘贴", redo, undo));
         }
 
-        private XGrid CalculateXGridMirror(IEnumerable<DisplayObjectViewModelBase> newObjects, PasteMirrorOption mirrorOption)
+        private XGrid CalculateXGridMirror(IEnumerable<OngekiObjectBase> newObjects, PasteMirrorOption mirrorOption)
         {
             if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
                 return XGrid.Zero;
@@ -334,7 +335,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
             {
                 (var min, var max) = newObjects
-                .Select(x => x.ReferenceOngekiObject as IHorizonPositionObject)
+                .Select(x => x as IHorizonPositionObject)
                 .FilterNull()
                 .MaxMinBy(x => x.XGrid, (a, b) =>
                 {
@@ -353,13 +354,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return default;
         }
 
-        private TGrid CalculateTGridMirror(IEnumerable<DisplayObjectViewModelBase> newObjects, PasteMirrorOption mirrorOption)
+        private TGrid CalculateTGridMirror(IEnumerable<OngekiObjectBase> newObjects, PasteMirrorOption mirrorOption)
         {
             if (mirrorOption != PasteMirrorOption.SelectedRangeCenterTGridMirror)
                 return default;
 
             (var min, var max) = newObjects
-                .Select(x => x.ReferenceOngekiObject as ITimelineObject)
+                .Select(x => x as ITimelineObject)
                 .FilterNull()
                 .MaxMinBy(x => x.TGrid, (a, b) =>
                 {
@@ -376,7 +377,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
-        private DisplayObjectViewModelBase mouseDownHitObject;
+        private OngekiObjectBase mouseDownHitObject;
         private Point? mouseDownHitObjectPosition;
         private Point mouseStartPosition;
         /// <summary>
@@ -390,10 +391,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             cacheObjectAudioTime.Clear();
             foreach (var obj in SelectObjects)
             {
-                if (obj.ReferenceOngekiObject is ITimelineObject timelineObject)
+                if (obj is ITimelineObject timelineObject)
                     cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this);
                 else
-                    ToastNotify($"无法记忆此物件，因为此物件没有实现ITimelineObject : {obj.ReferenceOngekiObject}");
+                    ToastNotify($"无法记忆此物件，因为此物件没有实现ITimelineObject : {obj}");
             }
 
             ToastNotify($"已记忆 {cacheObjectAudioTime.Count} 个物件的音频时间");
@@ -401,9 +402,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_RecoverySelectedObjectToAudioTime()
         {
-            var recoverTargets = EditorViewModels
-                .OfType<DisplayObjectViewModelBase>()
-                .Select(x => x.ReferenceOngekiObject as ITimelineObject)
+            var recoverTargets = Fumen.GetAllDisplayableObjects()
+                .OfType<ITimelineObject>()
                 .Select(x => cacheObjectAudioTime.TryGetValue(x, out var audioTime) ? (x, audioTime) : default)
                 .Where(x => x.x is not null)
                 .OrderBy(x => x.audioTime)
@@ -432,6 +432,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void SelectRangeObjects(Rect selectionRect)
         {
+            //todo
+            /*
             var selectObjects = EditorViewModels
                 .OfType<DisplayObjectViewModelBase>()
                 .Where(x => selectionRect.Contains(x.ReferenceOngekiObject is not IHorizonPositionObject ? selectionRect.X : x.CanvasX, x.CanvasY + Setting.JudgeLineOffsetY)).ToArray();
@@ -441,6 +443,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             else
                 foreach (var o in selectObjects)
                     o.IsSelected = true;
+            */
         }
 
         public void OnFocusableChanged(ActionExecutionContext e)
@@ -461,7 +464,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             //删除已选择的物件
-            var selectedObject = SelectObjects.ToArray();
+            var selectedObject = SelectObjects.OfType<OngekiObjectBase>().ToArray();
 
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("删除物件", () =>
             {
@@ -480,14 +483,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
-        public void RemoveObject(DisplayObjectViewModelBase obj)
+        public void RemoveObject(OngekiObjectBase obj)
         {
-            obj.IsSelected = false;
-            EditorViewModels.Remove(obj);
-            Fumen.RemoveObject(obj.ReferenceOngekiObject);
+            if (obj is ISelectableObject selectable)
+                selectable.IsSelected = false;
+            Fumen.RemoveObject(obj);
 
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-            if (propertyBrowser != null && propertyBrowser.OngekiObject == obj.ReferenceOngekiObject)
+            if (propertyBrowser != null && propertyBrowser.OngekiObject == obj)
                 propertyBrowser.SetCurrentOngekiObject(default, this);
         }
 
@@ -496,7 +499,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            EditorViewModels.OfType<DisplayObjectViewModelBase>().ForEach(x => x.IsSelected = true);
+            Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
         }
 
         public void KeyboardAction_CancelSelectingObjects()
@@ -557,8 +560,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (isDragging)
                 {
                     var cp = pos;
-                    cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY;
-                    SelectObjects.ToArray().ForEach(x => x.OnDragEnd(cp));
+                    cp.Y = ViewHeight - cp.Y + MinVisibleCanvasY;
+                    SelectObjects.ToArray().ForEach(x => OnObjectDragEnd(x as OngekiObjectBase, cp));
                 }
                 else
                 {
@@ -575,7 +578,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     else
                     {
                         if (mouseDownHitObjectPosition is Point p)
-                            mouseDownHitObject?.OnMouseClick(p);
+                            NotifyObjectClicked(mouseDownHitObject);
                     }
                 }
             }
@@ -588,27 +591,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryApplyBrushObject(Point p)
         {
-            if (!CurrentCopiedSources.IsOnlyOne(out var copySouceObj))
+            if (!(CurrentCopiedSources.IsOnlyOne(out var c) && c is OngekiObjectBase copySouceObj))
                 return;
 
-            var newObjViewModel = copySouceObj.Copy();
+            var newObjViewModel = copySouceObj.CopyNew(Fumen);
             if (newObjViewModel is null
                 //不支持笔刷模式下新建以下玩意
-                || newObjViewModel.ReferenceOngekiObject is ConnectableStartObject
-                || newObjViewModel.ReferenceOngekiObject is ConnectableEndObject)
+                || newObjViewModel is ConnectableStartObject
+                || newObjViewModel is ConnectableEndObject)
             {
-                ToastNotify($"笔刷模式下不支持{copySouceObj?.ReferenceOngekiObject?.Name}");
+                ToastNotify($"笔刷模式下不支持{copySouceObj?.Name}");
                 return;
             }
 
-            p.Y = CanvasHeight - p.Y + MinVisibleCanvasY;
+            p.Y = ViewHeight - p.Y + MinVisibleCanvasY;
             var v = new Vector2((float)p.X, (float)p.Y);
 
             System.Action undo = () =>
             {
-                if (newObjViewModel.ReferenceOngekiObject is ConnectableChildObjectBase childObject)
+                if (newObjViewModel is ConnectableChildObjectBase childObject)
                 {
-                    (copySouceObj.ReferenceOngekiObject as ConnectableChildObjectBase)?.ReferenceStartObject.RemoveChildObject(childObject);
+                    (copySouceObj as ConnectableChildObjectBase)?.ReferenceStartObject.RemoveChildObject(childObject);
                 }
                 else
                 {
@@ -619,9 +622,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             System.Action redo = async () =>
             {
-                newObjViewModel.OnObjectCreated(newObjViewModel.ReferenceOngekiObject, this);
-                newObjViewModel.MoveCanvas(p);
-                var dist = Vector2.Distance(v, new Vector2((float)newObjViewModel.CanvasX, (float)newObjViewModel.CanvasY));
+                OnObjectMovingCanvas(newObjViewModel, p);
+                var x = newObjViewModel is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, this) : 0;
+                var y = newObjViewModel is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this) : 0;
+                var dist = Vector2.Distance(v, new Vector2((float)x, (float)y));
                 if (dist > 20)
                 {
                     Log.LogDebug($"dist : {dist:F2} > 20 , undo&&discard");
@@ -633,10 +637,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    if (newObjViewModel.ReferenceOngekiObject is ConnectableChildObjectBase childObject)
+                    if (newObjViewModel is ConnectableChildObjectBase childObject)
                     {
                         //todo there is a bug.
-                        (copySouceObj.ReferenceOngekiObject as ConnectableChildObjectBase)?.ReferenceStartObject.AddChildObject(childObject);
+                        (copySouceObj as ConnectableChildObjectBase)?.ReferenceStartObject.AddChildObject(childObject);
                     }
                     else
                     {
@@ -661,9 +665,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 isMouseDown = true;
                 isDragging = false;
-                var position = Mouse.GetPosition(view.Parent as IInputElement);
-                var hitInputElement = (view.Parent as FrameworkElement)?.InputHitTest(position);
-                var hitOngekiObjectViewModel = (hitInputElement as FrameworkElement)?.DataContext as DisplayObjectViewModelBase;
+
+                var arg = e.EventArgs as MouseEventArgs;
+                var hitPoint = arg.GetPosition(e.Source);
+                hitPoint.Y = (e.Source.ActualHeight - hitPoint.Y) + CurrentPlayTime;
+                var hitResult = Enumerable.Empty<KeyValuePair<OngekiObjectBase, Rect>>();
+                var position = hitPoint;
+
+                hitResult = hits.AsParallel().Where(x => x.Value.Contains(hitPoint)).ToArray();
+                var hitOngekiObjectViewModel = hitResult.FirstOrDefault().Key;
+                Log.LogDebug($"hit result = {hitResult.FirstOrDefault().Key}");
 
                 //Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObjectViewModel = {hitOngekiObjectViewModel?.ReferenceOngekiObject}");
 
@@ -692,6 +703,137 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             (e.View as FrameworkElement)?.Focus();
         }
 
+        Dictionary<OngekiObjectBase, Point> dragStartCanvasPointMap = new();
+        Dictionary<OngekiObjectBase, Point> dragStartPointMap = new();
+
+        public void OnObjectDragEnd(OngekiObjectBase obj, Point pos)
+        {
+            var dragStartCanvasPoint = dragStartCanvasPointMap[obj];
+            var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, this) : 0;
+            var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this) : 0;
+
+            OnObjectDragMoving(obj, pos);
+            var oldPos = dragStartCanvasPoint;
+            var newPos = new Point(x, y);
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("物件拖动",
+                () =>
+                {
+                    OnObjectMovingCanvas(obj, newPos);
+                }, () =>
+                {
+                    OnObjectMovingCanvas(obj, oldPos);
+                }));
+
+            //Log.LogDebug($"OnObjectDragEnd: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
+
+            dragStartCanvasPointMap.Remove(obj);
+            dragStartPointMap.Remove(obj);
+        }
+
+        public void OnObjectDragMoving(OngekiObjectBase obj, Point pos)
+        {
+            var dragStartCanvasPoint = dragStartCanvasPointMap[obj];
+            var dragStartPoint = dragStartPointMap[obj];
+
+            var movePoint = new Point(
+                dragStartCanvasPoint.X + (pos.X - dragStartPoint.X),
+                dragStartCanvasPoint.Y + (pos.Y - dragStartPoint.Y)
+                );
+
+            //这里限制一下
+            movePoint.X = Math.Max(0, Math.Min(TotalDurationHeight, movePoint.X));
+            movePoint.Y = Math.Max(0, Math.Min(TotalDurationHeight, movePoint.Y));
+
+            //Log.LogDebug($"OnObjectDragMoving: ({pos.X:F2},{pos.Y:F2}) -> ({movePoint.X:F2},{movePoint.Y:F2})");
+
+            OnObjectMovingCanvas(obj, movePoint);
+        }
+
+        public void OnObjectMovingCanvas(OngekiObjectBase obj, Point relativePoint)
+        {
+            if (obj is ITimelineObject timeObj)
+            {
+                var ry = CheckAndAdjustY(relativePoint.Y);
+                if (ry is double dry && TGridCalculator.ConvertYToTGrid(dry, this) is TGrid tGrid)
+                {
+                    timeObj.TGrid = tGrid;
+                    //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
+                }
+            }
+
+            if (obj is IHorizonPositionObject posObj)
+            {
+                var rx = CheckAndAdjustX(relativePoint.X);
+                if (rx is double drx)
+                {
+                    var xGrid = XGridCalculator.ConvertXToXGrid(drx, this);
+                    posObj.XGrid = xGrid;
+                }
+
+                //Log.LogDebug($"x : {rx:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, this)}");
+            }
+        }
+
+        private class TempCloseLine
+        {
+            public double distance { get; set; }
+            public double value { get; set; }
+        }
+
+        public virtual double? CheckAndAdjustY(double y)
+        {
+            var enableMagneticAdjust = !(Setting.DisableTGridMagneticDock);
+            if (!enableMagneticAdjust)
+                return y;
+
+            var forceMagneticAdjust = Setting.ForceMagneticDock;
+            var fin = forceMagneticAdjust ? TGridCalculator.TryPickClosestBeatTime((float)y, this, 240) : TGridCalculator.TryPickMagneticBeatTime((float)y, 4, this, 240);
+            var ry = fin.y;
+            if (fin.tGrid == null)
+                ry = y;
+            //Log.LogDebug($"before y={y:F2} ,select:({fin.tGrid}) ,fin:{ry:F2}");
+            return ry;
+        }
+
+        public virtual double? CheckAndAdjustX(double x)
+        {
+            //todo 基于二分法查询最近
+            var enableMagneticAdjust = !(Setting.DisableXGridMagneticDock);
+            var forceMagneticAdjust = (Setting.ForceMagneticDock) || (Setting.ForceXGridMagneticDock);
+            var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
+            using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
+            mid.Clear();
+            mid.AddRange(enableMagneticAdjust ? XGridUnitLineLocations?.Select(z =>
+            {
+                var r = ObjectPool<TempCloseLine>.Get();
+                r.distance = Math.Abs(z.X - x);
+                r.value = z.X;
+                return r;
+            })?.Where(z => z.distance < dockableTriggerDistance)?.OrderBy(x => x.distance)?.ToList() : Enumerable.Empty<TempCloseLine>());
+            var nearestUnitLine = mid?.FirstOrDefault();
+            double? fin = nearestUnitLine != null ? nearestUnitLine.value : (forceMagneticAdjust ? null : x);
+            //Log.LogInfo($"nearestUnitLine x:{x:F2} distance:{nearestUnitLine?.distance:F2} fin:{fin}");
+            mid.ForEach(x => ObjectPool<TempCloseLine>.Return(x));
+            mid.Clear();
+            return fin;
+        }
+
+        public void OnObjectDragStart(OngekiObjectBase obj, Point pos)
+        {
+            var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, this) : 0;
+            var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this) : 0;
+
+            if (double.IsNaN(x))
+                x = default;
+            if (double.IsNaN(y))
+                y = default;
+
+            dragStartCanvasPointMap[obj] = new Point(x, y);
+            dragStartPointMap[obj] = pos;
+
+            //Log.LogDebug($"OnObjectDragStart: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
+        }
+
         public void OnMouseMove(ActionExecutionContext e)
         {
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
@@ -712,16 +854,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var r = isDragging;
             isDragging = true;
-            var dragCall = new Action<DisplayObjectViewModelBase, Point>((vm, pos) =>
+            var dragCall = new Action<OngekiObjectBase, Point>((vm, pos) =>
             {
                 if (r)
-                    vm.OnDragMoving(pos);
+                    OnObjectDragMoving(vm as OngekiMovableObjectBase, pos);
                 else
-                    vm.OnDragStart(pos);
+                    OnObjectDragStart(vm as OngekiMovableObjectBase, pos);
             });
 
-            var rp = 1 - pos.Y / CanvasHeight;
-            var srp = 1 - mouseStartPosition.Y / CanvasHeight;
+            var rp = 1 - pos.Y / ViewHeight;
+            var srp = 1 - mouseStartPosition.Y / ViewHeight;
             var offsetY = 0d;
 
             //const double dragDist = 0.7;
@@ -763,8 +905,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 //拖动已选物件
                 var cp = pos;
-                cp.Y = CanvasHeight - cp.Y + MinVisibleCanvasY;
-                SelectObjects.ForEach(x => dragCall(x, cp));
+                cp.Y = ViewHeight - cp.Y + MinVisibleCanvasY;
+                //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
+                SelectObjects.ForEach(x => dragCall(x as OngekiObjectBase, cp));
             }
 
             //持续性的
@@ -779,18 +922,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Object Click&Selection
 
-        public void TryCancelAllObjectSelecting(params DisplayObjectViewModelBase[] expects)
+        public void TryCancelAllObjectSelecting(params ISelectableObject[] expects)
         {
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             var curBrowserObj = objBrowser.OngekiObject;
-            expects = expects ?? new DisplayObjectViewModelBase[0];
+            expects = expects ?? new ISelectableObject[0];
 
             if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
             {
                 foreach (var o in SelectObjects.Where(x => !expects.Contains(x)))
                 {
                     o.IsSelected = false;
-                    if (o.ReferenceOngekiObject == curBrowserObj)
+                    if (o == curBrowserObj)
                         objBrowser.SetCurrentOngekiObject(null, this);
                 }
             }
@@ -804,12 +947,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             var curBrowserObj = objBrowser.OngekiObject;
             var count = SelectObjects.Take(2).Count();
-            var first = SelectObjects.FirstOrDefault()?.ReferenceOngekiObject as ISelectableObject;
-            var refViewModel = EditorViewModels.FirstOrDefault(x => x.DisplayableObject == obj) as DisplayObjectViewModelBase;
+            var first = SelectObjects.FirstOrDefault();
 
             if ((count > 1) || (count == 1 && first != obj)) //比如你目前有多个已选择的，但你单点了一个
             {
-                TryCancelAllObjectSelecting(refViewModel);
+                TryCancelAllObjectSelecting(obj as ISelectableObject);
                 selectable.IsSelected = true;
                 objBrowser.SetCurrentOngekiObject(obj, this);
             }
@@ -820,13 +962,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     objBrowser.SetCurrentOngekiObject(obj, this);
                 else if (obj == curBrowserObj)
                     objBrowser.SetCurrentOngekiObject(null, this);
-                TryCancelAllObjectSelecting(refViewModel);
+                TryCancelAllObjectSelecting(obj as ISelectableObject);
             }
-        }
-
-        public void NotifyObjectClicked(DisplayObjectViewModelBase obj)
-        {
-            NotifyObjectClicked(obj.ReferenceOngekiObject);
         }
 
         #endregion
@@ -896,7 +1033,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             var mousePosition = arg.GetPosition(e.View as FrameworkElement);
-            mousePosition.Y = CanvasHeight - mousePosition.Y + MinVisibleCanvasY;
+            mousePosition.Y = ViewHeight - mousePosition.Y + MinVisibleCanvasY;
 
             switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
             {
@@ -910,6 +1047,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         #endregion
+
+        private Dictionary<OngekiObjectBase, Rect> hits = new();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RegisterSelectableObject(OngekiObjectBase obj, System.Numerics.Vector2 centerPos, System.Numerics.Vector2 size)
+        {
+            //rect.Y = rect.Y - CurrentPlayTime;
+            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
+        }
 
         public void OnMouseWheel(ActionExecutionContext e)
         {

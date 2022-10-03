@@ -56,8 +56,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         if (item.TGrid < previewMinTGrid || item.TGrid > previewMaxTGrid)
                             continue;
 
-                        var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, 30, target.ViewWidth, 1);
-                        var y = (float)TGridCalculator.ConvertTGridToY(item.TGrid, target.Editor.Fumen.BpmList, 1.0, 240);
+                        var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);
+                        var y = (float)TGridCalculator.ConvertTGridToY(item.TGrid, target.Editor);
 
                         var pos = new Vector2(x, y);
                         drawList.Add((size, pos, 0f));

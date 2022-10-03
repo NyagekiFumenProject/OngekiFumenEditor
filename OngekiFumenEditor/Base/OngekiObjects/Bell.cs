@@ -16,7 +16,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "BEL";
         public override string IDShortName => CommandName;
 
-        public override Type ModelViewType => typeof(BellViewModel);
 
         private BulletPalleteAuxiliaryLine line;
 

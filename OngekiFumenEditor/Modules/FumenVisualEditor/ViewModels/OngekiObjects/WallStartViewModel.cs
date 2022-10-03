@@ -20,7 +20,7 @@ using System.Windows.Data;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [MapToView(ViewType = typeof(WallStartView))]
-    public class WallStartViewModel<T> : DisplayObjectViewModelBase<T> where T : WallStartBase, new()
+    public class WallStartViewModel<T> : ToolboxGenerator<T> where T : WallStartBase, new()
     {
 
     }

@@ -13,6 +13,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
     public class EnemyLaneNext : LaneNextBase
     {
         public override string IDShortName => "ENN";
-        public override Type ModelViewType => typeof(EnemyLaneNextViewModel);
     }
 }

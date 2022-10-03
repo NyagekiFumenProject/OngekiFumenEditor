@@ -16,24 +16,8 @@ using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public class BulletViewModel : DisplayObjectViewModelBase<Bullet>
+    public class BulletViewModel : ToolboxGenerator<Bullet>
     {
-        public override double? CheckAndAdjustX(double x)
-        {
-            var bullet = ReferenceOngekiObject as Bullet;
-            var pallete = bullet.ReferenceBulletPallete;
-            double? result;
 
-            if (pallete.TargetValue == Target.Player)
-            {
-                result = XGridCalculator.ConvertXGridToX(XGrid.Zero, EditorViewModel);
-            }
-            else
-            {
-                result = base.CheckAndAdjustX(x);
-            }
-
-            return result;
-        }
     }
 }

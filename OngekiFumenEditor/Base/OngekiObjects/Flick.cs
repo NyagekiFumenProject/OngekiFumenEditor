@@ -38,7 +38,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public override Type ModelViewType => typeof(FlickViewModel);
 
         public override string IDShortName => IsCritical ? "CFK" : "FLK";
 

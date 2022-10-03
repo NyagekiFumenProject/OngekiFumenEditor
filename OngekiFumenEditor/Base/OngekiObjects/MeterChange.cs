@@ -9,7 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class MeterChange : OngekiTimelineObjectBase
     {
-        public override Type ModelViewType => typeof(MeterChangeViewModel);
 
         private int bunShi = 4;
         //分子(numerator)

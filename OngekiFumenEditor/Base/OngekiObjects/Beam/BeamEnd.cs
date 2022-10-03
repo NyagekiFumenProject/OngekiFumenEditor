@@ -9,7 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
     public class BeamEnd : ConnectableEndObject,IBeamObject
     {
-        public override Type ModelViewType => typeof(BeamEndViewModel);
 
         public override string IDShortName => "BME"; 
         

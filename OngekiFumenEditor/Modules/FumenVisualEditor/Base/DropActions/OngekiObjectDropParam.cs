@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
 {
     public class OngekiObjectDropParam : EditorAddObjectDropAction
     {
-        private readonly Func<DisplayObjectViewModelBase> lazyLoadFunc;
+        private readonly Func<OngekiObjectBase> lazyLoadFunc;
 
-        public OngekiObjectDropParam(Func<DisplayObjectViewModelBase> lazyLoadFunc)
+        public OngekiObjectDropParam(Func<OngekiObjectBase> lazyLoadFunc)
         {
             this.lazyLoadFunc = lazyLoadFunc;
         }
 
-        protected override DisplayObjectViewModelBase GetDisplayObject()
+        protected override OngekiObjectBase GetDisplayObject()
         {
             return lazyLoadFunc();
         }

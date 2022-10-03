@@ -116,13 +116,11 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             {
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
                 {
-                    var bulletViewModel = new BulletViewModel();
                     var bullet = new Bullet()
                     {
                         ReferenceBulletPallete = selectingPallete
                     };
-                    bulletViewModel.ReferenceOngekiObject = bullet;
-                    return bulletViewModel;
+                    return bullet;
                 }));
                 DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
                 _draggingItem = false;
@@ -145,13 +143,11 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             {
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
                 {
-                    var bulletViewModel = new BellViewModel();
                     var bullet = new Bell()
                     {
                         ReferenceBulletPallete = selectingPallete
                     };
-                    bulletViewModel.ReferenceOngekiObject = bullet;
-                    return bulletViewModel;
+                    return bullet;
                 }));
                 DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
                 _draggingItem = false;

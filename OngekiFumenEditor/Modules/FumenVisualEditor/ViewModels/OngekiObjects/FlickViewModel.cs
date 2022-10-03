@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Flick", "Ongeki Objects")]
-    public class FlickViewModel : DisplayObjectViewModelBase<Flick>
+    public class FlickViewModel : ToolboxGenerator<Flick>
     {
 
     }

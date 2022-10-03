@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
 {
     public abstract class EditorAddObjectDropAction : IEditorDropHandler
     {
-        protected abstract DisplayObjectViewModelBase GetDisplayObject();
+        protected abstract OngekiObjectBase GetDisplayObject();
 
         public void Drop(FumenVisualEditorViewModel editor, Point mousePosition)
         {
@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
                 editor.AddObject(displayObject);
-                displayObject.MoveCanvas(mousePosition);
+                editor.OnObjectMovingCanvas(displayObject, mousePosition);
                 editor.Redraw(RedrawTarget.OngekiObjects);
 
                 if (isFirst)

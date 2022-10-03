@@ -1,5 +1,4 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,8 +20,6 @@ namespace OngekiFumenEditor.Base
                 NotifyOfPropertyChange(() => TGrid);
             }
         }
-
-        public abstract Type ModelViewType { get; }
 
         private bool isSelecting = false;
         public virtual bool IsSelected

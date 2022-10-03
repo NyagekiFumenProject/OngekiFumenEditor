@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 if (isFirst)
                 {
-                    editor.NotifyObjectClicked(editor.EditorViewModels.FirstOrDefault(x=>x.DisplayableObject == cachePathControl) as DisplayObjectViewModelBase);
+                    editor.NotifyObjectClicked(cachePathControl);
                     isFirst = false;
                 }
             }, () =>

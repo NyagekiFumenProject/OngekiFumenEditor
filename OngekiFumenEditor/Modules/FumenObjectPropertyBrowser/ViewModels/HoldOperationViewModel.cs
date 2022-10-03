@@ -87,13 +87,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     var laneType = ConnectableObject.ReferenceLaneStart?.LaneType;
                     var isWall = laneType == LaneType.WallLeft || laneType == LaneType.WallRight;
                     var genWallChild = isWall ? new WallHoldEnd() : new HoldEnd();
-                    var genViewModel = isWall ? new WallHoldEndViewModel() : new HoldEndViewModel();
-                    genViewModel.ReferenceOngekiObject = genWallChild;
 
                     ConnectableObject.AddChildObject(genWallChild);
 
                     CheckEnableDrag();
-                    return genViewModel;
+                    return genWallChild;
                 }));
                 DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
                 _draggingItem = false;

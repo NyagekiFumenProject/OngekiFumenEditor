@@ -10,7 +10,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class BPMChange : OngekiTimelineObjectBase
     {
-        public override Type ModelViewType => typeof(BPMChangeViewModel);
 
         private double bpm = 240;
         public double BPM

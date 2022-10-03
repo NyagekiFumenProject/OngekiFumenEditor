@@ -60,8 +60,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var w = bound.Width;
             var h = bound.Height;
 
-            var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, 30, target.ViewWidth, 1);
-            var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor.Fumen.BpmList, 1.0, 240);
+            var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
+            var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
 
             var dx = x + w / 2;
             var dy = y - h / 2;

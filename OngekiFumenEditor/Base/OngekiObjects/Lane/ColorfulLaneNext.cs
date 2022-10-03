@@ -13,7 +13,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
     public class ColorfulLaneNext : LaneNextBase, IColorfulLane
     {
         public override string IDShortName => "CLN";
-        public override Type ModelViewType => typeof(LaneColorfulNextViewModel);
 
         private ColorId colorId = ColorIdConst.Akari;
         public ColorId ColorId

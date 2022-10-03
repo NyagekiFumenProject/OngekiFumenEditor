@@ -17,13 +17,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Hold Start", "Ongeki Objects")]
     [MapToView(ViewType = typeof(TapView))]
-    public class HoldViewModel : LaneDockableViewModelBase<Hold>
+    public class HoldViewModel : ToolboxGenerator<Hold>
     {
-        public override IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
-        {
-            return base.PickDockableObjects(editor)
-                    .FilterNull()
-                    .Where(x => x.IDShortName[0] == 'L');
-        }
+
     }
 }

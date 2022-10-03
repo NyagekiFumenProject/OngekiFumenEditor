@@ -5,7 +5,6 @@ using Gemini.Modules.Shell.Commands;
 using Microsoft.Win32;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
@@ -177,28 +176,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return y;
         }
 
-        private double canvasWidth = default;
-        public double CanvasWidth
-        {
-            get => canvasWidth;
-            set
-            {
-                Set(ref canvasWidth, value);
-            }
-        }
-        private double canvasHeight = default;
-        public double CanvasHeight
-        {
-            get => canvasHeight;
-            set
-            {
-                Set(ref canvasHeight, value);
-            }
-        }
-
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
-        public HashSet<IEditorDisplayableViewModel> EditorViewModels { get; } = new();
         public ObservableCollection<ISelectableObject> CurrentSelectedObjects { get; } = new();
 
         private bool isDragging;
@@ -351,13 +330,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
-        public void AddObject(DisplayObjectViewModelBase viewModel)
+        public void AddObject(OngekiObjectBase viewModel)
         {
-            if (viewModel is IEditorDisplayableViewModel m)
-                m.OnObjectCreated(viewModel.ReferenceOngekiObject, this);
-            Fumen.AddObject(viewModel.ReferenceOngekiObject);
-            EditorViewModels.Add(viewModel);
-            //Log.LogInfo($"create new display object: {viewModel.ReferenceOngekiObject.GetType().Name}");
+            Fumen.AddObject(viewModel);
+            Log.LogInfo($"create new display object: {viewModel.GetType().Name}");
         }
     }
 }

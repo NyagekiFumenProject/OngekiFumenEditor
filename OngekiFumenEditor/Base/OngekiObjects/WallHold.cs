@@ -9,6 +9,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class WallHold : Hold
     {
-        public override Type ModelViewType => typeof(WallHoldViewModel);
     }
 }

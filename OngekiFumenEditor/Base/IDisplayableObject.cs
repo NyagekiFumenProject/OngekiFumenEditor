@@ -8,8 +8,6 @@ namespace OngekiFumenEditor.Base
     {
         static IEnumerable<IDisplayableObject> EmptyDisplayable { get; } = new IDisplayableObject[0];
 
-        Type ModelViewType { get; }
-
         bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid);
 
         IEnumerable<IDisplayableObject> GetDisplayableObjects();

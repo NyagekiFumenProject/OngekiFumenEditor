@@ -11,14 +11,13 @@ using static OngekiFumenEditor.Base.OngekiObjects.LaneBlockArea;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {   
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Block", "Lane Control")]
-    public class LaneBlockAreaViewModel : DisplayTextLineObjectViewModelBase<LaneBlockArea>
+    public class LaneBlockAreaViewModel : ToolboxGenerator<LaneBlockArea>
     {
-        public static Brush Brush { get; } = Brushes.HotPink;
-        public override Brush DisplayBrush { get; } = Brush;
+
     }
 
-    public class LaneBlockAreaEndIndicatorViewModel : DisplayTextLineObjectViewModelBase<LaneBlockAreaEndIndicator>
+    public class LaneBlockAreaEndIndicatorViewModel : ToolboxGenerator<LaneBlockAreaEndIndicator>
     {
-        public override Brush DisplayBrush { get; } = LaneBlockAreaViewModel.Brush;
+
     }
 }

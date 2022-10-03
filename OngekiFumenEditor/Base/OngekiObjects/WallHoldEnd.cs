@@ -9,6 +9,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class WallHoldEnd : HoldEnd
     {
-        public override Type ModelViewType => typeof(WallHoldEndViewModel);
     }
 }

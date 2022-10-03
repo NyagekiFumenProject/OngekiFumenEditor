@@ -18,7 +18,7 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public class WallNextViewModel<T> : ConnectableChildBaseViewModel<T> where T : WallNextBase, new()
+    public class WallNextViewModel<T> : ToolboxGenerator<T> where T : WallNextBase, new()
     {
 
     }

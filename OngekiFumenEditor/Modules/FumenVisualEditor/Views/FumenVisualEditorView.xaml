@@ -23,9 +23,6 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="./EditorObjectDataTemplates.xaml" />
-            </ResourceDictionary.MergedDictionaries>
             <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
             <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
             <converters:BeatRhythmToBrushConverter x:Key="BeatRhythmToBrushConverter" />
@@ -74,7 +71,7 @@
         </Grid.ContextMenu>
         <opentkcontrol:GLWpfControl
             x:Name="glView"
-            cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];           [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];              [Event ScrollChanged] = [Action ScrollViewer_OnScrollChanged($executionContext)]; [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
+            cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
             Ready="glView_Ready"
             SizeChanged="glView_SizeChanged" />
         <TextBlock

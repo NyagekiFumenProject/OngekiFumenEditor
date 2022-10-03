@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
@@ -18,14 +19,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
     public class ConnectableObjectDropAction : IEditorDropHandler
     {
         private readonly ConnectableStartObject startObject;
-        private readonly DisplayObjectViewModelBase childViewModel;
+        private readonly OngekiObjectBase childViewModel;
         private readonly Action callback;
 
         public ConnectableObjectDropAction(ConnectableStartObject startObject, ConnectableChildObjectBase childObject, Action callback = default)
         {
             this.startObject = startObject;
-            childViewModel = CacheLambdaActivator.CreateInstance(childObject.ModelViewType) as DisplayObjectViewModelBase;
-            childViewModel.ReferenceOngekiObject = childObject;
+            childViewModel = CacheLambdaActivator.CreateInstance(childObject.GetType()) as OngekiObjectBase;
             this.callback = callback;
         }
 
@@ -37,12 +37,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
-                childViewModel.OnObjectCreated(childViewModel.ReferenceOngekiObject, editor);
                 if (isAppend)
-                    startObject.AddChildObject(childViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
+                    startObject.AddChildObject(childViewModel as ConnectableChildObjectBase);
                 else
-                    startObject.InsertChildObject(dragTGrid, childViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
-                childViewModel.MoveCanvas(dragEndPoint);
+                    startObject.InsertChildObject(dragTGrid, childViewModel as ConnectableChildObjectBase);
+                editor.OnObjectMovingCanvas(childViewModel, dragEndPoint);
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
                 if (isFirst)
@@ -52,7 +51,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 }
             }, () =>
             {
-                startObject.RemoveChildObject(childViewModel.ReferenceOngekiObject as ConnectableChildObjectBase);
+                startObject.RemoveChildObject(childViewModel as ConnectableChildObjectBase);
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
             }));

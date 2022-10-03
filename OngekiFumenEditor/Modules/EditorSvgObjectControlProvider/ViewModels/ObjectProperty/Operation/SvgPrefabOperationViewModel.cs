@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                     }).Prepend(path.StartPoint).ToList();
 
                     var firstP = points[0];
-                    var startObj = (LambdaActivator.CreateInstance(targetObject.ModelViewType) as DisplayObjectViewModelBase).ReferenceOngekiObject as ConnectableStartObject;
+                    var startObj = LambdaActivator.CreateInstance(targetObject.GetType()) as ConnectableStartObject;
                     CommomBuildUp(firstP, startObj);
 
                     foreach (var childP in points.Skip(1).SkipLast(1))

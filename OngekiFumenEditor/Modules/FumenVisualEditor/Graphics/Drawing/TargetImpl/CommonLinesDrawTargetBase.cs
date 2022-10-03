@@ -42,8 +42,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             void PostPoint(TGrid tGrid, XGrid xGrid)
             {
-                var x = (float)XGridCalculator.ConvertXGridToX(xGrid, 30, target.ViewWidth, 1);
-                var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Editor.Fumen.BpmList, 1.0, 240);
+                var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
+                var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Editor);
 
                 lineDrawing.PostPoint(new(x, y), color);
             }

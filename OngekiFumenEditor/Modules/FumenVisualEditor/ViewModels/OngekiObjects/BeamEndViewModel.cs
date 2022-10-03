@@ -16,7 +16,7 @@ using System.Windows.Data;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     //[ToolboxItem(typeof(FumenVisualEditorViewModel), "BeamEnd", "Ongeki Objects")]
-    public class BeamEndViewModel : ConnectableChildBaseViewModel<BeamEnd>
+    public class BeamEndViewModel : ToolboxGenerator<BeamEnd>
     {
 
     }

@@ -19,8 +19,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.LaneCurve
             set => Set(ref refCurveObject, value);
         }
 
-        public override Type ModelViewType => typeof(LaneCurvePathControlObjectViewModel);
-
         public const string CommandName = "[LCO_CTRL]";
 
         public override string IDShortName => CommandName;

@@ -179,9 +179,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 return;
             }
 
-            var copiedObjectViewModel = editor.CurrentCopiedSources.FirstOrDefault();
+            var copiedObjectViewModel = editor.CurrentCopiedSources.FirstOrDefault() as OngekiObjectBase;
 
-            if (copiedObjectViewModel?.Copy() is null)
+            if (copiedObjectViewModel?.CopyNew(fumen) is null)
             {
                 MessageBox.Show("此复制的物件无法使用刷子功能");
                 return;
@@ -210,8 +210,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 editor.Setting.VerticalDisplayScale,
                 240))
             {
-                var objViewModel = copiedObjectViewModel.Copy();
-                var obj = objViewModel.ReferenceOngekiObject;
+                var obj = copiedObjectViewModel.CopyNew(fumen);
                 var xGrid = RefStartObject.CalulateXGrid(tGrid);
 
                 if (xGrid is null)
@@ -224,11 +223,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     if (obj is IHorizonPositionObject horizonPositionObject)
                         horizonPositionObject.XGrid = xGrid;
 
-                    editor.AddObject(objViewModel);
+                    editor.AddObject(obj);
                 };
                 undoAction += () =>
                 {
-                    editor.RemoveObject(objViewModel);
+                    editor.RemoveObject(obj);
                 };
             }
 

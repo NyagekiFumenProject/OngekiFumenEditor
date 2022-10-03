@@ -9,6 +9,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class WallTap : Tap
     {
-        public override Type ModelViewType => typeof(WallTapViewModel);
     }
 }

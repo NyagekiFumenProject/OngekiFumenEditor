@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
         public double MinVisibleCanvasY => ScrollViewerVerticalOffset - Setting.JudgeLineOffsetY;
-        public double MaxVisibleCanvasY => ScrollViewerVerticalOffset + CanvasHeight - Setting.JudgeLineOffsetY;
+        public double MaxVisibleCanvasY => ScrollViewerVerticalOffset + ViewHeight - Setting.JudgeLineOffsetY;
 
         private double totalDurationHeight;
         public double TotalDurationHeight
@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get => totalDurationHeight;
             set
             {
-                value = Math.Max(value, CanvasHeight);
+                value = Math.Max(value, ViewHeight);
                 //Log.LogDebug($"TotalDurationHeight {TotalDurationHeight} -> {value}");
                 Set(ref totalDurationHeight, value);
             }
@@ -65,11 +65,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if ((objViewModel.DisplayableObject as ITimelineObject).TGrid is not TGrid tGrid)
                 throw new Exception("ScrollTo.objViewModel is not a timeline object view model.");
             ScrollTo(tGrid);
-        }
-
-        public void ScrollTo(DisplayObjectViewModelBase objViewModel)
-        {
-            ScrollTo(objViewModel.CanvasY);
         }
 
         public void ScrollTo(ITimelineObject timelineObject)

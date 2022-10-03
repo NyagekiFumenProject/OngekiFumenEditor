@@ -25,14 +25,14 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
             set => Set(ref editor, value);
         }
 
-        private DisplayObjectViewModelBase currentPickedSelectObject;
-        public DisplayObjectViewModelBase CurrentPickedSelectObject
+        private OngekiObjectBase currentPickedSelectObject;
+        public OngekiObjectBase CurrentPickedSelectObject
         {
             get => currentPickedSelectObject;
             set
             {
                 Set(ref currentPickedSelectObject, value);
-                IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(value?.ReferenceOngekiObject, Editor);
+                IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(value, Editor);
             }
         }
 
@@ -56,14 +56,14 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
             Editor?.NotifyOfPropertyChange(nameof(Editor.SelectObjects));
         }
 
-        public void OnItemSingleClick(DisplayObjectViewModelBase item)
+        public void OnItemSingleClick(OngekiObjectBase item)
         {
-            IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(item.ReferenceOngekiObject, Editor);
+            IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(item, Editor);
         }
 
-        public void OnItemDoubleClick(DisplayObjectViewModelBase item)
+        public void OnItemDoubleClick(OngekiObjectBase item)
         {
-            if (item.ReferenceOngekiObject is ITimelineObject timelineObject)
+            if (item is ITimelineObject timelineObject)
                 Editor.ScrollTo(timelineObject.TGrid);
 
             Editor.SelectObjects.Where(x => x != item).ForEach(x => x.IsSelected = false);

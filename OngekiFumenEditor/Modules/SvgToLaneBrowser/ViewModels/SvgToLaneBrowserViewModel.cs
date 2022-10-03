@@ -373,8 +373,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 if (MathUtils.calcGradient(lineSegment[0].X, lineSegment[1].X, lineSegment[0].Y, lineSegment[1].Y) < 0)
                     lineSegment.Reverse();
 
-                if (GenerateLaneViewModel(lineSegment, laneType) is DisplayObjectViewModelBase generatedViewModel)
-                    Editor.AddObject(generatedViewModel);
+                if (GenerateLaneViewModel(lineSegment, laneType) is LaneStartBase genStart)
+                    Editor.AddObject(genStart);
             }
 
             Editor.Redraw(RedrawTarget.OngekiObjects);
@@ -404,17 +404,17 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
             });
         }
 
-        private DisplayObjectViewModelBase GenerateLaneViewModel(List<System.Drawing.PointF> lineSegment, LaneType? laneType)
+        private OngekiObjectBase GenerateLaneViewModel(List<System.Drawing.PointF> lineSegment, LaneType? laneType)
         {
             var xtGrids = EnumMappedPositionLineSegements(lineSegment);
 
-            var laneStartViewModel = laneType switch
+            var leneStartObj = laneType switch
             {
-                LaneType.Left => new LaneLeftStartViewModel(),
-                LaneType.Center => new LaneCenterStartViewModel(),
-                LaneType.Right => new LaneRightStartViewModel(),
-                LaneType.Colorful => new LaneColorfulStartViewModel(),
-                _ => default(DisplayObjectViewModelBase)
+                LaneType.Left => new LaneLeftStart(),
+                LaneType.Center => new LaneCenterStart(),
+                LaneType.Right => new LaneRightStart(),
+                LaneType.Colorful => new ColorfulLaneStart(),
+                _ => default(LaneStartBase)
             };
 
             var nextGenetor = laneType switch
@@ -435,10 +435,8 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 _ => default(Func<ConnectableChildObjectBase>)
             };
 
-            if (laneStartViewModel is null)
+            if (leneStartObj is null)
                 return null;
-
-            var leneStartObj = laneStartViewModel.ReferenceOngekiObject as LaneStartBase;
 
             foreach ((var tGrid, var xGrid, var status) in xtGrids)
             {
@@ -456,7 +454,7 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser.ViewModels
                 obj.TGrid = tGrid;
             }
 
-            return laneStartViewModel;
+            return leneStartObj;
         }
     }
 }

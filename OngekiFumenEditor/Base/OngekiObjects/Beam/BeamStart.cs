@@ -12,7 +12,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
     public class BeamStart : ConnectableStartObject, IBeamObject
     {
-        public override Type ModelViewType => typeof(BeamStartViewModel);
         public override string IDShortName => "BMS";
         private int widthId = 2;
         public int WidthId

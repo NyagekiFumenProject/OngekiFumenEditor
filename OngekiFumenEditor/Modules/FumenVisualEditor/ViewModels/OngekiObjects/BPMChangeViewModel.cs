@@ -11,15 +11,8 @@ using System.Windows.Media;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "BPM Change", "Ongeki Objects")]
-    public class BPMChangeViewModel : DisplayTextLineObjectViewModelBase<BPMChange>
+    public class BPMChangeViewModel : ToolboxGenerator<BPMChange>
     {
-        public override Brush DisplayBrush => Brushes.Pink;
 
-        public override void OnDragEnd(Point pos)
-        {
-            base.OnDragEnd(pos);
-            //when bpmChange drag done. all ongeki object need to redraw to adapt new bpmList changed.
-            EditorViewModel.Redraw(RedrawTarget.OngekiObjects);
-        }
     }
 }

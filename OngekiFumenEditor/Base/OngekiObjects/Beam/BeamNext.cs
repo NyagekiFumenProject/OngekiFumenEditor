@@ -9,7 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
     public class BeamNext : ConnectableNextObject,IBeamObject
     {
-        public override Type ModelViewType => typeof(BeamNextViewModel);
 
         public override string IDShortName => "BMN";
 

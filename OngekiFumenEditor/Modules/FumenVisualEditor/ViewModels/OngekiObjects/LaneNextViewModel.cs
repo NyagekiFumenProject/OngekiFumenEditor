@@ -20,7 +20,7 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public class LaneNextViewModel<T> : ConnectableChildBaseViewModel<T> where T : LaneNextBase, new()
+    public class LaneNextViewModel<T> : ToolboxGenerator<T> where T : LaneNextBase, new()
     {
 
     }

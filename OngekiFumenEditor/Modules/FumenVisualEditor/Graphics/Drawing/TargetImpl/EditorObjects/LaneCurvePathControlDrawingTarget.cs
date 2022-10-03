@@ -49,8 +49,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var size = new Vector2(16, 16);
 
             using var d = objs.Where(x => x.RefCurveObject.IsSelected || x.RefCurveObject.IsAnyControlSelecting).Select(x => (
-                (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Editor.Fumen.BpmList, 1, 240),
-                (float)XGridCalculator.ConvertXGridToX(x.XGrid, 30, target.ViewWidth, 1),
+                (float)TGridCalculator.ConvertTGridToY(x.TGrid, target.Editor),
+                (float)XGridCalculator.ConvertXGridToX(x.XGrid, target.Editor),
                 x
             )).ToHashSetWithObjectPool<(float y, float x, LaneCurvePathControlObject obj)>(out var list);
 

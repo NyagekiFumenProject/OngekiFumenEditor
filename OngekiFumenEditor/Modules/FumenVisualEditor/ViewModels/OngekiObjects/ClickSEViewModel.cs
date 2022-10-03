@@ -7,8 +7,8 @@ using System.Windows.Media;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Click SE", "Ongeki Objects")]
-    public class ClickSEViewModel : DisplayTextLineObjectViewModelBase<ClickSE>
+    public class ClickSEViewModel : ToolboxGenerator<ClickSE>
     {
-        public override Brush DisplayBrush => Brushes.CadetBlue;
+            
     }
 }

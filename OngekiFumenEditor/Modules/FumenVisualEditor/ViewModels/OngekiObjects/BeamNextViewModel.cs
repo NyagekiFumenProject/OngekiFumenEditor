@@ -15,7 +15,7 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    public class BeamNextViewModel : ConnectableChildBaseViewModel<BeamNext>
+    public class BeamNextViewModel : ToolboxGenerator<BeamNext>
     {
 
     }

@@ -9,7 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class EnemySet : OngekiTimelineObjectBase
     {
-        public override Type ModelViewType => typeof(EnemySetViewModel);
 
         public enum WaveChangeConst
         {

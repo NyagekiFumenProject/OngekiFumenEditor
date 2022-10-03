@@ -13,7 +13,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
     public class ColorfulLaneStart : LaneStartBase, IColorfulLane
     {
         public override string IDShortName => "CLS";
-        public override Type ModelViewType => typeof(LaneColorfulStartViewModel);
 
         public override LaneType LaneType => LaneType.Colorful;
 

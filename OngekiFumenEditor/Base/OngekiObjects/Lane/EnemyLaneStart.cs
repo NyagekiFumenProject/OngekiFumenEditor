@@ -14,7 +14,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
     public class EnemyLaneStart : LaneStartBase
     {
         public override string IDShortName => "ENS";
-        public override Type ModelViewType => typeof(EnemyLaneStartViewModel);
 
         public override LaneType LaneType => LaneType.Enemy;
 

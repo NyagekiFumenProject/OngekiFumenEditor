@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects
 {
-    public class LaneCurvePathControlObjectViewModel : DisplayObjectViewModelBase<LaneCurvePathControlObject>
+    public class LaneCurvePathControlObjectViewModel : ToolboxGenerator<LaneCurvePathControlObject>
     {
 
     }

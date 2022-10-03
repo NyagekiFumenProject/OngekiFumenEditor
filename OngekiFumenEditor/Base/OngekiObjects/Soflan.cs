@@ -11,7 +11,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     {
         public class SoflanEndIndicator : OngekiTimelineObjectBase
         {
-            public override Type ModelViewType => typeof(SoflanEndIndicatorViewModel);
 
             public override string IDShortName => "[SFL_End]";
 
@@ -36,7 +35,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             displayables = new IDisplayableObject[] { this, EndIndicator };
         }
 
-        public override Type ModelViewType => typeof(SoflanViewModel);
         public override string IDShortName => $"SFL";
 
         public SoflanEndIndicator EndIndicator { get; }

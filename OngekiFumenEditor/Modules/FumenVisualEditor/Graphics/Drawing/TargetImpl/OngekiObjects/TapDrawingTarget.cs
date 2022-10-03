@@ -31,6 +31,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Texture blueTexture;
         private Texture wallTexture;
         private Texture tapExTexture;
+        private Texture wallExTexture;
+        private Texture untagExTexture;
 
         private Vector2 tapSize = new Vector2(40, 16);
         private Vector2 exTapEffSize = new Vector2(40, 16);
@@ -41,35 +43,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> exList = new();
         private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> selectTapList = new();
 
-        private Texture wallExTexture;
         private IBatchTextureDrawing batchTextureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
 
         public TapDrawingTarget() : base()
         {
-            var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png", UriKind.Relative));
-            using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-            redTexture = new Texture(bitmap, "mu3_nt_tap_02.png");
+            redTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png");
 
-            info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png", UriKind.Relative));
-            using var bitmap1 = Image.FromStream(info.Stream) as Bitmap;
-            greenTexture = new Texture(bitmap1, "mu3_nt_extap_02.png");
+            greenTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png");
 
-            info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png", UriKind.Relative));
-            using var bitmap2 = Image.FromStream(info.Stream) as Bitmap;
-            blueTexture = new Texture(bitmap2, "mu3_nt_hold_02.png");
+            blueTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png");
 
-            info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png", UriKind.Relative));
-            using var bitmap3 = Image.FromStream(info.Stream) as Bitmap;
-            wallTexture = new Texture(bitmap3, "walltap.png");
+            wallTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png");
 
-            info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png", UriKind.Relative));
-            using var bitmap4 = Image.FromStream(info.Stream) as Bitmap;
-            tapExTexture = new Texture(bitmap4, "tap_exEff.png");
+            tapExTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png");
 
-            info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png", UriKind.Relative));
-            using var bitmap5 = Image.FromStream(info.Stream) as Bitmap;
-            wallExTexture = new Texture(bitmap5, "walltap_Eff.png");
+            wallExTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png");
+
+            untagExTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png");
 
             void init(Texture texture)
             {
@@ -81,6 +72,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             init(greenTexture);
             init(blueTexture);
             init(wallTexture);
+            init(untagExTexture);
 
             exList[tapExTexture] = new();
             exList[wallExTexture] = new();
@@ -97,7 +89,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 LaneType.Center => greenTexture,
                 LaneType.Right => blueTexture,
                 LaneType.WallRight or LaneType.WallLeft => wallTexture,
-                _ => default
+                _ => untagExTexture
             };
 
             if (texture is null)
@@ -110,8 +102,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 _ => tapSize
             };
 
-            var x = XGridCalculator.ConvertXGridToX(tap.XGrid, 30, target.ViewWidth, 1);
-            var y = TGridCalculator.ConvertTGridToY(tap.TGrid, target.Editor.Fumen.BpmList, 1.0, 240);
+            var x = XGridCalculator.ConvertXGridToX(tap.XGrid, target.Editor);
+            var y = TGridCalculator.ConvertTGridToY(tap.TGrid, target.Editor);
 
             var pos = new Vector2((float)x, (float)y);
             normalList[texture].Add((size, pos, 0f));

@@ -20,7 +20,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public class LaneBlockAreaEndIndicator : OngekiTimelineObjectBase
         {
-            public override Type ModelViewType => typeof(LaneBlockAreaEndIndicatorViewModel);
 
             public override string IDShortName => "[LBK_End]";
 
@@ -66,7 +65,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             set => Set(ref direction, value);
         }
 
-        public override Type ModelViewType => typeof(LaneBlockAreaViewModel);
 
         public (LaneStartBase startWallLane, LaneStartBase endWallLane) CalculateReferenceWallLanes(OngekiFumen fumen)
         {

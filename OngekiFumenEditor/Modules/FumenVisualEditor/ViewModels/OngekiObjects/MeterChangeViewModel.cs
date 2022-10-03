@@ -11,8 +11,8 @@ using System.Windows.Media;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Meter Change", "Ongeki Objects")]
-    public class MeterChangeViewModel : DisplayTextLineObjectViewModelBase<MeterChange>
+    public class MeterChangeViewModel : ToolboxGenerator<MeterChange>
     {
-        public override Brush DisplayBrush => Brushes.LightGreen;
+
     }
 }

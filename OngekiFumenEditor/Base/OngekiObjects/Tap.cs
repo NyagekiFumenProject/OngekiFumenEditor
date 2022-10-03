@@ -46,8 +46,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public override Type ModelViewType => typeof(TapViewModel);
-
         public override string IDShortName => IsCritical ? "CTP" : "TAP";
 
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)

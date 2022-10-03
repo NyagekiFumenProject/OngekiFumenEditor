@@ -7,7 +7,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class HoldEnd : ConnectableEndObject, ILaneDockable
     {
-        public override Type ModelViewType => typeof(HoldEndViewModel);
 
         public bool IsCritical => (ReferenceStartObject as Hold)?.IsCritical ?? false;
 

@@ -74,7 +74,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public override Type ModelViewType => typeof(BulletViewModel);
 
         public override string IDShortName => CommandName;
 

@@ -22,7 +22,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             BottomToTop
         }
 
-        public override Type ModelViewType => typeof(SvgStringPrefabViewModel);
         public const string CommandName = "[SVG_STR]";
         public override string IDShortName => CommandName;
 

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Bell", "Ongeki Objects")]
-    public class BellViewModel : DisplayObjectViewModelBase<Bell>
+    public class BellToolboxGenerator : ToolboxGenerator<Bell>
     {
 
     }
