@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls;
 using System;
@@ -27,6 +28,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
         {
             return ongeki switch
             {
+                WallHoldEnd or HoldEnd => new HoldEndObjectInteractiveAction(),
+                WallHold => new WallHoldObjectInteractiveAction(),
+                Hold => new HoldObjectInteractiveAction(),
                 ILaneDockable => new DockableObjectInteractiveAction(),
                 ConnectableChildObjectBase => new ConnectableObjectInteractiveAction(),
                 IHorizonPositionObject => new HorizonObjectInteractiveAction(),

@@ -37,17 +37,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Draw(IFumenEditorDrawingContext target, Hold hold)
         {
-            if (hold.Children.FirstOrDefault() is not HoldEnd holdEnd || hold.ReferenceLaneStart is not LaneStartBase start)
-                return;
+            var start = hold.ReferenceLaneStart;
+            var holdEnd = hold.HoldEnd;
+            var laneType = start?.LaneType;
 
-            var color = start.LaneType switch
+            var color = laneType switch
             {
                 LaneType.Left => new Vector4(1, 0, 0, 0.75f),
                 LaneType.Center => new Vector4(0, 1, 0, 0.75f),
                 LaneType.Right => new Vector4(0, 0, 1, 0.75f),
                 LaneType.WallLeft => new Vector4(35 / 255.0f, 4 / 255.0f, 117 / 255.0f, 0.75f),
                 LaneType.WallRight => new Vector4(136 / 255.0f, 3 / 255.0f, 152 / 255.0f, 0.75f),
-                _ => default,
+                _ => new Vector4(1, 1, 1, 0.75f),
             };
 
             //draw line
@@ -61,17 +62,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 list.Add(new(new(x, y), color));
             }
 
-            Upsert(hold);
-            foreach (var node in start.Children.AsEnumerable<ConnectableObjectBase>().Prepend(start).Where(x => hold.TGrid <= x.TGrid && x.TGrid <= holdEnd.TGrid))
-                Upsert(node);
-            Upsert(holdEnd);
-
-            lineDrawing.Draw(target, list, 13);
+            if (holdEnd != null)
+            {
+                Upsert(hold);
+                if (start != null)
+                {
+                    foreach (var node in start.Children.AsEnumerable<ConnectableObjectBase>().Prepend(start).Where(x => hold.TGrid <= x.TGrid && x.TGrid <= holdEnd.TGrid))
+                        Upsert(node);
+                }
+                Upsert(holdEnd);
+                lineDrawing.Draw(target, list, 13);
+            }
 
             //draw taps
             tapDraw.Begin(target);
-            tapDraw.Draw(target, start.LaneType, hold, hold.IsCritical);
-            tapDraw.Draw(target, start.LaneType, holdEnd, false);
+            tapDraw.Draw(target, laneType, hold, hold.IsCritical);
+            if (holdEnd != null)
+                tapDraw.Draw(target, laneType, holdEnd, false);
             tapDraw.End();
         }
     }

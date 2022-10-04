@@ -12,7 +12,7 @@ using System.ComponentModel;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls
 {
-    internal class DockableObjectInteractiveAction : DefaultObjectInteractiveAction
+    public class DockableObjectInteractiveAction : DefaultObjectInteractiveAction
     {
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
