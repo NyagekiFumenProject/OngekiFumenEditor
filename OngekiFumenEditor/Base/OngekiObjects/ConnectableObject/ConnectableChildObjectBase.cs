@@ -212,12 +212,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     {
                         prevVec2 = prevVec2 ?? gridVec2;
 
-                        var fromXGrid = prevVec2.Value.Y;
-                        var fromTGrid = prevVec2.Value.X;
+                        var fromXGrid = prevVec2.Value.X;
+                        var fromTGrid = prevVec2.Value.Y;
                         var toTGrid = gridVec2.Y;
                         var toXGrid = gridVec2.X;
 
-                        var xTotalGrid = MathUtils.CalculateXFromTwoPointFormFormula(totalTGrid / TGrid.DEFAULT_RES_T, fromXGrid, fromTGrid, toTGrid, toXGrid);
+                        var xTotalGrid = MathUtils.CalculateXFromTwoPointFormFormula(totalTGrid, fromXGrid, fromTGrid, toXGrid, toTGrid);
 
                         //Log.LogDebug($"fromXGrid:{fromXGrid} fromTGrid:{fromTGrid} fromTGrid:{fromTGrid} fromTGrid:{fromTGrid} tGrid:{tGrid} -> {xGrid}");
                         return xTotalGrid;
@@ -239,7 +239,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public XGrid CalulateXGrid(TGrid tGrid)
         {
             var xGrid = new XGrid(0, (int)CalulateXGridTotalGrid(tGrid.TotalGrid));
-            xGrid.NormalizeSelf();
+            xGrid?.NormalizeSelf();
             return xGrid;
         }
 
