@@ -35,8 +35,9 @@ namespace OngekiFumenEditor.Base
 
         private string tag = string.Empty;
         /// <summary>
-        /// 表示用户自定义的标签，一般用于脚本区分
+        /// 
         /// </summary>
+        [ObjectPropertyBrowserTipText("表示用户自己自定义的标签，一般用于脚本区分")]
         public string Tag
         {
             get => tag;

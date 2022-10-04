@@ -16,7 +16,8 @@
             Margin="0,0,15,0"
             VerticalAlignment="Center"
             Foreground="{DynamicResource EnvironmentToolWindowText}"
-            Text="{Binding PropertyInfo.DisplayPropertyName}">
+            Text="{Binding PropertyInfo.DisplayPropertyName}"
+            ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
         </TextBlock>
         <CheckBox
             Grid.Column="1"

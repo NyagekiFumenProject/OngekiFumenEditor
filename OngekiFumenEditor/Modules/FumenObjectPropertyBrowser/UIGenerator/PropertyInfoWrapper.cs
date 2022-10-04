@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.UndoRedo;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings.Views;
@@ -42,6 +43,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
         }
 
         public string DisplayPropertyName => PropertyInfo.Name;
+        public string DisplayPropertyTipText => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserTipText>()?.TipText;
 
         public override string ToString() => $"PropName:{DisplayPropertyName} PropValue:{ProxyValue}";
     }

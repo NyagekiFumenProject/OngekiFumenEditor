@@ -20,7 +20,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public class LaneBlockAreaEndIndicator : OngekiTimelineObjectBase
         {
-
             public override string IDShortName => "[LBK_End]";
 
             public LaneBlockArea RefLaneBlockArea { get; internal protected set; }

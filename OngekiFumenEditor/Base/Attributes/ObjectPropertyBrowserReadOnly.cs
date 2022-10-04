@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public class ObjectPropertyBrowserReadOnly : Attribute
     {
     }

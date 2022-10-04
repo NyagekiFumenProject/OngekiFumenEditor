@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         private int referenceLaneStrId = default;
+        [ObjectPropertyBrowserTipText("当前所属轨道物件ID,改变此值可以改变此物件对应的轨道所属")]
         public int ReferenceLaneStrId
         {
             get { return ReferenceLaneStart?.RecordId ?? referenceLaneStrId; }

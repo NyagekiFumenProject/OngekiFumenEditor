@@ -11,7 +11,8 @@
         Margin="5,0,5,0"
         BorderBrush="DarkGray"
         Foreground="{DynamicResource EnvironmentToolWindowText}"
-        Header="{Binding PropertyInfo.DisplayPropertyName}">
+        Header="{Binding PropertyInfo.DisplayPropertyName}"
+        ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />

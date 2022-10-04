@@ -19,7 +19,7 @@
             VerticalAlignment="Center"
             Foreground="{DynamicResource EnvironmentToolWindowText}"
             Text="{Binding PropertyInfo.DisplayPropertyName}"
-            ToolTip="{Binding PropertyInfo.DisplayPropertyName}">
+            ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
         </TextBlock>
         <TextBox
             Name="Input"

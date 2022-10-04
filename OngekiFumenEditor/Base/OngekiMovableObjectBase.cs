@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace OngekiFumenEditor.Base
     public abstract class OngekiMovableObjectBase : OngekiTimelineObjectBase, IHorizonPositionObject
     {
         private XGrid xGrid = new XGrid();
+        [ObjectPropertyBrowserTipText("物件横坐标")]
         public virtual XGrid XGrid
         {
             get { return xGrid; }

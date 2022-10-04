@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace OngekiFumenEditor.Base
     public interface ILaneDockable : IHorizonPositionObject, ITimelineObject
     {
         LaneStartBase ReferenceLaneStart { get; set; }
+
         public int ReferenceLaneStrId { get; set; }
     }
 }

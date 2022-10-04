@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

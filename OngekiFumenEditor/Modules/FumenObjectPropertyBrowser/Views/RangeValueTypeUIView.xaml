@@ -26,7 +26,8 @@
             Margin="15,0,0,0"
             VerticalAlignment="Center"
             Foreground="{DynamicResource EnvironmentToolWindowText}"
-            Text="{Binding PropertyInfo.DisplayPropertyName}">
+            Text="{Binding PropertyInfo.DisplayPropertyName}"
+            ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
         </TextBlock>
         <TextBox
             x:Name="Editbox"
