@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
     {
         public static UIElement GenerateUI(PropertyInfoWrapper wrapper)
         {
-            if (wrapper.PropertyInfo.Name == nameof(PropertyChangedBase.IsNotifying))
+            if (wrapper.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() is not null)
                 return default;
+
+            var editable = wrapper.PropertyInfo.CanWrite && wrapper.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserReadOnly>() is null;
 
             var typeGenerators = IoC.GetAll<ITypeUIGenerator>();
             return typeGenerators
@@ -26,7 +29,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
                 {
                     try
                     {
-                        return x.Generate(wrapper);
+                        var element = x.Generate(wrapper);
+                        element.IsEnabled = editable;
+                        return element;
                     }
                     catch
                     {

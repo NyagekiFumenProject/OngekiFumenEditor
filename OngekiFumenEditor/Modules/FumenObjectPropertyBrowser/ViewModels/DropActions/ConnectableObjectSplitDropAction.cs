@@ -59,8 +59,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 startObject.AddChildObject(prevEndObject);
                 editor.AddObject(nextStartObject);
 
-                editor.OnObjectMovingCanvas(prevEndObject, dragEndPoint);
-                editor.OnObjectMovingCanvas(nextStartObject, dragEndPoint);
+                editor.MoveObjectTo(prevEndObject, dragEndPoint);
+                editor.MoveObjectTo(nextStartObject, dragEndPoint);
 
                 foreach (var affactedObj in affactedObjects)
                 {

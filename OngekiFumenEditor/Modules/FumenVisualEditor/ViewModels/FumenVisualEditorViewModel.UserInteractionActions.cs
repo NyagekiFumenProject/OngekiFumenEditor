@@ -9,6 +9,7 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Utils;
@@ -115,6 +116,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private HashSet<ISelectableObject> currentCopiedSources = new();
         public IEnumerable<ISelectableObject> CurrentCopiedSources => currentCopiedSources;
+        public ObjectInteractiveManager InteractiveManager { get; private set; } = new();
 
         #region provide extra MenuItem by plugins
 
@@ -561,7 +563,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     var cp = pos;
                     cp.Y = ViewHeight - cp.Y + Rect.MinY;
-                    SelectObjects.ToArray().ForEach(x => OnObjectDragEnd(x as OngekiObjectBase, cp));
+                    SelectObjects.ToArray().ForEach(x =>
+                    {
+                        var obj = x as OngekiObjectBase;
+                        InteractiveManager.GetInteractive(obj).OnDragEnd(obj, cp, this);
+                    });
                 }
                 else
                 {
@@ -622,7 +628,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             System.Action redo = async () =>
             {
-                OnObjectMovingCanvas(newObjViewModel, p);
+                InteractiveManager.GetInteractive(newObjViewModel).OnMoveCanvas(newObjViewModel, p, this);
                 var x = newObjViewModel is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, this) : 0;
                 var y = newObjViewModel is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this) : 0;
                 var dist = Vector2.Distance(v, new Vector2((float)x, (float)y));
@@ -701,137 +707,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             (e.View as FrameworkElement)?.Focus();
         }
 
-        Dictionary<OngekiObjectBase, Point> dragStartCanvasPointMap = new();
-        Dictionary<OngekiObjectBase, Point> dragStartPointMap = new();
-
-        public void OnObjectDragEnd(OngekiObjectBase obj, Point pos)
-        {
-            var dragStartCanvasPoint = dragStartCanvasPointMap[obj];
-            var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, this) : 0;
-            var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this) : 0;
-
-            OnObjectDragMoving(obj, pos);
-            var oldPos = dragStartCanvasPoint;
-            var newPos = new Point(x, y);
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("物件拖动",
-                () =>
-                {
-                    OnObjectMovingCanvas(obj, newPos);
-                }, () =>
-                {
-                    OnObjectMovingCanvas(obj, oldPos);
-                }));
-
-            //Log.LogDebug($"OnObjectDragEnd: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
-
-            dragStartCanvasPointMap.Remove(obj);
-            dragStartPointMap.Remove(obj);
-        }
-
-        public void OnObjectDragMoving(OngekiObjectBase obj, Point pos)
-        {
-            var dragStartCanvasPoint = dragStartCanvasPointMap[obj];
-            var dragStartPoint = dragStartPointMap[obj];
-
-            var movePoint = new Point(
-                dragStartCanvasPoint.X + (pos.X - dragStartPoint.X),
-                dragStartCanvasPoint.Y + (pos.Y - dragStartPoint.Y)
-                );
-
-            //这里限制一下
-            movePoint.X = Math.Max(0, Math.Min(TotalDurationHeight, movePoint.X));
-            movePoint.Y = Math.Max(0, Math.Min(TotalDurationHeight, movePoint.Y));
-
-            //Log.LogDebug($"OnObjectDragMoving: ({pos.X:F2},{pos.Y:F2}) -> ({movePoint.X:F2},{movePoint.Y:F2})");
-
-            OnObjectMovingCanvas(obj, movePoint);
-        }
-
-        public void OnObjectMovingCanvas(OngekiObjectBase obj, Point relativePoint)
-        {
-            if (obj is ITimelineObject timeObj)
-            {
-                var ry = CheckAndAdjustY(relativePoint.Y);
-                if (ry is double dry && TGridCalculator.ConvertYToTGrid(dry, this) is TGrid tGrid)
-                {
-                    timeObj.TGrid = tGrid;
-                    //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
-                }
-            }
-
-            if (obj is IHorizonPositionObject posObj)
-            {
-                var rx = CheckAndAdjustX(relativePoint.X);
-                if (rx is double drx)
-                {
-                    var xGrid = XGridCalculator.ConvertXToXGrid(drx, this);
-                    posObj.XGrid = xGrid;
-                }
-
-                //Log.LogDebug($"x : {rx:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, this)}");
-            }
-        }
-
-        private class TempCloseLine
-        {
-            public double distance { get; set; }
-            public double value { get; set; }
-        }
-
-        public virtual double? CheckAndAdjustY(double y)
-        {
-            var enableMagneticAdjust = !(Setting.DisableTGridMagneticDock);
-            if (!enableMagneticAdjust)
-                return y;
-
-            var forceMagneticAdjust = Setting.ForceMagneticDock;
-            var fin = forceMagneticAdjust ? TGridCalculator.TryPickClosestBeatTime((float)y, this, 240) : TGridCalculator.TryPickMagneticBeatTime((float)y, 4, this, 240);
-            var ry = fin.y;
-            if (fin.tGrid == null)
-                ry = y;
-            //Log.LogDebug($"before y={y:F2} ,select:({fin.tGrid}) ,fin:{ry:F2}");
-            return ry;
-        }
-
-        public virtual double? CheckAndAdjustX(double x)
-        {
-            //todo 基于二分法查询最近
-            var enableMagneticAdjust = !(Setting.DisableXGridMagneticDock);
-            var forceMagneticAdjust = (Setting.ForceMagneticDock) || (Setting.ForceXGridMagneticDock);
-            var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
-            using var d1 = ObjectPool<List<TempCloseLine>>.GetWithUsingDisposable(out var mid, out var _);
-            mid.Clear();
-            mid.AddRange(enableMagneticAdjust ? XGridUnitLineLocations?.Select(z =>
-            {
-                var r = ObjectPool<TempCloseLine>.Get();
-                r.distance = Math.Abs(z.X - x);
-                r.value = z.X;
-                return r;
-            })?.Where(z => z.distance < dockableTriggerDistance)?.OrderBy(x => x.distance)?.ToList() : Enumerable.Empty<TempCloseLine>());
-            var nearestUnitLine = mid?.FirstOrDefault();
-            double? fin = nearestUnitLine != null ? nearestUnitLine.value : (forceMagneticAdjust ? null : x);
-            //Log.LogInfo($"nearestUnitLine x:{x:F2} distance:{nearestUnitLine?.distance:F2} fin:{fin}");
-            mid.ForEach(x => ObjectPool<TempCloseLine>.Return(x));
-            mid.Clear();
-            return fin;
-        }
-
-        public void OnObjectDragStart(OngekiObjectBase obj, Point pos)
-        {
-            var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, this) : 0;
-            var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this) : 0;
-
-            if (double.IsNaN(x))
-                x = default;
-            if (double.IsNaN(y))
-                y = default;
-
-            dragStartCanvasPointMap[obj] = new Point(x, y);
-            dragStartPointMap[obj] = pos;
-
-            //Log.LogDebug($"OnObjectDragStart: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
-        }
-
         public void OnMouseMove(ActionExecutionContext e)
         {
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
@@ -854,10 +729,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             isDragging = true;
             var dragCall = new Action<OngekiObjectBase, Point>((vm, pos) =>
             {
+                var action = InteractiveManager.GetInteractive(vm);
                 if (r)
-                    OnObjectDragMoving(vm, pos);
+                    action.OnDragMove(vm, pos, this);
                 else
-                    OnObjectDragStart(vm, pos);
+                    action.OnDragStart(vm, pos, this);
             });
 
             var rp = 1 - pos.Y / ViewHeight;
@@ -1098,5 +974,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Toast.ShowMessage(message);
             Log.LogInfo(message);
         }
+
+        #region Object Interaction
+
+        public void MoveObjectTo(OngekiObjectBase obj, Point point) => InteractiveManager.GetInteractive(obj).OnMoveCanvas(obj, point, this);
+
+        #endregion
     }
 }

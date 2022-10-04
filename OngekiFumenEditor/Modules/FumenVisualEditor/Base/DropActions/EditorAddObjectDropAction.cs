@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
                 editor.AddObject(displayObject);
-                editor.OnObjectMovingCanvas(displayObject, mousePosition);
+                editor.MoveObjectTo(displayObject, mousePosition);
                 editor.Redraw(RedrawTarget.OngekiObjects);
 
                 if (isFirst)

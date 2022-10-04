@@ -21,10 +21,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         public struct CacheDrawLineResult
         {
             public float X { get; set; }
+            public float XGridTotalUnit { get; set; }
             public string XGridTotalUnitDisplay { get; set; }
         }
-
-        private List<CacheDrawLineResult> drawLines = new();
 
         private IStringDrawing stringDrawing;
         private ILineDrawing lineDrawing;
@@ -35,49 +34,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
         }
 
-        public void DrawLines(IFumenEditorDrawingContext target)
+        public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawLineResult> drawLines)
         {
             if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
                 return;
-
-            drawLines.Clear();
-
-            var width = target.ViewWidth;
-            var xUnitSpace = (float)target.Editor.Setting.XGridUnitSpace;
-            var maxDisplayXUnit = target.Editor.Setting.XGridDisplayMaxUnit;
-
-            var unitSize = (float)XGridCalculator.CalculateXUnitSize(maxDisplayXUnit, width, xUnitSpace);
-            var totalUnitValue = 0f;
-
-            for (float totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
-            {
-                totalUnitValue += xUnitSpace;
-
-                drawLines.Add(new()
-                {
-                    X = totalLength,
-                    XGridTotalUnitDisplay = totalUnitValue.ToString()
-                });
-
-                drawLines.Add(new()
-                {
-                    X = (width / 2) - (totalLength - (width / 2)),
-                    XGridTotalUnitDisplay = (-totalUnitValue).ToString()
-                });
-            }
-            drawLines.Add(new()
-            {
-                X = width / 2
-            });
 
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();
 
             foreach (var result in drawLines)
             {
+                var a = result.XGridTotalUnit == 0 ? 0.4f : 0.25f;
+
                 list.Add(new(new(result.X, target.Rect.Height), new(1, 1, 1, 0)));
-                list.Add(new(new(result.X, 0), new(1, 1, 1, 0.25f)));
-                list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, 0.25f)));
+                list.Add(new(new(result.X, 0), new(1, 1, 1, a)));
+                list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, a)));
                 list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, 0)));
             }
 
@@ -86,7 +57,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing.PopOverrideViewProjectMatrix(out _);
         }
 
-        public void DrawXGridText(IFumenEditorDrawingContext target)
+        public void DrawXGridText(IFumenEditorDrawingContext target, IEnumerable<CacheDrawLineResult> drawLines)
         {
             if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
                 return;
@@ -95,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 stringDrawing.Draw(
                     pair.XGridTotalUnitDisplay,
                     new(pair.X,
-                    target.CurrentPlayTime + target.ViewHeight),
+                    target.Rect.MaxY),
                     Vector2.One,
                     12,
                     0,

@@ -23,6 +23,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.CompilerServices;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.IFumenEditorDrawingContext;
+using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawXGridHelper;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -33,6 +35,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private DrawXGridHelper xGridHelper;
         private DrawJudgeLineHelper judgeLineHelper;
         private StringBuilder stringBuilder = new StringBuilder();
+
+        private List<CacheDrawLineResult> cachedMagneticXGridLines = new();
+        public IEnumerable<CacheDrawLineResult> CachedMagneticXGridLines => cachedMagneticXGridLines;
 
         private float viewWidth = 0;
         public float ViewWidth
@@ -186,8 +191,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //todo 这里就要计算可视区域了
             Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight), minTGrid, maxTGrid);
 
+            RecalculateMagaticXGridLines();
+
             timeSignatureHelper.DrawLines(this);
-            xGridHelper.DrawLines(this);
+            xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
             foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
             {
@@ -217,7 +224,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             drawMap.Clear();
 
             timeSignatureHelper.DrawTimeSigntureText(this);
-            xGridHelper.DrawXGridText(this);
+            xGridHelper.DrawXGridText(this, CachedMagneticXGridLines);
             judgeLineHelper.Draw(this);
 
             performenceMonitor.OnAfterRender();
@@ -242,6 +249,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var scrollViewer = e.Source as FrameworkElement;
             var view = e.View as FrameworkElement;
             Redraw(RedrawTarget.All);
+        }
+
+        private void RecalculateMagaticXGridLines()
+        {
+            cachedMagneticXGridLines.Clear();
+
+            var width = ViewWidth;
+            var xUnitSpace = (float)Editor.Setting.XGridUnitSpace;
+            var maxDisplayXUnit = Editor.Setting.XGridDisplayMaxUnit;
+
+            var unitSize = (float)XGridCalculator.CalculateXUnitSize(maxDisplayXUnit, width, xUnitSpace);
+            var totalUnitValue = 0f;
+
+            for (float totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
+            {
+                totalUnitValue += xUnitSpace;
+
+                cachedMagneticXGridLines.Add(new()
+                {
+                    X = totalLength,
+                    XGridTotalUnit = totalUnitValue,
+                    XGridTotalUnitDisplay = totalUnitValue.ToString()
+                });
+
+                cachedMagneticXGridLines.Add(new()
+                {
+                    X = (width / 2) - (totalLength - (width / 2)),
+                    XGridTotalUnit = -totalUnitValue,
+                    XGridTotalUnitDisplay = (-totalUnitValue).ToString()
+                });
+            }
+            cachedMagneticXGridLines.Add(new()
+            {
+                X = width / 2,
+                XGridTotalUnit = 0f,
+            });
         }
 
         public void OnSizeChanged(ActionExecutionContext e)

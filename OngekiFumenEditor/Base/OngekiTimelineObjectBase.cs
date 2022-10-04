@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,8 @@ namespace OngekiFumenEditor.Base
         }
 
         private bool isSelecting = false;
+
+        [ObjectPropertyBrowserHide]
         public virtual bool IsSelected
         {
             get => isSelecting;

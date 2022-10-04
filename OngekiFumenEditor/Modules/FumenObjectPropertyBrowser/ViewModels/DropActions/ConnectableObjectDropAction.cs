@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                     startObject.AddChildObject(childViewModel as ConnectableChildObjectBase);
                 else
                     startObject.InsertChildObject(dragTGrid, childViewModel as ConnectableChildObjectBase);
-                editor.OnObjectMovingCanvas(childViewModel, dragEndPoint);
+                editor.MoveObjectTo(childViewModel, dragEndPoint);
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
                 if (isFirst)
