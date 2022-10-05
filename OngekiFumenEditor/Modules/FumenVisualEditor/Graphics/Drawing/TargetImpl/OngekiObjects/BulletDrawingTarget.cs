@@ -120,7 +120,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
 
             //计算向量化的物件运动时间
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor.Fumen.BpmList, 1, 240);
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
             var fromTime = toTime - appearOffsetTime;
             var currentTime = target.CurrentPlayTime;
             var precent = (currentTime - fromTime) / appearOffsetTime;
@@ -143,6 +143,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             normalDrawList[texture].Add((size, offsetPos, rotate));
             if (obj.IsSelected)
                 selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate));
+            drawStrList.Add((offsetPos, obj));
+            target.RegisterSelectableObject(obj, offsetPos, size);
+        }
+
+
+        private void DrawEditor(IFumenEditorDrawingContext target, Bullet obj)
+        {
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
+            
+            var pos = new Vector2((float)toX, (float)toTime);
+
+            var texture = spritesMap[obj.BulletDamageTypeValue][obj.ReferenceBulletPallete.TypeValue];
+            var size = spritesSize[texture];
+            var origOffset = spritesOriginOffset[texture];
+
+            var offsetPos = pos + origOffset;
+            normalDrawList[texture].Add((size, offsetPos, 0));
+            if (obj.IsSelected)
+                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0));
             drawStrList.Add((offsetPos, obj));
             target.RegisterSelectableObject(obj, offsetPos, size);
         }
@@ -175,13 +195,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Bullet> objs)
         {
-            foreach (var obj in objs)
-                Draw(target, obj);
+            if (target.Editor.EditorObjectVisibility == System.Windows.Visibility.Visible)
+            {
+                foreach (var obj in objs)
+                    DrawEditor(target, obj);
+            }
+            else
+            {
+                foreach (var obj in objs)
+                    Draw(target, obj);
+            }
+
             foreach (var item in selectedDrawList)
                 highlightDrawing.Draw(target, item.Key, item.Value);
+
             foreach (var item in normalDrawList)
                 batchTextureDrawing.Draw(target, item.Key, item.Value);
-            DrawPallateStr(target);
+
+            if (target.Editor.EditorObjectVisibility == System.Windows.Visibility.Visible)
+                DrawPallateStr(target);
             ClearDrawList();
         }
     }

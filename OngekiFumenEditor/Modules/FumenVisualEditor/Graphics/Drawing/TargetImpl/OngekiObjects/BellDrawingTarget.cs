@@ -52,6 +52,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             return time;
         }
 
+        public void PostDrawEditor(IFumenEditorDrawingContext target, Bell obj)
+        {
+            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
+
+            var pos = new Vector2((float)toX, (float)toTime);
+            normalFlichList.Add((size, pos, 0f));
+            if (obj.IsSelected)
+                selectedFlickList.Add((selectSize, pos, 0f));
+            DrawPallateStr(target, obj, pos);
+            target.RegisterSelectableObject(obj, pos, size);
+        }
+
         public void PostDraw(IFumenEditorDrawingContext target, Bell obj)
         {
             /*
@@ -93,14 +106,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             normalFlichList.Add((size, pos, 0f));
             if (obj.IsSelected)
                 selectedFlickList.Add((selectSize, pos, 0f));
-            DrawPallateStr(target, obj, pos);
             target.RegisterSelectableObject(obj, pos, size);
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Bell> objs)
         {
-            foreach (var obj in objs)
-                PostDraw(target, obj);
+            if (target.Editor.EditorObjectVisibility == System.Windows.Visibility.Visible)
+            {
+                foreach (var obj in objs)
+                    PostDrawEditor(target, obj);
+            }
+            else
+            {
+                foreach (var obj in objs)
+                    PostDraw(target, obj);
+            }
+
             highlightDrawing.Draw(target, texture, selectedFlickList);
             textureDrawing.Draw(target, texture, normalFlichList);
 

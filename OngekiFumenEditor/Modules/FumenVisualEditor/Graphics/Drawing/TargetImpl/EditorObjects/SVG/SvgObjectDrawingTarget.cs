@@ -12,6 +12,7 @@ using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.IStati
 using System.Drawing;
 using OngekiFumenEditor.Utils;
 using System.Numerics;
+using NAudio.Gui;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG
 {
@@ -31,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public SvgObjectDrawingTarget()
         {
-            texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\WN.png");
+            texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\CC.png");
 
             cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
@@ -41,37 +42,38 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Draw(IFumenEditorDrawingContext target, SvgPrefabBase obj)
         {
-            var vertics = cachedSvgRenderDataManager.GetRenderData(target, obj, out var isCached, out var bound);
-            if (vertics.Count == 0)
-                return;
-            var isCachedVBO = vboHolder.TryGetValue(obj, out var handle);
-
-            if (isCached)
-            {
-                if (!isCachedVBO)
-                    handle = vboHolder[obj] = lineDrawing.GenerateVBOWithPresetPoints(vertics, 1);
-            }
-            else
-            {
-                handle?.Dispose();
-                handle = vboHolder[obj] = lineDrawing.GenerateVBOWithPresetPoints(vertics, 1);
-            }
-
-            var w = bound.Width;
-            var h = bound.Height;
-
             var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
             var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
-
-            var dx = x + w / 2;
-            var dy = y - h / 2;
-            lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * OpenTK.Mathematics.Matrix4.CreateTranslation((float)dx, (float)dy, 0));
-            {
-                lineDrawing.DrawVBO(target, handle);
-            }
-            lineDrawing.PopOverrideModelMatrix(out _);
-
             var pos = new Vector2(x, y);
+
+            var vertics = cachedSvgRenderDataManager.GetRenderData(target, obj, out var isCached, out var bound);
+            if (vertics.Count != 0)
+            {
+                var isCachedVBO = vboHolder.TryGetValue(obj, out var handle);
+
+                if (isCached)
+                {
+                    if (!isCachedVBO)
+                        handle = vboHolder[obj] = lineDrawing.GenerateVBOWithPresetPoints(vertics, 1);
+                }
+                else
+                {
+                    handle?.Dispose();
+                    handle = vboHolder[obj] = lineDrawing.GenerateVBOWithPresetPoints(vertics, 1);
+                }
+
+                var w = bound.Width;
+                var h = bound.Height;
+
+
+                var dx = x + w / 2;
+                var dy = y - h / 2;
+                lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * OpenTK.Mathematics.Matrix4.CreateTranslation((float)dx, (float)dy, 0));
+                {
+                    lineDrawing.DrawVBO(target, handle);
+                }
+                lineDrawing.PopOverrideModelMatrix(out _);
+            }
 
             if (obj.IsSelected)
                 highlightDrawing.Draw(target, texture, new[] { (new Vector2(20, 20), pos, 0f) });
