@@ -17,13 +17,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
     public class DrawTimeSignatureHelper
     {
-        public struct CacheDrawLineResult
+        public struct CacheDrawTimeLineResult
         {
             public double Y { get; set; }
             public string Display { get; set; }
         }
 
-        private List<CacheDrawLineResult> drawLines = new();
+        private List<CacheDrawTimeLineResult> drawLines = new();
 
         private IStringDrawing stringDrawing;
         private ILineDrawing lineDrawing;

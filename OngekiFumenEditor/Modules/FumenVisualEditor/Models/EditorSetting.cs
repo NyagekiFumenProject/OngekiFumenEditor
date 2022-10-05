@@ -72,6 +72,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private bool judgeLineAlignBeat = Properties.EditorGlobalSetting.Default.JudgeLineAlignBeat;
+        public bool JudgeLineAlignBeat
+        {
+            get => judgeLineAlignBeat;
+            set
+            {
+                judgeLineAlignBeat = Properties.EditorGlobalSetting.Default.JudgeLineAlignBeat = value;
+                Save();
+                NotifyOfPropertyChange(() => JudgeLineAlignBeat);
+            }
+        }
+
         private bool disableTGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock;
         /// <summary>
         /// 表示物件或者其他在时间轴上移动时，是否可以自动吸附到最近的单位线上
@@ -230,6 +242,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.DisplayTimeFormat):
                     displayTimeFormat = (TimeFormat)Properties.EditorGlobalSetting.Default.DisplayTimeFormat;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.JudgeLineAlignBeat):
+                    judgeLineAlignBeat = Properties.EditorGlobalSetting.Default.JudgeLineAlignBeat;
                     break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");

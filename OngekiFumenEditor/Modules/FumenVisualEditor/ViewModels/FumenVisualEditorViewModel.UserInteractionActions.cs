@@ -781,7 +781,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var cp = pos;
                 cp.Y = ViewHeight - cp.Y + Rect.MinY;
                 //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
-                SelectObjects.ForEach(x => dragCall(x as OngekiObjectBase, cp));
+                SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
             }
 
             //持续性的
@@ -939,7 +939,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as MouseWheelEventArgs;
             arg.Handled = true;
 
-            ScrollViewerVerticalOffset = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * 100;
+            if (Setting.JudgeLineAlignBeat)
+            {
+
+                var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Setting.TGridUnitLength, Fumen.BpmList);
+                (var prevY, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.startY < ScrollViewerVerticalOffset);
+                if (meter is null)
+                    (prevY, _, meter, bpm) = timeSignatures.FirstOrDefault();
+                var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
+
+                //消除精度误差~
+                prevY = Math.Max(0, prevY - 1);
+                nextY++;
+
+                var downFirst = TGridCalculator.GetVisbleTimelines(Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength)
+                    .Where(x => x.y != ScrollViewerVerticalOffset).LastOrDefault();
+                var nextFirst = TGridCalculator.GetVisbleTimelines(Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength)
+                    .Where(x => x.y != ScrollViewerVerticalOffset).FirstOrDefault();
+
+                //Log.LogDebug($"ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2} , downFirst: {downFirst.y:F2} , nextFirst: {nextFirst.y:F2}");
+                var result = arg.Delta > 0 ? nextFirst : downFirst;
+                ScrollViewerVerticalOffset = result.y;
+            }
+            else
+            {
+                ScrollViewerVerticalOffset = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * 50;
+            }
         }
 
         #region Lock/Unlock User Interaction

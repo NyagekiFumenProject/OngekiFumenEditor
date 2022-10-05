@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
     public class DrawXGridHelper
     {
-        public struct CacheDrawLineResult
+        public struct CacheDrawXLineResult
         {
             public float X { get; set; }
             public float XGridTotalUnit { get; set; }
@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
         }
 
-        public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawLineResult> drawLines)
+        public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
         {
             if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
                 return;
@@ -57,7 +57,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing.PopOverrideViewProjectMatrix(out _);
         }
 
-        public void DrawXGridText(IFumenEditorDrawingContext target, IEnumerable<CacheDrawLineResult> drawLines)
+        public void DrawXGridText(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
         {
             if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
                 return;

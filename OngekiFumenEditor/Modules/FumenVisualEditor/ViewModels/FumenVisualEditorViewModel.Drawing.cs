@@ -25,6 +25,7 @@ using System.Runtime.CompilerServices;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.IFumenEditorDrawingContext;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawXGridHelper;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawTimeSignatureHelper;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -36,8 +37,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private DrawJudgeLineHelper judgeLineHelper;
         private StringBuilder stringBuilder = new StringBuilder();
 
-        private List<CacheDrawLineResult> cachedMagneticXGridLines = new();
-        public IEnumerable<CacheDrawLineResult> CachedMagneticXGridLines => cachedMagneticXGridLines;
+        private List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
+        public IEnumerable<CacheDrawXLineResult> CachedMagneticXGridLines => cachedMagneticXGridLines;
 
         private float viewWidth = 0;
         public float ViewWidth
