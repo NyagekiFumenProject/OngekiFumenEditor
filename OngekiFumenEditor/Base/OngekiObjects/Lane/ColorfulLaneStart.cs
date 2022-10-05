@@ -33,12 +33,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
         public override Type NextType => typeof(ColorfulLaneNext);
         public override Type EndType => typeof(ColorfulLaneEnd);
 
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new LaneColorfulConnector()
-        {
-            From = from,
-            To = to
-        };
-
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {
             base.Copy(fromObj, fumen);

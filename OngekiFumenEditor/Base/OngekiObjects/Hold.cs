@@ -58,14 +58,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override Type NextType => null;
         public override Type EndType => typeof(HoldEnd);
-
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to)
-        {
-            return new HoldConnector()
-            {
-                From = from,
-                To = to
-            };
-        }
     }
 }

@@ -6,9 +6,9 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Click SE", "Ongeki Objects")]
-    public class ClickSEViewModel : ToolboxGenerator<ClickSE>
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Enemy Set", "Ongeki Objects")]
+    public class EnemySetToolboxGenerator : ToolboxGenerator<EnemySet>
     {
-            
+
     }
 }

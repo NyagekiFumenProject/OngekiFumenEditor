@@ -11,7 +11,6 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.EditorObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.Utils;

@@ -21,10 +21,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         }
         public override Type NextType => typeof(BeamNext);
         public override Type EndType => typeof(BeamEnd);
-
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to)
-        {
-            return GenerateConnectorInternal<BeamConnector>(from, to);
-        }
     }
 }

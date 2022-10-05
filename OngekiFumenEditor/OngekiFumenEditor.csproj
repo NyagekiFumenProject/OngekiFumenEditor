@@ -186,15 +186,6 @@
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneBlockLaneDecorationView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\HoldConnectorView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletPalleteAuxiliaryLineView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -363,23 +354,7 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneBlockLaneDecorationView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\HoldConnectorView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\BulletPalleteAuxiliaryLineView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="Modules\EditorSvgObjectControlProvider\Views\SvgPrefabView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\EditorObjects\LaneCurvePathControlObjectView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

@@ -12,12 +12,7 @@ using static OngekiFumenEditor.Base.OngekiObjects.Soflan;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {   
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Soflan", "Lane Control")]
-    public class SoflanViewModel : ToolboxGenerator<Soflan>
-    {
-
-    }
-
-    public class SoflanEndIndicatorViewModel : ToolboxGenerator<SoflanEndIndicator>
+    public class SoflanToolboxGenerator : ToolboxGenerator<Soflan>
     {
 
     }

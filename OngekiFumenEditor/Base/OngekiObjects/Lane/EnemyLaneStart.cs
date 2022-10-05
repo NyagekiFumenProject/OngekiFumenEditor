@@ -19,11 +19,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 
         public override Type NextType => typeof(EnemyLaneNext);
         public override Type EndType => typeof(EnemyLaneEnd);
-
-        protected override ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to) => new EnemyLaneConnector()
-        {
-            From = from,
-            To = to
-        };
     }
 }

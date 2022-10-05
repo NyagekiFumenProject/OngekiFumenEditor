@@ -11,7 +11,7 @@ using System.Windows.Media;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "BPM Change", "Ongeki Objects")]
-    public class BPMChangeViewModel : ToolboxGenerator<BPMChange>
+    public class BPMChangeToolboxGenerator : ToolboxGenerator<BPMChange>
     {
 
     }

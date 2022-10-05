@@ -21,38 +21,37 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [MapToView(ViewType = typeof(LaneStartView))]
-    public class LaneStartViewModel<T> : ToolboxGenerator<T> where T : LaneStartBase, new()
+    public class LaneStartToolboxGenerator<T> : ToolboxGenerator<T> where T : LaneStartBase, new()
     {
 
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Left(Red) Start", "Ongeki Lanes")]
-    public class LaneLeftStartViewModel : LaneStartViewModel<LaneLeftStart>
+    public class LaneLeftStartToolboxGenerator : LaneStartToolboxGenerator<LaneLeftStart>
     {
 
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Center(Green) Start", "Ongeki Lanes")]
-    public class LaneCenterStartViewModel : LaneStartViewModel<LaneCenterStart>
+    public class LaneCenterStartToolboxGenerator : LaneStartToolboxGenerator<LaneCenterStart>
     {
 
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Right(Blue) Start", "Ongeki Lanes")]
-    public class LaneRightStartViewModel : LaneStartViewModel<LaneRightStart>
+    public class LaneRightStartToolboxGenerator : LaneStartToolboxGenerator<LaneRightStart>
     {
 
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Colorful Start", "Ongeki Lanes")]
-    public class LaneColorfulStartViewModel : LaneStartViewModel<ColorfulLaneStart>
+    public class LaneColorfulStartToolboxGenerator : LaneStartToolboxGenerator<ColorfulLaneStart>
     {
 
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Enemy Lane Start", "Ongeki Lanes")]
-    public class EnemyLaneStartViewModel : LaneStartViewModel<EnemyLaneStart>
+    public class EnemyLaneStartToolboxGenerator : LaneStartToolboxGenerator<EnemyLaneStart>
     {
 
     }

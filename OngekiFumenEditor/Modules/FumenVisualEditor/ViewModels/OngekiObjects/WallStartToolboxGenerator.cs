@@ -19,20 +19,19 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [MapToView(ViewType = typeof(WallStartView))]
-    public class WallStartViewModel<T> : ToolboxGenerator<T> where T : WallStartBase, new()
+    public class WallStartToolboxGenerator<T> : ToolboxGenerator<T> where T : WallStartBase, new()
     {
 
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Left Start", "Ongeki Lanes")]
-    public class WallLeftStartViewModel : WallStartViewModel<WallLeftStart>
+    public class WallLeftStartToolboxGenerator : WallStartToolboxGenerator<WallLeftStart>
     {
 
     }
 
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Right Start", "Ongeki Lanes")]
-    public class WallRightStartViewModel : WallStartViewModel<WallRightStart>
+    public class WallRightStartToolboxGenerator : WallStartToolboxGenerator<WallRightStart>
     {
 
     }

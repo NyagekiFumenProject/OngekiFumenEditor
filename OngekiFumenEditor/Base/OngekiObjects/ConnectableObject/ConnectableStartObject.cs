@@ -32,7 +32,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         }
 
         private List<ConnectableChildObjectBase> children = new();
-        private List<ConnectorLineBase<ConnectableObjectBase>> connectors = new();
         public IEnumerable<ConnectableChildObjectBase> Children => children;
 
         public TGrid MinTGrid => TGrid;
@@ -41,19 +40,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         private int recordId = -1;
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
-        protected abstract ConnectorLineBase<ConnectableObjectBase> GenerateConnector(ConnectableObjectBase from, ConnectableObjectBase to);
-
         public abstract Type NextType { get; }
         public abstract Type EndType { get; }
-
-        protected ConnectorLineBase<ConnectableObjectBase> GenerateConnectorInternal<T>(ConnectableObjectBase from, ConnectableObjectBase to) where T : ConnectorLineBase<ConnectableObjectBase>, new()
-        {
-            return new T()
-            {
-                From = from,
-                To = to,
-            };
-        }
 
         public ConnectableStartObject()
         {
@@ -69,13 +57,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 {
                     var nextObj = children.ElementAtOrDefault(insertIdx);
                     var prevObj = children.ElementAtOrDefault(insertIdx - 1) ?? this as ConnectableObjectBase;
-                    RemoveConnector(prevObj, nextObj);
                     child.PrevObject = prevObj;
 
                     if (nextObj is not null)
                     {
                         nextObj.PrevObject = child;
-                        AddConnector(GenerateConnector(nextObj.PrevObject, nextObj));
                     }
                     insertIdx = Math.Min(insertIdx, children.Count);
                     children.Insert(insertIdx, child);
@@ -85,7 +71,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     child.PrevObject = Children.LastOrDefault() ?? this as ConnectableObjectBase;
                     children.Add(child);
                 }
-                AddConnector(GenerateConnector(child.PrevObject, child));
                 child.PropertyChanged += OnPropertyChanged;
                 NotifyWhenChildrenChanged();
             }
@@ -98,29 +83,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             NotifyOfPropertyChange(() => Children);
             NotifyOfPropertyChange(() => MinTGrid);
             NotifyOfPropertyChange(() => MaxTGrid);
-        }
-
-        private void RemoveConnector(ConnectorLineBase<ConnectableObjectBase> connector)
-        {
-            connectors.Remove(connector);
-            connector.OnConnectorRemoved();
-        }
-
-        private void RemoveConnector(ConnectableObjectBase from, ConnectableObjectBase to)
-        {
-            if (connectors.FirstOrDefault(x => x.From == from && x.To == to) is ConnectorLineBase<ConnectableObjectBase> connector)
-                RemoveConnector(connector);
-        }
-
-        private void RemoveAnyConnector(ConnectableObjectBase from, ConnectableObjectBase to)
-        {
-            foreach (var connector in connectors.Where(x => x.From == from || x.To == to).ToArray())
-                RemoveConnector(connector);
-        }
-
-        private void AddConnector(ConnectorLineBase<ConnectableObjectBase> connector)
-        {
-            connectors.Add(connector);
         }
 
         public void InsertChildObject(TGrid dragTGrid, ConnectableChildObjectBase child)
@@ -142,12 +104,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     {
                         ConnectableObjectBase prev = i == 0 ? this : children[i - 1];
                         children.Insert(i, child);
-                        RemoveConnector(prev, next);
                         next.PrevObject = child;
                         child.PrevObject = prev;
-
-                        AddConnector(GenerateConnector(child.PrevObject, child));
-                        AddConnector(GenerateConnector(next.PrevObject, next));
 
                         child.PropertyChanged += OnPropertyChanged;
                         child.RecordId = RecordId;
@@ -169,14 +127,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             var idx = children.IndexOf(child);
             children.Remove(child);
 
-            RemoveAnyConnector(child, child);
-
             var prev = child.PrevObject;
             var next = children.FirstOrDefault(x => x.PrevObject == child);
             if (next is not null)
             {
                 next.PrevObject = prev;
-                AddConnector(GenerateConnector(next.PrevObject, next));
             }
             child.PrevObject = default;
 
@@ -210,8 +165,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
-            foreach (var child in connectors.SelectMany(x => x.GetDisplayableObjects().Append(x)))
-                yield return child;
             yield return this;
             foreach (var child in Children.SelectMany(x => x.GetDisplayableObjects().Append(x)))
                 yield return child;

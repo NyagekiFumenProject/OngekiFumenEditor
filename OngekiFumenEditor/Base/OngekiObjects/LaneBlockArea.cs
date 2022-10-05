@@ -41,8 +41,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         {
             EndIndicator = new LaneBlockAreaEndIndicator() { RefLaneBlockArea = this };
             EndIndicator.PropertyChanged += EndIndicator_PropertyChanged;
-            connector = new LaneBlockLaneDecoration() { From = this, To = EndIndicator };
-            displayables = new IDisplayableObject[] { connector, this, EndIndicator };
+            displayables = new IDisplayableObject[] { this, EndIndicator };
         }
 
         private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -54,7 +53,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override string IDShortName => "LBK";
 
-        private LaneBlockLaneDecoration connector;
         public LaneBlockAreaEndIndicator EndIndicator { get; }
 
         private BlockDirection direction = BlockDirection.Left;

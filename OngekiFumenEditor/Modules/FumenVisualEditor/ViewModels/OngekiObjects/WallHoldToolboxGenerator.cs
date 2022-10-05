@@ -16,8 +16,9 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [MapToView(ViewType = typeof(WallTapView))]
-    public class WallHoldEndViewModel : HoldEndViewModel
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Hold Start", "Ongeki Objects")]
+    public class WallHoldToolboxGenerator : ToolboxGenerator<WallHold>
     {
+
     }
 }

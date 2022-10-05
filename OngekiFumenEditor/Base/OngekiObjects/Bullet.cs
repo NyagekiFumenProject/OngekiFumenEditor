@@ -50,16 +50,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
         */
 
-        private BulletPalleteAuxiliaryLine line;
-
         public Bullet()
         {
-            line = new BulletPalleteAuxiliaryLine(this);
+
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
-            yield return line;
             yield return this;
         }
 

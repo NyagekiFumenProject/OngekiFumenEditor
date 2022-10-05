@@ -11,12 +11,7 @@ using static OngekiFumenEditor.Base.OngekiObjects.LaneBlockArea;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {   
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Block", "Lane Control")]
-    public class LaneBlockAreaViewModel : ToolboxGenerator<LaneBlockArea>
-    {
-
-    }
-
-    public class LaneBlockAreaEndIndicatorViewModel : ToolboxGenerator<LaneBlockAreaEndIndicator>
+    public class LaneBlockAreaToolboxGenerator : ToolboxGenerator<LaneBlockArea>
     {
 
     }

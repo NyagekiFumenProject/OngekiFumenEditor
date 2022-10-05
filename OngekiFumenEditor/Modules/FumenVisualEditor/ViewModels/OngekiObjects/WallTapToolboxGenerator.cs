@@ -10,11 +10,14 @@ using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
+using OngekiFumenEditor.Utils.Attributes;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Views.OngekiObjects;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Tap", "Ongeki Objects")]
-    public class TapViewModel : ToolboxGenerator<Tap>
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Tap", "Ongeki Objects")]
+    public class WallTapToolboxGenerator : ToolboxGenerator<WallTap>
     {
 
     }

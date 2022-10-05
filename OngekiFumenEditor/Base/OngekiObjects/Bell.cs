@@ -16,12 +16,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "BEL";
         public override string IDShortName => CommandName;
 
-
-        private BulletPalleteAuxiliaryLine line;
-
         public Bell()
         {
-            line = new BulletPalleteAuxiliaryLine(this);
             ReferenceBulletPallete = null;
         }
 
@@ -33,13 +29,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             {
                 referenceBulletPallete = value;
                 NotifyOfPropertyChange(() => ReferenceBulletPallete);
-                line.Visibility = value is not null ? Visibility.Visible : Visibility.Hidden;
             }
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
-            yield return line;
             yield return this;
         }
 
