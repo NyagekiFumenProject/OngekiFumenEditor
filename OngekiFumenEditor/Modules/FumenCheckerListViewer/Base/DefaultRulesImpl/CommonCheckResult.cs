@@ -17,14 +17,6 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
         public string LocationDescription { get; set; }
         public string Description { get; set; }
 
-        public TGrid NavigateTGridLocation { get; set; }
-
-        public void Navigate(object fumenHostedObj)
-        {
-            if (fumenHostedObj is FumenVisualEditorViewModel editor)
-            {
-                editor.ScrollTo(NavigateTGridLocation);
-            }
-        }
+        public INavigateBehavior NavigateBehavior { get; set; }
     }
 }

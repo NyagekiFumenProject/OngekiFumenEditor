@@ -65,6 +65,9 @@ namespace OngekiFumenEditor.Base.Collections.Base
             if (IsBatching)
                 throw new Exception("Collection is in batching....");
 #endif
+            if (obj is null)
+                return false;
+
             var keyRange = rangeKeySelector(obj);
             return tree.Query(keyRange.Min, keyRange.Max).Contains(obj);
         }

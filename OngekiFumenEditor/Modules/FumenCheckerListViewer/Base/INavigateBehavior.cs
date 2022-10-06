@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base
 {
-    public interface IFumenCheckRule
+    public interface INavigateBehavior
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostEditor);
+        void Navigate(FumenVisualEditorViewModel editor);
     }
 }

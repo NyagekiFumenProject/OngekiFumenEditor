@@ -1,6 +1,8 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -13,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     [Export(typeof(IFumenCheckRule))]
     internal class CommonObjectOverlapCheckRule : IFumenCheckRule
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, object fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
         {
             IEnumerable<ICheckResult> CheckList(IEnumerable<OngekiMovableObjectBase> objs)
             {
@@ -32,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                         },
                         Description = $"多个同类{conflict.FirstOrDefault().IDShortName}物件重叠",
                         LocationDescription = $"{conflict.Key.XGrid} {conflict.Key.TGrid}",
-                        NavigateTGridLocation = conflict.Key.TGrid,
+                        NavigateBehavior = new NavigateToTGridBehavior(conflict.Key.TGrid),
                         RuleName = RuleName,
                     };
                 }
@@ -49,7 +51,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                         Severity = RuleSeverity.Error,
                         Description = $"多个ITimelineObject同类({conflict.FirstOrDefault().IDShortName})物件重叠",
                         LocationDescription = $"{conflict.Key}",
-                        NavigateTGridLocation = conflict.Key,
+                        NavigateBehavior = new NavigateToTGridBehavior(conflict.Key),
                         RuleName = RuleName,
                     };
                 }

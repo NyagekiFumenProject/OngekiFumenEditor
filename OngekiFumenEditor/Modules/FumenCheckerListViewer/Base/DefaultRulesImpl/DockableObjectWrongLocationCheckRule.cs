@@ -1,6 +1,8 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -15,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     {
         const string RuleName = "WrongLocation";
 
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, object fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
         {
             foreach (var dockableObj in fumen.Holds
                 .AsEnumerable<ILaneDockable>()
@@ -28,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 {
                     Description = $"{dockableObj.GetType().Name}物件貌似没有放置在正确的轨道(id:{dockableObj.ReferenceLaneStrId})线上",
                     LocationDescription = dockableObj.ToString(),
-                    NavigateTGridLocation = dockableObj.TGrid,
+                    NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
                     RuleName = RuleName,
                     Severity = RuleSeverity.Problem
                 };

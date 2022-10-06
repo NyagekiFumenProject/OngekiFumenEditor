@@ -1,5 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -14,7 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     {
         const string RuleName = "MissingRefObject";
 
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, object fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
         {
             foreach (var dockableObj in fumen.Holds.AsEnumerable<ILaneDockable>().Concat(fumen.Taps).Where(x => x.ReferenceLaneStart is null))
             {
@@ -22,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 {
                     Description = $"{dockableObj.GetType().Name}物件缺少引用Lane物件",
                     LocationDescription = dockableObj.ToString(),
-                    NavigateTGridLocation = dockableObj.TGrid,
+                    NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
                     RuleName = RuleName,
                     Severity = RuleSeverity.Error
                 };
@@ -34,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 {
                     Description = $"{dockableObj.GetType().Name}物件引用的Lane物件(laneId:{dockableObj.ReferenceLaneStrId}),不存在于谱面文件内",
                     LocationDescription = dockableObj.ToString(),
-                    NavigateTGridLocation = dockableObj.TGrid,
+                    NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
                     RuleName = RuleName,
                     Severity = RuleSeverity.Error
                 };

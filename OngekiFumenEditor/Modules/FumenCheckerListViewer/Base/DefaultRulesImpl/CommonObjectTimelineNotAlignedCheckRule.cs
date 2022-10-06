@@ -1,5 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -13,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     [Export(typeof(IFumenCheckRule))]
     internal class CommonObjectTimelineNotAlignedCheckRule : IFumenCheckRule
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, object fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
         {
             IEnumerable<ICheckResult> CheckList(IEnumerable<OngekiTimelineObjectBase> objs)
             {
@@ -61,7 +63,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                             Severity = RuleSeverity.Problem,
                             Description = $"物件{obj.IDShortName}没对上节奏",
                             LocationDescription = $"{obj}",
-                            NavigateTGridLocation = obj.TGrid,
+                            NavigateBehavior = new NavigateToObjectBehavior(obj),
                             RuleName = RuleName,
                         };
                     }

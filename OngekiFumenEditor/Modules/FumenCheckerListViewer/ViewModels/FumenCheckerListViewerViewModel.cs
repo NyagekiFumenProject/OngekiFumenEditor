@@ -85,7 +85,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 
         public void OnItemDoubleClick(ICheckResult checkResult)
         {
-            checkResult?.Navigate(Editor);
+            checkResult?.NavigateBehavior?.Navigate(Editor);
         }
 
         public void RefreshCurrentFumen()

@@ -14,6 +14,6 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base
 
         string Description { get; }
 
-        void Navigate(object fumenHostedObj);
+        INavigateBehavior NavigateBehavior { get; }
     }
 }

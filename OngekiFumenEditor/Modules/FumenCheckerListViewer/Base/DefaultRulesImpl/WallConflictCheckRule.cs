@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -173,10 +174,8 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
             }
         }
 
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, object fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
         {
-            var editor = fumenHostViewModel as FumenVisualEditorViewModel;
-
             var leftWalls = fumen.Lanes.Where(x => x.LaneType == LaneType.WallLeft).Select(x => new WallInfo
             {
                 Wall = x,
@@ -208,7 +207,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                             Severity = RuleSeverity.Error,
                             Description = $"墙(id:{cur.Wall.RecordId})与另一个同方向的墙(id:{next.Wall.RecordId})发生时间冲突",
                             LocationDescription = cur.TGridRange.ToString(),
-                            NavigateTGridLocation = cur.Wall.TGrid
+                            NavigateBehavior = new NavigateToTGridBehavior(cur.Wall.TGrid)
                         };
                     }
                 }
@@ -229,7 +228,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                                 Severity = RuleSeverity.Error,
                                 LocationDescription = child.ToString(),
                                 Description = $"墙(id:{wall.Wall.RecordId})Next/End物件的TGrid({child.TGrid})不能低于前者({maxTGrid})",
-                                NavigateTGridLocation = child.TGrid
+                                NavigateBehavior = new NavigateToObjectBehavior(child)
                             };
                             break;
                         }
@@ -286,11 +285,11 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 
                         var leftPoints =
                             leftWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Prepend(leftWall.Wall)
-                            .Select(x => new Point() { x = XGridCalculator.ConvertXGridToX(x.XGrid, editor), y = TGridCalculator.ConvertTGridToY(x.TGrid, editor) });
+                            .Select(x => new Point() { x = XGridCalculator.ConvertXGridToX(x.XGrid, fumenHostViewModel), y = TGridCalculator.ConvertTGridToY(x.TGrid, fumenHostViewModel) });
 
                         var rightPoints =
                             rightWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Prepend(rightWall.Wall)
-                            .Select(x => new Point() { x = XGridCalculator.ConvertXGridToX(x.XGrid, editor), y = TGridCalculator.ConvertTGridToY(x.TGrid, editor) });
+                            .Select(x => new Point() { x = XGridCalculator.ConvertXGridToX(x.XGrid, fumenHostViewModel), y = TGridCalculator.ConvertTGridToY(x.TGrid, fumenHostViewModel) });
 
                         var leftLines = leftPoints
                             .SequenceConsecutivelyWrap(2)
@@ -322,7 +321,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                                 Severity = RuleSeverity.Error,
                                 LocationDescription = $"leftLine:{leftLine} rightLine:{rightLine} C[{p.x:F2},{p.y:F2}]",
                                 Description = $"不同边的墙(id:{leftWall.Wall.RecordId})和(id:{rightWall.Wall.RecordId})水平交叉碰撞或重合",
-                                NavigateTGridLocation = leftWall.Wall.TGrid
+                                NavigateBehavior = new NavigateToTGridBehavior(leftWall.Wall.TGrid)
                             };
                         }
                     }
