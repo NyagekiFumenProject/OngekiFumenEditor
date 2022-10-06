@@ -89,14 +89,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (itor.MoveNext())
                 {
                     var point = itor.Current;
-                    list.Add(new(point, Vector4.Zero));
-                    list.Add(new(point, color));
+                    list.Add(new(point, Vector4.Zero, VertexDash.Solider));
+                    list.Add(new(point, color, VertexDash.Solider));
                     while (itor.MoveNext())
                     {
                         point = itor.Current;
-                        list.Add(new(point, color));
+                        list.Add(new(point, color, VertexDash.Solider));
                     }
-                    list.Add(new(point, Vector4.Zero));
+                    list.Add(new(point, Vector4.Zero, VertexDash.Solider));
                 }
             }
 

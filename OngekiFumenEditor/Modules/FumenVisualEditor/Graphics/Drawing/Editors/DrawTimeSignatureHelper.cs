@@ -85,12 +85,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     Y = y
                 });
 
-                list.Add(new(new(0, (float)y), new(1, 1, 1, 0)));
-                list.Add(new(new(0, (float)y), new(1, 1, 1, maxDispAlpha)));
-                list.Add(new(new(transDisp, (float)y), new(1, 1, 1, minDispAlpha)));
-                list.Add(new(new(eDisp, (float)y), new(1, 1, 1, minDispAlpha)));
-                list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, maxDispAlpha)));
-                list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, 0)));
+                list.Add(new(new(0, (float)y), new(1, 1, 1, 0), VertexDash.Solider));
+                list.Add(new(new(0, (float)y), new(1, 1, 1, maxDispAlpha), VertexDash.Solider));
+                list.Add(new(new(transDisp, (float)y), new(1, 1, 1, minDispAlpha), VertexDash.Solider));
+                list.Add(new(new(eDisp, (float)y), new(1, 1, 1, minDispAlpha), VertexDash.Solider));
+                list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, maxDispAlpha), VertexDash.Solider));
+                list.Add(new(new(target.ViewWidth, (float)y), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
             lineDrawing.Draw(target, list, 1);

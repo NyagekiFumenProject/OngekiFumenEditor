@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
                 var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Editor);
 
-                lineDrawing.PostPoint(new(x, y), color);
+                lineDrawing.PostPoint(new(x, y), color, VertexDash.Solider);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

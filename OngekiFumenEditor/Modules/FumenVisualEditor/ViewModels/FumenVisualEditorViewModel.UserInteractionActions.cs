@@ -941,7 +941,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (Setting.JudgeLineAlignBeat)
             {
-
                 var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Setting.TGridUnitLength, Fumen.BpmList);
                 (var prevY, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.startY < ScrollViewerVerticalOffset);
                 if (meter is null)

@@ -87,8 +87,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 for (int i = 0; i < regColors.Count; i++)
                 {
                     var c = regColors[i];
-                    lineDrawing.PostPoint(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f));
-                    lineDrawing.PostPoint(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f));
+                    lineDrawing.PostPoint(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider);
+                    lineDrawing.PostPoint(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider);
                 }
                 lineDrawing.End();
 
@@ -279,11 +279,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     var hh = size.Value.Y / 2;
 
                     lineDrawing.Begin(target, 1);
-                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1));
-                    lineDrawing.PostPoint(new(bx + hw, by + hh), new(1, 1, 0, 1));
-                    lineDrawing.PostPoint(new(bx + hw, by - hh), new(1, 1, 0, 1));
-                    lineDrawing.PostPoint(new(bx - hw, by - hh), new(1, 1, 0, 1));
-                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1));
+                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
+                    lineDrawing.PostPoint(new(bx + hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
+                    lineDrawing.PostPoint(new(bx + hw, by - hh), new(1, 1, 0, 1), VertexDash.Solider);
+                    lineDrawing.PostPoint(new(bx - hw, by - hh), new(1, 1, 0, 1), VertexDash.Solider);
+                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
                     lineDrawing.End();
                 }
                 x += size.Value.X;

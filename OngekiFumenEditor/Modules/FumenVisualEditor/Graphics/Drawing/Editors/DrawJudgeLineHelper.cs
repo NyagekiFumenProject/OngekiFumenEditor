@@ -27,8 +27,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         {
             var y = target.CurrentPlayTime;
 
-            vertices[0] = new(new(0, y), color);
-            vertices[1] = new(new(target.ViewWidth, y), color);
+            vertices[0] = new(new(0, y), color, VertexDash.Solider);
+            vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);
 
             lineDrawing.Draw(target, vertices, 1);
             var t = target.Editor.GetCurrentJudgeLineTGrid();

@@ -17,6 +17,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                   layout(location = 2) in vec4 line_col_a;
                   layout(location = 3) in vec4 line_pos_width_b;
                   layout(location = 4) in vec4 line_col_b;
+                  layout(location = 5) in float dashSize;
+                  layout(location = 6) in float gapSize;
       
                   uniform mat4 u_mvp;
                   uniform vec2 u_viewport_size;
@@ -28,8 +30,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                   out float v_line_width;
                   out float v_line_length;
 
+                  out float v_dashSize;
+                  out float v_gapSize;
+
+                  flat out vec3 startPos;
+                  out vec3 vertPos;
+
                   void main()
                   {
+                    v_dashSize = dashSize;
+                    v_gapSize = gapSize;
+
                     float u_width        = u_viewport_size[0];
                     float u_height       = u_viewport_size[1];
                     float u_aspect_ratio = u_height / u_width;
@@ -68,13 +79,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                     vec2 dir_y = quad_pos.y * ((1.0 - quad_pos.x) * normal_a + quad_pos.x * normal_b);
                     vec2 dir_x = quad_pos.x * line_vector +  (2.0 * quad_pos.x - 1.0) * extension;
 
-                    gl_Position = vec4( (ndc_pos_0 + dir_x + dir_y) * zw_part.y, zw_part );
+                    vec4 pos = vec4( (ndc_pos_0 + dir_x + dir_y) * zw_part.y, zw_part );
+                    gl_Position = pos;
+                    vertPos     = pos.xyz / pos.w;
+                    startPos    = vertPos;
                   }
 ";
 
             FragmentProgram = @"
                 #version 330
                 uniform vec2 u_aa_radius;
+                uniform vec2 u_viewport_size;
 
               in vec4 v_col;
               in float v_u;
@@ -82,10 +97,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
               in float v_line_width;
               in float v_line_length;
 
+              in float v_gapSize;
+              in float v_dashSize;
+
+              flat in vec3 startPos;
+              in vec3 vertPos;
+
               out vec4 frag_color;
       
               void main()
               {
+                vec2  dir  = (vertPos.xy-startPos.xy) * u_viewport_size/2.0;
+                float dist = length(dir);
+
+                if (fract(dist / (v_dashSize + v_gapSize)) > v_dashSize/(v_dashSize + v_gapSize))
+                    discard; 
+
                 float au = 1.0 - smoothstep( 1.0 - ((2.0*u_aa_radius[0]) / v_line_width),  1.0, abs( v_u / v_line_width ) );
                 float av = 1.0 - smoothstep( 1.0 - ((2.0*u_aa_radius[1]) / v_line_length), 1.0, abs( v_v / v_line_length ) );
                 frag_color = v_col;

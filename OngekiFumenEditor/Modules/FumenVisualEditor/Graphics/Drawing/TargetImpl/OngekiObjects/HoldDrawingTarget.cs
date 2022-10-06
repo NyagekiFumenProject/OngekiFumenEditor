@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {
                 var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
                 var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-                list.Add(new(new(x, y), color));
+                list.Add(new(new(x, y), color, VertexDash.Solider));
             }
 
             if (holdEnd != null)

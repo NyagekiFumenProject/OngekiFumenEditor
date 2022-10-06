@@ -49,6 +49,11 @@
                 Content="强制自动停靠"
                 IsChecked="{Binding Setting.ForceMagneticDock}">
             </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                Content="滑轮滚动判定线对齐节奏线"
+                IsChecked="{Binding Setting.JudgeLineAlignBeat}">
+            </CheckBox>
             <Grid Margin="0,2,0,2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />

@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 msh_vec4_t col;
             } vertex_t;
          */
-        public const int VertexTBytesSize = sizeof(float) * (3 + 1 + 4);
+        public const int VertexTBytesSize = sizeof(float) * (3 + 1 + 4 + 2);
 
         private int vao;
         private int line_vbo;
@@ -51,6 +51,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
         private int mvp;
         private int viewport_size;
+        private int dashSize;
+        private int gapSize;
         private int aa_radius;
 
         private float[] PostData { get; } = new float[MAX_VERTS];
@@ -73,6 +75,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             mvp = shader.GetUniformLocation("u_mvp");
             aa_radius = shader.GetUniformLocation("u_aa_radius");
             viewport_size = shader.GetUniformLocation("u_viewport_size");
+
+            dashSize = shader.GetAttribLocation("dashSize");
+            gapSize = shader.GetAttribLocation("gapSize");
 
             int binding_idx = 0;
 
@@ -142,37 +147,45 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             GL.DeleteVertexArray(vao);
         }
 
-        private void PostPointInternal(Vector2 Point, Vector4 Color)
+        private void PostPointInternal(Vector2 point, Vector4 color, VertexDash dash)
         {
             var buffer = PostData.AsSpan().Slice(postDataFillIndex / sizeof(float), VertexTBytesSize / sizeof(float));
 
-            buffer[0] = Point.X;
-            buffer[1] = Point.Y;
+            buffer[0] = point.X;
+            buffer[1] = point.Y;
             buffer[2] = 0;
 
             buffer[3] = lineWidth;
 
-            buffer[4] = Color.X;
-            buffer[5] = Color.Y;
-            buffer[6] = Color.Z;
-            buffer[7] = Color.W;
+            buffer[4] = color.X;
+            buffer[5] = color.Y;
+            buffer[6] = color.Z;
+            buffer[7] = color.W;
+
+            buffer[8] = dash.DashSize;
+            buffer[9] = dash.GapSize;
 
             postDataFillIndex += VertexTBytesSize;
             postDataFillCount++;
+
+            prevPoint = point;
+            prevColor = color;
+            prevDash = dash;
         }
 
         Vector2 prevPoint = default;
         Vector4 prevColor = default;
+        VertexDash prevDash = default;
 
-        public void PostPoint(Vector2 Point, Vector4 Color)
+        public void PostPoint(Vector2 Point, Vector4 Color, VertexDash dash)
         {
             if (postDataFillIndex + VertexTBytesSize >= MAX_VERTS)
             {
                 FlushDraw();
-                PostPointInternal(prevPoint, prevColor);
+                PostPointInternal(prevPoint, prevColor, prevDash);
             }
 
-            PostPointInternal(Point, Color);
+            PostPointInternal(Point, Color, dash);
         }
 
         public void End()
@@ -205,7 +218,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
         {
             Begin(target, lineWidth);
             foreach (var point in points)
-                PostPoint(point.Point, point.Color);
+                PostPoint(point.Point, point.Color, point.Dash);
             End();
         }
 
@@ -260,6 +273,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             GL.EnableVertexArrayAttrib(vao, line_col_b);
             GL.VertexArrayAttribFormat(vao, line_col_b, 4, VertexAttribType.Float, false, VertexTBytesSize + 4 * sizeof(float));
             GL.VertexArrayAttribBinding(vao, line_col_b, 0);
+
+            GL.EnableVertexArrayAttrib(vao, dashSize);
+            GL.VertexArrayAttribFormat(vao, dashSize, 1, VertexAttribType.Float, false, 8 * sizeof(float));
+            GL.VertexArrayAttribBinding(vao, dashSize, 0);
+
+            GL.EnableVertexArrayAttrib(vao, gapSize);
+            GL.VertexArrayAttribFormat(vao, gapSize, 1, VertexAttribType.Float, false, 9 * sizeof(float));
+            GL.VertexArrayAttribBinding(vao, gapSize, 0);
         }
 
         public ISimpleLineDrawing.IVBOHandle GenerateVBOWithPresetPoints(IEnumerable<LineVertex> vertices, float lineWidth)

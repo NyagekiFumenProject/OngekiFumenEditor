@@ -99,6 +99,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             {
                 arrBuffer2[(6 * arrBufferIdx2) + 0] = p.x;
                 arrBuffer2[(6 * arrBufferIdx2) + 1] = p.y;
+
                 arrBuffer2[(6 * arrBufferIdx2) + 2] = color.X;
                 arrBuffer2[(6 * arrBufferIdx2) + 3] = color.Y;
                 arrBuffer2[(6 * arrBufferIdx2) + 4] = color.Z;

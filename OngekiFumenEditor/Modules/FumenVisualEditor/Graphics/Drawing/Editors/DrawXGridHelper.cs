@@ -46,10 +46,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             {
                 var a = result.XGridTotalUnit == 0 ? 0.4f : 0.25f;
 
-                list.Add(new(new(result.X, target.Rect.Height), new(1, 1, 1, 0)));
-                list.Add(new(new(result.X, 0), new(1, 1, 1, a)));
-                list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, a)));
-                list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, 0)));
+                list.Add(new(new(result.X, target.Rect.Height), new(1, 1, 1, 0), VertexDash.Solider));
+                list.Add(new(new(result.X, 0), new(1, 1, 1, a), VertexDash.Solider));
+                list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, a), VertexDash.Solider));
+                list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
             lineDrawing.PushOverrideViewProjectMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0) * target.ProjectionMatrix);
