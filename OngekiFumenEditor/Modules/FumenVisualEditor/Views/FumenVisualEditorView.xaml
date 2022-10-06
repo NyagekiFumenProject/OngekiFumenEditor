@@ -127,6 +127,7 @@
             VerticalAlignment="Top"
             FontWeight="Bold"
             Foreground="White"
+            IsHitTestVisible="False"
             Opacity="0.25"
             Text="{Binding DisplayFPS}"
             Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
@@ -138,14 +139,6 @@
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
             Value="{Binding ReverseScrollViewerVerticalOffset}">
         </ScrollBar>
-        <TextBlock
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            FontWeight="Bold"
-            Foreground="White"
-            Opacity="0.25"
-            Text="{Binding DisplayFPS}"
-            Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
         <StackPanel
             Margin="0,0,0,50"
             HorizontalAlignment="Center"

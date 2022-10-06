@@ -32,9 +32,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulable, IFumenEditorDrawingContext
     {
         private IPerfomenceMonitor performenceMonitor;
+
         private DrawTimeSignatureHelper timeSignatureHelper;
         private DrawXGridHelper xGridHelper;
         private DrawJudgeLineHelper judgeLineHelper;
+        private DrawSelectingRangeHelper selectingRangeHelper;
+
         private StringBuilder stringBuilder = new StringBuilder();
 
         private List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
@@ -161,6 +164,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             timeSignatureHelper = new DrawTimeSignatureHelper();
             xGridHelper = new DrawXGridHelper();
             judgeLineHelper = new DrawJudgeLineHelper();
+            selectingRangeHelper = new DrawSelectingRangeHelper();
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
 
@@ -227,6 +231,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             timeSignatureHelper.DrawTimeSigntureText(this);
             xGridHelper.DrawXGridText(this, CachedMagneticXGridLines);
             judgeLineHelper.Draw(this);
+            selectingRangeHelper.Draw(this);
 
             performenceMonitor.OnAfterRender();
         }

@@ -327,10 +327,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
-        public void AddObject(OngekiObjectBase viewModel)
+        public void AddObject(OngekiObjectBase obj)
         {
-            Fumen.AddObject(viewModel);
-            Log.LogInfo($"create new display object: {viewModel.GetType().Name}");
+            Fumen.AddObject(obj);
+            Log.LogInfo($"create new display object: {obj.GetType().Name}");
         }
     }
 }

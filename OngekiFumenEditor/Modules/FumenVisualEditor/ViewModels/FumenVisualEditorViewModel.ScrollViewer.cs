@@ -55,13 +55,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region ScrollTo
 
-        public void ScrollTo(IEditorDisplayableViewModel objViewModel)
-        {
-            if ((objViewModel.DisplayableObject as ITimelineObject).TGrid is not TGrid tGrid)
-                throw new Exception("ScrollTo.objViewModel is not a timeline object view model.");
-            ScrollTo(tGrid);
-        }
-
         public void ScrollTo(ITimelineObject timelineObject)
         {
             ScrollTo(timelineObject.TGrid);
