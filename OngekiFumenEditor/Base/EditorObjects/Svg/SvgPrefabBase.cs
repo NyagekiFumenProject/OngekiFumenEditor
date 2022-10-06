@@ -263,7 +263,12 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
         public LaneColor? PickSimilarLaneColor(Color color)
         {
-            var arr = LaneColor.AllLaneColors;
+            var arr = LaneColor.AllLaneColors.Where(x => x.LaneType switch
+            {
+                LaneType.WallRight or LaneType.WallLeft => false,
+                _ => true
+            });
+
             if (!EnableColorfulLaneSimilar)
                 arr = arr.Where(x => x.LaneType != LaneType.Colorful);
 
@@ -311,9 +316,15 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             {
                 var lines = childGeometry.Geometry.GetFlattenedPathGeometry();
                 var brush = (childGeometry.Brush ?? childGeometry.Pen?.Brush) as SolidColorBrush;
+                var color = brush?.Color ?? Colors.White;
 
-                if (PickSimilarLaneColor(brush.Color) is not LaneColor laneColor)
-                    continue;
+                if (!ShowOriginColor)
+                {
+                    if (PickSimilarLaneColor(brush.Color) is LaneColor laneColor)
+                        color = laneColor.Color;
+                    else
+                        continue;
+                }
 
                 Vector2 CalculateRelativePoint(Point relativePoint)
                 {
@@ -327,7 +338,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 foreach (var path in lines.Figures.OfType<PathFigure>())
                 {
                     var segment = new LineSegment();
-                    segment.Color = laneColor.Color;
+                    segment.Color = color;
 
                     var points = path.Segments.SelectMany(x => x switch
                     {
