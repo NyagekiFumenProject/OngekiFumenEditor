@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "BPM";
         public override string IDShortName => CommandName;
 
-        public override string ToString() => $"BPM T[{TGrid.Unit},{TGrid.Grid}] {BPM}";
+        public override string ToString() => $"{base.ToString()} Bpm[{BPM}]";
 
         public GridOffset LengthConvertToOffset(double len, int timeGridSize)
         {

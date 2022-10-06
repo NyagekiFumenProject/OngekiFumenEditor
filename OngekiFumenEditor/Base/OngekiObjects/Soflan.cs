@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public int GridLength => EndIndicator.TGrid.TotalGrid - TGrid.TotalGrid;
 
-        public override string ToString() => $"{base.ToString()} Speed:{speed}";
+        public override string ToString() => $"{base.ToString()} Speed[{speed}x]";
 
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
         {

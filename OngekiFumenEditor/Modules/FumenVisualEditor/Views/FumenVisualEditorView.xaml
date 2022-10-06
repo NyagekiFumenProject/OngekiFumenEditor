@@ -49,17 +49,19 @@
                 </MenuItem>
                 <MenuItem Header="对选取物件...">
                     <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()" Header="删除" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="复制可复制的物件" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="复制 (可复制的物件)" />
+                    <MenuItem Header="操作时间...">
+                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="记忆音频时间" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="恢复到音频时间" />
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="对已复制物件...">
                     <MenuItem Header="粘贴...">
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects()" Header="直接粘贴" />
                         <Separator />
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror()" Header="按整体全体范围水平镜像粘贴" />
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror()" Header="按整体全体范围垂直镜像粘贴" />
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror()" Header="按X[0,0]为基准水平镜像粘贴" />
-                    </MenuItem>
-                    <MenuItem Header="操作时间...">
-                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="记忆音频时间" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="恢复到音频时间" />
                     </MenuItem>
                 </MenuItem>
                 <Separator />

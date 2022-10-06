@@ -65,6 +65,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             ApplySvgContent(svgContent);
         }
 
-        public override string ToString() => $"{base.ToString()} File:{Path.GetFileName(SvgFile?.Name)}";
+        public override string ToString() => $"{base.ToString()} File[{Path.GetFileName(SvgFile?.Name)}]";
     }
 }

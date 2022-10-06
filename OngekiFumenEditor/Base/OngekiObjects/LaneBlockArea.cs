@@ -76,7 +76,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             return (startWallLane, endWallLane);
         }
 
-        public override string ToString() => $"{base.ToString()} {Direction} End:({EndIndicator})";
+        public override string ToString() => $"{base.ToString()} Direction[{Direction}] End[{EndIndicator}]";
 
         public IEnumerable<LaneStartBase> GetAffactableWallLanes(OngekiFumen fumen)
         {

@@ -45,17 +45,17 @@
                     </GridView.ColumnHeaderContainerStyle>
                     <GridViewColumn
                         Width="100"
-                        DisplayMemberBinding="{Binding ReferenceOngekiObject.Name}"
+                        DisplayMemberBinding="{Binding Name}"
                         Header="物件名字" />
 
                     <GridViewColumn
                         Width="100"
-                        DisplayMemberBinding="{Binding ReferenceOngekiObject.TGrid}"
+                        DisplayMemberBinding="{Binding TGrid}"
                         Header="物件时间" />
 
                     <GridViewColumn
                         Width="550"
-                        DisplayMemberBinding="{Binding ReferenceOngekiObject}"
+                        DisplayMemberBinding="{Binding .}"
                         Header="描述" />
                 </GridView>
             </ListView.View>

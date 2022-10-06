@@ -353,6 +353,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             return outputSegments;
         }
 
-        public override string ToString() => $"{base.ToString()} R:∠{Rotation}° O:{Opacity.ValuePercent * 100:F2}% S:{Rotation:F2}x";
+        public override string ToString() => $"{base.ToString()} R[∠{Rotation}°] O[{Opacity.ValuePercent * 100:F2}%] S[{Rotation:F2}x]";
     }
 }

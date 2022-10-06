@@ -795,8 +795,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var p = pos;
                 p.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - p.Y + offsetY));
                 SelectionCurrentCursorPosition = new Vector2((float)p.X, (float)p.Y);
-
-                Log.LogDebug($"offsetY: {offsetY}");
             }
             else
             {
@@ -879,17 +877,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             SelectionRect = new Rect(sx, sy, width, height);
 
             //Log.LogDebug($"SelectionRect = {SelectionRect}");
-        }
-
-        private void UpdateCurrentCursorPosition(ActionExecutionContext e)
-        {
-            var contentObject = IoC.Get<CommonStatusBar>().SubRightMainContentViewModel;
-            if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
-            {
-                contentObject.Message = string.Empty;
-                CurrentCursorPosition = null;
-                return;
-            }
         }
 
         private void UpdateCurrentCursorPosition(Point pos)

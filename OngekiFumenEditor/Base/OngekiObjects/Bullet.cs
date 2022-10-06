@@ -76,7 +76,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public const string CommandName = "BLT";
 
-        public override string ToString() => $"{base.ToString()} Pallete:({ReferenceBulletPallete}) DamageType:({BulletDamageTypeValue})";
+        public override string ToString() => $"{base.ToString()} Pallete[{ReferenceBulletPallete}] DamageType[{BulletDamageTypeValue}]";
 
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {

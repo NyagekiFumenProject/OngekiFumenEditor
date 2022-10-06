@@ -48,6 +48,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             BunShi = from.BunShi;
         }
 
-        public override string ToString() => $"{base.ToString()} {BunShi}/{Bunbo}";
+        public override string ToString() => $"{base.ToString()} Bunshi/Bunbo[{BunShi}/{Bunbo}]";
     }
 }

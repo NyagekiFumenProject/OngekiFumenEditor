@@ -258,7 +258,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             return base.CheckVisiable(minVisibleTGrid, maxVisibleTGrid) || (TGrid > maxVisibleTGrid && PrevObject is not null && PrevObject.TGrid < minVisibleTGrid);
         }
 
-        public override string ToString() => $"{base.ToString()} {RecordId} Ref:{ReferenceStartObject} {(PathControls.Count > 0 ? $"CurveCount:{PathControls.Count}" : string.Empty)}";
+        public override string ToString() => $"{base.ToString()} {(PathControls.Count > 0 ? $"CurveCount[{PathControls.Count}]" : string.Empty)} RefStart[{ReferenceStartObject}]";
 
         public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
         {

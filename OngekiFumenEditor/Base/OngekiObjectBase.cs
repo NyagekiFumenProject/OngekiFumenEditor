@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Base
         public abstract string IDShortName { get; }
         public string Name => GetType().GetTypeName();
 
-        public override string ToString() => $"[oid:{Id}]{IDShortName}";
+        public override string ToString() => $"{{{IDShortName}}} OID[{Id}]";
 
         [ObjectPropertyBrowserHide]
         public override bool IsNotifying
