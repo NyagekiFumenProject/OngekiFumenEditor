@@ -11,8 +11,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels
 {
     [Gemini.Modules.Toolbox.ToolboxItem(typeof(FumenVisualEditorViewModel), "SvgPrefab(File)", "Misc")]
-    [MapToView(ViewType = typeof(SvgPrefabView))]
-    public class SvgImageFilePrefabViewModel : SvgPrefabViewModelBase<SvgImageFilePrefab>
+    public class SvgImageFilePrefabToolboxGenerator : ToolboxGenerator<SvgImageFilePrefab>
     {
     }
 }
