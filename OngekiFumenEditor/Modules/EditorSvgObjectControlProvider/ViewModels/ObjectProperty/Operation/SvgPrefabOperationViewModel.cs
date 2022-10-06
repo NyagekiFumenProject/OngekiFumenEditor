@@ -15,6 +15,7 @@ using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -82,6 +83,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                     var actualCanvasX = baseCanvasX - (bound.Width - relativePoint.X) - offset.X + bound.Width * (1 - SvgPrefab.OffsetX.ValuePercent);
                     var actualCanvasY = baseCanvasY - relativePoint.Y + offset.Y + bound.Height * SvgPrefab.OffsetY.ValuePercent;
 
+                    //Log.LogDebug($"{relativePoint}  ->  {new Vector2((float)actualCanvasX, (float)actualCanvasY)}");
                     var tGrid = TGridCalculator.ConvertYToTGrid(actualCanvasY, editor);
                     var xGrid = XGridCalculator.ConvertXToXGrid(actualCanvasX, editor);
 

@@ -14,6 +14,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Numerics;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.ILineDrawing;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.IStaticVBODrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
@@ -222,7 +223,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             End();
         }
 
-        private class VBOHandle : ISimpleLineDrawing.IVBOHandle
+        private class VBOHandle : IVBOHandle
         {
             public int vbo = int.MinValue;
             public int verticsCount = 0;
@@ -283,7 +284,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
             GL.VertexArrayAttribBinding(vao, gapSize, 0);
         }
 
-        public ISimpleLineDrawing.IVBOHandle GenerateVBOWithPresetPoints(IEnumerable<LineVertex> vertices, float lineWidth)
+        public IVBOHandle GenerateVBOWithPresetPoints(IEnumerable<LineVertex> vertices, float lineWidth)
         {
             var handle = new VBOHandle()
             {
@@ -308,6 +309,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                     buffer[i++] = vertex.Color.Y;
                     buffer[i++] = vertex.Color.Z;
                     buffer[i++] = vertex.Color.W;
+
+                    buffer[i++] = vertex.Dash.DashSize;
+                    buffer[i++] = vertex.Dash.GapSize;
                 }
 
                 handle.verticsCount = list.Count;

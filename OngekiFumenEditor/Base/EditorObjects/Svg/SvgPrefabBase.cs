@@ -122,7 +122,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             }
         }
 
-        private RangeValue tolerance = RangeValue.Create(0.001f, 20f, 0.001f);
+        private RangeValue tolerance = RangeValue.Create(0.001f, 20f, 20f);
         public RangeValue Tolerance
         {
             get => tolerance;
@@ -301,13 +301,13 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         {
             var outputSegments = new List<LineSegment>();
 
-            if (drawingGroup is null)
+            if (ProcessingDrawingGroup is not DrawingGroup drawingGroup)
                 return outputSegments;
 
             var bound = drawingGroup.Bounds.Size;
             var offset = drawingGroup.Bounds.Location;
 
-            foreach (var childGeometry in ProcessingDrawingGroup.Children.OfType<GeometryDrawing>())
+            foreach (var childGeometry in drawingGroup.Children.OfType<GeometryDrawing>())
             {
                 var lines = childGeometry.Geometry.GetFlattenedPathGeometry();
                 var brush = (childGeometry.Brush ?? childGeometry.Pen?.Brush) as SolidColorBrush;
@@ -317,9 +317,10 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
                 Vector2 CalculateRelativePoint(Point relativePoint)
                 {
-                    var rx = relativePoint.X - offset.X - bound.Width * 0.5f;
-                    var ry = -relativePoint.Y + offset.Y + bound.Height * 0.5f;
+                    var rx = -(bound.Width - relativePoint.X) - offset.X + bound.Width * (1 - OffsetX.ValuePercent);
+                    var ry = -relativePoint.Y + offset.Y + bound.Height * OffsetY.ValuePercent;
 
+                    //Log.LogDebug($"{relativePoint}  ->  {new Vector2((float)rx, (float)ry)}");
                     return new((float)rx, (float)ry);
                 }
 

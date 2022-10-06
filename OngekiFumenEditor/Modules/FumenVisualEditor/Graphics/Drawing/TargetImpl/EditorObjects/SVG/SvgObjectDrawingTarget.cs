@@ -62,12 +62,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     handle = vboHolder[obj] = lineDrawing.GenerateVBOWithPresetPoints(vertics, 1);
                 }
 
-                var w = bound.Width;
-                var h = bound.Height;
+                var dx = x;
+                var dy = y;
 
-
-                var dx = x + w / 2;
-                var dy = y - h / 2;
                 lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * OpenTK.Mathematics.Matrix4.CreateTranslation((float)dx, (float)dy, 0));
                 {
                     lineDrawing.DrawVBO(target, handle);
