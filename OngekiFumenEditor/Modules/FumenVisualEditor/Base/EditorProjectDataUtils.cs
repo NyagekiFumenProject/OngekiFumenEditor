@@ -64,6 +64,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
         public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(string filePath)
         {
+            Log.LogDebug($"filePath = {filePath}");
             using var fileStream = File.OpenRead(filePath);
             var projectData = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(fileStream, JsonSerializerOptions);
 
@@ -71,11 +72,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
             //always make full path
             var fileFolder = Path.GetDirectoryName(filePath);
+            Log.LogDebug($"fileFolder = {fileFolder}");
             projectData.FumenFilePath = Path.Combine(fileFolder, projectData.FumenFilePath);
+            Log.LogDebug($"projectData.FumenFilePath = {projectData.FumenFilePath}");
             projectData.AudioFilePath = Path.Combine(fileFolder, projectData.AudioFilePath);
+            Log.LogDebug($"projectData.AudioFilePath = {projectData.AudioFilePath}");
 
             using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
             var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
+            Log.LogDebug($"fumenDeserializer = {fumenDeserializer}");
             if (fumenDeserializer is null)
                 throw new NotSupportedException($"不支持此谱面文件的解析:{projectData.FumenFilePath}");
             var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
@@ -135,15 +140,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
                 //always make relative path
                 var fileFolder = Path.GetDirectoryName(projFilePath);
+                Log.LogDebug($"projFilePath = {projFilePath}");
+                Log.LogDebug($"fileFolder = {fileFolder}");
                 if (Path.IsPathFullyQualified(editorProject.FumenFilePath))
                     editorProject.FumenFilePath = Path.GetRelativePath(fileFolder, editorProject.FumenFilePath);
                 if (Path.IsPathFullyQualified(editorProject.AudioFilePath))
                     editorProject.AudioFilePath = Path.GetRelativePath(fileFolder, editorProject.AudioFilePath);
+                var fumenFullPath = Path.Combine(fileFolder, editorProject.FumenFilePath);
 
-                var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFilePath);
+                var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFullPath);
+                Log.LogDebug($"serializer = {serializer}");
                 if (serializer is null)
                     throw new NotSupportedException($"不支持保存此文件格式:{fumenFilePath}");
-                if (!FileHelper.IsPathWritable(fumenFilePath))
+                if (!FileHelper.IsPathWritable(fumenFullPath))
                     throw new IOException("谱面文件被占用或无权限,无法写入数据");
 
                 await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
@@ -152,7 +161,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 await fileStream.FlushAsync();
                 fileStream.Close();
 
-                File.Copy(tmpFumenFilePath, fumenFilePath, true);
+                Log.LogDebug($"Copy tmpFumenFilePath '{tmpFumenFilePath}' to '{fumenFullPath}'");
+                File.Copy(tmpFumenFilePath, fumenFullPath, true);
+                Log.LogDebug($"Copy tmpProjFilePath '{tmpProjFilePath}' to '{projFilePath}'");
                 File.Copy(tmpProjFilePath, projFilePath, true);
             }
             catch (Exception e)
