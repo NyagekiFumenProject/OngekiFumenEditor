@@ -42,6 +42,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             else
                 str = t.ToString();
 
+            var r = stringDrawing.SupportFonts;
+
             stringDrawing.Draw(
                     str,
                     new(target.ViewWidth - 50,
@@ -51,7 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     0,
                     color,
                     new(1, 0.5f),
-                    IStringDrawing.StringStyle.Normal,
+                    IStringDrawing.StringStyle.Bold,
                     target,
                     default,
                     out _

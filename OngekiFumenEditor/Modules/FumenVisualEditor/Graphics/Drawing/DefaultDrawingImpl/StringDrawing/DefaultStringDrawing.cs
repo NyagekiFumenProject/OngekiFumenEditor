@@ -53,8 +53,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
                 fontSystem = new FontSystem(new FontSystemSettings
                 {
                     FontResolutionFactor = 2,
-                    KernelWidth = 2,
-                    KernelHeight = 2
+                    KernelWidth = 1,
+                    KernelHeight = 1,
+                    Effect = FontSystemEffect.Stroked
                 });
                 fontSystem.AddFont(File.ReadAllBytes(handle.FilePath));
                 cacheFonts[fontHandle] = fontSystem;
@@ -71,10 +72,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
                 var fontStyle = TextStyle.None;
 
-                if (style == IStringDrawing.StringStyle.Underline)
+                IStringDrawing.FontHandle GetSubFont(IStringDrawing.FontHandle handle, string sub)
+                {
+                    var boldFontName = handle.Name + "b";
+                    return SupportFonts.FirstOrDefault(x => x.Name == boldFontName);
+                }
+
+                if (style.HasFlag(IStringDrawing.StringStyle.Underline))
                     fontStyle = TextStyle.Underline;
-                if (style == IStringDrawing.StringStyle.Strike)
+                if (style.HasFlag(IStringDrawing.StringStyle.Strike))
                     fontStyle = TextStyle.Strikethrough;
+                if (style.HasFlag(IStringDrawing.StringStyle.Bold))
+                {
+                    if (GetSubFont(handle, "b") is IStringDrawing.FontHandle sb)
+                        handle = sb;
+                }
+                if (style.HasFlag(IStringDrawing.StringStyle.Italic))
+                {
+                    if (GetSubFont(handle, "i") is IStringDrawing.FontHandle sb)
+                        handle = sb;
+                }
+                if (style.HasFlag(IStringDrawing.StringStyle.Italic) && style.HasFlag(IStringDrawing.StringStyle.Bold))
+                {
+                    if (GetSubFont(handle, "z") is IStringDrawing.FontHandle sb)
+                        handle = sb;
+                }
 
                 renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target), target.PerfomenceMonitor, this);
                 var font = GetFontSystem(handle).GetFont(fontSize);

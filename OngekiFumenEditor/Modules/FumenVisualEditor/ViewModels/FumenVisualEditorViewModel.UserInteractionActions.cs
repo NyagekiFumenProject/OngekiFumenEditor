@@ -269,7 +269,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         var rawId = startObject.RecordId;
                         redo += () =>
                         {
-                            AddObject(displayObjectView);
+                            Fumen.AddObject(displayObjectView);
                             var newId = startObject.RecordId;
                             idMap[rawId] = newId;
                             selectObj.IsSelected = true;
@@ -288,7 +288,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         {
                             if (idMap.TryGetValue(rawChildId, out var newChildId))
                                 childObject.RecordId = newChildId;
-                            AddObject(displayObjectView);
+                            Fumen.AddObject(displayObjectView);
                             selectObj.IsSelected = true;
                         };
 
@@ -302,7 +302,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     default:
                         redo += () =>
                         {
-                            AddObject(displayObjectView);
+                            Fumen.AddObject(displayObjectView);
                             selectObj.IsSelected = true;
                         };
 
@@ -505,7 +505,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 foreach (var obj in selectedObject)
                 {
-                    AddObject(obj);
+                    Fumen.AddObject(obj);
                 }
 
                 Redraw(RedrawTarget.OngekiObjects);
@@ -677,7 +677,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     }
                     else
                     {
-                        AddObject(newObject);
+                        Fumen.AddObject(newObject);
                     }
                     Redraw(RedrawTarget.OngekiObjects);
                 }
