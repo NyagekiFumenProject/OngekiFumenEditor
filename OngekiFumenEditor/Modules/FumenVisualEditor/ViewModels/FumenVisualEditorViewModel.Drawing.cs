@@ -37,6 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private DrawXGridHelper xGridHelper;
         private DrawJudgeLineHelper judgeLineHelper;
         private DrawSelectingRangeHelper selectingRangeHelper;
+        private DrawSelectableObjectTextureHelper selectableObjectHelper;
 
         private StringBuilder stringBuilder = new StringBuilder();
 
@@ -165,6 +166,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             xGridHelper = new DrawXGridHelper();
             judgeLineHelper = new DrawJudgeLineHelper();
             selectingRangeHelper = new DrawSelectingRangeHelper();
+            selectableObjectHelper = new DrawSelectableObjectTextureHelper();
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
 

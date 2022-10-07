@@ -107,22 +107,15 @@
                     MinValue="0"
                     Step="1">
                 </controls:RangeValue>
-                <TextBlock
+                <controls:RangeValue
                     Grid.Row="4"
-                    Margin="0,0,0,5"
-                    VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    TextWrapping="Wrap">
-                    水平轴最大显示范围
-                </TextBlock>
-                <TextBox
-                    Grid.Row="4"
-                    Grid.Column="1"
-                    Margin="0,0,0,5"
-                    VerticalAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    Text="{Binding Setting.XGridDisplayMaxUnit}">
-                </TextBox>
+                    Grid.ColumnSpan="2"
+                    Padding="0,10,0,10"
+                    CurrentValue="{Binding Setting.XGridDisplayMaxUnit, Mode=TwoWay}"
+                    DisplayName="水平轴最大显示范围:"
+                    MaxValue="200"
+                    MinValue="0"
+                    Step="1" />
                 <controls:RangeValue
                     Grid.Row="6"
                     Grid.ColumnSpan="2"

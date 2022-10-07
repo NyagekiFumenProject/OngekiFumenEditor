@@ -223,7 +223,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     if (obj is IHorizonPositionObject horizonPositionObject)
                         horizonPositionObject.XGrid = xGrid;
 
-                    editor.AddObject(obj);
+                    editor.Fumen.AddObject(obj);
                 };
                 undoAction += () =>
                 {

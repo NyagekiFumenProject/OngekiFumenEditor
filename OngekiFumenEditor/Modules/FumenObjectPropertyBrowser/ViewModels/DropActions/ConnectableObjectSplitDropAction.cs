@@ -57,7 +57,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 }
 
                 startObject.AddChildObject(prevEndObject);
-                editor.AddObject(nextStartObject);
+                editor.Fumen.AddObject(nextStartObject);
 
                 editor.MoveObjectTo(prevEndObject, dragEndPoint);
                 editor.MoveObjectTo(nextStartObject, dragEndPoint);

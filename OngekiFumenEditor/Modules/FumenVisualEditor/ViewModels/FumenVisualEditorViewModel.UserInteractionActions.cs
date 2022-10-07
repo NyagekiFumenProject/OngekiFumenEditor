@@ -8,16 +8,17 @@ using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -937,10 +938,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private Dictionary<OngekiObjectBase, Rect> hits = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RegisterSelectableObject(OngekiObjectBase obj, System.Numerics.Vector2 centerPos, System.Numerics.Vector2 size)
+        public void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size)
         {
             //rect.Y = rect.Y - CurrentPlayTime;
-            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
+            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y); 
         }
 
         public void OnMouseWheel(ActionExecutionContext e)

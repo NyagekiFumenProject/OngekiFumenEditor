@@ -13,7 +13,6 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
-using OngekiFumenEditor.Modules.SvgToLaneBrowser.Views;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
