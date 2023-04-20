@@ -16,19 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public abstract class NormalLaneDrawingTarget : LaneDrawingTargetBase
     {
-        public NormalLaneDrawingTarget() : base()
-        {
-            Texture LoadTex(string rPath)
-            {
-                var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + rPath, UriKind.Relative));
-                using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-                return new Texture(bitmap);
-            }
 
-            StartEditorTexture = LoadTex("NS.png");
-            NextEditorTexture = LoadTex("NN.png");
-            EndEditorTexture = LoadTex("NE.png");
-        }
     }
 
     [Export(typeof(IDrawingTarget))]

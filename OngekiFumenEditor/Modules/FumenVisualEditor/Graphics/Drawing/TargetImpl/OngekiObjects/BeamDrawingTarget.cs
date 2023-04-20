@@ -13,20 +13,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IDrawingTarget))]
     public class BeamDrawingTarget : LaneDrawingTargetBase<BeamStart>
     {
-        public BeamDrawingTarget()
-        {
-            Texture LoadTex(string rPath)
-            {
-                var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + rPath, UriKind.Relative));
-                using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-                return new Texture(bitmap);
-            }
-
-            StartEditorTexture = LoadTex("NS.png");
-            NextEditorTexture = LoadTex("NN.png");
-            EndEditorTexture = LoadTex("NE.png");
-        }
-
         public static Vector4 LaneColor { get; } = new(1, 1, 0, 1);
 
         public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;

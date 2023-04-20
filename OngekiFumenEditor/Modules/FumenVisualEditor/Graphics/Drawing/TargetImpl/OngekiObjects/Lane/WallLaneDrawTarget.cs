@@ -14,20 +14,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IDrawingTarget))]
     internal class WallLaneDrawTarget : LaneDrawingTargetBase
     {
-        public WallLaneDrawTarget() : base()
-        {
-            Texture LoadTex(string rPath)
-            {
-                var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + rPath, UriKind.Relative));
-                using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-                return new Texture(bitmap);
-            }
-
-            StartEditorTexture = LoadTex("WS.png");
-            NextEditorTexture = LoadTex("WN.png");
-            EndEditorTexture = LoadTex("WE.png");
-        }
-
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "WLS", "WRS" };
 
         public static Vector4 LeftWallColor { get; } = new(181 / 255.0f, 156 / 255.0f, 231 / 255.0f, 255 / 255.0f);
