@@ -2,26 +2,24 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.Lane
 {
     [Export(typeof(IDrawingTarget))]
-    internal class NormalLaneEditorObjectDrawingTarget : TextureLaneEditorObjectDrawingTarget
+    internal class BeamEditorObjectDrawingTarget : TextureLaneEditorObjectDrawingTarget
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[]
         {
-            "LLS","LCS","LRS"
+            "BMS"
         };
 
-        public NormalLaneEditorObjectDrawingTarget() : base(
+        public BeamEditorObjectDrawingTarget() : base(
             LoadTextrueFromDefaultResource("NS.png"),
             LoadTextrueFromDefaultResource("NN.png"),
             LoadTextrueFromDefaultResource("NE.png")
             )
         {
+
         }
     }
 }
