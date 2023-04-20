@@ -227,7 +227,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {
                 BPMChange o => $"BPM:{(int)o.BPM}",
                 MeterChange o => $"MET:{o.Bunbo}/{o.BunShi}",
-                Soflan o => $"SPD:{(int)o.Speed:F2}x",
+                Soflan o => $"SPD:{o.Speed:F2}x",
                 Soflan.SoflanEndIndicator o => $"{formatObj(o.RefSoflan)}_End",
                 LaneBlockArea o => $"LBK:{o.Direction}",
                 LaneBlockArea.LaneBlockAreaEndIndicator o => $"{formatObj(o.RefLaneBlockArea)}_End",

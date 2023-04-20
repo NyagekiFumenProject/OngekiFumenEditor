@@ -27,6 +27,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Markup;
 using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -49,6 +50,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 RecalculateTotalDurationHeight();
                 Fumen = EditorProjectData.Fumen;
             }
+        }
+
+
+        private string specifyDefaultName;
+
+        public string SpecifyDefaultName
+        {
+            get => string.IsNullOrWhiteSpace(specifyDefaultName) ? base.DisplayName : specifyDefaultName;
+            set
+            {
+                specifyDefaultName = value;
+            }
+        }
+
+        public override string DisplayName
+        {
+            get
+            {
+                var name = (string.IsNullOrWhiteSpace(FileName) ? SpecifyDefaultName : FileName);
+                return IsDirty ? name + "*" : name;
+            }
+            set => base.DisplayName = value;
         }
 
         private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)

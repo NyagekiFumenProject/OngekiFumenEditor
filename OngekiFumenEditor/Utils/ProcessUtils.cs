@@ -17,5 +17,14 @@ namespace OngekiFumenEditor.Utils
                 UseShellExecute = true
             });
         }
+
+        public static void OpenPath(string path)
+        {
+            Log.LogDebug($"user request open url by default : {path}");
+            Process.Start(new ProcessStartInfo(path)
+            {
+                UseShellExecute = true
+            });
+        }
     }
 }

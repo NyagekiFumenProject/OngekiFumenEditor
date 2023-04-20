@@ -137,7 +137,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         {
             try
             {
-                UpdatePropsManually();
+                if (!cancellationToken.IsCancellationRequested)
+                    UpdatePropsManually();
             }
             catch
             {
