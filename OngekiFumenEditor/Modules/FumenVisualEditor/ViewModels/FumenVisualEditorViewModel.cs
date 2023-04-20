@@ -61,6 +61,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 specifyDefaultName = value;
+                NotifyOfPropertyChange(() => SpecifyDefaultName);
+                NotifyOfPropertyChange(() => DisplayName);
             }
         }
 
