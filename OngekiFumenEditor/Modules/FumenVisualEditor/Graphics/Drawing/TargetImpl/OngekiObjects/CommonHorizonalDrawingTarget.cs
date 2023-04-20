@@ -25,7 +25,7 @@ using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.ILineD
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IDrawingTarget))]
-    public class HorizonalDrawingTarget : CommonBatchDrawTargetBase<OngekiTimelineObjectBase>
+    public class CommonHorizonalDrawingTarget : CommonBatchDrawTargetBase<OngekiTimelineObjectBase>
     {
         public record RegisterDrawingInfo(OngekiTimelineObjectBase TimelineObject, double Y);
 
@@ -33,13 +33,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private IStringDrawing stringDrawing;
         private ISimpleLineDrawing lineDrawing;
-        private IPolygonDrawing polygonDrawing;
-        private HashSet<int> overdrawingDefferSet = new HashSet<int>();
 
-        public HorizonalDrawingTarget()
+        public CommonHorizonalDrawingTarget()
         {
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
             stringDrawing = IoC.Get<IStringDrawing>();
         }
 
@@ -62,7 +59,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiTimelineObjectBase> objs)
         {
-            overdrawingDefferSet.Clear();
             using var d4 = objs.Select(x => new RegisterDrawingInfo(x, TGridCalculator.ConvertTGridToY(x.TGrid, target.Editor))).ToListWithObjectPool(out var objects);
 
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
@@ -97,12 +93,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 {
                     switch (obj.TimelineObject)
                     {
-                        case LaneBlockArea.LaneBlockAreaEndIndicator laneBlockEnd:
-                            DrawLaneBlockArea(target, laneBlockEnd.RefLaneBlockArea);
-                            break;
-                        case LaneBlockArea laneBlock:
-                            DrawLaneBlockArea(target, laneBlock);
-                            break;
                         default:
                             break;
                     }
@@ -110,115 +100,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 DrawDescText(target, y, actualItems);
             }
-        }
-
-        private void DrawLaneBlockArea(IFumenEditorDrawingContext target, LaneBlockArea lbk)
-        {
-            var hashCode = lbk.GetHashCode();
-            if (overdrawingDefferSet.Contains(hashCode))
-                return;
-            else
-                overdrawingDefferSet.Add(hashCode);
-
-            var fumen = target.Editor.Fumen;
-
-            var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 60;
-            var color = lbk.Direction == LaneBlockArea.BlockDirection.Left ? WallLaneDrawTarget.LeftWallColor : WallLaneDrawTarget.RightWallColor;
-            var colorF = color;
-            colorF.W = -0.25f;
-            (double, double) lastP = default;
-
-            #region Generate LBK lines
-
-            void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, Vector4? specifyColor = default)
-            {
-                var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, target.Editor.Setting.XGridUnitSpace);
-                var y = (float)TGridCalculator.ConvertTGridUnitToY(tGridTotalUnit, target.Editor.Fumen.BpmList, target.Editor.Setting.VerticalDisplayScale, target.Editor.Setting.TGridUnitLength);
-
-                //lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
-                polygonDrawing.PostPoint(new(x, y), Vector4.One);
-                polygonDrawing.PostPoint(new(x + offsetX, y), colorF);
-
-                lastP = (tGridTotalUnit, xGridTotalUnit);
-            }
-
-            void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid grid, Vector4? specifyColor = default)
-            {
-                var xGridTotalGridOpt = obj.CalulateXGridTotalGrid(grid.TotalGrid);
-                if (xGridTotalGridOpt is double xGridTotalGrid)
-                    PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, grid.TotalUnit, specifyColor);
-            }
-
-            void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid)
-            {
-                var minTotalGrid = minTGrid.TotalGrid;
-                var maxTotalGrid = maxTGrid.TotalGrid;
-
-                if (!obj.IsCurvePath)
-                {
-                    //直线，优化
-                    PostPointByTGrid(obj, minTGrid);
-                    PostPointByTGrid(obj, maxTGrid);
-                }
-                else
-                {
-                    using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var list, out _);
-                    list.Clear();
-
-                    foreach ((var gridVec2, var isVaild) in obj.GetConnectionPaths().Where(x => x.pos.Y <= maxTotalGrid && x.pos.Y >= minTotalGrid))
-                    {
-                        if (!isVaild)
-                        {
-                            PostPointByXTGrid(obj.PrevObject.XGrid.TotalUnit, minTGrid.TotalUnit);
-                            PostPointByXTGrid(obj.XGrid.TotalUnit, maxTGrid.TotalUnit);
-                            return;
-                        }
-                        list.Add(new(gridVec2.X, gridVec2.Y));
-                    }
-                    foreach (var gridVec2 in list)
-                        PostPointByXTGrid(gridVec2.X / obj.XGrid.ResX, gridVec2.Y / obj.TGrid.ResT);
-                }
-            }
-
-            void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
-            {
-                polygonDrawing.Begin(target);
-                foreach (var child in wallStartLane.Children)
-                {
-                    if (child.TGrid < minTGrid)
-                        continue;
-                    if (child.PrevObject.TGrid > maxTGrid)
-                        break;
-
-                    var childMinTGrid = MathUtils.Max(minTGrid, child.PrevObject.TGrid);
-                    var childMaxTGrid = MathUtils.Min(maxTGrid, child.TGrid);
-
-                    ProcessConnectable(child, childMinTGrid, childMaxTGrid);
-                }
-                polygonDrawing.End();
-            }
-
-            #endregion
-
-            var itor = lbk.GetAffactableWallLanes(fumen).OrderBy(x => x.TGrid).GetEnumerator();
-
-            var beginTGrid = lbk.TGrid;
-            var endTGrid = lbk.EndIndicator.TGrid;
-
-            if (itor.MoveNext())
-            {
-                ProcessWallLane(itor.Current, beginTGrid, endTGrid);
-
-                while (itor.MoveNext())
-                {
-                    var start = itor.Current;
-
-                    (var prevTGrid, var prevXGrid) = lastP;
-                    ProcessWallLane(start, beginTGrid, endTGrid);
-                }
-            }
-
-            //lineDrawing.End();
         }
 
         private void DrawDescText(IFumenEditorDrawingContext target, float y, IEnumerable<RegisterDrawingInfo> group)

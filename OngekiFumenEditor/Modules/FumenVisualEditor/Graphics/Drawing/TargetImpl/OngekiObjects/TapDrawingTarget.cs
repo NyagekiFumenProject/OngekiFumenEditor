@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };
 
-        public override int DefaultRenderOrder => 1000;
+        public override int DefaultRenderOrder => 1200;
 
         private Texture redTexture;
         private Texture greenTexture;

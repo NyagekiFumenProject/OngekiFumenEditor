@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { LaneCurvePathControlObject.CommandName };
 
-        public override int DefaultRenderOrder => 100;
+        public override int DefaultRenderOrder => 2000;
 
         public LaneCurvePathControlDrawingTarget()
         {
