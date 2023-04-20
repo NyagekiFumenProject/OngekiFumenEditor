@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.CommonLinesDrawTargetBase<OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase>;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.ILineDrawing;
+using AngleSharp.Dom;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
@@ -67,8 +68,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 Upsert(hold);
                 if (start != null)
                 {
-                    foreach (var node in start.Children.AsEnumerable<ConnectableObjectBase>().Prepend(start).Where(x => hold.TGrid <= x.TGrid && x.TGrid <= holdEnd.TGrid))
-                        Upsert(node);
+                    var itor = start.Children.AsEnumerable<ConnectableObjectBase>().Prepend(start).Where(x => hold.TGrid <= x.TGrid && x.TGrid <= holdEnd.TGrid).GetEnumerator();
+                    itor.MoveNext();
+                    var cur = itor.Current;
+                    var prev = null as ConnectableObjectBase;
+
+                    while (itor.MoveNext())
+                    {
+                        Upsert(cur);
+                        prev = cur;
+                        cur = itor.Current;
+                    }
+
+                    if (cur?.TGrid != prev?.TGrid)
+                        Upsert(cur);
                 }
                 Upsert(holdEnd);
                 lineDrawing.Draw(target, list, 13);

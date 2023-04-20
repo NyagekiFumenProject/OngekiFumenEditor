@@ -11,21 +11,27 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane
 {
-    [Export(typeof(IDrawingTarget))]
-    internal class WallLaneDrawTarget : LaneDrawingTargetBase
+    internal abstract class WallLaneDrawTarget : LaneDrawingTargetBase
     {
-        public override IEnumerable<string> DrawTargetID { get; } = new[] { "WLS", "WRS" };
-
         public static Vector4 LeftWallColor { get; } = new(181 / 255.0f, 156 / 255.0f, 231 / 255.0f, 255 / 255.0f);
         public static Vector4 RightWallColor { get; } = new(231 / 255.0f, 149 / 255.0f, 178 / 255.0f, 255 / 255.0f);
 
+        public abstract Vector4 WallLaneColor { get; }
         public override int LineWidth => 6;
+        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => WallLaneColor;
+    }
 
-        public override Vector4 GetLanePointColor(ConnectableObjectBase obj)
-        {
-            if (obj.IDShortName[1] == 'L')
-                return LeftWallColor;
-            return RightWallColor;
-        }
+    [Export(typeof(IDrawingTarget))]
+    internal class WallLeftLaneDrawTarget : WallLaneDrawTarget
+    {
+        public override IEnumerable<string> DrawTargetID { get; } = new[] { "WLS" };
+        public override Vector4 WallLaneColor { get; } = LeftWallColor;
+    }
+
+    [Export(typeof(IDrawingTarget))]
+    internal class WallRightLaneDrawTarget : WallLaneDrawTarget
+    {
+        public override IEnumerable<string> DrawTargetID { get; } = new[] { "WRS" };
+        public override Vector4 WallLaneColor { get; } = RightWallColor;
     }
 }
