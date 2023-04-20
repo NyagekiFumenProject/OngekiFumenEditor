@@ -3,7 +3,7 @@
 ## 简介
 ![image](https://user-images.githubusercontent.com/7549173/168522091-1386d6b6-0f71-4299-be78-4fedb38e6677.png)
 
-当前进度&roadmap:
+## 当前进度&roadmap:
 * Tap实现 
 * WallTap实现 
 * Hold实现 
@@ -15,7 +15,7 @@
 * 谱面预览播放音效
 * 实现时间轴的简便操作
 * 编辑器细节优化  
-* ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~(暂时)
+* ~~OpenTK/Vulkan/SkiaSharp 三选一重写渲染器~~
 * 一边写个谱面做测试一边修bugs  
 * ~~正式公布~~
 * 其他类型子弹
@@ -31,8 +31,13 @@
 * 自制谱面，正式公布  
 * 垂直显示缩放 ([有明显问题，但能用](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E7%BC%96%E8%BE%91%E5%99%A8-%E5%9E%82%E7%9B%B4%E6%98%BE%E7%A4%BA%E7%BC%A9%E6%94%BE-%E5%8A%9F%E8%83%BD))
 * ~~快捷键~~ (暂时没必要,跳过)
-* ~~星咲あかり心灵控制计划~~  
-* 优化性能 **<--- we are here? ---**
+* 星咲あかり心灵控制计划
+* 重写渲染器，优化性能
+* 音频频谱显示 **<--- we are here! ---**
+* 美化物件美术素材
+* 轨道操作简单化
+* 完全实现Soflan变速
+* 修BUG....
 ....
 
 https://pastebin.com/hyNyvdwt
