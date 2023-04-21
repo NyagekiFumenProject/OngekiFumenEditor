@@ -3,7 +3,6 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -14,11 +13,10 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.CommonLinesDrawTargetBase<OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase>;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.ILineDrawing;
 using AngleSharp.Dom;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds
 {
     [Export(typeof(IDrawingTarget))]
     public class HoldDrawingTarget : CommonDrawTargetBase<Hold>
@@ -27,12 +25,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override int DefaultRenderOrder => 500;
 
-        private TapDrawingTarget tapDraw;
         private ILineDrawing lineDrawing;
 
         public HoldDrawingTarget() : base()
         {
-            tapDraw = IoC.Get<TapDrawingTarget>();
             lineDrawing = IoC.Get<ILineDrawing>();
         }
 
@@ -86,13 +82,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 Upsert(holdEnd);
                 lineDrawing.Draw(target, list, 13);
             }
-
-            //draw taps
-            tapDraw.Begin(target);
-            tapDraw.Draw(target, laneType, hold, hold.IsCritical);
-            if (holdEnd != null)
-                tapDraw.Draw(target, laneType, holdEnd, false);
-            tapDraw.End();
         }
     }
 }

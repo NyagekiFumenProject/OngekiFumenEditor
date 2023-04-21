@@ -164,7 +164,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             wallTexture?.Dispose();
         }
 
-
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Tap> objs)
         {
             foreach (var tap in objs)
