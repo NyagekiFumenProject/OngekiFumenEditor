@@ -40,6 +40,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             set => Set(ref isPlaying, value);
         }
 
+        public bool IsAvaliable { get; } = true;
+
         public Task Load(string audio_file)
         {
             //release resource before loading new one.

@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
@@ -328,12 +329,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         protected override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             await base.OnActivateAsync(cancellationToken);
+            await IoC.Get<ISchedulerManager>().AddScheduler(this);
             EditorManager.NotifyActivate(this);
         }
 
         protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
             await base.OnDeactivateAsync(close, cancellationToken);
+            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
             EditorManager.NotifyDeactivate(this);
         }
 

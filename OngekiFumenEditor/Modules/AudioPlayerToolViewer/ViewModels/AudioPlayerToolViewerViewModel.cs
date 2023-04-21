@@ -140,7 +140,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private async void LoadAudio()
         {
             if (string.IsNullOrWhiteSpace(Editor?.EditorProjectData?.AudioFilePath))
+            {
+                AudioPlayer = null;
                 return;
+            }
             var audioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(Editor.EditorProjectData.AudioFilePath);
             AudioPlayer = audioPlayer;
         }
@@ -277,7 +280,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 Log.LogWarn($"音频未加载!");
                 return;
             }
-
+            if (!AudioPlayer.IsAvaliable)
+            {
+                Log.LogWarn($"音频还没准备好!");
+                return;
+            }
             if (AudioPlayer.IsPlaying)
             {
                 scrollAnimationClearFunc?.Invoke();

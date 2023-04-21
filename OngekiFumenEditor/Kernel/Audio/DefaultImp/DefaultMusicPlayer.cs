@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
         private DateTime startTime;
         private TimeSpan pauseTime;
+        private bool isAvaliable;
 
         public TimeSpan Duration { get => audioFileReader.TotalTime; }
 
@@ -36,6 +37,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromMilliseconds(1000.0 / 60);
 
+        public bool IsAvaliable
+        {
+            get => isAvaliable;
+            set
+            {
+                Set(ref isAvaliable, value);
+            }
+        }
+
         public Task Load(string audio_file)
         {
             //release resource before loading new one.
@@ -47,6 +57,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 audioFileReader = new AudioFileReader(audio_file);
                 currentOut?.Init(audioFileReader);
                 NotifyOfPropertyChange(() => Duration);
+                IsAvaliable = true;
             }
             catch (Exception e)
             {
@@ -126,6 +137,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
             audioFileReader?.Dispose();
             audioFileReader = null;
+            IsAvaliable = false;
         }
 
         public void OnSchedulerTerm()
@@ -135,20 +147,16 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 
         public Task OnScheduleCall(CancellationToken cancellationToken)
         {
-            try
-            {
-                if (!cancellationToken.IsCancellationRequested)
-                    UpdatePropsManually();
-            }
-            catch
-            {
-
-            }
+            if (!cancellationToken.IsCancellationRequested)
+                UpdatePropsManually();
             return Task.CompletedTask;
         }
 
         private void UpdatePropsManually()
         {
+            if (!IsAvaliable)
+                return;
+
             NotifyOfPropertyChange(() => CurrentTime);
             NotifyOfPropertyChange(() => Volume);
             NotifyOfPropertyChange(() => PlaybackSpeed);

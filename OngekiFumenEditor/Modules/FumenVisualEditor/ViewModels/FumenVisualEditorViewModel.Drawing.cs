@@ -84,7 +84,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get => displayFPS;
             set
             {
-                Set(ref displayFPS, value);
+                displayFPS = value;
+                NotifyOfPropertyChange(() => DisplayFPS);
             }
         }
 
@@ -116,7 +117,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-            IoC.Get<ISchedulerManager>().AddScheduler(this);
             Log.LogInfo($"Init OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
         }
 
@@ -311,16 +311,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public Task OnScheduleCall(CancellationToken cancellationToken)
         {
-            stringBuilder.Clear();
+            if (IsDisplayFPS)
+            {
+                stringBuilder.Clear();
 
-            performenceMonitor?.FormatStatistics(stringBuilder);
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine($"View: {ViewWidth}x{ViewHeight}");
+                performenceMonitor?.FormatStatistics(stringBuilder);
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine($"View: {ViewWidth}x{ViewHeight}");
 
-            DisplayFPS = stringBuilder.ToString();
+                DisplayFPS = stringBuilder.ToString();
 
-            performenceMonitor?.Clear();
+                performenceMonitor?.Clear();
 
+            }
             return Task.CompletedTask;
         }
 

@@ -192,7 +192,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Performen
             {
                 if (p is null)
                     return;
-                builder.AppendLine($"D.TOP{i}:{p.Name} {p.AveDrawCall}drawcall {formatMSec(p.AveSpendTicks)}ms ");
+                builder.AppendLine($"D.TOP{i}:{p.Name} {p.AveDrawCall} dc ({formatMSec(p.AveSpendTicks)}ms) ");
             }
 
             void dipt(PerformenceItem p, int i)

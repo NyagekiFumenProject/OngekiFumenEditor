@@ -35,6 +35,7 @@
                 <gemini:SliderEx
                     Margin="0,0,0,5"
                     cal:Message.Attach="[Event ThumbDragCompleted] = [Action OnSliderValueChanged()];[Event ThumbDragStarted] = [Action OnSliderValueStartChanged()];"
+                    IsEnabled="{Binding AudioPlayer.IsAvaliable}"
                     Maximum="{Binding AudioPlayer.Duration.TotalMilliseconds, Mode=OneWay}"
                     Value="{Binding SliderValue, Mode=TwoWay}">
                 </gemini:SliderEx>
@@ -88,9 +89,10 @@
                         <TextBlock VerticalAlignment="Center">音乐音量</TextBlock>
                         <Slider
                             Width="150"
-                            Margin="0,0,0,5"
+                            Margin="5,0,0,0"
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
+                            IsEnabled="{Binding AudioPlayer.IsAvaliable}"
                             LargeChange="0.2"
                             Maximum="1"
                             SmallChange="0.2"
@@ -102,11 +104,14 @@
                             Content="加载音频文件"
                             Visibility="Collapsed" />
                     </StackPanel>
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <StackPanel
+                        Margin="0,5,0,0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
                         <TextBlock VerticalAlignment="Center">音效音量</TextBlock>
                         <Slider
                             Width="150"
-                            Margin="0,0,0,5"
+                            Margin="5,0,0,0"
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
                             LargeChange="0.2"
