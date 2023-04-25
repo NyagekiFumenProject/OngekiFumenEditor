@@ -38,7 +38,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => ConvertTGridToY(ConvertAudioTimeToTGrid(audioTime, editor), editor);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor) => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
+        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor) 
+            => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, BpmList bpmList, int tUnitLength = 240)
             => ConvertYToTGrid(audioTime.TotalMilliseconds, bpmList, 1, tUnitLength);
@@ -88,6 +89,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return TimeSpan.FromMilliseconds(audioTimeMsec);
         }
 
+        public static (double nonScaledStartY, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, BpmList bpmList, MeterChangeList meterList, int tUnitLength = 240)
+        {
+            var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
+            var idx = timeSignatures.BinarySearchBy(tGrid, x => x.startTGrid);
+            idx = idx < 0 ? Math.Max(0, ((~idx) - 1)) : idx;
+            return timeSignatures[idx];
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static List<(double startY, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor)
             => GetAllBpmUniformPositionList(editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
@@ -114,7 +123,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
             //划线的中止位置
             var endTGrid = ConvertYToTGrid(maxVisibleCanvasY, bpmList, scale, tUnitLength);
-            //可显示划线的起始位置
+            //可显示划线的起始位置 
             var currentTGridBaseOffset = ConvertYToTGrid(minVisibleCanvasY, bpmList, scale, tUnitLength) ?? ConvertYToTGrid(minVisibleCanvasY + judgeLineOffsetY, bpmList, 1, tUnitLength);
 
             var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(240, bpmList);
@@ -153,11 +162,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 var totalGrid = diff.Unit * resT + diff.Grid;
                 var i = (int)Math.Max(0, totalGrid / lengthPerBeat);
 
+                if (double.IsInfinity(lengthPerBeat))
+                    break;
+
                 while (true)
                 {
                     var tGrid = currentTGridBase + new GridOffset(0, (int)(lengthPerBeat * i));
                     //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
-                    var y = currentStartY + MathUtils.CalculateBPMLength(currentTGridBase, tGrid, currentBpm.BPM, 240);
+                    var y = currentStartY + MathUtils.CalculateBPMLength(currentTGridBase, tGrid, currentBpm.BPM, tUnitLength);
 
                     //节奏线画不了惹,跳过
                     if (beatCount == 0)
