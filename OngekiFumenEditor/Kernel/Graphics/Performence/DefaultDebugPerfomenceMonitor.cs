@@ -5,11 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Markup;
 using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Performence;
 using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor;
 using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor.IDrawingPerformenceStatisticsData;
 
