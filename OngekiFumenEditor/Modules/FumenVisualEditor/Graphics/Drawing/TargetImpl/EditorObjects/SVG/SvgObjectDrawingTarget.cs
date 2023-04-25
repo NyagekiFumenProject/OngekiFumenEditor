@@ -3,16 +3,17 @@ using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using OngekiFumenEditor.Modules.FumenVisualEditor;
 using System.Windows;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.ISimpleLineDrawing;
+using static OngekiFumenEditor.Kernel.Graphics.ISimpleLineDrawing;
 using System;
 using System.Net.Sockets;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.IStaticVBODrawing;
+using static OngekiFumenEditor.Kernel.Graphics.IStaticVBODrawing;
 using System.Drawing;
 using OngekiFumenEditor.Utils;
 using System.Numerics;
 using NAudio.Gui;
+using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Kernel.Graphics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG
 {

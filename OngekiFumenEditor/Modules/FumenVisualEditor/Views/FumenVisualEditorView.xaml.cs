@@ -2,8 +2,10 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Controls;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels;
@@ -46,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         {
             Dispatcher.InvokeAsync(() =>
             {
-                if (DataContext is IFumenEditorDrawingContext fumenPreviewer)
+                if (DataContext is IDrawingContext fumenPreviewer)
                 {
                     fumenPreviewer.PrepareOpenGLView(glView);
                 }
@@ -55,7 +57,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void glView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (DataContext is IFumenEditorDrawingContext fumenPreviewer)
+            if (DataContext is IDrawingContext fumenPreviewer)
             {
                 fumenPreviewer.OnOpenGLViewSizeChanged(glView, e);
             }

@@ -2,8 +2,8 @@
 using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
-using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -167,7 +167,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             target.RegisterSelectableObject(obj, offsetPos, size);
         }
 
-        private void DrawPallateStr(IFumenEditorDrawingContext target)
+        private void DrawPallateStr(IDrawingContext target)
         {
             foreach ((var pos, var obj) in drawStrList)
             {

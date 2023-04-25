@@ -1,8 +1,7 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
 using OngekiFumenEditor.Base;
-
-using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.ILineDrawing;
+using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -96,7 +95,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing.Draw(target, list, 1);
         }
 
-        public void DrawTimeSigntureText(IFumenEditorDrawingContext target)
+        public void DrawTimeSigntureText(IDrawingContext target)
         {
             foreach (var pair in drawLines)
                 stringDrawing.Draw(

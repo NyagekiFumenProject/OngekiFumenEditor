@@ -1,19 +1,15 @@
 using Caliburn.Micro;
 using Gemini.Framework;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Mathematics;
 using OpenTK.Wpf;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -21,11 +17,10 @@ using OpenTK.Graphics.OpenGL;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Runtime.CompilerServices;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.IFumenEditorDrawingContext;
-using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawXGridHelper;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawTimeSignatureHelper;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
+using OngekiFumenEditor.Kernel.Graphics;
+using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {

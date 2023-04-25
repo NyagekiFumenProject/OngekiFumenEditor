@@ -1,7 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Scheduler;
-using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.ILineDrawing;
+using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached.DefaultImpl
 {
@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             public int SvgGeometryHashCode { get; set; } = int.MaxValue;
             public Vector2 ViewSize { get; set; } = new(int.MinValue);
             public DateTime LastAccessTime { get; set; }
-            public IFumenEditorDrawingContext Target { get; set; }
+            public IDrawingContext Target { get; set; }
             public Rect Bound { get; set; }
 
             public void CleanPoints()
@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             return Task.CompletedTask;
         }
 
-        private bool CheckCachedDataVailed(IFumenEditorDrawingContext target, CachedSvgGeneratedData data)
+        private bool CheckCachedDataVailed(IDrawingContext target, CachedSvgGeneratedData data)
         {
             if (!(data.SvgPrefab?.ProcessingDrawingGroup?.GetHashCode() is int curHash && curHash == data.SvgGeometryHashCode))
                 return false;
@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             return list;
         }
 
-        public List<LineVertex> GetRenderData(IFumenEditorDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
+        public List<LineVertex> GetRenderData(IDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
         {
             var curTime = DateTime.Now;
             isCached = true;

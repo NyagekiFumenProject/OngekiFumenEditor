@@ -2,7 +2,8 @@
 using FontStashSharp;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
-        public float CalculateBulletMsecTime(IFumenEditorDrawingContext target, Bell obj, float userSpeed = 2.35f)
+        public float CalculateBulletMsecTime(IDrawingContext target, Bell obj, float userSpeed = 2.35f)
         {
             //const float fat = 3.95f;
             //var time =  32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
@@ -129,7 +130,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             selectedFlickList.Clear();
         }
 
-        private void DrawPallateStr(IFumenEditorDrawingContext target, IBulletPalleteReferencable obj, Vector2 pos)
+        private void DrawPallateStr(IDrawingContext target, IBulletPalleteReferencable obj, Vector2 pos)
         {
             if (obj.ReferenceBulletPallete is null)
                 return;

@@ -1,5 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;

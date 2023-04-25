@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Kernel.Graphics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
 using System.ComponentModel.Composition;
+using OngekiFumenEditor.Kernel.Graphics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {

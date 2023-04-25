@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Kernel.Graphics;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
