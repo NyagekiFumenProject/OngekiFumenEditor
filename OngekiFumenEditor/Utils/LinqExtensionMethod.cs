@@ -209,7 +209,7 @@ namespace OngekiFumenEditor.Utils
 
         public static void SortBy<T, X>(this List<T> list, Func<T, X> keySelect) => list.Sort((a, b) => Comparer<X>.Default.Compare(keySelect(a), keySelect(b)));
 
-        public static int BinarySearch<T, X>(this IList<T> insertable, X value, Func<T, X> keySelect, int lo = 0) where X : IComparable<X>
+        public static int BinarySearchBy<T, X>(this IList<T> insertable, X value, Func<T, X> keySelect, int lo = 0) where X : IComparable<X>
         {
             //https://referencesource.microsoft.com/mscorlib/system/collections/generic/arraysorthelper.cs.html#f3d6c6df965a8a86
 
@@ -398,5 +398,7 @@ namespace OngekiFumenEditor.Utils
                 prev = cur;
             }
         }
+
+
     }
 }

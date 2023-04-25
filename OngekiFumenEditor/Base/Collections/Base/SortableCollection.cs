@@ -92,9 +92,9 @@ namespace OngekiFumenEditor.Base.Collections.Base
                 throw new Exception("Collection is in batching....");
 #endif
 
-            var minIndex = items.BinarySearch(min, sortKeySelector);
+            var minIndex = items.BinarySearchBy(min, sortKeySelector);
             minIndex = minIndex < 0 ? ~minIndex : minIndex;
-            var maxIndex = items.BinarySearch(max, sortKeySelector, minIndex);
+            var maxIndex = items.BinarySearchBy(max, sortKeySelector, minIndex);
             maxIndex = maxIndex < 0 ? ~maxIndex : maxIndex + 1;
 
             return Enumerable.Range(minIndex, maxIndex - minIndex).Select(i => items[i]);
