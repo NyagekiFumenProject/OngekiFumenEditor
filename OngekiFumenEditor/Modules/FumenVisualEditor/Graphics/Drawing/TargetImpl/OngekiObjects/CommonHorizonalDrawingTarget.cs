@@ -59,6 +59,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiTimelineObjectBase> objs)
         {
+            if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
+                return;
+
             using var d4 = objs.Select(x => new RegisterDrawingInfo(x, TGridCalculator.ConvertTGridToY(x.TGrid, target.Editor))).ToListWithObjectPool(out var objects);
 
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
