@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => ConvertTGridToY(ConvertAudioTimeToTGrid(audioTime, editor), editor);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor) 
+        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor)
             => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, BpmList bpmList, int tUnitLength = 240)
@@ -162,18 +162,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 var totalGrid = diff.Unit * resT + diff.Grid;
                 var i = (int)Math.Max(0, totalGrid / lengthPerBeat);
 
-                if (double.IsInfinity(lengthPerBeat))
-                    break;
+                //检测是否可以绘制线
+                var isDrawable = !(double.IsInfinity(lengthPerBeat) || (beatCount == 0));
 
-                while (true)
+                while (isDrawable)
                 {
                     var tGrid = currentTGridBase + new GridOffset(0, (int)(lengthPerBeat * i));
                     //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
                     var y = currentStartY + MathUtils.CalculateBPMLength(currentTGridBase, tGrid, currentBpm.BPM, tUnitLength);
 
-                    //节奏线画不了惹,跳过
-                    if (beatCount == 0)
-                        break;
                     //超过当前timeSignature范围，切换到下一个timeSignature画新的线
                     if (nextBpm is not null && y >= nextStartY)
                         break;

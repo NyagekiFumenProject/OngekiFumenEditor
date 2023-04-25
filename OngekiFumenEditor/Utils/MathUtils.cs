@@ -19,6 +19,16 @@ namespace OngekiFumenEditor.Utils
         public static int Random(int min, int max) => rand.Next(min, max);
         public static int Random(int max) => rand.Next(max);
 
+        public static int LCM(int a, int b)
+        {
+            return a / GCD(a, b) * b;
+        }
+
+        public static int GCD(int a, int b)
+        {
+            return b == 0 ? a : GCD(b, a % b);
+        }
+
         public static double CalculateLength(TGrid from, TGrid to, BpmList bpmList, double unitLen)
         {
             var fromBpm = bpmList.GetBpm(from);

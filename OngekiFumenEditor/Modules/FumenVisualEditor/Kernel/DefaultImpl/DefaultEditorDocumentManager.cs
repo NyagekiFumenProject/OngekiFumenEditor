@@ -49,27 +49,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
         public void NotifyDeactivate(FumenVisualEditorViewModel editor)
         {
-            Log.LogInfo($"editor deactivated: {editor.GetHashCode()} {editor.DisplayName}");
+            Log.LogDebug($"editor deactivated: {editor.GetHashCode()} {editor.DisplayName}");
             var otherActive = currentEditor.Where(x => x != editor).FirstOrDefault(x => x.IsActive);
             CurrentActivatedEditor = otherActive;
         }
 
         public void NotifyActivate(FumenVisualEditorViewModel editor)
         {
-            Log.LogInfo($"editor activated: {editor.GetHashCode()} {editor.DisplayName}");
+            Log.LogDebug($"editor activated: {editor.GetHashCode()} {editor.DisplayName}");
             CurrentActivatedEditor = editor;
         }
 
         public void NotifyCreate(FumenVisualEditorViewModel editor)
         {
-            Log.LogInfo($"editor created: {editor.GetHashCode()} {editor.DisplayName}");
+            Log.LogDebug($"editor created: {editor.GetHashCode()} {editor.DisplayName}");
             currentEditor.Add(editor);
             OnNotifyCreated?.Invoke(editor);
         }
 
         public void NotifyDestory(FumenVisualEditorViewModel editor)
         {
-            Log.LogInfo($"editor destoryed: {editor.GetHashCode()} {editor.DisplayName}");
+            Log.LogDebug($"editor destoryed: {editor.GetHashCode()} {editor.DisplayName}");
             currentEditor.Remove(editor);
             if (CurrentActivatedEditor == editor)
                 NotifyDeactivate(editor);
@@ -91,7 +91,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
             var editor = CurrentActivatedEditor;
             Log.LogInfo($"begin auto save current document: {editor.FileName}");
+            //editor.LockAllUserInteraction();
             await editor.Save(editor.FilePath);
+            //editor.UnlockAllUserInteraction();
             Log.LogInfo($"auto save done.");
         }
 
