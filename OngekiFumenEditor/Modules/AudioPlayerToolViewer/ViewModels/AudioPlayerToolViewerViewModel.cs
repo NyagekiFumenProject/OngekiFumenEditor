@@ -148,21 +148,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             AudioPlayer = audioPlayer;
         }
 
-        public void OnPlayOrPauseButtonClicked()
-        {
-            if (AudioPlayer is null)
-                return;
-
-            Editor.LockAllUserInteraction();
-            if (scrollAnimationClearFunc is null)
-                InitPreviewActions();
-
-            if (AudioPlayer.IsPlaying)
-                OnPauseButtonClicked();
-            else
-                OnPlayOrResumeButtonClicked();
-        }
-
         private async void InitPreviewActions()
         {
             scrollAnimationClearFunc?.Invoke();
@@ -190,18 +175,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             Editor.ScrollViewerVerticalOffset = (float)Math.Max(0, scrollOffset);
         }
 
-        private void OnPauseButtonClicked()
-        {
-            fumenSoundPlayer.Pause();
-            AudioPlayer.Pause();
-        }
-
-        private void OnPlayOrResumeButtonClicked()
-        {
-            fumenSoundPlayer.Play();
-            AudioPlayer.Play();
-        }
-
         public void OnStopButtonClicked()
         {
             if (AudioPlayer is null)
@@ -211,45 +184,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             scrollAnimationClearFunc?.Invoke();
             fumenSoundPlayer.Stop();
             AudioPlayer.Stop();
-        }
-
-        public void OnJumpButtonClicked()
-        {
-            if (AudioPlayer is null)
-                return;
-
-            //todo
-        }
-
-        public async void OnOpenFileButtonClicked()
-        {
-            var dialog = new OpenFileDialog();
-            dialog.Multiselect = false;
-            dialog.Filter = FileDialogHelper.GetSupportAudioFileExtensionFilter();
-            if (dialog.ShowDialog() == true)
-            {
-                var filePath = dialog.FileName;
-                try
-                {
-                    AudioPlayer.Dispose();
-                }
-                catch
-                {
-
-                }
-                try
-                {
-                    Editor.EditorProjectData.AudioFilePath = filePath;
-                    var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(filePath);
-                    AudioPlayer = audio;
-                }
-                catch (Exception e)
-                {
-                    var msg = $"无法打开音频文件:{filePath} ,原因:{e.Message}";
-                    Log.LogError(msg);
-                    MessageBox.Show(msg, "错误");
-                }
-            }
         }
 
         public void OnSliderValueChanged()
