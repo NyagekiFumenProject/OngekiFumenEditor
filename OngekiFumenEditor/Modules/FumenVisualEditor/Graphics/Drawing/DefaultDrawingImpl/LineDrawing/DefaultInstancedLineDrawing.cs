@@ -135,6 +135,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.DefaultDr
 
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
                 target.PerfomenceMonitor.CountDrawCall(this);
+
+                postDataFillIndex = postDataFillCount = 0;
             }
         }
 
