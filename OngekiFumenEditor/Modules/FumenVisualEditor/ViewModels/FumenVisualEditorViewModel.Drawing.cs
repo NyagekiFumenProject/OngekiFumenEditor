@@ -21,6 +21,7 @@ using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editor
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Kernel.Graphics;
 using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.IFumenEditorDrawingContext;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -95,6 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public FumenVisualEditorViewModel Editor => this;
 
         public VisibleRect Rect { get; set; } = default;
+        public VisibleTGridRange TGridRange { get; set; } = default;
 
         public IPerfomenceMonitor PerfomenceMonitor => performenceMonitor;
 
@@ -148,9 +150,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             ViewWidth = (float)openGLView.ActualWidth;
             ViewHeight = (float)openGLView.ActualHeight;
 
-            GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
-            GL.Viewport(0, 0, (int)ViewWidth, (int)ViewHeight);
-
             drawTargets = IoC.GetAll<IDrawingTarget>()
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
@@ -174,12 +173,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             performenceMonitor.PostUIRenderTime(ts);
             performenceMonitor.OnBeforeRender();
+
 #if DEBUG
             var error = GL.GetError();
             if (error != ErrorCode.NoError)
                 Log.LogDebug($"OpenGL ERROR!! : {error}");
 #endif
+            GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.Viewport(0, 0, (int)ViewWidth, (int)ViewHeight);
+
             hits.Clear();
 
             var fumen = Fumen;
@@ -191,7 +194,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var maxTGrid = TGridCalculator.ConvertYToTGrid(minY + ViewHeight, this);
 
             //todo 这里就要计算可视区域了
-            Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight), minTGrid, maxTGrid);
+            Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));
+            TGridRange = new VisibleTGridRange(minTGrid, maxTGrid);
 
             RecalculateMagaticXGridLines();
 

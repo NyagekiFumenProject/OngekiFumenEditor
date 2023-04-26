@@ -18,12 +18,10 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// </summary>
         public struct VisibleRect
         {
-            public VisibleRect(Vector2 buttomRight, Vector2 topLeft, TGrid minTGrid, TGrid maxTGrid)
+            public VisibleRect(Vector2 buttomRight, Vector2 topLeft)
             {
                 TopLeft = topLeft;
                 ButtomRight = buttomRight;
-                VisiableMinTGrid = minTGrid;
-                VisiableMaxTGrid = maxTGrid;
             }
 
             public Vector2 TopLeft { get; init; }
@@ -37,9 +35,6 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
             public float MinX => TopLeft.X;
             public float MaxX => ButtomRight.X;
-
-            public TGrid VisiableMinTGrid { get; init; }
-            public TGrid VisiableMaxTGrid { get; init; }
         }
 
         //values are updating by frame

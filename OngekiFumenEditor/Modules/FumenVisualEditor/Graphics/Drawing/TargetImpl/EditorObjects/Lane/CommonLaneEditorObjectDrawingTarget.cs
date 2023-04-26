@@ -38,8 +38,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 return;
             target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             {
-                var previewMinTGrid = target.Rect.VisiableMinTGrid;
-                var previewMaxTGrid = target.Rect.VisiableMaxTGrid;
+                var previewMinTGrid = target.TGridRange.VisiableMinTGrid;
+                var previewMaxTGrid = target.TGridRange.VisiableMaxTGrid;
 
                 void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {

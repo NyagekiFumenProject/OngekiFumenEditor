@@ -51,7 +51,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             bool isVisible(TGrid tGrid)
             {
-                return target.Rect.VisiableMinTGrid <= tGrid || tGrid <= target.Rect.VisiableMaxTGrid;
+                return target.TGridRange.VisiableMinTGrid <= tGrid || tGrid <= target.TGridRange.VisiableMaxTGrid;
             }
 
             var prevVisible = isVisible(obj.TGrid);

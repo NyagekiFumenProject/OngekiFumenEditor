@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {
                 var tGrid = g.FirstOrDefault().TimelineObject.TGrid;
                 using var d3 = g.ToListWithObjectPool(out var actualItems);
-                if (tGrid < target.Rect.VisiableMinTGrid || tGrid > target.Rect.VisiableMaxTGrid)
+                if (tGrid < target.TGridRange.VisiableMinTGrid || tGrid > target.TGridRange.VisiableMaxTGrid)
                 {
                     actualItems.RemoveAll(x => x.TimelineObject switch
                     {
