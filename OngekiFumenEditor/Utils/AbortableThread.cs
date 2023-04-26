@@ -50,11 +50,12 @@ namespace OngekiFumenEditor.Utils
         }
 
 
-        public void Abort()
+        public void Abort(bool waitForTask = true)
         {
             Log.LogInfo($"Begin to abort thread {Name}.", prefix: "AbortableThread");
             cancellationTokenSource.Cancel();
-            thread?.Join();
+            if (waitForTask)
+                thread?.Join();
             Log.LogInfo($"Aborted thread {Name}.", prefix: "AbortableThread");
         }
     }
