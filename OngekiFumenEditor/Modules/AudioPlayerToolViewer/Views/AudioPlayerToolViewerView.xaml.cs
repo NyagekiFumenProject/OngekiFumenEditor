@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OngekiFumenEditor.Kernel.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,12 +23,32 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Views
     {
         public AudioPlayerToolViewerView()
         {
-            InitializeComponent();
+            InitializeComponent(); 
+            glView.Start(new()
+            {
+                MajorVersion = 4,
+                MinorVersion = 5,
+                GraphicsProfile = OpenTK.Windowing.Common.ContextProfile.Core
+            });
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void GLWpfControl_Ready()
         {
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (DataContext is IDrawingContext fumenPreviewer)
+                {
+                    fumenPreviewer.PrepareOpenGLView(glView);
+                }
+            });
+        }
 
+        private void GLWpfControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (DataContext is IDrawingContext fumenPreviewer)
+            {
+                fumenPreviewer.OnOpenGLViewSizeChanged(glView, e);
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
+namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 {
     public class DummyAudioPlayer : PropertyChangedBase, IAudioPlayer
     {
@@ -91,6 +91,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             baseTime = TimeSpan.FromMilliseconds(0);
             stopwatch.Reset();
             stopwatch.Stop();
+        }
+
+        public Task<SampleData> GetSamplesAsync()
+        {
+            return null;
         }
     }
 }

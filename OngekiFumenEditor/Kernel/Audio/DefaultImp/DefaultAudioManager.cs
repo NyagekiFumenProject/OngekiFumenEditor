@@ -4,6 +4,8 @@ using DereTore.Exchange.Audio.HCA;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using OngekiFumenEditor.Kernel.Audio.DefaultImp.Music;
+using OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Buffers;
@@ -156,7 +158,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             {
                 var formatVersion = acb.FormatVersion;
                 var awb = acb.InternalAwb ?? acb.ExternalAwb;
-                var tempAwbFilePath = Path.GetTempFileName() + ".wav";
+                var tempFileName = Path.GetFileNameWithoutExtension(filePath) + "_" + filePath.GetHashCode() + ".wav";
+                var tempAwbFilePath = Path.Combine(Path.GetTempPath(), tempFileName);
+                Log.LogInfo($"tempAwbFilePath = {tempAwbFilePath}");
+
+                if (File.Exists(tempAwbFilePath))
+                {
+                    Log.LogInfo($"use cache file.");
+                    return tempAwbFilePath;
+                }
 
                 try
                 {
@@ -172,13 +182,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             }
         }
 
-
         public Task<ISoundPlayer> LoadSoundAsync(string filePath)
         {
             var cached = new CachedSound(filePath);
             if (cached.WaveFormat.SampleRate != 48000)
             {
-                Log.LogWarn($"Resample sound audio file (sr:{cached.WaveFormat.SampleRate} != 48000) : {filePath}");
+                Log.LogWarn($"Resample sound audio file from {cached.WaveFormat.SampleRate} to 48000 : {filePath}");
                 cached = ResampleCacheSound(cached);
             }
 

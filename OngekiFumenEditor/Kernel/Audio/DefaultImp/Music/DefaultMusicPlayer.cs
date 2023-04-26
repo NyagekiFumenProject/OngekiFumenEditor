@@ -1,18 +1,20 @@
 ﻿using Caliburn.Micro;
 using NAudio.Wave;
+using NAudio.Wave.Compression;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
+namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 {
     internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
     {
@@ -22,6 +24,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         private DateTime startTime;
         private TimeSpan pauseTime;
         private bool isAvaliable;
+        private byte[] samples;
 
         public TimeSpan Duration { get => audioFileReader.TotalTime; }
 
@@ -46,7 +49,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             }
         }
 
-        public Task Load(string audio_file)
+        public async Task Load(string audio_file)
         {
             //release resource before loading new one.
             Dispose();
@@ -55,6 +58,10 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             {
                 currentOut = new WaveOut();
                 audioFileReader = new AudioFileReader(audio_file);
+                var ms = new MemoryStream();
+                await audioFileReader.CopyToAsync(ms);
+                audioFileReader.Seek(0, SeekOrigin.Begin);
+                samples = ms.ToArray();
                 currentOut?.Init(audioFileReader);
                 NotifyOfPropertyChange(() => Duration);
                 IsAvaliable = true;
@@ -64,8 +71,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 Log.LogError($"Load audio file ({audio_file}) failed : {e.Message}");
                 Dispose();
             }
-
-            return Task.CompletedTask;
         }
 
         public void Seek(TimeSpan time, bool pause)
@@ -76,7 +81,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             currentOut?.Dispose();
             currentOut = default;
 
-            audioFileReader.Seek(0, System.IO.SeekOrigin.Begin);
+            audioFileReader.Seek(0, SeekOrigin.Begin);
             var provider = new OffsetSampleProvider(audioFileReader)
             {
                 SkipOver = time
@@ -161,6 +166,28 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             NotifyOfPropertyChange(() => Volume);
             NotifyOfPropertyChange(() => PlaybackSpeed);
             NotifyOfPropertyChange(() => IsPlaying);
+        }
+
+        public Task<SampleData> GetSamplesAsync()
+        {
+            if (!IsAvaliable)
+                return Task.FromResult<SampleData>(default);
+
+            var subBuffer = samples.AsMemory();
+            var sampleData = new SampleData(subBuffer, ConvertToSampleInfo(audioFileReader.WaveFormat));
+
+            return Task.FromResult(sampleData);
+        }
+
+        public static SampleInfo ConvertToSampleInfo(WaveFormat waveFormat)
+        {
+            var sampleInfo = new SampleInfo();
+
+            sampleInfo.SampleRate = waveFormat.SampleRate;
+            sampleInfo.Channels = waveFormat.Channels;
+            sampleInfo.BitsPerSample = waveFormat.BitsPerSample;
+
+            return sampleInfo;
         }
     }
 }

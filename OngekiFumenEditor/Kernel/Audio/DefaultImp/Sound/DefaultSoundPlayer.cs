@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Kernel.Audio.DefaultImp.DefaultAudioManager;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
+namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
 {
     internal class DefaultSoundPlayer : ISoundPlayer
     {

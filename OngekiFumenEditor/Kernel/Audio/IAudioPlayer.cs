@@ -38,5 +38,7 @@ namespace OngekiFumenEditor.Kernel.Audio
         void Stop();
         void Pause();
         void Seek(TimeSpan TimeSpan, bool pause);
+
+        Task<SampleData> GetSamplesAsync();
     }
 }

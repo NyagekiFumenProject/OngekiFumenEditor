@@ -11,6 +11,7 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels"
+    xmlns:wpf="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:AudioPlayerToolViewerViewModel,
                                      IsDesignTimeCreatable=True}"
@@ -27,6 +28,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+
             <StackPanel Margin="10" IsEnabled="{Binding IsAudioButtonEnabled}">
                 <TextBlock Margin="0,0,0,5">
                     <Run Text="当前播放：" />
@@ -44,6 +46,13 @@
                     <Run Text=" - " />
                     <Run Text="{Binding AudioPlayer.Duration, Mode=OneWay, Converter={StaticResource IntToTimeDisplayConverter}}" />
                 </TextBlock>
+                <wpf:GLWpfControl
+                    x:Name="glView"
+                    Height="100"
+                    Margin="0,0,0,5"
+                    Ready="GLWpfControl_Ready"
+                    SizeChanged="GLWpfControl_SizeChanged">
+                </wpf:GLWpfControl>
             </StackPanel>
 
             <Grid

@@ -25,7 +25,7 @@ using System.Windows.Threading;
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 {
     [Export(typeof(IAudioPlayerToolViewer))]
-    public class AudioPlayerToolViewerViewModel : Tool, IAudioPlayerToolViewer
+    public partial class AudioPlayerToolViewerViewModel : Tool, IAudioPlayerToolViewer
     {
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
@@ -75,6 +75,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 this.RegisterOrUnregisterPropertyChangeEvent(audioPlayer, value, OnAudioPlayerPropChanged);
                 Set(ref audioPlayer, value);
                 NotifyOfPropertyChange(() => IsAudioButtonEnabled);
+                PrepareWaveform(AudioPlayer);
             }
         }
 
