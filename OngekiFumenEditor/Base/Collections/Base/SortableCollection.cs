@@ -3,34 +3,42 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections.Base
 {
-    public class SortableCollection<T, X> : IEnumerable<T> where T : INotifyPropertyChanged where X : IComparable<X>
+    public class SortableCollection<T, X> : IEnumerable<T> where X : IComparable<X>
     {
         private List<T> items = new List<T>();
         private readonly Func<T, X> sortKeySelector;
-        private readonly string sortKeyPropertyName;
         private ComparerWrapper<T> comparer;
 
         public bool IsBatching { get; private set; }
         public int Count => items.Count;
 
-        public SortableCollection(Func<T, X> sortKeySelector, string sortKeyPropertyName = default)
+        public int Capacity
+        {
+            get => items.Capacity;
+            set => items.Capacity = value;
+        }
+
+        public T this[int i]
+        {
+            get { return items[i]; }
+        }
+
+        public SortableCollection(Func<T, X> sortKeySelector)
         {
             comparer = new ComparerWrapper<T>((a, b) => sortKeySelector(a).CompareTo(sortKeySelector(b)));
             this.sortKeySelector = sortKeySelector;
-            this.sortKeyPropertyName = sortKeyPropertyName;
         }
 
         public IEnumerator<T> GetEnumerator() => items.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public void Add(T obj)
+        public virtual void Add(T obj)
         {
             if (IsBatching)
                 items.Add(obj);
@@ -41,27 +49,11 @@ namespace OngekiFumenEditor.Base.Collections.Base
                     index = ~index;
                 items.Insert(index, obj);
             }
-
-            obj.PropertyChanged += OnItemPropChanged;
         }
 
-        private void OnItemPropChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (IsBatching)
-                return;
-
-            if (e.PropertyName == sortKeyPropertyName)
-            {
-                var obj = (T)sender;
-                Remove(obj);
-                Add(obj);
-            }
-        }
-
-        public void Remove(T obj)
+        public virtual void Remove(T obj)
         {
             items.Remove(obj);
-            obj.PropertyChanged -= OnItemPropChanged;
         }
 
         public bool Contains(T obj)
@@ -85,7 +77,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
             items.Sort(comparer);
         }
 
-        public IEnumerable<T> BinaryFindRange(X min, X max)
+        public (int minIndex, int maxIndex) BinaryFindRangeIndex(X min, X max)
         {
 #if DEBUG
             if (IsBatching)
@@ -97,7 +89,13 @@ namespace OngekiFumenEditor.Base.Collections.Base
             var maxIndex = items.BinarySearchBy(max, sortKeySelector, minIndex);
             maxIndex = maxIndex < 0 ? ~maxIndex : maxIndex + 1;
 
-            return Enumerable.Range(minIndex, maxIndex - minIndex).Select(i => items[i]);
+            return (minIndex, maxIndex);
+        }
+
+        public IEnumerable<T> BinaryFindRange(X min, X max)
+        {
+            var range = BinaryFindRangeIndex(min, max);
+            return Enumerable.Range(range.minIndex, range.maxIndex - range.minIndex).Select(i => items[i]);
         }
 
         public bool FastContains(T obj) => Contains(obj);
