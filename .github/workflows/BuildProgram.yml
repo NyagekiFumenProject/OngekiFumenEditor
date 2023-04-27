@@ -38,6 +38,8 @@ jobs:
       run: pwd
     - name: show version.json
       run: cat .\OngekiFumenEditor\version.json
+    - name: show version.json2
+      run: cat D:\a\OngekiFumenEditor\OngekiFumenEditor\OngekiFumenEditor\version.json
     - name: get-version-action
       id: project-version
       uses: euberdeveloper/ga-project-version@main
