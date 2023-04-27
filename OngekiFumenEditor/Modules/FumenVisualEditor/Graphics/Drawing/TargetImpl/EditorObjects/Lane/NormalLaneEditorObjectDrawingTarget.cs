@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[]
         {
-            "LLS","LCS","LRS"
+            "LLS","LCS","LRS","CLS"
         };
 
         public NormalLaneEditorObjectDrawingTarget() : base(
