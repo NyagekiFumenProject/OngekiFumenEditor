@@ -12,10 +12,10 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-    public class BpmList : IEnumerable<BPMChange>
+    public class BpmList : IBinaryFindRangeEnumable<BPMChange, TGrid>
     {
         private BPMChange firstBpm = new BPMChange();
-        private TGridSortList<BPMChange> changedBpmList = new ();
+        private TGridSortList<BPMChange> changedBpmList = new();
         public BPMChange FirstBpm => firstBpm;
 
         public event Action OnChangedEvent;
@@ -118,5 +118,14 @@ namespace OngekiFumenEditor.Base.Collections
 
             return cachedBpmUniformPosition;
         }
+
+        public (int minIndex, int maxIndex) BinaryFindRangeIndex(TGrid min, TGrid max)
+            => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).BinaryFindRangeIndex(min, max);
+
+        public IEnumerable<BPMChange> BinaryFindRange(TGrid min, TGrid max)
+            => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).BinaryFindRange(min, max);
+
+        public bool Contains(BPMChange obj)
+            => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).Contains(obj);
     }
 }

@@ -6,6 +6,7 @@ using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
@@ -42,8 +43,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public IPerfomenceMonitor PerfomenceMonitor => performenceMonitor;
 
         public TimeSpan CurrentTime { get; private set; }
+        public TimeSpan AudioTotalDuration => AudioPlayer?.Duration ?? default;
         public float DurationMsPerPixel { get; private set; } = 10.0f;
         public float CurrentTimeXOffset { get; private set; } = 30f;
+
+        public FumenVisualEditorViewModel EditorViewModel => Editor;
 
         private void RecalcViewProjectionMatrix()
         {
@@ -163,10 +167,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             Rect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
 
-            if (AudioPlayer is null)
-                return;
-
-            CurrentTime = AudioPlayer.CurrentTime;
+            if (AudioPlayer?.IsPlaying ?? false)
+                CurrentTime = AudioPlayer.CurrentTime;
+            else
+            {
+                var tGrid = Editor?.GetCurrentJudgeLineTGrid();
+                if (tGrid is null)
+                    return;
+                var editorAudioTime = TGridCalculator.ConvertTGridToAudioTime(tGrid, Editor);
+                CurrentTime = editorAudioTime;
+            }
         }
     }
 }

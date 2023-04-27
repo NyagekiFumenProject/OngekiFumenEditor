@@ -13,10 +13,10 @@ using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-    public class MeterChangeList : IEnumerable<MeterChange>
+    public class MeterChangeList : IBinaryFindRangeEnumable<MeterChange, TGrid>
     {
         private MeterChange firstMeter = new MeterChange();
-        private TGridSortList<MeterChange> changedMeterList = new ();
+        private TGridSortList<MeterChange> changedMeterList = new();
         public MeterChange FirstMeter => firstMeter;
 
         public event Action OnChangedEvent;
@@ -141,5 +141,14 @@ namespace OngekiFumenEditor.Base.Collections
             }
             return cachedBpmUniformPosition;
         }
+
+        public (int minIndex, int maxIndex) BinaryFindRangeIndex(TGrid min, TGrid max)
+            => ((IBinaryFindRangeEnumable<MeterChange, TGrid>)changedMeterList).BinaryFindRangeIndex(min, max);
+
+        public IEnumerable<MeterChange> BinaryFindRange(TGrid min, TGrid max)
+            => ((IBinaryFindRangeEnumable<MeterChange, TGrid>)changedMeterList).BinaryFindRange(min, max);
+
+        public bool Contains(MeterChange obj)
+            => ((IBinaryFindRangeEnumable<MeterChange, TGrid>)changedMeterList).Contains(obj);
     }
 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections.Base
 {
-    public class SortableCollection<T, X> : IEnumerable<T> where X : IComparable<X>
+    public class SortableCollection<T, X> : IBinaryFindRangeEnumable<T, X> where X : IComparable<X>
     {
         private List<T> items = new List<T>();
         private readonly Func<T, X> sortKeySelector;

@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,14 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics
         /// <summary>
         /// 表示当前时间
         /// </summary>
-        public TimeSpan CurrentTime { get; }
+        TimeSpan CurrentTime { get; }
+        TimeSpan AudioTotalDuration { get; }
         /// <summary>
         /// 表示每个像素显示时间间距
         /// </summary>
-        public float DurationMsPerPixel { get; }
+        float DurationMsPerPixel { get; }
+        float CurrentTimeXOffset { get; }
 
-        public float CurrentTimeXOffset { get; }
+        FumenVisualEditorViewModel EditorViewModel { get; }
     }
 }

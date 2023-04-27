@@ -126,7 +126,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             //可显示划线的起始位置 
             var currentTGridBaseOffset = ConvertYToTGrid(minVisibleCanvasY, bpmList, scale, tUnitLength) ?? ConvertYToTGrid(minVisibleCanvasY + judgeLineOffsetY, bpmList, 1, tUnitLength);
 
-            var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(240, bpmList);
+            var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
             var currentTimeSignatureIndex = 0;
             //快速定位,尽量避免计算完全不用画的timesignature(
             for (int i = 0; i < timeSignatures.Count; i++)
@@ -240,7 +240,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
               |
             ------ prevY
              */
-            var timeSignatures = meterChanges.GetCachedAllTimeSignatureUniformPositionList(240, bpmList);
+            var timeSignatures = meterChanges.GetCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
 
             (var prevY, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.startY <= y);
             var downFirst = GetVisbleTimelines(bpmList, meterChanges, prevY, y, 0, beatSplit, scale, tUnitLength)

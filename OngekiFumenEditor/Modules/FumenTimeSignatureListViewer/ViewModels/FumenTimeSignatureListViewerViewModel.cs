@@ -131,7 +131,7 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
             using var disp = DisplayTimeSignatures.ToListWithObjectPool(out var removeList);
             CurrentSelectTimeSignature = default;
 
-            var list = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(240, Fumen.BpmList);
+            var list = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Editor.Setting.TGridUnitLength, Fumen.BpmList);
             foreach (var ts in list)
             {
                 var cacheObj = removeList.FirstOrDefault();
