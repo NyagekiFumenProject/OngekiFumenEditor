@@ -311,31 +311,6 @@ namespace OngekiFumenEditor.Base
             return first.SelectMany(x => x.GetDisplayableObjects());
         }
 
-        public bool Contains(OngekiObjectBase obj) => obj switch
-        {
-            Bell f => Bells.FastContains(f),
-            Flick f => Flicks.FastContains(f),
-            ClickSE f => ClickSEs.FastContains(f),
-            EnemySet f => EnemySets.FastContains(f),
-            Tap f => Taps.FastContains(f),
-            Bullet f => Bullets.FastContains(f),
-            BPMChange f => BpmList.Contains(f),
-            MeterChange f => MeterChanges.Contains(f),
-            LaneBlockArea f => LaneBlocks.Contains(f),
-            LaneBlockArea.LaneBlockAreaEndIndicator f => LaneBlocks.Any(x => x.EndIndicator == f),
-            Hold f => Holds.Contains(f),
-            HoldEnd f => Holds.Any(x => x.HoldEnd == f),
-            SvgPrefabBase f => SvgPrefabs.Contains(f),
-            Soflan f => Soflans.Contains(f),
-            Soflan.SoflanEndIndicator f => Soflans.Any(x => x.EndIndicator == f),
-            LaneStartBase f => Lanes.Contains(f),
-            (LaneNextBase or LaneEndBase) => Lanes.SelectMany(x => x.Children).Any(x => x == obj),
-            BeamStart f => Beams.Contains(f),
-            (BeamEnd or BeamNext) => Beams.SelectMany(x => x.Children).Any(x => x == obj),
-            LaneCurvePathControlObject f => Beams.SelectMany(x => x.Children).SelectMany(x => x.PathControls).Contains(f),
-            _ => false
-        };
-
         private void OnFumenMetaInfoPropChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FumenMetaInfo.BpmDefinition))
