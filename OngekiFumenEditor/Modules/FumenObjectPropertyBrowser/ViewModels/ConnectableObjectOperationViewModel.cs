@@ -200,7 +200,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             var redoAction = new System.Action(() => { });
             var undoAction = new System.Action(() => { });
 
-            foreach ((var tGrid, _, _) in TGridCalculator.GetVisbleTimelines(
+            foreach ((var tGrid, _, _, _, _) in TGridCalculator.GetVisbleTimelines(
                 fumen.BpmList,
                 fumen.MeterChanges,
                 TGridCalculator.ConvertTGridToY(beginTGrid, editor),

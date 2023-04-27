@@ -115,9 +115,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(FumenVisualEditorViewModel editor, int tUnitLength = 240)
+        public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines(FumenVisualEditorViewModel editor, int tUnitLength = 240)
             => GetVisbleTimelines(editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Rect.MinY, editor.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale, tUnitLength);
-        public static IEnumerable<(TGrid tGrid, double y, int beatIndex)> GetVisbleTimelines(BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
+        public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines(BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
         {
             minVisibleCanvasY = Math.Max(0, minVisibleCanvasY);
 
@@ -184,7 +184,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                         continue;
                     }
 
-                    yield return (tGrid, y * scale, i % beatCount);
+                    yield return (tGrid, y * scale, i % beatCount, currentMeter, currentBpm);
                     i++;
                 }
                 currentTGridBaseOffset = nextTGridBase;
@@ -205,7 +205,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (TGrid tGrid, double y, int beatIndex) TryPickMagneticBeatTime(float y, float range, BpmList bpmList, MeterChangeList meterChanges, int beatSplit, double scale, int tUnitLength = 240)
-            => GetVisbleTimelines(bpmList, meterChanges, y - range, y + range, 0, beatSplit, scale, tUnitLength).MinByOrDefault(x => Math.Abs(x.y - y));
+        {
+            var result = GetVisbleTimelines(bpmList, meterChanges, y - range, y + range, 0, beatSplit, scale, tUnitLength).MinByOrDefault(x => Math.Abs(x.y - y));
+            return (result.tGrid, result.y, result.beatIndex);
+        }
         /// <summary>
         /// 计算在y±range内，最近的节奏线
         /// </summary>
@@ -249,8 +252,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 .FirstOrDefault();
 
             if (Math.Abs(downFirst.y - y) < Math.Abs(nextFirst.y - y))
-                return downFirst;
-            return nextFirst;
+                return (downFirst.tGrid, downFirst.y, downFirst.beatIndex);
+            return (nextFirst.tGrid, nextFirst.y, nextFirst.beatIndex);
         }
     }
 }

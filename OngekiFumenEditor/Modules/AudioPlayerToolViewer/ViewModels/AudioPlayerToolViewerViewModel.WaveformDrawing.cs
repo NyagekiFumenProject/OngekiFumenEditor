@@ -19,6 +19,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
@@ -178,5 +179,15 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 CurrentTime = editorAudioTime;
             }
         }
+
+        #region User Interection
+
+        public void OnMouseWheel(ActionExecutionContext ctx)
+        {
+            var arg = ctx.EventArgs as MouseWheelEventArgs;
+            DurationMsPerPixel = (float)Math.Max(2.5f, DurationMsPerPixel + Math.Sign(arg.Delta) * 2.5);
+        }
+
+        #endregion
     }
 }

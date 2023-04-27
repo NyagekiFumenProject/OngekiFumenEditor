@@ -67,7 +67,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             var displayAudioTime = target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime;
 
-            foreach ((var t, var y, _) in timelines)
+            foreach ((var t, var y, _, _, _) in timelines)
             {
                 var str = string.Empty;
                 if (displayAudioTime)

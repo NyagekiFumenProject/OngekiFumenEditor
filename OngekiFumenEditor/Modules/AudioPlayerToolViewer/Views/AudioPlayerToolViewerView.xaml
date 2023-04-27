@@ -48,8 +48,9 @@
                 </TextBlock>
                 <wpf:GLWpfControl
                     x:Name="glView"
-                    Height="100"
+                    Height="150"
                     Margin="0,0,0,5"
+                    cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];"
                     Ready="GLWpfControl_Ready"
                     SizeChanged="GLWpfControl_SizeChanged">
                 </wpf:GLWpfControl>
