@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.SamplePeak
 
         public PeakPointCollection GetPeakValues(SampleData data)
         {
-            var list = new PeakPointCollection();
+            var list = new PeakPointCollection(data.SampleInfo);
 
             var channels = data.SampleInfo.Channels;
             var samplesPerPoint = (int)(data.SampleInfo.SampleRate * SampleDurationPerPoint * channels);

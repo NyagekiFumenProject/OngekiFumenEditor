@@ -30,30 +30,69 @@
             </Grid.RowDefinitions>
 
             <StackPanel Margin="10" IsEnabled="{Binding IsAudioButtonEnabled}">
-                <TextBlock Margin="0,0,0,5">
-                    <Run Text="当前播放：" />
-                    <Run d:Text="asd" Text="{Binding AudioName}" />
-                </TextBlock>
-                <gemini:SliderEx
-                    Margin="0,0,0,5"
-                    cal:Message.Attach="[Event ThumbDragCompleted] = [Action OnSliderValueChanged()];[Event ThumbDragStarted] = [Action OnSliderValueStartChanged()];"
-                    IsEnabled="{Binding AudioPlayer.IsAvaliable}"
-                    Maximum="{Binding AudioPlayer.Duration.TotalMilliseconds, Mode=OneWay}"
-                    Value="{Binding SliderValue, Mode=TwoWay}">
-                </gemini:SliderEx>
-                <TextBlock Margin="0,0,0,5" HorizontalAlignment="Right">
-                    <Run Text="{Binding AudioPlayer.CurrentTime, Mode=OneWay, Converter={StaticResource IntToTimeDisplayConverter}}" />
-                    <Run Text=" - " />
-                    <Run Text="{Binding AudioPlayer.Duration, Mode=OneWay, Converter={StaticResource IntToTimeDisplayConverter}}" />
-                </TextBlock>
                 <wpf:GLWpfControl
                     x:Name="glView"
                     Height="150"
                     Margin="0,0,0,5"
-                    cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];"
                     Ready="GLWpfControl_Ready"
                     SizeChanged="GLWpfControl_SizeChanged">
                 </wpf:GLWpfControl>
+
+                <StackPanel Margin="0,5,0,5">
+                    <GroupBox Header="频谱渲染选项">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <controls:RangeValue
+                                Margin="0,0,10,0"
+                                Padding="0,5,0,5"
+                                CurrentValue="{Binding CurrentTimeXOffset, Mode=TwoWay}"
+                                DisplayName="当前时间线偏移"
+                                MaxValue="{Binding ElementName=glView, Path=ActualWidth}"
+                                MinValue="0"
+                                Step="1">
+                            </controls:RangeValue>
+                            <controls:RangeValue
+                                Grid.Column="1"
+                                Margin="10,0,0,0"
+                                Padding="0,5,0,5"
+                                CurrentValue="{Binding DurationMsPerPixel, Mode=TwoWay}"
+                                DisplayName="频谱水平缩放"
+                                MaxValue="50"
+                                MinValue="2.5"
+                                Step="2.5">
+                            </controls:RangeValue>
+                            <controls:RangeValue
+                                Grid.Row="1"
+                                Margin="0,0,10,0"
+                                Padding="0,5,0,5"
+                                CurrentValue="{Binding ResampleSize, Mode=TwoWay}"
+                                DisplayName="重采样"
+                                MaxValue="30"
+                                MinValue="0"
+                                Step="1">
+                            </controls:RangeValue>
+                            <controls:RangeValue
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Margin="10,0,0,0"
+                                Padding="0,5,0,5"
+                                CurrentValue="{Binding WaveformVecticalScale, Mode=TwoWay}"
+                                DisplayName="频谱垂直缩放"
+                                MaxValue="1.5"
+                                MinValue="0.01"
+                                Step="0.01">
+                            </controls:RangeValue>
+                        </Grid>
+                    </GroupBox>
+                </StackPanel>
             </StackPanel>
 
             <Grid
@@ -93,49 +132,56 @@
                     </WrapPanel>
                 </GroupBox>
 
-
-                <StackPanel Grid.Column="1" Margin="10">
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center">音乐音量</TextBlock>
-                        <Slider
-                            Width="150"
-                            Margin="5,0,0,0"
-                            VerticalAlignment="Center"
-                            VerticalContentAlignment="Center"
-                            IsEnabled="{Binding AudioPlayer.IsAvaliable}"
-                            LargeChange="0.2"
-                            Maximum="1"
-                            SmallChange="0.2"
-                            Value="{Binding AudioPlayer.Volume}">
-                        </Slider>
-                        <Button
-                            Padding="30,5,30,5"
-                            cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
-                            Content="加载音频文件"
-                            Visibility="Collapsed" />
+                <GroupBox
+                    Grid.Column="1"
+                    Margin="10"
+                    Header="音效开关控制">
+                    <StackPanel>
+                        <StackPanel
+                            Margin="5"
+                            HorizontalAlignment="Stretch"
+                            Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center">音乐</TextBlock>
+                            <Slider
+                                Width="150"
+                                Margin="5,0,0,0"
+                                VerticalAlignment="Stretch"
+                                VerticalContentAlignment="Center"
+                                IsEnabled="{Binding AudioPlayer.IsAvaliable}"
+                                LargeChange="0.2"
+                                Maximum="1"
+                                SmallChange="0.2"
+                                Value="{Binding AudioPlayer.Volume}">
+                            </Slider>
+                            <Button
+                                Padding="30,5,30,5"
+                                cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
+                                Content="加载音频文件"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+                        <StackPanel
+                            Margin="5"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center">音效</TextBlock>
+                            <Slider
+                                Width="150"
+                                Margin="5,0,0,0"
+                                VerticalAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                LargeChange="0.2"
+                                Maximum="1"
+                                SmallChange="0.2"
+                                Value="{Binding SoundVolume}">
+                            </Slider>
+                            <Button
+                                Padding="30,5,30,5"
+                                cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
+                                Content="加载音频文件"
+                                Visibility="Collapsed" />
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel
-                        Margin="0,5,0,0"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center">音效音量</TextBlock>
-                        <Slider
-                            Width="150"
-                            Margin="5,0,0,0"
-                            VerticalAlignment="Center"
-                            VerticalContentAlignment="Center"
-                            LargeChange="0.2"
-                            Maximum="1"
-                            SmallChange="0.2"
-                            Value="{Binding SoundVolume}">
-                        </Slider>
-                        <Button
-                            Padding="30,5,30,5"
-                            cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
-                            Content="加载音频文件"
-                            Visibility="Collapsed" />
-                    </StackPanel>
-                </StackPanel>
+                </GroupBox>
             </Grid>
 
             <StackPanel Grid.Row="2">

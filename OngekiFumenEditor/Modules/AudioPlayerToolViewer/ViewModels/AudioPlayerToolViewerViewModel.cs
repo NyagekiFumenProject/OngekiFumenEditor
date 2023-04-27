@@ -123,6 +123,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
+
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)

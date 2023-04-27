@@ -9,15 +9,6 @@ using System.Windows.Documents;
 
 namespace OngekiFumenEditor.Kernel.Audio
 {
-    public record SampleInfo()
-    {
-        public int SampleRate { get; set; }
-        public int Channels { get; set; }
-        public int BitsPerSample { get; set; }
-
-        public int BytesPerSample => BitsPerSample / 8;
-    }
-
     public record SampleData(ReadOnlyMemory<byte> Samples, SampleInfo SampleInfo)
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

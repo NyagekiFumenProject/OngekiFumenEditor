@@ -25,9 +25,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         private readonly ISimpleLineDrawing lineDrawing;
         private readonly IStringDrawing stringDrawing;
 
-        private static readonly Matrix4 WaveformScale = Matrix4.CreateScale(1, 0.70f, 1f);
         private static readonly VertexDash InvailedLineDash = new VertexDash() { DashSize = 2, GapSize = 2 };
-        private static readonly VertexDash SemiBeatDash = new VertexDash() { DashSize = 2, GapSize = 2 };
 
         private static readonly System.Numerics.Vector4 TransparentColor = new(1, 1, 1, 0);
         private static readonly System.Numerics.Vector4 WhiteColor = new(1, 1, 1, 1);
@@ -60,7 +58,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
 
             //绘制波形
-            lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * WaveformScale);
+            lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4.CreateScale(1, target.WaveformVecticalScale, 1f));
             lineDrawing.Begin(target, 1);
             {
                 var prevX = 0f;

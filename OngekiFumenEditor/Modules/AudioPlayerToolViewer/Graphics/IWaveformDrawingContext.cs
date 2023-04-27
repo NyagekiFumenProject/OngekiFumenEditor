@@ -20,6 +20,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics
         /// </summary>
         float DurationMsPerPixel { get; }
         float CurrentTimeXOffset { get; }
+        float WaveformVecticalScale { get; }
 
         FumenVisualEditorViewModel EditorViewModel { get; }
     }

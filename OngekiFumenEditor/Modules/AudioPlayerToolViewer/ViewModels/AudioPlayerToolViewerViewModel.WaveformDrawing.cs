@@ -33,7 +33,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private ISamplePeak samplePeak;
         private IWaveformDrawing waveformDrawing;
         private CancellationTokenSource loadWaveformTask;
-        private ISamplePeak.PeakPointCollection peakData;
+        private CancellationTokenSource resampleTaskCancelTokenSource;
+
+        private PeakPointCollection rawPeakData;
+        private PeakPointCollection usingPeakData;
 
         public VisibleRect Rect { get; private set; }
 
@@ -45,8 +48,55 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public TimeSpan CurrentTime { get; private set; }
         public TimeSpan AudioTotalDuration => AudioPlayer?.Duration ?? default;
-        public float DurationMsPerPixel { get; private set; } = 10.0f;
-        public float CurrentTimeXOffset { get; private set; } = 30f;
+
+        private int resampleSize = Properties.AudioPlayerToolViewerSetting.Default.ResampleSize;
+        public int ResampleSize
+        {
+            get => resampleSize;
+            set
+            {
+                Set(ref resampleSize, value);
+                ResamplePeak();
+                Properties.AudioPlayerToolViewerSetting.Default.ResampleSize = value;
+                Properties.AudioPlayerToolViewerSetting.Default.Save();
+            }
+        }
+
+        private float waveformVecticalScale = Properties.AudioPlayerToolViewerSetting.Default.WaveformVecticalScale;
+        public float WaveformVecticalScale
+        {
+            get => waveformVecticalScale;
+            set
+            {
+                Set(ref waveformVecticalScale, value);
+                Properties.AudioPlayerToolViewerSetting.Default.WaveformVecticalScale = value;
+                Properties.AudioPlayerToolViewerSetting.Default.Save();
+            }
+        }
+
+        private float durationMsPerPixel = Properties.AudioPlayerToolViewerSetting.Default.DurationMsPerPixel;
+        public float DurationMsPerPixel
+        {
+            get => durationMsPerPixel;
+            set
+            {
+                Set(ref durationMsPerPixel, value);
+                Properties.AudioPlayerToolViewerSetting.Default.DurationMsPerPixel = value;
+                Properties.AudioPlayerToolViewerSetting.Default.Save();
+            }
+        }
+
+        private float currentTimeXOffset = Properties.AudioPlayerToolViewerSetting.Default.CurrentTimeXOffset;
+        public float CurrentTimeXOffset
+        {
+            get => currentTimeXOffset;
+            set
+            {
+                Set(ref currentTimeXOffset, value);
+                Properties.AudioPlayerToolViewerSetting.Default.CurrentTimeXOffset = value;
+                Properties.AudioPlayerToolViewerSetting.Default.Save();
+            }
+        }
 
         public FumenVisualEditorViewModel EditorViewModel => Editor;
 
@@ -131,14 +181,32 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (cancelToken.IsCancellationRequested || player is null)
                 return;
             var sampleData = await player.GetSamplesAsync();
-            peakData = samplePeak.GetPeakValues(sampleData);
+            rawPeakData = samplePeak.GetPeakValues(sampleData);
+            ResamplePeak();
+        }
+
+        private async void ResamplePeak()
+        {
+            resampleTaskCancelTokenSource?.Cancel();
+            var tokenSource = new CancellationTokenSource();
+            resampleTaskCancelTokenSource = tokenSource;
+
+            if (ResampleSize == 0)
+                usingPeakData = rawPeakData;
+            else
+            {
+                var newPeakData = await rawPeakData.GenerateSimplfiedAsync(ResampleSize, tokenSource.Token);
+                if (!tokenSource.IsCancellationRequested)
+                    usingPeakData = newPeakData;
+            }
         }
 
         private void CleanWaveform()
         {
             loadWaveformTask?.Cancel();
             loadWaveformTask = null;
-            peakData = null;
+            rawPeakData = null;
+            usingPeakData = null;
         }
 
         public void OnRender(GLWpfControl openGLView, TimeSpan ts)
@@ -152,14 +220,14 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 Log.LogDebug($"OpenGL ERROR!! : {error}");
 #endif
 
-            GL.ClearColor(0 / 255f, 0 / 255f, 0 / 255f, 1f);
+            GL.ClearColor(16 / 255f, 16 / 255f, 16 / 255f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Viewport(0, 0, (int)viewWidth, (int)viewHeight);
 
             UpdateDrawingContext();
 
-            if (peakData is not null)
-                waveformDrawing.Draw(this, peakData);
+            if (usingPeakData is not null)
+                waveformDrawing.Draw(this, usingPeakData);
 
             performenceMonitor.OnAfterRender();
         }
@@ -179,15 +247,5 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 CurrentTime = editorAudioTime;
             }
         }
-
-        #region User Interection
-
-        public void OnMouseWheel(ActionExecutionContext ctx)
-        {
-            var arg = ctx.EventArgs as MouseWheelEventArgs;
-            DurationMsPerPixel = (float)Math.Max(2.5f, DurationMsPerPixel + Math.Sign(arg.Delta) * 2.5);
-        }
-
-        #endregion
     }
 }

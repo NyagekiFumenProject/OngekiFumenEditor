@@ -1,6 +1,4 @@
-﻿using OngekiFumenEditor.Base.Collections.Base;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -9,27 +7,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio
 {
-    public interface ISamplePeak
+    public partial interface ISamplePeak
     {
-        public class PeakPointCollection : SortableCollection<PeakPoint, TimeSpan>
-        {
-            public PeakPointCollection() : base(x => x.Time)
-            {
-
-            }
-        }
-
-        public record PeakPoint(TimeSpan Time, float[] Amplitudes) : IComparable<PeakPoint>
-        {
-            public int CompareTo(PeakPoint other)
-            {
-                return this.Time.CompareTo(other.Time);
-            }
-
-            public override string ToString()
-                => $"{Time} [{string.Join(", ", Amplitudes)}]";
-        }
-
         /// <summary>
         /// 获取波峰数据
         /// </summary>
