@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using static System.Windows.Forms.AxHost;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -80,6 +81,7 @@ namespace OngekiFumenEditor.Utils
         public static double CalculateBPMLength(BPMChange from, TGrid to, double timeGridSize)
             => CalculateBPMLength(from.TGrid, to, from.BPM, timeGridSize);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateBPMLength(TGrid from, TGrid to, double bpm, double timeGridSize)
         {
             if (to is null)
@@ -88,6 +90,7 @@ namespace OngekiFumenEditor.Utils
             return msec;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateBPMLength(double fromTGridUnit, double toTGridUnit, double bpm, double timeGridSize, uint resT = TGrid.DEFAULT_RES_T)
         {
             /*
@@ -113,6 +116,7 @@ namespace OngekiFumenEditor.Utils
             return msec;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static double Limit(double val, double min, double max)
         {
             if (min > max)
@@ -125,6 +129,7 @@ namespace OngekiFumenEditor.Utils
             return Math.Max(Math.Min(val, max), min);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Func<double, double> BuildTwoPointFormFormula(double x1, double y1, double x2, double y2)
         {
             var by = y2 - y1;
@@ -136,6 +141,7 @@ namespace OngekiFumenEditor.Utils
             return y => (y - y1) * 1.0 / by * bx + x1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateXFromTwoPointFormFormula(double y, double x1, double y1, double x2, double y2)
         {
             var by = y2 - y1;
@@ -147,6 +153,7 @@ namespace OngekiFumenEditor.Utils
             return (y - y1) * 1.0 / by * bx + x1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateYFromTwoPointFormFormula(double x, double x1, double y1, double x2, double y2)
         {
             var by = y2 - y1;
@@ -157,6 +164,9 @@ namespace OngekiFumenEditor.Utils
 
             return (x - x1) / bx * by + y1;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInRange(double start1, double end1, double start2, double end2) => (start1 <= end2 && start2 <= end1) || (start2 <= end1 && start1 <= end2);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateXFromBetweenObjects<T>(T from, T to, FumenVisualEditorViewModel editor, TGrid tGrid) where T : IHorizonPositionObject, ITimelineObject
