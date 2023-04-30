@@ -22,6 +22,10 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Kernel.Graphics;
 using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.IFumenEditorDrawingContext;
+using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.OngekiObjects;
+using static System.Windows.Forms.AxHost;
+using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -169,6 +173,61 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public IDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
 
+        List<IDisplayableObject> obj = new List<IDisplayableObject>();
+
+        private IEnumerable<IDisplayableObject> GetDisplayableObjects(OngekiFumen fumen, TGrid min, TGrid max)
+        {
+            var first = Enumerable.Empty<IDisplayableObject>()
+                   //.Concat(fumen.Bells.BinaryFindRange(min, max))
+                   .Concat(fumen.Flicks.BinaryFindRange(min, max))
+                   .Concat(fumen.MeterChanges.Skip(1)) //not show first meter
+                   .Concat(fumen.BpmList.Skip(1)) //not show first bpm
+                   .Concat(fumen.ClickSEs.BinaryFindRange(min, max))
+                   .Concat(fumen.LaneBlocks.GetVisibleStartObjects(min, max))
+                   .Concat(fumen.Soflans)
+                   .Concat(fumen.EnemySets.BinaryFindRange(min, max))
+                   //.Concat(fumen.Bullets.BinaryFindRange(min, max))
+                   .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
+                   .Concat(fumen.Taps.BinaryFindRange(min, max))
+                   .Concat(fumen.Holds.GetVisibleStartObjects(min, max))
+                   .Concat(fumen.SvgPrefabs)
+                   .Concat(fumen.Beams)
+                   .Distinct();
+
+            /*
+             这里考虑到有spd<1的子弹/Bell会提前出现的情况，因此得分状态分别去选择
+             */
+            obj.Clear();
+            if (Editor.EditorObjectVisibility != Visibility.Visible)
+            {
+                //todo 还能再优化
+                bool check(IBulletPalleteReferencable bell)
+                {
+                    var appearOffsetTime = ViewHeight / (bell.ReferenceBulletPallete?.Speed ?? 1f);
+
+                    var toTime = TGridCalculator.ConvertTGridToY(bell.TGrid, this);
+                    var fromTime = toTime - appearOffsetTime;
+
+                    return MathUtils.IsInRange(fromTime, toTime, Rect.MinY, Rect.MaxY);
+                }
+
+                foreach (var x in fumen.Bells
+                    .AsEnumerable<IBulletPalleteReferencable>()
+                    .Concat(fumen.Bullets))
+                {
+                    if (check(x))
+                        obj.Add(x);
+                }
+            }
+            else
+            {
+                obj.AddRange(fumen.Bells.BinaryFindRange(min, max));
+                obj.AddRange(fumen.Bullets.BinaryFindRange(min, max));
+            }
+
+            return first.Concat(obj).SelectMany(x => x.GetDisplayableObjects());
+        }
+
         public void OnRender(GLWpfControl openGLView, TimeSpan ts)
         {
             performenceMonitor.PostUIRenderTime(ts);
@@ -202,7 +261,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             timeSignatureHelper.DrawLines(this);
             xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
-            foreach (var objGroup in fumen.GetAllDisplayableObjects(minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
+            foreach (var objGroup in GetDisplayableObjects(fumen, minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
             {
                 if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget[] drawingTargets)
                     continue;
