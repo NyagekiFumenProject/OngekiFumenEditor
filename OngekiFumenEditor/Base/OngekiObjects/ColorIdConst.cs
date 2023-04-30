@@ -106,13 +106,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Name = nameof(Setsuna),
             Color = Color.FromArgb(255, 96, 74, 163)
         };
-        /*
+
         public static ColorId Brown { get; } = new ColorId()
         {
-            Id = 1,
+            Id = 14,
             Name = nameof(Brown),
-            Color = Color.FromArgb(255, 96, 74, 163)
-        };*/
+            Color = Color.FromArgb(255, 165, 42, 42)
+        };
 
         public static ColorId Haruna { get; } = new ColorId()
         {
@@ -179,6 +179,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Chinatsu,
             Tsumugi,
             Setsuna,
+            Brown,
             Haruna,
             Black,
             Akane,
