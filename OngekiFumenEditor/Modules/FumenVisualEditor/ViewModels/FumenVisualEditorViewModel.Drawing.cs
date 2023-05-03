@@ -168,7 +168,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
 
-            openGLView.Render += (ts) => OnRender(openGLView, ts);
+            openGLView.Render += Render;
         }
 
         public IDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
@@ -228,7 +228,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return first.Concat(obj).SelectMany(x => x.GetDisplayableObjects());
         }
 
-        public void OnRender(GLWpfControl openGLView, TimeSpan ts)
+        public void Render(TimeSpan ts)
         {
             performenceMonitor.PostUIRenderTime(ts);
             performenceMonitor.OnBeforeRender();
@@ -383,11 +383,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             }
             return Task.CompletedTask;
-        }
-
-        public void Render(TimeSpan ts)
-        {
-            OnRender(default, ts);
         }
     }
 }

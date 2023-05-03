@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
 
-            glView.Render += (ts) => OnRender(glView, ts);
+            glView.Render += Render;
         }
 
         private void InitRender()
@@ -159,11 +159,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             samplePeak = IoC.Get<ISamplePeak>();
             waveformDrawing = IoC.Get<IWaveformDrawing>();
             initTask.SetResult();
-        }
-
-        public void Render(TimeSpan ts)
-        {
-            OnRender(default, ts);
         }
 
         private void PrepareWaveform(IAudioPlayer player)
@@ -209,7 +204,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             usingPeakData = null;
         }
 
-        public void OnRender(GLWpfControl openGLView, TimeSpan ts)
+        public void Render(TimeSpan ts)
         {
             performenceMonitor.PostUIRenderTime(ts);
             performenceMonitor.OnBeforeRender();
