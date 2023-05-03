@@ -178,7 +178,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private async void OnPrepareWaveform(IAudioPlayer player, CancellationToken cancelToken)
         {
-            if (cancelToken.IsCancellationRequested || player is null)
+            if (cancelToken.IsCancellationRequested || player is null || samplePeak is null)
                 return;
             var sampleData = await player.GetSamplesAsync();
             rawPeakData = samplePeak.GetPeakValues(sampleData);

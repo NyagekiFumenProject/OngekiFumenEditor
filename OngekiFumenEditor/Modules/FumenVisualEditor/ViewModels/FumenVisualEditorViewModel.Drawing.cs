@@ -200,7 +200,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             obj.Clear();
             if (Editor.EditorObjectVisibility != Visibility.Visible)
             {
-                //todo 还能再优化
+                //todo 还能再次优化
                 bool check(IBulletPalleteReferencable bell)
                 {
                     var appearOffsetTime = ViewHeight / (bell.ReferenceBulletPallete?.Speed ?? 1f);

@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,14 +32,16 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
 
             if (svg is SvgImageFilePrefab imageFilePrefab)
             {
-                imageFilePrefab.SvgFile = new System.IO.FileInfo(Encoding.UTF8.GetString(Convert.FromBase64String(map["FilePathBase64"])));
+                var filePath = Encoding.UTF8.GetString(Convert.FromBase64String(map["FilePathBase64"]));
+                if (File.Exists(filePath))
+                    imageFilePrefab.SvgFile = new FileInfo(filePath);
             }
             if (svg is SvgStringPrefab stringPrefab)
             {
                 stringPrefab.Content = Encoding.UTF8.GetString(Convert.FromBase64String(map["Content"]));
                 stringPrefab.TypefaceName = map["TypefaceName"];
                 var colorId = int.Parse(map["FontColorId"]);
-                stringPrefab.FontColor = ColorIdConst.AllColors.FirstOrDefault(x=>x.Id == colorId);
+                stringPrefab.FontColor = ColorIdConst.AllColors.FirstOrDefault(x => x.Id == colorId);
                 stringPrefab.FontSize = double.Parse(map["FontSize"]);
                 stringPrefab.ContentFlowDirection = Enum.Parse<SvgStringPrefab.FlowDirection>(map["ContentFlowDirection"]);
                 stringPrefab.ContentLineHeight = double.Parse(map["ContentLineHeight"]);
