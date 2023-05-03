@@ -34,6 +34,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private IWaveformDrawing waveformDrawing;
         private CancellationTokenSource loadWaveformTask;
         private CancellationTokenSource resampleTaskCancelTokenSource;
+        private TaskCompletionSource initTask = new TaskCompletionSource();
 
         private PeakPointCollection rawPeakData;
         private PeakPointCollection usingPeakData;
@@ -142,11 +143,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public void PrepareOpenGLView(GLWpfControl glView)
         {
             Log.LogDebug($"ready.");
-
             InitOpenGL();
-
             InitRender();
-
             viewWidth = (float)glView.ActualWidth;
             viewHeight = (float)glView.ActualHeight;
             RecalcViewProjectionMatrix();
@@ -160,6 +158,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             samplePeak = IoC.Get<ISamplePeak>();
             waveformDrawing = IoC.Get<IWaveformDrawing>();
+            initTask.SetResult();
         }
 
         public void Render(TimeSpan ts)
@@ -178,6 +177,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private async void OnPrepareWaveform(IAudioPlayer player, CancellationToken cancelToken)
         {
+            await initTask.Task;
             if (cancelToken.IsCancellationRequested || player is null || samplePeak is null)
                 return;
             var sampleData = await player.GetSamplesAsync();

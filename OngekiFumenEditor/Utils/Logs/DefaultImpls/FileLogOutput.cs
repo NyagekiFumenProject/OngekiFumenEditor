@@ -72,11 +72,8 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
             await Task.Run(() =>
             {
                 writing = true;
-                while (writer is not null)
-                {
-                    if (contents.TryDequeue(out var msg))
-                        writer.Write(msg);
-                }
+                while (writer is not null && contents.TryDequeue(out var msg))
+                    writer.Write(msg);
                 writer.Flush();
                 writing = false;
             });
