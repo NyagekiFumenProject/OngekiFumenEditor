@@ -47,8 +47,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
         {
             public Sound Sounds { get; set; }
             public TimeSpan Time { get; set; }
+            //public TGrid TGrid { get; set; }
 
-            public override string ToString() => $"{Time:F2} {Sounds}";
+            public override string ToString() => $"{Time} {Sounds}";
         }
 
         private LinkedList<SoundEvent> events = new();
@@ -221,8 +222,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             void AddSound(Sound sound, TGrid tGrid)
             {
                 var evt = ObjectPool<SoundEvent>.Get();
+
                 evt.Sounds = sound;
                 evt.Time = TGridCalculator.ConvertTGridToAudioTime(tGrid, editor);
+                //evt.TGrid = tGrid;
+
                 list.Add(evt);
             }
 
@@ -238,7 +242,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             {
                 var sounds = (Sound)0;
 
-                foreach (var obj in group.DistinctBy(x => x.IDShortName))
+                foreach (var obj in group.DistinctBy(x => x.GetType()))
                 {
                     sounds = sounds | obj switch
                     {
@@ -283,10 +287,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
 
                 while (itor is not null)
                 {
-                    var ct = (player.CurrentTime - itor.Value.Time).TotalMilliseconds;
+                    var currentTime = player.CurrentTime.TotalMilliseconds;
+                    var itorTime = itor.Value.Time.TotalMilliseconds;
+                    var ct = currentTime - itorTime;
                     if (ct >= 0)
                     {
-                        //Debug.WriteLine($"diff:{currentTime - itor.Value.Time:F2}ms/{currentTime - player.CurrentTime:F2}ms target:{itor.Value.Time:F2} {itor.Value.Sounds}");
+                        //Debug.WriteLine($"diff:{ct:F2}ms target:{itor.Value}");
                         PlaySounds(itor.Value.Sounds);
                         itor = itor.Next;
                     }
