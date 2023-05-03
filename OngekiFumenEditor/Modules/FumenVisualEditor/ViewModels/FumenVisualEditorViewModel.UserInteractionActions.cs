@@ -975,7 +975,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             else
             {
-                ScrollViewerVerticalOffset = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * 50;
+                ScrollViewerVerticalOffset = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength;
             }
         }
 

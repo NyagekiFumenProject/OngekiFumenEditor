@@ -19,10 +19,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
     internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
     {
         private AudioFileReader audioFileReader;
+        private VolumeSampleProvider currentVolumeProvider;
         private WaveOut currentOut;
         private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
         private DateTime startTime;
         private TimeSpan pauseTime;
+        private float volume = 1;
         private bool isAvaliable;
         private byte[] samples;
 
@@ -34,7 +36,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 
         public bool IsPlaying { get => currentOut?.PlaybackState == PlaybackState.Playing; }
 
-        public float Volume { get => currentOut?.Volume ?? 0; set => currentOut.Volume = value; }
+        public float Volume { 
+            get => volume;
+            set
+            {
+                volume = value;
+                if (currentVolumeProvider is not null)
+                    currentVolumeProvider.Volume = volume;
+            }
+        }
 
         public string SchedulerName => $"DefaultMusicPlayer Playing Updater";
 
@@ -82,14 +92,18 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
             currentOut = default;
 
             audioFileReader.Seek(0, SeekOrigin.Begin);
-            var provider = new OffsetSampleProvider(audioFileReader)
+            var provider = new VolumeSampleProvider(new OffsetSampleProvider(audioFileReader)
             {
                 SkipOver = time
+            })
+            {
+                Volume = Volume
             };
 
             baseOffset = time;
             startTime = DateTime.Now;
 
+            currentVolumeProvider = provider;
             currentOut = new WaveOut();
             currentOut.Init(provider);
             UpdatePropsManually();

@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Properties;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
     internal static class FileLogOutput
     {
         static StreamWriter writer;
-        static Queue<string> contents = new Queue<string>();
+        static ConcurrentQueue<string> contents = new();
         static volatile bool writing = false;
 
         public static void Init()
@@ -41,7 +42,7 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
 
         public static void Term()
         {
-            while (writing);
+            while (writing) ;
             if (writer is null)
                 return;
             writer.Flush();
@@ -71,10 +72,10 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
             await Task.Run(() =>
             {
                 writing = true;
-                while (contents.Count > 0 && writer is not null)
+                while (writer is not null)
                 {
-                    var msg = contents.Dequeue();
-                    writer.Write(msg);
+                    if (contents.TryDequeue(out var msg))
+                        writer.Write(msg);
                 }
                 writer.Flush();
                 writing = false;

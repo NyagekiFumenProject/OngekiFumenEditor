@@ -184,6 +184,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private int mouseWheelLength = Properties.EditorGlobalSetting.Default.MouseWheelLength;
+        public int MouseWheelLength
+        {
+            get => mouseWheelLength;
+            set
+            {
+                mouseWheelLength = Properties.EditorGlobalSetting.Default.MouseWheelLength = value;
+                Save();
+                NotifyOfPropertyChange(() => MouseWheelLength);
+            }
+        }
+
         public enum TimeFormat
         {
             TGrid,
@@ -245,6 +257,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.JudgeLineAlignBeat):
                     judgeLineAlignBeat = Properties.EditorGlobalSetting.Default.JudgeLineAlignBeat;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.MouseWheelLength):
+                    mouseWheelLength = Properties.EditorGlobalSetting.Default.MouseWheelLength;
                     break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");
