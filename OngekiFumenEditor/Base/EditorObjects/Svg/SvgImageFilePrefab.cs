@@ -49,7 +49,10 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         public void ReloadSvgFile()
         {
             if (SvgFile is null)
+            {
+                CleanGeometry();
                 return;
+            }
 
             var svgContent = ConverterLogic.ConvertSvgToObject(SvgFile.FullName, ResultMode.DrawingGroup, new WpfDrawingSettings()
             {

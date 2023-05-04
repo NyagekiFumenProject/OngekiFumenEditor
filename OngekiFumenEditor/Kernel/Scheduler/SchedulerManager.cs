@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace OngekiFumenEditor.Kernel.Scheduler
 
         private List<ISchedulable> schedulers { get; } = new List<ISchedulable>();
 
-        private Dictionary<ISchedulable, DateTime> schedulersCallTime { get; } = new();
+        private ConcurrentDictionary<ISchedulable, DateTime> schedulersCallTime { get; } = new();
 
         public IEnumerable<ISchedulable> Schedulers => schedulers;
 
