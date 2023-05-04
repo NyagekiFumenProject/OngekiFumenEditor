@@ -22,14 +22,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => WallLaneColor;
     }
 
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     internal class WallLeftLaneDrawTarget : WallLaneDrawTarget
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "WLS" };
         public override Vector4 WallLaneColor { get; } = LeftWallColor;
     }
 
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     internal class WallRightLaneDrawTarget : WallLaneDrawTarget
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "WRS" };

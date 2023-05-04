@@ -19,7 +19,7 @@ using OngekiFumenEditor.Kernel.Graphics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class HoldDrawingTarget : CommonDrawTargetBase<Hold>
     {
         public override IEnumerable<string> DrawTargetID { get; } = new string[] { "HLD", "CHD", "XHD" };

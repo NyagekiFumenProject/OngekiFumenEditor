@@ -13,7 +13,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     internal class HoldTapDrawingTarget : CommonDrawTargetBase<Hold>
     {
         public override IEnumerable<string> DrawTargetID { get; } = new string[] { "HLD", "CHD", "XHD" };

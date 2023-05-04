@@ -17,7 +17,7 @@ using OngekiFumenEditor.Kernel.Graphics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     internal class LaneBlockerDrawingTarget : CommonDrawTargetBase<OngekiTimelineObjectBase>
     {
         private readonly IPolygonDrawing polygonDrawing;

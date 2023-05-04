@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
     }
 
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class LeftLaneDrawTarget : NormalLaneDrawingTarget
     {
         public static Vector4 LaneColor { get; } = new(1, 0, 0, 1);
@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "LLS" };
     }
 
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class CenterLaneDrawTarget : NormalLaneDrawingTarget
     {
         public static Vector4 LaneColor { get; } = new(0, 1, 0, 1);
@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "LCS" };
     }
 
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class RightLaneDrawTarget : NormalLaneDrawingTarget
     {
         public static Vector4 LaneColor { get; } = new(0, 0, 1, 1);

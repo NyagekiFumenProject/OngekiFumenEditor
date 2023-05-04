@@ -19,7 +19,7 @@ using static System.Windows.Forms.AxHost;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class BulletDrawingTarget : CommonBatchDrawTargetBase<Bullet>, IDisposable
     {
         public override int DefaultRenderOrder => 1500;

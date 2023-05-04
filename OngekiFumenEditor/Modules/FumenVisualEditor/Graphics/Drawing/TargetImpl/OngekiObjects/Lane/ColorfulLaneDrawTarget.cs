@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class ColorfulLaneDrawTarget : NormalLaneDrawingTarget
     {
         public override Vector4 GetLanePointColor(ConnectableObjectBase obj)

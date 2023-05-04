@@ -17,9 +17,8 @@ using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     [Export(typeof(TapDrawingTarget))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
     public class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };

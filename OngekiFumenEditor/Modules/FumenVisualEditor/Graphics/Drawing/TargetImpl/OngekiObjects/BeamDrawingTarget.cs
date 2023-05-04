@@ -11,7 +11,7 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class BeamDrawingTarget : LaneDrawingTargetBase<BeamStart>
     {
         public static Vector4 LaneColor { get; } = new(1, 1, 0, 1);

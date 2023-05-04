@@ -26,6 +26,7 @@ using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using static System.Windows.Forms.AxHost;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -104,9 +105,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public IPerfomenceMonitor PerfomenceMonitor => performenceMonitor;
 
-        private static Dictionary<string, IDrawingTarget[]> drawTargets = new();
-        private IDrawingTarget[] drawTargetOrder;
-        private Dictionary<IDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
+        private static Dictionary<string, IFumenEditorDrawingTarget[]> drawTargets = new();
+        private IFumenEditorDrawingTarget[] drawTargetOrder;
+        private Dictionary<IFumenEditorDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
 
         private void InitOpenGL()
         {
@@ -154,11 +155,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             ViewWidth = (float)openGLView.ActualWidth;
             ViewHeight = (float)openGLView.ActualHeight;
 
-            drawTargets = IoC.GetAll<IDrawingTarget>()
+            drawTargets = IoC.GetAll<IFumenEditorDrawingTarget>()
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
 
-            drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderBy(x => x.DefaultRenderOrder).Distinct().ToArray();
+            ResortRenderOrder();
 
             timeSignatureHelper = new DrawTimeSignatureHelper();
             xGridHelper = new DrawXGridHelper();
@@ -171,7 +172,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             openGLView.Render += Render;
         }
 
-        public IDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
+        private void ResortRenderOrder()
+        {
+            drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderBy(x => x.DefaultRenderOrder).Distinct().ToArray();
+        }
+
+        public IFumenEditorDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
 
         List<IDisplayableObject> obj = new List<IDisplayableObject>();
 
@@ -263,7 +269,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             foreach (var objGroup in GetDisplayableObjects(fumen, minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
             {
-                if (GetDrawingTarget(objGroup.Key) is not IDrawingTarget[] drawingTargets)
+                if (GetDrawingTarget(objGroup.Key) is not IFumenEditorDrawingTarget[] drawingTargets)
                     continue;
 
                 foreach (var drawingTarget in drawingTargets)

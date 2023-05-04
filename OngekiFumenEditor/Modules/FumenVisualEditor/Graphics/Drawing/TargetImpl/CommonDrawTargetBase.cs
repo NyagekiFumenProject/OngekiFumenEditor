@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl
 {
-    public abstract class CommonDrawTargetBase<T> : IDrawingTarget where T : OngekiObjectBase
+    public abstract class CommonDrawTargetBase<T> : IFumenEditorDrawingTarget where T : OngekiObjectBase
     {
         public abstract IEnumerable<string> DrawTargetID { get; }
         public abstract int DefaultRenderOrder { get; }
@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         }
     }
 
-    public abstract class CommonBatchDrawTargetBase<T> : IDrawingTarget where T : OngekiObjectBase
+    public abstract class CommonBatchDrawTargetBase<T> : IFumenEditorDrawingTarget where T : OngekiObjectBase
     {
         public abstract IEnumerable<string> DrawTargetID { get; }
         public abstract int DefaultRenderOrder { get; }

@@ -24,7 +24,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class CommonHorizonalDrawingTarget : CommonBatchDrawTargetBase<OngekiTimelineObjectBase>
     {
         public record RegisterDrawingInfo(OngekiTimelineObjectBase TimelineObject, double Y);

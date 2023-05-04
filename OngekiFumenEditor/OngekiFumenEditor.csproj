@@ -419,6 +419,7 @@
 
   <ItemGroup>
     <Folder Include="Modules\FumenBulletPalleteListViewer\Converters\" />
+    <Folder Include="Modules\FumenEditorRenderControlViewer\Views\" />
   </ItemGroup>
 
 </Project>

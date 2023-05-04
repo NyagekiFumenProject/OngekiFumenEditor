@@ -9,7 +9,7 @@ using OngekiFumenEditor.Kernel.Graphics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.Lane
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     internal class NormalLaneEditorObjectDrawingTarget : TextureLaneEditorObjectDrawingTarget
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[]

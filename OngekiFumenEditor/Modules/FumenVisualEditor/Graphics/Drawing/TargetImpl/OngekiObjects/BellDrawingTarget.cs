@@ -17,7 +17,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
     public class BellDrawingTarget : CommonBatchDrawTargetBase<Bell>, IDisposable
     {
         public override int DefaultRenderOrder => 1200;
