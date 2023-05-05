@@ -271,8 +271,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
 
             var prevOrder = int.MinValue;
-            foreach (var drawingTarget in drawTargetOrder)
+            foreach (var drawingTarget in drawTargetOrder.Where(x => CheckDrawingVisible(x.Visible)))
             {
+                //check render order
                 var order = drawingTarget.CurrentRenderOrder;
                 if (prevOrder > order)
                 {
@@ -281,9 +282,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 }
                 prevOrder = order;
-
-                if (!CheckDrawingVisible(drawingTarget.Visible))
-                    continue;
 
                 if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
                 {
