@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Base
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
         public List<SvgPrefabBase> SvgPrefabs { get; } = new();
-        public TGridSortList<Soflan> Soflans { get; } = new();
+        public SoflanList Soflans { get; } = new();
         public LaneBlockAreaList LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();

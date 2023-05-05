@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using Gemini.Framework.Services;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.LocatorOverride;

@@ -105,7 +105,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         public List<(double startY, BPMChange bpm)> GetCachedAllBpmUniformPositionList(double tUnitLength)
         {
-            int calcHash(BPMChange e) => HashCode.Combine(e.BPM, e.TGrid.Grid, e.TGrid.Unit, e.TGrid.ResT);
+            int calcHash(BPMChange e) => HashCode.Combine(e.BPM, e.TGrid.TotalGrid);
             var hash = this.Aggregate(calcHash(FirstBpm), (x, e) => HashCode.Combine(x, calcHash(e)));
             hash = HashCode.Combine(hash, tUnitLength);
 
