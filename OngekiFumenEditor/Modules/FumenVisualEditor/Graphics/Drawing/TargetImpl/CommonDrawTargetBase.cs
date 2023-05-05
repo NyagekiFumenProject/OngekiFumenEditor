@@ -16,6 +16,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public abstract IEnumerable<string> DrawTargetID { get; }
         public abstract int DefaultRenderOrder { get; }
+        public virtual DrawingVisible DefaultVisible => DrawingVisible.All;
+
         private int? currentRenderOrder = default;
         public int CurrentRenderOrder
         {
@@ -25,7 +27,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
         }
 
-        public bool IsEnable { get; set; } = true;
+        private DrawingVisible? currentVisible = default;
+        public DrawingVisible Visible
+        {
+            get => currentVisible ?? DefaultVisible; set
+            {
+                currentVisible = value;
+            }
+        }
 
         public virtual void Begin(IFumenEditorDrawingContext target)
         {

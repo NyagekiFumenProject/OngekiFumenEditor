@@ -203,13 +203,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     return MathUtils.IsInRange(fromTime, toTime, Rect.MinY, Rect.MaxY);
                 }
 
-                foreach (var x in fumen.Bells
+                var r = fumen.Bells
                     .AsEnumerable<IBulletPalleteReferencable>()
-                    .Concat(fumen.Bullets))
-                {
-                    if (check(x))
-                        obj.Add(x);
-                }
+                    .Concat(fumen.Bullets).AsParallel().Where(check);
+
+                obj.AddRange(r);
             }
             else
             {
@@ -284,7 +282,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 prevOrder = order;
 
-                if (!drawingTarget.IsEnable)
+                if (!CheckDrawingVisible(drawingTarget.Visible))
                     continue;
 
                 if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
@@ -385,6 +383,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             }
             return Task.CompletedTask;
+        }
+
+        public bool CheckDrawingVisible(DrawingVisible visible)
+        {
+            return visible.HasFlag(EditorObjectVisibility == Visibility.Visible ? DrawingVisible.Design : DrawingVisible.Preview);
         }
     }
 }

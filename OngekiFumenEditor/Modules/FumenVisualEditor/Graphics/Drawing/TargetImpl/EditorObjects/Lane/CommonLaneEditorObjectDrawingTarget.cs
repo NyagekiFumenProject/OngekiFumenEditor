@@ -14,6 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public abstract class CommonLaneEditorObjectDrawingTarget : CommonBatchDrawTargetBase<ConnectableStartObject>
     {
         public override int DefaultRenderOrder => 2000;
+        public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
         private IBatchTextureDrawing textureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
@@ -34,8 +35,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<ConnectableStartObject> objs)
         {
-            if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
-                return;
             target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             {
                 var previewMinTGrid = target.TGridRange.VisiableMinTGrid;

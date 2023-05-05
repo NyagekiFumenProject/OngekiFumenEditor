@@ -52,18 +52,35 @@
             ItemContainerStyle="{StaticResource ItemContStyle}"
             ItemsSource="{Binding ControlItems}"
             SelectionMode="Single">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel
-                        Margin="2,5,2,5"
-                        Focusable="False"
-                        Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding IsEnable}" />
-                        <TextBlock Margin="5,0,5,0" Text="{Binding RenderOrder}" />
-                        <TextBlock Text="{Binding Name}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn
+                        Width="30"
+                        DisplayMemberBinding="{Binding RenderOrder}"
+                        Header="Idx" />
+                    <GridViewColumn Header="Design">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    Margin="2,5,2,5"
+                                    HorizontalAlignment="Center"
+                                    IsChecked="{Binding IsDesignEnable}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Preview">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    Margin="2,5,2,5"
+                                    HorizontalAlignment="Center"
+                                    IsChecked="{Binding IsPreviewEnable}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" />
+                </GridView>
+            </ListView.View>
         </ListView>
     </Grid>
 </UserControl>

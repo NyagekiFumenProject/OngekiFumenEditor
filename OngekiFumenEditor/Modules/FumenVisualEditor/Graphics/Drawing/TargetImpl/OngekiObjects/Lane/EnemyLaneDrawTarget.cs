@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     public class EnemyLaneDrawTarget : NormalLaneDrawingTarget
     {
+        public override DrawingVisible DefaultVisible => DrawingVisible.Design;
+
         public static Vector4 LaneColor { get; } = new(1, 1, 0, 1);
 
         public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;

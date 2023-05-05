@@ -15,7 +15,6 @@ namespace OngekiFumenEditor.Kernel.Graphics
         IEnumerable<string> DrawTargetID { get; }
         int DefaultRenderOrder { get; }
         int CurrentRenderOrder { get; set; }
-        bool IsEnable { get; set; }
 
         void Begin(IFumenEditorDrawingContext target);
         void Post(OngekiObjectBase ongekiObject);

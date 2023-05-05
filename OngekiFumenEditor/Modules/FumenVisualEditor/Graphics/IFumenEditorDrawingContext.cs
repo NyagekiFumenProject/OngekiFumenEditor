@@ -31,5 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics
         float CurrentPlayTime { get; }
         FumenVisualEditorViewModel Editor { get; }
         void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size);
+
+        bool CheckDrawingVisible(DrawingVisible visible);
     }
 }

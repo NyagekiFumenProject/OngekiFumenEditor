@@ -29,18 +29,37 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
             public ControlItem(IFumenEditorDrawingTarget target)
             {
                 this.target = target;
+                Name = target.GetType().Name.TrimEnd("DrawingTarget").TrimEnd("DrawTarget");
             }
 
-            public string Name => target.GetType().Name.TrimEnd("DrawingTarget");
+            public string Name { get; init; }
             private readonly IFumenEditorDrawingTarget target;
 
-            public bool IsEnable
+            public IFumenEditorDrawingTarget Target => target;
+
+            public bool IsDesignEnable
             {
-                get { return target.IsEnable; }
+                get { return target.Visible.HasFlag(DrawingVisible.Design); }
                 set
                 {
-                    target.IsEnable = value;
-                    NotifyOfPropertyChange(() => IsEnable);
+                    if (value)
+                        target.Visible |= DrawingVisible.Design;
+                    else
+                        target.Visible &= ~DrawingVisible.Design;
+                    NotifyOfPropertyChange(() => IsDesignEnable);
+                }
+            }
+
+            public bool IsPreviewEnable
+            {
+                get { return target.Visible.HasFlag(DrawingVisible.Preview); }
+                set
+                {
+                    if (value)
+                        target.Visible |= DrawingVisible.Preview;
+                    else
+                        target.Visible &= ~DrawingVisible.Preview;
+                    NotifyOfPropertyChange(() => IsPreviewEnable);
                 }
             }
 
@@ -54,7 +73,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
                 }
             }
 
-            public override string ToString() => $"{IsEnable} : {Name}";
+            public override string ToString() => $"[{target.Visible}] : {Name}";
         }
 
         public override PaneLocation PreferredLocation => PaneLocation.Right;
@@ -88,7 +107,10 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
         {
             RebuildItems(true);
             for (int i = 0; i < ControlItems.Count; i++)
-                ControlItems[i].IsEnable = true;
+            {
+                ControlItems[i].Target.Visible = ControlItems[i].Target.DefaultVisible;
+                ControlItems[i].Refresh();
+            }
         }
 
         public void OnListLoaded(FrameworkElement list)

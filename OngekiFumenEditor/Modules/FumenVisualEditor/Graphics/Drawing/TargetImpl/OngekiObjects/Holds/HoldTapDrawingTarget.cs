@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var laneType = start?.LaneType;
 
             //draw taps
-            if (tapDraw.IsEnable)
+            if (target.CheckDrawingVisible(tapDraw.Visible))
             {
                 tapDraw.Begin(target);
                 tapDraw.Draw(target, laneType, hold, hold.IsCritical);
