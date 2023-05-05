@@ -34,11 +34,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var laneType = start?.LaneType;
 
             //draw taps
-            tapDraw.Begin(target);
-            tapDraw.Draw(target, laneType, hold, hold.IsCritical);
-            if (holdEnd != null)
-                tapDraw.Draw(target, laneType, holdEnd, false);
-            tapDraw.End();
+            if (tapDraw.IsEnable)
+            {
+                tapDraw.Begin(target);
+                tapDraw.Draw(target, laneType, hold, hold.IsCritical);
+                if (holdEnd != null)
+                    tapDraw.Draw(target, laneType, holdEnd, false);
+                tapDraw.End();
+            }
         }
     }
 }

@@ -111,7 +111,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
         }
 
-        public void OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
+        public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
         {
             Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
 
@@ -120,30 +120,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             RecalcViewProjectionMatrix();
         }
 
-        private void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
-        {
-            var str = Marshal.PtrToStringAnsi(message, length);
-            Log.LogDebug($"{id}\t:\t{str}");
-            if (str.Contains("error generated"))
-                throw new Exception(str);
-        }
-
-        private void InitOpenGL()
-        {
-            //GL.Enable(EnableCap.DebugOutput);
-            //GL.Enable(EnableCap.DebugOutputSynchronous);
-            //GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
-
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
-            Log.LogInfo($"Init OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
-        }
-
-        public void PrepareOpenGLView(GLWpfControl glView)
+        public async void PrepareRender(GLWpfControl glView)
         {
             Log.LogDebug($"ready.");
-            InitOpenGL();
+            await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
+
             InitRender();
             viewWidth = (float)glView.ActualWidth;
             viewHeight = (float)glView.ActualHeight;

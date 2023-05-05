@@ -49,8 +49,8 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         IPerfomenceMonitor PerfomenceMonitor { get; }
 
-        void PrepareOpenGLView(GLWpfControl glView);
-        void OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs e);
+        void PrepareRender(GLWpfControl glView);
+        void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs e);
 
         void Render(TimeSpan ts);
     }

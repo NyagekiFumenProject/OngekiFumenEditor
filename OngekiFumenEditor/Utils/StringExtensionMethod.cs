@@ -13,5 +13,9 @@ namespace OngekiFumenEditor.Utils
         public static long ToLong(this string str, long defaultVal = default) => long.TryParse(str, out var val) ? val : defaultVal;
         public static double ToDouble(this string str, double defaultVal = default) => double.TryParse(str, out var val) ? val : defaultVal;
         public static byte ToByte(this string str, byte defaultVal = default) => byte.TryParse(str, out var val) ? val : defaultVal;
+
+        public static string TrimEnd(this string str, string subStr) => str.EndsWith(subStr) ? str.Substring(0, str.Length - subStr.Length) : str;
+        public static string TrimStart(this string str, string subStr) => str.StartsWith(subStr) ? str.Substring(subStr.Length) : str;
+
     }
 }

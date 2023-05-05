@@ -109,19 +109,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private IFumenEditorDrawingTarget[] drawTargetOrder;
         private Dictionary<IFumenEditorDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
 
-        private void InitOpenGL()
-        {
-            //GL.Enable(EnableCap.DebugOutput);
-            //GL.Enable(EnableCap.DebugOutputSynchronous);
-            GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
-
-            GL.ClearColor(System.Drawing.Color.Black);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
-            Log.LogInfo($"Init OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
-        }
-
         protected override void OnViewLoaded(object v)
         {
             base.OnViewLoaded(v);
@@ -138,7 +125,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
         }
 
-        public void OnOpenGLViewSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
+        public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
         {
             Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
 
@@ -146,11 +133,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             ViewHeight = (float)sizeArg.NewSize.Height;
         }
 
-        public void PrepareOpenGLView(GLWpfControl openGLView)
+        public async void PrepareRender(GLWpfControl openGLView)
         {
             Log.LogDebug($"ready.");
-
-            InitOpenGL();
+            await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
 
             ViewWidth = (float)openGLView.ActualWidth;
             ViewHeight = (float)openGLView.ActualHeight;
@@ -174,7 +160,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void ResortRenderOrder()
         {
-            drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderBy(x => x.DefaultRenderOrder).Distinct().ToArray();
+            drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderBy(x => x.CurrentRenderOrder).Distinct().ToArray();
         }
 
         public IFumenEditorDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
@@ -234,6 +220,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return first.Concat(obj).SelectMany(x => x.GetDisplayableObjects());
         }
 
+        private void CleanRender()
+        {
+            GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        }
+
         public void Render(TimeSpan ts)
         {
             performenceMonitor.PostUIRenderTime(ts);
@@ -244,8 +236,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (error != ErrorCode.NoError)
                 Log.LogDebug($"OpenGL ERROR!! : {error}");
 #endif
-            GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            CleanRender();
             GL.Viewport(0, 0, (int)ViewWidth, (int)ViewHeight);
 
             hits.Clear();
@@ -281,8 +272,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             }
 
+            var prevOrder = int.MinValue;
             foreach (var drawingTarget in drawTargetOrder)
             {
+                if (prevOrder > drawingTarget.CurrentRenderOrder)
+                {
+                    ResortRenderOrder();
+                    CleanRender();
+                    break;
+                }
+                prevOrder = drawingTarget.CurrentRenderOrder;
+
+                if (!drawingTarget.IsEnable)
+                    continue;
+
                 if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
                 {
                     drawingTarget.Begin(this);
@@ -300,14 +303,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             selectingRangeHelper.Draw(this);
 
             performenceMonitor.OnAfterRender();
-        }
-
-        private void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
-        {
-            var str = Marshal.PtrToStringAnsi(message, length);
-            Log.LogDebug($"{id}\t:\t{str}");
-            if (str.Contains("error generated"))
-                throw new Exception(str);
         }
 
         public void Redraw(RedrawTarget target)

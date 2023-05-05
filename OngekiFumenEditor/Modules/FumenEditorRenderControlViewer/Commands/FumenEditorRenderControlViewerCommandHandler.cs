@@ -7,12 +7,12 @@ using Gemini.Framework.Threading;
 namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.Commands
 {
     [CommandHandler]
-    public class ModulesFumenEditorRenderControlViewerCommandHandler : CommandHandlerBase<FumenEditorRenderControlViewerCommandDefinition>
+    public class FumenEditorRenderControlViewerCommandHandler : CommandHandlerBase<FumenEditorRenderControlViewerCommandDefinition>
     {
         private readonly IShell _shell;
 
         [ImportingConstructor]
-        public ModulesFumenEditorRenderControlViewerCommandHandler(IShell shell)
+        public FumenEditorRenderControlViewerCommandHandler(IShell shell)
         {
             _shell = shell;
         }

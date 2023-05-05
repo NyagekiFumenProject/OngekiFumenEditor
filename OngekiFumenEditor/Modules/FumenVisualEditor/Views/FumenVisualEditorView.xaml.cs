@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             {
                 if (DataContext is IDrawingContext fumenPreviewer)
                 {
-                    fumenPreviewer.PrepareOpenGLView(glView);
+                    fumenPreviewer.PrepareRender(glView);
                 }
             });
         }
@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         {
             if (DataContext is IDrawingContext fumenPreviewer)
             {
-                fumenPreviewer.OnOpenGLViewSizeChanged(glView, e);
+                fumenPreviewer.OnRenderSizeChanged(glView, e);
             }
         }
 

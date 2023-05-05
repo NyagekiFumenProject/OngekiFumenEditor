@@ -10,12 +10,22 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl
 {
-    public abstract class CommonDrawTargetBase<T> : IFumenEditorDrawingTarget where T : OngekiObjectBase
+    public abstract class CommonDrawTargetBase : IFumenEditorDrawingTarget
     {
+        protected IFumenEditorDrawingContext target;
+
         public abstract IEnumerable<string> DrawTargetID { get; }
         public abstract int DefaultRenderOrder { get; }
+        private int? currentRenderOrder = default;
+        public int CurrentRenderOrder
+        {
+            get => currentRenderOrder ?? DefaultRenderOrder; set
+            {
+                currentRenderOrder = value;
+            }
+        }
 
-        private IFumenEditorDrawingContext target;
+        public bool IsEnable { get; set; } = true;
 
         public virtual void Begin(IFumenEditorDrawingContext target)
         {
@@ -23,46 +33,36 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             this.target = target;
         }
 
-        public abstract void Draw(IFumenEditorDrawingContext target, T obj);
+        public abstract void Post(OngekiObjectBase ongekiObject);
 
         public virtual void End()
         {
             target.PerfomenceMonitor.OnAfterTargetDrawing(this);
             target = default;
-        }
-
-        public void Post(OngekiObjectBase ongekiObject)
-        {
-            Draw(target, (T)ongekiObject);
         }
     }
 
-    public abstract class CommonBatchDrawTargetBase<T> : IFumenEditorDrawingTarget where T : OngekiObjectBase
+    public abstract class CommonDrawTargetBase<T> : CommonDrawTargetBase where T : OngekiObjectBase
     {
-        public abstract IEnumerable<string> DrawTargetID { get; }
-        public abstract int DefaultRenderOrder { get; }
+        public abstract void Draw(IFumenEditorDrawingContext target, T obj);
+        public override void Post(OngekiObjectBase ongekiObject) => Draw(target, (T)ongekiObject);
+    }
 
-        private IFumenEditorDrawingContext target;
+    public abstract class CommonBatchDrawTargetBase<T> : CommonDrawTargetBase where T : OngekiObjectBase
+    {
         private List<T> drawObjects = new();
-
-        public virtual void Begin(IFumenEditorDrawingContext target)
-        {
-            target.PerfomenceMonitor.OnBeginTargetDrawing(this);
-            this.target = target;
-        }
 
         public abstract void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> objs);
 
-        public virtual void End()
+        public override void End()
         {
             DrawBatch(target, drawObjects);
-
             drawObjects.Clear();
-            target.PerfomenceMonitor.OnAfterTargetDrawing(this);
-            target = default;
+
+            base.End();
         }
 
-        public void Post(OngekiObjectBase ongekiObject)
+        public override void Post(OngekiObjectBase ongekiObject)
         {
             drawObjects.Add((T)ongekiObject);
         }
