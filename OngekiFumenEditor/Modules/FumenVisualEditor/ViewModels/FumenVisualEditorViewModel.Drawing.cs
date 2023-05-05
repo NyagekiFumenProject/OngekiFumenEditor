@@ -275,13 +275,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var prevOrder = int.MinValue;
             foreach (var drawingTarget in drawTargetOrder)
             {
-                if (prevOrder > drawingTarget.CurrentRenderOrder)
+                var order = drawingTarget.CurrentRenderOrder;
+                if (prevOrder > order)
                 {
                     ResortRenderOrder();
                     CleanRender();
                     break;
                 }
-                prevOrder = drawingTarget.CurrentRenderOrder;
+                prevOrder = order;
 
                 if (!drawingTarget.IsEnable)
                     continue;

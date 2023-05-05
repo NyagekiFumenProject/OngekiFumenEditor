@@ -84,7 +84,12 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
                 ControlItems[i].RenderOrder = i;
         }
 
-        public void ResetDefault() => RebuildItems(true);
+        public void ResetDefault()
+        {
+            RebuildItems(true);
+            for (int i = 0; i < ControlItems.Count; i++)
+                ControlItems[i].IsEnable = true;
+        }
 
         public void OnListLoaded(FrameworkElement list)
         {
