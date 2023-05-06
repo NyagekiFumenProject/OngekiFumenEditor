@@ -38,7 +38,16 @@ namespace OngekiFumenEditor.Base.Collections
 
         private void OnBpmPropChanged(object sender, PropertyChangedEventArgs e)
         {
-            OnChangedEvent?.Invoke();
+            switch (e.PropertyName)
+            {
+                case nameof(Soflan.Speed):
+                case nameof(Soflan.TGrid):
+                case nameof(Soflan.GridLength):
+                    OnChangedEvent?.Invoke();
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void Remove(Soflan bpm)
@@ -56,11 +65,7 @@ namespace OngekiFumenEditor.Base.Collections
             cachedSoflanPositionList.Clear();
 
             var curBpm = bpmList.FirstBpm;
-            var curSpeed = new Soflan()
-            {
-                TGrid = TGrid.Zero,
-                Speed = 1
-            };
+            var curSpeed = Soflan.Default;
 
             var eventList = this.AsEnumerable<ITimelineObject>().Concat(bpmList).OrderBy(x => x.TGrid).Select((evt) =>
             {
@@ -97,18 +102,17 @@ namespace OngekiFumenEditor.Base.Collections
                 var len = MathUtils.CalculateBPMLength(prevEvent.TGrid, curEvent.TGrid, prevEvent.curBpm.BPM, tUnitLength);
                 var scaledLen = len * prevEvent.curSpeed.Speed;
 
-                cachedSoflanPositionList.Add((currentY, prevEvent.TGrid, prevEvent.curSpeed, prevEvent.curBpm));
-                currentY += scaledLen;
+                var fromY = currentY;
+                var toY = currentY + scaledLen;
 
+                cachedSoflanPositionList.Add((fromY, prevEvent.TGrid, prevEvent.curSpeed, prevEvent.curBpm));
+
+                currentY = toY;
                 prevEvent = curEvent;
             }
 
             if (cachedSoflanPositionList.Count == 0)
-                cachedSoflanPositionList.Add((0, TGrid.Zero, new Soflan()
-                {
-                    TGrid = TGrid.Zero,
-                    Speed = 1
-                }, bpmList.FirstBpm));
+                cachedSoflanPositionList.Add((0, TGrid.Zero, Soflan.Default, bpmList.FirstBpm));
             else if (prevEvent.TGrid != cachedSoflanPositionList.First().startTGrid)
                 cachedSoflanPositionList.Add((currentY, prevEvent.TGrid, prevEvent.curSpeed, prevEvent.curBpm));
         }

@@ -9,8 +9,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class Soflan : OngekiTimelineObjectBase
     {
+        public static Soflan Default { get; } = new Soflan
+        {
+            Speed = 1,
+        };
+
         public class SoflanEndIndicator : OngekiTimelineObjectBase
         {
+            public SoflanEndIndicator()
+            {
+                TGrid = null;
+            }
 
             public override string IDShortName => "[SFL_End]";
 
@@ -20,7 +29,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
             public override TGrid TGrid
             {
-                get => base.TGrid.TotalGrid <= 0 ? (TGrid = RefSoflan.TGrid.CopyNew()) : base.TGrid;
+                get => base.TGrid is null ? (base.TGrid = RefSoflan.TGrid.CopyNew()) : base.TGrid;
                 set => base.TGrid = value;
             }
 
