@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             void Upsert<T>(T obj) where T : IHorizonPositionObject, ITimelineObject
             {
-                var y = (float)TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
+                var y = (float)TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor);
                 var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
                 list.Add(new(new(x, y), color, VertexDash.Solider));
             }

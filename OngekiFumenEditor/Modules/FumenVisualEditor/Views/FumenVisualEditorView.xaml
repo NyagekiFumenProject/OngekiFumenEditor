@@ -30,7 +30,6 @@
             </converters:TGridDisplayConverter>
             <converters:ReverseDoubleConverter x:Key="ReverseDoubleConverter" />
             <converters:BeatRhythmToVisibleConverter x:Key="BeatRhythmToVisibleConverter" />
-            <converters:JudgeLineDisplayConverter x:Key="JudgeLineDisplayConverter" />
             <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter" />
             <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />

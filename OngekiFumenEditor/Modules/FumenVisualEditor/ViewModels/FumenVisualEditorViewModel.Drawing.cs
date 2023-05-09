@@ -197,7 +197,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     var appearOffsetTime = ViewHeight / (bell.ReferenceBulletPallete?.Speed ?? 1f);
 
-                    var toTime = TGridCalculator.ConvertTGridToY(bell.TGrid, this);
+                    var toTime = TGridCalculator.ConvertTGridToY_DesignMode(bell.TGrid, this);
                     var fromTime = toTime - appearOffsetTime;
 
                     return MathUtils.IsInRange(fromTime, toTime, Rect.MinY, Rect.MaxY);
@@ -244,8 +244,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             var minY = (float)(CurrentPlayTime - Setting.JudgeLineOffsetY);
-            var minTGrid = TGridCalculator.ConvertYToTGrid(minY, this) ?? TGrid.Zero;
-            var maxTGrid = TGridCalculator.ConvertYToTGrid(minY + ViewHeight, this);
+            var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this) ?? TGrid.Zero;
+            var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY + ViewHeight, this);
 
             //todo 这里就要计算可视区域了
             Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));

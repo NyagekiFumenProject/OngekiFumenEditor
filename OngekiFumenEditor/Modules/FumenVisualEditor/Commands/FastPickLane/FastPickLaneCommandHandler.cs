@@ -21,8 +21,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
         {
             if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
                 return TaskUtility.Completed;
+            if (!editor.IsDesignMode)
+            {
+                editor.Toast.ShowMessage("请先将编辑器切换到编辑模式");
+                return TaskUtility.Completed;
+            }
 
-            var filterTGrid = TGridCalculator.ConvertYToTGrid(editor.Rect.MaxY, editor);
+            var filterTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(editor.Rect.MaxY, editor);
             var selectLane = editor.Fumen.Lanes.OfType<T>().Where(x => x.MaxTGrid <= filterTGrid).OrderBy(x => x.MaxTGrid).LastOrDefault();
 
             var obj = selectLane?.Children.LastOrDefault() as ConnectableObjectBase;
@@ -45,7 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
 
     [CommandHandler]
     public class FastPickRightLaneCommandHandler : FastPickLaneCommandHandler<LaneRightStart, FastPickRightLaneCommandDefinition>
-    {}
+    { }
 
 
     [CommandHandler]

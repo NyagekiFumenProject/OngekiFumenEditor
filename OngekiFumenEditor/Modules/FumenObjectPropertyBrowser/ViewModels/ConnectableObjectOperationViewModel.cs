@@ -173,6 +173,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 return;
             }
 
+            if (!editor.IsDesignMode)
+            {
+                MessageBox.Show("请先将编辑器切换到设计模式");
+                return;
+            }
+
             if (editor.CurrentCopiedSources.Count() < 1)
             {
                 MessageBox.Show("需要先复制一个可以复制的物件，才能使用刷子功能");
@@ -200,11 +206,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             var redoAction = new System.Action(() => { });
             var undoAction = new System.Action(() => { });
 
-            foreach ((var tGrid, _, _, _, _) in TGridCalculator.GetVisbleTimelines(
+            foreach ((var tGrid, _, _, _, _) in TGridCalculator.GetVisbleTimelines_DesignMode(
+                fumen.Soflans,
                 fumen.BpmList,
                 fumen.MeterChanges,
-                TGridCalculator.ConvertTGridToY(beginTGrid, editor),
-                TGridCalculator.ConvertTGridToY(endTGrid, editor),
+                TGridCalculator.ConvertTGridToY_DesignMode(beginTGrid, editor),
+                TGridCalculator.ConvertTGridToY_DesignMode(endTGrid, editor),
                 0,
                 editor.Setting.BeatSplit,
                 editor.Setting.VerticalDisplayScale,

@@ -80,7 +80,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         public MeterChange GetNextMeter(TGrid time) => this.FirstOrDefault(bpm => time < bpm.TGrid);
 
-        private List<(double startY, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedBpmUniformPosition = new();
+        private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedBpmUniformPosition = new();
         private double cachedBpmListCacheHash = int.MinValue;
 
         private void UpdateCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
@@ -90,29 +90,29 @@ namespace OngekiFumenEditor.Base.Collections
             cachedBpmUniformPosition.Clear();
 
             //最初默认的
-            cachedBpmUniformPosition.Add((0, pickBiggerTGrid(FirstMeter, bpmList.FirstBpm), FirstMeter, bpmList.FirstBpm));
+            cachedBpmUniformPosition.Add((TimeSpan.FromMilliseconds(0), pickBiggerTGrid(FirstMeter, bpmList.FirstBpm), FirstMeter, bpmList.FirstBpm));
 
             var bpmUnitList = bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
 
             foreach (var meterChange in changedMeterList)
             {
-                (var startY, var refBpm) = bpmUnitList.LastOrDefault(x => x.bpm.TGrid <= meterChange.TGrid);
-                var meterY = startY + MathUtils.CalculateBPMLength(refBpm, meterChange.TGrid, tUnitLength);
+                (var audioTime, var refBpm) = bpmUnitList.LastOrDefault(x => x.bpm.TGrid <= meterChange.TGrid);
+                var meterY = audioTime + TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(refBpm, meterChange.TGrid, tUnitLength));
                 cachedBpmUniformPosition.Add((meterY, pickBiggerTGrid(meterChange, refBpm), meterChange, refBpm));
             }
 
-            foreach ((var startY, var bpm) in bpmUnitList.Skip(1))
+            foreach ((var audioTime, var bpm) in bpmUnitList.Skip(1))
             {
                 var meter = GetMeter(bpm.TGrid);
-                cachedBpmUniformPosition.Add((startY, pickBiggerTGrid(meter, bpm), meter, bpm));
+                cachedBpmUniformPosition.Add((audioTime, pickBiggerTGrid(meter, bpm), meter, bpm));
             }
 
-            cachedBpmUniformPosition.SortBy(x => x.startY);
+            cachedBpmUniformPosition.SortBy(x => x.audioTime);
 
             //remove conflict meter position.
-            var conflictGroups = cachedBpmUniformPosition.GroupBy(x => x.startY).Where(x => x.Count() > 1);
+            var conflictGroups = cachedBpmUniformPosition.GroupBy(x => x.audioTime).Where(x => x.Count() > 1);
             //using var disp = ObjectPool<HashSet<(double startY, MeterChange meterChange, BPMChange bpmChange)>>.GetWithUsingDisposable(out var removeSet,out _);
-            var removeSet = new HashSet<(double startY, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)>();
+            var removeSet = new HashSet<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)>();
             removeSet.Clear();
             foreach (var conflicts in conflictGroups)
             {
@@ -129,7 +129,7 @@ namespace OngekiFumenEditor.Base.Collections
                 cachedBpmUniformPosition.Remove(item);
         }
 
-        public List<(double startY, TGrid startTGrid, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
+        public List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
         {
             var hash = HashCode.Combine(tUnitLength, bpmList.cachedBpmContentHash);
 

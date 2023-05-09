@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         {
             var dragStartCanvasPoint = dragStartCanvasPointMap[obj];
             var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor) : 0;
-            var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, editor) : 0;
+            var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, editor) : 0;
 
             OnDragMove(obj, point, editor);
             var oldPos = dragStartCanvasPoint;
@@ -64,7 +64,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         public override void OnDragStart(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
         {
             var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor) : 0;
-            var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, editor) : 0;
+            var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, editor) : 0;
 
             if (double.IsNaN(x))
                 x = default;
@@ -82,7 +82,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             if (obj is ITimelineObject timeObj)
             {
                 var ry = CheckAndAdjustY(point.Y, editor);
-                if (ry is double dry && TGridCalculator.ConvertYToTGrid(dry, editor) is TGrid tGrid)
+                if (ry is double dry && TGridCalculator.ConvertYToTGrid_DesignMode(dry, editor) is TGrid tGrid)
                 {
                     timeObj.TGrid = tGrid;
                     //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");

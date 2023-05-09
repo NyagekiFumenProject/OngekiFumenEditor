@@ -148,7 +148,6 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
                 cacheObj.BPMChange = ts.bpm;
                 cacheObj.Meter = ts.meter;
                 cacheObj.StartTGrid = ts.startTGrid;
-                cacheObj.StartY = (float)ts.startY;
             }
 
             foreach (var item in removeList)

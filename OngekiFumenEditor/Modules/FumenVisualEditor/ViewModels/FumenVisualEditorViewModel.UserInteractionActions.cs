@@ -41,6 +41,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 Set(ref isLocked, value);
                 NotifyOfPropertyChange(() => EditorObjectVisibility);
                 NotifyOfPropertyChange(() => EditorLockedVisibility);
+                NotifyOfPropertyChange(() => IsDesignMode);
+                NotifyOfPropertyChange(() => IsPreviewMode);
             }
         }
 
@@ -63,6 +65,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IsLocked || // 编辑器被锁住
             IsUserRequestHideEditorObject // 用户要求隐藏(比如按下Q)
             ? Visibility.Hidden : Visibility.Visible;
+
+        public bool IsDesignMode => EditorObjectVisibility == Visibility.Visible;
+        public bool IsPreviewMode => !IsDesignMode;
 
         #endregion
 
@@ -392,11 +397,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_RememberSelectedObjectAudioTime()
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify("请先将编辑器切换到设计模式");
+                return;
+            }
+
             cacheObjectAudioTime.Clear();
             foreach (var obj in SelectObjects)
             {
                 if (obj is ITimelineObject timelineObject)
-                    cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this);
+                    cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, this);
                 else
                     ToastNotify($"无法记忆此物件，因为此物件没有实现ITimelineObject : {obj}");
             }
@@ -406,6 +417,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_RecoverySelectedObjectToAudioTime()
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify("请先将编辑器切换到设计模式");
+                return;
+            }
+
             var recoverTargets = Fumen.GetAllDisplayableObjects()
                 .OfType<ITimelineObject>()
                 .Select(x => cacheObjectAudioTime.TryGetValue(x, out var audioTime) ? (x, audioTime) : default)
@@ -420,7 +437,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     Log.LogInfo($"开始恢复物件时间...");
                     foreach ((var timelineObject, var audioTime) in recoverTargets)
-                        timelineObject.TGrid = TGridCalculator.ConvertYToTGrid(audioTime, this);
+                        timelineObject.TGrid = TGridCalculator.ConvertYToTGrid_DesignMode(audioTime, this);
 
                     ToastNotify($"已恢复 {recoverTargets.Count} 个物件到音频时间...");
                 }, () =>
@@ -436,13 +453,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void SelectRangeObjects()
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify("请先将编辑器切换到设计模式");
+                return;
+            }
+
             var topY = Math.Max(SelectionCurrentCursorPosition.Y, SelectionStartPosition.Y);
             var buttomY = Math.Min(SelectionCurrentCursorPosition.Y, SelectionStartPosition.Y);
             var rightX = Math.Max(SelectionCurrentCursorPosition.X, SelectionStartPosition.X);
             var leftX = Math.Min(SelectionCurrentCursorPosition.X, SelectionStartPosition.X);
 
-            var minTGrid = TGridCalculator.ConvertYToTGrid(buttomY, this);
-            var maxTGrid = TGridCalculator.ConvertYToTGrid(topY, this);
+            var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(buttomY, this);
+            var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(topY, this);
             var minXGrid = XGridCalculator.ConvertXToXGrid(leftX, this);
             var maxXGrid = XGridCalculator.ConvertXToXGrid(rightX, this);
 
@@ -580,39 +603,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!(isMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
                 return;
 
-            if (IsRangeSelecting && SelectionCurrentCursorPosition != SelectionStartPosition)
+            if (IsDesignMode)
             {
-                SelectRangeObjects();
-            }
-            else
-            {
-                var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
-                if (isDragging)
+                if (IsRangeSelecting && SelectionCurrentCursorPosition != SelectionStartPosition)
                 {
-                    var cp = pos;
-                    cp.Y = ViewHeight - cp.Y + Rect.MinY;
-                    SelectObjects.ToArray().ForEach(x =>
-                    {
-                        var obj = x as OngekiObjectBase;
-                        InteractiveManager.GetInteractive(obj).OnDragEnd(obj, cp, this);
-                    });
+                    SelectRangeObjects();
                 }
                 else
                 {
-                    //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
-                    //if no object clicked or alt is pressing , just to process as brush actions.
-                    if (mouseDownHitObject is null || Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+                    var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
+                    if (isDragging)
                     {
-                        //for object brush
-                        if (BrushMode)
+                        var cp = pos;
+                        cp.Y = ViewHeight - cp.Y + Rect.MinY;
+                        SelectObjects.ToArray().ForEach(x =>
                         {
-                            TryApplyBrushObject(pos);
-                        }
+                            var obj = x as OngekiObjectBase;
+                            InteractiveManager.GetInteractive(obj).OnDragEnd(obj, cp, this);
+                        });
                     }
                     else
                     {
-                        if (mouseDownHitObjectPosition is Point p)
-                            NotifyObjectClicked(mouseDownHitObject);
+                        //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
+                        //if no object clicked or alt is pressing , just to process as brush actions.
+                        if (mouseDownHitObject is null || Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
+                        {
+                            //for object brush
+                            if (BrushMode)
+                            {
+                                TryApplyBrushObject(pos);
+                            }
+                        }
+                        else
+                        {
+                            if (mouseDownHitObjectPosition is Point p)
+                                NotifyObjectClicked(mouseDownHitObject);
+                        }
                     }
                 }
             }
@@ -658,7 +684,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 InteractiveManager.GetInteractive(newObject).OnMoveCanvas(newObject, p, this);
                 var x = newObject is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, this) : 0;
-                var y = newObject is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY(timelineObject.TGrid, this) : 0;
+                var y = newObject is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, this) : 0;
                 var dist = Vector2.Distance(v, new Vector2((float)x, (float)y));
                 if (dist > 20)
                 {
@@ -751,6 +777,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             if (!isMouseDown)
+                return;
+
+            if (!IsDesignMode)
                 return;
 
             var r = isDragging;
@@ -886,12 +915,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var canvasY = Rect.MaxY - pos.Y;
             var canvasX = pos.X;
-
-            var tGrid = TGridCalculator.ConvertYToTGrid(canvasY, this);
-            TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
-            var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
-            contentObject.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff")}]";
             CurrentCursorPosition = new(canvasX, canvasY);
+            if (IsDesignMode)
+            {
+                var tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this);
+                TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
+                var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
+                contentObject.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff")}]";
+            }
+            else
+            {
+                contentObject.Message = string.Empty;
+            }
         }
 
         public void Grid_DragEnter(ActionExecutionContext e)
@@ -912,6 +947,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
             {
                 Log.LogWarn($"discard user actions because editor was locked.");
+                return;
+            }
+            if (!IsDesignMode)
+            {
+                Log.LogWarn($"请先将编辑器切换到编辑模式");
                 return;
             }
 
@@ -941,12 +981,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size)
         {
             //rect.Y = rect.Y - CurrentPlayTime;
-            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y); 
+            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
         }
 
         public void OnMouseWheel(ActionExecutionContext e)
         {
             if (IsLocked)
+                return;
+            if (!IsDesignMode)
                 return;
 
             var arg = e.EventArgs as MouseWheelEventArgs;
@@ -954,19 +996,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (Setting.JudgeLineAlignBeat)
             {
-                var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Setting.TGridUnitLength, Fumen.BpmList);
-                (var prevY, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.startY < ScrollViewerVerticalOffset);
-                if (meter is null)
-                    (prevY, _, meter, bpm) = timeSignatures.FirstOrDefault();
-                var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
+                var time = TimeSpan.FromMilliseconds(ScrollViewerVerticalOffset);
 
+                var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Setting.TGridUnitLength, Fumen.BpmList);
+                (var prevAudioTime, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.audioTime < time);
+                if (meter is null)
+                    (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
+
+                var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
                 //消除精度误差~
-                prevY = Math.Max(0, prevY - 1);
+                var prevY = Math.Max(0, prevAudioTime.TotalMilliseconds - 1);
                 nextY++;
 
-                var downFirst = TGridCalculator.GetVisbleTimelines(Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength)
+                var downFirst = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength)
                     .Where(x => x.y != ScrollViewerVerticalOffset).LastOrDefault();
-                var nextFirst = TGridCalculator.GetVisbleTimelines(Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength)
+                var nextFirst = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength)
                     .Where(x => x.y != ScrollViewerVerticalOffset).FirstOrDefault();
 
                 //Log.LogDebug($"ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2} , downFirst: {downFirst.y:F2} , nextFirst: {nextFirst.y:F2}");

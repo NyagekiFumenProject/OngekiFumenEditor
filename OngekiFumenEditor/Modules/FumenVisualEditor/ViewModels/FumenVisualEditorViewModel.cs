@@ -53,7 +53,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-
         private string specifyDefaultName;
 
         public string SpecifyDefaultName
@@ -184,7 +183,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (EditorProjectData?.AudioDuration is TimeSpan timeSpan)
             {
-                TotalDurationHeight = TGridCalculator.ConvertTGridToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this), this);
+                TotalDurationHeight = TGridCalculator.ConvertTGridToY_DesignMode(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this), this);
             }
             else
             {
@@ -195,7 +194,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public double CalculateYFromAudioTime(TimeSpan audioTime)
         {
-            var y = TGridCalculator.ConvertAudioTimeToY(audioTime, this);
+            var y = 0d;
+
+            if (IsDesignMode)
+            {
+                y = TGridCalculator.ConvertAudioTimeToY_DesignMode(audioTime, this);
+            }
+
             return y;
         }
 

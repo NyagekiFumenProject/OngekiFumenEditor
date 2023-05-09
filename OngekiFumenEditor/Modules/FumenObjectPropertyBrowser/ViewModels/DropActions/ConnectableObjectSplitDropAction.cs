@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
         public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
         {
-            var dragTGrid = TGridCalculator.ConvertYToTGrid(dragEndPoint.Y, editor);
+            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
             var backupStores = new HashSet<ConnectableChildObjectBase>();
             var backupIdxStores = new Dictionary<ConnectableChildObjectBase, int>();
             var affactedObjects = new HashSet<ILaneDockable>();

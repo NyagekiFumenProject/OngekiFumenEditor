@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             foreach (var obj in objs)
             {
                 var x = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-                var y = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor) + 24;
+                var y = TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor) + 24;
                 var pos = new Vector2((float)x, (float)y);
                 var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
                 normalFlichList.Add((size, pos, 0f));

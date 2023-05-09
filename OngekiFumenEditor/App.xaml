@@ -8,8 +8,6 @@
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters">
     <Application.Resources>
         <ResourceDictionary>
-            <converters:CalculateObjectToPointsConverter x:Key="CalculateObjectToPointsConverter">
-            </converters:CalculateObjectToPointsConverter>
             <converters:EnumToIntConverter x:Key="EnumToIntConverter">
             </converters:EnumToIntConverter>
             <valueconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter">

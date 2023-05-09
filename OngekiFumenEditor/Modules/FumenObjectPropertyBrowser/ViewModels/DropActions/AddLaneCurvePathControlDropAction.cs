@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
         public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
         {
-            var dragTGrid = TGridCalculator.ConvertYToTGrid(dragEndPoint.Y, editor);
+            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
             var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
             var isFirst = true;
 

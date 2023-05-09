@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
         {
-            if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
+            if (target.Editor.IsPreviewMode)
                 return;
 
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void DrawXGridText(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
         {
-            if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
+            if (target.Editor.IsPreviewMode)
                 return;
 
             foreach (var pair in drawLines)

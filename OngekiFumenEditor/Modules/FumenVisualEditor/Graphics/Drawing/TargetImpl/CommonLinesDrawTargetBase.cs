@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPoint(TGrid tGrid, XGrid xGrid)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-                var y = (float)TGridCalculator.ConvertTGridToY(tGrid, target.Editor);
+                var y = (float)TGridCalculator.ConvertTGridToY_DesignMode(tGrid, target.Editor);
 
                 lineDrawing.PostPoint(new(x, y), color, VertexDash.Solider);
             }

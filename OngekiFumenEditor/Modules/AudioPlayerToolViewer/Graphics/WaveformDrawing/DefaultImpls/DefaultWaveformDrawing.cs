@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
     {
         private readonly ISimpleLineDrawing lineDrawing;
         private readonly IStringDrawing stringDrawing;
-
+        private readonly SoflanList dummySoflanList;
         private static readonly VertexDash InvailedLineDash = new VertexDash() { DashSize = 2, GapSize = 2 };
 
         private static readonly System.Numerics.Vector4 TransparentColor = new(1, 1, 1, 0);
@@ -39,6 +39,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         {
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
             stringDrawing = IoC.Get<IStringDrawing>();
+            dummySoflanList = new SoflanList();
         }
 
         public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData)
@@ -88,9 +89,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 var beginTime = fromTime.TotalSeconds < 0 ? TimeSpan.Zero : fromTime;
                 var endTime = toTime > target.AudioTotalDuration ? target.AudioTotalDuration : toTime;
 
-                var beginX = TGridCalculator.ConvertAudioTimeToY(beginTime, target.EditorViewModel);
-                var endX = TGridCalculator.ConvertAudioTimeToY(endTime, target.EditorViewModel);
-                var curX = TGridCalculator.ConvertAudioTimeToY(curTime, target.EditorViewModel);
+                var beginTGrid = TGridCalculator.ConvertAudioTimeToTGrid(beginTime, target.EditorViewModel);
+                var endTGrid = TGridCalculator.ConvertAudioTimeToTGrid(endTime, target.EditorViewModel);
+                var curTGrid = TGridCalculator.ConvertAudioTimeToTGrid(curTime, target.EditorViewModel);
+
+                var bpmList = editor.Fumen.BpmList;
+                var tGridUnitLength = editor.Setting.TGridUnitLength;
+
+                var beginX = TGridCalculator.ConvertTGridToY_DesignMode(beginTGrid, dummySoflanList, bpmList, 1.0f, tGridUnitLength);
+                var endX = TGridCalculator.ConvertTGridToY_DesignMode(endTGrid, dummySoflanList, bpmList, 1.0f, tGridUnitLength);
+                var curX = TGridCalculator.ConvertTGridToY_DesignMode(curTGrid, dummySoflanList, bpmList, 1.0f, tGridUnitLength);
 
                 var aWidth = (endTime - beginTime).TotalMilliseconds / target.DurationMsPerPixel;
                 var prefixOffsetX = -Math.Min(0, fromTime.TotalMilliseconds) / target.DurationMsPerPixel;
@@ -101,8 +109,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     var prevMeter = currentMeter;
                     var prevBpm = currentBpm;
 
-                    foreach ((_, var bx, var beatIdx, var meter, var bpm) in TGridCalculator.GetVisbleTimelines(editor.Fumen.BpmList,
-                        editor.Fumen.MeterChanges, beginX, endX, curX, editor.Setting.BeatSplit, 1, editor.Setting.TGridUnitLength))
+                    foreach ((_, var bx, var beatIdx, var meter, var bpm) in TGridCalculator.GetVisbleTimelines_DesignMode(dummySoflanList, bpmList,
+                        editor.Fumen.MeterChanges, beginX, endX, curX, editor.Setting.BeatSplit, 1.0f, editor.Setting.TGridUnitLength))
                     {
                         var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
 

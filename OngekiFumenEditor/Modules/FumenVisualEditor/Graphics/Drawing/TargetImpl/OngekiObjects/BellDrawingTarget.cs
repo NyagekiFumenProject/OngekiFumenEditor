@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public void PostDrawEditor(IFumenEditorDrawingContext target, Bell obj)
         {
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
+            var toTime = TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor);
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
 
             var pos = new Vector2((float)toX, (float)toTime);
@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             */
             var appearOffsetTime = CalculateBulletMsecTime(target, obj);
 
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
+            var toTime = TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor);
             var fromTime = toTime - appearOffsetTime;
 
             if (target.Rect.MinY < fromTime)
@@ -112,7 +112,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Bell> objs)
         {
-            if (target.Editor.EditorObjectVisibility == System.Windows.Visibility.Visible)
+            if (target.Editor.IsDesignMode)
             {
                 foreach (var obj in objs)
                     PostDrawEditor(target, obj);

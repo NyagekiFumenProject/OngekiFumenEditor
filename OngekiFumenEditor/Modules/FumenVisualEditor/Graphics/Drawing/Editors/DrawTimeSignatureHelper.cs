@@ -42,7 +42,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (target.Editor.Setting.BeatSplit == 0)
                 return;
 
-            var timelines = TGridCalculator.GetVisbleTimelines(
+            var timelines = TGridCalculator.GetVisbleTimelines_DesignMode(
+                fumen.Soflans,
                 fumen.BpmList,
                 fumen.MeterChanges,
                 Math.Max(0, target.Rect.MinY),
@@ -56,7 +57,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var maxDispAlpha = 0.3f;
             var minDispAlpha = 0f;
 
-            if (target.Editor.EditorObjectVisibility != System.Windows.Visibility.Visible)
+            if (target.Editor.IsPreviewMode)
                 timelines = timelines.Where(x => x.beatIndex == 0);
             else
                 minDispAlpha = maxDispAlpha;

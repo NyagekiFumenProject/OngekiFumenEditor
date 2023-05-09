@@ -29,19 +29,20 @@ namespace OngekiFumenEditor.Base.Collections
             cachedSoflanListCacheHash = int.MinValue;
         }
 
-        public override void Add(Soflan bpm)
+        public override void Add(Soflan soflan)
         {
-            base.Add(bpm);
-            bpm.PropertyChanged += OnBpmPropChanged;
+            base.Add(soflan);
+            soflan.PropertyChanged += OnSoflanPropChanged;
             OnChangedEvent?.Invoke();
         }
 
-        private void OnBpmPropChanged(object sender, PropertyChangedEventArgs e)
+        private void OnSoflanPropChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
                 case nameof(Soflan.Speed):
                 case nameof(Soflan.TGrid):
+                case nameof(Soflan.EndTGrid):
                 case nameof(Soflan.GridLength):
                     OnChangedEvent?.Invoke();
                     break;
@@ -50,39 +51,47 @@ namespace OngekiFumenEditor.Base.Collections
             }
         }
 
-        public override void Remove(Soflan bpm)
+        public override void Remove(Soflan soflan)
         {
-            base.Remove(bpm);
-            bpm.PropertyChanged -= OnBpmPropChanged;
+            base.Remove(soflan);
+            soflan.PropertyChanged -= OnSoflanPropChanged;
             OnChangedEvent?.Invoke();
         }
 
-        private List<(double startY, TGrid startTGrid, Soflan soflan, BPMChange bpmChange)> cachedSoflanPositionList = new();
+        private List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> cachedNonNegativeSoflanPositionList = new();
         private double cachedSoflanListCacheHash = int.MinValue;
 
         private void UpdateCachedSoflanPositionList(double tUnitLength, BpmList bpmList)
         {
-            cachedSoflanPositionList.Clear();
+            cachedNonNegativeSoflanPositionList.Clear();
 
             var curBpm = bpmList.FirstBpm;
-            var curSpeed = Soflan.Default;
+            Soflan curSpeedEvent = null;
 
-            var eventList = this.AsEnumerable<ITimelineObject>().Concat(bpmList).OrderBy(x => x.TGrid).Select((evt) =>
+            var i = 0;
+
+            IEnumerable<(int id, TGrid TGrid, double speed, BPMChange curBpm)> GetEventTimings(ITimelineObject evt)
             {
+                var t = evt.TGrid;
                 switch (evt)
                 {
                     case BPMChange bpmEvt:
                         curBpm = bpmEvt;
+                        var speed = (curSpeedEvent is not null && curSpeedEvent.EndTGrid > t) ? curSpeedEvent.Speed : 1.0d;
+                        yield return (i++, evt.TGrid, speed, curBpm);
                         break;
                     case Soflan soflanEvt:
-                        curSpeed = soflanEvt;
-                        break;
-                    default:
+                        curSpeedEvent = soflanEvt;
+                        yield return (i++, evt.TGrid, soflanEvt.Speed, curBpm);
+                        yield return (i++, evt.TGrid + new GridOffset(0, soflanEvt.GridLength), 1.0f, curBpm);
                         break;
                 }
-                return (evt.TGrid, curSpeed, curBpm);
-            }).GroupBy(x => x.TGrid)
-            .Select(x => x.LastOrDefault()).ToList();
+            }
+            var eventList = this.AsEnumerable<ITimelineObject>().Concat(bpmList)
+                .OrderBy(x => x.TGrid)
+                .SelectMany(GetEventTimings)
+                .GroupBy(x => x.Item2)
+                .Select(x => x.OrderBy(x => x.id).LastOrDefault()).ToList();
 
             var itor = eventList.GetEnumerator();
             if (!itor.MoveNext())
@@ -93,31 +102,31 @@ namespace OngekiFumenEditor.Base.Collections
 
             while (itor.MoveNext())
             {
-                /* |---------------------------|
+                /* |------------|--------------|
                   prev                        cur
                     
                  */
                 var curEvent = itor.Current;
 
                 var len = MathUtils.CalculateBPMLength(prevEvent.TGrid, curEvent.TGrid, prevEvent.curBpm.BPM, tUnitLength);
-                var scaledLen = len * prevEvent.curSpeed.Speed;
+                var scaledLen = len * Math.Abs(prevEvent.speed);
 
                 var fromY = currentY;
                 var toY = currentY + scaledLen;
 
-                cachedSoflanPositionList.Add((fromY, prevEvent.TGrid, prevEvent.curSpeed, prevEvent.curBpm));
+                cachedNonNegativeSoflanPositionList.Add((fromY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
 
                 currentY = toY;
                 prevEvent = curEvent;
             }
 
-            if (cachedSoflanPositionList.Count == 0)
-                cachedSoflanPositionList.Add((0, TGrid.Zero, Soflan.Default, bpmList.FirstBpm));
-            else if (prevEvent.TGrid != cachedSoflanPositionList.First().startTGrid)
-                cachedSoflanPositionList.Add((currentY, prevEvent.TGrid, prevEvent.curSpeed, prevEvent.curBpm));
+            if (cachedNonNegativeSoflanPositionList.Count == 0)
+                cachedNonNegativeSoflanPositionList.Add((0, TGrid.Zero, 1.0d, bpmList.FirstBpm));
+            else if (prevEvent.TGrid != cachedNonNegativeSoflanPositionList.First().startTGrid)
+                cachedNonNegativeSoflanPositionList.Add((currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
         }
 
-        public List<(double startY, TGrid startTGrid, Soflan soflan, BPMChange bpmChange)> GetCachedSoflanPositionList(double tUnitLength, BpmList bpmList)
+        public List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedNonNegativeSoflanPositionList(double tUnitLength, BpmList bpmList)
         {
             var hash = HashCode.Combine(tUnitLength, bpmList.cachedBpmContentHash);
 
@@ -127,7 +136,7 @@ namespace OngekiFumenEditor.Base.Collections
                 UpdateCachedSoflanPositionList(tUnitLength, bpmList);
                 cachedSoflanListCacheHash = hash;
             }
-            return cachedSoflanPositionList;
+            return cachedNonNegativeSoflanPositionList;
         }
     }
 }

@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         public override void OnMoveCanvas(OngekiObjectBase obj, Point relativePoint, FumenVisualEditorViewModel editor)
         {
             var ry = CheckAndAdjustY(relativePoint.Y, editor);
-            if (ry is double y && TGridCalculator.ConvertYToTGrid(y, editor) is TGrid tGrid)
+            if (ry is double y && TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is TGrid tGrid)
             {
                 if (((obj as HoldEnd)?.ReferenceStartObject as Hold)?.ReferenceLaneStart is LaneStartBase start)
                 {
@@ -35,7 +35,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                     //Log.LogDebug($"auto lock to lane x: {x}");
                 }
             }
-
 
             base.OnMoveCanvas(obj, relativePoint, editor);
         }

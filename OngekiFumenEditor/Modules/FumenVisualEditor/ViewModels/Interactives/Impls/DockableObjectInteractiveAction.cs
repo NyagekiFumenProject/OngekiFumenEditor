@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             var forceMagnetic = editor.Setting.ForceMagneticDock;
             var enableMoveTo = !forceMagneticToLane;
 
-            if (CheckAndAdjustY(relativePoint.Y, editor) is double y && TGridCalculator.ConvertYToTGrid(y, editor) is TGrid tGrid)
+            if (CheckAndAdjustY(relativePoint.Y, editor) is double y && TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is TGrid tGrid)
             {
                 var closestLaneObject = PickDockableObjects(editor)
                     .Select(x => x switch

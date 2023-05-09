@@ -9,11 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class Soflan : OngekiTimelineObjectBase
     {
-        public static Soflan Default { get; } = new Soflan
-        {
-            Speed = 1,
-        };
-
         public class SoflanEndIndicator : OngekiTimelineObjectBase
         {
             public SoflanEndIndicator()
@@ -41,7 +36,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public Soflan()
         {
             EndIndicator = new SoflanEndIndicator() { RefSoflan = this };
+            EndIndicator.PropertyChanged += EndIndicator_PropertyChanged;
             displayables = new IDisplayableObject[] { this, EndIndicator };
+        }
+
+        private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(TGrid):
+                    NotifyOfPropertyChange(nameof(EndTGrid));
+                    break;
+                default:
+                    NotifyOfPropertyChange(nameof(EndIndicator));
+                    break;
+            }
         }
 
         public override string IDShortName => $"SFL";

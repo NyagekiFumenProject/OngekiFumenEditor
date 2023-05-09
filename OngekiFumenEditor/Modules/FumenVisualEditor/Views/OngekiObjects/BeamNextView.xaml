@@ -11,10 +11,6 @@
     Visibility="{Binding EditorViewModel.EditorObjectVisibility}"
     mc:Ignorable="d">
     <Grid>
-        <Grid.Resources>
-            <converters:CalculateObjectToPointsConverter x:Key="CalculateObjectToPointsConverter">
-            </converters:CalculateObjectToPointsConverter>
-        </Grid.Resources>
         <Ellipse
             Width="20"
             Height="20"

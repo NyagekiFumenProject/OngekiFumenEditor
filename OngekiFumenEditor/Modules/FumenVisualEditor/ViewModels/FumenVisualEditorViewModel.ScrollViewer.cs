@@ -62,8 +62,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void ScrollTo(TGrid startTGrid)
         {
-            var y = TGridCalculator.ConvertTGridToY(startTGrid, this);
-            ScrollTo(y);
+            if (IsDesignMode)
+            {
+                var y = TGridCalculator.ConvertTGridToY_DesignMode(startTGrid, this);
+                ScrollTo(y);
+            }
         }
 
         public void ScrollTo(double y)
@@ -77,7 +80,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public TGrid GetCurrentJudgeLineTGrid()
         {
             var y = Setting.JudgeLineOffsetY + Rect.MinY;
-            return TGridCalculator.ConvertYToTGrid(y, this);
+            return TGridCalculator.ConvertYToTGrid_DesignMode(y, this);
         }
     }
 }

@@ -120,7 +120,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
 
             //计算向量化的物件运动时间
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
+            var toTime = TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor);
             var fromTime = toTime - appearOffsetTime;
             var currentTime = target.CurrentPlayTime;
             var precent = (currentTime - fromTime) / appearOffsetTime;
@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private void DrawEditor(IFumenEditorDrawingContext target, Bullet obj)
         {
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
-            var toTime = TGridCalculator.ConvertTGridToY(obj.TGrid, target.Editor);
+            var toTime = TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor);
             
             var pos = new Vector2((float)toX, (float)toTime);
 
@@ -195,7 +195,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Bullet> objs)
         {
-            if (target.Editor.EditorObjectVisibility == System.Windows.Visibility.Visible)
+            if (target.Editor.IsDesignMode)
             {
                 foreach (var obj in objs)
                     DrawEditor(target, obj);
@@ -212,7 +212,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             foreach (var item in normalDrawList)
                 batchTextureDrawing.Draw(target, item.Key, item.Value);
 
-            if (target.Editor.EditorObjectVisibility == System.Windows.Visibility.Visible)
+            if (target.Editor.IsDesignMode)
                 DrawPallateStr(target);
             ClearDrawList();
         }

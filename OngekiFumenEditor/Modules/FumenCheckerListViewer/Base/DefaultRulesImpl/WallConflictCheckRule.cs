@@ -282,14 +282,15 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                     if (rightWall.XGridRange.IsInRange(leftWall.XGridRange, false))
                     {
                         var resT = leftWall.Wall.TGrid.ResT;
+                        var resX = leftWall.Wall.XGrid.ResX;
 
                         var leftPoints =
                             leftWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Prepend(leftWall.Wall)
-                            .Select(x => new Point() { x = XGridCalculator.ConvertXGridToX(x.XGrid, fumenHostViewModel), y = TGridCalculator.ConvertTGridToY(x.TGrid, fumenHostViewModel) });
+                            .Select(x => new Point() { x = x.XGrid.TotalGrid, y = x.TGrid.TotalGrid });
 
                         var rightPoints =
                             rightWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Prepend(rightWall.Wall)
-                            .Select(x => new Point() { x = XGridCalculator.ConvertXGridToX(x.XGrid, fumenHostViewModel), y = TGridCalculator.ConvertTGridToY(x.TGrid, fumenHostViewModel) });
+                            .Select(x => new Point() { x = x.XGrid.TotalGrid, y = x.TGrid.TotalGrid });
 
                         var leftLines = leftPoints
                             .SequenceConsecutivelyWrap(2)
@@ -315,13 +316,18 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                         (var leftLine, var rightLine, var point) = leftLines.SelectMany(x => rightLines.Select(y => (x, y, LineIntersection.FindIntersection(x, y, 0.000001f)))).FirstOrDefault(x => x.Item3 is not null);
                         if (point is Point p)
                         {
+                            var conflictXGrid = new XGrid((float)(p.x / resX), 0, resX);
+                            conflictXGrid.NormalizeSelf();
+                            var conflictTGrid = new TGrid((float)(p.y / resT), 0, resT);
+                            conflictTGrid.NormalizeSelf();
+
                             yield return new CommonCheckResult()
                             {
                                 RuleName = RuleName,
                                 Severity = RuleSeverity.Error,
-                                LocationDescription = $"leftLine:{leftLine} rightLine:{rightLine} C[{p.x:F2},{p.y:F2}]",
+                                LocationDescription = $"leftLine:{leftLine} rightLine:{rightLine} conflict at {conflictXGrid} {conflictTGrid}",
                                 Description = $"不同边的墙(id:{leftWall.Wall.RecordId})和(id:{rightWall.Wall.RecordId})水平交叉碰撞或重合",
-                                NavigateBehavior = new NavigateToTGridBehavior(leftWall.Wall.TGrid)
+                                NavigateBehavior = new NavigateToTGridBehavior(conflictTGrid)
                             };
                         }
                     }

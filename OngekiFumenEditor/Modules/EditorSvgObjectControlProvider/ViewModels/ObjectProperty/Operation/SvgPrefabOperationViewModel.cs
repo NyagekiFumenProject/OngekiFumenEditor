@@ -41,6 +41,12 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                 return;
             }
 
+            if (!editor.IsDesignMode)
+            {
+                MessageBox.Show("请先将编辑器切换到设计模式");
+                return;
+            }
+
             if (SvgPrefab.ProcessingDrawingGroup is not DrawingGroup drawingGroup)
             {
                 MessageBox.Show("无效的SVG内容");
@@ -54,7 +60,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
             }
 
             var baseCanvasX = XGridCalculator.ConvertXGridToX(SvgPrefab.XGrid, editor);
-            var baseCanvasY = TGridCalculator.ConvertTGridToY(SvgPrefab.TGrid, editor);
+            var baseCanvasY = TGridCalculator.ConvertTGridToY_DesignMode(SvgPrefab.TGrid, editor);
 
             var segments = SvgPrefab.GenerateLineSegments();
 
@@ -83,7 +89,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                     var actualCanvasY = baseCanvasY + relativePoint.Y;
 
                     //Log.LogDebug($"{relativePoint}  ->  {new Vector2((float)actualCanvasX, (float)actualCanvasY)}");
-                    var tGrid = TGridCalculator.ConvertYToTGrid(actualCanvasY, editor);
+                    var tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(actualCanvasY, editor);
                     var xGrid = XGridCalculator.ConvertXToXGrid(actualCanvasX, editor);
 
                     obj.XGrid = xGrid;
