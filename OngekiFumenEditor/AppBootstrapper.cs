@@ -30,6 +30,10 @@ namespace OngekiFumenEditor
 {
     public class AppBootstrapper : Gemini.AppBootstrapper
     {
+        public AppBootstrapper() : base(false)
+        {
+        }
+
         protected async Task InitKernels()
         {
             await IoC.Get<ISchedulerManager>().Init();
