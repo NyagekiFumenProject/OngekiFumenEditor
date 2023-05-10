@@ -25,6 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private ISimpleLineDrawing lineDrawing;
         TGrid shareTGrid = new TGrid();
         XGrid shareXGrid = new XGrid();
+        private static VertexDash invailedDash = new VertexDash() { DashSize = 6, GapSize = 3 };
 
         public CommonLinesDrawTargetBase()
         {
@@ -40,28 +41,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var resX = obj.XGrid.ResX;
 
             [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-            void PostPoint(TGrid tGrid, XGrid xGrid)
+            void PostPoint(TGrid tGrid, XGrid xGrid, bool isVailed)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
                 var y = (float)TGridCalculator.ConvertTGridToY_DesignMode(tGrid, target.Editor);
 
-                lineDrawing.PostPoint(new(x, y), color, VertexDash.Solider);
+                lineDrawing.PostPoint(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            bool isVisible(TGrid tGrid)
-            {
-                return target.TGridRange.VisiableMinTGrid <= tGrid || tGrid <= target.TGridRange.VisiableMaxTGrid;
-            }
+            bool isVisible(TGrid tGrid) => target.TGridRange.VisiableMinTGrid <= tGrid || tGrid <= target.TGridRange.VisiableMaxTGrid;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            bool getNextIsVaild(ConnectableObjectBase o) => o.NextObject?.IsVaildPath ?? default;
 
             var prevVisible = isVisible(obj.TGrid);
             var alwaysDrawing = isVisible(obj.MinTGrid) && isVisible(obj.MaxTGrid);
 
-            PostPoint(obj.TGrid, obj.XGrid);
+            PostPoint(obj.TGrid, obj.XGrid, getNextIsVaild(obj));
 
             foreach (var childObj in obj.Children)
             {
                 var visible = alwaysDrawing || isVisible(childObj.TGrid);
+                var nextIsVaild = getNextIsVaild(childObj);
 
                 if (visible || prevVisible)
                 {
@@ -71,11 +73,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         {
                             shareTGrid.Unit = item.pos.Y / resT;
                             shareXGrid.Unit = item.pos.X / resX;
-                            PostPoint(shareTGrid, shareXGrid);
+                            PostPoint(shareTGrid, shareXGrid, nextIsVaild);
                         }
                     }
                     else
-                        PostPoint(childObj.TGrid, childObj.XGrid);
+                        PostPoint(childObj.TGrid, childObj.XGrid, nextIsVaild);
                 }
 
                 prevVisible = visible;

@@ -30,7 +30,12 @@ namespace OngekiFumenEditor
 {
     public class AppBootstrapper : Gemini.AppBootstrapper
     {
-        public AppBootstrapper() : base(false)
+        public AppBootstrapper() : this(true)
+        {
+
+        }
+
+        public AppBootstrapper(bool useApplication = true) : base(useApplication)
         {
         }
 
