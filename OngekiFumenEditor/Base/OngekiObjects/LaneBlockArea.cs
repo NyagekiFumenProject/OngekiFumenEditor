@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             public override TGrid TGrid
             {
                 get => base.TGrid.TotalGrid <= 0 ? (TGrid = RefLaneBlockArea.TGrid.CopyNew()) : base.TGrid;
-                set => base.TGrid = value;
+                set => base.TGrid = value is not null ? MathUtils.Max(value, RefLaneBlockArea.TGrid.CopyNew()) : value;
             }
 
             public override string ToString() => $"{base.ToString()}";
@@ -42,6 +42,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             EndIndicator = new LaneBlockAreaEndIndicator() { RefLaneBlockArea = this };
             EndIndicator.PropertyChanged += EndIndicator_PropertyChanged;
             displayables = new IDisplayableObject[] { this, EndIndicator };
+        }
+
+        public override TGrid TGrid
+        {
+            get => base.TGrid;
+            set
+            {
+                base.TGrid = value;
+                if (value is not null)
+                    EndIndicator.TGrid = MathUtils.Max(value.CopyNew(), EndIndicator.TGrid);
+            }
         }
 
         private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
