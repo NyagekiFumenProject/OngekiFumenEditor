@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
     public static class TGridCalculator
     {
+        #region [DesignMode] Y -> TGrid
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TGrid ConvertYToTGrid_DesignMode(double pickY, FumenVisualEditorViewModel editor)
             => ConvertYToTGrid_DesignMode(pickY, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
@@ -31,12 +33,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return pickTGrid;
         }
 
+        #endregion
+
+        #region [DesignMode] AudioTime -> Y
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ConvertAudioTimeToY_DesignMode(TimeSpan audioTime, FumenVisualEditorViewModel editor)
             => ConvertTGridToY_DesignMode(ConvertAudioTimeToTGrid(audioTime, editor), editor);
+
+        #endregion
+
+        #region AudioTime -> TGrid
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor)
-            => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
+           => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, BpmList bpmList, int tUnitLength = 240)
         {
@@ -51,6 +62,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var pickTGrid = pickBpm.TGrid + relativeBpmLenOffset;
             return pickTGrid;
         }
+
+        #endregion
+
+        #region [DesignMode] TGrid -> Y
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ConvertTGridToY_DesignMode(TGrid tGrid, FumenVisualEditorViewModel editor)
             => ConvertTGridToY_DesignMode(tGrid, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
@@ -80,6 +96,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return y;
         }
 
+        #endregion
+
+        #region TGrid -> AudioTime
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TimeSpan ConvertTGridToAudioTime(TGrid tGrid, FumenVisualEditorViewModel editor)
             => ConvertTGridToAudioTime(tGrid, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
@@ -99,6 +119,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var audioTimeMsec = audioTimeMsecBase + relativeBpmLenOffset;
             return audioTimeMsec;
         }
+
+        #endregion
 
         public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, BpmList bpmList, MeterChangeList meterList, int tUnitLength = 240)
         {

@@ -192,18 +192,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public double CalculateYFromAudioTime(TimeSpan audioTime)
-        {
-            var y = 0d;
-
-            if (IsDesignMode)
-            {
-                y = TGridCalculator.ConvertAudioTimeToY_DesignMode(audioTime, this);
-            }
-
-            return y;
-        }
-
         public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
         public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
         public ObservableCollection<ISelectableObject> CurrentSelectedObjects { get; } = new();
