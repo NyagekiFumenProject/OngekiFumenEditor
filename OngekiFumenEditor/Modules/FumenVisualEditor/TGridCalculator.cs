@@ -15,10 +15,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TGrid ConvertYToTGrid_DesignMode(double pickY, FumenVisualEditorViewModel editor)
             => ConvertYToTGrid_DesignMode(pickY, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
-        public static TGrid ConvertYToTGrid_DesignMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
+        private static TGrid ConvertYToTGrid_DesignMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
         {
             pickY = pickY / scale;
-            var list = soflanList.GetCachedNonNegativeSoflanPositionList(tUnitLength, bpmList);
+            var list = soflanList.GetCachedSoflanPositionList_DesignMode(tUnitLength, bpmList);
 
             //获取pickY对应的bpm和bpm起始位置
             (var pickStartY, var tGrid, var speed, var pickBpm) = list.LastOrDefault(x => x.startY <= pickY);
@@ -55,12 +55,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public static double ConvertTGridToY_DesignMode(TGrid tGrid, FumenVisualEditorViewModel editor)
             => ConvertTGridToY_DesignMode(tGrid, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double ConvertTGridToY_DesignMode(TGrid tGrid, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
+        private static double ConvertTGridToY_DesignMode(TGrid tGrid, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
             => ConvertTGridUnitToY_DesignMode(tGrid.TotalUnit, soflanList, bpmList, scale, tUnitLength);
-
-        public static double ConvertTGridUnitToY_DesignMode(double tGridUnit, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ConvertTGridUnitToY_DesignMode(double tGridUnit, FumenVisualEditorViewModel editor)
+            => ConvertTGridUnitToY_DesignMode(tGridUnit, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
+        private static double ConvertTGridUnitToY_DesignMode(double tGridUnit, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
         {
-            var positionBpmList = soflanList.GetCachedNonNegativeSoflanPositionList(tUnitLength, bpmList);
+            var positionBpmList = soflanList.GetCachedSoflanPositionList_DesignMode(tUnitLength, bpmList);
 
             //获取pickY对应的bpm和bpm起始位置
             (var pickStartY, var tGrid, var speed, var pickBpm) = positionBpmList.LastOrDefault(x => x.startTGrid.TotalUnit <= tGridUnit);

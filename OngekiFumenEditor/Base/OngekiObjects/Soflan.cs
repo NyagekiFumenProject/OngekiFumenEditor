@@ -78,6 +78,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             set => Set(ref speed, value);
         }
 
+        private bool applySpeedInDesignMode = false;
+        public bool ApplySpeedInDesignMode
+        {
+            get => applySpeedInDesignMode;
+            set => Set(ref applySpeedInDesignMode, value);
+        }
+
+        public float SpeedInEditor => ApplySpeedInDesignMode ? speed : 1;
+            
         public TGrid EndTGrid
         {
             get => EndIndicator.TGrid;

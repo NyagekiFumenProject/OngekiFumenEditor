@@ -21,7 +21,11 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             var data = seg[1].Split(":");
 
             soflan.Speed = float.Parse(data[0]);
-            var tgridRange = data[1].Split("->").Select(x=>x.Trim().TrimStart('(').TrimEnd(')')).Select(x=>x.ParseToTGrid()).ToArray();
+            var tgridRange = data[1]
+                .Split("->")
+                .Select(x=>x.Trim().TrimStart('(').TrimEnd(')'))
+                .Select(x=>x.ParseToTGrid())
+                .ToArray();
 
             soflan.TGrid = tgridRange[0];
             soflan.EndIndicator.TGrid = tgridRange[1];
