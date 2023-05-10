@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         private void OnChilidrenSubPropsChangedEvent()
         {
-            cachedBpmListCacheHash = int.MinValue;
+            cachedMetListCacheHash = int.MinValue;
         }
 
         public void Add(MeterChange bpm)
@@ -42,7 +42,8 @@ namespace OngekiFumenEditor.Base.Collections
 
         private void OnBpmPropChanged(object sender, PropertyChangedEventArgs e)
         {
-            OnChangedEvent?.Invoke();
+            if (e.PropertyName != nameof(ISelectableObject.IsSelected))
+                OnChangedEvent?.Invoke();
         }
 
         public void SetFirstBpm(MeterChange firstBpm)
@@ -80,17 +81,17 @@ namespace OngekiFumenEditor.Base.Collections
 
         public MeterChange GetNextMeter(TGrid time) => this.FirstOrDefault(bpm => time < bpm.TGrid);
 
-        private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedBpmUniformPosition = new();
-        private double cachedBpmListCacheHash = int.MinValue;
+        private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedTimesignUniformPosition = new();
+        private double cachedMetListCacheHash = int.MinValue;
 
         private void UpdateCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
         {
             TGrid pickBiggerTGrid(ITimelineObject a, ITimelineObject b) => a.TGrid > b.TGrid ? a.TGrid : b.TGrid;
 
-            cachedBpmUniformPosition.Clear();
+            cachedTimesignUniformPosition.Clear();
 
             //最初默认的
-            cachedBpmUniformPosition.Add((TimeSpan.FromMilliseconds(0), pickBiggerTGrid(FirstMeter, bpmList.FirstBpm), FirstMeter, bpmList.FirstBpm));
+            cachedTimesignUniformPosition.Add((TimeSpan.FromMilliseconds(0), pickBiggerTGrid(FirstMeter, bpmList.FirstBpm), FirstMeter, bpmList.FirstBpm));
 
             var bpmUnitList = bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
 
@@ -98,19 +99,19 @@ namespace OngekiFumenEditor.Base.Collections
             {
                 (var audioTime, var refBpm) = bpmUnitList.LastOrDefault(x => x.bpm.TGrid <= meterChange.TGrid);
                 var meterY = audioTime + TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(refBpm, meterChange.TGrid, tUnitLength));
-                cachedBpmUniformPosition.Add((meterY, pickBiggerTGrid(meterChange, refBpm), meterChange, refBpm));
+                cachedTimesignUniformPosition.Add((meterY, pickBiggerTGrid(meterChange, refBpm), meterChange, refBpm));
             }
 
             foreach ((var audioTime, var bpm) in bpmUnitList.Skip(1))
             {
                 var meter = GetMeter(bpm.TGrid);
-                cachedBpmUniformPosition.Add((audioTime, pickBiggerTGrid(meter, bpm), meter, bpm));
+                cachedTimesignUniformPosition.Add((audioTime, pickBiggerTGrid(meter, bpm), meter, bpm));
             }
 
-            cachedBpmUniformPosition.SortBy(x => x.audioTime);
+            cachedTimesignUniformPosition.SortBy(x => x.audioTime);
 
             //remove conflict meter position.
-            var conflictGroups = cachedBpmUniformPosition.GroupBy(x => x.audioTime).Where(x => x.Count() > 1);
+            var conflictGroups = cachedTimesignUniformPosition.GroupBy(x => x.audioTime).Where(x => x.Count() > 1);
             //using var disp = ObjectPool<HashSet<(double startY, MeterChange meterChange, BPMChange bpmChange)>>.GetWithUsingDisposable(out var removeSet,out _);
             var removeSet = new HashSet<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)>();
             removeSet.Clear();
@@ -126,20 +127,20 @@ namespace OngekiFumenEditor.Base.Collections
                 */
             }
             foreach (var item in removeSet)
-                cachedBpmUniformPosition.Remove(item);
+                cachedTimesignUniformPosition.Remove(item);
         }
 
         public List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
         {
             var hash = HashCode.Combine(tUnitLength, bpmList.cachedBpmContentHash);
 
-            if (cachedBpmListCacheHash != hash)
+            if (cachedMetListCacheHash != hash)
             {
                 //Log.LogDebug("recalculate all time signatures.");
                 UpdateCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
-                cachedBpmListCacheHash = hash;
+                cachedMetListCacheHash = hash;
             }
-            return cachedBpmUniformPosition;
+            return cachedTimesignUniformPosition;
         }
 
         public (int minIndex, int maxIndex) BinaryFindRangeIndex(TGrid min, TGrid max)

@@ -161,7 +161,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
                 //钦定好要画的相对于当前timeSignature的偏移Y，节拍信息，节奏速度
                 (_, var currentTGridBase, var currentMeter, var currentBpm) = currentTimeSignature;
-                var currentStartY = ConvertTGridToY_DesignMode(currentTGridBase, soflans, bpmList, 1, tUnitLength);
+                var currentStartY = ConvertTGridToY_DesignMode(currentTGridBase, soflans, bpmList, scale, tUnitLength);
                 (_, var nextTGridBase, _, var nextBpm) = nextTimeSignature;
 
                 //计算每一拍的(grid)长度
@@ -181,8 +181,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 {
                     var tGrid = currentTGridBase + new GridOffset(0, (int)(lengthPerBeat * i));
                     //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
-                    var len = ConvertTGridToY_DesignMode(tGrid, soflans, bpmList, 1.0f, tUnitLength);
-                    var y = currentStartY + len;
+                    var y = ConvertTGridToY_DesignMode(tGrid, soflans, bpmList, 1, tUnitLength);
+                    //var y = currentStartY + len;
 
                     //超过当前timeSignature范围，切换到下一个timeSignature画新的线
                     if (nextBpm is not null && tGrid >= nextTGridBase)

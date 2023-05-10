@@ -42,6 +42,8 @@ namespace OngekiFumenEditor.Base.Collections
             {
                 case nameof(Soflan.Speed):
                 case nameof(Soflan.TGrid):
+                case nameof(TGrid.Grid):
+                case nameof(TGrid.Unit):
                 case nameof(Soflan.EndTGrid):
                 case nameof(Soflan.GridLength):
                     OnChangedEvent?.Invoke();

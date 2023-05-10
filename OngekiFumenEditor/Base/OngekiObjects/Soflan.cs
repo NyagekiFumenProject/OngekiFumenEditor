@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,8 +25,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
             public override TGrid TGrid
             {
-                get => base.TGrid is null ? (base.TGrid = RefSoflan.TGrid.CopyNew()) : base.TGrid;
-                set => base.TGrid = value;
+                get => base.TGrid is null ? RefSoflan.TGrid.CopyNew() : base.TGrid;
+                set => base.TGrid = value is not null ? MathUtils.Max(value, RefSoflan.TGrid.CopyNew()) : value;
             }
 
             public override string ToString() => $"{base.ToString()}";
@@ -38,6 +39,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             EndIndicator = new SoflanEndIndicator() { RefSoflan = this };
             EndIndicator.PropertyChanged += EndIndicator_PropertyChanged;
             displayables = new IDisplayableObject[] { this, EndIndicator };
+        }
+
+        public override TGrid TGrid
+        {
+            get => base.TGrid;
+            set
+            {
+                base.TGrid = value;
+                if (value is not null)
+                    EndIndicator.TGrid = MathUtils.Max(value.CopyNew(), EndIndicator.TGrid);
+            }
         }
 
         private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
