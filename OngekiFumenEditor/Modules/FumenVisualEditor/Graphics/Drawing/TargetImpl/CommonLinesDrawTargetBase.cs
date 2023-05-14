@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPoint(TGrid tGrid, XGrid xGrid, bool isVailed)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-                var y = (float)TGridCalculator.ConvertTGridToY_DesignMode(tGrid, target.Editor);
+                var y = (float)target.ConvertToY(tGrid);
 
                 lineDrawing.PostPoint(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash);
             }

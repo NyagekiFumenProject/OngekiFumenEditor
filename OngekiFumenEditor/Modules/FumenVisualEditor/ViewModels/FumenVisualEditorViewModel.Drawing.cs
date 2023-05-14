@@ -38,7 +38,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private DrawXGridHelper xGridHelper;
         private DrawJudgeLineHelper judgeLineHelper;
         private DrawSelectingRangeHelper selectingRangeHelper;
-        private DrawSelectableObjectTextureHelper selectableObjectHelper;
+
+        private Func<double, FumenVisualEditorViewModel, double> convertToY = TGridCalculator.ConvertTGridUnitToY_DesignMode;
 
         private StringBuilder stringBuilder = new StringBuilder();
 
@@ -151,7 +152,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             xGridHelper = new DrawXGridHelper();
             judgeLineHelper = new DrawJudgeLineHelper();
             selectingRangeHelper = new DrawSelectingRangeHelper();
-            selectableObjectHelper = new DrawSelectableObjectTextureHelper();
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
 
@@ -197,7 +197,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     var appearOffsetTime = ViewHeight / (bell.ReferenceBulletPallete?.Speed ?? 1f);
 
-                    var toTime = TGridCalculator.ConvertTGridToY_DesignMode(bell.TGrid, this);
+                    var toTime = ConvertToY(bell.TGrid.TotalUnit);
                     var fromTime = toTime - appearOffsetTime;
 
                     return MathUtils.IsInRange(fromTime, toTime, Rect.MinY, Rect.MaxY);
@@ -243,9 +243,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (fumen is null)
                 return;
 
-            var minY = (float)(CurrentPlayTime - Setting.JudgeLineOffsetY);
-            var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this) ?? TGrid.Zero;
-            var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY + ViewHeight, this);
+            Func<double, FumenVisualEditorViewModel, TGrid> convertToTGrid = IsDesignMode ?
+                TGridCalculator.ConvertYToTGrid_DesignMode :
+                TGridCalculator.ConvertYToTGrid_PreviewMode;
+
+            var tGrid = GetCurrentTGrid();
+            var curY = ConvertToY(tGrid.TotalUnit);
+
+            var minY = (float)(curY - Setting.JudgeLineOffsetY);
+            var minTGrid = convertToTGrid(minY, this) ?? TGrid.Zero;
+            var maxTGrid = convertToTGrid(minY + ViewHeight, this);
 
             //todo 这里就要计算可视区域了
             Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));
@@ -386,6 +393,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public bool CheckDrawingVisible(DrawingVisible visible)
         {
             return visible.HasFlag(EditorObjectVisibility == Visibility.Visible ? DrawingVisible.Design : DrawingVisible.Preview);
+        }
+
+        public double ConvertToY(double tGridUnit)
+        {
+            return convertToY(tGridUnit, this);
         }
     }
 }

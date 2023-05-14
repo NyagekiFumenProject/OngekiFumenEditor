@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -41,17 +42,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             if (target.Editor.Setting.BeatSplit == 0)
                 return;
-
-            var timelines = TGridCalculator.GetVisbleTimelines_DesignMode(
-                fumen.Soflans,
-                fumen.BpmList,
-                fumen.MeterChanges,
-                Math.Max(0, target.Rect.MinY),
-                target.Rect.MaxY,
-                target.Editor.Setting.JudgeLineOffsetY,
-                target.Editor.Setting.BeatSplit,
-                target.Editor.Setting.VerticalDisplayScale
-            );
+            IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> timelines = Enumerable.Empty<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)>();
+            if (target.Editor.IsDesignMode)
+            {
+                timelines = TGridCalculator.GetVisbleTimelines_DesignMode(
+                    fumen.Soflans,
+                    fumen.BpmList,
+                    fumen.MeterChanges,
+                    Math.Max(0, target.Rect.MinY),
+                    target.Rect.MaxY,
+                    target.Editor.Setting.JudgeLineOffsetY,
+                    target.Editor.Setting.BeatSplit,
+                    target.Editor.Setting.VerticalDisplayScale
+                );
+            }
+            else
+            {
+                timelines = TGridCalculator.GetVisbleTimelines_PreviewMode(
+                    fumen.Soflans,
+                    fumen.BpmList,
+                    fumen.MeterChanges,
+                    Math.Max(0, target.Rect.MinY),
+                    target.Rect.MaxY,
+                    target.Editor.Setting.JudgeLineOffsetY,
+                    target.Editor.Setting.BeatSplit,
+                    target.Editor.Setting.VerticalDisplayScale
+                );
+            }
 
             var transDisp = target.Rect.Width * 0.4f;
             var maxDispAlpha = 0.3f;

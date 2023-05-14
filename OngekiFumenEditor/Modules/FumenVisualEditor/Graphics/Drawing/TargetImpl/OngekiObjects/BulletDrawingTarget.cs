@@ -120,7 +120,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
 
             //计算向量化的物件运动时间
-            var toTime = TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor);
+            var toTime = target.ConvertToY(obj.TGrid);
             var fromTime = toTime - appearOffsetTime;
             var currentTime = target.CurrentPlayTime;
             var precent = (currentTime - fromTime) / appearOffsetTime;
@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private void DrawEditor(IFumenEditorDrawingContext target, Bullet obj)
         {
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
-            var toTime = TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor);
+            var toTime = target.ConvertToY(obj.TGrid);
             
             var pos = new Vector2((float)toX, (float)toTime);
 

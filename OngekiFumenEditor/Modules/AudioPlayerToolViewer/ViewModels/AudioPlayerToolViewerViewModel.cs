@@ -173,8 +173,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (Editor is null)
                 return;
             NotifyOfPropertyChange(() => SliderValue);
-            var scrollOffset = TGridCalculator.ConvertAudioTimeToY_DesignMode(time, Editor);
-            Editor.ScrollViewerVerticalOffset = (float)Math.Max(0, scrollOffset);
+            var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(time, Editor);
+            Editor.ScrollTo(tGrid);
         }
 
         public void OnStopButtonClicked()
@@ -232,7 +232,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 if (scrollAnimationClearFunc is null)
                     InitPreviewActions();
                 Log.LogDebug($"seek by RequestPlayOrPause()");
-                var tgrid = Editor.GetCurrentJudgeLineTGrid();
+                var tgrid = Editor.GetCurrentTGrid();
                 var seekTo = TGridCalculator.ConvertTGridToAudioTime(tgrid, Editor);
                 AudioPlayer.Seek(seekTo, false);
                 fumenSoundPlayer.Seek(seekTo, false);

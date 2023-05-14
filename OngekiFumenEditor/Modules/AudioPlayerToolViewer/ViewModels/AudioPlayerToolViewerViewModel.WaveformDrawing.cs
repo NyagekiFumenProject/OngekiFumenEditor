@@ -216,7 +216,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 CurrentTime = AudioPlayer.CurrentTime;
             else
             {
-                var tGrid = Editor?.GetCurrentJudgeLineTGrid();
+                var tGrid = Editor?.GetCurrentTGrid();
                 if (tGrid is null)
                     return;
                 var editorAudioTime = TGridCalculator.ConvertTGridToAudioTime(tGrid, Editor);

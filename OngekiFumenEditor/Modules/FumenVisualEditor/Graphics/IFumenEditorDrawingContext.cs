@@ -33,5 +33,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics
         void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size);
 
         bool CheckDrawingVisible(DrawingVisible visible);
+
+        double ConvertToY(TGrid tGrid) => ConvertToY(tGrid.TotalUnit);
+        double ConvertToY(double tGridUnit);
     }
 }

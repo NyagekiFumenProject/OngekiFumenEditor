@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiTimelineObjectBase> objs)
         {
-            using var d4 = objs.Select(x => new RegisterDrawingInfo(x, TGridCalculator.ConvertTGridToY_DesignMode(x.TGrid, target.Editor))).ToListWithObjectPool(out var objects);
+            using var d4 = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToY(x.TGrid))).ToListWithObjectPool(out var objects);
 
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
             {

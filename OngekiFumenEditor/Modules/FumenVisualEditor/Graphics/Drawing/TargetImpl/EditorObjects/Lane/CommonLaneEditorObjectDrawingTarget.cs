@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                             continue;
 
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);
-                        var y = (float)TGridCalculator.ConvertTGridToY_DesignMode(item.TGrid, target.Editor);
+                        var y = (float)target.ConvertToY(item.TGrid);
 
                         var pos = new Vector2(x, y);
                         drawList.Add((size, pos, 0f));

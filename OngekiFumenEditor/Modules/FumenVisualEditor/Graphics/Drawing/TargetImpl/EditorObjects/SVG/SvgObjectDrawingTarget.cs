@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override void Draw(IFumenEditorDrawingContext target, SvgPrefabBase obj)
         {
             var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-            var y = (float)TGridCalculator.ConvertTGridToY_DesignMode(obj.TGrid, target.Editor);
+            var y = (float)target.ConvertToY(obj.TGrid);
             var pos = new Vector2(x, y);
 
             var vertics = cachedSvgRenderDataManager.GetRenderData(target, obj, out var isCached, out var bound);

@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);
 
             lineDrawing.Draw(target, vertices, 1);
-            var t = target.Editor.GetCurrentJudgeLineTGrid();
+            var t = target.Editor.GetCurrentTGrid();
 
             string str;
             if (target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime)
@@ -42,8 +42,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             else
                 str = t.ToString();
-
-            var r = stringDrawing.SupportFonts;
 
             stringDrawing.Draw(
                     str,

@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Kernel.Scheduler
             while (!cancellationToken.IsCancellationRequested)
             {
                 var schedulers = Schedulers
-                    .Where(x => DateTime.Now - schedulersCallTime[x] >= x.ScheduleCallLoopInterval)
+                    .Where(x => x is not null && DateTime.Now - schedulersCallTime[x] >= x.ScheduleCallLoopInterval)
                     .Select(x => x.OnScheduleCall(cancellationToken).ContinueWith(_ => schedulersCallTime[x] = DateTime.Now))
                     .ToArray();
                 if (schedulers.Length > 0)

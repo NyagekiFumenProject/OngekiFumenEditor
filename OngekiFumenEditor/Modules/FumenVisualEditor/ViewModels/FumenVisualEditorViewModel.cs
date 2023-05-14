@@ -183,7 +183,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (EditorProjectData?.AudioDuration is TimeSpan timeSpan)
             {
-                TotalDurationHeight = TGridCalculator.ConvertTGridToY_DesignMode(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this), this);
+                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit);
             }
             else
             {
@@ -294,7 +294,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
-            EditorProjectData.RememberLastDisplayTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentJudgeLineTGrid(), this);
+            EditorProjectData.RememberLastDisplayTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentTGrid(), this);
             if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
             {
                 //ask fumen file save path before save project.

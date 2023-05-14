@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private bool isUserRequestHideEditorObject = default;
-        public bool IsUserRequestHideEditorObject
+        private bool IsUserRequestHideEditorObject
         {
             get => isUserRequestHideEditorObject;
             set
@@ -571,8 +571,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_HideOrShow()
         {
-            IsUserRequestHideEditorObject = !IsUserRequestHideEditorObject;
+            SwitchMode(!IsPreviewMode);
         }
+
+        private void SwitchMode(bool isPreviewMode)
+        {
+            var tGrid = GetCurrentTGrid();
+            IsUserRequestHideEditorObject = isPreviewMode;
+            convertToY = IsDesignMode ?
+                TGridCalculator.ConvertTGridUnitToY_DesignMode :
+                TGridCalculator.ConvertTGridUnitToY_PreviewMode;
+            RecalculateScrollBar();
+            RecalculateTotalDurationHeight();
+            ScrollTo(tGrid);
+        }
+
         #endregion
 
         #region Drag Actions
@@ -1015,11 +1028,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 //Log.LogDebug($"ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2} , downFirst: {downFirst.y:F2} , nextFirst: {nextFirst.y:F2}");
                 var result = arg.Delta > 0 ? nextFirst : downFirst;
-                ScrollViewerVerticalOffset = result.y;
+                ScrollTo(result.y);
             }
             else
             {
-                ScrollViewerVerticalOffset = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength;
+                ScrollTo(ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength);
             }
         }
 

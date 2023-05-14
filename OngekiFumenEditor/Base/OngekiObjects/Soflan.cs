@@ -86,10 +86,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         public float SpeedInEditor => ApplySpeedInDesignMode ? speed : 1;
-            
+
         public TGrid EndTGrid
         {
             get => EndIndicator.TGrid;
+            set => EndIndicator.TGrid = value;
         }
 
         public int GridLength => EndIndicator.TGrid.TotalGrid - TGrid.TotalGrid;

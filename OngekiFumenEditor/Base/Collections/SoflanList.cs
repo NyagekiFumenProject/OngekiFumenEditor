@@ -62,12 +62,13 @@ namespace OngekiFumenEditor.Base.Collections
         }
 
         private List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> cachedSoflanPositionList_DesignMode = new();
+        private List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> cachedSoflanPositionList_PreviewMode = new();
         private double cachedSoflanListCacheHash = int.MinValue;
 
-        private void UpdateCachedSoflanPositionList_DesignMode(double tUnitLength, BpmList bpmList)
-        {
-            cachedSoflanPositionList_DesignMode.Clear();
+        #region SoflanPositionList
 
+        private IEnumerable<(int id, TGrid TGrid, double speed, BPMChange curBpm)> GetCalculatableEvents(BpmList bpmList, bool isDesignModel)
+        {
             var curBpm = bpmList.FirstBpm;
             Soflan curSpeedEvent = null;
 
@@ -80,21 +81,28 @@ namespace OngekiFumenEditor.Base.Collections
                 {
                     case BPMChange bpmEvt:
                         curBpm = bpmEvt;
-                        var speed = (curSpeedEvent is not null && curSpeedEvent.EndTGrid > t) ? curSpeedEvent.SpeedInEditor : 1.0d;
+                        var speed = (curSpeedEvent is not null && curSpeedEvent.EndTGrid > t) ? (isDesignModel ? curSpeedEvent.SpeedInEditor : curSpeedEvent.Speed) : 1.0d;
                         yield return (i++, evt.TGrid, speed, curBpm);
                         break;
                     case Soflan soflanEvt:
                         curSpeedEvent = soflanEvt;
-                        yield return (i++, evt.TGrid, soflanEvt.SpeedInEditor, curBpm);
+                        yield return (i++, evt.TGrid, (isDesignModel ? soflanEvt.SpeedInEditor : soflanEvt.Speed), curBpm);
                         yield return (i++, evt.TGrid + new GridOffset(0, soflanEvt.GridLength), 1.0f, curBpm);
                         break;
                 }
             }
-            var eventList = this.AsEnumerable<ITimelineObject>().Concat(bpmList)
+
+            return this.AsEnumerable<ITimelineObject>().Concat(bpmList)
                 .OrderBy(x => x.TGrid)
                 .SelectMany(GetEventTimings)
-                .GroupBy(x => x.Item2)
-                .Select(x => x.OrderBy(x => x.id).LastOrDefault()).ToList();
+                .DistinctContinuousBy(x => x.TGrid);
+        }
+
+        private void UpdateCachedSoflanPositionList(double tUnitLength, BpmList bpmList, List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list, bool isDesignMode)
+        {
+            list.Clear();
+
+            var eventList = GetCalculatableEvents(bpmList, isDesignMode);
 
             var itor = eventList.GetEnumerator();
             if (!itor.MoveNext())
@@ -105,41 +113,57 @@ namespace OngekiFumenEditor.Base.Collections
 
             while (itor.MoveNext())
             {
-                /* |------------|--------------|
+                /* |---------------------------|
                   prev                        cur
-                    
                  */
                 var curEvent = itor.Current;
 
                 var len = MathUtils.CalculateBPMLength(prevEvent.TGrid, curEvent.TGrid, prevEvent.curBpm.BPM, tUnitLength);
+
+                //todo 什么时候能够实现倒车Soflan显示在处理吧~
+                //var scaledLen = len * (isDesignMode ? Math.Abs(prevEvent.speed) : prevEvent.speed
                 var scaledLen = len * Math.Abs(prevEvent.speed);
 
                 var fromY = currentY;
                 var toY = currentY + scaledLen;
 
-                cachedSoflanPositionList_DesignMode.Add((fromY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
+                list.Add((fromY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
 
                 currentY = toY;
                 prevEvent = curEvent;
             }
 
-            if (cachedSoflanPositionList_DesignMode.Count == 0)
-                cachedSoflanPositionList_DesignMode.Add((0, TGrid.Zero, 1.0d, bpmList.FirstBpm));
-            else if (prevEvent.TGrid != cachedSoflanPositionList_DesignMode.First().startTGrid)
-                cachedSoflanPositionList_DesignMode.Add((currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
+            if (list.Count == 0)
+                list.Add((0, TGrid.Zero, 1.0d, bpmList.FirstBpm));
+            else if (prevEvent.TGrid != list.First().startTGrid)
+                list.Add((currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
         }
 
-        public List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_DesignMode(double tUnitLength, BpmList bpmList)
+        private void CheckAndUpdateSoflanPositionList(double tUnitLength, BpmList bpmList)
         {
             var hash = HashCode.Combine(tUnitLength, bpmList.cachedBpmContentHash);
 
             if (cachedSoflanListCacheHash != hash)
             {
                 Log.LogDebug("recalculate all.");
-                UpdateCachedSoflanPositionList_DesignMode(tUnitLength, bpmList);
+                UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_DesignMode, true);
+                UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_PreviewMode, false);
                 cachedSoflanListCacheHash = hash;
             }
+        }
+
+        public IReadOnlyList<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_DesignMode(double tUnitLength, BpmList bpmList)
+        {
+            CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
             return cachedSoflanPositionList_DesignMode;
         }
+
+        public IReadOnlyList<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_PreviewMode(double tUnitLength, BpmList bpmList)
+        {
+            CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
+            return cachedSoflanPositionList_PreviewMode;
+        }
+
+        #endregion
     }
 }

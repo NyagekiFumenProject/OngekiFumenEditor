@@ -16,6 +16,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
+        private TGrid currentTGrid = new TGrid(0, 0);
+
         private double totalDurationHeight;
         public double TotalDurationHeight
         {
@@ -35,10 +37,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 var val = Math.Min(TotalDurationHeight, Math.Max(0, value));
+                Func<double, FumenVisualEditorViewModel, TGrid> convertToTGrid = IsDesignMode ? TGridCalculator.ConvertYToTGrid_DesignMode : TGridCalculator.ConvertYToTGrid_PreviewMode;
 
                 Set(ref scrollViewerVerticalOffset, val);
                 NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
                 RecalcViewProjectionMatrix();
+                currentTGrid = convertToTGrid(scrollViewerVerticalOffset, this);
             }
         }
 
@@ -62,11 +66,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void ScrollTo(TGrid startTGrid)
         {
-            if (IsDesignMode)
-            {
-                var y = TGridCalculator.ConvertTGridToY_DesignMode(startTGrid, this);
-                ScrollTo(y);
-            }
+            var y = ConvertToY(startTGrid.TotalUnit);
+            ScrollTo(y);
         }
 
         public void ScrollTo(double y)
@@ -77,10 +78,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
-        public TGrid GetCurrentJudgeLineTGrid()
+        public TGrid GetCurrentTGrid()
         {
-            var y = Setting.JudgeLineOffsetY + Rect.MinY;
-            return TGridCalculator.ConvertYToTGrid_DesignMode(y, this);
+            return currentTGrid;
         }
     }
 }
