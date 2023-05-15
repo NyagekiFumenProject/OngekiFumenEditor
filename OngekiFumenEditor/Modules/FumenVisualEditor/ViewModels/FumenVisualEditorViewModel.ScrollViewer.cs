@@ -73,7 +73,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void ScrollTo(double y)
         {
             ScrollViewerVerticalOffset = (float)y;
-            //Log.LogInfo($"Scroll to AnimatedScrollViewer.CurrentVerticalOffset = {AnimatedScrollViewer.CurrentVerticalOffset:F2}, ScrollViewerVerticalOffset = {ScrollViewerVerticalOffset:F2}");
         }
 
         #endregion

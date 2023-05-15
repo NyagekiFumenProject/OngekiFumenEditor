@@ -95,7 +95,8 @@ namespace OngekiFumenEditor.Base.Collections
             return this.AsEnumerable<ITimelineObject>().Concat(bpmList)
                 .OrderBy(x => x.TGrid)
                 .SelectMany(GetEventTimings)
-                .DistinctContinuousBy(x => x.TGrid);
+                .GroupBy(x => x.TGrid)
+                .Select(x => x.Last());
         }
 
         private void UpdateCachedSoflanPositionList(double tUnitLength, BpmList bpmList, List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list, bool isDesignMode)
