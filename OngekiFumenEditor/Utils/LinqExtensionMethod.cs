@@ -340,7 +340,6 @@ namespace OngekiFumenEditor.Utils
         public static IEnumerable<T> ExceptBy<T>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, T, bool> compFunc)
             => a.Except(b, new EqualsComparerWrapper<T>(compFunc));
 
-
         public static T FirstOrDefault<T>(this IEnumerable<T> a, Func<T, bool> compFunc, T defaultValue)
         {
             var val = a.FirstOrDefault(compFunc);

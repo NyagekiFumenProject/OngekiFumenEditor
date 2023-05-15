@@ -17,6 +17,7 @@ using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -929,17 +930,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var canvasY = Rect.MaxY - pos.Y;
             var canvasX = pos.X;
             CurrentCursorPosition = new(canvasX, canvasY);
-            if (IsDesignMode)
-            {
-                var tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this);
-                TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
-                var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
-                contentObject.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff")}]";
-            }
-            else
-            {
-                contentObject.Message = string.Empty;
-            }
+
+            var tGrid = IsDesignMode ?
+                    TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this) :
+                    TGridCalculator.ConvertYToTGrid_PreviewMode(canvasY, this);
+            TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
+            var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
+            contentObject.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff")}]";
         }
 
         public void Grid_DragEnter(ActionExecutionContext e)
@@ -1001,8 +998,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (IsLocked)
                 return;
-            if (!IsDesignMode)
-                return;
 
             var arg = e.EventArgs as MouseWheelEventArgs;
             arg.Handled = true;
@@ -1032,7 +1027,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             else
             {
-                ScrollTo(ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength);
+                if (IsPreviewMode)
+                {
+                    var audioTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentTGrid(), this);
+                    var offset = TimeSpan.FromMilliseconds(Setting.MouseWheelLength);
+                    if (Math.Sign(arg.Delta) > 0)
+                        audioTime += offset;
+                    else
+                        audioTime -= offset;
+                    ScrollTo(audioTime);
+                }
+                else
+                {
+                    ScrollTo(ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength);
+                }
             }
         }
 

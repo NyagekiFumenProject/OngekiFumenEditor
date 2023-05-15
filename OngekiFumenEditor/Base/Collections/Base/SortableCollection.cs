@@ -99,5 +99,13 @@ namespace OngekiFumenEditor.Base.Collections.Base
         }
 
         public bool FastContains(T obj) => Contains(obj);
+
+        public int BinaryFindLastIndexByKey(X key)
+        {
+            var minIndex = items.BinarySearchBy(key, sortKeySelector);
+            minIndex = minIndex < 0 ? ~minIndex : minIndex;
+
+            return minIndex;
+        }
     }
 }

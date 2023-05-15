@@ -1,4 +1,6 @@
 ﻿using Caliburn.Micro;
+using FontStashSharp;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Kernel.Graphics;
 using System;
 using System.Collections.Generic;
@@ -6,6 +8,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using OngekiFumenEditor.Utils;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
@@ -15,6 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private IStringDrawing stringDrawing;
         private ILineDrawing lineDrawing;
         private Vector4 color = new(1, 1, 0, 1);
+        private Vector4 spdColor = new(FSColor.LightCyan.R / 255.0f, FSColor.LightCyan.G / 255.0f, FSColor.LightCyan.B / 255.0f, FSColor.LightCyan.A / 255.0f);
 
         LineVertex[] vertices = new LineVertex[2];
 
@@ -34,6 +38,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing.Draw(target, vertices, 1);
             var t = target.Editor.GetCurrentTGrid();
 
+            var bpmList = target.Editor.Fumen.BpmList;
+            var soflanList = target.Editor.Fumen.Soflans;
+
             string str;
             if (target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime)
             {
@@ -42,6 +49,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             else
                 str = t.ToString();
+
+            var soflan = soflanList.LastOrDefault(x => x.TGrid <= t && t <= x.EndTGrid);
+            var speed = soflan?.Speed ?? 1;
 
             stringDrawing.Draw(
                     str,
@@ -57,6 +67,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     default,
                     out _
             );
+
+            if (speed != 1)
+            {
+                var speedStr = $"{speed}x";
+
+                stringDrawing.Draw(
+                        speedStr,
+                        new(target.ViewWidth - 50,
+                        y - 10f),
+                        Vector2.One,
+                        12,
+                        0,
+                        spdColor,
+                        new(1, 1.5f),
+                        IStringDrawing.StringStyle.Bold,
+                        target,
+                        default,
+                        out _
+                );
+            }
         }
     }
 }

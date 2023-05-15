@@ -91,6 +91,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             //const float fat = 3.95f;
             //var time =  32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
+
             var time = (float)target.ViewHeight / (obj.ReferenceBulletPallete?.Speed ?? 1f);
             return time;
         }
@@ -98,7 +99,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private void Draw(IFumenEditorDrawingContext target, Bullet obj)
         {
             var appearOffsetTime = CalculateBulletMsecTime(target, obj);
-
             /*
             --------------------------- toTime 
                     \
@@ -150,7 +150,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private void DrawEditor(IFumenEditorDrawingContext target, Bullet obj)
         {
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
+            var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
             var toTime = target.ConvertToY(obj.TGrid);
             
             var pos = new Vector2((float)toX, (float)toTime);

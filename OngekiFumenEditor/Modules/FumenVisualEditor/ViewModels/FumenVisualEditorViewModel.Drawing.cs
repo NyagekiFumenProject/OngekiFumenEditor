@@ -211,8 +211,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             else
             {
-                obj.AddRange(fumen.Bells.BinaryFindRange(min, max));
-                obj.AddRange(fumen.Bullets.BinaryFindRange(min, max));
+                var blts = fumen.Bullets.BinaryFindRange(min, max);
+                var bels = fumen.Bells.BinaryFindRange(min, max);
+
+                obj.AddRange(bels);
+                obj.AddRange(blts);
             }
 
             return first.Concat(obj).SelectMany(x => x.GetDisplayableObjects());

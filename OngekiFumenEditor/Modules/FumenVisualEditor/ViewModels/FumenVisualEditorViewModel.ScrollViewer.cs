@@ -66,8 +66,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void ScrollTo(TGrid startTGrid)
         {
+            if (startTGrid is null)
+                return;
             var y = ConvertToY(startTGrid.TotalUnit);
             ScrollTo(y);
+        }
+
+        public void ScrollTo(TimeSpan audioTime)
+        {
+            var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(audioTime, this);
+            ScrollTo(tGrid);
         }
 
         public void ScrollTo(double y)
