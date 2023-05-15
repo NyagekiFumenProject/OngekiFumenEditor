@@ -20,7 +20,6 @@
 * ~~正式公布~~
 * 其他类型子弹
 * ~~制作预览器(OpenGL)~~(暂时跳过) 
-* 实现Soflan变速 ([有限支持](https://github.com/MikiraSora/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
 * svg转线 ([略有问题](https://github.com/MikiraSora/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#svg%E5%88%92%E7%BA%BF%E9%97%AE%E9%A2%98))
 * LispBlock实现
 * EmenyLane实现
@@ -34,7 +33,8 @@
 * 星咲あかり心灵控制计划
 * 重写渲染器，优化性能
 * 音频频谱显示
-* 完全实现Soflan变速 **<--- we are here! ---**
+* 实现Soflan变速 ([有限支持](https://github.com/MikiraSora/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
+* 优化性能 **<--- we are here! ---**
 * 美化物件美术素材
 * 实现扫描式预览方式
 * 轨道操作简单化
