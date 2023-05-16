@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             Log.LogDebug($"fileFolder = {fileFolder}");
             projectData.FumenFilePath = Path.Combine(fileFolder, projectData.FumenFilePath);
             Log.LogDebug($"projectData.FumenFilePath = {projectData.FumenFilePath}");
-            projectData.AudioFilePath = Path.Combine(fileFolder, projectData.AudioFilePath);
+            projectData.AudioFilePath = Path.GetFullPath(Path.Combine(fileFolder, projectData.AudioFilePath));
             Log.LogDebug($"projectData.AudioFilePath = {projectData.AudioFilePath}");
 
             using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);

@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             bool isVisible(TGrid tGrid) => target.TGridRange.VisiableMinTGrid <= tGrid || tGrid <= target.TGridRange.VisiableMaxTGrid;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            bool getNextIsVaild(ConnectableObjectBase o) => o.NextObject?.IsVaildPath ?? default;
+            bool getNextIsVaild(ConnectableObjectBase o) => o.NextObject?.IsVaildPath ?? true;
 
             var prevVisible = isVisible(obj.TGrid);
             var alwaysDrawing = isVisible(obj.MinTGrid) && isVisible(obj.MaxTGrid);
