@@ -130,23 +130,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 if (!FileHelper.IsPathWritable(projFilePath))
                     throw new IOException("项目文件被占用或无权限,无法写入数据");
 
+                var fumen = editorProject.Fumen;
+
+                //clone new project object to modify
+                using var ms = new MemoryStream();
+                await JsonSerializer.SerializeAsync(ms, editorProject, JsonSerializerOptions);
+                ms.Seek(0, SeekOrigin.Begin);
+                var cloneProj = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(ms, JsonSerializerOptions);
+
                 var tmpProjFilePath = Path.GetTempFileName();
                 var fileStream = File.Open(tmpProjFilePath, FileMode.Create);
-                StoreBulletPalleteListEditorData(editorProject);
+                StoreBulletPalleteListEditorData(cloneProj);
 
-                var fumenFilePath = editorProject.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(projFilePath);
-                if (editorProject.FumenFilePath is null)
-                    editorProject.FumenFilePath = fumenFilePath;
+                var fumenFilePath = cloneProj.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(projFilePath);
+                if (cloneProj.FumenFilePath is null)
+                    cloneProj.FumenFilePath = fumenFilePath;
 
                 //always make relative path
                 var fileFolder = Path.GetDirectoryName(projFilePath);
                 Log.LogDebug($"projFilePath = {projFilePath}");
                 Log.LogDebug($"fileFolder = {fileFolder}");
-                if (Path.IsPathFullyQualified(editorProject.FumenFilePath))
-                    editorProject.FumenFilePath = Path.GetRelativePath(fileFolder, editorProject.FumenFilePath);
-                if (Path.IsPathFullyQualified(editorProject.AudioFilePath))
-                    editorProject.AudioFilePath = Path.GetRelativePath(fileFolder, editorProject.AudioFilePath);
-                var fumenFullPath = Path.Combine(fileFolder, editorProject.FumenFilePath);
+                if (Path.IsPathFullyQualified(cloneProj.FumenFilePath))
+                    cloneProj.FumenFilePath = Path.GetRelativePath(fileFolder, cloneProj.FumenFilePath);
+                if (Path.IsPathFullyQualified(cloneProj.AudioFilePath))
+                    cloneProj.AudioFilePath = Path.GetRelativePath(fileFolder, cloneProj.AudioFilePath);
+                var fumenFullPath = Path.Combine(fileFolder, cloneProj.FumenFilePath);
 
                 var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFullPath);
                 Log.LogDebug($"serializer = {serializer}");
@@ -155,9 +163,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 if (!FileHelper.IsPathWritable(fumenFullPath))
                     throw new IOException("谱面文件被占用或无权限,无法写入数据");
 
-                await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
+                await JsonSerializer.SerializeAsync(fileStream, cloneProj, JsonSerializerOptions);
                 var tmpFumenFilePath = Path.GetTempFileName();
-                await File.WriteAllBytesAsync(tmpFumenFilePath, await serializer.SerializeAsync(editorProject.Fumen));
+                await File.WriteAllBytesAsync(tmpFumenFilePath, await serializer.SerializeAsync(fumen));
                 await fileStream.FlushAsync();
                 fileStream.Close();
 
