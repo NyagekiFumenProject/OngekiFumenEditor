@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using OngekiFumenEditor.Utils;
 using System.Windows;
 using System.ComponentModel;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls
 {
@@ -35,6 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                         _ => default
                     })
                     .FilterNull()
+                    .Where(x => x is not IColorfulLane)
                     .Select(startObject => (CalculateConnectableObjectCurrentRelativeX(startObject, tGrid, editor), startObject))
                     .Where(x => x.Item1 != null)
                     .Select(x => (Math.Abs(x.Item1.Value - relativePoint.X), x.Item1.Value, x.startObject))
