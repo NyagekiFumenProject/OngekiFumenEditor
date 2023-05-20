@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
     //[DontShowPropertyInfoAttrbute]
-    public class Bullet : OngekiMovableObjectBase,IBulletPalleteReferencable
+    public class Bullet : OngekiMovableObjectBase, IBulletPalleteReferencable
     {
         private BulletPallete referenceBulletPallete;
         public BulletPallete ReferenceBulletPallete

@@ -286,15 +286,17 @@ namespace OngekiFumenEditor.Base
                         if (sender is ILaneDockableChangable dockableObj)
                         {
                             var beforeRefLane = dockableObj.ReferenceLaneStart;
-                            var newRefLaneId = dockableObj.ReferenceLaneStrIdManualSet;
-                            if (Lanes.FirstOrDefault(x => x.RecordId == newRefLaneId) is LaneStartBase newRefLane)
+                            if (dockableObj.ReferenceLaneStrIdManualSet is int newRefLaneId)
                             {
-                                dockableObj.ReferenceLaneStart = newRefLane;
-                                Log.LogInfo($"Change dockable object {dockableObj} ref lane from {beforeRefLane?.RecordId} to {newRefLane?.RecordId}.");
-                            }
-                            else
-                            {
-                                Log.LogWarn($"Change dockable object {dockableObj} ref failed, LaneId={newRefLaneId} not found.");
+                                if (Lanes.FirstOrDefault(x => x.RecordId == newRefLaneId) is LaneStartBase newRefLane)
+                                {
+                                    dockableObj.ReferenceLaneStart = newRefLane;
+                                    Log.LogInfo($"Change dockable object {dockableObj} ref lane from {beforeRefLane?.RecordId} to {newRefLane?.RecordId}.");
+                                }
+                                else
+                                {
+                                    Log.LogWarn($"Change dockable object {dockableObj} ref failed, LaneId={newRefLaneId} not found.");
+                                }
                             }
                         }
                         break;

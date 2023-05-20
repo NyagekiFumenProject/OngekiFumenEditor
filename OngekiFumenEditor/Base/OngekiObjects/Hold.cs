@@ -40,14 +40,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        [ObjectPropertyBrowserReadOnly]
+        [ObjectPropertyBrowserShow]
+        [ObjectPropertyBrowserAlias("RefLaneId")]
         public int ReferenceLaneStrId => ReferenceLaneStart?.RecordId ?? -1;
 
 
-        private int referenceLaneStrIdManualSet = default;
+        private int? referenceLaneStrIdManualSet = default;
+        [ObjectPropertyBrowserShow]
         [ObjectPropertyBrowserTipText("改变此值可以改变此物件对应的轨道所属")]
-        [ObjectPropertyBrowserAlias("手动改变所属轨道Id")]
-        public int ReferenceLaneStrIdManualSet
+        [ObjectPropertyBrowserAlias("SetRefLaneId")]
+        public int? ReferenceLaneStrIdManualSet
         {
             get => referenceLaneStrIdManualSet;
             set

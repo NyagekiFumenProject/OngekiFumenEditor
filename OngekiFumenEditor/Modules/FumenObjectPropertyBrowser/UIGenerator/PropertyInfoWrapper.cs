@@ -42,10 +42,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
             }
         }
 
-        public string DisplayPropertyName => PropertyInfo.Name;
-        public string DisplayPropertyTipText => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserTipText>()?.TipText;
+        public string DisplayPropertyName => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAlias>()?.Alias ?? PropertyInfo.Name;
+        public string DisplayPropertyTipText => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserTipText>()?.TipText ?? string.Empty;
 
-        public override string ToString() => $"PropName:{DisplayPropertyName} PropValue:{ProxyValue}";
+        public override string ToString() => $"DisplayName:{DisplayPropertyName} PropValue:{ProxyValue}";
     }
 
     public class PropertyInfoWrapper<T> : PropertyInfoWrapper

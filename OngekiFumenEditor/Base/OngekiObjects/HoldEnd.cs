@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        [ObjectPropertyBrowserHide]
+        [ObjectPropertyBrowserAlias("RefLaneId")]
         public int ReferenceLaneStrId
         {
             get => (ReferenceStartObject as Hold)?.ReferenceLaneStrId ?? -1;

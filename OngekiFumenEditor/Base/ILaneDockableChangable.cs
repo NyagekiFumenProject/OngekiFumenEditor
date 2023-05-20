@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OngekiFumenEditor.Base.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace OngekiFumenEditor.Base
 {
     public interface ILaneDockableChangable : ILaneDockable
     {
-        public int ReferenceLaneStrIdManualSet { get; set; }
+        public int? ReferenceLaneStrIdManualSet { get; set; }
     }
 }
