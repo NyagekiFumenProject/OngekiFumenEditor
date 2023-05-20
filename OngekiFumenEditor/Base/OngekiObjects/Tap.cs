@@ -5,11 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Tap : OngekiMovableObjectBase, ILaneDockable
+    public class Tap : OngekiMovableObjectBase, ILaneDockableChangable
     {
         private bool isCritical = false;
         public bool IsCritical
@@ -30,21 +31,26 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             set
             {
                 referenceLaneStart = value;
+
                 NotifyOfPropertyChange(() => ReferenceLaneStart);
                 NotifyOfPropertyChange(() => ReferenceLaneStrId);
             }
         }
 
-        private int referenceLaneStrId = default;
-        [ObjectPropertyBrowserTipText("当前所属轨道物件ID,改变此值可以改变此物件对应的轨道所属")]
-        public int ReferenceLaneStrId
+        [ObjectPropertyBrowserReadOnly]
+        public int ReferenceLaneStrId => ReferenceLaneStart?.RecordId ?? -1;
+
+        private int referenceLaneStrIdManualSet = default;
+        [ObjectPropertyBrowserTipText("改变此值可以改变此物件对应的轨道所属")]
+        [ObjectPropertyBrowserAlias("手动改变所属轨道Id")]
+        public int ReferenceLaneStrIdManualSet
         {
-            get { return ReferenceLaneStart?.RecordId ?? referenceLaneStrId; }
+            get => referenceLaneStrIdManualSet;
             set
             {
-                if (ReferenceLaneStart is null)
-                    referenceLaneStrId = value;
-                NotifyOfPropertyChange(() => ReferenceLaneStrId);
+                referenceLaneStrIdManualSet = value;
+                NotifyOfPropertyChange(() => ReferenceLaneStrIdManualSet);
+                referenceLaneStrIdManualSet = default;
             }
         }
 
