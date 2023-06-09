@@ -439,6 +439,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             //var tGrid = ConvertAudioTimeToTGrid(audioTime, bpmList, tUnitLength);
             //var y = ConvertTGridToY_DesignMode(tGrid, soflans, bpmList, scale, tUnitLength);
             var tGrid = ConvertYToTGrid_DesignMode(y, soflans, bpmList, scale, tUnitLength);
+            if (tGrid is null)
+                return default;
             var audioTime = ConvertTGridToAudioTime(tGrid, bpmList);
 
             (var prevAudioTime, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.audioTime <= audioTime);
