@@ -26,6 +26,18 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.TypeI
             typeof(string),
             typeof(float),
             typeof(double),
+
+            //nullable
+            typeof(int?),
+            typeof(long?),
+            typeof(short?),
+
+            typeof(uint?),
+            typeof(ulong?),
+            typeof(ushort?),
+
+            typeof(float?),
+            typeof(double?),
         };
 
         public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new BaseValueTypeUIViewModel(wrapper));

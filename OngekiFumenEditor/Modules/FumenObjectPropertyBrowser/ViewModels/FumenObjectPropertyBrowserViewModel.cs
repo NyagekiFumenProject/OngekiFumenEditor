@@ -1,10 +1,12 @@
 ﻿using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Attrbutes;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -33,14 +35,27 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         {
             PropertyInfoWrappers.Clear();
             var propertyWrappers = (OngekiObject?.GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                ?? Array.Empty<PropertyInfo>())?
-                .Where(x => x.CanWrite && x.CanRead)
-                .Select(x => new UndoablePropertyInfoWrapper(new PropertyInfoWrapper()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance) ?? Array.Empty<PropertyInfo>())
+                .Where(x => x.CanRead)
+                .Select(x => new PropertyInfoWrapper()
                 {
                     OwnerObject = OngekiObject,
                     PropertyInfo = x
-                }, referenceEditor)).OrderBy(x => x.DisplayPropertyName).ToArray();
+                })
+                .Select(x =>
+                {
+                    if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() is not null)
+                        return null;
+
+                    if (x.PropertyInfo.CanWrite)
+                        return new UndoablePropertyInfoWrapper(x, referenceEditor);
+                    else if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() is not null)
+                        return x;
+                    return null;
+                })
+                .FilterNull()
+                .OrderBy(x => x.DisplayPropertyName)
+                .ToArray();
 
             foreach (var wrapper in propertyWrappers)
             {

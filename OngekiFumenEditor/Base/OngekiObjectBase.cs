@@ -19,7 +19,10 @@ namespace OngekiFumenEditor.Base
         [ObjectPropertyBrowserReadOnly]
         public int Id { get; init; } = ID_GEN++;
 
+        [ObjectPropertyBrowserHide]
         public abstract string IDShortName { get; }
+
+        [ObjectPropertyBrowserHide]
         public string Name => GetType().GetTypeName();
 
         public override string ToString() => $"{{{IDShortName}}} OID[{Id}]";

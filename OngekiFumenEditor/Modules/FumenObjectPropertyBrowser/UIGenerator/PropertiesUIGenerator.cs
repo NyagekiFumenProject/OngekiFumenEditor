@@ -15,10 +15,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
     {
         public static UIElement GenerateUI(PropertyInfoWrapper wrapper)
         {
-            if (wrapper.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() is not null)
-                return default;
-
-            var editable = wrapper.PropertyInfo.CanWrite && wrapper.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserReadOnly>() is null;
+            var editable = 
+                wrapper.PropertyInfo.CanWrite &&
+                wrapper.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserReadOnly>() is null;
 
             var typeGenerators = IoC.GetAll<ITypeUIGenerator>();
             return typeGenerators
