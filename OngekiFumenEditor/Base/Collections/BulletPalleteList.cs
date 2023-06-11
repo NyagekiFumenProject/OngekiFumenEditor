@@ -20,12 +20,12 @@ namespace OngekiFumenEditor.Base.Collections
 
         private static readonly Dictionary<int, char> ALPHABET_REV = ALPHABET.ToDictionary(x => x.Value, x => x.Key);
 
-        private int ConvertIdToInt(string id)
+        public int ConvertIdToInt(string id)
         {
             return id.Reverse().Select((x, i) => (int)Math.Pow(ALPHABET.Count, i) * (ALPHABET.TryGetValue(x, out var d) ? d : 0)).Sum();
         }
 
-        private string ConvertIntToId(int val)
+        public string ConvertIntToId(int val)
         {
             var str = "";
 
