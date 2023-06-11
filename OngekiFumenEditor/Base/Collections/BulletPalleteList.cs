@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Base.Collections
         }
 
         private HashSet<BulletPallete> palletes = new();
-        private string cacheCurrentMaxId = "9Z";
+        private string cacheCurrentMaxId = null;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
@@ -48,6 +48,14 @@ namespace OngekiFumenEditor.Base.Collections
 
         public void AddPallete(BulletPallete pallete)
         {
+            if (cacheCurrentMaxId is null)
+            {
+                if (palletes.Count == 0)
+                    cacheCurrentMaxId = "9Z";
+                else
+                    cacheCurrentMaxId = ConvertIntToId(palletes.Select(x=> ConvertIdToInt(x.StrID)).OrderBy(x => x).LastOrDefault());
+            }
+
             if (string.IsNullOrWhiteSpace(pallete.StrID))
             {
                 //generate new id
