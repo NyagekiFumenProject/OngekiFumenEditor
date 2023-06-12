@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
     [Export(typeof(IAudioManager))]
     public class DefaultAudioManager : IAudioManager
     {
-        private HashSet<IAudioPlayer> ownAudioPlayers = new();
+        private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
 
         private readonly IWavePlayer soundOutputDevice;
         private readonly MixingSampleProvider soundMixer;
@@ -81,8 +81,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             }
 
             var player = new DefaultMusicPlayer();
-            ownAudioPlayers.Add(player);
-
+            ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
             await player.Load(filePath);
             return player;
         }
@@ -230,9 +229,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
         public void Dispose()
         {
             Log.LogDebug("call DefaultAudioManager.Dispose()");
-            foreach (var player in ownAudioPlayers)
-                player?.Dispose();
-            ownAudioPlayers.Clear();
+            foreach (var weakRef in ownAudioPlayerRefs)
+            {
+                if (weakRef.TryGetTarget(out var player))
+                    player?.Dispose();
+            }
+            ownAudioPlayerRefs.Clear();
             soundOutputDevice?.Dispose();
         }
     }

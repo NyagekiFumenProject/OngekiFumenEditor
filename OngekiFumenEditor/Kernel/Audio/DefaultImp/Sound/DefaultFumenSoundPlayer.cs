@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
         private IAudioPlayer player;
         private FumenVisualEditorViewModel editor;
         private bool isPlaying = false;
-        public bool IsPlaying => isPlaying && player.IsPlaying;
+        public bool IsPlaying => isPlaying && (player?.IsPlaying ?? false);
 
         public SoundControl SoundControl { get; set; } = SoundControl.All;
 
@@ -119,7 +119,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             source.SetResult();
         }
 
-        public async Task Init(FumenVisualEditorViewModel editor, IAudioPlayer player)
+        public async Task Prepare(FumenVisualEditorViewModel editor, IAudioPlayer player)
         {
             await loadTask;
 
@@ -135,6 +135,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             RebuildEvents();
 
             thread = new AbortableThread(OnUpdate);
+            thread.Name = $"DefaultFumenSoundPlayer_Thread";
             thread.Start();
         }
 
@@ -310,7 +311,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
         {
             void checkPlay(Sound subFlag, SoundControl control)
             {
-                if (sounds.HasFlag(subFlag) && SoundControl.HasFlag(control) && cacheSounds.TryGetValue(subFlag,out var sound))
+                if (sounds.HasFlag(subFlag) && SoundControl.HasFlag(control) && cacheSounds.TryGetValue(subFlag, out var sound))
                     sound.PlayOnce();
             }
 
@@ -359,6 +360,20 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             thread?.Abort();
             foreach (var sound in cacheSounds.Values)
                 sound.Dispose();
+        }
+
+        public Task Clean()
+        {
+            Stop();
+
+            thread = null;
+
+            player = null;
+            editor = null;
+
+            events.Clear();
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -58,8 +58,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             set
             {
                 Set(ref editor, value);
-                AudioPlayer?.Dispose();
-                fumenSoundPlayer?.Stop();
+                FumenSoundPlayer?.Clean();
                 scrollAnimationClearFunc?.Invoke();
                 LoadAudio();
                 NotifyOfPropertyChange(() => IsAudioButtonEnabled);
@@ -123,7 +122,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
-
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -143,6 +141,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Editor?.EditorProjectData?.AudioFilePath))
             {
+                AudioPlayer?.Dispose();
                 AudioPlayer = null;
                 return;
             }
@@ -153,7 +152,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private async void InitPreviewActions()
         {
             scrollAnimationClearFunc?.Invoke();
-            await fumenSoundPlayer.Init(Editor, AudioPlayer);
+            await FumenSoundPlayer.Prepare(Editor, AudioPlayer);
             EventHandler func = (e, d) =>
             {
                 if (AudioPlayer is null)
@@ -184,7 +183,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             Editor.UnlockAllUserInteraction();
             scrollAnimationClearFunc?.Invoke();
-            fumenSoundPlayer.Stop();
+            FumenSoundPlayer.Stop();
             AudioPlayer.Stop();
         }
 
@@ -196,7 +195,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 InitPreviewActions();
             var seekTo = TimeSpan.FromMilliseconds(SliderValue);
             AudioPlayer.Seek(seekTo, true);
-            fumenSoundPlayer.Seek(seekTo, true);
+            FumenSoundPlayer.Seek(seekTo, true);
 
             Log.LogDebug($"Drag done, seek : {seekTo}");
             isSliderDragging = false;
@@ -224,7 +223,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (AudioPlayer.IsPlaying)
             {
                 scrollAnimationClearFunc?.Invoke();
-                fumenSoundPlayer.Pause();
+                FumenSoundPlayer.Pause();
                 AudioPlayer.Pause();
             }
             else
@@ -235,7 +234,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var tgrid = Editor.GetCurrentTGrid();
                 var seekTo = TGridCalculator.ConvertTGridToAudioTime(tgrid, Editor);
                 AudioPlayer.Seek(seekTo, false);
-                fumenSoundPlayer.Seek(seekTo, false);
+                FumenSoundPlayer.Seek(seekTo, false);
             }
         }
 

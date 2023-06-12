@@ -150,13 +150,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
             UpdatePropsManually();
         }
 
-        public void Dispose()
+        public async void Dispose()
         {
             CleanCurrentOut();
 
             audioFileReader?.Dispose();
             audioFileReader = null;
             IsAvaliable = false;
+
+            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
         }
 
         public void OnSchedulerTerm()
