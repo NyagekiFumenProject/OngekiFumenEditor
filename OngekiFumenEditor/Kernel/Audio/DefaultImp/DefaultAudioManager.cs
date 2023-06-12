@@ -61,9 +61,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             throw new NotImplementedException("Not yet implemented this channel count conversion");
         }
 
-        public void PlaySound(CachedSound sound)
+        public void PlaySound(CachedSound sound, float volume)
         {
-            AddMixerInput(new CachedSoundSampleProvider(sound));
+            AddMixerInput(new VolumeSampleProvider(new CachedSoundSampleProvider(sound))
+            {
+                Volume = volume
+            });
         }
 
         public void AddMixerInput(ISampleProvider input)

@@ -375,5 +375,29 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
 
             return Task.CompletedTask;
         }
+
+        public float GetVolume(Sound sound)
+        {
+            foreach (var item in cacheSounds)
+            {
+                if (item.Key == sound)
+                {
+                    return item.Value.Volume;
+                }
+            }
+
+            return 0;
+        }
+
+        public void SetVolume(Sound sound, float volume)
+        {
+            foreach (var item in cacheSounds)
+            {
+                if (item.Key == sound)
+                {
+                    item.Value.Volume = volume;
+                }
+            }
+        }
     }
 }

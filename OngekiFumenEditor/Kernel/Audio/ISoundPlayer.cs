@@ -8,6 +8,8 @@ namespace OngekiFumenEditor.Kernel.Audio
 {
     public interface ISoundPlayer : IDisposable
     {
+        float Volume { get; set; }
+
         void PlayOnce();
         void PlayLoop();
         void StopLoop();

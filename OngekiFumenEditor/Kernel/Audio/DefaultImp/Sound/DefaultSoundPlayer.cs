@@ -18,6 +18,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             cacheSound = cache;
         }
 
+        public float Volume { get; set; } = 1;
+
         public void Dispose()
         {
 
@@ -30,7 +32,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
 
         public void PlayOnce()
         {
-            soundManager.PlaySound(cacheSound);
+            soundManager.PlaySound(cacheSound, Volume);
         }
 
         public void StopLoop()

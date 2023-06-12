@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Microsoft.Win32;
 using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Models;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Utils;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
@@ -11,16 +12,19 @@ using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using static OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound.DefaultFumenSoundPlayer;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 {
@@ -87,14 +91,23 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             set
             {
                 Set(ref fumenSoundPlayer, value);
+
+                //init SoundControls
                 var soundControl = FumenSoundPlayer.SoundControl;
                 for (int i = 0; i < SoundControlLength; i++)
                     SoundControls[i] = soundControl.HasFlag((SoundControl)(1 << i));
                 NotifyOfPropertyChange(() => SoundControls);
+
+                //init SoundVolumes
+                var sounds = Enum.GetValues<Sound>();
+                SoundVolumes = sounds.Select(x => new SoundVolumeProxy(value, x)).ToArray();
+                NotifyOfPropertyChange(() => SoundVolumes);
             }
         }
 
         public bool[] SoundControls { get; set; } = new bool[SoundControlLength];
+
+        public SoundVolumeProxy[] SoundVolumes { get; set; } = new SoundVolumeProxy[0];
 
         public float SoundVolume
         {

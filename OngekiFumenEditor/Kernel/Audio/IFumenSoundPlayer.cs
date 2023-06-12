@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound.DefaultFumenSoundPlayer;
 
 namespace OngekiFumenEditor.Kernel.Audio
 {
@@ -16,6 +17,8 @@ namespace OngekiFumenEditor.Kernel.Audio
         void Stop();
         void Play();
         void Pause();
-        void Seek(TimeSpan msec,bool pause);
+        float GetVolume(Sound sound);
+        void SetVolume(Sound sound, float volume);
+        void Seek(TimeSpan msec, bool pause);
     }
 }

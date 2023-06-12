@@ -106,30 +106,55 @@
                 </Grid.ColumnDefinitions>
 
                 <GroupBox Header="音效开关控制">
-                    <WrapPanel>
-                        <WrapPanel.Resources>
-                            <Style TargetType="CheckBox">
-                                <Setter Property="Margin" Value="5" />
-                                <Setter Property="cal:Message.Attach" Value="[Event Checked] = [Action OnSoundControlSwitchChanged($source)];[Event Unchecked] = [Action OnSoundControlSwitchChanged($source)];" />
-                            </Style>
-                        </WrapPanel.Resources>
-                        <CheckBox Content="Tap" IsChecked="{Binding SoundControls[0]}" />
-                        <CheckBox Content="CriticalTap" IsChecked="{Binding SoundControls[1]}" />
-                        <CheckBox Content="Hold" IsChecked="{Binding SoundControls[2]}" />
-                        <CheckBox Content="CriticalHold" IsChecked="{Binding SoundControls[3]}" />
-                        <CheckBox Content="WallTap" IsChecked="{Binding SoundControls[4]}" />
-                        <CheckBox Content="CriticalWallTap" IsChecked="{Binding SoundControls[5]}" />
-                        <CheckBox Content="WallHold" IsChecked="{Binding SoundControls[6]}" />
-                        <CheckBox Content="CriticalWallHold" IsChecked="{Binding SoundControls[7]}" />
-                        <CheckBox Content="Flick" IsChecked="{Binding SoundControls[8]}" />
-                        <CheckBox Content="CriticalFlick" IsChecked="{Binding SoundControls[9]}" />
-                        <CheckBox Content="Bell" IsChecked="{Binding SoundControls[12]}" />
-                        <CheckBox Content="Beam" IsChecked="{Binding SoundControls[11]}" />
-                        <CheckBox Content="Bullet" IsChecked="{Binding SoundControls[10]}" />
-                        <CheckBox Content="ClickSE" IsChecked="{Binding SoundControls[13]}" />
-                        <CheckBox Content="HoldTick" IsChecked="{Binding SoundControls[14]}" />
-                        <CheckBox Content="HoldEnd" IsChecked="{Binding SoundControls[15]}" />
-                    </WrapPanel>
+                    <StackPanel>
+                        <WrapPanel>
+                            <WrapPanel.Resources>
+                                <Style TargetType="CheckBox">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="cal:Message.Attach" Value="[Event Checked] = [Action OnSoundControlSwitchChanged($source)];[Event Unchecked] = [Action OnSoundControlSwitchChanged($source)];" />
+                                </Style>
+                            </WrapPanel.Resources>
+                            <CheckBox Content="Tap" IsChecked="{Binding SoundControls[0]}" />
+                            <CheckBox Content="CriticalTap" IsChecked="{Binding SoundControls[1]}" />
+                            <CheckBox Content="Hold" IsChecked="{Binding SoundControls[2]}" />
+                            <CheckBox Content="CriticalHold" IsChecked="{Binding SoundControls[3]}" />
+                            <CheckBox Content="WallTap" IsChecked="{Binding SoundControls[4]}" />
+                            <CheckBox Content="CriticalWallTap" IsChecked="{Binding SoundControls[5]}" />
+                            <CheckBox Content="WallHold" IsChecked="{Binding SoundControls[6]}" />
+                            <CheckBox Content="CriticalWallHold" IsChecked="{Binding SoundControls[7]}" />
+                            <CheckBox Content="Flick" IsChecked="{Binding SoundControls[8]}" />
+                            <CheckBox Content="CriticalFlick" IsChecked="{Binding SoundControls[9]}" />
+                            <CheckBox Content="Bell" IsChecked="{Binding SoundControls[12]}" />
+                            <CheckBox Content="Beam" IsChecked="{Binding SoundControls[11]}" />
+                            <CheckBox Content="Bullet" IsChecked="{Binding SoundControls[10]}" />
+                            <CheckBox Content="ClickSE" IsChecked="{Binding SoundControls[13]}" />
+                            <CheckBox Content="HoldTick" IsChecked="{Binding SoundControls[14]}" />
+                            <CheckBox Content="HoldEnd" IsChecked="{Binding SoundControls[15]}" />
+                        </WrapPanel>
+                        <ItemsControl ItemsSource="{Binding SoundVolumes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="5" Orientation="Horizontal">
+                                        <TextBlock
+                                            Width="70"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding Name}">
+                                        </TextBlock>
+                                        <Slider
+                                            Width="150"
+                                            Margin="5,0,0,0"
+                                            VerticalAlignment="Center"
+                                            VerticalContentAlignment="Center"
+                                            LargeChange="0.2"
+                                            Maximum="1"
+                                            SmallChange="0.02"
+                                            Value="{Binding Volume}">
+                                        </Slider>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </GroupBox>
 
                 <GroupBox
@@ -153,11 +178,6 @@
                                 SmallChange="0.2"
                                 Value="{Binding AudioPlayer.Volume}">
                             </Slider>
-                            <Button
-                                Padding="30,5,30,5"
-                                cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
-                                Content="加载音频文件"
-                                Visibility="Collapsed" />
                         </StackPanel>
                         <StackPanel
                             Margin="5"
@@ -174,11 +194,6 @@
                                 SmallChange="0.2"
                                 Value="{Binding SoundVolume}">
                             </Slider>
-                            <Button
-                                Padding="30,5,30,5"
-                                cal:Message.Attach="[Event Click] = [Action OnOpenFileButtonClicked()];"
-                                Content="加载音频文件"
-                                Visibility="Collapsed" />
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
