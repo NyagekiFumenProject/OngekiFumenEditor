@@ -16,6 +16,7 @@ namespace OngekiFumenEditor.Utils
         {
             cancellationTokenSource = new CancellationTokenSource();
             thread = new Thread(() => cancellableMethod?.Invoke(cancellationTokenSource.Token));
+            Name = $"AbortableThread:{cancellableMethod}";
         }
 
         public bool IsBackground
