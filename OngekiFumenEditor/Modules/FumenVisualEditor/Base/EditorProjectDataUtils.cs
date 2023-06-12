@@ -137,6 +137,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 await JsonSerializer.SerializeAsync(ms, editorProject, JsonSerializerOptions);
                 ms.Seek(0, SeekOrigin.Begin);
                 var cloneProj = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(ms, JsonSerializerOptions);
+                cloneProj.Fumen = editorProject.Fumen;
 
                 var tmpProjFilePath = Path.GetTempFileName();
                 var fileStream = File.Open(tmpProjFilePath, FileMode.Create);

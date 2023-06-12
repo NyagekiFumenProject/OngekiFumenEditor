@@ -311,8 +311,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 EditorProjectData.FumenFilePath = dialog.FileName;
             }
 
-            ToastNotify("谱面项目和文件保存成功");
             await EditorProjectDataUtils.TrySaveToFileAsync(filePath, EditorProjectData);
+            ToastNotify("谱面项目和文件保存成功");
         }
 
         #endregion

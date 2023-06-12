@@ -10,9 +10,13 @@
 
   <ItemGroup>
     <Compile Remove="Dependencies\**" />
+    <Compile Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
     <EmbeddedResource Remove="Dependencies\**" />
+    <EmbeddedResource Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
     <None Remove="Dependencies\**" />
+    <None Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
     <Page Remove="Dependencies\**" />
+    <Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -415,10 +419,6 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Modules\FumenBulletPalleteListViewer\Converters\" />
   </ItemGroup>
 
 </Project>
