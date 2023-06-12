@@ -20,6 +20,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
@@ -29,6 +30,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
     {
         private float viewWidth;
         private float viewHeight;
+        private int renderViewWidth;
+        private int renderViewHeight;
         private IPerfomenceMonitor performenceMonitor;
         private ISamplePeak samplePeak;
         private IWaveformDrawing waveformDrawing;
@@ -114,9 +117,14 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
         {
             Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
+            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
+            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
 
             viewWidth = (float)sizeArg.NewSize.Width;
             viewHeight = (float)sizeArg.NewSize.Height;
+            renderViewWidth = (int)(sizeArg.NewSize.Width * dpiX);
+            renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
+
             RecalcViewProjectionMatrix();
         }
 
@@ -126,8 +134,14 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
 
             InitRender();
+            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
+            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+
             viewWidth = (float)glView.ActualWidth;
             viewHeight = (float)glView.ActualHeight;
+            renderViewWidth = (int)(glView.ActualWidth * dpiX);
+            renderViewHeight = (int)(glView.ActualHeight * dpiY);
+
             RecalcViewProjectionMatrix();
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
@@ -198,7 +212,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             GL.ClearColor(16 / 255f, 16 / 255f, 16 / 255f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.Viewport(0, 0, (int)viewWidth, (int)viewHeight);
+            GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
 
             UpdateDrawingContext();
 

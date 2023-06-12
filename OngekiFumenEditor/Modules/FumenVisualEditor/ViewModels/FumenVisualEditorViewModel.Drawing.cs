@@ -27,13 +27,13 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using static System.Windows.Forms.AxHost;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulable, IFumenEditorDrawingContext
     {
         private IPerfomenceMonitor performenceMonitor;
-
         private DrawTimeSignatureHelper timeSignatureHelper;
         private DrawXGridHelper xGridHelper;
         private DrawJudgeLineHelper judgeLineHelper;
@@ -45,6 +45,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
         public IEnumerable<CacheDrawXLineResult> CachedMagneticXGridLines => cachedMagneticXGridLines;
+
+        private int renderViewWidth;
+        private int renderViewHeight;
 
         private float viewWidth = 0;
         public float ViewWidth
@@ -130,8 +133,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
 
+            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
+            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+
             ViewWidth = (float)sizeArg.NewSize.Width;
             ViewHeight = (float)sizeArg.NewSize.Height;
+            renderViewWidth = (int)(sizeArg.NewSize.Width * dpiX);
+            renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
         }
 
         public async void PrepareRender(GLWpfControl openGLView)
@@ -139,8 +147,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Log.LogDebug($"ready.");
             await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
 
+            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
+            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+
             ViewWidth = (float)openGLView.ActualWidth;
             ViewHeight = (float)openGLView.ActualHeight;
+
+            renderViewWidth = (int)(openGLView.ActualWidth * dpiX);
+            renderViewHeight = (int)(openGLView.ActualHeight * dpiY);
 
             drawTargets = IoC.GetAll<IFumenEditorDrawingTarget>()
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
@@ -238,7 +252,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 Log.LogDebug($"OpenGL ERROR!! : {error}");
 #endif
             CleanRender();
-            GL.Viewport(0, 0, (int)ViewWidth, (int)ViewHeight);
+            GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
 
             hits.Clear();
 
