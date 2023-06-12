@@ -40,6 +40,13 @@
             <ListView.Resources>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <!--<Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="复制新的" cal:Message.Attach="OnCopyNewBPL($executionContext)"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>-->
                 </Style>
             </ListView.Resources>
             <ListView.View>
@@ -156,6 +163,13 @@
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
                                         TextDecorations="Baseline">
                                         拖动生成钟(Bell)
+                                    </TextBlock>
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnCopyNewBPL($executionContext)];"
+                                        TextDecorations="Baseline">
+                                        克隆到新的子弹类型
                                     </TextBlock>
                                 </StackPanel>
                             </DataTemplate>

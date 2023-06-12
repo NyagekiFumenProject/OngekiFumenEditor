@@ -164,6 +164,19 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             _draggingItem = true;
         }
 
+        public void OnCopyNewBPL(ActionExecutionContext e)
+        {
+            var arg = e.EventArgs as MouseEventArgs;
+            if ((arg.LeftButton != MouseButtonState.Pressed) || e.Source?.DataContext is not BulletPallete pallete)
+                return;
+
+            var cpBPL = new BulletPallete();
+            cpBPL.Copy(pallete, Fumen);
+            cpBPL.StrID = null;
+
+            Fumen.AddObject(cpBPL);
+        }
+
         public void OnChangeEditorAxuiliaryLineColor(ActionExecutionContext e)
         {
             if (e.Source?.DataContext is not BulletPallete pallete)
