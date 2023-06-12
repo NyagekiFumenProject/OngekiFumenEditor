@@ -310,8 +310,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
         {
             void checkPlay(Sound subFlag, SoundControl control)
             {
-                if (sounds.HasFlag(subFlag) && SoundControl.HasFlag(control))
-                    cacheSounds[subFlag].PlayOnce();
+                if (sounds.HasFlag(subFlag) && SoundControl.HasFlag(control) && cacheSounds.TryGetValue(subFlag,out var sound))
+                    sound.PlayOnce();
             }
 
             checkPlay(Sound.Tap, SoundControl.Tap);
