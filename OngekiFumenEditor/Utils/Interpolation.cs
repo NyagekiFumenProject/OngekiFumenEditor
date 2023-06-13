@@ -22,6 +22,7 @@ THE SOFTWARE.
 */
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -67,6 +68,7 @@ namespace OngekiFumenEditor.Utils
 
     public static class Interpolation
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static EasingTypes GetReverseEasing(EasingTypes easing)
         {
             var s = easing.ToString();
@@ -94,9 +96,16 @@ namespace OngekiFumenEditor.Utils
             return easing;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Lerp(double start, double final, double amount) => start + (final - start) * amount;
 
-        public static double ApplyEasing(EasingTypes easing, double time)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ApplyEasing(EasingTypes easing, double from, double to, double cur)
+        {
+            return from == to ? to : ApplyEasing(easing, (cur - from) / (to - from));
+        }
+
+        public static double ApplyEasing(EasingTypes easing, double normalizedValue)
         {
             const double elastic_const = 2 * Math.PI / .3;
             const double elastic_const2 = .3 / 4;
@@ -109,131 +118,131 @@ namespace OngekiFumenEditor.Utils
             switch (easing)
             {
                 default:
-                    return time;
+                    return normalizedValue;
 
                 case EasingTypes.In:
                 case EasingTypes.InQuad:
-                    return time * time;
+                    return normalizedValue * normalizedValue;
 
                 case EasingTypes.Out:
                 case EasingTypes.OutQuad:
-                    return time * (2 - time);
+                    return normalizedValue * (2 - normalizedValue);
 
                 case EasingTypes.InOutQuad:
-                    if (time < .5) return time * time * 2;
-                    return --time * time * -2 + 1;
+                    if (normalizedValue < .5) return normalizedValue * normalizedValue * 2;
+                    return --normalizedValue * normalizedValue * -2 + 1;
 
                 case EasingTypes.InCubic:
-                    return time * time * time;
+                    return normalizedValue * normalizedValue * normalizedValue;
 
                 case EasingTypes.OutCubic:
-                    return --time * time * time + 1;
+                    return --normalizedValue * normalizedValue * normalizedValue + 1;
 
                 case EasingTypes.InOutCubic:
-                    if (time < .5) return time * time * time * 4;
-                    return --time * time * time * 4 + 1;
+                    if (normalizedValue < .5) return normalizedValue * normalizedValue * normalizedValue * 4;
+                    return --normalizedValue * normalizedValue * normalizedValue * 4 + 1;
 
                 case EasingTypes.InQuart:
-                    return time * time * time * time;
+                    return normalizedValue * normalizedValue * normalizedValue * normalizedValue;
 
                 case EasingTypes.OutQuart:
-                    return 1 - --time * time * time * time;
+                    return 1 - --normalizedValue * normalizedValue * normalizedValue * normalizedValue;
 
                 case EasingTypes.InOutQuart:
-                    if (time < .5) return time * time * time * time * 8;
-                    return --time * time * time * time * -8 + 1;
+                    if (normalizedValue < .5) return normalizedValue * normalizedValue * normalizedValue * normalizedValue * 8;
+                    return --normalizedValue * normalizedValue * normalizedValue * normalizedValue * -8 + 1;
 
                 case EasingTypes.InQuint:
-                    return time * time * time * time * time;
+                    return normalizedValue * normalizedValue * normalizedValue * normalizedValue * normalizedValue;
 
                 case EasingTypes.OutQuint:
-                    return --time * time * time * time * time + 1;
+                    return --normalizedValue * normalizedValue * normalizedValue * normalizedValue * normalizedValue + 1;
 
                 case EasingTypes.InOutQuint:
-                    if (time < .5) return time * time * time * time * time * 16;
-                    return --time * time * time * time * time * 16 + 1;
+                    if (normalizedValue < .5) return normalizedValue * normalizedValue * normalizedValue * normalizedValue * normalizedValue * 16;
+                    return --normalizedValue * normalizedValue * normalizedValue * normalizedValue * normalizedValue * 16 + 1;
 
                 case EasingTypes.InSine:
-                    return 1 - Math.Cos(time * Math.PI * .5);
+                    return 1 - Math.Cos(normalizedValue * Math.PI * .5);
 
                 case EasingTypes.OutSine:
-                    return Math.Sin(time * Math.PI * .5);
+                    return Math.Sin(normalizedValue * Math.PI * .5);
 
                 case EasingTypes.InOutSine:
-                    return .5 - .5 * Math.Cos(Math.PI * time);
+                    return .5 - .5 * Math.Cos(Math.PI * normalizedValue);
 
                 case EasingTypes.InExpo:
-                    return Math.Pow(2, 10 * (time - 1));
+                    return Math.Pow(2, 10 * (normalizedValue - 1));
 
                 case EasingTypes.OutExpo:
-                    return -Math.Pow(2, -10 * time) + 1;
+                    return -Math.Pow(2, -10 * normalizedValue) + 1;
 
                 case EasingTypes.InOutExpo:
-                    if (time < .5) return .5 * Math.Pow(2, 20 * time - 10);
-                    return 1 - .5 * Math.Pow(2, -20 * time + 10);
+                    if (normalizedValue < .5) return .5 * Math.Pow(2, 20 * normalizedValue - 10);
+                    return 1 - .5 * Math.Pow(2, -20 * normalizedValue + 10);
 
                 case EasingTypes.InCirc:
-                    return 1 - Math.Sqrt(1 - time * time);
+                    return 1 - Math.Sqrt(1 - normalizedValue * normalizedValue);
 
                 case EasingTypes.OutCirc:
-                    return Math.Sqrt(1 - --time * time);
+                    return Math.Sqrt(1 - --normalizedValue * normalizedValue);
 
                 case EasingTypes.InOutCirc:
-                    if ((time *= 2) < 1) return .5 - .5 * Math.Sqrt(1 - time * time);
-                    return .5 * Math.Sqrt(1 - (time -= 2) * time) + .5;
+                    if ((normalizedValue *= 2) < 1) return .5 - .5 * Math.Sqrt(1 - normalizedValue * normalizedValue);
+                    return .5 * Math.Sqrt(1 - (normalizedValue -= 2) * normalizedValue) + .5;
 
                 case EasingTypes.InElastic:
-                    return -Math.Pow(2, -10 + 10 * time) * Math.Sin((1 - elastic_const2 - time) * elastic_const);
+                    return -Math.Pow(2, -10 + 10 * normalizedValue) * Math.Sin((1 - elastic_const2 - normalizedValue) * elastic_const);
 
                 case EasingTypes.OutElastic:
-                    return Math.Pow(2, -10 * time) * Math.Sin((time - elastic_const2) * elastic_const) + 1;
+                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((normalizedValue - elastic_const2) * elastic_const) + 1;
 
                 case EasingTypes.OutElasticHalf:
-                    return Math.Pow(2, -10 * time) * Math.Sin((.5 * time - elastic_const2) * elastic_const) + 1;
+                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((.5 * normalizedValue - elastic_const2) * elastic_const) + 1;
 
                 case EasingTypes.OutElasticQuarter:
-                    return Math.Pow(2, -10 * time) * Math.Sin((.25 * time - elastic_const2) * elastic_const) + 1;
+                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((.25 * normalizedValue - elastic_const2) * elastic_const) + 1;
 
                 case EasingTypes.InOutElastic:
-                    if ((time *= 2) < 1)
-                        return -.5 * Math.Pow(2, -10 + 10 * time) * Math.Sin((1 - elastic_const2 * 1.5 - time) * elastic_const / 1.5);
-                    return .5 * Math.Pow(2, -10 * --time) * Math.Sin((time - elastic_const2 * 1.5) * elastic_const / 1.5) + 1;
+                    if ((normalizedValue *= 2) < 1)
+                        return -.5 * Math.Pow(2, -10 + 10 * normalizedValue) * Math.Sin((1 - elastic_const2 * 1.5 - normalizedValue) * elastic_const / 1.5);
+                    return .5 * Math.Pow(2, -10 * --normalizedValue) * Math.Sin((normalizedValue - elastic_const2 * 1.5) * elastic_const / 1.5) + 1;
 
                 case EasingTypes.InBack:
-                    return time * time * ((back_const + 1) * time - back_const);
+                    return normalizedValue * normalizedValue * ((back_const + 1) * normalizedValue - back_const);
 
                 case EasingTypes.OutBack:
-                    return --time * time * ((back_const + 1) * time + back_const) + 1;
+                    return --normalizedValue * normalizedValue * ((back_const + 1) * normalizedValue + back_const) + 1;
 
                 case EasingTypes.InOutBack:
-                    if ((time *= 2) < 1) return .5 * time * time * ((back_const2 + 1) * time - back_const2);
-                    return .5 * ((time -= 2) * time * ((back_const2 + 1) * time + back_const2) + 2);
+                    if ((normalizedValue *= 2) < 1) return .5 * normalizedValue * normalizedValue * ((back_const2 + 1) * normalizedValue - back_const2);
+                    return .5 * ((normalizedValue -= 2) * normalizedValue * ((back_const2 + 1) * normalizedValue + back_const2) + 2);
 
                 case EasingTypes.InBounce:
-                    time = 1 - time;
-                    if (time < bounce_const)
-                        return 1 - 7.5625 * time * time;
-                    if (time < 2 * bounce_const)
-                        return 1 - (7.5625 * (time -= 1.5 * bounce_const) * time + .75);
-                    if (time < 2.5 * bounce_const)
-                        return 1 - (7.5625 * (time -= 2.25 * bounce_const) * time + .9375);
-                    return 1 - (7.5625 * (time -= 2.625 * bounce_const) * time + .984375);
+                    normalizedValue = 1 - normalizedValue;
+                    if (normalizedValue < bounce_const)
+                        return 1 - 7.5625 * normalizedValue * normalizedValue;
+                    if (normalizedValue < 2 * bounce_const)
+                        return 1 - (7.5625 * (normalizedValue -= 1.5 * bounce_const) * normalizedValue + .75);
+                    if (normalizedValue < 2.5 * bounce_const)
+                        return 1 - (7.5625 * (normalizedValue -= 2.25 * bounce_const) * normalizedValue + .9375);
+                    return 1 - (7.5625 * (normalizedValue -= 2.625 * bounce_const) * normalizedValue + .984375);
 
                 case EasingTypes.OutBounce:
-                    if (time < bounce_const)
-                        return 7.5625 * time * time;
-                    if (time < 2 * bounce_const)
-                        return 7.5625 * (time -= 1.5 * bounce_const) * time + .75;
-                    if (time < 2.5 * bounce_const)
-                        return 7.5625 * (time -= 2.25 * bounce_const) * time + .9375;
-                    return 7.5625 * (time -= 2.625 * bounce_const) * time + .984375;
+                    if (normalizedValue < bounce_const)
+                        return 7.5625 * normalizedValue * normalizedValue;
+                    if (normalizedValue < 2 * bounce_const)
+                        return 7.5625 * (normalizedValue -= 1.5 * bounce_const) * normalizedValue + .75;
+                    if (normalizedValue < 2.5 * bounce_const)
+                        return 7.5625 * (normalizedValue -= 2.25 * bounce_const) * normalizedValue + .9375;
+                    return 7.5625 * (normalizedValue -= 2.625 * bounce_const) * normalizedValue + .984375;
 
                 case EasingTypes.InOutBounce:
-                    if (time < .5) return .5 - .5 * ApplyEasing(EasingTypes.OutBounce, 1 - time * 2);
-                    return ApplyEasing(EasingTypes.OutBounce, (time - .5) * 2) * .5 + .5;
+                    if (normalizedValue < .5) return .5 - .5 * ApplyEasing(EasingTypes.OutBounce, 1 - normalizedValue * 2);
+                    return ApplyEasing(EasingTypes.OutBounce, (normalizedValue - .5) * 2) * .5 + .5;
 
                 case EasingTypes.OutPow10:
-                    return --time * Math.Pow(time, 10) + 1;
+                    return --normalizedValue * Math.Pow(normalizedValue, 10) + 1;
             }
         }
     }
