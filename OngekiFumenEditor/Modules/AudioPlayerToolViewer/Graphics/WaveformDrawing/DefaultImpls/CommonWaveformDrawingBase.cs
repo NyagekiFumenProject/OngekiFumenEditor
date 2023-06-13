@@ -13,6 +13,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 {
     public abstract class CommonWaveformDrawingBase : CommonDrawingBase, IWaveformDrawing
     {
+        public abstract IWaveformDrawingOption Options { get; }
         public abstract void Draw(IWaveformDrawingContext target, PeakPointCollection samplePeak);
     }
 }

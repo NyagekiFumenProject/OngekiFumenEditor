@@ -11,6 +11,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 {
     public interface IWaveformDrawing : IDrawing
     {
+        IWaveformDrawingOption Options { get; }
         void Draw(IWaveformDrawingContext target, PeakPointCollection samplePeak);
     }
 }

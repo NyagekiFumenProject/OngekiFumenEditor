@@ -40,57 +40,60 @@
 
                 <StackPanel Margin="0,5,0,5">
                     <GroupBox Header="频谱渲染选项">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="77*" />
+                                    <ColumnDefinition Width="298*" />
+                                    <ColumnDefinition Width="376*" />
+                                </Grid.ColumnDefinitions>
 
-                            <controls:RangeValue
-                                Margin="0,0,10,0"
-                                Padding="0,5,0,5"
-                                CurrentValue="{Binding CurrentTimeXOffset, Mode=TwoWay}"
-                                DisplayName="当前时间线偏移"
-                                MaxValue="{Binding ElementName=glView, Path=ActualWidth}"
-                                MinValue="0"
-                                Step="1">
-                            </controls:RangeValue>
-                            <controls:RangeValue
-                                Grid.Column="1"
-                                Margin="10,0,0,0"
-                                Padding="0,5,0,5"
-                                CurrentValue="{Binding DurationMsPerPixel, Mode=TwoWay}"
-                                DisplayName="频谱水平缩放"
-                                MaxValue="50"
-                                MinValue="2.5"
-                                Step="2.5">
-                            </controls:RangeValue>
-                            <controls:RangeValue
-                                Grid.Row="1"
-                                Margin="0,0,10,0"
-                                Padding="0,5,0,5"
-                                CurrentValue="{Binding ResampleSize, Mode=TwoWay}"
-                                DisplayName="重采样"
-                                MaxValue="30"
-                                MinValue="0"
-                                Step="1">
-                            </controls:RangeValue>
-                            <controls:RangeValue
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Margin="10,0,0,0"
-                                Padding="0,5,0,5"
-                                CurrentValue="{Binding WaveformVecticalScale, Mode=TwoWay}"
-                                DisplayName="频谱垂直缩放"
-                                MaxValue="1.5"
-                                MinValue="0.01"
-                                Step="0.01">
-                            </controls:RangeValue>
-                        </Grid>
+                                <controls:RangeValue
+                                    Grid.ColumnSpan="2"
+                                    Margin="0,0,10,0"
+                                    Padding="0,5,0,5"
+                                    CurrentValue="{Binding CurrentTimeXOffset, Mode=TwoWay}"
+                                    DisplayName="当前时间线偏移"
+                                    MaxValue="{Binding ElementName=glView, Path=ActualWidth}"
+                                    MinValue="0"
+                                    Step="1">
+                                </controls:RangeValue>
+                                <controls:RangeValue
+                                    Grid.Column="2"
+                                    Margin="10,0,0,0"
+                                    Padding="0,5,0,5"
+                                    CurrentValue="{Binding DurationMsPerPixel, Mode=TwoWay}"
+                                    DisplayName="频谱水平缩放"
+                                    MaxValue="50"
+                                    MinValue="2.5"
+                                    Step="2.5">
+                                </controls:RangeValue>
+                                <controls:RangeValue
+                                    Grid.RowSpan="2"
+                                    Grid.ColumnSpan="2"
+                                    Margin="0,60,10,0"
+                                    Padding="0,5,0,5"
+                                    CurrentValue="{Binding ResampleSize, Mode=TwoWay}"
+                                    DisplayName="重采样"
+                                    MaxValue="30"
+                                    MinValue="0"
+                                    Step="1" />
+                                <controls:RangeValue
+                                    Grid.RowSpan="2"
+                                    Grid.Column="2"
+                                    Margin="10,60,0,0"
+                                    Padding="0,5,0,5"
+                                    CurrentValue="{Binding WaveformVecticalScale, Mode=TwoWay}"
+                                    DisplayName="频谱垂直缩放"
+                                    MaxValue="1.5"
+                                    MinValue="0.01"
+                                    Step="0.01" />
+                            </Grid>
+                        </StackPanel>
                     </GroupBox>
                 </StackPanel>
             </StackPanel>
