@@ -1,10 +1,7 @@
-﻿using Caliburn.Micro;
-using FontStashSharp.Interfaces;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
+﻿using FontStashSharp.Interfaces;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
-using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String.Platform
 {

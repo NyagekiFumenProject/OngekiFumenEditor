@@ -2,6 +2,7 @@
 using FontStashSharp;
 using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String.Platform;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing
 {
@@ -60,6 +62,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
                 });
                 fontSystem.AddFont(File.ReadAllBytes(handle.FilePath));
                 cacheFonts[fontHandle] = fontSystem;
+
+                Log.LogDebug($"Created new FontSystem: {handle.Name}, FilePath: {handle.FilePath}");
             }
 
             return fontSystem;

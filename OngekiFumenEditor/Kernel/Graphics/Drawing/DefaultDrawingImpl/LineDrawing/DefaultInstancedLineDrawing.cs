@@ -52,17 +52,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
         private int line_pos_width_b;
         private int line_col_b;
 
-        private int mvp;
-        private int viewport_size;
+        private int mvp_loc;
+        private int viewport_size_loc;
         private int dashSize;
         private int gapSize;
-        private int aa_radius;
+        private int aa_radius_loc;
 
         private float[] PostData { get; } = new float[MAX_VERTS];
         private int postDataFillIndex = 0;
         private int postDataFillCount = 0;
         private IDrawingContext target;
         private float lineWidth;
+
+        private OpenTK.Mathematics.Vector2 aa_radius_val = new OpenTK.Mathematics.Vector2(2, 2);
 
         public DefaultInstancedLineDrawing()
         {
@@ -75,9 +77,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
             line_pos_width_b = shader.GetAttribLocation("line_pos_width_b");
             line_col_b = shader.GetAttribLocation("line_col_b");
 
-            mvp = shader.GetUniformLocation("u_mvp");
-            aa_radius = shader.GetUniformLocation("u_aa_radius");
-            viewport_size = shader.GetUniformLocation("u_viewport_size");
+            mvp_loc = shader.GetUniformLocation("u_mvp");
+            aa_radius_loc = shader.GetUniformLocation("u_aa_radius");
+            viewport_size_loc = shader.GetUniformLocation("u_viewport_size");
 
             dashSize = shader.GetAttribLocation("dashSize");
             gapSize = shader.GetAttribLocation("gapSize");
@@ -213,11 +215,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
             shader.Begin();
             GL.BindVertexArray(vao);
             var mvpMatrix = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target);
-            shader.PassUniform(mvp, mvpMatrix);
-            shader.PassUniform(viewport_size, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
-            shader.PassUniform(aa_radius, new OpenTK.Mathematics.Vector2(2, 2));
+            shader.PassUniform(mvp_loc, mvpMatrix);
+            shader.PassUniform(viewport_size_loc, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
+            shader.PassUniform(aa_radius_loc, aa_radius_val);
         }
-
 
         public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
         {
