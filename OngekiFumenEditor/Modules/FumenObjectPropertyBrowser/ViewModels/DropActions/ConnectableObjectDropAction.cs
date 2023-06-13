@@ -31,6 +31,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
         public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
         {
+            if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
+            {
+                editor.Toast.ShowMessage("无法添加物件到音频范围之外");
+                return;
+            }
+
             var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
             var endObj = startObject.Children.OfType<ConnectableEndObject>().FirstOrDefault();
             var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) && endObj is null;
@@ -59,8 +65,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
             }));
-
-
         }
     }
 }

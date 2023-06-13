@@ -34,12 +34,18 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
         public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
         {
+            if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
+            {
+                editor.Toast.ShowMessage("无法划分物件到音频范围之外");
+                return;
+            }
+
             var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
             var backupStores = new HashSet<ConnectableChildObjectBase>();
             var backupIdxStores = new Dictionary<ConnectableChildObjectBase, int>();
             var affactedObjects = new HashSet<ILaneDockable>();
 
-            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("划分轨道", () =>
             {
                 //计算出需要划分出来的后边子物件
                 backupStores.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));

@@ -26,6 +26,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
         public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
         {
+            if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
+            {
+                editor.Toast.ShowMessage("无法添加物件到音频范围之外");
+                return;
+            }
+
             var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
             var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
             var isFirst = true;

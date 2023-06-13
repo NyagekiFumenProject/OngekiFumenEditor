@@ -19,6 +19,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
             var displayObject = GetDisplayObject();
             var isFirst = true;
 
+            if (mousePosition.Y > editor.TotalDurationHeight || mousePosition.Y < 0)
+            {
+                editor.Toast.ShowMessage("无法添加物件到音频范围之外");
+                return;
+            }
+
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {
                 editor.Fumen.AddObject(displayObject);

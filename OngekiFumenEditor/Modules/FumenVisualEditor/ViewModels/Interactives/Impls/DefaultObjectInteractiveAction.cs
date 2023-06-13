@@ -3,6 +3,7 @@ using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 );
 
             //这里限制一下
-            movePoint.X = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.X));
+            //movePoint.X = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.X));
             movePoint.Y = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.Y));
 
             //Log.LogDebug($"OnObjectDragMoving: ({pos.X:F2},{pos.Y:F2}) -> ({movePoint.X:F2},{movePoint.Y:F2})");
