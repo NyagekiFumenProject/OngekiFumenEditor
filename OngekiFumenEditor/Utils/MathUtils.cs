@@ -14,17 +14,20 @@ namespace OngekiFumenEditor.Utils
 {
     public static class MathUtils
     {
-        private static Random rand = new Random();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Random() => RandomHepler.RandomDouble();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Random(int min, int max) => RandomHepler.Random(min, max);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Random(int max) => RandomHepler.Random(max);
 
-        public static double Random() => rand.NextDouble();
-        public static int Random(int min, int max) => rand.Next(min, max);
-        public static int Random(int max) => rand.Next(max);
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LCM(int a, int b)
         {
             return a / GCD(a, b) * b;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GCD(int a, int b)
         {
             return b == 0 ? a : GCD(b, a % b);

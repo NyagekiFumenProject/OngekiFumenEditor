@@ -139,7 +139,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 var cloneProj = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(ms, JsonSerializerOptions);
                 cloneProj.Fumen = editorProject.Fumen;
 
-                var tmpProjFilePath = Path.GetTempFileName();
+                var tmpProjFilePath = TempFileHelper.GetTempFilePath("FumenProjFile", Path.GetFileNameWithoutExtension(projFilePath), Path.GetExtension(projFilePath));
                 var fileStream = File.Open(tmpProjFilePath, FileMode.Create);
                 StoreBulletPalleteListEditorData(cloneProj);
 
@@ -165,7 +165,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                     throw new IOException("谱面文件被占用或无权限,无法写入数据");
 
                 await JsonSerializer.SerializeAsync(fileStream, cloneProj, JsonSerializerOptions);
-                var tmpFumenFilePath = Path.GetTempFileName();
+                var tmpFumenFilePath = TempFileHelper.GetTempFilePath("FumenFile", Path.GetFileNameWithoutExtension(fumenFullPath), Path.GetExtension(fumenFullPath));
                 await File.WriteAllBytesAsync(tmpFumenFilePath, await serializer.SerializeAsync(fumen));
                 await fileStream.FlushAsync();
                 fileStream.Close();
