@@ -39,6 +39,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var holdEnd = hold.HoldEnd;
             var laneType = start?.LaneType;
 
+            var shareTGrid = new TGrid();
+            var shareXGrid = new XGrid();
+
             var color = laneType switch
             {
                 LaneType.Left => new Vector4(1, 0, 0, 0.75f),
@@ -60,26 +63,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 list.Add(new(new(x, y), color, VertexDash.Solider));
             }
 
+            void Upsert2((float, float) pos)
+            {
+                var y = (float)target.ConvertToY(pos.Item1);
+                var x = (float)XGridCalculator.ConvertXGridToX(pos.Item2, target.Editor);
+                list.Add(new(new(x, y), color, VertexDash.Solider));
+            }
+
             if (holdEnd != null)
             {
+                var resT = hold.TGrid.ResT;
+                var resX = hold.XGrid.ResX;
+
                 Upsert(hold);
                 if (start != null)
                 {
-                    var itor = start.Children.AsEnumerable<ConnectableObjectBase>().Prepend(start).Where(x => hold.TGrid <= x.TGrid && x.TGrid <= holdEnd.TGrid).GetEnumerator();
-                    itor.MoveNext();
+                    var itor = start.Children.SelectMany(x => x.GetConnectionPaths()).Select(x =>
+                    {
+                        return (x.pos.Y / resT, x.pos.X / resX);
+                    }).Prepend(((float)start.TGrid.TotalUnit, (float)start.XGrid.TotalUnit))
+                    .Where(pos => hold.TGrid.TotalUnit <= pos.Item1 && pos.Item1 <= holdEnd.TGrid.TotalUnit).GetEnumerator();
+                    var hasValue = itor.MoveNext();
                     var cur = itor.Current;
-                    var prev = null as ConnectableObjectBase;
+                    var prev = (-2857f, 0f);
 
                     while (itor.MoveNext())
                     {
-                        Upsert(cur);
+                        Upsert2(cur);
                         prev = cur;
                         cur = itor.Current;
                     }
 
-                    if (cur?.TGrid != prev?.TGrid)
-                        Upsert(cur);
+                    if (cur.Item1 != prev.Item1 && hasValue)
+                        Upsert2(cur);
                 }
+
                 Upsert(holdEnd);
                 lineDrawing.Draw(target, list, 13);
             }

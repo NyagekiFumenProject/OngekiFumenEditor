@@ -35,6 +35,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => ConvertXGridToX(xGrid, editor.Setting.XGridDisplayMaxUnit, editor.ViewWidth, editor.Setting.XGridUnitSpace);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ConvertXGridToX(double xGridUnit, FumenVisualEditorViewModel editor)
+            => ConvertXGridToX(xGridUnit, editor.Setting.XGridDisplayMaxUnit, editor.ViewWidth, editor.Setting.XGridUnitSpace);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ConvertXGridToX(XGrid xGrid, double xGridDisplayMaxUnit, double viewWidth, double xUnitSpace)
             => ConvertXGridToX(xGrid.TotalUnit, xGridDisplayMaxUnit, viewWidth, xUnitSpace);
 
