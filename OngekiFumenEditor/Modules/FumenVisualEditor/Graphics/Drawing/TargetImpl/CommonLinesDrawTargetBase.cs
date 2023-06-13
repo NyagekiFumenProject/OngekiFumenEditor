@@ -61,8 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             PostPoint(obj.TGrid, obj.XGrid, getNextIsVaild(obj));
             var prevInvaild = true;
 
-            var prevPostTGrid = obj.TGrid;
-            var prevPostXGrid = obj.XGrid;
+            ConnectableObjectBase prevObj = obj;
 
             foreach (var childObj in obj.Children)
             {
@@ -70,7 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var curIsVaild = childObj.IsVaildPath;
                 if (prevInvaild != curIsVaild)
                 {
-                    PostPoint(prevPostTGrid, prevPostXGrid, curIsVaild);
+                    PostPoint(prevObj.TGrid, prevObj.XGrid, curIsVaild);
                     prevInvaild = curIsVaild;
                 }
 
@@ -89,8 +88,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         PostPoint(childObj.TGrid, childObj.XGrid, curIsVaild);
                 }
 
-                prevPostTGrid = childObj.TGrid;
-                prevPostXGrid = childObj.XGrid;
+                prevObj = childObj;
                 prevVisible = visible;
             }
         }
