@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void Draw(IFumenEditorDrawingContext target)
         {
-            if (!target.Editor.IsPreviewMode)
+            if (!target.Editor.IsDesignMode)
                 return;
 
             var y = (float)target.Editor.TotalDurationHeight;
