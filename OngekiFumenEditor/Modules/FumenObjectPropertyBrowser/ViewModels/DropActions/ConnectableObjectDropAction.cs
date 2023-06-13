@@ -32,8 +32,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
         public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
         {
             var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
-            var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) && startObject.Children.OfType<ConnectableEndObject>().None();
+            var endObj = startObject.Children.OfType<ConnectableEndObject>().FirstOrDefault();
+            var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) && endObj is null;
             var isFirst = true;
+
+            if (endObj is not null && !isAppend && endObj.TGrid < dragTGrid)
+                return;
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
             {

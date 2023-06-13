@@ -59,11 +59,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var alwaysDrawing = isVisible(obj.MinTGrid) && isVisible(obj.MaxTGrid);
 
             PostPoint(obj.TGrid, obj.XGrid, getNextIsVaild(obj));
+            var prevInvaild = true;
+
+            var prevPostTGrid = obj.TGrid;
+            var prevPostXGrid = obj.XGrid;
 
             foreach (var childObj in obj.Children)
             {
                 var visible = alwaysDrawing || isVisible(childObj.TGrid);
-                var nextIsVaild = getNextIsVaild(childObj);
+                var curIsVaild = childObj.IsVaildPath;
+                if (prevInvaild != curIsVaild)
+                {
+                    PostPoint(prevPostTGrid, prevPostXGrid, curIsVaild);
+                    prevInvaild = curIsVaild;
+                }
 
                 if (visible || prevVisible)
                 {
@@ -73,13 +82,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         {
                             shareTGrid.Unit = item.pos.Y / resT;
                             shareXGrid.Unit = item.pos.X / resX;
-                            PostPoint(shareTGrid, shareXGrid, nextIsVaild);
+                            PostPoint(shareTGrid, shareXGrid, curIsVaild);
                         }
                     }
                     else
-                        PostPoint(childObj.TGrid, childObj.XGrid, nextIsVaild);
+                        PostPoint(childObj.TGrid, childObj.XGrid, curIsVaild);
                 }
 
+                prevPostTGrid = childObj.TGrid;
+                prevPostXGrid = childObj.XGrid;
                 prevVisible = visible;
             }
         }
