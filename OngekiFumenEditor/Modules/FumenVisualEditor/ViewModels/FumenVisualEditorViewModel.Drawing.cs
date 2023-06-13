@@ -11,7 +11,6 @@ using OpenTK.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 using OpenTK.Graphics.OpenGL;
 using System.Text;
@@ -22,10 +21,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Kernel.Graphics;
 using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.IFumenEditorDrawingContext;
-using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
-using static System.Windows.Forms.AxHost;
-using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using System.Windows.Media;
 
@@ -38,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private DrawXGridHelper xGridHelper;
         private DrawJudgeLineHelper judgeLineHelper;
         private DrawSelectingRangeHelper selectingRangeHelper;
-
+        private DrawPlayableAreaHelper playableAreaHelper;
         private Func<double, FumenVisualEditorViewModel, double> convertToY = TGridCalculator.ConvertTGridUnitToY_DesignMode;
 
         private StringBuilder stringBuilder = new StringBuilder();
@@ -166,6 +162,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             xGridHelper = new DrawXGridHelper();
             judgeLineHelper = new DrawJudgeLineHelper();
             selectingRangeHelper = new DrawSelectingRangeHelper();
+            playableAreaHelper = new DrawPlayableAreaHelper();
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
 
@@ -277,6 +274,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             RecalculateMagaticXGridLines();
 
+            playableAreaHelper.Draw(this);
             timeSignatureHelper.DrawLines(this);
             xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
