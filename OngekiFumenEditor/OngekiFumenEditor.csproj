@@ -178,7 +178,7 @@
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\EnumValueTypeUIView.xaml.cs">
+    <Compile Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.xaml.cs">
@@ -221,6 +221,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>LogSetting.settings</DependentUpon>
+    </Compile>
+    <Compile Update="UI\Controls\ObjectInspector\Views\ObjectInspectorView.xaml.cs">
+      <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
 
@@ -308,7 +311,7 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\CurveInterpolaterFactoryTypeUIView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\Views\CurveInterpolaterFactoryTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -316,7 +319,7 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\ColorIdEnumTypeUIView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\Views\ColorIdEnumTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -324,11 +327,14 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\FileInfoTypeUIView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\Views\FileInfoTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\RangeValueTypeUIView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\Views\ObjectInspectorView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="UI\Controls\ObjectInspector\Views\RangeValueTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -336,11 +342,11 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\BoolValueTypeUIView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\Views\BoolValueTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\EnumValueTypeUIView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
@@ -352,11 +358,11 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\TGridTypeUIView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\Views\TGridTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\XGridTypeUIView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\Views\XGridTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

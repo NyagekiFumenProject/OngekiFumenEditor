@@ -1,8 +1,4 @@
-﻿using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Attrbutes;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {

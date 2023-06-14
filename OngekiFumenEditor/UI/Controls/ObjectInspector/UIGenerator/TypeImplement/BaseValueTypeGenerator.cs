@@ -1,0 +1,46 @@
+﻿using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels;
+using OngekiFumenEditor.Utils;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplement
+{
+    [Export(typeof(ITypeUIGenerator))]
+    public class BaseValueTypeGenerator : ITypeUIGenerator
+    {
+        public IEnumerable<Type> SupportTypes { get; } = new[] {
+            typeof(int),
+            typeof(long),
+            typeof(short),
+
+            typeof(uint),
+            typeof(ulong),
+            typeof(ushort),
+
+            typeof(string),
+            typeof(float),
+            typeof(double),
+
+            //nullable
+            typeof(int?),
+            typeof(long?),
+            typeof(short?),
+
+            typeof(uint?),
+            typeof(ulong?),
+            typeof(ushort?),
+
+            typeof(float?),
+            typeof(double?),
+        };
+
+        public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new BaseValueTypeUIViewModel(wrapper));
+    }
+}

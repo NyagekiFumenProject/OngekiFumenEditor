@@ -16,10 +16,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
+namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
-    [Export(typeof(IFumenObjectPropertyBrowser))]
-    public class FumenObjectPropertyBrowserViewModel : Tool, IFumenObjectPropertyBrowser
+    public class ObjectInspectorViewViewModel : Tool
     {
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
@@ -79,7 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             NotifyOfPropertyChange(() => OngekiObject);
         }
 
-        public FumenObjectPropertyBrowserViewModel()
+        public ObjectInspectorViewViewModel()
         {
             UpdateDisplayName();
         }

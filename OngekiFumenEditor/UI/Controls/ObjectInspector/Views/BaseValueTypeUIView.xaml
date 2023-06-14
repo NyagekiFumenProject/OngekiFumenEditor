@@ -1,0 +1,34 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.UI.Controls.ObjectInspector.Views.BaseValueTypeUIView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Grid Name="MainPanel" Margin="5,0,5,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition>
+            </ColumnDefinition>
+            <ColumnDefinition>
+            </ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <TextBlock
+            Name="NameBlock"
+            Margin="0,0,15,0"
+            VerticalAlignment="Center"
+            Foreground="{DynamicResource EnvironmentToolWindowText}"
+            Text="{Binding PropertyInfo.DisplayPropertyName}"
+            ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
+        </TextBlock>
+        <TextBox
+            Name="Input"
+            Grid.Column="1"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Center"
+            Background="Transparent"
+            BorderBrush="DarkGray"
+            Text="{Binding PropertyInfo.ProxyValue}">
+        </TextBox>
+    </Grid>
+</UserControl>
