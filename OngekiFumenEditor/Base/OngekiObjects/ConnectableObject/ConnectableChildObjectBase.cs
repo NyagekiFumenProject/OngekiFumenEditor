@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
     public abstract class ConnectableChildObjectBase : ConnectableObjectBase
     {
-        private float curvePrecision = 0.1f;
+        private float curvePrecision = 0.025f;
         public float CurvePrecision
         {
             get => curvePrecision;
@@ -32,7 +32,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         }
 
         public bool IsAnyControlSelecting => PathControls.Any(x => x.IsSelected);
-
 
         private ConnectableObjectBase prevObject;
         public ConnectableObjectBase PrevObject
