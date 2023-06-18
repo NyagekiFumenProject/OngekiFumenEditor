@@ -15,6 +15,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Interop;
 
 namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
 {
@@ -88,7 +90,16 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             var audioManager = IoC.Get<IAudioManager>();
 
             var soundFolderPath = AudioSetting.Default.SoundFolderPath;
-            Log.LogError($"SoundFolderPath : {soundFolderPath} , fullpath : {Path.GetFullPath(soundFolderPath)}");
+            if (!Directory.Exists(soundFolderPath))
+            {
+                var msg = $"因为音效文件夹不存在,无法加载音效";
+                MessageBox.Show(msg);
+                Log.LogError(msg);
+            }
+            else
+                Log.LogInfo($"SoundFolderPath : {soundFolderPath} , fullpath : {Path.GetFullPath(soundFolderPath)}");
+
+            bool noError = true;
 
             async Task load(Sound sound, string fileName)
             {
@@ -101,6 +112,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
                 catch (Exception e)
                 {
                     Log.LogError($"Can't load {sound} sound file : {fixFilePath} , reason : {e.Message}");
+                    noError = false;
                 }
             }
 
@@ -115,6 +127,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             await load(Sound.HoldEnd, "holdend.wav");
             await load(Sound.ClickSE, "clickse.wav");
             await load(Sound.HoldTick, "holdtick.wav");
+
+            if (!noError)
+                MessageBox.Show("部分音效并未加载成功,详情可查看日志");
 
             source.SetResult();
         }

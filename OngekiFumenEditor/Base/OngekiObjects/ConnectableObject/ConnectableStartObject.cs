@@ -211,6 +211,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 if (tGrid <= cur.TGrid)
                 {
                     var xGrid = cur.CalulateXGrid(tGrid);
+                    if (xGrid == null)
+                        return default;
                     return xGrid;
                 }
             }
@@ -267,7 +269,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 if (a.TGrid == b.TGrid)
                     return float.MaxValue;
 
-                return -(a.TGrid - b.TGrid).TotalGrid(a.TGrid.ResT);
+                var offset = a.TGrid - b.TGrid;
+                return -(offset.Unit * a.TGrid.ResT + offset.Grid);
             }
 
             IEnumerable<List<CurvePoint>> split()

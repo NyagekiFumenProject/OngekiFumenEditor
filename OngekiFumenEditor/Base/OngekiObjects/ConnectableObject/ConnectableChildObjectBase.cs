@@ -237,7 +237,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public XGrid CalulateXGrid(TGrid tGrid)
         {
-            var xGrid = new XGrid(0, (int)CalulateXGridTotalGrid(tGrid.TotalGrid));
+            if (CalulateXGridTotalGrid(tGrid.TotalGrid) is not double totalGrid)
+                return default;
+            var xGrid = new XGrid(0, (int)totalGrid);
             xGrid?.NormalizeSelf();
             return xGrid;
         }
