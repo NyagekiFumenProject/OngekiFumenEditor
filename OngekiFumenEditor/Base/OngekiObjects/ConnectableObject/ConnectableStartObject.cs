@@ -13,6 +13,7 @@ using SimpleSvg2LineSegementInterpolater.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.DirectoryServices.AccountManagement;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -40,8 +41,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         private int recordId = -1;
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
-        public abstract Type NextType { get; }
-        public abstract Type EndType { get; }
+        public abstract ConnectableNextObject CreateNextObject();
+        public abstract ConnectableEndObject CreateEndObject();
 
         public ConnectableStartObject()
         {
@@ -244,7 +245,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         }
 
         public IEnumerable<ConnectableStartObject> InterpolateCurve(ICurveInterpolaterFactory factory = default)
-            => InterpolateCurve(GetType(), NextType, EndType, factory).OfType<ConnectableStartObject>();
+            => InterpolateCurve(() => CopyNew() as ConnectableStartObject, () => CreateNextObject(), () => CreateEndObject(), factory).OfType<ConnectableStartObject>();
 
         public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType, ICurveInterpolaterFactory factory = default)
             => InterpolateCurve(
@@ -260,7 +261,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             where NEXT : ConnectableNextObject, new()
             => InterpolateCurve(() => new START(), () => new NEXT(), () => new END(), factory).OfType<START>();
 
-        public IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, ICurveInterpolaterFactory factory = default)
+        public virtual IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, ICurveInterpolaterFactory factory = default)
         {
             var traveller = (factory ?? CurveInterpolaterFactory).CreateInterpolaterForAll(this);
 
@@ -333,10 +334,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
-
+            base.Copy(fromObj);
 
             if (fromObj is not ConnectableStartObject from)
                 return;

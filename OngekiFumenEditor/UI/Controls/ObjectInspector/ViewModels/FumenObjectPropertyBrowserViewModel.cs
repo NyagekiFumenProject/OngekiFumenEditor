@@ -22,33 +22,26 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
     {
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
-        private OngekiObjectBase ongekiObject;
-        private FumenVisualEditorViewModel referenceEditor;
+        private object inspectObject;
 
         public ObservableCollection<PropertyInfoWrapper> PropertyInfoWrappers { get; } = new ObservableCollection<PropertyInfoWrapper>();
-
-        public OngekiObjectBase OngekiObject => ongekiObject;
-        public FumenVisualEditorViewModel Editor => referenceEditor;
 
         private void OnObjectChanged()
         {
             PropertyInfoWrappers.Clear();
-            var propertyWrappers = (OngekiObject?.GetType()
+            var propertyWrappers = (inspectObject?.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance) ?? Array.Empty<PropertyInfo>())
                 .Where(x => x.CanRead)
                 .Select(x => new PropertyInfoWrapper()
                 {
-                    OwnerObject = OngekiObject,
+                    OwnerObject = inspectObject,
                     PropertyInfo = x
                 })
                 .Select(x =>
                 {
                     if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() is not null)
                         return null;
-
-                    if (x.PropertyInfo.CanWrite)
-                        return new UndoablePropertyInfoWrapper(x, referenceEditor);
-                    else if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() is not null)
+                    if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() is not null)
                         return x;
                     return null;
                 })
@@ -60,27 +53,6 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
             {
                 PropertyInfoWrappers.Add(wrapper);
             }
-
-            UpdateDisplayName();
-        }
-
-        private void UpdateDisplayName()
-        {
-            DisplayName = "物件属性" + (OngekiObject is null ? string.Empty : $" - {OngekiObject.Name}");
-        }
-
-        public void SetCurrentOngekiObject(OngekiObjectBase ongekiObject, FumenVisualEditorViewModel referenceEditor)
-        {
-            this.ongekiObject = ongekiObject;
-            this.referenceEditor = referenceEditor;
-
-            OnObjectChanged();
-            NotifyOfPropertyChange(() => OngekiObject);
-        }
-
-        public ObjectInspectorViewViewModel()
-        {
-            UpdateDisplayName();
         }
     }
 }

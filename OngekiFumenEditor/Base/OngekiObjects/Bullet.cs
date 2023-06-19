@@ -74,9 +74,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override string ToString() => $"{base.ToString()} Pallete[{ReferenceBulletPallete}] DamageType[{BulletDamageTypeValue}]";
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not Bullet from)
                 return;

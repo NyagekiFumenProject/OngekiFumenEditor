@@ -19,7 +19,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
             get => widthId;
             set => Set(ref widthId, value);
         }
-        public override Type NextType => typeof(BeamNext);
-        public override Type EndType => typeof(BeamEnd);
+
+        public override ConnectableNextObject CreateNextObject() => new BeamNext();
+        public override ConnectableEndObject CreateEndObject() => new BeamEnd();
     }
 }

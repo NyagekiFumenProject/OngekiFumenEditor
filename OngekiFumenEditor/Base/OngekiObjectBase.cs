@@ -51,9 +51,9 @@ namespace OngekiFumenEditor.Base
         /// 复制物件参数和内容
         /// </summary>
         /// <param name="fromObj">复制源，本对象的仿制目标</param>
-        public abstract void Copy(OngekiObjectBase fromObj, OngekiFumen fumen);
+        public abstract void Copy(OngekiObjectBase fromObj);
 
-        public OngekiObjectBase CopyNew(OngekiFumen fumen)
+        public OngekiObjectBase CopyNew()
         {
             if (this is not IDisplayableObject displayable
                 //暂不支持 以下类型的复制粘贴
@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Base
                 return default;
 
             var newObj = CacheLambdaActivator.CreateInstance(GetType()) as OngekiObjectBase;
-            newObj.Copy(this, fumen);
+            newObj.Copy(this);
             return newObj;
         }
     }

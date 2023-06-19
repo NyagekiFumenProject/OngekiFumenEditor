@@ -50,12 +50,12 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             // Next/End
             foreach (var childData in notes.Skip(1))
             {
-                var childObject = LambdaActivator.CreateInstance(childData["Type"].Last() switch
+                var childObject = childData["Type"].Last() switch
                 {
-                    'N' => startObject.NextType,
-                    'E' => startObject.EndType,
-                    _ => default
-                }) as ConnectableChildObjectBase;
+                    'N' => startObject.CreateNextObject(),
+                    'E' => startObject.CreateEndObject(),
+                    _ => default(ConnectableChildObjectBase)
+                };
 
                 buildCommon(childObject, childData);
                 buildBeam((IBeamObject)childObject, childData);

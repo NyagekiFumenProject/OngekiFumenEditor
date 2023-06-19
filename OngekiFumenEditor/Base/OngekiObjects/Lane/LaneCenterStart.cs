@@ -16,7 +16,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
         public override string IDShortName => "LCS";
 
         public override LaneType LaneType => LaneType.Center;
-        public override Type NextType => typeof(LaneCenterNext);
-        public override Type EndType => typeof(LaneCenterEnd);
+
+        public override ConnectableNextObject CreateNextObject() => new LaneCenterNext();
+        public override ConnectableEndObject CreateEndObject() => new LaneCenterEnd();
     }
 }

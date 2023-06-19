@@ -102,13 +102,13 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 
                 foreach (var childP in points.Skip(1).SkipLast(1))
                 {
-                    var nextObj = LambdaActivator.CreateInstance(targetObject.NextType) as ConnectableChildObjectBase;
+                    var nextObj = targetObject.CreateNextObject();
                     CommomBuildUp(childP, nextObj);
                     startObj.AddChildObject(nextObj);
                 }
 
                 var lastP = points.LastOrDefault();
-                var endObj = LambdaActivator.CreateInstance(targetObject.EndType) as ConnectableChildObjectBase;
+                var endObj = targetObject.CreateEndObject();
                 CommomBuildUp(lastP, endObj);
                 startObj.AddChildObject(endObj);
 

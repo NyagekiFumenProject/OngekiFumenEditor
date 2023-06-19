@@ -22,9 +22,9 @@ namespace OngekiFumenEditor.Base.EditorObjects.LaneCurve
 
         public override string IDShortName => CommandName;
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not LaneCurvePathControlObject from)
                 return;

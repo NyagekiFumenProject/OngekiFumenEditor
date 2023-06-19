@@ -1,6 +1,8 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using System;
 using System.Collections.Generic;
@@ -23,25 +25,55 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
             set => Set(ref colorId, value);
         }
 
-        private int brightness = 0;
+        private int brightness = 3;
         public int Brightness
         {
             get => brightness;
             set => Set(ref brightness, value);
         }
 
-        public override Type NextType => typeof(ColorfulLaneNext);
-        public override Type EndType => typeof(ColorfulLaneEnd);
+        public override ConnectableNextObject CreateNextObject() => new ColorfulLaneNext();
+        public override ConnectableEndObject CreateEndObject() => new ColorfulLaneEnd();
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not ColorfulLaneStart cls)
                 return;
 
             ColorId = cls.ColorId;
             Brightness = cls.Brightness;
+        }
+
+        public override IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, ICurveInterpolaterFactory factory = null)
+        {
+            void Copy(OngekiObjectBase fromObj)
+            {
+                var obj = fromObj as IColorfulLane;
+                obj.ColorId = ColorId;
+                obj.Brightness = Brightness;
+            }
+
+            var overrideGenStartFunc = () =>
+            {
+                var obj = genStartFunc();
+                Copy(obj);
+                return obj;
+            };
+            var overrideGenNextFunc = () =>
+            {
+                var obj = genNextFunc();
+                Copy(obj);
+                return obj;
+            };
+            var overrideGenEndFunc = () =>
+            {
+                var obj = genEndFunc();
+                Copy(obj);
+                return obj;
+            };
+            return base.InterpolateCurve(overrideGenStartFunc, overrideGenNextFunc, overrideGenEndFunc, factory);
         }
     }
 }

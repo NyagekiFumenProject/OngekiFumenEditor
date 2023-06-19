@@ -31,9 +31,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "EST";
         public override string IDShortName => CommandName;
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not EnemySet fromSet)
                 return;

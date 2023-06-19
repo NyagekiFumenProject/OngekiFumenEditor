@@ -15,7 +15,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
         public override string IDShortName => "WLS";
 
         public override LaneType LaneType => LaneType.WallLeft;
-        public override Type NextType => typeof(WallLeftNext);
-        public override Type EndType => typeof(WallLeftEnd);
+
+        public override ConnectableNextObject CreateNextObject() => new WallLeftNext();
+        public override ConnectableEndObject CreateEndObject() => new WallLeftEnd();
     }
 }

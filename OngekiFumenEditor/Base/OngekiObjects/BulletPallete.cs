@@ -207,7 +207,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "BPL";
         public override string IDShortName => CommandName;
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
             if (fromObj is not BulletPallete fromBpl)
                 return;

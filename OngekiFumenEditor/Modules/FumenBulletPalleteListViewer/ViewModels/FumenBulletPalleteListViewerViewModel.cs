@@ -171,7 +171,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
                 return;
 
             var cpBPL = new BulletPallete();
-            cpBPL.Copy(pallete, Fumen);
+            cpBPL.Copy(pallete);
             cpBPL.StrID = null;
 
             Fumen.AddObject(cpBPL);

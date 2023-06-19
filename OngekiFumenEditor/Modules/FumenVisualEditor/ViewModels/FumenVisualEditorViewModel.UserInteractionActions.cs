@@ -196,7 +196,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             //先取消选择所有的物件
             TryCancelAllObjectSelecting();
-            var newObjects = currentCopiedSources.OfType<OngekiObjectBase>().Select(x => x.CopyNew(Fumen)).FilterNull().ToList();
+            var newObjects = currentCopiedSources.OfType<OngekiObjectBase>().Select(x => x.CopyNew()).FilterNull().ToList();
             var mirrorTGrid = CalculateTGridMirror(newObjects, mirrorOption);
             var mirrorXGrid = CalculateXGridMirror(newObjects, mirrorOption);
 
@@ -225,7 +225,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var newStartObject = LambdaActivator.CreateInstance(refSourceHeadChildObject.ReferenceStartObject.GetType()) as OngekiObjectBase;
 
-                newStartObject.Copy(headChildObject, Fumen);
+                newStartObject.Copy(headChildObject);
 
                 newObjects.RemoveAll(x => x == headChildObject);
                 newObjects.Insert(0, newStartObject);
@@ -668,7 +668,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!(CurrentCopiedSources.IsOnlyOne(out var c) && c is OngekiObjectBase copySouceObj))
                 return;
 
-            var newObject = copySouceObj.CopyNew(Fumen);
+            var newObject = copySouceObj.CopyNew();
             if (newObject is null
                 //不支持笔刷模式下新建以下玩意
                 || newObject is ConnectableStartObject

@@ -12,9 +12,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public override string ToString() => $"{base.ToString()} RID[{RecordId}]";
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not ConnectableObjectBase from)
                 return;

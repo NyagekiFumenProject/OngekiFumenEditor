@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 
         public override LaneType LaneType => LaneType.Enemy;
 
-        public override Type NextType => typeof(EnemyLaneNext);
-        public override Type EndType => typeof(EnemyLaneEnd);
+        public override ConnectableNextObject CreateNextObject() => new EnemyLaneNext();
+        public override ConnectableEndObject CreateEndObject() => new EnemyLaneEnd();
     }
 }

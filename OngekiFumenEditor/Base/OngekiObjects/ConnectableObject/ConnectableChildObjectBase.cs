@@ -261,9 +261,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public override string ToString() => $"{base.ToString()} {(PathControls.Count > 0 ? $"CurveCount[{PathControls.Count}]" : string.Empty)} RefStart[{ReferenceStartObject}]";
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not ConnectableChildObjectBase from)
                 return;
@@ -276,7 +276,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             foreach (var cp in PathControls)
             {
                 var newCP = new LaneCurvePathControlObject();
-                newCP.Copy(cp, fumen);
+                newCP.Copy(cp);
                 AddControlObject(newCP);
             }
         }
@@ -291,7 +291,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 if (itor.EnumerateNext() is not CurvePoint point)
                     break;
 
-                var newNext = LambdaActivator.CreateInstance(ReferenceStartObject.NextType) as ConnectableChildObjectBase;
+                var newNext = ReferenceStartObject.CreateNextObject();
+
+                newNext.Copy(this);
 
                 newNext.TGrid = point.TGrid;
                 newNext.XGrid = point.XGrid;

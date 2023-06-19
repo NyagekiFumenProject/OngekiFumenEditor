@@ -187,7 +187,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
             var copiedObjectViewModel = editor.CurrentCopiedSources.FirstOrDefault() as OngekiObjectBase;
 
-            if (copiedObjectViewModel?.CopyNew(fumen) is null)
+            if (copiedObjectViewModel?.CopyNew() is null)
             {
                 MessageBox.Show("此复制的物件无法使用刷子功能");
                 return;
@@ -217,7 +217,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 editor.Setting.VerticalDisplayScale,
                 240))
             {
-                var obj = copiedObjectViewModel.CopyNew(fumen);
+                var obj = copiedObjectViewModel.CopyNew();
                 var xGrid = RefStartObject.CalulateXGrid(tGrid);
 
                 if (xGrid is null)

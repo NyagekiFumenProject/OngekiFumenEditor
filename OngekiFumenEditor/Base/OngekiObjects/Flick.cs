@@ -41,9 +41,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override string IDShortName => IsCritical ? "CFK" : "FLK";
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not Flick from)
                 return;

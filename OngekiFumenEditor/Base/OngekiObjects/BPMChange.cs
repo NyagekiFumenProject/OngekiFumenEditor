@@ -38,9 +38,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             return new GridOffset(unit, grid);
         }
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not BPMChange fromBpm)
                 return;

@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
@@ -65,7 +66,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public override string IDShortName => IsCritical ? "CHD" : "HLD";
 
-        public override Type NextType => null;
-        public override Type EndType => typeof(HoldEnd);
+        public override ConnectableNextObject CreateNextObject() => null;
+        public override ConnectableEndObject CreateEndObject() => new HoldEnd();
     }
 }

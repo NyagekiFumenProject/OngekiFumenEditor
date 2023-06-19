@@ -21,16 +21,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
             set => Set(ref colorId, value);
         }
 
-        private int brightness = 0;
+        private int brightness = 3;
         public int Brightness
         {
             get => brightness;
             set => Set(ref brightness, value);
         }
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not ColorfulLaneStart cls)
                 return;

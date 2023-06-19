@@ -37,9 +37,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             yield return this;
         }
 
-        public override void Copy(OngekiObjectBase fromObj, OngekiFumen fumen)
+        public override void Copy(OngekiObjectBase fromObj)
         {
-            base.Copy(fromObj, fumen);
+            base.Copy(fromObj);
 
             if (fromObj is not Bell from)
                 return;
