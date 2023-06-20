@@ -35,8 +35,85 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         private List<ConnectableChildObjectBase> children = new();
         public IEnumerable<ConnectableChildObjectBase> Children => children;
 
-        public TGrid MinTGrid => TGrid;
-        public TGrid MaxTGrid => children.Count == 0 ? MinTGrid : children[children.Count - 1].TGrid;
+        private TGrid cachedMinTGrid = default;
+        public TGrid MinTGrid {
+            get
+            {
+                if (cachedMinTGrid is null)
+                {
+                    var minTGrid = TGrid;
+                    if (!Children.All(x=>x.IsVaildPath))
+                    {
+                        var shareTGrid = new TGrid();
+                        foreach (var child in Children)
+                        {
+                            if (child.IsVaildPath)
+                            {
+                                minTGrid = MathUtils.Min(minTGrid, child.TGrid);
+                            }
+                            else
+                            {
+                                foreach (var path in child.GetConnectionPaths())
+                                {
+                                    shareTGrid.Unit = path.pos.Y / TGrid.ResT;
+                                    if (shareTGrid < minTGrid)
+                                        minTGrid = shareTGrid.CopyNew();
+                                }
+                            }
+                        }
+                    }
+
+                    cachedMinTGrid = minTGrid;
+                    cachedMinTGrid.NormalizeSelf();
+                }
+                return cachedMinTGrid;
+            }
+        }
+
+        private TGrid cachedMaxTGrid = default;
+        public TGrid MaxTGrid
+        {
+            get
+            {
+                //children.Count == 0 ? MinTGrid : children[children.Count - 1].TGrid
+                if (cachedMaxTGrid is null)
+                {
+                    var maxTGrid = TGrid;
+                    if (children.Count == 0)
+                    {
+                        maxTGrid = MinTGrid;
+                    }
+                    else if (Children.All(x => x.IsVaildPath))
+                    {
+                        maxTGrid = children[children.Count - 1].TGrid;
+                    }
+                    else
+                    {
+                        var shareTGrid = new TGrid();
+                        foreach (var child in Children)
+                        {
+                            if (child.IsVaildPath)
+                            {
+                                maxTGrid = MathUtils.Max(maxTGrid, child.TGrid);
+                            }
+                            else
+                            {
+                                foreach (var path in child.GetConnectionPaths())
+                                {
+                                    shareTGrid.Unit = path.pos.Y / TGrid.ResT;
+                                    if (shareTGrid > maxTGrid)
+                                        maxTGrid = shareTGrid.CopyNew();
+                                }
+                            }
+                        }
+                    }
+
+                    cachedMaxTGrid = maxTGrid;
+                    cachedMaxTGrid.NormalizeSelf();
+                }
+                return cachedMaxTGrid;
+            }
+        }
 
         private int recordId = -1;
         public override int RecordId { get => recordId; set => Set(ref recordId, value); }
@@ -82,8 +159,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         private void NotifyWhenChildrenChanged()
         {
             NotifyOfPropertyChange(() => Children);
-            NotifyOfPropertyChange(() => MinTGrid);
-            NotifyOfPropertyChange(() => MaxTGrid);
+            NotifyRefreshMinMaxTGrid();
         }
 
         public void InsertChildObject(TGrid dragTGrid, ConnectableChildObjectBase child)
@@ -156,12 +232,19 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     }
                     else
                         NextObject?.NotifyRefreshPaths();
-                    NotifyOfPropertyChange(() => MinTGrid);
-                    NotifyOfPropertyChange(() => MaxTGrid);
+                    NotifyRefreshMinMaxTGrid();
                     break;
                 default:
                     break;
             }
+        }
+
+        private void NotifyRefreshMinMaxTGrid()
+        {
+            cachedMaxTGrid = default;
+            cachedMinTGrid = default;
+            NotifyOfPropertyChange(() => MinTGrid);
+            NotifyOfPropertyChange(() => MaxTGrid);
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
