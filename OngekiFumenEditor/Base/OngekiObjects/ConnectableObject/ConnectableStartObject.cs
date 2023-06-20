@@ -58,12 +58,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 {
                     var nextObj = children.ElementAtOrDefault(insertIdx);
                     var prevObj = children.ElementAtOrDefault(insertIdx - 1) ?? this as ConnectableObjectBase;
+
+                    //build their relations: prev -> cur(child) -> next
+                    if (nextObj is not null)
+                        nextObj.PrevObject = child;
                     child.PrevObject = prevObj;
 
-                    if (nextObj is not null)
-                    {
-                        nextObj.PrevObject = child;
-                    }
                     insertIdx = Math.Min(insertIdx, children.Count);
                     children.Insert(insertIdx, child);
                 }
