@@ -53,13 +53,6 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             set => Set(ref contentLineHeight, value);
         }
 
-        private ColorId fontColor = ColorIdConst.LaneGreen;
-        public ColorId FontColor
-        {
-            get => fontColor;
-            set => Set(ref fontColor, value);
-        }
-
         private string typefaceName = "Tahoma";
         public string TypefaceName
         {
@@ -73,7 +66,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             {
                 case nameof(Content):
                 case nameof(FontSize):
-                case nameof(FontColor):
+                case nameof(ColorfulLaneColor):
                 case nameof(ContentLineHeight):
                 case nameof(ContentFlowDirection):
                 case nameof(TypefaceName):
@@ -92,7 +85,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             if (string.IsNullOrWhiteSpace(Content))
                 return;
 
-            var brush = new SolidColorBrush(FontColor.Color);
+            var brush = new SolidColorBrush(ColorfulLaneColor.Color);
             brush.Freeze();
             var pen = new Pen(brush, 1);
             pen.Freeze();

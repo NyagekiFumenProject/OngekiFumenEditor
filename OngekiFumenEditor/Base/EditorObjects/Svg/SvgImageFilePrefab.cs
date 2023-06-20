@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels;

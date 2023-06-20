@@ -123,7 +123,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                         writer.Write(", ");
                         writer.Write($"TypefaceName[{stringPrefab.TypefaceName}]");
                         writer.Write(", ");
-                        writer.Write($"FontColorId[{stringPrefab.FontColor.Id}]");
+                        writer.Write($"FontColorId[{stringPrefab.ColorfulLaneColor.Id}]");
                         writer.Write(", ");
                         writer.Write($"ContentFlowDirection[{stringPrefab.ContentFlowDirection}]");
                         writer.Write(", ");

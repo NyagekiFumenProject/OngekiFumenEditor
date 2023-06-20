@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
                 stringPrefab.Content = Encoding.UTF8.GetString(Convert.FromBase64String(map["Content"]));
                 stringPrefab.TypefaceName = map["TypefaceName"];
                 var colorId = int.Parse(map["FontColorId"]);
-                stringPrefab.FontColor = ColorIdConst.AllColors.FirstOrDefault(x => x.Id == colorId);
+                stringPrefab.ColorfulLaneColor = ColorIdConst.AllColors.FirstOrDefault(x => x.Id == colorId);
                 stringPrefab.FontSize = double.Parse(map["FontSize"]);
                 stringPrefab.ContentFlowDirection = Enum.Parse<SvgStringPrefab.FlowDirection>(map["ContentFlowDirection"]);
                 stringPrefab.ContentLineHeight = double.Parse(map["ContentLineHeight"]);

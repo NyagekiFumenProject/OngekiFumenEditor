@@ -29,6 +29,20 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             set => Set(ref curveInterpolaterFactory, value);
         }
 
+        private bool isForceColorful = false;
+        public bool IsForceColorful
+        {
+            get => isForceColorful;
+            set => Set(ref isForceColorful, value);
+        }
+
+        private ColorId colorfulLaneColor = ColorIdConst.LaneGreen;
+        public ColorId ColorfulLaneColor
+        {
+            get => colorfulLaneColor;
+            set => Set(ref colorfulLaneColor, value);
+        }
+
         private RangeValue colorfulLaneBrightness = RangeValue.Create(-3, 3, 0);
         public RangeValue ColorfulLaneBrightness
         {
@@ -163,6 +177,8 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
                 case nameof(Rotation):
                 case nameof(Scale):
                 case nameof(ShowOriginColor):
+                case nameof(IsForceColorful):
+                case nameof(colorfulLaneColor):
                 case nameof(Opacity):
                 case nameof(OffsetX):
                 case nameof(OffsetY):
@@ -288,11 +304,14 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
             if (ShowOriginColor)
                 return pen;
-            var color = pen?.Brush is SolidColorBrush b ? PickColor(b.Color) : Colors.Green;
+
+            var color = IsForceColorful ? ColorfulLaneColor.Color : (pen?.Brush is SolidColorBrush b ? PickColor(b.Color) : Colors.Green);
             var brush = new SolidColorBrush(Color.FromArgb((byte)(Opacity.CurrentValue * color.A), color.R, color.G, color.B));
             brush.Freeze();
+
             var p = new Pen(brush, 2);
             p.Freeze();
+
             return p;
         }
 
