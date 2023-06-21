@@ -193,7 +193,10 @@ namespace OngekiFumenEditor
                     recHandle.Add(exceptionHandle);
                 }
 
+                FileLogOutput.WriteLog("FumenRescue.Rescue() Begin");
                 FumenRescue.Rescue();
+                FileLogOutput.WriteLog("FumenRescue.Rescue() End");
+                FileLogOutput.WaitForWriteDone();
             }
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) => LogException(sender, e.ExceptionObject as Exception);

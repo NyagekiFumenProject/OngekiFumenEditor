@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Utils.DeadHandler
 {
     public static class DumpFileHelper
     {
@@ -80,7 +80,7 @@ namespace OngekiFumenEditor.Utils
 
             Log.LogError($"call MiniDumpWriteDump() exceptionInfo = {exceptionInfo} , dumpType = {dumpType} , isSuccessful = {exceptionInfo} , getLastError = {getErrMsg()} , dumpFilePath = {filePath}");
 
-            MessageBox.Show($"程序捕获到未处理的异常，并将此异常和应用状态Dump保存到:\n{filePath}", "程序错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"程序捕获到未处理的异常,日志(Logs)和转储文件(Dumps)已存放到程序目录对应文件夹中,可发给开发者处理", "程序错误", MessageBoxButton.OK, MessageBoxImage.Error);
 
             FileLogOutput.WaitForWriteDone();
             return 1;

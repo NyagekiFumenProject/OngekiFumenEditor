@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Utils
             return rand.Next(min, max);
         }
 
-        public static string RandomString(int length)
+        public static string RandomString(int length = 10)
         {
             sb.Clear();
 

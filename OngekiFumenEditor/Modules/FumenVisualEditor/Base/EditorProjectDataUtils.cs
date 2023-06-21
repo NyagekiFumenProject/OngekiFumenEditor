@@ -157,20 +157,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             try
             {
                 if (!FileHelper.IsPathWritable(fumenFileFullPath))
-                    throw new IOException("项目文件被占用或无权限,无法写入数据");
+                    throw new IOException("谱面文件被占用或无权限,无法写入数据");
 
                 var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFileFullPath);
                 Log.LogDebug($"serializer = {serializer}");
                 if (serializer is null)
                     throw new NotSupportedException($"不支持保存此文件格式:{Path.GetFileName(fumenFileFullPath)}");
-                if (!FileHelper.IsPathWritable(fumenFileFullPath))
-                    throw new IOException("谱面文件被占用或无权限,无法写入数据");
 
-                using var fileStream = File.OpenWrite(fumenFileFullPath);
                 var tmpFumenFilePath = TempFileHelper.GetTempFilePath("FumenFile", Path.GetFileNameWithoutExtension(fumenFileFullPath), Path.GetExtension(fumenFileFullPath));
-                await File.WriteAllBytesAsync(tmpFumenFilePath, await serializer.SerializeAsync(editorProject.Fumen));
-                await fileStream.FlushAsync();
-                fileStream.Close();
+                var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
+                using var fs = File.OpenWrite(tmpFumenFilePath);
+                fs.Write(fumenBuffer);
+                fs.Flush();
+                fs.Close();
 
                 File.Copy(tmpFumenFilePath, fumenFileFullPath, true);
 
