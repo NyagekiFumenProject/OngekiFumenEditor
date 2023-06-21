@@ -10,13 +10,14 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public class EditorProjectDataUtils
     {
         private static JsonSerializerOptions JsonSerializerOptions;
+
+        public record Result(bool IsSuccess, string ErrorMessage);
 
         private class TimeSpanJsonConverter : JsonConverter<TimeSpan>
         {
@@ -123,14 +124,70 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             }
         }
 
-        public static async Task TrySaveToFileAsync(string projFilePath, EditorProjectDataModel editorProject)
+        public static async Task<Result> TrySaveProjFileAsync(string projFileFullPath, EditorProjectDataModel editorProject)
         {
             try
             {
-                if (!FileHelper.IsPathWritable(projFilePath))
+                if (!FileHelper.IsPathWritable(projFileFullPath))
                     throw new IOException("项目文件被占用或无权限,无法写入数据");
 
-                var fumen = editorProject.Fumen;
+                var tmpProjFilePath = TempFileHelper.GetTempFilePath("FumenProjFile", Path.GetFileNameWithoutExtension(projFileFullPath), Path.GetExtension(projFileFullPath));
+                var fileStream = File.Open(tmpProjFilePath, FileMode.Create);
+                StoreBulletPalleteListEditorData(editorProject);
+
+                await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
+                fileStream.Close();
+
+                File.Copy(tmpProjFilePath, projFileFullPath, true);
+
+                return new(true, "");
+            }
+            catch (Exception e)
+            {
+                var msg = $"无法保存项目文件:{e.Message}{Environment.NewLine}{e.StackTrace}";
+                return new(false, msg);
+                //Log.LogError(msg);
+                //MessageBox.Show(msg);
+            }
+        }
+
+
+        public static async Task<Result> TrySaveFumenFileAsync(string fumenFileFullPath, EditorProjectDataModel editorProject)
+        {
+            try
+            {
+                if (!FileHelper.IsPathWritable(fumenFileFullPath))
+                    throw new IOException("项目文件被占用或无权限,无法写入数据");
+
+                var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFileFullPath);
+                Log.LogDebug($"serializer = {serializer}");
+                if (serializer is null)
+                    throw new NotSupportedException($"不支持保存此文件格式:{Path.GetFileName(fumenFileFullPath)}");
+                if (!FileHelper.IsPathWritable(fumenFileFullPath))
+                    throw new IOException("谱面文件被占用或无权限,无法写入数据");
+
+                using var fileStream = File.OpenWrite(fumenFileFullPath);
+                var tmpFumenFilePath = TempFileHelper.GetTempFilePath("FumenFile", Path.GetFileNameWithoutExtension(fumenFileFullPath), Path.GetExtension(fumenFileFullPath));
+                await File.WriteAllBytesAsync(tmpFumenFilePath, await serializer.SerializeAsync(editorProject.Fumen));
+                await fileStream.FlushAsync();
+                fileStream.Close();
+
+                File.Copy(tmpFumenFilePath, fumenFileFullPath, true);
+
+                return new(true, "");
+            }
+            catch (Exception e)
+            {
+                var msg = $"无法保存谱面项目:{e.Message}{Environment.NewLine}{e.StackTrace}";
+                return new(false, msg);
+            }
+        }
+
+        public static async Task<Result> TrySaveEditorAsync(string projFilePath, EditorProjectDataModel editorProject)
+        {
+            try
+            {
+                var tmpProjFilePath = TempFileHelper.GetTempFilePath();
 
                 //clone new project object to modify
                 using var ms = new MemoryStream();
@@ -139,47 +196,37 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 var cloneProj = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(ms, JsonSerializerOptions);
                 cloneProj.Fumen = editorProject.Fumen;
 
-                var tmpProjFilePath = TempFileHelper.GetTempFilePath("FumenProjFile", Path.GetFileNameWithoutExtension(projFilePath), Path.GetExtension(projFilePath));
-                var fileStream = File.Open(tmpProjFilePath, FileMode.Create);
-                StoreBulletPalleteListEditorData(cloneProj);
-
-                var fumenFilePath = cloneProj.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(projFilePath);
-                if (cloneProj.FumenFilePath is null)
-                    cloneProj.FumenFilePath = fumenFilePath;
-
-                //always make relative path
                 var fileFolder = Path.GetDirectoryName(projFilePath);
-                Log.LogDebug($"projFilePath = {projFilePath}");
-                Log.LogDebug($"fileFolder = {fileFolder}");
                 if (Path.IsPathFullyQualified(cloneProj.FumenFilePath))
                     cloneProj.FumenFilePath = Path.GetRelativePath(fileFolder, cloneProj.FumenFilePath);
                 if (Path.IsPathFullyQualified(cloneProj.AudioFilePath))
                     cloneProj.AudioFilePath = Path.GetRelativePath(fileFolder, cloneProj.AudioFilePath);
-                var fumenFullPath = Path.Combine(fileFolder, cloneProj.FumenFilePath);
 
-                var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFullPath);
-                Log.LogDebug($"serializer = {serializer}");
-                if (serializer is null)
-                    throw new NotSupportedException($"不支持保存此文件格式:{fumenFilePath}");
-                if (!FileHelper.IsPathWritable(fumenFullPath))
-                    throw new IOException("谱面文件被占用或无权限,无法写入数据");
+                //save proj to tmp file
+                var saveProjTaskResult = await TrySaveProjFileAsync(tmpProjFilePath, cloneProj);
+                if (!saveProjTaskResult.IsSuccess)
+                    throw new Exception(saveProjTaskResult.ErrorMessage);
 
-                await JsonSerializer.SerializeAsync(fileStream, cloneProj, JsonSerializerOptions);
-                var tmpFumenFilePath = TempFileHelper.GetTempFilePath("FumenFile", Path.GetFileNameWithoutExtension(fumenFullPath), Path.GetExtension(fumenFullPath));
-                await File.WriteAllBytesAsync(tmpFumenFilePath, await serializer.SerializeAsync(fumen));
-                await fileStream.FlushAsync();
-                fileStream.Close();
+                //save fumen to tmp file
+                var fumenFullPath = Path.Combine(fileFolder, cloneProj.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(projFilePath));
+                var tmpFumenFilePath = TempFileHelper.GetTempFilePath(extension:Path.GetExtension(fumenFullPath));
 
-                Log.LogDebug($"Copy tmpFumenFilePath '{tmpFumenFilePath}' to '{fumenFullPath}'");
-                File.Copy(tmpFumenFilePath, fumenFullPath, true);
+                var saveFumenTaskResult = await TrySaveFumenFileAsync(tmpFumenFilePath, cloneProj);
+                if (!saveFumenTaskResult.IsSuccess)
+                    throw new Exception(saveFumenTaskResult.ErrorMessage);
+
+                //tmp files cover to real files.
                 Log.LogDebug($"Copy tmpProjFilePath '{tmpProjFilePath}' to '{projFilePath}'");
                 File.Copy(tmpProjFilePath, projFilePath, true);
+                Log.LogDebug($"Copy tmpFumenFilePath '{tmpFumenFilePath}' to '{fumenFullPath}'");
+                File.Copy(tmpFumenFilePath, fumenFullPath, true);
+
+                return new(true, "");
             }
             catch (Exception e)
             {
-                var msg = $"无法保存:{e.Message}{Environment.NewLine}{e.StackTrace}";
-                Log.LogError(msg);
-                MessageBox.Show(msg);
+                var msg = $"无法完全保存项目:{e.Message}{Environment.NewLine}{e.StackTrace}";
+                return new(false, msg);
             }
         }
     }

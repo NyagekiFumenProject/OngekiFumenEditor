@@ -6,8 +6,10 @@ using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.LocatorOverride;
 using OngekiFumenEditor.Kernel.Scheduler;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.DeadHandler;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
 using System.Collections.Generic;
@@ -162,6 +164,7 @@ namespace OngekiFumenEditor
         private void InitExceptionCatcher()
         {
             var recHandle = new HashSet<IntPtr>();
+
             void LogException(object sender, Exception exception)
             {
                 var sb = new StringBuilder();
@@ -169,7 +172,7 @@ namespace OngekiFumenEditor
                 {
                     if (e is null)
                         return;
-                    var tab = string.Concat(" ".Repeat(2 * level));
+                    var tab = string.Concat("\t".Repeat(2 * level));
 
                     sb.AppendLine();
                     sb.AppendLine(tab + $"Exception lv.{level} : {e.Message}");
@@ -189,6 +192,8 @@ namespace OngekiFumenEditor
                     DumpFileHelper.WriteMiniDump(exceptionHandle);
                     recHandle.Add(exceptionHandle);
                 }
+
+                FumenRescue.Rescue();
             }
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) => LogException(sender, e.ExceptionObject as Exception);
