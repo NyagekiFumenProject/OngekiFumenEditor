@@ -28,6 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Dictionary<SvgPrefabBase, IVBOHandle> vboHolder = new();
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { SvgStringPrefab.CommandName, SvgImageFilePrefab.CommandName };
+        public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
         public override int DefaultRenderOrder => 1000 + 0;
 
