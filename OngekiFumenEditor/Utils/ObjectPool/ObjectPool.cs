@@ -2,9 +2,11 @@
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,23 +34,24 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 
         #endregion
 
-        private HashSet<T> cache_obj = new HashSet<T>();
+        private ConcurrentBag<T> cache_obj = new ConcurrentBag<T>();
 
         public static bool EnableTrim { get; set; } = true;
-
         public override int CachingObjectCount => cache_obj.Count;
 
         protected override void OnReduceObjects()
         {
             if (!EnableTrim)
                 return;
+            var cachingObjectCount = CachingObjectCount;
 
-            var count = CachingObjectCount > MaxTempCache ?
-                (MaxTempCache + ((CachingObjectCount - MaxTempCache) / 2)) :
-                CachingObjectCount / 4; ;
+            var count = cachingObjectCount > MaxTempCache ?
+                (MaxTempCache + ((cachingObjectCount - MaxTempCache) / 2)) :
+                cachingObjectCount / 4; ;
 
             for (int i = 0; i < count / 2; i++)
-                cache_obj.Remove(cache_obj.First());
+                if (!cache_obj.TryTake(out _))
+                    break;
         }
 
         #region Sugar~
@@ -79,21 +82,18 @@ namespace OngekiFumenEditor.Utils.ObjectPool
         /// </summary>
         /// <param name="obj">gained object</param>
         /// <returns>it's a new object if returns true</returns>
-        public static bool Get(out T obj)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Get(out T obj) => Instance.GetInternal(out obj);
+
+        private bool GetInternal(out T obj)
         {
-            var cache_obj = Instance.cache_obj;
-
-            if (cache_obj.Count == 0)
-            {
+            var isSuccess = cache_obj.TryTake(out obj);
+            if (isSuccess)
+                (obj as ICacheCleanable)?.OnBeforeGetClean();
+            else
                 obj = new T();
-                return true;
-            }
 
-            obj = cache_obj.First();
-            cache_obj.Remove(obj);
-
-            (obj as ICacheCleanable)?.OnBeforeGetClean();
-            return false;
+            return !isSuccess;
         }
 
         public static T Get()
@@ -102,12 +102,15 @@ namespace OngekiFumenEditor.Utils.ObjectPool
             return t;
         }
 
-        public static void Return(T obj)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Return(T obj) => Instance.ReturnInternal(obj);
+
+        private void ReturnInternal(T obj)
         {
             if (obj == null)
                 return;
 
-            Instance.cache_obj.Add(obj);
+            cache_obj.Add(obj);
             (obj as ICacheCleanable)?.OnAfterPutClean();
         }
 
