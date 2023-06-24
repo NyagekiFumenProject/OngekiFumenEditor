@@ -46,7 +46,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 {
                     if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() is not null)
                         return null;
-
                     if (x.PropertyInfo.CanWrite)
                         return new UndoablePropertyInfoWrapper(x, referenceEditor);
                     else if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() is not null)

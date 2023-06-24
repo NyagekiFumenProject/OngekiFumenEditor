@@ -34,7 +34,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private int renderViewHeight;
         private IPerfomenceMonitor performenceMonitor;
         private ISamplePeak samplePeak;
-        private IWaveformDrawing waveformDrawing;
         private CancellationTokenSource loadWaveformTask;
         private CancellationTokenSource resampleTaskCancelTokenSource;
         private TaskCompletionSource initTask = new TaskCompletionSource();
@@ -52,6 +51,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public TimeSpan CurrentTime { get; private set; }
         public TimeSpan AudioTotalDuration => AudioPlayer?.Duration ?? default;
+
+        private IWaveformDrawing waveformDrawing;
+        public IWaveformDrawing WaveformDrawing
+        {
+            get => waveformDrawing;
+            set
+            {
+                Set(ref waveformDrawing, value);
+            }
+        }
 
         private int resampleSize = Properties.AudioPlayerToolViewerSetting.Default.ResampleSize;
         public int ResampleSize
@@ -152,7 +161,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private void InitRender()
         {
             samplePeak = IoC.Get<ISamplePeak>();
-            waveformDrawing = IoC.Get<IWaveformDrawing>();
+            WaveformDrawing = IoC.Get<IWaveformDrawing>();
             initTask.SetResult();
         }
 
@@ -217,7 +226,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             UpdateDrawingContext();
 
             if (usingPeakData is not null)
-                waveformDrawing.Draw(this, usingPeakData);
+                WaveformDrawing.Draw(this, usingPeakData);
 
             performenceMonitor.OnAfterRender();
         }

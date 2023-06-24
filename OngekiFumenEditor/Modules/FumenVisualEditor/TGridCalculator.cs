@@ -71,12 +71,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public static double ConvertTGridToY_DesignMode(TGrid tGrid, FumenVisualEditorViewModel editor)
             => ConvertTGridToY_DesignMode(tGrid, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static double ConvertTGridToY_DesignMode(TGrid tGrid, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
+        public static double ConvertTGridToY_DesignMode(TGrid tGrid, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
             => ConvertTGridUnitToY_DesignMode(tGrid.TotalUnit, soflanList, bpmList, scale, tUnitLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ConvertTGridUnitToY_DesignMode(double tGridUnit, FumenVisualEditorViewModel editor)
             => ConvertTGridUnitToY_DesignMode(tGridUnit, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
-        private static double ConvertTGridUnitToY_DesignMode(double tGridUnit, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
+        public static double ConvertTGridUnitToY_DesignMode(double tGridUnit, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
         {
             var positionBpmList = soflanList.GetCachedSoflanPositionList_DesignMode(tUnitLength, bpmList);
 

@@ -10,6 +10,7 @@
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:objectinspector="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels"
     xmlns:wpf="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
     d:Background="White"
@@ -30,6 +31,8 @@
             </Grid.RowDefinitions>
 
             <StackPanel Margin="10" IsEnabled="{Binding IsAudioButtonEnabled}">
+                <Line Height="2" Stroke="Red">
+                </Line>
                 <wpf:GLWpfControl
                     x:Name="glView"
                     Height="150"
@@ -43,8 +46,8 @@
                         <StackPanel>
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="77*" />
@@ -73,9 +76,9 @@
                                     Step="2.5">
                                 </controls:RangeValue>
                                 <controls:RangeValue
-                                    Grid.RowSpan="2"
+                                    Grid.Row="2"
                                     Grid.ColumnSpan="2"
-                                    Margin="0,60,10,0"
+                                    Margin="0,10,10,0"
                                     Padding="0,5,0,5"
                                     CurrentValue="{Binding ResampleSize, Mode=TwoWay}"
                                     DisplayName="重采样"
@@ -83,9 +86,9 @@
                                     MinValue="0"
                                     Step="1" />
                                 <controls:RangeValue
-                                    Grid.RowSpan="2"
+                                    Grid.Row="2"
                                     Grid.Column="2"
-                                    Margin="10,60,0,0"
+                                    Margin="10,10,0,0"
                                     Padding="0,5,0,5"
                                     CurrentValue="{Binding WaveformVecticalScale, Mode=TwoWay}"
                                     DisplayName="频谱垂直缩放"
@@ -93,6 +96,11 @@
                                     MinValue="0.01"
                                     Step="0.01" />
                             </Grid>
+                            <GroupBox Header="渲染特有选项">
+                                <objectinspector:ObjectInspectorView Margin="5,10,10,5" InspectObject="{Binding WaveformDrawing.Options}">
+
+                                </objectinspector:ObjectInspectorView>
+                            </GroupBox>
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>

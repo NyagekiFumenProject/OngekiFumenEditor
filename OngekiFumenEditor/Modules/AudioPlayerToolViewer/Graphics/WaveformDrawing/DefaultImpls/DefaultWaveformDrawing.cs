@@ -23,26 +23,8 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls
 {
     [Export(typeof(IWaveformDrawing))]
-    public class DefaultWaveformDrawing : CommonWaveformDrawingBase
+    public partial class DefaultWaveformDrawing : CommonWaveformDrawingBase
     {
-        private class DefaultWaveformOption : WaveformDrawingOptionBase
-        {
-            private bool onlyShowContainsObjBeat = true;
-            public bool OnlyShowContainsObjBeat
-            {
-                get => onlyShowContainsObjBeat;
-                set => Set(ref onlyShowContainsObjBeat, value);
-            }
-
-
-            private bool showContainsObjBeat = true;
-            public bool ShowContainsObjBeat
-            {
-                get => showContainsObjBeat;
-                set => Set(ref showContainsObjBeat, value);
-            }
-        }
-
         private readonly ISimpleLineDrawing lineDrawing;
         private readonly IStringDrawing stringDrawing;
         private readonly SoflanList dummySoflanList;
@@ -52,7 +34,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         private static readonly System.Numerics.Vector4 WhiteColor = new(1, 1, 1, 1);
         private static readonly System.Numerics.Vector4 IndirectorColor = new(1, 1, 0, 1);
         private static readonly System.Numerics.Vector4 BeatColor = new(1, 0, 0, 1);
-        private static readonly System.Numerics.Vector4 ContainsObjBeatColor = new(1, 1, 0, 1);
+        private static readonly System.Numerics.Vector4 ObjectPlaceColor = new(1, 1, 0, 1);
         private static readonly System.Numerics.Vector4 WaveformFillColor = new(100 / 255.0f, 149 / 255.0f, 237 / 255.0f, 1);
 
         private static readonly List<(float, string)> cachedPostDrawList = new();
@@ -119,34 +101,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 var endTGrid = TGridCalculator.ConvertAudioTimeToTGrid(endTime, target.EditorViewModel);
                 var curTGrid = TGridCalculator.ConvertAudioTimeToTGrid(curTime, target.EditorViewModel);
 
-                cachedObjTimeMap.Clear();
-
-                void applyObjCounting(IEnumerable<ITimelineObject> timelineObjects)
-                {
-                    foreach (var timeObj in timelineObjects)
-                    {
-                        var t = cachedObjTimeMap.TryGetValue(timeObj.TGrid, out var _t) ? _t : 0;
-                        cachedObjTimeMap[timeObj.TGrid] = t + 1;
-                    }
-                }
-
-                var fumen = editor.Fumen;
-                applyObjCounting(fumen.Taps.BinaryFindRange(beginTGrid, endTGrid));
-                applyObjCounting(fumen.Bullets.BinaryFindRange(beginTGrid, endTGrid));
-                applyObjCounting(fumen.Bells.BinaryFindRange(beginTGrid, endTGrid));
-                applyObjCounting(fumen.Beams.GetVisibleStartObjects(beginTGrid, endTGrid));
-                applyObjCounting(fumen.Flicks.BinaryFindRange(beginTGrid, endTGrid));
-                foreach (var hold in fumen.Holds.GetVisibleStartObjects(beginTGrid, endTGrid))
-                {
-                    var t = cachedObjTimeMap.TryGetValue(hold.TGrid, out var _t) ? _t : 0;
-                    cachedObjTimeMap[hold.TGrid] = t + 1;
-                    if (hold?.HoldEnd?.TGrid is TGrid et)
-                    {
-                        t = cachedObjTimeMap.TryGetValue(et, out _t) ? _t : 0;
-                        cachedObjTimeMap[et] = t + 1;
-                    }
-                }
-
                 var bpmList = editor.Fumen.BpmList;
                 var tGridUnitLength = editor.Setting.TGridUnitLength;
 
@@ -158,45 +112,92 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 var prefixOffsetX = -Math.Min(0, fromTime.TotalMilliseconds) / target.DurationMsPerPixel;
                 var xWidth = endX - beginX;
 
-                var beatColor = option.OnlyShowContainsObjBeat ? TransparentColor : BeatColor;
-                var containsObjBeatColor = option.ShowContainsObjBeat ? ContainsObjBeatColor : beatColor;
-
-                lineDrawing.Begin(target, 2);
+                if (option.ShowObjectPlaceLine)
                 {
-                    var prevMeter = currentMeter;
-                    var prevBpm = currentBpm;
-
-                    foreach ((var tGrid, var bx, var beatIdx, var meter, var bpm) in TGridCalculator.GetVisbleTimelines_DesignMode(dummySoflanList, bpmList,
-                        editor.Fumen.MeterChanges, beginX, endX, curX, editor.Setting.BeatSplit, 1.0f, editor.Setting.TGridUnitLength))
+                    void applyObjCounting(IEnumerable<ITimelineObject> timelineObjects)
                     {
-                        var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
+                        foreach (var timeObj in timelineObjects)
+                        {
+                            var t = cachedObjTimeMap.TryGetValue(timeObj.TGrid, out var _t) ? _t : 0;
+                            cachedObjTimeMap[timeObj.TGrid] = t + 1;
+                        }
+                    }
 
-                        var beatHeightWeight = beatIdx == 0 ? 1 : 0.85f;
+                    var fumen = editor.Fumen;
+                    applyObjCounting(fumen.Taps.BinaryFindRange(beginTGrid, endTGrid));
+                    applyObjCounting(fumen.Bullets.BinaryFindRange(beginTGrid, endTGrid));
+                    applyObjCounting(fumen.Bells.BinaryFindRange(beginTGrid, endTGrid));
+                    applyObjCounting(fumen.Beams.GetVisibleStartObjects(beginTGrid, endTGrid));
+                    applyObjCounting(fumen.Flicks.BinaryFindRange(beginTGrid, endTGrid));
+                    foreach (var hold in fumen.Holds.GetVisibleStartObjects(beginTGrid, endTGrid))
+                    {
+                        var t = cachedObjTimeMap.TryGetValue(hold.TGrid, out var _t) ? _t : 0;
+                        cachedObjTimeMap[hold.TGrid] = t + 1;
+                        if (hold?.HoldEnd?.TGrid is TGrid et)
+                        {
+                            t = cachedObjTimeMap.TryGetValue(et, out _t) ? _t : 0;
+                            cachedObjTimeMap[et] = t + 1;
+                        }
+                    }
+
+                    lineDrawing.Begin(target, 2);
+                    {
+                        var beatHeightWeight = 0.85f;
                         var topY = height / 2 * beatHeightWeight;
                         var buttomY = -topY;
 
-                        var color = beatColor;
-                        if (cachedObjTimeMap.ContainsKey(tGrid))
-                            color = containsObjBeatColor;
+                        foreach (var pair in cachedObjTimeMap)
+                        {
+                            var tGrid = pair.Key;
+                            var bx = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, dummySoflanList, bpmList, 1, editor.Setting.TGridUnitLength);
+                            var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
 
-                        lineDrawing.PostPoint(new(x, buttomY), TransparentColor, VertexDash.Solider);
-                        lineDrawing.PostPoint(new(x, buttomY), color, VertexDash.Solider);
-                        lineDrawing.PostPoint(new(x, topY), color, VertexDash.Solider);
-                        lineDrawing.PostPoint(new(x, topY), TransparentColor, VertexDash.Solider);
-
-                        var str = "";
-                        if (prevMeter != meter)
-                            str += $"{meter.Bunbo}/{meter.BunShi}";
-                        if (prevBpm != bpm)
-                            str += $" BPM:{bpm.BPM}";
-                        if (str.Length > 0)
-                            cachedPostDrawList.Add((x + 2, str));
-
-                        prevMeter = meter;
-                        prevBpm = bpm;
+                            lineDrawing.PostPoint(new(x, buttomY), TransparentColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(x, buttomY), ObjectPlaceColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(x, topY), ObjectPlaceColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(x, topY), TransparentColor, VertexDash.Solider);
+                        }
                     }
+                    lineDrawing.End();
                 }
-                lineDrawing.End();
+
+                if (option.ShowTimingLine)
+                {
+                    lineDrawing.Begin(target, 2);
+                    {
+                        var prevMeter = currentMeter;
+                        var prevBpm = currentBpm;
+
+                        foreach ((var tGrid, var bx, var beatIdx, var meter, var bpm) in TGridCalculator.GetVisbleTimelines_DesignMode(dummySoflanList, bpmList,
+                            editor.Fumen.MeterChanges, beginX, endX, curX, editor.Setting.BeatSplit, 1.0f, editor.Setting.TGridUnitLength))
+                        {
+                            var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
+
+                            var beatHeightWeight = beatIdx == 0 ? 1 : 0.85f;
+                            var topY = height / 2 * beatHeightWeight;
+                            var buttomY = -topY;
+
+                            var beatColor = cachedObjTimeMap.ContainsKey(tGrid) ? TransparentColor : BeatColor;
+
+                            lineDrawing.PostPoint(new(x, buttomY), TransparentColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(x, buttomY), beatColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(x, topY), beatColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(x, topY), TransparentColor, VertexDash.Solider);
+
+                            var str = "";
+                            if (prevMeter != meter)
+                                str += $"{meter.Bunbo}/{meter.BunShi}";
+                            if (prevBpm != bpm)
+                                str += $" BPM:{bpm.BPM}";
+                            if (str.Length > 0)
+                                cachedPostDrawList.Add((x + 2, str));
+
+                            prevMeter = meter;
+                            prevBpm = bpm;
+                        }
+                    }
+                    lineDrawing.End();
+                }
 
                 //绘制提示
                 foreach ((var x, var str) in cachedPostDrawList)
@@ -213,6 +214,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     target,
                     default, out _);
                 }
+
+                cachedObjTimeMap.Clear();
             }
 
             //绘制当前播放时间游标
