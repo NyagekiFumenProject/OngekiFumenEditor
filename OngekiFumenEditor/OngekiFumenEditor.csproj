@@ -222,7 +222,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>LogSetting.settings</DependentUpon>
     </Compile>
-    <Compile Update="UI\Controls\ObjectInspector\Views\ObjectInspectorView.xaml.cs">
+    <Compile Update="UI\Controls\ObjectInspector\ObjectInspectorView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -331,7 +331,7 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\ObjectInspectorView.xaml">
+    <Page Update="UI\Controls\ObjectInspector\ObjectInspectorView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="UI\Controls\ObjectInspector\Views\RangeValueTypeUIView.xaml">

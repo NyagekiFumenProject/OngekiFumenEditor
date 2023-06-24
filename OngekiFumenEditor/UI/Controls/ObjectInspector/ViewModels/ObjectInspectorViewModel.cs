@@ -18,13 +18,23 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
-    public class ObjectInspectorViewViewModel : Tool
+    public class ObjectInspectorViewModel : Tool
     {
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
         private object inspectObject;
 
         public ObservableCollection<PropertyInfoWrapper> PropertyInfoWrappers { get; } = new ObservableCollection<PropertyInfoWrapper>();
+
+        public object InspectObject
+        {
+            get => inspectObject;
+            set
+            {
+                Set(ref inspectObject, value);
+                OnObjectChanged();
+            }
+        }
 
         private void OnObjectChanged()
         {
@@ -43,7 +53,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
                         return null;
                     if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() is not null)
                         return x;
-                    return null;
+                    return x;
                 })
                 .FilterNull()
                 .OrderBy(x => x.DisplayPropertyName)

@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplemen
     public class RangeValueTypeGenerator : ITypeUIGenerator
     {
         public IEnumerable<Type> SupportTypes { get; } = new[] {
-            typeof(RangeValue)
+            typeof(Base.RangeValue)
         };
 
         public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new RangeValueTypeUIViewModel(wrapper));

@@ -16,12 +16,14 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
                 wrapper.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserReadOnly>() is null;
 
             var typeGenerators = IoC.GetAll<ITypeUIGenerator>();
-            return typeGenerators
+            var generator = typeGenerators
                 .Where(x =>
                     x.SupportTypes.Contains(wrapper.PropertyInfo.PropertyType) ||
                     x.SupportTypes.Any(x => wrapper.PropertyInfo.PropertyType.IsSubclassOf(x))
-                    )
-                .Select(x =>
+                    );
+
+
+            return generator.Select(x =>
                 {
                     try
                     {

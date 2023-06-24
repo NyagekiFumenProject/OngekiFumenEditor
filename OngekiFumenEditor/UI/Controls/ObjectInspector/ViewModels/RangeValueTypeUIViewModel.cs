@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
-    public class RangeValueTypeUIViewModel : CommonUIViewModelBase<RangeValue>
+    public class RangeValueTypeUIViewModel : CommonUIViewModelBase<Base.RangeValue>
     {
-        public double CurrentValue
+        public float CurrentValue
         {
             get => TypedProxyValue.CurrentValue;
             set
@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
             }
         }
 
-        public double MinValue
+        public float MinValue
         {
             get => TypedProxyValue.MinValue;
             set
@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
             }
         }
 
-        public double MaxValue
+        public float MaxValue
         {
             get => TypedProxyValue.MaxValue;
             set

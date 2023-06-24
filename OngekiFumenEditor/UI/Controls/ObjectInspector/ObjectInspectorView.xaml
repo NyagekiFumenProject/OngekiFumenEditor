@@ -1,9 +1,8 @@
 ﻿<UserControl
-    x:Class="OngekiFumenEditor.UI.Controls.ObjectInspector.Views.ObjectInspectorView"
+    x:Class="OngekiFumenEditor.UI.Controls.ObjectInspector.ObjectInspectorView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
     d:DesignHeight="800"
@@ -18,8 +17,10 @@
             <ItemsControl ItemsSource="{Binding PropertyInfoWrappers}">
                 <ItemsControl.ItemTemplate>
                     <ItemContainerTemplate>
-                        <ContentPresenter Margin="0,0,0,5" Content="{Binding ., Converter={StaticResource PropertyGeneratorConverter}}">
-                        </ContentPresenter>
+                        <Border Padding="5" HorizontalAlignment="Left">
+                            <ContentPresenter Content="{Binding ., Converter={StaticResource PropertyGeneratorConverter}}">
+                            </ContentPresenter>
+                        </Border>
                     </ItemContainerTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
