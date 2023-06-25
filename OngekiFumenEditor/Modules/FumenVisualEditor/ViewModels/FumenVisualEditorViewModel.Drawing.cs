@@ -35,6 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private DrawJudgeLineHelper judgeLineHelper;
         private DrawSelectingRangeHelper selectingRangeHelper;
         private DrawPlayableAreaHelper playableAreaHelper;
+        private ICircleDrawing circleDrawing;
         private Func<double, FumenVisualEditorViewModel, double> convertToY = TGridCalculator.ConvertTGridUnitToY_DesignMode;
 
         private StringBuilder stringBuilder = new StringBuilder();
@@ -163,6 +164,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             judgeLineHelper = new DrawJudgeLineHelper();
             selectingRangeHelper = new DrawSelectingRangeHelper();
             playableAreaHelper = new DrawPlayableAreaHelper();
+
+            circleDrawing = IoC.Get<ICircleDrawing>();
 
             performenceMonitor = IoC.Get<IPerfomenceMonitor>();
 

@@ -59,9 +59,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
                         discard;
 
                     float d = dist / varying_radius;
-                    vec3 color = mix(varying_color.rgb, vec3(0.0), step(1.0-threshold, d));
-
-                    out_color = vec4(color, varying_color.a);
+                    out_color = mix(varying_color, vec4(varying_color.rgb,0.0), step(1.0-threshold, d));
                 }
                 ";
         }
