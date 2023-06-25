@@ -213,6 +213,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(TimeSpan ts)
         {
+            if (Editor is null)
+                return;
+
             PerfomenceMonitor.PostUIRenderTime(ts);
             PerfomenceMonitor.OnBeforeRender();
 
