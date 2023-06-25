@@ -52,11 +52,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set => ScrollViewerVerticalOffset = TotalDurationHeight - value;
         }
 
-        private void RecalculateScrollBar()
-        {
-            Setting.NotifyOfPropertyChange(nameof(Setting.JudgeLineOffsetY));
-        }
-
         #region ScrollTo
 
         public void ScrollTo(ITimelineObject timelineObject)

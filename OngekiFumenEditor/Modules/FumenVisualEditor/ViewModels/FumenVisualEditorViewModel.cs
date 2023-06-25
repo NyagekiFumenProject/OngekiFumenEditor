@@ -95,19 +95,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     RecalcViewProjectionMatrix();
                     break;
                 case nameof(EditorSetting.XGridUnitSpace):
-                    Redraw(RedrawTarget.XGridUnitLines);
-                    break;
                 case nameof(EditorSetting.DisplayTimeFormat):
-                    TGridUnitLineLocations.Clear();
-                    Redraw(RedrawTarget.TGridUnitLines);
-                    break;
                 case nameof(EditorSetting.BeatSplit):
-                    //case nameof(EditorSetting.BaseLineY):
-                    Redraw(RedrawTarget.TGridUnitLines | RedrawTarget.ScrollBar);
-                    break;
                 case nameof(EditorSetting.XGridDisplayMaxUnit):
-                    Redraw(RedrawTarget.XGridUnitLines);
-                    break;
                 default:
                     break;
             }
@@ -134,7 +124,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     value.ObjectModifiedChanged += OnFumenObjectModifiedChanged;
                 }
                 EditorProjectData.Fumen = value;
-                Redraw(RedrawTarget.All);
                 NotifyOfPropertyChange(() => Fumen);
             }
         }
@@ -192,8 +181,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public ObservableCollection<XGridUnitLineViewModel> XGridUnitLineLocations { get; } = new();
-        public ObservableCollection<TGridUnitLineViewModel> TGridUnitLineLocations { get; } = new();
         public ObservableCollection<ISelectableObject> CurrentSelectedObjects { get; } = new();
 
         private bool isDragging;
@@ -243,7 +230,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     projectData.Fumen = fumen;
                 }
                 EditorProjectData = dialogViewModel.EditorProjectData;
-                Redraw(RedrawTarget.All);
                 Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
                 await Dispatcher.Yield();
             }
@@ -278,7 +264,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public Task Load(EditorProjectDataModel projModel)
         {
             EditorProjectData = projModel;
-            Redraw(RedrawTarget.All);
             var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
             ScrollTo(dispTGrid);
 

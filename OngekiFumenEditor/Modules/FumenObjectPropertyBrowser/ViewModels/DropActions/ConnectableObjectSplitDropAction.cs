@@ -74,7 +74,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                     affactedObj.ReferenceLaneStart = (tGrid >= startObject.MinTGrid && tGrid <= startObject.MaxTGrid ? startObject : nextStartObject) as LaneStartBase;
                 }
 
-                editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
             }, () =>
             {
@@ -95,7 +94,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
                 backupStores.Clear();
                 affactedObjects.Clear();
-                editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
             }));
         }

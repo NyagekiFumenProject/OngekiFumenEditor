@@ -52,7 +52,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 else
                     startObject.InsertChildObject(dragTGrid, childViewModel as ConnectableChildObjectBase);
                 editor.MoveObjectTo(childViewModel, dragEndPoint);
-                editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
                 if (isFirst)
                 {
@@ -62,7 +61,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
             }, () =>
             {
                 startObject.RemoveChildObject(childViewModel as ConnectableChildObjectBase);
-                editor.Redraw(RedrawTarget.OngekiObjects);
                 callback?.Invoke();
             }));
         }

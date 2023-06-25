@@ -75,54 +75,6 @@
             cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event MouseLeftButtonUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
             Ready="glView_Ready"
             SizeChanged="glView_SizeChanged" />
-        <!--<TextBlock
-            Grid.Column="0"
-            Height="30"
-            Margin="0,0,20,0"
-            HorizontalAlignment="Right"
-            d:Text="500000000000000000"
-            Foreground="Yellow"
-            IsHitTestVisible="False">
-            <TextBlock.Text>
-                <MultiBinding Converter="{StaticResource JudgeLineDisplayConverter}">
-                    <MultiBinding.Bindings>
-                        <Binding Path="." />
-                        <Binding Path="Setting.JudgeLineOffsetY" />
-                        <Binding Path="Rect.MinY" />
-                    </MultiBinding.Bindings>
-                </MultiBinding>
-            </TextBlock.Text>
-            <TextBlock.RenderTransform>
-                <TranslateTransform>
-                    <TranslateTransform.Y>
-                        <MultiBinding Converter="{StaticResource JudgeLineConverter}" ConverterParameter="0">
-                            <MultiBinding.Bindings>
-                                <Binding Path="." />
-                                <Binding Path="Setting.JudgeLineOffsetY" />
-                            </MultiBinding.Bindings>
-                        </MultiBinding>
-                    </TranslateTransform.Y>
-                </TranslateTransform>
-            </TextBlock.RenderTransform>
-        </TextBlock>-->
-        <!--<Rectangle
-            Grid.Column="0"
-            Height="2"
-            IsHitTestVisible="False"
-            Stroke="Yellow">
-            <Rectangle.RenderTransform>
-                <TranslateTransform>
-                    <TranslateTransform.Y>
-                        <MultiBinding Converter="{StaticResource JudgeLineConverter}">
-                            <MultiBinding.Bindings>
-                                <Binding Path="." />
-                                <Binding Path="Setting.JudgeLineOffsetY" />
-                            </MultiBinding.Bindings>
-                        </MultiBinding>
-                    </TranslateTransform.Y>
-                </TranslateTransform>
-            </Rectangle.RenderTransform>
-        </Rectangle>-->
         <TextBlock
             HorizontalAlignment="Left"
             VerticalAlignment="Top"

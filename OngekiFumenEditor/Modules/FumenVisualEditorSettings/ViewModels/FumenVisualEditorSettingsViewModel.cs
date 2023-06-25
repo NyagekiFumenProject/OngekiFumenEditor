@@ -86,10 +86,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
                 Setting = Editor?.Setting;
             }
         }
-
-        public void OnSliderValueChanged()
-        {
-            Editor?.Redraw(FumenVisualEditor.Base.RedrawTarget.All);
-        }
     }
 }

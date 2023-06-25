@@ -29,7 +29,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
             {
                 editor.MoveObjectTo(displayObject, mousePosition);
                 editor.Fumen.AddObject(displayObject);
-                editor.Redraw(RedrawTarget.OngekiObjects);
 
                 if (isFirst)
                 {
@@ -39,7 +38,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
             }, () =>
             {
                 editor.RemoveObject(displayObject);
-                editor.Redraw(RedrawTarget.OngekiObjects);
             }));
         }
     }

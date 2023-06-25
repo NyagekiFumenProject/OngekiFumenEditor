@@ -136,11 +136,9 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Svg原地生成轨道物件", () =>
             {
                 editor.Fumen.AddObjects(genStarts);
-                editor.Redraw(RedrawTarget.OngekiObjects);
             }, () =>
             {
                 editor.Fumen.RemoveObjects(genStarts);
-                editor.Redraw(RedrawTarget.OngekiObjects);
             }));
         }
     }

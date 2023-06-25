@@ -322,18 +322,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             };
 
-            redo += () =>
-            {
-                Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
-                ToastNotify($"已粘贴生成 {newObjects.Count} 个物件");
-            };
-
-            undo += () =>
-            {
-                Redraw(RedrawTarget.OngekiObjects | RedrawTarget.TGridUnitLines);
-                ToastNotify($"已撤销粘贴生成");
-            };
-
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("复制粘贴", redo, undo));
         }
 
@@ -507,7 +495,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnTimeSignatureListChanged()
         {
-            Redraw(RedrawTarget.TGridUnitLines);
+            //nothing but leave it empty.
         }
 
         #region Keyboard Actions
@@ -524,16 +512,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 foreach (var obj in selectedObject)
                     RemoveObject(obj);
-
-                Redraw(RedrawTarget.OngekiObjects);
             }, () =>
             {
                 foreach (var obj in selectedObject)
                 {
                     Fumen.AddObject(obj);
                 }
-
-                Redraw(RedrawTarget.OngekiObjects);
             }));
         }
 
@@ -582,7 +566,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             convertToY = IsDesignMode ?
                 TGridCalculator.ConvertTGridUnitToY_DesignMode :
                 TGridCalculator.ConvertTGridUnitToY_PreviewMode;
-            RecalculateScrollBar();
             RecalculateTotalDurationHeight();
             ScrollTo(tGrid);
         }
@@ -691,7 +674,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     RemoveObject(newObject);
                 }
-                Redraw(RedrawTarget.OngekiObjects);
             };
 
             System.Action redo = async () =>
@@ -720,7 +702,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     {
                         Fumen.AddObject(newObject);
                     }
-                    Redraw(RedrawTarget.OngekiObjects);
                 }
             };
 

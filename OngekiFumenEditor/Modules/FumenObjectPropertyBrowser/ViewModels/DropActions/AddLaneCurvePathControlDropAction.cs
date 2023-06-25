@@ -41,7 +41,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 cachePathControl.TGrid = dragTGrid;
                 cachePathControl.XGrid = dragXGrid;
                 curveObject.AddControlObject(cachePathControl);
-                editor.Redraw(RedrawTarget.OngekiObjects);
                 if (isFirst)
                 {
                     editor.NotifyObjectClicked(cachePathControl);
@@ -50,7 +49,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
             }, () =>
             {
                 curveObject.RemoveControlObject(cachePathControl);
-                editor.Redraw(RedrawTarget.OngekiObjects);
             }));
         }
     }

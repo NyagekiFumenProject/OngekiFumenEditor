@@ -104,13 +104,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 editor.Fumen.RemoveObject(RefStartObject);
                 foreach (var start in genStarts)
                     editor.Fumen.AddObject(start);
-                editor.Redraw(RedrawTarget.OngekiObjects);
             }, () =>
             {
                 foreach (var start in genStarts)
                     editor.Fumen.RemoveObject(start);
                 editor.Fumen.AddObject(RefStartObject);
-                editor.Redraw(RedrawTarget.OngekiObjects);
             }));
         }
 
@@ -238,8 +236,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 };
             }
 
-            redoAction += () => editor.Redraw(RedrawTarget.OngekiObjects);
-            undoAction += () => editor.Redraw(RedrawTarget.OngekiObjects);
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("批量粘贴刷子", redoAction, undoAction));
         }
@@ -279,7 +275,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 foreach (var cp in storeBackupControlPoints)
                     childObj.RemoveControlObject(cp);
 
-                editor.Redraw(RedrawTarget.OngekiObjects);
             }, () =>
             {
                 foreach (var newChild in genChildren)
@@ -289,7 +284,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     childObj.AddControlObject(cp);
                 storeBackupControlPoints.Clear();
 
-                editor.Redraw(RedrawTarget.OngekiObjects);
             }));
         }
     }

@@ -327,17 +327,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             performenceMonitor.OnAfterRender();
         }
 
-        public void Redraw(RedrawTarget target)
-        {
-            if (target.HasFlag(RedrawTarget.ScrollBar))
-                RecalculateScrollBar();
-        }
-
         public void OnLoaded(ActionExecutionContext e)
         {
-            var scrollViewer = e.Source as FrameworkElement;
-            var view = e.View as FrameworkElement;
-            Redraw(RedrawTarget.All);
+
         }
 
         private void RecalculateMagaticXGridLines()
@@ -382,7 +374,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             scrollViewer?.InvalidateMeasure();
 
             var view = GetView() as FrameworkElement;
-            Redraw(RedrawTarget.All);
         }
 
         public void OnSchedulerTerm()
