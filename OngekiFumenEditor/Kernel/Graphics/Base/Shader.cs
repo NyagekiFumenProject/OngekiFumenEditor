@@ -22,13 +22,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.Base
 
         public string FragmentProgram { get { return frag; } set { frag = value; } }
 
+
+        public string GeometryProgram { get { return geo; } set { geo = value; } }
+
         private Dictionary<string, object> _uniforms;
 
         public Dictionary<string, object> Uniforms { get { return _uniforms; } internal set { _uniforms = value; } }
 
         private string vertError;
         private string fragError;
-        public string Error => $"vertex shader compile error :\n{vertError}\n\nfragment shader compile error :\n{fragError}";
+        private string geoError;
+        public string Error => GenErrorString();
+
+        private string GenErrorString()
+        {
+            string gen(string name,string msg)
+            {
+                if (string.IsNullOrWhiteSpace(msg))
+                    return string.Empty;
+
+                return $"{msg} has compile error(s):{msg}\n";
+            }
+
+            return gen(nameof(VertexProgram), vertError) + gen(nameof(FragmentProgram), fragError) + gen(nameof(GeometryProgram), geoError);
+        }
 
         public void Compile()
         {
@@ -38,36 +55,38 @@ namespace OngekiFumenEditor.Kernel.Graphics.Base
 
                 Uniforms = new Dictionary<string, object>();
 
-                vertexShader = GL.CreateShader(ShaderType.VertexShader);
-                fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
+                var genShaders = new List<int>();
 
-                GL.ShaderSource(vertexShader, vert);
-                GL.ShaderSource(fragmentShader, frag);
+                void compileShader(string source,ShaderType shaderType,ref int shader,ref string msg)
+                {
+                    shader = GL.CreateShader(shaderType);
+                    GL.ShaderSource(shader, source);
 
-                GL.CompileShader(vertexShader);
-                if (!GL.IsShader(vertexShader))
-                    throw new Exception("Vertex shader compile failed.");
-                GL.CompileShader(fragmentShader);
-                if (!GL.IsShader(fragmentShader))
-                    throw new Exception("Fragment shader compile failed.");
+                    GL.CompileShader(shader);
+                    if (!GL.IsShader(shader))
+                        throw new Exception($"{shaderType} compile failed.");
+                    msg = GL.GetShaderInfoLog(shader);
+                    if (!string.IsNullOrEmpty(msg))
+                        Log.LogDebug($"[{shaderType}]:{msg}");
 
-                vertError = GL.GetShaderInfoLog(vertexShader);
-                if (!string.IsNullOrEmpty(vertError))
-                    Log.LogDebug("[Vertex Shader]:" + vertError);
+                    genShaders.Add(shader);
+                }
 
-                fragError = GL.GetShaderInfoLog(fragmentShader);
-                if (!string.IsNullOrEmpty(fragError))
-                    Log.LogDebug("[Fragment Shader]:" + fragError);
+                compileShader(VertexProgram, ShaderType.VertexShader, ref vertexShader, ref vertError);
+                compileShader(FragmentProgram, ShaderType.FragmentShader, ref fragmentShader, ref fragError);
+                if (!string.IsNullOrWhiteSpace(GeometryProgram))
+                    compileShader(GeometryProgram, ShaderType.GeometryShader, ref geometryShader, ref geoError);
 
                 program = GL.CreateProgram();
 
-                GL.AttachShader(program, vertexShader);
-                GL.AttachShader(program, fragmentShader);
+                foreach (var shader in genShaders)
+                    GL.AttachShader(program, shader);
 
                 GL.LinkProgram(program);
 
-                if (!string.IsNullOrEmpty(GL.GetProgramInfoLog(program)))
-                    Log.LogError(GL.GetProgramInfoLog(program));
+                var buildShaderError = GL.GetProgramInfoLog(program);
+                if (!string.IsNullOrEmpty(buildShaderError))
+                    Log.LogError(buildShaderError);
 
                 GL.GetProgram(program, GetProgramParameterName.ActiveUniforms, out var total);
 
@@ -156,6 +175,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Base
 
         private Dictionary<string, int> _uniformDictionary = new Dictionary<string, int>();
         private Dictionary<string, int> _attrbDictionary = new Dictionary<string, int>();
+        private string geo;
+        private int geometryShader;
 
         public int GetUniformLocation(string name)
         {
