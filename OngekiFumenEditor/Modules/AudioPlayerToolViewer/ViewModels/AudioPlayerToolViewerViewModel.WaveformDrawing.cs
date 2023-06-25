@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
@@ -153,7 +154,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             RecalcViewProjectionMatrix();
 
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
+            //暂时没有需要显示检测的必要?
+            //performenceMonitor = IoC.Get<IPerfomenceMonitor>();
+            performenceMonitor = new DummyPerformenceMonitor();
 
             glView.Render += Render;
         }
@@ -210,8 +213,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(TimeSpan ts)
         {
-            performenceMonitor.PostUIRenderTime(ts);
-            performenceMonitor.OnBeforeRender();
+            PerfomenceMonitor.PostUIRenderTime(ts);
+            PerfomenceMonitor.OnBeforeRender();
 
 #if DEBUG
             var error = GL.GetError();
@@ -228,7 +231,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (usingPeakData is not null)
                 WaveformDrawing.Draw(this, usingPeakData);
 
-            performenceMonitor.OnAfterRender();
+            PerfomenceMonitor.OnAfterRender();
         }
 
         private void UpdateDrawingContext()

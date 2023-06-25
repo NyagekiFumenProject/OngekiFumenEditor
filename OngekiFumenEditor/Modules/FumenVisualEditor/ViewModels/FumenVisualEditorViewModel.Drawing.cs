@@ -3,7 +3,6 @@ using Gemini.Framework;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
@@ -24,18 +23,20 @@ using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.IFumenEditorDr
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using System.Windows.Media;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulable, IFumenEditorDrawingContext
     {
-        private IPerfomenceMonitor performenceMonitor;
+        private IPerfomenceMonitor dummyPerformenceMonitor = new DummyPerformenceMonitor();
+        private IPerfomenceMonitor actualPerformenceMonitor;
+
         private DrawTimeSignatureHelper timeSignatureHelper;
         private DrawXGridHelper xGridHelper;
         private DrawJudgeLineHelper judgeLineHelper;
         private DrawSelectingRangeHelper selectingRangeHelper;
         private DrawPlayableAreaHelper playableAreaHelper;
-        private ICircleDrawing circleDrawing;
         private Func<double, FumenVisualEditorViewModel, double> convertToY = TGridCalculator.ConvertTGridUnitToY_DesignMode;
 
         private StringBuilder stringBuilder = new StringBuilder();
@@ -77,6 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref isDisplayFPS, value);
+                PerfomenceMonitor = value ? actualPerformenceMonitor : dummyPerformenceMonitor;
             }
         }
 
@@ -104,7 +106,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public VisibleRect Rect { get; set; } = default;
         public VisibleTGridRange TGridRange { get; set; } = default;
 
-        public IPerfomenceMonitor PerfomenceMonitor => performenceMonitor;
+        public IPerfomenceMonitor PerfomenceMonitor { get; private set; } = new DummyPerformenceMonitor();
 
         private static Dictionary<string, IFumenEditorDrawingTarget[]> drawTargets = new();
         private IFumenEditorDrawingTarget[] drawTargetOrder;
@@ -165,9 +167,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             selectingRangeHelper = new DrawSelectingRangeHelper();
             playableAreaHelper = new DrawPlayableAreaHelper();
 
-            circleDrawing = IoC.Get<ICircleDrawing>();
-
-            performenceMonitor = IoC.Get<IPerfomenceMonitor>();
+            actualPerformenceMonitor = IoC.Get<IPerfomenceMonitor>();
+            IsDisplayFPS = IsDisplayFPS;
 
             openGLView.Render += Render;
         }
@@ -243,8 +244,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Render(TimeSpan ts)
         {
-            performenceMonitor.PostUIRenderTime(ts);
-            performenceMonitor.OnBeforeRender();
+            PerfomenceMonitor.PostUIRenderTime(ts);
+            PerfomenceMonitor.OnBeforeRender();
 
 #if DEBUG
             var error = GL.GetError();
@@ -324,7 +325,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             judgeLineHelper.Draw(this);
             selectingRangeHelper.Draw(this);
 
-            performenceMonitor.OnAfterRender();
+            PerfomenceMonitor.OnAfterRender();
         }
 
         public void OnLoaded(ActionExecutionContext e)
@@ -372,8 +373,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var scrollViewer = e.Source as AnimatedScrollViewer;
             scrollViewer?.InvalidateMeasure();
-
-            var view = GetView() as FrameworkElement;
         }
 
         public void OnSchedulerTerm()
@@ -387,13 +386,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 stringBuilder.Clear();
 
-                performenceMonitor?.FormatStatistics(stringBuilder);
+                PerfomenceMonitor?.FormatStatistics(stringBuilder);
                 stringBuilder.AppendLine();
                 stringBuilder.AppendLine($"View: {ViewWidth}x{ViewHeight}");
 
                 DisplayFPS = stringBuilder.ToString();
 
-                performenceMonitor?.Clear();
+                PerfomenceMonitor?.Clear();
 
             }
             return Task.CompletedTask;
