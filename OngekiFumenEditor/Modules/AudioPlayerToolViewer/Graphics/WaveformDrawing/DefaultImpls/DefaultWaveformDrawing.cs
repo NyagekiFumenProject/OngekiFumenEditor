@@ -1,23 +1,14 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static OngekiFumenEditor.Kernel.Audio.ISamplePeak;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls
@@ -174,14 +165,14 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
 
                             var beatHeightWeight = beatIdx == 0 ? 1 : 0.85f;
+                            beatHeightWeight = cachedObjTimeMap.ContainsKey(tGrid) ? 0.1f : beatHeightWeight;
                             var topY = height / 2 * beatHeightWeight;
                             var buttomY = -topY;
 
-                            var beatColor = cachedObjTimeMap.ContainsKey(tGrid) ? TransparentColor : BeatColor;
 
                             lineDrawing.PostPoint(new(x, buttomY), TransparentColor, VertexDash.Solider);
-                            lineDrawing.PostPoint(new(x, buttomY), beatColor, VertexDash.Solider);
-                            lineDrawing.PostPoint(new(x, topY), beatColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(x, buttomY), BeatColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(x, topY), BeatColor, VertexDash.Solider);
                             lineDrawing.PostPoint(new(x, topY), TransparentColor, VertexDash.Solider);
 
                             var str = "";
