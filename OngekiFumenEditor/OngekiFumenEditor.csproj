@@ -427,4 +427,8 @@
     </Page>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Kernel\Audio\BassImpl\" />
+  </ItemGroup>
+
 </Project>

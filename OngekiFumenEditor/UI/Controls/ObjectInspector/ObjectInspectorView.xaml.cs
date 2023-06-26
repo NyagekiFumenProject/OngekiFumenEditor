@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector
     /// <summary>
     /// FumenMetaInfoBrowserView.xaml 的交互逻辑
     /// </summary>
-    public partial class ObjectInspectorView : UserControl, INotifyPropertyChanged
+    public partial class ObjectInspectorView : UserControl
     {
         public object InspectObject
         {
@@ -47,7 +47,5 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector
 
             HostContent.DataContext = new ObjectInspectorViewModel();
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
