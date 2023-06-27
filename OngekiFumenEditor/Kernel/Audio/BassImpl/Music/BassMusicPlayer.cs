@@ -13,11 +13,7 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
     internal class BassMusicPlayer : PropertyChangedBase, IAudioPlayer
     {
         private int audioHandle;
-        private FXVolumeParam volumeParam = new FXVolumeParam()
-        {
-            volume = 1,
-            lChannel = FXChannelFlags.All
-        };
+        private FXVolumeParam volumeParam = new FXVolumeParam();
         private int volumeFXHandle;
         private bool isStoped;
 
@@ -30,7 +26,8 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
 
             Duration = TimeSpan.FromSeconds(durationSecond);
 
-            volumeFXHandle = Bass.ChannelSetFX(audioHandle, EffectType.Volume, 0);
+            volumeFXHandle = Bass.ChannelSetFX(audioHandle,(EffectType)9, 0);
+            BassUtils.ReportError(nameof(Bass.ChannelSetFX));
 
             //init values
             Volume = 1;
@@ -43,13 +40,16 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
             get
             {
                 Bass.FXGetParameters(volumeFXHandle, volumeParam);
-                return volumeParam.volume;
+                return volumeParam.fCurrent;
             }
 
             set
             {
-                volumeParam.volume = value;
+                volumeParam.fCurrent = value;
+                volumeParam.fTarget = value;
+                volumeParam.fTime = 0;
                 Bass.FXSetParameters(volumeFXHandle, volumeParam);
+                NotifyOfPropertyChange(() => Volume);
             }
         }
 
@@ -83,6 +83,7 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
             Bass.ChannelRemoveFX(audioHandle, volumeFXHandle);
             Bass.StreamFree(audioHandle);
             audioHandle = 0;
+            volumeFXHandle = 0;
         }
 
         public async Task<SampleData> GetSamplesAsync()

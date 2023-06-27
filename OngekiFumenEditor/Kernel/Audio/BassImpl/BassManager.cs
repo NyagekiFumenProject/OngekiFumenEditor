@@ -1,6 +1,8 @@
-﻿using Gemini.Framework.Services;
+﻿using Caliburn.Micro;
+using Gemini.Framework.Services;
 using ManagedBass;
 using ManagedBass.Mix;
+using OngekiFumenEditor.Kernel.Audio.BassImpl.Base;
 using OngekiFumenEditor.Kernel.Audio.BassImpl.Music;
 using OngekiFumenEditor.Kernel.Audio.BassImpl.Sound;
 using OngekiFumenEditor.Utils;
@@ -16,11 +18,33 @@ using System.Windows.Interop;
 namespace OngekiFumenEditor.Kernel.Audio.BassImpl
 {
     [Export(typeof(IAudioManager))]
-    internal class BassManager : IAudioManager
+    internal class BassManager : PropertyChangedBase, IAudioManager
     {
-        public float SoundVolume { get => 1; set {
-            //todo
-            } }
+        private int soundMixVolumeHandle = 0;
+        private FXVolumeParam volumeParam = new FXVolumeParam();
+
+        public float SoundVolume 
+        {
+            get
+            {
+                //var volume = Bass.ChannelGetAttribute(soundMixer, ChannelAttribute.Volume);
+                //return (float)volume;
+                Bass.FXGetParameters(soundMixVolumeHandle, volumeParam);
+                return volumeParam.fCurrent;
+            }
+
+            set
+            {
+                //Bass.ChannelSetAttribute(soundMixer, ChannelAttribute.Volume, value);
+                
+                volumeParam.fCurrent = value;
+                volumeParam.fTarget = value;
+                volumeParam.fTime = 0;
+                Bass.FXSetParameters(soundMixVolumeHandle, volumeParam);
+                
+                NotifyOfPropertyChange(() => SoundVolume);
+            }
+        }
 
         //private int masterMixer = 0;
         private int soundMixer = 0;
@@ -36,7 +60,7 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
             WindowInteropHelper helper = new WindowInteropHelper(App.Current.MainWindow);
             var handle = helper.Handle;
 
-            Bass.Init(-1, 48000, DeviceInitFlags.Default, handle, default);
+            Bass.Init(-1, 48000, DeviceInitFlags.Latency, handle, default);
             BassUtils.ReportError(nameof(Bass.Init));
 
             Bass.GetInfo(out var info);
@@ -49,10 +73,19 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
 
             Bass.ChannelPlay(soundMixer);
             BassUtils.ReportError(nameof(Bass.ChannelPlay));
+
+            soundMixVolumeHandle = Bass.ChannelSetFX(soundMixer, (EffectType)9, 0);
+            BassUtils.ReportError(nameof(Bass.ChannelSetFX));
+            
+            SoundVolume = 1;
         }
 
         public void Dispose()
         {
+            if (soundMixVolumeHandle != 0)
+                Bass.ChannelRemoveFX(soundMixer, soundMixVolumeHandle);
+            soundMixVolumeHandle = 0;
+
             if (soundMixer != 0)
                 Bass.StreamFree(soundMixer);
             soundMixer = 0;

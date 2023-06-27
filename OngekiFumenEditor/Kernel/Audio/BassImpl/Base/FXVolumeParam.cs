@@ -12,8 +12,10 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Base
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public class FXVolumeParam : IEffectParameter
     {
-        public float volume;
-        public FXChannelFlags lChannel;
+        public float fTarget;
+        public float fCurrent;
+        public float fTime;
+        public uint lCurve;
 
         public EffectType FXType => EffectType.Volume;
     }

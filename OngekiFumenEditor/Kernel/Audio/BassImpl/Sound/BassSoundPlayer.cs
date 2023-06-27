@@ -1,4 +1,5 @@
-﻿using ManagedBass;
+﻿using Caliburn.Micro;
+using ManagedBass;
 using ManagedBass.Mix;
 using Microsoft.VisualBasic.Devices;
 using NAudio.Mixer;
@@ -12,16 +13,12 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Sound
 {
-    internal class BassSoundPlayer : ISoundPlayer
+    internal class BassSoundPlayer : PropertyChangedBase, ISoundPlayer
     {
         private int soundHandle;
         private int soundMixer;
         private int volumeFXHandle;
-        private FXVolumeParam volumeParam = new FXVolumeParam()
-        {
-            volume = 1,
-            lChannel = FXChannelFlags.All
-        };
+        private FXVolumeParam volumeParam = new FXVolumeParam();
         private bool added = false;
 
         public bool IsAvaliable => soundHandle != 0;
@@ -31,7 +28,8 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Sound
             this.soundHandle = soundHandle;
             this.soundMixer = soundMixer;
 
-            volumeFXHandle = Bass.ChannelSetFX(soundHandle, EffectType.Volume, 0);
+            volumeFXHandle = Bass.ChannelSetFX(soundHandle, (EffectType)9, 0);
+            BassUtils.ReportError(nameof(Bass.ChannelSetFX));
             //init values
             Volume = 1;
         }
@@ -41,13 +39,17 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Sound
             get
             {
                 Bass.FXGetParameters(volumeFXHandle, volumeParam);
-                return volumeParam.volume;
+                return volumeParam.fCurrent;
             }
 
             set
             {
-                volumeParam.volume = value;
+
+                volumeParam.fCurrent = value;
+                volumeParam.fTarget = value;
+                volumeParam.fTime = 0;
                 Bass.FXSetParameters(volumeFXHandle, volumeParam);
+                NotifyOfPropertyChange(()=>Volume);
             }
         }
 
@@ -57,9 +59,13 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Sound
                 return;
 
             MakeSureChannelRemoved();
+
+            Bass.ChannelRemoveFX(soundHandle,volumeFXHandle);
             Bass.StreamFree(soundHandle);
+
             soundHandle = default;
             soundMixer = default;
+            volumeFXHandle= default;
         }
 
         private void MakeSureChannelRemoved()

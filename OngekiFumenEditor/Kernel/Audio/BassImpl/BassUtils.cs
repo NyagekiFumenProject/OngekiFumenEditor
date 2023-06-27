@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
             var state = Bass.LastError;
             if (state != Errors.OK)
             {
-                var msg = $"Call {callMethod}(...) failed, error = {Bass.LastError}";
+                var msg = $"Call {callMethod}(...) failed, error = {state}";
                 Log.LogError(msg);
 
                 throw new Exception(msg);
