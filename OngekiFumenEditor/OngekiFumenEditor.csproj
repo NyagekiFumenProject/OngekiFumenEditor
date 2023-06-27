@@ -67,6 +67,8 @@
 
   <ItemGroup>
     <PackageReference Include="FontStashSharp" Version="1.2.5" />
+    <PackageReference Include="ManagedBass" Version="3.1.1" />
+    <PackageReference Include="ManagedBass.Mix" Version="3.1.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.5.107">
@@ -228,6 +230,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="bass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bassmix.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Properties\AudioPlayerToolViewerSetting.settings">
       <LastGenOutput>AudioPlayerToolViewerSetting.Designer.cs</LastGenOutput>
       <Generator>PublicSettingsSingleFileGenerator</Generator>
@@ -425,10 +433,6 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Kernel\Audio\BassImpl\" />
   </ItemGroup>
 
 </Project>

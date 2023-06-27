@@ -12,10 +12,14 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
     {
         public static void ReportError(string callMethod)
         {
-            var msg = $"Call {callMethod}(...) failed, error = {Bass.LastError}";
-            Log.LogError(msg);
+            var state = Bass.LastError;
+            if (state != Errors.OK)
+            {
+                var msg = $"Call {callMethod}(...) failed, error = {Bass.LastError}";
+                Log.LogError(msg);
 
-            throw new Exception(msg);
+                throw new Exception(msg);
+            }
         }
     }
 }

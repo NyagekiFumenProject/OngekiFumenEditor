@@ -21,7 +21,7 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 {
-    [Export(typeof(IAudioManager))]
+    //[Export(typeof(IAudioManager))]
     public class NAudioManager : IAudioManager
     {
         private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();

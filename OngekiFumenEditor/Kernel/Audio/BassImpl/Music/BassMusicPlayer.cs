@@ -55,7 +55,23 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
 
         public TimeSpan Duration { get; init; }
 
-        public bool IsPlaying => Bass.ChannelIsActive(audioHandle).HasFlag(PlaybackState.Playing);
+        public bool IsPlaying
+        {
+            get {
+                var state = Bass.ChannelIsActive(audioHandle);
+                switch (state)
+                {
+                    case PlaybackState.Playing:
+                        return true;
+                    case PlaybackState.Stopped:
+                    case PlaybackState.Stalled:
+                    case PlaybackState.Paused:
+                    default:
+                        return false;
+                }
+
+            }
+        }
 
         public bool IsAvaliable => audioHandle != 0;
 
@@ -69,9 +85,9 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
             audioHandle = 0;
         }
 
-        public Task<SampleData> GetSamplesAsync()
+        public async Task<SampleData> GetSamplesAsync()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public void Pause()
@@ -104,6 +120,8 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
                 Pause();
             var len = Bass.ChannelSeconds2Bytes(audioHandle, TimeSpan.TotalSeconds);
             Bass.ChannelSetPosition(audioHandle, len, PositionFlags.Bytes);
+            if (!pause)
+                Play();
         }
 
         public void Stop()

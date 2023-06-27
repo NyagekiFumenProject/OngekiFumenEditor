@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Kernel.Audio.ISamplePeak;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.SamplePeak
+namespace OngekiFumenEditor.Kernel.Audio.SamplePeak
 {
     [Export(typeof(ISamplePeak))]
     internal class DefaultSamplePeak : ISamplePeak

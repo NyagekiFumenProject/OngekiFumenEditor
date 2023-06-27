@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
+namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 {
     [Export(typeof(IFumenSoundPlayer))]
     public class DefaultFumenSoundPlayer : PropertyChangedBase, IFumenSoundPlayer, IDisposable

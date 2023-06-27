@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound.DefaultFumenSoundPlayer;
+using static OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound.DefaultFumenSoundPlayer;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Models
 {
