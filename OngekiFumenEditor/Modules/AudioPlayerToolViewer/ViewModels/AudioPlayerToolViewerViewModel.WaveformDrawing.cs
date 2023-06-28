@@ -183,7 +183,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (cancelToken.IsCancellationRequested || player is null || samplePeak is null)
                 return;
             var sampleData = await player.GetSamplesAsync();
-            rawPeakData = sampleData is not null ? samplePeak.GetPeakValues(sampleData):null;
+            rawPeakData = sampleData is not null ? samplePeak.GetPeakValues(sampleData) : null;
             ResamplePeak();
         }
 
@@ -197,7 +197,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 usingPeakData = rawPeakData;
             else
             {
-                var newPeakData = await rawPeakData?.GenerateSimplfiedAsync(ResampleSize, tokenSource.Token);
+                var newPeakData = rawPeakData is null ? default : await rawPeakData?.GenerateSimplfiedAsync(ResampleSize, tokenSource.Token);
                 if (!tokenSource.IsCancellationRequested)
                     usingPeakData = newPeakData;
             }
