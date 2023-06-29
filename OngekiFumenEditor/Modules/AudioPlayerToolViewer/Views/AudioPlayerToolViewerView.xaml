@@ -30,7 +30,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel Margin="10" IsEnabled="{Binding IsAudioButtonEnabled}">
+            <StackPanel Margin="10" Visibility="{Binding IsShowWaveform,Converter={StaticResource BoolToVisibilityConverter},ConverterParameter=true}" IsEnabled="{Binding IsAudioButtonEnabled}">
                 <Line Height="2" Stroke="Red">
                 </Line>
                 <wpf:GLWpfControl
@@ -171,8 +171,9 @@
                 <GroupBox
                     Grid.Column="1"
                     Margin="10"
-                    Header="音效开关控制">
+                    Header="开关控制">
                     <StackPanel>
+                        <CheckBox Margin="5" IsChecked="{Binding IsShowWaveform}">是否显示频谱</CheckBox>
                         <StackPanel
                             Margin="5"
                             HorizontalAlignment="Stretch"

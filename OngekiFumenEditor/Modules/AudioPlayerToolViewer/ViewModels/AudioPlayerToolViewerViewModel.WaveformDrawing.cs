@@ -112,6 +112,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
+        private bool isShowWaveform = true;
+        public bool IsShowWaveform
+        {
+            get => isShowWaveform;
+            set => Set(ref isShowWaveform, value);
+        }
+
         public FumenVisualEditorViewModel EditorViewModel => Editor;
 
         private void RecalcViewProjectionMatrix()
@@ -213,7 +220,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(TimeSpan ts)
         {
-            if (Editor is null)
+            if (Editor is null || !IsShowWaveform)
                 return;
 
             PerfomenceMonitor.PostUIRenderTime(ts);
