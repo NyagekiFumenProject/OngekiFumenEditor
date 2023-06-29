@@ -177,6 +177,24 @@
                             Margin="5"
                             HorizontalAlignment="Stretch"
                             Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center">速度</TextBlock>
+                            <Slider
+                                Width="150"
+                                Minimum="0.25"
+                                Margin="5,0,0,0"
+                                VerticalAlignment="Stretch"
+                                VerticalContentAlignment="Center"
+                                IsEnabled="{Binding AudioPlayer.IsAvaliable}"
+                                LargeChange="0.25"
+                                Maximum="1.25"
+                                SmallChange="0.25"
+                                Value="{Binding AudioPlayer.Speed}">
+                            </Slider>
+                        </StackPanel>
+                        <StackPanel
+                            Margin="5"
+                            HorizontalAlignment="Stretch"
+                            Orientation="Horizontal">
                             <TextBlock VerticalAlignment="Center">音乐</TextBlock>
                             <Slider
                                 Width="150"

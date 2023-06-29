@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 
         public TimeSpan CurrentTime { get => GetTime(); }
 
-        public float PlaybackSpeed { get => 1; set { } }
+        public float Speed { get => 1; set { } }
 
         public bool IsPlaying { get => currentOut?.PlaybackState == PlaybackState.Playing; }
 
@@ -180,7 +180,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 
             NotifyOfPropertyChange(() => CurrentTime);
             NotifyOfPropertyChange(() => Volume);
-            NotifyOfPropertyChange(() => PlaybackSpeed);
+            NotifyOfPropertyChange(() => Speed);
             NotifyOfPropertyChange(() => IsPlaying);
         }
 

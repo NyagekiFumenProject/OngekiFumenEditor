@@ -41,6 +41,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
         }
 
         public bool IsAvaliable { get; } = true;
+        public float Speed { get => 1; set { } }
 
         public Task Load(string audio_file)
         {

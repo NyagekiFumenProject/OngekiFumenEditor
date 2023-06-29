@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,6 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
             {
                 var msg = $"Call {callMethod}(...) failed, error = {state}";
                 Log.LogError(msg);
-
                 throw new Exception(msg);
             }
         }

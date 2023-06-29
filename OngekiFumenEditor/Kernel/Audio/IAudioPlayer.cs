@@ -13,6 +13,11 @@ namespace OngekiFumenEditor.Kernel.Audio
         /// 当前播放时间,毫秒
         /// </summary>
         TimeSpan CurrentTime { get; }
+        
+        /// <summary>
+        /// 播放速度 0~1 
+        /// </summary>
+        float Speed { get; set; }
 
         /// <summary>
         /// 音量,0~1

@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using ManagedBass;
+using ManagedBass.Fx;
 using OngekiFumenEditor.Kernel.Audio.BassImpl.Base;
 using System;
 using System.Buffers;
@@ -44,6 +45,8 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
             this.info = info;
 
             syncHandle = Bass.ChannelSetSync(audioHandle, SyncFlags.End, 0, OnPlaybackStopped);
+
+            Speed = 1f;
         }
 
         public TimeSpan CurrentTime => TimeSpan.FromSeconds(Math.Max(0, Bass.ChannelBytes2Seconds(audioHandle, Bass.ChannelGetPosition(audioHandle)) - audioLatency));
@@ -63,6 +66,21 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Music
                 volumeParam.fTime = 0;
                 Bass.FXSetParameters(volumeFXHandle, volumeParam);
                 NotifyOfPropertyChange(() => Volume);
+            }
+        }
+
+        public float Speed
+        {
+            get
+            {
+                var rSpd = (float)Bass.ChannelGetAttribute(audioHandle, ChannelAttribute.Tempo);
+                return (rSpd + 100) / 100;
+            }
+            set
+            {
+                var rSpd = value * 100 - 100;
+                Bass.ChannelSetAttribute(audioHandle, ChannelAttribute.Tempo, rSpd);
+                NotifyOfPropertyChange(() => Speed);
             }
         }
 

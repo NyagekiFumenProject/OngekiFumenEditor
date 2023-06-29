@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Services;
 using ManagedBass;
+using ManagedBass.Fx;
 using ManagedBass.Mix;
 using OngekiFumenEditor.Kernel.Audio.BassImpl.Base;
 using OngekiFumenEditor.Kernel.Audio.BassImpl.Music;
@@ -70,7 +71,8 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
             Bass.GetInfo(out var info);
             BassUtils.ReportError(nameof(Bass.GetInfo));
 
-            audioLatency = info.Latency / 1000;//convert to seconds
+            //audioLatency = info.Latency / 1000;//convert to seconds
+            audioLatency = 0;
 
             soundMixer = BassMix.CreateMixerStream(OUTPUT_SAMPLES, 2, BassFlags.MixerNonStop);
             BassUtils.ReportError(nameof(BassMix.CreateMixerStream));
@@ -87,7 +89,7 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
             {
                 var before = Bass.GetConfig(cfg);
                 Bass.Configure(cfg, val);
-                Log.LogDebug($"Configure Bass {cfg}: {before} -> {val} {(val == before?"(same)":string.Empty)}");
+                Log.LogDebug($"Configure Bass {cfg}: {before} -> {val} {(val == before ? "(same)" : string.Empty)}");
             }
 
             config(Configuration.UpdatePeriod, 16);
@@ -142,10 +144,12 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
 
             DumpSampleDataAndInfo(buffer, out var sampleData, out var info);
 
-            var audioHandle = Bass.CreateStream(buffer, 0, buffer.Length, BassFlags.Default);
+            var audioHandle = Bass.CreateStream(buffer, 0, buffer.Length, BassFlags.Decode | BassFlags.Float | BassFlags.Prescan);
             BassUtils.ReportError(nameof(Bass.CreateStream));
+            var fxAudioHandle = BassFx.TempoCreate(audioHandle, BassFlags.FxFreeSource);
+            BassUtils.ReportError(nameof(BassFx.TempoCreate));
 
-            return new BassMusicPlayer(audioHandle, audioLatency, sampleData, info);
+            return new BassMusicPlayer(fxAudioHandle, audioLatency, sampleData, info);
         }
 
         public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
