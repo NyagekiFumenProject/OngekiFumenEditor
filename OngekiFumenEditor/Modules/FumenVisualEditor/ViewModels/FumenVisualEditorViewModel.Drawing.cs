@@ -335,6 +335,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RecalculateMagaticXGridLines()
         {
+            //todo 可以优化
             cachedMagneticXGridLines.Clear();
 
             var width = ViewWidth;

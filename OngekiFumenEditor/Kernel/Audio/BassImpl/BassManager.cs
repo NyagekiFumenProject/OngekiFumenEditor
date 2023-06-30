@@ -121,16 +121,34 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
             BassUtils.ReportError(nameof(Bass.ChannelGetLength));
             Bass.ChannelGetInfo(handle, out var channelInfo);
             BassUtils.ReportError(nameof(Bass.ChannelGetData));
-            var floatLength = byteLength / (channelInfo.OriginalResolution / 8) * channelInfo.Channels;
-            samples = new float[floatLength];
-
-            var read = Bass.ChannelGetData(handle, samples, floatLength);
-            BassUtils.ReportError(nameof(Bass.ChannelGetData));
 
             info = new SampleInfo();
             info.Channels = channelInfo.Channels;
             info.SampleRate = channelInfo.Frequency;
             info.BitsPerSample = channelInfo.OriginalResolution;
+
+            Log.LogDebug($"channelInfo.Channels = {channelInfo.Channels}");
+            Log.LogDebug($"channelInfo.Frequency = {channelInfo.Frequency}");
+            Log.LogDebug($"channelInfo.Resolution = {channelInfo.Resolution}");
+            Log.LogDebug($"channelInfo.FileName = {channelInfo.FileName}");
+            Log.LogDebug($"channelInfo.OriginalResolution = {channelInfo.OriginalResolution}");
+            Log.LogDebug($"channelInfo.Sample = {channelInfo.Sample}");
+            Log.LogDebug($"channelInfo.Flags = {channelInfo.Flags}");
+            Log.LogDebug($"channelInfo.IsDecodingChannel = {channelInfo.IsDecodingChannel}");
+
+            if (info.BitsPerSample == 0)
+            {
+                Log.LogError($"channelInfo.OriginalResolution == 0, stop dump samples");
+                samples = new float[0];
+                return;
+            }
+
+            var floatLength = byteLength / (info.BitsPerSample / 8) * info.Channels;
+            samples = new float[floatLength];
+
+            var read = Bass.ChannelGetData(handle, samples, floatLength);
+            BassUtils.ReportError(nameof(Bass.ChannelGetData));
+
 
             Bass.StreamFree(handle);
         }
