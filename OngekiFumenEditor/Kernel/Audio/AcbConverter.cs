@@ -87,7 +87,7 @@ namespace OngekiFumenEditor.Kernel.Audio
 
                 var formatVersion = acb.FormatVersion;
                 var awb = acb.InternalAwb ?? acb.ExternalAwb;
-                var tempAwbFilePath = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(filePath), ".wav");
+                var tempAwbFilePath = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(filePath) + ".wav");
 
                 if (File.Exists(tempAwbFilePath))
                 {
