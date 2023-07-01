@@ -179,19 +179,7 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
         public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
         {
             var buffer = await File.ReadAllBytesAsync(filePath);
-            var soundHandle = Bass.CreateStream(buffer, 0, buffer.Length, BassFlags.Default);
-            BassUtils.ReportError(nameof(Bass.CreateStream));
-
-            var sample = Bass.ChannelGetAttribute(soundHandle, ChannelAttribute.Frequency);
-            if (sample != OUTPUT_SAMPLES)
-            {
-                Log.LogWarn($"Sound file {filePath} samples {sample} != 48000");
-                //just warn
-            }
-
-            Bass.ChannelSetAttribute(soundHandle, ChannelAttribute.Buffer, 5);
-            BassUtils.ReportError(nameof(Bass.ChannelSetAttribute));
-            return new BassSoundPlayer(soundHandle, soundMixer);
+            return new BassSoundPlayer(soundMixer, buffer);
         }
     }
 }
