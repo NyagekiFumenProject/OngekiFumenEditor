@@ -55,8 +55,6 @@ namespace OngekiFumenEditor
                         return r;
                 return ViewHelper.CreateView(model);
             };
-            foreach (var locatorOverrider in IoC.GetAll<ILocatorOverride>())
-                locatorOverrider.Override();
         }
 
         protected override void BindServices(CompositionBatch batch)
