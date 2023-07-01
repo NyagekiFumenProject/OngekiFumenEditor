@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             set => Set(ref curvePrecision, value <= 0 ? 0.01f : value);
         }
 
-        private ICurveInterpolaterFactory curveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default;
+        private ICurveInterpolaterFactory curveInterpolaterFactory = XGridLimitedCurveInterpolaterFactory.Default;
         public ICurveInterpolaterFactory CurveInterpolaterFactory
         {
             get => curveInterpolaterFactory;

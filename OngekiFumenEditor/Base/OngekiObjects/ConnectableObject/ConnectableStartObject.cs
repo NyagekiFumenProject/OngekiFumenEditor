@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
     {
         public event Action<object, PropertyChangedEventArgs> ConnectableObjectsPropertyChanged;
 
-        private ICurveInterpolaterFactory curveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default;
+        private ICurveInterpolaterFactory curveInterpolaterFactory = XGridLimitedCurveInterpolaterFactory.Default;
         public ICurveInterpolaterFactory CurveInterpolaterFactory
         {
             get => curveInterpolaterFactory;
