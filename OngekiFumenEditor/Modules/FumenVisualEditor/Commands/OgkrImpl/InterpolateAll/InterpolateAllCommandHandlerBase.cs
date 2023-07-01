@@ -17,6 +17,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
+
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll
 {
     public abstract class InterpolateAllCommandHandlerBase<T> : CommandHandlerBase<T> where T : CommandDefinition
@@ -27,12 +28,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 
             var laneMap = new Dictionary<ConnectableStartObject, List<ConnectableStartObject>>();
 
-            foreach ((var beforeLane, var genLanes) in OngekiFumenEditor.Kernel.InterpolateAll.Calculate(fumen, xGridLimit))
+            foreach ((var beforeLane, var genLanes) in Utils.Ogkr.InterpolateAll.Calculate(fumen, xGridLimit))
                 laneMap[beforeLane] = genLanes.ToList();
 
             var curveStarts = laneMap.Keys.ToList();
 
-            var affactObjects = OngekiFumenEditor.Kernel.InterpolateAll.CalculateAffectedDockableObjects(fumen, curveStarts).ToArray();
+            var affactObjects = Utils.Ogkr.InterpolateAll.CalculateAffectedDockableObjects(fumen, curveStarts).ToArray();
 
             var redoAction = new System.Action(() => { });
 

@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Kernel
+namespace OngekiFumenEditor.Utils.Ogkr
 {
     public static class InterpolateAll
     {
