@@ -92,8 +92,11 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
                 Log.LogDebug($"Configure Bass {cfg}: {before} -> {val} {(val == before ? "(same)" : string.Empty)}");
             }
 
-            config(Configuration.UpdatePeriod, 16);
-            config(Configuration.DevicePeriod, 10);
+            config(Configuration.UpdatePeriod, 8);
+            config(Configuration.DevicePeriod, 8);
+            config(Configuration.DeviceBufferLength, 5);
+            config(Configuration.MixerBufferLength, 2);
+            config(Configuration.PlaybackBufferLength, 100);
             config(Configuration.UpdateThreads, 2);
         }
 
@@ -166,6 +169,9 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
             BassUtils.ReportError(nameof(Bass.CreateStream));
             var fxAudioHandle = BassFx.TempoCreate(audioHandle, BassFlags.FxFreeSource);
             BassUtils.ReportError(nameof(BassFx.TempoCreate));
+            var vv = Bass.ChannelGetAttribute(fxAudioHandle, ChannelAttribute.Buffer);
+            Bass.ChannelSetAttribute(fxAudioHandle, ChannelAttribute.Buffer, 5);
+            BassUtils.ReportError(nameof(Bass.ChannelSetAttribute));
 
             return new BassMusicPlayer(fxAudioHandle, audioLatency, sampleData, info);
         }
@@ -183,6 +189,8 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
                 //just warn
             }
 
+            Bass.ChannelSetAttribute(soundHandle, ChannelAttribute.Buffer, 5);
+            BassUtils.ReportError(nameof(Bass.ChannelSetAttribute));
             return new BassSoundPlayer(soundHandle, soundMixer);
         }
     }

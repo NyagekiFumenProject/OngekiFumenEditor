@@ -216,15 +216,18 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             var bpm = fumen.BpmList.GetBpm(tGrid);
             var resT = bpm.TGrid.ResT;
             var beatCount = met.BunShi * 1;
-            var lengthPerBeat = (int)(resT / beatCount);
-
-            var stepGrid = new GridOffset(0, lengthPerBeat);
-
-            var curTGrid = tGrid + stepGrid;
-            while (curTGrid < endTGrid)
+            if (beatCount != 0)
             {
-                yield return curTGrid;
-                curTGrid = curTGrid + stepGrid;
+                var lengthPerBeat = (int)(resT / beatCount);
+
+                var stepGrid = new GridOffset(0, lengthPerBeat);
+
+                var curTGrid = tGrid + stepGrid;
+                while (curTGrid < endTGrid)
+                {
+                    yield return curTGrid;
+                    curTGrid = curTGrid + stepGrid;
+                }
             }
         }
 
