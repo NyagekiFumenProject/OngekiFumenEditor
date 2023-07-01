@@ -317,8 +317,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     }
                     else
                     {
-                        if (ct < -5)
-                            Thread.Sleep(Math.Min(1000, (int)(Math.Abs(ct) - 2)));
+                        var sleepTime = Math.Min(1000, (int)((Math.Abs(ct) - 2) * player.Speed));
+                        if (ct < -5 && sleepTime > 0)
+                            Thread.Sleep(sleepTime);
                         break;
                     }
                 }
