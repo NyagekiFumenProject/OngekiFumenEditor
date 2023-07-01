@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
@@ -43,13 +44,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override IEnumerable<string> DrawTargetID { get; } = new[]
         {
-            "MET","SFL","BPM","EST","CLK","LBK","[LBK_End]","[SFL_End]"
+            "MET","SFL","BPM","EST","CLK","LBK","[LBK_End]","[SFL_End]","[CMT]"
         };
 
         private static Dictionary<string, FSColor> colors = new()
         {
             {"MET", FSColor.LightGreen },
             {"SFL", FSColor.LightCyan },
+            {"[CMT]", FSColor.Crimson },
             {"BPM", FSColor.Pink },
             {"EST", FSColor.Yellow },
             {"CLK", FSColor.CadetBlue },
@@ -108,6 +110,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             string formatObj(OngekiObjectBase s) => s switch
             {
                 BPMChange o => $"BPM:{(int)o.BPM}",
+                Comment o => $"Comment:{o.Content}",
                 MeterChange o => $"MET:{o.Bunbo}/{o.BunShi}",
                 Soflan o => $"SPD:{o.Speed:F2}x",
                 Soflan.SoflanEndIndicator o => $"{formatObj(o.RefSoflan)}_End",

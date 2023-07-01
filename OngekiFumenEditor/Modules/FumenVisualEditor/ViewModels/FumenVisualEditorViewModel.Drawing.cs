@@ -191,6 +191,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                    .Concat(fumen.BpmList.Skip(1)) //not show first bpm
                    .Concat(fumen.ClickSEs.BinaryFindRange(min, max))
                    .Concat(fumen.LaneBlocks.GetVisibleStartObjects(min, max))
+                   .Concat(fumen.Comments.BinaryFindRange(min, max))
                    .Concat(fumen.Soflans)
                    .Concat(fumen.EnemySets.BinaryFindRange(min, max))
                    //.Concat(fumen.Bullets.BinaryFindRange(min, max))
