@@ -218,7 +218,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenSupport
             sb.AppendLine("[COMPOSITION]");
 
             foreach (var o in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
-                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.BPM}");
+                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.BPM:F6}");
             sb.AppendLine();
 
             foreach (var o in fumen.MeterChanges.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.MeterChanges.FirstMeter.TGrid))
@@ -226,7 +226,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenSupport
             sb.AppendLine();
 
             foreach (var o in fumen.Soflans.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.GridLength}\t{o.Speed}");
+                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.GridLength}\t{o.Speed:F6}");
             sb.AppendLine();
 
             foreach (var o in fumen.ClickSEs.OrderBy(x => x.TGrid))
