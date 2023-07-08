@@ -130,7 +130,6 @@
                     Grid.Row="7"
                     Grid.ColumnSpan="2"
                     Padding="0,10,0,10"
-                    cal:Message.Attach="[Event ThumbDragCompleted] = [Action OnSliderValueChanged()];"
                     CurrentValue="{Binding Setting.VerticalDisplayScale, Mode=TwoWay}"
                     DisplayName="水平显示缩放:"
                     MaxValue="3"
