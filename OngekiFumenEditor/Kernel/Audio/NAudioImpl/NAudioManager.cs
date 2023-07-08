@@ -21,7 +21,7 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
 {
-    //[Export(typeof(IAudioManager))]
+    [Export(typeof(IAudioManager))]
     public class NAudioManager : IAudioManager
     {
         private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
@@ -46,6 +46,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
             soundOutputDevice.Init(soundVolumeWrapper);
             soundOutputDevice.Play();
+
+            Log.LogInfo($"Audio implement will use {GetType()}");
         }
 
         private ISampleProvider ConvertToRightChannelCount(ISampleProvider input)

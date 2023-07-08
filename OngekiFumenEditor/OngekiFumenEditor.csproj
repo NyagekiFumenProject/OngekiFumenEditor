@@ -231,15 +231,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="bass.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="bassmix.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="bass_fx.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Properties\AudioPlayerToolViewerSetting.settings">
       <LastGenOutput>AudioPlayerToolViewerSetting.Designer.cs</LastGenOutput>
       <Generator>PublicSettingsSingleFileGenerator</Generator>
@@ -255,6 +246,15 @@
     <None Update="Properties\LogSetting.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>LogSetting.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="bass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bassmix.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="bass_fx.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\sounds\bell.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -437,6 +437,10 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\Binaries\" />
   </ItemGroup>
 
 </Project>

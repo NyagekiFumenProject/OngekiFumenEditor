@@ -18,7 +18,7 @@ using System.Windows.Interop;
 
 namespace OngekiFumenEditor.Kernel.Audio.BassImpl
 {
-    [Export(typeof(IAudioManager))]
+    //[Export(typeof(IAudioManager))]
     internal class BassManager : PropertyChangedBase, IAudioManager
     {
         public const int OUTPUT_SAMPLES = 48000;
@@ -98,6 +98,8 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
             config(Configuration.MixerBufferLength, 2);
             config(Configuration.PlaybackBufferLength, 100);
             config(Configuration.UpdateThreads, 2);
+
+            Log.LogInfo($"Audio implement will use {GetType()}");
         }
 
         public void Dispose()

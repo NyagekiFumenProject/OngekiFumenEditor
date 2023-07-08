@@ -4,7 +4,6 @@ using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
-using OngekiFumenEditor.Kernel.LocatorOverride;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.UI.KeyBinding.Input;
