@@ -234,7 +234,7 @@ namespace OngekiFumenEditorPlugins.OngekiFumenSupport
             sb.AppendLine();
 
             foreach (var o in fumen.EnemySets.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.TagTblValue}");
+                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.TagTblValue.ToString().ToUpper()}");
         }
 
         public void ProcessLANE(OngekiFumen fumen, StringBuilder sb)
