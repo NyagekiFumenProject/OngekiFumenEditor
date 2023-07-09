@@ -181,6 +181,11 @@
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Properties\ProgramSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>ProgramSetting.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -243,6 +248,10 @@
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>EditorGlobalSetting.Designer.cs</LastGenOutput>
     </None>
+    <None Update="Properties\ProgramSetting.settings">
+      <LastGenOutput>ProgramSetting.Designer.cs</LastGenOutput>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+    </None>
     <None Update="Properties\LogSetting.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>LogSetting.Designer.cs</LastGenOutput>
@@ -293,6 +302,9 @@
 
   <ItemGroup>
     <Page Update="Kernel\SettingPages\Audio\Views\AudioSettingView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Kernel\SettingPages\Program\Views\ProgramSettingView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Kernel\SettingPages\Logs\Views\LogsSettingView.xaml">

@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.5.0.0")]
     public sealed partial class LogSetting : global::System.Configuration.ApplicationSettingsBase {
         
         private static LogSetting defaultInstance = ((LogSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new LogSetting())));
@@ -32,42 +32,6 @@ namespace OngekiFumenEditor.Properties {
             }
             set {
                 this["LogFileDirPath"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(".\\Dumps")]
-        public string DumpFileDirPath {
-            get {
-                return ((string)(this["DumpFileDirPath"]));
-            }
-            set {
-                this["DumpFileDirPath"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsFullDump {
-            get {
-                return ((bool)(this["IsFullDump"]));
-            }
-            set {
-                this["IsFullDump"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool IsNotifyUserCrash {
-            get {
-                return ((bool)(this["IsNotifyUserCrash"]));
-            }
-            set {
-                this["IsNotifyUserCrash"] = value;
             }
         }
     }

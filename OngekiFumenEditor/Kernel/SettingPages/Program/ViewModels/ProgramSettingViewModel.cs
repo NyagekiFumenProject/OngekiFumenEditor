@@ -11,15 +11,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace OngekiFumenEditor.Kernel.SettingPages.Logs.ViewModels
+namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 {
     [Export(typeof(ISettingsEditor))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class LogsSettingViewModel : PropertyChangedBase, ISettingsEditor
+    public class ProgramSettingViewModel : PropertyChangedBase, ISettingsEditor
     {
-        public Properties.LogSetting Setting => Properties.LogSetting.Default;
+        public Properties.ProgramSetting Setting => Properties.ProgramSetting.Default;
 
-        public LogsSettingViewModel()
+        public ProgramSettingViewModel()
         {
             Setting.PropertyChanged += SettingPropertyChanged;
         }
@@ -38,23 +38,28 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Logs.ViewModels
             Setting.Save();
         }
 
-        public void OnLogsFolderPathButtonClick()
+        public void OnDumpFolderPathButtonClick()
         {
             using var openFolderDialog = new FolderBrowserDialog();
             openFolderDialog.ShowNewFolderButton = true;
-            openFolderDialog.SelectedPath = Path.GetFullPath(Setting.LogFileDirPath);
+            openFolderDialog.SelectedPath = Path.GetFullPath(Setting.DumpFileDirPath);
             if (openFolderDialog.ShowDialog() == DialogResult.OK)
             {
                 var folderPath = openFolderDialog.SelectedPath;
                 if (!Directory.Exists(folderPath))
                 {
                     MessageBox.Show("选择的文件夹为空,请重新选择");
-                    OnLogsFolderPathButtonClick();
+                    OnDumpFolderPathButtonClick();
                     return;
                 }
-                Setting.LogFileDirPath = folderPath;
+                Setting.DumpFileDirPath = folderPath;
                 ApplyChanges();
             }
+        }
+
+        public void ThrowException()
+        {
+            throw new Exception("塔塔开!");
         }
     }
 }

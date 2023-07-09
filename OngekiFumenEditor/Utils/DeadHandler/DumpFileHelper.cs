@@ -42,14 +42,14 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 
         public static void Init()
         {
-            Directory.CreateDirectory(LogSetting.Default.DumpFileDirPath);
+            Directory.CreateDirectory(ProgramSetting.Default.DumpFileDirPath);
             SetUnhandledExceptionFilter(WriteMiniDump);
         }
 
         public static int WriteMiniDump(IntPtr exceptionInfo)
         {
-            Directory.CreateDirectory(LogSetting.Default.DumpFileDirPath);
-            var filePath = Path.Combine(LogSetting.Default.DumpFileDirPath, FileHelper.FilterFileName(DateTime.Now.ToString() + ".dmp"));
+            Directory.CreateDirectory(ProgramSetting.Default.DumpFileDirPath);
+            var filePath = Path.Combine(ProgramSetting.Default.DumpFileDirPath, FileHelper.FilterFileName(DateTime.Now.ToString() + ".dmp"));
 
             using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 
@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 
             // MiniDumpWithFullMemory = 0x00000002
             // MiniDumpNormal = 0x00000000
-            var dumpType = LogSetting.Default.IsFullDump ? 0x2 : 0x0;
+            var dumpType = ProgramSetting.Default.IsFullDump ? 0x2 : 0x0;
 
             var isSuccessful = MiniDumpWriteDump(currentProcess.Handle, (uint)currentProcess.Id, fileStream.SafeFileHandle, (uint)dumpType, ref param, IntPtr.Zero, IntPtr.Zero);
 

@@ -6,6 +6,7 @@ using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.DeadHandler;
@@ -154,6 +155,18 @@ namespace OngekiFumenEditor
 
             await InitKernels();
             await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
+
+            if (ProgramSetting.Default.UpgradeProcessPriority)
+            {
+                var curProc = Process.GetCurrentProcess();
+                //ÌáÉý
+                var before = curProc.PriorityClass;
+                var after = ProcessPriorityClass.High;
+                curProc.PriorityClass = after;
+                Log.LogDebug($"Upgrade process priority: {before} -> {after}");
+
+                curProc.PriorityBoostEnabled = true;
+            }
 
             Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
         }

@@ -5,14 +5,5 @@
     <Setting Name="LogFileDirPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">.\Logs</Value>
     </Setting>
-    <Setting Name="DumpFileDirPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">.\Dumps</Value>
-    </Setting>
-    <Setting Name="IsFullDump" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="IsNotifyUserCrash" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
   </Settings>
 </SettingsFile>
