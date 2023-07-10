@@ -103,9 +103,10 @@ namespace OngekiFumenEditor.Base.Collections
             var r = this.AsEnumerable<ITimelineObject>().Concat(bpmList)
                 .OrderBy(x => x.TGrid)
                 .SelectMany(GetEventTimings)
-                .GroupBy(x => x.TGrid);
-                
-            return r
+                .GroupBy(x => x.TGrid)
+                .OrderBy(x => x.Key);
+
+            var s = r
                 .Select(x =>
                 {
                     var itor = x.GetEnumerator();
@@ -139,6 +140,8 @@ namespace OngekiFumenEditor.Base.Collections
                     return default;
                 })
                 .Where(x => x.evt != ChgEvt.None);
+
+            return s;
         }
 
         private void UpdateCachedSoflanPositionList(double tUnitLength, BpmList bpmList, List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list, bool isDesignMode)
