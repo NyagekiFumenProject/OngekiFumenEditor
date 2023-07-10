@@ -95,14 +95,16 @@ namespace OngekiFumenEditor.Base.Collections
                     case Soflan soflanEvt:
                         curSpeedEvent = soflanEvt;
                         yield return (evt.TGrid, (isDesignModel ? soflanEvt.SpeedInEditor : soflanEvt.Speed), curBpm, ChgEvt.SoflanBegan);
-                        yield return (evt.TGrid + new GridOffset(0, soflanEvt.GridLength), 1.0f, curBpm, ChgEvt.SoflanEnded);
+                        var endTGrid = evt.TGrid + new GridOffset(0, soflanEvt.GridLength);
+                        yield return (endTGrid, 1.0f, bpmList.GetBpm(endTGrid), ChgEvt.SoflanEnded);
                         break;
                 }
             }
             var r = this.AsEnumerable<ITimelineObject>().Concat(bpmList)
                 .SelectMany(GetEventTimings)
-                .GroupBy(x => x.TGrid)
-                .OrderBy(x => x.Key)
+                .GroupBy(x => x.TGrid);
+                
+            return r.OrderBy(x => x.Key)
                 .Select(x =>
                 {
                     var itor = x.GetEnumerator();
@@ -134,8 +136,7 @@ namespace OngekiFumenEditor.Base.Collections
                         return totalState;
                     }
                     return default;
-                });
-            return r
+                })
                 .Where(x => x.evt != ChgEvt.None);
         }
 

@@ -11,7 +11,7 @@ using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Comment", "Editor Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Comment", "Misc")]
     public class CommentToolboxGenerator : ToolboxGenerator<Comment>
     {
 
