@@ -1,4 +1,5 @@
 using Caliburn.Micro;
+using DereTore.Common;
 using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
@@ -634,7 +635,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         else
                         {
                             if (mouseDownHitObjectPosition is Point p)
-                                NotifyObjectClicked(mouseDownHitObject);
+                                mouseDownHitObject = NotifyObjectClicked(mouseDownHitObject, mouseDownNextHitObject);
                         }
                     }
                 }
@@ -723,14 +724,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var arg = e.EventArgs as MouseEventArgs;
                 var position = arg.GetPosition(e.Source);
                 position.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - position.Y));
-                var hitResult = Enumerable.Empty<KeyValuePair<OngekiObjectBase, Rect>>();
 
-                hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).ToArray();
-                var hitOngekiObject = hitResult.FirstOrDefault().Key;
+                var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToArray();
+                var idx = Math.Max(0, hitResult.IndexOf(mouseDownHitObject));
+                var hitOngekiObject =  hitResult.ElementAtOrDefault(idx);
 
                 Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject}");
 
                 mouseDownHitObject = null;
+                mouseDownNextHitObject = null;
                 mouseDownHitObjectPosition = default;
                 mouseStartPosition = position;
                 dragOutBound = false;
@@ -747,9 +749,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
+                    //这里如果已经有物件选择了就判断是否还有其他物件可以选择
                     SelectionVisibility = Visibility.Collapsed;
                     mouseDownHitObject = hitOngekiObject;
                     mouseDownHitObjectPosition = position;
+
+                    if (hitResult.Length > 1)
+                    {
+                        var nextIdx = (idx + 1) % hitResult.Length;
+                        mouseDownNextHitObject = hitResult[nextIdx];
+                    }
                 }
             }
 
@@ -859,10 +868,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public void NotifyObjectClicked(OngekiObjectBase obj)
+        public OngekiObjectBase NotifyObjectClicked(OngekiObjectBase obj, OngekiObjectBase next = default)
         {
             if (obj is not ISelectableObject selectable)
-                return;
+                return default;
 
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             var curBrowserObj = objBrowser.OngekiObject;
@@ -883,7 +892,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 else if (obj == curBrowserObj)
                     objBrowser.SetCurrentOngekiObject(null, this);
                 TryCancelAllObjectSelecting(obj as ISelectableObject);
+
+                if (next != null && !selectable.IsSelected)
+                    return NotifyObjectClicked(next);
             }
+
+            return obj;
         }
 
         #endregion
@@ -967,6 +981,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         #endregion
 
         private Dictionary<OngekiObjectBase, Rect> hits = new();
+        private OngekiObjectBase mouseDownNextHitObject;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size)
