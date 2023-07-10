@@ -101,10 +101,11 @@ namespace OngekiFumenEditor.Base.Collections
                 }
             }
             var r = this.AsEnumerable<ITimelineObject>().Concat(bpmList)
+                .OrderBy(x => x.TGrid)
                 .SelectMany(GetEventTimings)
                 .GroupBy(x => x.TGrid);
                 
-            return r.OrderBy(x => x.Key)
+            return r
                 .Select(x =>
                 {
                     var itor = x.GetEnumerator();
