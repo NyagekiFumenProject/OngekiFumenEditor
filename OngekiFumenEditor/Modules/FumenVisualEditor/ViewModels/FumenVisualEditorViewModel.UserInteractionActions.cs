@@ -727,7 +727,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToArray();
                 var idx = Math.Max(0, hitResult.IndexOf(mouseDownHitObject));
-                var hitOngekiObject =  hitResult.ElementAtOrDefault(idx);
+                var hitOngekiObject = hitResult.ElementAtOrDefault(idx);
 
                 Log.LogDebug($"mousePos = £¨{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject}");
 
@@ -998,9 +998,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as MouseWheelEventArgs;
             arg.Handled = true;
 
-            if (Setting.JudgeLineAlignBeat)
+            if (Setting.JudgeLineAlignBeat && IsDesignMode)
             {
-                var time = TimeSpan.FromMilliseconds(ScrollViewerVerticalOffset);
+                var tGrid = GetCurrentTGrid();
+                var time = TGridCalculator.ConvertTGridToAudioTime(tGrid, this);
+                var y = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, this);
 
                 var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Setting.TGridUnitLength, Fumen.BpmList);
                 (var prevAudioTime, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.audioTime < time);
@@ -1009,13 +1011,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
                 //Ïû³ý¾«¶ÈÎó²î~
-                var prevY = Math.Max(0, prevAudioTime.TotalMilliseconds - 1);
+                var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
                 nextY++;
 
-                var downFirst = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength)
-                    .Where(x => x.y != ScrollViewerVerticalOffset).LastOrDefault();
-                var nextFirst = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength)
-                    .Where(x => x.y != ScrollViewerVerticalOffset).FirstOrDefault();
+                var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
+                var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
+                var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
+                var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
 
                 //Log.LogDebug($"ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2} , downFirst: {downFirst.y:F2} , nextFirst: {nextFirst.y:F2}");
                 var result = arg.Delta > 0 ? nextFirst : downFirst;
