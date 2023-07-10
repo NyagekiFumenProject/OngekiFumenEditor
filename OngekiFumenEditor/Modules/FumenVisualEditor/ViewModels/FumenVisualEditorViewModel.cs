@@ -85,11 +85,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     UndoRedoManager.UndoCountLimit = Properties.EditorGlobalSetting.Default.IsEnableUndoActionSavingLimit ? Properties.EditorGlobalSetting.Default.UndoActionSavingLimit : null;
                     break;
                 case nameof(EditorSetting.VerticalDisplayScale):
-                    var beforeHeight = TotalDurationHeight;
                     RecalculateTotalDurationHeight();
-                    var offset = TotalDurationHeight - beforeHeight;
-                    Log.LogDebug($"offset = {offset:F2}");
-                    //ScrollViewerVerticalOffset = Math.Max(0, ScrollViewerVerticalOffset - offset);
+                    var tGrid = GetCurrentTGrid();
+                    ScrollTo(tGrid);
                     break;
                 case nameof(EditorSetting.JudgeLineOffsetY):
                     RecalcViewProjectionMatrix();

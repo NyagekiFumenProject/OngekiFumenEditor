@@ -1019,7 +1019,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
                 var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
 
-                //Log.LogDebug($"ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2} , downFirst: {downFirst.y:F2} , nextFirst: {nextFirst.y:F2}");
                 var result = arg.Delta > 0 ? nextFirst : downFirst;
                 ScrollTo(result.y);
             }
