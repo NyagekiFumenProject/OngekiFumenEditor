@@ -55,8 +55,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 return;
 
             var curTGrid = target.Editor.GetCurrentTGrid();
-            var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION), target.Editor);
-            var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(endTGrid, target.Editor) + TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), target.Editor);
 
             /* ^  -- leadOutTGrid
              * |  |
@@ -78,6 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             double progress;
             XGrid xGrid;
             bool prepareWarn = false;
+
             if (curTGrid < beginTGrid)
             {
                 //progress = [-1,0]
@@ -90,6 +89,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             else if (curTGrid > endTGrid)
             {
                 //progress = [1,2]
+                var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(endTGrid, target.Editor) + TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), target.Editor);
                 progress = MathUtils.Normalize(endTGrid.TotalGrid, leadOutTGrid.TotalGrid, curTGrid.TotalGrid) + 1;
                 xGrid = obj.Children.LastOrDefault()?.XGrid;
             }
@@ -106,9 +106,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             if (prepareWarn)
             {
+                var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION), target.Editor);
                 var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 0.25;
                 lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f));
             }
+
             lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One);
         }
 
