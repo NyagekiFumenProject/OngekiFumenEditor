@@ -24,7 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
         {
-            var width = 50 * obj.WidthId;
+            var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
+            var width = xGridWidth * obj.WidthId;
 
             var beginTGrid = obj.MinTGrid;
             var endTGrid = obj.MaxTGrid;
@@ -78,7 +79,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (xGrid is null)
                 return;
             var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-            lazerDrawing.Draw(target, width, x, (float)progress, 0);
+            lazerDrawing.Draw(target, (int)width, x, (float)progress, 0);
         }
 
         public void Dispose()
