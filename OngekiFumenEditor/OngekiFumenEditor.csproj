@@ -23,6 +23,7 @@
   <ItemGroup>
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
@@ -121,6 +122,7 @@
   <ItemGroup>
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
+    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />

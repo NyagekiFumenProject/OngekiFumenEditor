@@ -31,6 +31,7 @@ void main(){
             FragmentProgram = @"
                 #version 330
 uniform sampler2D diffuse;
+uniform vec4 color;
 uniform float textureScaleY;
 uniform float progress;
 in vec2 varying_texPos;
@@ -39,7 +40,7 @@ out vec4 out_color;
 void main(){
     vec2 tp = vec2(varying_texPos.x,varying_texPos.y * textureScaleY);
     float a =  smoothstep(-1, 0, progress) * (1 - smoothstep(1, 2, progress));
-	out_color = vec4(texture(diffuse,tp).rgb,a);
+	out_color = vec4(texture(diffuse,tp).rgb,a) * color;
 }
                 ";
         }

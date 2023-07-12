@@ -1,12 +1,9 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl;
 using OngekiFumenEditor.Kernel.Graphics;
 using System;
-using System.Collections.Generic;
 using OngekiFumenEditor.Kernel.Graphics.Base;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
-using System.Drawing;
-using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
 {
@@ -16,7 +13,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
-        private readonly Texture texture;
 
         public DefaultBeamLazerTextureDrawing()
         {
@@ -27,10 +23,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             textureVBO = GL.GenBuffer();
 
             vao = GL.GenVertexArray();
-
-            var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + "beam_body.png", UriKind.Relative));
-            using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-            texture = new Texture(bitmap);
 
             Init();
         }
@@ -78,14 +70,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public void Dispose()
         {
-            texture?.Dispose();
-
             GL.DeleteVertexArray(vao);
             GL.DeleteBuffer(vertexVBO);
             GL.DeleteBuffer(textureVBO);
         }
 
-        public void Draw(IDrawingContext target, int width, float x, float progress, float rotation)
+        public void Draw(IDrawingContext target, Texture texture, int width, float x, float progress, Vector4 color)
         {
             target.PerfomenceMonitor.OnBeginDrawing(this);
             {
@@ -95,7 +85,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     GetOverrideModelMatrix() *
                     Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
                     Matrix4.CreateScale(new Vector3(width * 1.0f / texture.Width, target.ViewHeight * 1.0f / texture.Height, 1)) *
-                    Matrix4.CreateRotationZ(rotation) *
                     Matrix4.CreateTranslation(x, (target.ViewHeight / 2 + target.Rect.MinY), 0);
 
                 shader.Begin();
@@ -104,6 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target));
                     shader.PassUniform("textureScaleY", textureScaleY);
                     shader.PassUniform("diffuse", texture);
+                    shader.PassUniform("color", color);
                     shader.PassUniform("progress", progress);
 
                     GL.BindVertexArray(vao);

@@ -1,9 +1,11 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Drawing;
 using System.Linq;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
@@ -12,6 +14,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     internal class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
         private DefaultBeamLazerTextureDrawing lazerDrawing;
+        private Texture textureBody;
+        private Texture textureWarn;
+
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS" };
         public override DrawingVisible DefaultVisible => DrawingVisible.Preview;
 
@@ -20,6 +25,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public BeamLazerDrawingTarget()
         {
             lazerDrawing = new();
+
+            void load(ref Texture t,string name) {
+                var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + name, UriKind.Relative));
+                using var bitmap = Image.FromStream(info.Stream) as Bitmap;
+                t = new Texture(bitmap);
+
+            }
+
+            load(ref textureBody, "beam_body.png");
+            textureBody.TextureWrapT = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
+
+            load(ref textureWarn, "beam_warn.png");
+            textureWarn.TextureWrapS = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
+            textureWarn.TextureWrapT = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
         }
 
         public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
@@ -36,8 +55,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 return;
 
             var curTGrid = target.Editor.GetCurrentTGrid();
-            var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_DURATION), target.Editor);
-            var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(endTGrid, target.Editor) + TimeSpan.FromMilliseconds(BeamStart.LEAD_DURATION), target.Editor);
+            var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION), target.Editor);
+            var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(endTGrid, target.Editor) + TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), target.Editor);
 
             /* ^  -- leadOutTGrid
              * |  |
@@ -58,11 +77,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             double progress;
             XGrid xGrid;
+            bool prepareWarn = false;
             if (curTGrid < beginTGrid)
             {
                 //progress = [-1,0]
-                progress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 1;
+                var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_BODY_DURATION), target.Editor);
+                progress = MathUtils.Normalize(leadBodyInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 1;
                 xGrid = obj.XGrid;
+
+                prepareWarn = true;
             }
             else if (curTGrid > endTGrid)
             {
@@ -80,13 +103,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (xGrid is null)
                 return;
             var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-            lazerDrawing.Draw(target, (int)width, x, (float)progress, 0);
+
+            if (prepareWarn)
+            {
+                var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 0.25;
+                lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f));
+            }
+            lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One);
         }
 
         public void Dispose()
         {
             lazerDrawing?.Dispose();
-            lazerDrawing = null;
+            lazerDrawing = default;
+
+            textureBody?.Dispose();
+            textureBody = default;
+
+            textureWarn?.Dispose();
+            textureWarn = default;
         }
     }
 }
