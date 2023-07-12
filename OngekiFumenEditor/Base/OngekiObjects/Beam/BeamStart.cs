@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
     public class BeamStart : ConnectableStartObject, IBeamObject
     {
+        public const int LEAD_DURATION = 250;
+
         public override string IDShortName => "BMS";
         private int widthId = 2;
         public int WidthId

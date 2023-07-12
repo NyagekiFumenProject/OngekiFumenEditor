@@ -9,7 +9,7 @@ using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
     public class BeamDrawingTarget : LaneDrawingTargetBase<BeamStart>

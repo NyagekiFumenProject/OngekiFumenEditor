@@ -196,6 +196,7 @@ namespace OngekiFumenEditor
                 sb.AppendLine($"----------------------------");
                 FileLogOutput.WriteLog(sb.ToString());
                 FileLogOutput.WaitForWriteDone();
+#if !DEBUG
                 var exceptionHandle = Marshal.GetExceptionPointers();
                 if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
                 {
@@ -207,6 +208,7 @@ namespace OngekiFumenEditor
                 FumenRescue.Rescue();
                 FileLogOutput.WriteLog("FumenRescue.Rescue() End");
                 FileLogOutput.WaitForWriteDone();
+#endif
             }
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) => LogException(sender, e.ExceptionObject as Exception);
