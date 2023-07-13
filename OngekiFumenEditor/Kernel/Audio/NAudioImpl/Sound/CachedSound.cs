@@ -10,14 +10,17 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
 {
     public class CachedSound
     {
-        public float[] AudioData { get; private set; }
-        public WaveFormat WaveFormat { get; private set; }
+        public float[] AudioData { get; init; }
+        public WaveFormat WaveFormat { get; init; }
+        public TimeSpan Duration { get; init; }
 
         public CachedSound(string audioFileName)
         {
             using var audioFileReader = new AudioFileReader(audioFileName);
 
+            Duration = audioFileReader.TotalTime;
             WaveFormat = audioFileReader.WaveFormat;
+
             var wholeFile = new List<float>((int)(audioFileReader.Length / 4));
 
             var readLen = audioFileReader.WaveFormat.SampleRate * audioFileReader.WaveFormat.Channels;
