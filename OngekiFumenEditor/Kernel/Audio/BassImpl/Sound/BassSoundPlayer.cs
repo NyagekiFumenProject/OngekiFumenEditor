@@ -101,6 +101,8 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Sound
 
         public bool IsAvaliable { get; } = true;
 
+        public TimeSpan Duration => throw new NotImplementedException();
+
         public void Dispose()
         {
             if (!IsAvaliable)
@@ -142,6 +144,16 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl.Sound
         {
             if (!IsAvaliable)
                 return;
+        }
+
+        public void PlayLoop(int loopId, TimeSpan init)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StopLoop(int loopId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 NotifyOfPropertyChange(() => SoundControls);
 
                 //init SoundVolumes
-                var sounds = Enum.GetValues<Sound>();
+                var sounds = Enum.GetValues<SoundControl>();
                 SoundVolumes = sounds.Select(x => new SoundVolumeProxy(value, x)).ToArray();
                 NotifyOfPropertyChange(() => SoundVolumes);
             }

@@ -17,8 +17,8 @@ namespace OngekiFumenEditor.Kernel.Audio
         void Stop();
         void Play();
         void Pause();
-        float GetVolume(Sound sound);
-        void SetVolume(Sound sound, float volume);
+        float GetVolume(SoundControl sound);
+        void SetVolume(SoundControl sound, float volume);
         void Seek(TimeSpan msec, bool pause);
     }
 }

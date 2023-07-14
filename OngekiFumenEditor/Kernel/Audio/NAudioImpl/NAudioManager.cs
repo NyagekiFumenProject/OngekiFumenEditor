@@ -6,8 +6,8 @@ using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Audio.DefaultImp.Music;
-using OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Buffers;
@@ -20,10 +20,8 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Threading;
-using static OngekiFumenEditor.Kernel.Audio.IAudioManager;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
+namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 {
     [Export(typeof(IAudioManager))]
     public class NAudioManager : IAudioManager
@@ -47,7 +45,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             soundOutputDevice = new WasapiOut(AudioClientShareMode.Shared, 0);
             soundMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
             soundMixer.ReadFully = true;
-            soundMixer.MixerInputEnded += SoundMixer_MixerInputEnded;
             soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
             soundOutputDevice.Init(soundVolumeWrapper);
             soundOutputDevice.Play();
@@ -114,7 +111,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 cached = ResampleCacheSound(cached);
             }
 
-            return Task.FromResult<ISoundPlayer>(new DefaultSoundPlayer(cached, this));
+            return Task.FromResult<ISoundPlayer>(new NAudioSoundPlayer(cached, this));
         }
 
         private CachedSound ResampleCacheSound(CachedSound cache)
@@ -162,14 +159,23 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
             soundOutputDevice?.Dispose();
         }
 
-        public ILoopHandle PlayLoopSound(CachedSound sound, float volume)
+        public ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init)
         {
-            var provider = new VolumeSampleProvider(new LoopableProvider(ConvertToRightChannelCount(new CachedSoundSampleProvider(sound))));
-            var handle = new NAudioLoopHandle(provider);
+            ISampleProvider provider = new LoopableProvider(ConvertToRightChannelCount(new CachedSoundSampleProvider(sound)));
+
+            if (init.TotalMilliseconds != 0)
+            {
+                provider = new OffsetSampleProvider(provider)
+                {
+                    DelayBy = init
+                };
+            }
+
+            var handle = new NAudioLoopHandle(new VolumeSampleProvider(provider));
             handle.Volume = volume;
 
             //add to mixer
-            AddMixerInput(provider);
+            AddMixerInput(handle.Provider);
 
             return handle;
         }
@@ -180,11 +186,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp
                 return;
 
             RemoveMixerInput(handle.Provider);
-        }
-
-        private void SoundMixer_MixerInputEnded(object sender, SampleProviderEventArgs e)
-        {
-
         }
     }
 }

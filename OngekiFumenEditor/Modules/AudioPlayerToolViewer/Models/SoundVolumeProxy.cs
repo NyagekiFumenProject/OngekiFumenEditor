@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Models
     public class SoundVolumeProxy : PropertyChangedBase
     {
         private readonly IFumenSoundPlayer soundPlayer;
-        private readonly Sound sound;
+        private readonly SoundControl sound;
 
         public string Name => sound.ToString();
 
@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Models
             }
         }
 
-        public SoundVolumeProxy(IFumenSoundPlayer soundPlayer, Sound sound)
+        public SoundVolumeProxy(IFumenSoundPlayer soundPlayer, SoundControl sound)
         {
             this.soundPlayer = soundPlayer;
             this.sound = sound;

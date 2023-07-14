@@ -1,13 +1,13 @@
-﻿using System;
+﻿using OngekiFumenEditor.Kernel.Audio.DefaultImp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static OngekiFumenEditor.Kernel.Audio.DefaultImp.NAudioManager;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
+namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 {
-    internal class DefaultSoundPlayer : ISoundPlayer
+    internal class NAudioSoundPlayer : ISoundPlayer
     {
         public TimeSpan Duration => cacheSound.Duration;
 
@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
         private CachedSound cacheSound = default;
         private Dictionary<int, ILoopHandle> loopMap = new Dictionary<int, ILoopHandle>();
 
-        public DefaultSoundPlayer(CachedSound cache, NAudioManager manager)
+        public NAudioSoundPlayer(CachedSound cache, NAudioManager manager)
         {
             soundManager = manager;
             cacheSound = cache;
@@ -33,11 +33,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
             soundManager.PlaySound(cacheSound, Volume);
         }
 
-        public void PlayLoop(int loopId)
+        public void PlayLoop(int loopId, TimeSpan init)
         {
             if (!loopMap.ContainsKey(loopId))
             {
-                var handle = soundManager.PlayLoopSound(cacheSound, Volume);
+                var handle = soundManager.PlayLoopSound(cacheSound, Volume, init);
                 loopMap[loopId] = handle;
             }
             else

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,13 +8,16 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio
 {
-    public interface IAudioManager : IDisposable
+    public partial interface IAudioManager : IDisposable
     {
         float SoundVolume { get; set; }
 
         Task<ISoundPlayer> LoadSoundAsync(string filePath);
         Task<IAudioPlayer> LoadAudioAsync(string filePath);
 
-        IEnumerable<(string fileExt,string extDesc)> SupportAudioFileExtensionList { get; }
+        IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; }
+
+        ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init);
+        void StopLoopSound(ILoopHandle handle);
     }
 }

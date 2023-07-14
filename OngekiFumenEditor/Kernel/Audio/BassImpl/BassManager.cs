@@ -6,6 +6,7 @@ using ManagedBass.Mix;
 using OngekiFumenEditor.Kernel.Audio.BassImpl.Base;
 using OngekiFumenEditor.Kernel.Audio.BassImpl.Music;
 using OngekiFumenEditor.Kernel.Audio.BassImpl.Sound;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -182,6 +183,16 @@ namespace OngekiFumenEditor.Kernel.Audio.BassImpl
         {
             var buffer = await File.ReadAllBytesAsync(filePath);
             return new BassSoundPlayer(soundMixer, buffer);
+        }
+
+        public ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StopLoopSound(ILoopHandle handle)
+        {
+            throw new NotImplementedException();
         }
     }
 }

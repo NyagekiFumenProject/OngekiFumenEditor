@@ -1,67 +1,47 @@
 ﻿using Caliburn.Micro;
+using FontStashSharp;
+using IntervalTree;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
+using SharpVectors.Dom.Events;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 
 namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 {
     [Export(typeof(IFumenSoundPlayer))]
-    public class DefaultFumenSoundPlayer : PropertyChangedBase, IFumenSoundPlayer, IDisposable
+    public partial class DefaultFumenSoundPlayer : PropertyChangedBase, IFumenSoundPlayer, IDisposable
     {
-        [Flags]
-        public enum Sound
-        {
-            Tap = 1,
-            ExTap = 2,
-
-            WallTap = 8,
-            WallExTap = 16,
-
-            Bell = 32,
-            Bullet = 64,
-
-            Hold = 128,
-
-            Flick = 256,
-            ExFlick = 512,
-
-            HoldEnd = 1024,
-            ClickSE = 2048,
-            HoldTick = 4096,
-        }
-
-        public class SoundEvent
-        {
-            public Sound Sounds { get; set; }
-            public TimeSpan Time { get; set; }
-            //public TGrid TGrid { get; set; }
-
-            public override string ToString() => $"{Time} {Sounds}";
-        }
+        private IntervalTree<TimeSpan, DurationSoundEvent> durationEvents = new();
+        private HashSet<DurationSoundEvent> currentPlayingDurationEvents = new();
 
         private LinkedList<SoundEvent> events = new();
         private LinkedListNode<SoundEvent> itor;
+
         private AbortableThread thread;
 
         private IAudioPlayer player;
         private FumenVisualEditorViewModel editor;
         private bool isPlaying = false;
         public bool IsPlaying => isPlaying && (player?.IsPlaying ?? false);
+        private static int loopIdGen = 0;
 
         public SoundControl SoundControl { get; set; } = SoundControl.All;
 
@@ -75,7 +55,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             }
         }
 
-        private Dictionary<Sound, ISoundPlayer> cacheSounds = new();
+        private Dictionary<SoundControl, ISoundPlayer> cacheSounds = new();
         private Task loadTask;
 
         public DefaultFumenSoundPlayer()
@@ -101,7 +81,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
             bool noError = true;
 
-            async Task load(Sound sound, string fileName)
+            async Task load(SoundControl sound, string fileName)
             {
                 var fixFilePath = Path.Combine(soundFolderPath, fileName);
 
@@ -116,17 +96,20 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 }
             }
 
-            await load(Sound.Tap, "tap.wav");
-            await load(Sound.Bell, "bell.wav");
-            await load(Sound.ExTap, "extap.wav");
-            await load(Sound.WallTap, "wall.wav");
-            await load(Sound.WallExTap, "exwall.wav");
-            await load(Sound.Flick, "flick.wav");
-            await load(Sound.Bullet, "bullet.wav");
-            await load(Sound.ExFlick, "exflick.wav");
-            await load(Sound.HoldEnd, "holdend.wav");
-            await load(Sound.ClickSE, "clickse.wav");
-            await load(Sound.HoldTick, "holdtick.wav");
+            await load(SoundControl.Tap, "tap.wav");
+            await load(SoundControl.Bell, "bell.wav");
+            await load(SoundControl.CriticalTap, "extap.wav");
+            await load(SoundControl.WallTap, "wall.wav");
+            await load(SoundControl.CriticalWallTap, "exwall.wav");
+            await load(SoundControl.Flick, "flick.wav");
+            await load(SoundControl.Bullet, "bullet.wav");
+            await load(SoundControl.CriticalFlick, "exflick.wav");
+            await load(SoundControl.HoldEnd, "holdend.wav");
+            await load(SoundControl.ClickSE, "clickse.wav");
+            await load(SoundControl.HoldTick, "holdtick.wav");
+            await load(SoundControl.BeamPrepare, "beamprepare.wav");
+            await load(SoundControl.BeamLoop, "beamlooping.wav");
+            await load(SoundControl.BeamEnd, "beamend.wav");
 
             if (!noError)
                 MessageBox.Show("部分音效并未加载成功,详情可查看日志");
@@ -233,12 +216,17 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         private void RebuildEvents()
         {
-            events.ForEach(evt => ObjectPool<SoundEvent>.Return(evt));
+            StopAllLoop();
+            events.ForEach(ObjectPool<SoundEvent>.Return);
+            durationEvents.Select(x => x.Value).ForEach(ObjectPool<DurationSoundEvent>.Return);
             events.Clear();
+            durationEvents.Clear();
+            currentPlayingDurationEvents.Clear();
 
             var list = new HashSet<SoundEvent>();
+            var durationList = new HashSet<DurationSoundEvent>();
 
-            void AddSound(Sound sound, TGrid tGrid)
+            void AddSound(SoundControl sound, TGrid tGrid)
             {
                 var evt = ObjectPool<SoundEvent>.Get();
 
@@ -249,32 +237,45 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 list.Add(evt);
             }
 
+            void AddDurationSound(SoundControl sound, TGrid tGrid, TGrid endTGrid, int loopId = 0)
+            {
+                var evt = ObjectPool<DurationSoundEvent>.Get();
+
+                evt.Sounds = sound;
+                evt.LoopId = loopId;
+                evt.Time = TGridCalculator.ConvertTGridToAudioTime(tGrid, editor);
+                evt.EndTime = TGridCalculator.ConvertTGridToAudioTime(endTGrid, editor);
+                //evt.TGrid = tGrid;
+
+                durationList.Add(evt);
+            }
+
             var fumen = editor.Fumen;
 
             var soundObjects = fumen.GetAllDisplayableObjects().OfType<OngekiTimelineObjectBase>();
 
             //add default clickse objects.
             foreach (var tGrid in CalculateDefaultClickSEs(fumen))
-                AddSound(Sound.ClickSE, tGrid);
+                AddSound(SoundControl.ClickSE, tGrid);
 
             foreach (var group in soundObjects.GroupBy(x => x.TGrid))
             {
-                var sounds = (Sound)0;
+                var sounds = (SoundControl)0;
 
                 foreach (var obj in group.DistinctBy(x => x.GetType()))
                 {
                     sounds = sounds | obj switch
                     {
-                        WallTap { IsCritical: false } => Sound.WallTap,
-                        WallTap { IsCritical: true } => Sound.WallExTap,
-                        Tap { IsCritical: false } or Hold { IsCritical: false } => Sound.Tap,
-                        Tap { IsCritical: true } or Hold { IsCritical: true } => Sound.ExTap,
-                        Bell => Sound.Bell,
-                        Bullet => Sound.Bullet,
-                        Flick { IsCritical: false } => Sound.Flick,
-                        Flick { IsCritical: true } => Sound.ExFlick,
-                        HoldEnd => Sound.HoldEnd,
-                        ClickSE => Sound.ClickSE,
+                        WallTap { IsCritical: false } => SoundControl.WallTap,
+                        WallTap { IsCritical: true } => SoundControl.CriticalWallTap,
+                        Tap { IsCritical: false } or Hold { IsCritical: false } => SoundControl.Tap,
+                        Tap { IsCritical: true } or Hold { IsCritical: true } => SoundControl.CriticalTap,
+                        Bell => SoundControl.Bell,
+                        Bullet => SoundControl.Bullet,
+                        Flick { IsCritical: false } => SoundControl.Flick,
+                        Flick { IsCritical: true } => SoundControl.CriticalFlick,
+                        HoldEnd => SoundControl.HoldEnd,
+                        ClickSE => SoundControl.ClickSE,
                         _ => default
                     };
 
@@ -283,17 +284,27 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                         //add hold ticks
                         foreach (var tickTGrid in CalculateHoldTicks(hold, fumen))
                         {
-                            AddSound(Sound.HoldTick, tickTGrid);
+                            AddSound(SoundControl.HoldTick, tickTGrid);
                         }
                     }
-                }
 
+                    if (obj is BeamStart beam)
+                    {
+                        var loopId = ++loopIdGen;
+
+                        //generate stop
+                        AddSound(SoundControl.BeamEnd, beam.MaxTGrid);
+                        AddDurationSound(SoundControl.BeamLoop, beam.TGrid, beam.MaxTGrid, loopId);
+                        var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beam.TGrid, editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION), editor);
+                        AddSound(SoundControl.BeamPrepare, leadBodyInTGrid);
+                    }
+                }
                 if (sounds != 0)
                     AddSound(sounds, group.Key);
             }
-
             events = new LinkedList<SoundEvent>(list.OrderBy(x => x.Time));
-
+            foreach (var durationEvent in durationList)
+                durationEvents.Add(durationEvent.Time, durationEvent.EndTime, durationEvent);
             itor = events.First;
         }
 
@@ -301,50 +312,92 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
         {
             while (!cancel.IsCancellationRequested)
             {
-                if (itor is null || player is null || !IsPlaying)
+                if (itor is null || player is null)
                     continue;
+                if (!IsPlaying)
+                {
+                    //stop all looping
+                    StopAllLoop();
+                    continue;
+                }
 
+                var currentTime = player.CurrentTime;
+
+                //播放普通音乐
                 while (itor is not null)
                 {
-                    var currentTime = player.CurrentTime.TotalMilliseconds;
-                    var itorTime = itor.Value.Time.TotalMilliseconds;
-                    var ct = currentTime - itorTime;
+                    var nextBeatTime = itor.Value.Time.TotalMilliseconds;
+                    var ct = currentTime.TotalMilliseconds - nextBeatTime;
                     if (ct >= 0)
                     {
                         //Debug.WriteLine($"diff:{ct:F2}ms target:{itor.Value}");
-                        PlaySounds(itor.Value.Sounds);
+                        ProcessSoundEvent(itor.Value);
                         itor = itor.Next;
                     }
                     else
-                    {
-                        var sleepTime = Math.Min(1000, (int)((Math.Abs(ct) - 2) * player.Speed));
-                        if (ct < -5 && sleepTime > 0)
-                            Thread.Sleep(sleepTime);
                         break;
+                }
+
+                var queryDurationEvents = durationEvents.Query(currentTime);
+                foreach (var durationEvent in queryDurationEvents)
+                {
+                    //检查是否正在播放了
+                    if (!currentPlayingDurationEvents.Contains(durationEvent))
+                    {
+                        if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                        {
+                            var initPlayTime = currentTime - durationEvent.Time;
+                            soundPlayer.PlayLoop(durationEvent.LoopId, initPlayTime);
+                            currentPlayingDurationEvents.Add(durationEvent);
+                        }
                     }
                 }
+
+                //检查是否已经播放完成
+                foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
+                {
+                    if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                    {
+                        soundPlayer.StopLoop(durationEvent.LoopId);
+                        currentPlayingDurationEvents.Remove(durationEvent);
+                    }
+                }
+
+                /*
+                else
+                {
+                    var sleepTime = Math.Min(1000, (int)((Math.Abs(ct) - 2) * player.Speed));
+                    if (ct < -5 && sleepTime > 0)
+                        Thread.Sleep(sleepTime);
+                    break;
+                }*/
+
             }
         }
 
-        private void PlaySounds(Sound sounds)
+        private void ProcessSoundEvent(SoundEvent evt)
         {
-            void checkPlay(Sound subFlag, SoundControl control)
+            var sounds = evt.Sounds;
+
+            void checkPlay(SoundControl subFlag)
             {
-                if (sounds.HasFlag(subFlag) && SoundControl.HasFlag(control) && cacheSounds.TryGetValue(subFlag, out var sound))
+                if (sounds.HasFlag(subFlag) && SoundControl.HasFlag(subFlag) && cacheSounds.TryGetValue(subFlag, out var sound))
                     sound.PlayOnce();
             }
 
-            checkPlay(Sound.Tap, SoundControl.Tap);
-            checkPlay(Sound.ExTap, SoundControl.CriticalTap);
-            checkPlay(Sound.Bell, SoundControl.Bell);
-            checkPlay(Sound.WallTap, SoundControl.WallTap);
-            checkPlay(Sound.WallExTap, SoundControl.CriticalWallTap);
-            checkPlay(Sound.Bullet, SoundControl.Bullet);
-            checkPlay(Sound.Flick, SoundControl.Flick);
-            checkPlay(Sound.ExFlick, SoundControl.CriticalFlick);
-            checkPlay(Sound.HoldEnd, SoundControl.HoldEnd);
-            checkPlay(Sound.HoldTick, SoundControl.HoldTick);
-            checkPlay(Sound.ClickSE, SoundControl.ClickSE);
+            checkPlay(SoundControl.Tap);
+            checkPlay(SoundControl.CriticalTap);
+            checkPlay(SoundControl.Bell);
+            checkPlay(SoundControl.WallTap);
+            checkPlay(SoundControl.CriticalWallTap);
+            checkPlay(SoundControl.Bullet);
+            checkPlay(SoundControl.Flick);
+            checkPlay(SoundControl.CriticalFlick);
+            checkPlay(SoundControl.HoldEnd);
+            checkPlay(SoundControl.HoldTick);
+            checkPlay(SoundControl.ClickSE);
+            checkPlay(SoundControl.BeamPrepare);
+            checkPlay(SoundControl.BeamEnd);
         }
 
         public void Seek(TimeSpan msec, bool pause)
@@ -356,8 +409,22 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 Play();
         }
 
+        private void StopAllLoop()
+        {
+            foreach (var durationEvent in currentPlayingDurationEvents.ToArray())
+            {
+                if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                {
+                    soundPlayer.StopLoop(durationEvent.LoopId);
+                    currentPlayingDurationEvents.Remove(durationEvent);
+                }
+            }
+        }
+
         public void Stop()
         {
+            StopAllLoop();
+
             thread?.Abort();
             isPlaying = false;
         }
@@ -395,7 +462,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             return Task.CompletedTask;
         }
 
-        public float GetVolume(Sound sound)
+        public float GetVolume(SoundControl sound)
         {
             foreach (var item in cacheSounds)
             {
@@ -408,7 +475,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             return 0;
         }
 
-        public void SetVolume(Sound sound, float volume)
+        public void SetVolume(SoundControl sound, float volume)
         {
             foreach (var item in cacheSounds)
             {

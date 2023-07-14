@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound
+namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 {
     public class CachedSound
     {
