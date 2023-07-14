@@ -24,7 +24,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using static OngekiFumenEditor.Kernel.Audio.DefaultImp.Sound.DefaultFumenSoundPlayer;
+using static OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound.DefaultFumenSoundPlayer;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 {
@@ -99,8 +99,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 NotifyOfPropertyChange(() => SoundControls);
 
                 //init SoundVolumes
-                var sounds = Enum.GetValues<Sound>();
-                SoundVolumes = sounds.Select(x => new SoundVolumeProxy(value, x)).ToArray();
+                var sounds = Enum.GetValues<SoundControl>();
+                SoundVolumes = sounds.Select(x => new SoundVolumeProxy(value, x)).Where(x=>x.IsValid).ToArray();
                 NotifyOfPropertyChange(() => SoundVolumes);
             }
         }

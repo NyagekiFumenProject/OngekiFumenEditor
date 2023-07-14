@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
         private int vao;
         private int vbo;
         private IDrawingContext target;
-        private float backupPointSize;
+        //private float backupPointSize;
         private const int VertexSize = (4+2+1) * sizeof(float);
         private const int MAX_DRAW_COUNT = 3000;
         private const float MAX_CIRCILE_SIZE = 50f;

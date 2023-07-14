@@ -35,39 +35,5 @@
                 </Button>
             </Grid>
         </GroupBox>
-        <GroupBox Margin="5" Header="崩溃调试文件">
-            <StackPanel>
-                <Grid Margin="10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Text="崩溃调试文件输出:" />
-                    <TextBox
-                        Grid.Column="1"
-                        Margin="10,0,10,0"
-                        VerticalAlignment="Center"
-                        Text="{Binding Setting.DumpFileDirPath}">
-                    </TextBox>
-                    <Button
-                        Grid.Column="2"
-                        Padding="20,2,20,2"
-                        cal:Message.Attach="OnDumpFolderPathButtonClick()">
-                        浏览
-                    </Button>
-                </Grid>
-                <CheckBox Margin="10,0,10,10" IsChecked="{Binding Setting.IsFullDump}">是否截取完整内存</CheckBox>
-                <CheckBox Margin="10,0,10,10" IsChecked="{Binding Setting.IsNotifyUserCrash}">是否显示对话框通知用户</CheckBox>
-
-                <Button
-                    Margin="10,0,10,10"
-                    Padding="20,2,20,2"
-                    HorizontalAlignment="Left"
-                    cal:Message.Attach="ThrowException()">
-                    抛个错误看看?
-                </Button>
-            </StackPanel>
-        </GroupBox>
     </StackPanel>
 </UserControl>

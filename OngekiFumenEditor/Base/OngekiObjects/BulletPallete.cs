@@ -204,6 +204,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        public override string ToString() => $"{base.ToString()} StrID[{StrID}] Speed[{Speed:F3}] ShooterValue[{ShooterValue}] TargetValue[{TargetValue}] SizeValue[{SizeValue}] TypeValue[{TypeValue}]";
+
         public static string CommandName => "BPL";
         public override string IDShortName => CommandName;
 

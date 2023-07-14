@@ -112,6 +112,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
+        private bool isShowWaveform = true;
+        public bool IsShowWaveform
+        {
+            get => isShowWaveform;
+            set => Set(ref isShowWaveform, value);
+        }
+
         public FumenVisualEditorViewModel EditorViewModel => Editor;
 
         private void RecalcViewProjectionMatrix()
@@ -183,7 +190,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (cancelToken.IsCancellationRequested || player is null || samplePeak is null)
                 return;
             var sampleData = await player.GetSamplesAsync();
-            rawPeakData = samplePeak.GetPeakValues(sampleData);
+            rawPeakData = sampleData is not null ? samplePeak.GetPeakValues(sampleData) : null;
             ResamplePeak();
         }
 
@@ -197,7 +204,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 usingPeakData = rawPeakData;
             else
             {
-                var newPeakData = await rawPeakData.GenerateSimplfiedAsync(ResampleSize, tokenSource.Token);
+                var newPeakData = rawPeakData is null ? default : await rawPeakData?.GenerateSimplfiedAsync(ResampleSize, tokenSource.Token);
                 if (!tokenSource.IsCancellationRequested)
                     usingPeakData = newPeakData;
             }
@@ -213,7 +220,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(TimeSpan ts)
         {
-            if (Editor is null)
+            if (Editor is null || !IsShowWaveform)
                 return;
 
             PerfomenceMonitor.PostUIRenderTime(ts);

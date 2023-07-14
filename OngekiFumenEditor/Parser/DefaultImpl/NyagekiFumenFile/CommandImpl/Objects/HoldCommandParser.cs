@@ -23,10 +23,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
             var commData = data[0].Split(",");
             var refRecordId = int.Parse(commData[0]);
             var refLane = fumen.Lanes.FirstOrDefault(x => x.RecordId == refRecordId);
-            if (refLane is null)
-                throw new Exception($"Can't parse line as Hold/WallHold because reference lane ({refRecordId}) is not found.");
 
-            var hold = refLane.IsWallLane ? new WallHold() : new Hold();
+            var hold = (refLane?.IsWallLane ?? false) ? new WallHold() : new Hold();
             hold.ReferenceLaneStart = refLane;
             hold.IsCritical = bool.Parse(commData[1]);
 
@@ -38,7 +36,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.NyagekiFumenFile.CommandImpl.Obje
 
             if (notes.Length > 1)
             {
-                var end = refLane.IsWallLane ? new WallHoldEnd() : new HoldEnd();
+                var end = (refLane?.IsWallLane ?? false) ? new WallHoldEnd() : new HoldEnd();
                 end.TGrid = notes[1]["T"].ParseToTGrid();
                 end.XGrid = notes[1]["X"].ParseToXGrid();
 

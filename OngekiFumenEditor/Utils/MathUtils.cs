@@ -22,6 +22,14 @@ namespace OngekiFumenEditor.Utils
         public static int Random(int max) => RandomHepler.Random(max);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Normalize(double from, double to, double cur)
+        {
+            var duration = to - from;
+            var normalized = (cur - from) / duration;
+            return normalized;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LCM(int a, int b)
         {
             return a / GCD(a, b) * b;
@@ -191,6 +199,7 @@ namespace OngekiFumenEditor.Utils
             return timeX;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float calcGradient(float x1, float y1, float x2, float y2)
         {
             if (y1 == y2)

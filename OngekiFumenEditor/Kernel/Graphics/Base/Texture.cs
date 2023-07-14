@@ -1,53 +1,98 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Numerics;
+using System.Windows.Media.TextFormatting;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Base
 {
     [Serializable]
     public class Texture : IDisposable
     {
-        protected int _id;
-
-        [Browsable(false)]
-        public int ID { get { return _id; } }
-
+        protected int? _id;
         private Vector2 _textureSize;
+        public string Name { get; init; }
 
-        public string Name { get; set; }
+        public int ID => _id ?? throw new ArgumentNullException(nameof(_id));
+        public int Width => (int)_textureSize.X;
+        public int Height => (int)_textureSize.Y;
 
-        public int Width { get { return (int)_textureSize.X; } }
-        public int Height { get { return (int)_textureSize.Y; } }
+        public TextureWrapMode TextureWrapS
+        {
+            get
+            {
+                GL.GetTextureParameter(ID, GetTextureParameter.TextureWrapS, out int m);
+                return (TextureWrapMode)m;
+            }
+            set
+            {
+                GL.TextureParameter(ID, TextureParameterName.TextureWrapS, (int)value);
+            }
+        }
+
+        public TextureWrapMode TextureWrapT
+        {
+            get
+            {
+                GL.GetTextureParameter(ID, GetTextureParameter.TextureWrapT, out int m);
+                return (TextureWrapMode)m;
+            }
+            set
+            {
+                GL.TextureParameter(ID, TextureParameterName.TextureWrapT, (int)value);
+            }
+        }
+
+        public TextureMinFilter TextureMinFilter
+        {
+            get
+            {
+                GL.GetTextureParameter(ID, GetTextureParameter.TextureMinFilter, out int m);
+                return (TextureMinFilter)m;
+            }
+            set
+            {
+                GL.TextureParameter(ID, TextureParameterName.TextureMinFilter, (int)value);
+            }
+        }
+
+        public TextureMagFilter TextureMagFilter
+        {
+            get
+            {
+                GL.GetTextureParameter(ID, GetTextureParameter.TextureMagFilter, out int m);
+                return (TextureMagFilter)m;
+            }
+            set
+            {
+                GL.TextureParameter(ID, TextureParameterName.TextureMagFilter, (int)value);
+            }
+        }
 
         public Texture(string name = "Texture")
         {
             Name = name;
-            _id = 0;
         }
 
         public Texture(Bitmap bmp, string name = "Texture") : this(name)
         {
-            LoadFromFile(bmp);
-        }
+            GL.GenTextures(1, out int id);
+            _id = id;
 
-        public void LoadFromFile(Bitmap bmp)
-        {
-            GL.GenTextures(1, out _id);
+            GL.BindTexture(TextureTarget.Texture2D, ID);
 
-            GL.BindTexture(TextureTarget.Texture2D, _id);
-
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            TextureMinFilter = TextureMinFilter.Linear;
+            TextureMagFilter = TextureMagFilter.Linear;
+            TextureWrapS = TextureWrapMode.ClampToEdge;
+            TextureWrapT = TextureWrapMode.ClampToEdge;
 
             _textureSize = new Vector2(bmp.Width, bmp.Height);
 
-            BitmapData bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var bmp_data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0,
                 OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
@@ -55,32 +100,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.Base
             bmp.UnlockBits(bmp_data);
         }
 
-        public void LoadFromData(IntPtr data, int width, int height)
-        {
-            if (data != IntPtr.Zero)
-            {
-                GL.GenTextures(1, out _id);
-
-                GL.BindTexture(TextureTarget.Texture2D, _id);
-
-                _textureSize = new Vector2(width, height);
-
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-
-                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0,
-                    OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data);
-            }
-        }
-
         public override string ToString()
         {
-            return Name;
+            return $"({ID}){Name}";
         }
 
         public void Dispose()
         {
-            GL.DeleteTexture(_id);
+            if (_id is int id)
+            {
+                GL.DeleteTexture(id);
+                _id = null;
+            }
         }
     }
 }

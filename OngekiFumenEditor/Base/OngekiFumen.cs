@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.Collections.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -39,6 +40,7 @@ namespace OngekiFumenEditor.Base
         public TGridSortList<Bullet> Bullets { get; } = new();
         public TGridSortList<ClickSE> ClickSEs { get; } = new();
         public MeterChangeList MeterChanges { get; } = new();
+        public TGridSortList<Comment> Comments { get; } = new();
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
         public List<SvgPrefabBase> SvgPrefabs { get; } = new();
@@ -161,6 +163,10 @@ namespace OngekiFumenEditor.Base
             {
                 Holds.Add(holdEnd);
             }
+            else if (obj is Comment comment)
+            {
+                Comments.Add(comment);
+            }
             else if (obj is LaneBlockArea laneBlock)
             {
                 LaneBlocks.Add(laneBlock);
@@ -230,6 +236,10 @@ namespace OngekiFumenEditor.Base
             else if (obj is ClickSE clickSE)
             {
                 ClickSEs.Remove(clickSE);
+            }
+            else if (obj is Comment comment)
+            {
+                Comments.Remove(comment);
             }
             else if (obj is Tap tap)
             {
@@ -325,6 +335,7 @@ namespace OngekiFumenEditor.Base
                    .Concat(LaneBlocks.GetVisibleStartObjects(min, max))
                    .Concat(Soflans)
                    .Concat(EnemySets.BinaryFindRange(min, max))
+                   .Concat(Comments.BinaryFindRange(min, max))
                    .Concat(Bullets.BinaryFindRange(min, max))
                    .Concat(Lanes.GetVisibleStartObjects(min, max))
                    .Concat(Taps.BinaryFindRange(min, max))

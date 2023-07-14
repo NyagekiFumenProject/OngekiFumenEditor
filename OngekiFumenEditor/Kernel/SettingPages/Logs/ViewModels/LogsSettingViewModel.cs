@@ -56,30 +56,5 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Logs.ViewModels
                 ApplyChanges();
             }
         }
-
-
-        public void OnDumpFolderPathButtonClick()
-        {
-            using var openFolderDialog = new FolderBrowserDialog();
-            openFolderDialog.ShowNewFolderButton = true;
-            openFolderDialog.SelectedPath = Path.GetFullPath(Setting.DumpFileDirPath);
-            if (openFolderDialog.ShowDialog() == DialogResult.OK)
-            {
-                var folderPath = openFolderDialog.SelectedPath;
-                if (!Directory.Exists(folderPath))
-                {
-                    MessageBox.Show("选择的文件夹为空,请重新选择");
-                    OnDumpFolderPathButtonClick();
-                    return;
-                }
-                Setting.DumpFileDirPath = folderPath;
-                ApplyChanges();
-            }
-        }
-
-        public void ThrowException()
-        {
-            throw new Exception("塔塔开!");
-        }
     }
 }

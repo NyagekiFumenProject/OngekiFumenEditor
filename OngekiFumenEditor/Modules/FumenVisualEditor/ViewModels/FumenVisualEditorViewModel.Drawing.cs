@@ -24,6 +24,10 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using System.Windows.Media;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
+using System.DirectoryServices.AccountManagement;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam;
+using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -191,6 +195,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                    .Concat(fumen.BpmList.Skip(1)) //not show first bpm
                    .Concat(fumen.ClickSEs.BinaryFindRange(min, max))
                    .Concat(fumen.LaneBlocks.GetVisibleStartObjects(min, max))
+                   .Concat(fumen.Comments.BinaryFindRange(min, max))
                    .Concat(fumen.Soflans)
                    .Concat(fumen.EnemySets.BinaryFindRange(min, max))
                    //.Concat(fumen.Bullets.BinaryFindRange(min, max))
@@ -198,8 +203,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                    .Concat(fumen.Taps.BinaryFindRange(min, max))
                    .Concat(fumen.Holds.GetVisibleStartObjects(min, max))
                    .Concat(fumen.SvgPrefabs)
-                   .Concat(fumen.Beams)
-                   .Distinct();
+                   //.Concat(fumen.Beams.GetVisibleStartObjects(min, max))
+                   /*.Distinct()*/;
+
+            if (fumen.Beams.Any())
+            {
+                var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(min, this) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION), this);
+                var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(max, this) + TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), this);
+
+                first = first.Concat(fumen.Beams.GetVisibleStartObjects(leadInTGrid, leadOutTGrid));
+            }
 
             /*
              这里考虑到有spd<1的子弹/Bell会提前出现的情况，因此得分状态分别去选择
@@ -335,6 +348,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RecalculateMagaticXGridLines()
         {
+            //todo 可以优化
             cachedMagneticXGridLines.Clear();
 
             var width = ViewWidth;

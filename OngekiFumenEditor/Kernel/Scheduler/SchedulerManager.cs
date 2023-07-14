@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Kernel.Scheduler
 
             schedulers.Add(s);
             schedulersCallTime[s] = DateTime.MinValue;
-            Log.LogInfo("Added new scheduler: " + s.SchedulerName);
+            Log.LogDebug("Added new scheduler: " + s.SchedulerName);
 
             return Task.CompletedTask;
         }
@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Kernel.Scheduler
             }
 
             schedulers.Remove(s);
-            Log.LogInfo("Remove scheduler: " + s.SchedulerName);
+            Log.LogDebug("Remove scheduler: " + s.SchedulerName);
 
             return Task.CompletedTask;
         }

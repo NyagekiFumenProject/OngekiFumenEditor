@@ -155,6 +155,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(int l, Vector4 v) => GL.Uniform4(l, v);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(string name, Vector4 val)
+        {
+            int l = GetUniformLocation(name);
+            PassUniform(l, val);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(int l, System.Numerics.Vector2 v) => PassUniform(l, new Vector2(v.X, v.Y));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, System.Numerics.Vector2 val)

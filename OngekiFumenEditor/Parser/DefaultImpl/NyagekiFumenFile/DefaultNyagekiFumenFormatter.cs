@@ -70,10 +70,19 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
             ProcessSvgPrefabs(fumen, writer);
 
+            ProcessComments(fumen, writer);
+
             await writer.FlushAsync();
             await memory.FlushAsync();
 
             return memory.ToArray();
+        }
+
+        private void ProcessComments(OngekiFumen fumen, StreamWriter sb)
+        {
+            foreach (var comment in fumen.Comments.OrderBy(x => x.TGrid))
+                sb.WriteLine($"Comment\t:\t{Base64.Encode(comment.Content)}\t:\tT[{comment.TGrid.Unit},{comment.TGrid.Grid}]");
+            sb.WriteLine();
         }
 
         private void ProcessSvgPrefabs(OngekiFumen fumen, StreamWriter writer)

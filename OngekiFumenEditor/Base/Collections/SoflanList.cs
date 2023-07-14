@@ -65,16 +65,24 @@ namespace OngekiFumenEditor.Base.Collections
         private List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> cachedSoflanPositionList_PreviewMode = new();
         private double cachedSoflanListCacheHash = int.MinValue;
 
+        [Flags]
+        private enum ChgEvt
+        {
+            None = 0,
+            BpmChanged = 1,
+            SoflanBegan = 2,
+            SoflanEnded = 4,
+            SoflanChanged = SoflanBegan | SoflanEnded
+        }
+
         #region SoflanPositionList
 
-        private IEnumerable<(int id, TGrid TGrid, double speed, BPMChange curBpm)> GetCalculatableEvents(BpmList bpmList, bool isDesignModel)
+        private IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm, ChgEvt)> GetCalculatableEvents(BpmList bpmList, bool isDesignModel)
         {
             var curBpm = bpmList.FirstBpm;
             Soflan curSpeedEvent = null;
 
-            var i = 0;
-
-            IEnumerable<(int id, TGrid TGrid, double speed, BPMChange curBpm)> GetEventTimings(ITimelineObject evt)
+            IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm, ChgEvt evt)> GetEventTimings(ITimelineObject evt)
             {
                 var t = evt.TGrid;
                 switch (evt)
@@ -82,21 +90,58 @@ namespace OngekiFumenEditor.Base.Collections
                     case BPMChange bpmEvt:
                         curBpm = bpmEvt;
                         var speed = (curSpeedEvent is not null && curSpeedEvent.EndTGrid > t) ? (isDesignModel ? curSpeedEvent.SpeedInEditor : curSpeedEvent.Speed) : 1.0d;
-                        yield return (i++, evt.TGrid, speed, curBpm);
+                        yield return (evt.TGrid, speed, curBpm, ChgEvt.BpmChanged);
                         break;
                     case Soflan soflanEvt:
                         curSpeedEvent = soflanEvt;
-                        yield return (i++, evt.TGrid, (isDesignModel ? soflanEvt.SpeedInEditor : soflanEvt.Speed), curBpm);
-                        yield return (i++, evt.TGrid + new GridOffset(0, soflanEvt.GridLength), 1.0f, curBpm);
+                        yield return (evt.TGrid, (isDesignModel ? soflanEvt.SpeedInEditor : soflanEvt.Speed), curBpm, ChgEvt.SoflanBegan);
+                        var endTGrid = evt.TGrid + new GridOffset(0, soflanEvt.GridLength);
+                        yield return (endTGrid, 1.0f, bpmList.GetBpm(endTGrid), ChgEvt.SoflanEnded);
                         break;
                 }
             }
-
-            return this.AsEnumerable<ITimelineObject>().Concat(bpmList)
+            var r = this.AsEnumerable<ITimelineObject>().Concat(bpmList)
                 .OrderBy(x => x.TGrid)
                 .SelectMany(GetEventTimings)
                 .GroupBy(x => x.TGrid)
-                .Select(x => x.Last());
+                .OrderBy(x => x.Key);
+
+            var s = r
+                .Select(x =>
+                {
+                    var itor = x.GetEnumerator();
+                    if (itor.MoveNext())
+                    {
+                        var totalState = itor.Current;
+                        while (itor.MoveNext())
+                        {
+                            var curState = itor.Current;
+
+                            totalState.evt |= curState.evt;
+                            switch (curState.evt)
+                            {
+                                case ChgEvt.SoflanEnded:
+                                    if (!totalState.evt.HasFlag(ChgEvt.SoflanBegan))
+                                        totalState.speed = curState.speed;
+                                    break;
+                                case ChgEvt.SoflanBegan:
+                                    totalState.speed = curState.speed;
+                                    break;
+                                case ChgEvt.BpmChanged:
+                                    totalState.curBpm = curState.curBpm;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        return totalState;
+                    }
+                    return default;
+                })
+                .Where(x => x.evt != ChgEvt.None);
+
+            return s;
         }
 
         private void UpdateCachedSoflanPositionList(double tUnitLength, BpmList bpmList, List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list, bool isDesignMode)

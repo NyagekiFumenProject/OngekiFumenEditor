@@ -13,7 +13,8 @@ namespace OngekiFumenEditor.UI.ValueConverters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (value is bool b ? b : false) ? Visibility.Hidden : Visibility.Visible;
+            var falseEnum = (bool.TryParse(parameter?.ToString(), out var r) && r) ? Visibility.Collapsed : Visibility.Hidden;
+            return (value is bool b ? b : false) ? falseEnum : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
