@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public void PostDrawEditor(IFumenEditorDrawingContext target, Bell obj)
         {
             var toTime = target.ConvertToY(obj.TGrid);
-            var toX = XGridCalculator.ConvertXGridToX(obj.XGrid.TotalUnit, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1, target.Editor.Setting.XOffset);
+            var toX = XGridCalculator.ConvertXGridToX(obj.XGrid.TotalUnit, target.Editor);
 
             var pos = new Vector2((float)toX, (float)toTime);
             normalFlichList.Add((size, pos, 0f));
@@ -92,8 +92,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (target.Rect.MinY < fromTime)
                 return;
 
-            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1, target.Editor.Setting.XOffset);
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1, target.Editor.Setting.XOffset);
+            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
 
             var currentTime = target.CurrentPlayTime;
 
