@@ -186,7 +186,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             //add to mixer
             AddMixerInput(handle.Provider);
 
-            Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
+            //Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
             return handle;
         }
 
@@ -195,7 +195,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             if (h is not NAudioLoopHandle handle)
                 return;
 
-            Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
+            //Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
             RemoveMixerInput(handle.Provider);
         }
     }
