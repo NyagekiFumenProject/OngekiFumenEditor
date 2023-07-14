@@ -250,5 +250,17 @@ namespace OngekiFumenEditor.Properties {
                 this["XOffset"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowXOffsetScrollBar {
+            get {
+                return ((bool)(this["ShowXOffsetScrollBar"]));
+            }
+            set {
+                this["ShowXOffsetScrollBar"] = value;
+            }
+        }
     }
 }
