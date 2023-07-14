@@ -92,6 +92,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 case nameof(EditorSetting.JudgeLineOffsetY):
                     RecalcViewProjectionMatrix();
                     break;
+                case nameof(EditorSetting.XOffset):
+                    RecalcViewProjectionMatrix();
+                    break;
                 case nameof(EditorSetting.XGridUnitSpace):
                 case nameof(EditorSetting.DisplayTimeFormat):
                 case nameof(EditorSetting.BeatSplit):

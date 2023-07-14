@@ -99,6 +99,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private double xOffset = Properties.EditorGlobalSetting.Default.XOffset;
+        /// <summary>
+        /// X轴上单位线间距大小
+        /// </summary>
+        public double XOffset
+        {
+            get => xOffset;
+            set
+            {
+                xOffset = Properties.EditorGlobalSetting.Default.XOffset = value;
+                Save();
+                NotifyOfPropertyChange(() => XOffset);
+            }
+        }
+
         private double xGridUnitSpace = Properties.EditorGlobalSetting.Default.XGridUnitSpace;
         /// <summary>
         /// X轴上单位线间距大小
@@ -260,6 +275,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.MouseWheelLength):
                     mouseWheelLength = Properties.EditorGlobalSetting.Default.MouseWheelLength;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.XOffset):
+                    xOffset = Properties.EditorGlobalSetting.Default.XOffset;
                     break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");

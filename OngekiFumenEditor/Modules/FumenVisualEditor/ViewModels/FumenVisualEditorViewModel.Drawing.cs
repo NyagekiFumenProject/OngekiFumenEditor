@@ -24,9 +24,6 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using System.Windows.Media;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
-using System.DirectoryServices.AccountManagement;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam;
-using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -124,10 +121,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RecalcViewProjectionMatrix()
         {
+            var xOffset = 0;
+
             ProjectionMatrix =
                 Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
             ViewMatrix =
-                Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2, -CurrentPlayTime - ViewHeight / 2 + (float)Setting.JudgeLineOffsetY, 0));
+                Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2 + xOffset, -CurrentPlayTime - ViewHeight / 2 + (float)Setting.JudgeLineOffsetY, 0));
 
             ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
         }
@@ -351,14 +350,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //todo 可以优化
             cachedMagneticXGridLines.Clear();
 
+            var xOffset = (float)Setting.XOffset;
             var width = ViewWidth;
-            var xUnitSpace = (float)Editor.Setting.XGridUnitSpace;
-            var maxDisplayXUnit = Editor.Setting.XGridDisplayMaxUnit;
+            var xUnitSpace = (float)Setting.XGridUnitSpace;
+            var maxDisplayXUnit = Setting.XGridDisplayMaxUnit;
 
             var unitSize = (float)XGridCalculator.CalculateXUnitSize(maxDisplayXUnit, width, xUnitSpace);
             var totalUnitValue = 0f;
 
-            for (float totalLength = width / 2 + unitSize; totalLength < width; totalLength += unitSize)
+            var baseX = width / 2 + xOffset;
+
+            var limitLength = width + Math.Abs(xOffset);
+
+            for (float totalLength = baseX + unitSize; totalLength - xOffset < limitLength; totalLength += unitSize)
             {
                 totalUnitValue += xUnitSpace;
 
@@ -371,14 +375,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 cachedMagneticXGridLines.Add(new()
                 {
-                    X = (width / 2) - (totalLength - (width / 2)),
+                    X = baseX - (totalLength - baseX),
                     XGridTotalUnit = -totalUnitValue,
                     XGridTotalUnitDisplay = (-totalUnitValue).ToString()
                 });
             }
             cachedMagneticXGridLines.Add(new()
             {
-                X = width / 2,
+                X = baseX,
                 XGridTotalUnit = 0f,
             });
         }

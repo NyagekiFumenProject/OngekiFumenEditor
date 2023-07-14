@@ -23,6 +23,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             public float X { get; set; }
             public float XGridTotalUnit { get; set; }
             public string XGridTotalUnitDisplay { get; set; }
+
+            public override string ToString() => $"X:{X:F3} XGridTotalUnit:{XGridTotalUnit:F3} Display:{XGridTotalUnitDisplay}";
         }
 
         private IStringDrawing stringDrawing;

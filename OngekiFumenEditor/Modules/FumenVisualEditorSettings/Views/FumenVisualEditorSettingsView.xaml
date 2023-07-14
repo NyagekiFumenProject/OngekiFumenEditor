@@ -62,13 +62,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <TextBlock
                     Margin="0,0,10,0"
@@ -96,10 +89,9 @@
                     Margin="0,5,0,5"
                     Text="{Binding Setting.TGridUnitLength}">
                 </TextBox>
-
+            </Grid>
+            <StackPanel>
                 <controls:RangeValue
-                    Grid.Row="3"
-                    Grid.ColumnSpan="2"
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.BeatSplit, Mode=TwoWay}"
                     DisplayName="节奏线细分倍率:"
@@ -108,8 +100,6 @@
                     Step="1">
                 </controls:RangeValue>
                 <controls:RangeValue
-                    Grid.Row="4"
-                    Grid.ColumnSpan="2"
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.XGridDisplayMaxUnit, Mode=TwoWay}"
                     DisplayName="水平轴最大显示范围:"
@@ -117,8 +107,6 @@
                     MinValue="0"
                     Step="1" />
                 <controls:RangeValue
-                    Grid.Row="6"
-                    Grid.ColumnSpan="2"
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.JudgeLineOffsetY, Mode=TwoWay}"
                     DisplayName="判定线偏移位置:"
@@ -127,8 +115,13 @@
                     Step="1">
                 </controls:RangeValue>
                 <controls:RangeValue
-                    Grid.Row="7"
-                    Grid.ColumnSpan="2"
+                    Padding="0,10,0,10"
+                    CurrentValue="{Binding Setting.XOffset, Mode=TwoWay}"
+                    DisplayName="水平轴偏移:"
+                    MaxValue="600"
+                    MinValue="-600"
+                    Step="1" />
+                <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.VerticalDisplayScale, Mode=TwoWay}"
                     DisplayName="水平显示缩放:"
@@ -136,6 +129,16 @@
                     MinValue="0.1"
                     Step="0.1">
                 </controls:RangeValue>
+            </StackPanel>
+            <Grid Margin="0,2,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
                 <TextBlock
                     Grid.Row="8"
                     Margin="0,0,10,0"

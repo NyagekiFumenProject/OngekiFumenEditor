@@ -238,5 +238,17 @@ namespace OngekiFumenEditor.Properties {
                 this["MouseWheelLength"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double XOffset {
+            get {
+                return ((double)(this["XOffset"]));
+            }
+            set {
+                this["XOffset"] = value;
+            }
+        }
     }
 }

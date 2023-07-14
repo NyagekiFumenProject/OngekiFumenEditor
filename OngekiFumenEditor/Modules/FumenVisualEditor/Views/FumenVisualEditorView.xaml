@@ -40,6 +40,10 @@
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
                 <MenuItem Header="选取...">
@@ -91,6 +95,13 @@
             Orientation="Vertical"
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
             Value="{Binding ReverseScrollViewerVerticalOffset}">
+        </ScrollBar>
+        <ScrollBar
+            Grid.Row="1"
+            Maximum="600"
+            Minimum="-600"
+            Orientation="Horizontal"
+            Value="{Binding Setting.XOffset, Mode=TwoWay}">
         </ScrollBar>
         <StackPanel
             Margin="0,0,0,50"

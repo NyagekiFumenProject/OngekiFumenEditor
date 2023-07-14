@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, Vector4? specifyColor = default)
             {
-                var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, target.Editor.Setting.XGridUnitSpace);
+                var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, target.Editor.Setting.XGridUnitSpace, target.Editor.Setting.XOffset);
                 var y = (float)target.ConvertToY(tGridTotalUnit);
 
                 //lineDrawing.PostPoint(new(x, y), specifyColor ?? color);

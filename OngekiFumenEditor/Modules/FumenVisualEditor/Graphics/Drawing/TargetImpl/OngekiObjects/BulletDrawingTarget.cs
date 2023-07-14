@@ -116,8 +116,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             ---------------------------- fromTime = toTime - appearOffsetTime
              */
 
-            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
+            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1, target.Editor.Setting.XOffset);
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1, target.Editor.Setting.XOffset);
 
             //计算向量化的物件运动时间
             var toTime = target.ConvertToY(obj.TGrid);
@@ -150,9 +150,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private void DrawEditor(IFumenEditorDrawingContext target, Bullet obj)
         {
-            var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1);
+            var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, 1, target.Editor.Setting.XOffset);
             var toTime = target.ConvertToY(obj.TGrid);
-            
+
             var pos = new Vector2((float)toX, (float)toTime);
 
             var texture = spritesMap[obj.BulletDamageTypeValue][obj.ReferenceBulletPallete.TypeValue];
