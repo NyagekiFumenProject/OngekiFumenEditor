@@ -56,6 +56,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 Set(ref isUserRequestHideEditorObject, value);
                 NotifyOfPropertyChange(() => EditorObjectVisibility);
+                NotifyOfPropertyChange(() => IsDesignMode);
+                NotifyOfPropertyChange(() => IsPreviewMode);
             }
         }
 

@@ -192,6 +192,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private bool showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar;
+        public bool ShowXOffsetScrollBar
+        {
+            get => showXOffsetScrollBar;
+            set
+            {
+                showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value;
+                RequestSave();
+                NotifyOfPropertyChange(() => ShowXOffsetScrollBar);
+            }
+        }
+
         private double verticalDisplayScale = Properties.EditorGlobalSetting.Default.VerticalDisplayScale;
         public double VerticalDisplayScale
         {
@@ -286,10 +298,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                 case nameof(Properties.EditorGlobalSetting.XOffset):
                     xOffset = Properties.EditorGlobalSetting.Default.XOffset;
                     break;
+                case nameof(Properties.EditorGlobalSetting.ShowXOffsetScrollBar):
+                    showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar;
+                    break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");
                     break;
             }
+
+            NotifyOfPropertyChange(e.PropertyName);
         }
 
         public void Dispose()
