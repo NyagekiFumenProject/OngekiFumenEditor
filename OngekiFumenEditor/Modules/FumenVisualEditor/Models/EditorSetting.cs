@@ -16,9 +16,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
         }
 
-        private void Save()
+        private async void RequestSave()
         {
+            if (isRequestSave)
+                return;
+            isRequestSave = true;
+            await Task.Delay(2000);
             Properties.EditorGlobalSetting.Default.Save();
+            isRequestSave = false;
         }
 
         private double judgeLineOffsetY = Properties.EditorGlobalSetting.Default.JudgeLineOffsetY;
@@ -28,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 judgeLineOffsetY = Properties.EditorGlobalSetting.Default.JudgeLineOffsetY = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => JudgeLineOffsetY);
             }
         }
@@ -43,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 disableXGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => DisableXGridMagneticDock);
             }
         }
@@ -55,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 forceMagneticDock = Properties.EditorGlobalSetting.Default.ForceMagneticDock = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => ForceMagneticDock);
             }
         }
@@ -67,7 +72,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 forceTapHoldMagneticDockToLane = Properties.EditorGlobalSetting.Default.ForceTapHoldMagneticDockToLane = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => ForceTapHoldMagneticDockToLane);
             }
         }
@@ -79,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 judgeLineAlignBeat = Properties.EditorGlobalSetting.Default.JudgeLineAlignBeat = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => JudgeLineAlignBeat);
             }
         }
@@ -94,8 +99,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 disableTGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => DisableTGridMagneticDock);
+            }
+        }
+
+        private double xOffset = Properties.EditorGlobalSetting.Default.XOffset;
+        /// <summary>
+        /// X轴上单位线间距大小
+        /// </summary>
+        public double XOffset
+        {
+            get => xOffset;
+            set
+            {
+                xOffset = Properties.EditorGlobalSetting.Default.XOffset = value;
+                RequestSave();
+                NotifyOfPropertyChange(() => XOffset);
             }
         }
 
@@ -109,7 +129,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 xGridUnitSpace = Properties.EditorGlobalSetting.Default.XGridUnitSpace = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => XGridUnitSpace);
             }
         }
@@ -124,7 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 tGridUnitLength = Properties.EditorGlobalSetting.Default.TGridUnitLength = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => TGridUnitLength);
             }
         }
@@ -140,7 +160,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 beatSplit = Properties.EditorGlobalSetting.Default.BeatSplit = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => BeatSplit);
             }
         }
@@ -155,7 +175,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 xGridDisplayMaxUnit = Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => XGridDisplayMaxUnit);
             }
         }
@@ -167,8 +187,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 forceXGridMagneticDock = Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => ForceXGridMagneticDock);
+            }
+        }
+
+        private bool showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar;
+        public bool ShowXOffsetScrollBar
+        {
+            get => showXOffsetScrollBar;
+            set
+            {
+                showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value;
+                RequestSave();
+                NotifyOfPropertyChange(() => ShowXOffsetScrollBar);
             }
         }
 
@@ -179,7 +211,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 verticalDisplayScale = Properties.EditorGlobalSetting.Default.VerticalDisplayScale = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => VerticalDisplayScale);
             }
         }
@@ -191,7 +223,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             set
             {
                 mouseWheelLength = Properties.EditorGlobalSetting.Default.MouseWheelLength = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => MouseWheelLength);
             }
         }
@@ -203,6 +235,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
         }
 
         private TimeFormat displayTimeFormat = (TimeFormat)Properties.EditorGlobalSetting.Default.DisplayTimeFormat;
+        private bool isRequestSave;
+
         public TimeFormat DisplayTimeFormat
         {
             get => displayTimeFormat;
@@ -210,7 +244,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             {
                 Properties.EditorGlobalSetting.Default.DisplayTimeFormat = (int)value;
                 displayTimeFormat = value;
-                Save();
+                RequestSave();
                 NotifyOfPropertyChange(() => DisplayTimeFormat);
             }
         }
@@ -261,10 +295,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                 case nameof(Properties.EditorGlobalSetting.MouseWheelLength):
                     mouseWheelLength = Properties.EditorGlobalSetting.Default.MouseWheelLength;
                     break;
+                case nameof(Properties.EditorGlobalSetting.XOffset):
+                    xOffset = Properties.EditorGlobalSetting.Default.XOffset;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.ShowXOffsetScrollBar):
+                    showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar;
+                    break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");
                     break;
             }
+
+            NotifyOfPropertyChange(e.PropertyName);
         }
 
         public void Dispose()

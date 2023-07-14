@@ -11,6 +11,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
     cal:Message.Attach="     [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];      [Key Q] = [Action KeyboardAction_HideOrShow]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];    "
@@ -40,6 +41,10 @@
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
                 <MenuItem Header="选取...">
@@ -89,8 +94,15 @@
             Maximum="{Binding TotalDurationHeight}"
             Minimum="0"
             Orientation="Vertical"
-            Visibility="{Binding IsLocked, Converter={StaticResource BoolToScrollBarVisibleConverter}}"
             Value="{Binding ReverseScrollViewerVerticalOffset}">
+        </ScrollBar>
+        <ScrollBar
+            Grid.Row="1"
+            Maximum="600"
+            Minimum="-600"
+            Orientation="Horizontal"
+            Visibility="{Binding Setting.ShowXOffsetScrollBar, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static sys:Boolean.TrueString}}"
+            Value="{Binding Setting.XOffset, Mode=TwoWay}">
         </ScrollBar>
         <StackPanel
             Margin="0,0,0,50"
