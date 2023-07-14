@@ -69,12 +69,21 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 #endif
         }
 
-        public void PlaySound(CachedSound sound, float volume)
+        public void PlaySound(CachedSound sound, float volume, TimeSpan init)
         {
-            AddMixerInput(ConvertToRightChannelCount(new VolumeSampleProvider(new CachedSoundSampleProvider(sound))
+            ISampleProvider provider = ConvertToRightChannelCount(new VolumeSampleProvider(new CachedSoundSampleProvider(sound))
             {
                 Volume = volume
-            }));
+            });
+            if (init.TotalMilliseconds != 0)
+            {
+                provider = new OffsetSampleProvider(provider)
+                {
+                    SkipOver = init
+                };
+            }
+
+            AddMixerInput(provider);
         }
 
         public void AddMixerInput(ISampleProvider input)
@@ -167,7 +176,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             {
                 provider = new OffsetSampleProvider(provider)
                 {
-                    DelayBy = init
+                    SkipOver = init
                 };
             }
 
@@ -177,6 +186,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             //add to mixer
             AddMixerInput(handle.Provider);
 
+            Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
             return handle;
         }
 
@@ -185,6 +195,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             if (h is not NAudioLoopHandle handle)
                 return;
 
+            Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
             RemoveMixerInput(handle.Provider);
         }
     }

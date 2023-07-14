@@ -134,6 +134,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
             thread = new AbortableThread(OnUpdate);
             thread.Name = $"DefaultFumenSoundPlayer_Thread";
+            UpdateInternal(thread.CancellationToken);
             thread.Start();
         }
 
@@ -150,31 +151,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     return null;
                 return (int)(resT / beatCount);
             }
-            /*
-            int? CalcHoldTickStepSizeB()
-            {
-                var bpm = fumen.BpmList.GetBpm(x.TGrid).BPM;
-                var progressJudgeBPM = fumen.MetaInfo.ProgJudgeBpm;
-                var standardBeatLen = fumen.MetaInfo.TRESOLUTION >> 2; //取1/4切片长度
-
-                if (bpm < progressJudgeBPM)
-                {
-                    while (bpm < progressJudgeBPM)
-                    {
-                        standardBeatLen >>= 1;
-                        bpm *= 2f;
-                    }
-                }
-                else
-                {
-                    for (progressJudgeBPM *= 2f; progressJudgeBPM <= bpm; progressJudgeBPM *= 2f)
-                    {
-                        standardBeatLen <<= 1;
-                    }
-                }
-                return standardBeatLen;
-            }
-            */
 
             if (CalcHoldTickStepSizeA() is not int lengthPerBeat)
                 yield break;
@@ -308,70 +284,74 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             itor = events.First;
         }
 
+        private void UpdateInternal(CancellationToken token)
+        {
+            if (itor is null || player is null || token.IsCancellationRequested)
+                return;
+            if (!IsPlaying)
+            {
+                //stop all looping
+                StopAllLoop();
+                return;
+            }
+
+            var currentTime = player.CurrentTime;
+
+            //播放普通音乐
+            while (itor is not null)
+            {
+                var nextBeatTime = itor.Value.Time.TotalMilliseconds;
+                var ct = currentTime.TotalMilliseconds - nextBeatTime;
+                if (ct >= 0)
+                {
+                    //Debug.WriteLine($"diff:{ct:F2}ms target:{itor.Value}");
+                    ProcessSoundEvent(itor.Value);
+                    itor = itor.Next;
+                }
+                else
+                    break;
+            }
+
+            var queryDurationEvents = durationEvents.Query(currentTime);
+            foreach (var durationEvent in queryDurationEvents)
+            {
+                //检查是否正在播放了
+                if (!currentPlayingDurationEvents.Contains(durationEvent))
+                {
+                    if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                    {
+                        var initPlayTime = currentTime - durationEvent.Time;
+                        soundPlayer.PlayLoop(durationEvent.LoopId, initPlayTime);
+                        currentPlayingDurationEvents.Add(durationEvent);
+                    }
+                }
+            }
+
+            //检查是否已经播放完成
+            foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
+            {
+                if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                {
+                    soundPlayer.StopLoop(durationEvent.LoopId);
+                    currentPlayingDurationEvents.Remove(durationEvent);
+                }
+            }
+
+            /*
+            else
+            {
+                var sleepTime = Math.Min(1000, (int)((Math.Abs(ct) - 2) * player.Speed));
+                if (ct < -5 && sleepTime > 0)
+                    Thread.Sleep(sleepTime);
+                break;
+            }*/
+        }
+
         private void OnUpdate(CancellationToken cancel)
         {
             while (!cancel.IsCancellationRequested)
             {
-                if (itor is null || player is null)
-                    continue;
-                if (!IsPlaying)
-                {
-                    //stop all looping
-                    StopAllLoop();
-                    continue;
-                }
-
-                var currentTime = player.CurrentTime;
-
-                //播放普通音乐
-                while (itor is not null)
-                {
-                    var nextBeatTime = itor.Value.Time.TotalMilliseconds;
-                    var ct = currentTime.TotalMilliseconds - nextBeatTime;
-                    if (ct >= 0)
-                    {
-                        //Debug.WriteLine($"diff:{ct:F2}ms target:{itor.Value}");
-                        ProcessSoundEvent(itor.Value);
-                        itor = itor.Next;
-                    }
-                    else
-                        break;
-                }
-
-                var queryDurationEvents = durationEvents.Query(currentTime);
-                foreach (var durationEvent in queryDurationEvents)
-                {
-                    //检查是否正在播放了
-                    if (!currentPlayingDurationEvents.Contains(durationEvent))
-                    {
-                        if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
-                        {
-                            var initPlayTime = currentTime - durationEvent.Time;
-                            soundPlayer.PlayLoop(durationEvent.LoopId, initPlayTime);
-                            currentPlayingDurationEvents.Add(durationEvent);
-                        }
-                    }
-                }
-
-                //检查是否已经播放完成
-                foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
-                {
-                    if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
-                    {
-                        soundPlayer.StopLoop(durationEvent.LoopId);
-                        currentPlayingDurationEvents.Remove(durationEvent);
-                    }
-                }
-
-                /*
-                else
-                {
-                    var sleepTime = Math.Min(1000, (int)((Math.Abs(ct) - 2) * player.Speed));
-                    if (ct < -5 && sleepTime > 0)
-                        Thread.Sleep(sleepTime);
-                    break;
-                }*/
-
+                UpdateInternal(cancel);
             }
         }
 
@@ -423,9 +403,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         public void Stop()
         {
-            StopAllLoop();
-
             thread?.Abort();
+            StopAllLoop();
             isPlaying = false;
         }
 
@@ -439,6 +418,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
         public void Pause()
         {
             isPlaying = false;
+            StopAllLoop();
         }
 
         public void Dispose()
@@ -462,7 +442,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             return Task.CompletedTask;
         }
 
-        public float GetVolume(SoundControl sound)
+        public float? GetVolume(SoundControl sound)
         {
             foreach (var item in cacheSounds)
             {
@@ -472,7 +452,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 }
             }
 
-            return 0;
+            return null;
         }
 
         public void SetVolume(SoundControl sound, float volume)

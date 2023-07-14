@@ -18,13 +18,15 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Models
 
         public float Volume
         {
-            get => soundPlayer.GetVolume(sound);
+            get => soundPlayer.GetVolume(sound) ?? 0;
             set
             {
                 soundPlayer.SetVolume(sound, value);
                 NotifyOfPropertyChange(() => Volume);
             }
         }
+
+        public bool IsValid => soundPlayer.GetVolume(sound) is not null;
 
         public SoundVolumeProxy(IFumenSoundPlayer soundPlayer, SoundControl sound)
         {

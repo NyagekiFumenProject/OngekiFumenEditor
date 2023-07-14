@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.Utils
         private Thread thread;
         private CancellationTokenSource cancellationTokenSource;
 
+        public CancellationToken CancellationToken => cancellationTokenSource.Token;
+
         public AbortableThread(Action<CancellationToken> cancellableMethod)
         {
             cancellationTokenSource = new CancellationTokenSource();
@@ -49,7 +51,6 @@ namespace OngekiFumenEditor.Utils
             thread.Start();
             Log.LogDebug($"Thread {Name} started.", prefix: "AbortableThread");
         }
-
 
         public void Abort(bool waitForTask = true)
         {

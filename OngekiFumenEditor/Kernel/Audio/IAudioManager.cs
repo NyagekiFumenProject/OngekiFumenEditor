@@ -16,8 +16,5 @@ namespace OngekiFumenEditor.Kernel.Audio
         Task<IAudioPlayer> LoadAudioAsync(string filePath);
 
         IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; }
-
-        ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init);
-        void StopLoopSound(ILoopHandle handle);
     }
 }

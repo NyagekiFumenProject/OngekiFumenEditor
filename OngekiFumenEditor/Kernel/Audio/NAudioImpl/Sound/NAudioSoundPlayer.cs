@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 
         public void PlayOnce()
         {
-            soundManager.PlaySound(cacheSound, Volume);
+            soundManager.PlaySound(cacheSound, Volume, TimeSpan.Zero);
         }
 
         public void PlayLoop(int loopId, TimeSpan init)
