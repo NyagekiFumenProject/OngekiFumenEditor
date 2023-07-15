@@ -677,7 +677,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var arg = e.EventArgs as MouseEventArgs;
 
-            if (IsLocked)
+            if (IsLocked || IsPreviewMode)
                 return;
 
             var view = e.View as FrameworkElement;
