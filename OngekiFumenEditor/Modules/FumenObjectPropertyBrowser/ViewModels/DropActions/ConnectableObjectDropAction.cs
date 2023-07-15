@@ -60,7 +60,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 }
             }, () =>
             {
-                startObject.RemoveChildObject(childViewModel as ConnectableChildObjectBase);
+                //startObject.RemoveChildObject(childViewModel as ConnectableChildObjectBase);
+                editor.RemoveObject(childViewModel);
                 callback?.Invoke();
             }));
         }

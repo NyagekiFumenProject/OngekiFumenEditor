@@ -9,6 +9,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
@@ -552,6 +553,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             //È¡ÏûÑ¡Ôñ
             SelectObjects.ForEach(x => x.IsSelected = false);
+        }
+
+        public void KeyboardAction_FastAddConnectableChild(ActionExecutionContext e)
+        {
+            if ((!IsDesignMode) || IoC.Get<IFumenObjectPropertyBrowser>().OngekiObject is not ConnectableObjectBase connectable)
+                return;
+
+            var startObj = connectable switch
+            {
+                ConnectableStartObject start => start,
+                ConnectableNextObject next => next.ReferenceStartObject,
+                _ => default
+            };
+
+            if (startObj is null || startObj.Children.OfType<ConnectableEndObject>().Any())
+                return;
+
+            var genChild = startObj.CreateNextObject();
+            var position = Mouse.GetPosition(e.View as FrameworkElement);
+
+            position.Y = ViewHeight - position.Y + Rect.MinY;
+
+            var dropAction = new ConnectableObjectDropAction(startObj, genChild, () => { });
+            dropAction.Drop(this, position);
         }
 
         public void KeyboardAction_PlayOrPause()
