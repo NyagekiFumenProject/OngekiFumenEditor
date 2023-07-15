@@ -184,8 +184,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public ObservableCollection<ISelectableObject> CurrentSelectedObjects { get; } = new();
 
-        private bool isDragging;
-        private bool isMouseDown;
+        private bool isSelectRangeDragging;
+        private bool isLeftMouseDown;
 
         private bool brushMode = false;
         public bool BrushMode
