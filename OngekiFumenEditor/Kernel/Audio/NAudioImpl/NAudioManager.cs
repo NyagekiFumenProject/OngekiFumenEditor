@@ -9,6 +9,7 @@ using OngekiFumenEditor.Kernel.Audio.DefaultImp.Music;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
 using OngekiFumenEditor.Utils;
+using OpenTK.Compute.OpenCL;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -52,29 +53,12 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             Log.LogInfo($"Audio implement will use {GetType()}");
         }
 
-        private ISampleProvider ConvertToRightChannelCount(ISampleProvider input)
-        {
-#if DEBUG
-            if (input.WaveFormat.Channels == soundMixer.WaveFormat.Channels)
-            {
-                return input;
-            }
-            if (input.WaveFormat.Channels == 1 && soundMixer.WaveFormat.Channels == 2)
-            {
-                return new MonoToStereoSampleProvider(input);
-            }
-            throw new NotImplementedException("Not yet implemented this channel count conversion");
-#else
-            return input;
-#endif
-        }
-
         public void PlaySound(CachedSound sound, float volume, TimeSpan init)
         {
-            ISampleProvider provider = ConvertToRightChannelCount(new VolumeSampleProvider(new CachedSoundSampleProvider(sound))
+            ISampleProvider provider = new VolumeSampleProvider(new CachedSoundSampleProvider(sound))
             {
                 Volume = volume
-            });
+            };
             if (init.TotalMilliseconds != 0)
             {
                 provider = new OffsetSampleProvider(provider)
@@ -120,12 +104,51 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
                 cached = ResampleCacheSound(cached);
             }
 
+            if (cached.WaveFormat.Channels == 1 && soundMixer.WaveFormat.Channels == 2)
+            {
+                Log.LogWarn($"Extend channel from Mono to Stereo : {filePath}");
+                cached = MonoToStereoSound(cached);
+            }
+
             return Task.FromResult<ISoundPlayer>(new NAudioSoundPlayer(cached, this));
+        }
+
+        private CachedSound MonoToStereoSound(CachedSound cache)
+        {
+            var converter = new MonoToStereoSampleProvider(cache.CreateSampleProvider());
+            var buffer = ArrayPool<float>.Shared.Rent(1024_000);
+            var outFormat = converter.WaveFormat;
+            var list = new List<(float[], int)>();
+
+            while (true)
+            {
+                var read = converter.Read(buffer, 0, buffer.Length);
+                if (read == 0)
+                    break;
+
+                var b = ArrayPool<float>.Shared.Rent(read);
+                buffer.AsSpan()[..read].CopyTo(b);
+                list.Add((b, read));
+            }
+
+            var totalLength = list.Select(x => x.Item2).Sum();
+            var newBuf = new float[totalLength];
+
+            var r = 0;
+            foreach ((var b, var read) in list)
+            {
+                b.AsSpan()[..read].CopyTo(newBuf.AsSpan().Slice(r, read));
+                r += read;
+                ArrayPool<float>.Shared.Return(b);
+            }
+
+            ArrayPool<float>.Shared.Return(buffer);
+            return new CachedSound(newBuf, outFormat);
         }
 
         private CachedSound ResampleCacheSound(CachedSound cache)
         {
-            var resampler = new WdlResamplingSampleProvider(new CachedSoundWrappedSampleProvider(cache), 48000);
+            var resampler = new WdlResamplingSampleProvider(cache.CreateSampleProvider(), 48000);
             var buffer = ArrayPool<float>.Shared.Rent(1024_000);
             var outFormat = resampler.WaveFormat;
             var list = new List<(float[], int)>();
@@ -170,7 +193,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
         public ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init)
         {
-            ISampleProvider provider = new LoopableProvider(ConvertToRightChannelCount(new CachedSoundSampleProvider(sound)));
+            ISampleProvider provider = new LoopableProvider(new CachedSoundSampleProvider(sound));
 
             if (init.TotalMilliseconds != 0)
             {

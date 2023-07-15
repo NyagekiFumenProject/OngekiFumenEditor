@@ -41,5 +41,10 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
             AudioData = newBuf;
             WaveFormat = outFormat;
         }
+
+        public ISampleProvider CreateSampleProvider()
+        {
+            return new CachedSoundWrappedSampleProvider(this);
+        }
     }
 }
