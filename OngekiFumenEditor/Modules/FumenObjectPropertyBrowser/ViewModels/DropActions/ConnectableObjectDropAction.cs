@@ -4,7 +4,6 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -19,13 +18,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
     public class ConnectableObjectDropAction : IEditorDropHandler
     {
         private readonly ConnectableStartObject startObject;
-        private readonly OngekiObjectBase childViewModel;
+        private readonly OngekiObjectBase childObject;
         private readonly Action callback;
 
         public ConnectableObjectDropAction(ConnectableStartObject startObject, ConnectableChildObjectBase childObject, Action callback = default)
         {
             this.startObject = startObject;
-            childViewModel = CacheLambdaActivator.CreateInstance(childObject.GetType()) as OngekiObjectBase;
+            this.childObject = CacheLambdaActivator.CreateInstance(childObject.GetType()) as OngekiObjectBase;
             this.callback = callback;
         }
 
@@ -45,23 +44,23 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
             if (endObj is not null && !isAppend && endObj.TGrid < dragTGrid)
                 return;
 
-            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加Next物件", () =>
             {
                 if (isAppend)
-                    startObject.AddChildObject(childViewModel as ConnectableChildObjectBase);
+                    startObject.AddChildObject(childObject as ConnectableChildObjectBase);
                 else
-                    startObject.InsertChildObject(dragTGrid, childViewModel as ConnectableChildObjectBase);
-                editor.MoveObjectTo(childViewModel, dragEndPoint);
+                    startObject.InsertChildObject(dragTGrid, childObject as ConnectableChildObjectBase);
+                editor.MoveObjectTo(childObject, dragEndPoint);
                 callback?.Invoke();
                 if (isFirst)
                 {
-                    editor.NotifyObjectClicked(childViewModel);
+                    editor.NotifyObjectClicked(childObject);
                     isFirst = false;
                 }
             }, () =>
             {
                 //startObject.RemoveChildObject(childViewModel as ConnectableChildObjectBase);
-                editor.RemoveObject(childViewModel);
+                editor.RemoveObject(childObject);
                 callback?.Invoke();
             }));
         }
