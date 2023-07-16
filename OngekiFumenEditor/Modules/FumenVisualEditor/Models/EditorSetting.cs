@@ -104,13 +104,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private bool enableXOffset = Properties.EditorGlobalSetting.Default.EnableXOffset;
+        public bool EnableXOffset
+        {
+            get => enableXOffset;
+            set
+            {
+                enableXOffset = Properties.EditorGlobalSetting.Default.EnableXOffset = value;
+                RequestSave();
+                NotifyOfPropertyChange(() => EnableXOffset);
+            }
+        }
+
         private double xOffset = Properties.EditorGlobalSetting.Default.XOffset;
         /// <summary>
         /// X轴上单位线间距大小
         /// </summary>
         public double XOffset
         {
-            get => xOffset;
+            get => EnableXOffset ? xOffset : 0;
             set
             {
                 xOffset = Properties.EditorGlobalSetting.Default.XOffset = value;
@@ -300,6 +312,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.ShowXOffsetScrollBar):
                     showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.EnableXOffset):
+                    enableXOffset = Properties.EditorGlobalSetting.Default.EnableXOffset;
                     break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");

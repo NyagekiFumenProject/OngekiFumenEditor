@@ -103,6 +103,7 @@
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.XGridDisplayMaxUnit, Mode=TwoWay}"
                     DisplayName="水平轴最大显示范围:"
+                    IsEnabled="{Binding Setting.EnableXOffset}"
                     MaxValue="200"
                     MinValue="0"
                     Step="1" />
