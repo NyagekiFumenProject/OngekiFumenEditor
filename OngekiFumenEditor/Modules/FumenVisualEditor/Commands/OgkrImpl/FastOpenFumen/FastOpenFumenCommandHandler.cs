@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
                 return;
 
             var ogkrFilePath = openFileDialog.FileName;
-            await FastOpenOgkrFumen.TryOpenAsDocument(ogkrFilePath);
+            await DocumentOpenHelper.TryOpenOgkrFileAsDocument(ogkrFilePath);
         }
     }
 }

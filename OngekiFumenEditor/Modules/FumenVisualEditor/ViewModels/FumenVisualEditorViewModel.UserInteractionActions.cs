@@ -1043,20 +1043,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
 
             var arg = e.EventArgs as DragEventArgs;
-            if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
-                return;
-
-            var mousePosition = arg.GetPosition(e.View as FrameworkElement);
-            mousePosition.Y = ViewHeight - mousePosition.Y + Rect.MinY;
-
-            switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
+            if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
             {
-                case ToolboxItem toolboxItem:
-                    new DefaultToolBoxDropAction(toolboxItem).Drop(this, mousePosition);
-                    break;
-                case IEditorDropHandler dropHandler:
-                    dropHandler.Drop(this, mousePosition);
-                    break;
+                var mousePosition = arg.GetPosition(e.View as FrameworkElement);
+                mousePosition.Y = ViewHeight - mousePosition.Y + Rect.MinY;
+
+                switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
+                {
+                    case ToolboxItem toolboxItem:
+                        new DefaultToolBoxDropAction(toolboxItem).Drop(this, mousePosition);
+                        break;
+                    case IEditorDropHandler dropHandler:
+                        dropHandler.Drop(this, mousePosition);
+                        break;
+                }
             }
         }
 

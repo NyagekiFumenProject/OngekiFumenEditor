@@ -1,4 +1,5 @@
 using Caliburn.Micro;
+using Gemini.Framework.Results;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -169,6 +170,30 @@ namespace OngekiFumenEditor
             }
 
             Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
+
+            if (Application.MainWindow is Window window)
+            {
+                window.AllowDrop = true;
+                window.Drop += MainWindow_Drop;
+            }
+        }
+
+        private async void MainWindow_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files != null && files.Length == 1)
+                {
+                    var filePath = files[0];
+                    await DocumentOpenHelper.TryOpenAsDocument(filePath);
+                }
+
+                e.Handled = true;
+                return;
+            }
+
+            e.Handled = false;
         }
 
         private void InitExceptionCatcher()

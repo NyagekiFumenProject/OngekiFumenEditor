@@ -6,21 +6,69 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Parser;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Xml.XPath;
 using System.Windows;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using System.Xml.XPath;
+using Gemini.Framework.Results;
+using System.Windows.Threading;
 
-namespace OngekiFumenEditor.Utils.Ogkr
+namespace OngekiFumenEditor.Utils
 {
-    public static class FastOpenOgkrFumen
+    internal static class DocumentOpenHelper
     {
-        public static async Task<bool> TryOpenAsDocument(string ogkrFilePath)
+        public static async Task<bool> TryOpenAsDocument(string filePath)
+        {
+            if (IoC.GetAll<IEditorProvider>().FirstOrDefault(x => x.Handles(filePath)) is IEditorProvider provider)
+            {
+                Log.LogInfo($"通过命令行快速打开文档:({provider}) {filePath}");
+                await Dispatcher.Yield();
+                var openDocument = Show.Document(filePath);
+                await Coroutine.ExecuteAsync(new IResult[] { openDocument }.AsEnumerable().GetEnumerator());
+                return true;
+            }
+            else if (filePath.EndsWith(".ogkr"))
+            {
+                return await TryOpenOgkrFileAsDocument(filePath);
+            }
+            
+            return false;
+        }
+
+        public static async Task<bool> TryOpenOgkrFileAsDocument(string ogkrFilePath)
+        {
+            var newProj = await TryCreateEditorProjectDataModel(ogkrFilePath);
+            if (newProj is null)
+                return false;
+
+            var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
+            var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
+            var viewAware = (IViewAware)editor;
+            viewAware.ViewAttached += (sender, e) =>
+            {
+                var frameworkElement = (FrameworkElement)e.View;
+
+                RoutedEventHandler loadedHandler = null;
+                loadedHandler = async (sender2, e2) =>
+                {
+                    frameworkElement.Loaded -= loadedHandler;
+                    await fumenProvider.Open(editor, newProj);
+                    var docName = await TryFormatOpenFileName(ogkrFilePath);
+
+                    editor.DisplayName = docName;
+                };
+                frameworkElement.Loaded += loadedHandler;
+            };
+
+            await IoC.Get<IShell>().OpenDocumentAsync(editor);
+            return true;
+        }
+
+        public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(string ogkrFilePath)
         {
             (var audioFile, var audioDuration) = await GetAudioFilePath(ogkrFilePath);
 
@@ -28,7 +76,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
             {
                 audioFile = FileDialogHelper.OpenFile("手动选择音频文件", IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
                 if (!File.Exists(audioFile))
-                    return false;
+                    return null;
                 audioDuration = await CalcAudioDuration(audioFile);
             }
 
@@ -41,34 +89,10 @@ namespace OngekiFumenEditor.Utils.Ogkr
             newProj.AudioFilePath = audioFile;
             newProj.AudioDuration = audioDuration;
 
-            var provider = IoC.Get<IFumenVisualEditorProvider>();
-            var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
-            var viewAware = (IViewAware)editor;
-            viewAware.ViewAttached += (sender, e) =>
-            {
-                var frameworkElement = (FrameworkElement)e.View;
-
-                RoutedEventHandler loadedHandler = null;
-                loadedHandler = async (sender2, e2) =>
-                {
-                    frameworkElement.Loaded -= loadedHandler;
-                    await provider.Open(editor, newProj);
-                    var docName = await TryFormatOpenFileName(ogkrFilePath);
-
-                    if (editor is FumenVisualEditorViewModel e)
-                        e.SpecifyDefaultName = docName;
-                    else
-                        editor.DisplayName = docName;
-                };
-                frameworkElement.Loaded += loadedHandler;
-            };
-
-            await IoC.Get<IShell>().OpenDocumentAsync(editor);
-            return true;
+            return newProj;
         }
 
-
-        private static  async Task<string> TryFormatOpenFileName(string ogkrFilePath)
+        public static async Task<string> TryFormatOpenFileName(string ogkrFilePath)
         {
             var result = Path.GetFileName(ogkrFilePath);
 
