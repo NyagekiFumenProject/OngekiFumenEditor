@@ -691,6 +691,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         var diffY = curY - mouseCanvasStartPosition.Y;
                         ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
                     }
+                    else
+                    {
+                        Setting.XOffset = 0;
+                    }
 
                     isCanvasDragging = false;
                     isMiddleMouseDown = false;
