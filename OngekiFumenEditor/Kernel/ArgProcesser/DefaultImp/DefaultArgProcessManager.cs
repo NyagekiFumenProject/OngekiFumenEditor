@@ -2,6 +2,7 @@
 using Gemini.Framework.Results;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.Ogkr;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -25,25 +26,35 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
                 Application.Current.Shutdown(-1);
             }
 
-            if (args.LastOrDefault() is string projPath)
+            if (args.LastOrDefault() is string filePath)
             {
-                if (File.Exists(projPath))
+                if (File.Exists(filePath))
                 {
-                    if (IoC.GetAll<IEditorProvider>().FirstOrDefault(x => x.Handles(projPath)) is IEditorProvider provider)
+                    Log.LogInfo($"arg.filePath: {filePath}");
+
+                    //存在，就检查要提供的文件是什么类型了
+                    if (IoC.GetAll<IEditorProvider>().FirstOrDefault(x => x.Handles(filePath)) is IEditorProvider provider)
                     {
-                        Log.LogInfo($"通过命令行快速打开:({provider}) {projPath}");
+                        Log.LogInfo($"通过命令行快速打开文档:({provider}) {filePath}");
                         await Dispatcher.Yield();
-                        var openDocument = Show.Document(projPath);
+                        var openDocument = Show.Document(filePath);
                         await Coroutine.ExecuteAsync(new IResult[] { openDocument }.AsEnumerable().GetEnumerator());
+                        return;
                     }
-                    else
+                    else if (filePath.EndsWith(".ogkr"))
                     {
-                        ErrorExit("不支持加载参数打开的项目路径");
+                        if (await FastOpenOgkrFumen.TryOpenAsDocument(filePath))
+                        {
+                            Log.LogInfo($"通过命令行快速打开ogkr文件:{filePath}");
+                            return;
+                        }
                     }
+
+                    ErrorExit("提供的文件编辑器无法打开处理");
                 }
                 else
                 {
-                    ErrorExit("参数打开的项目路径不存在");
+                    ErrorExit("通过参数提供的文件不存在");
                 }
             }
         }
