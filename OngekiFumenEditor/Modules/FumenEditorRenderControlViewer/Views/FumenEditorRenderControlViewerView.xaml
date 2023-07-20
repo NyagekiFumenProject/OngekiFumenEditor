@@ -15,6 +15,7 @@
     <UserControl.Resources>
         <Style x:Key="ItemContStyle" TargetType="ListViewItem">
             <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Style.Resources>
                 <LinearGradientBrush x:Key="MouseOverBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
                     <GradientStop Offset="0" Color="#22000000" />
@@ -24,7 +25,6 @@
                     <GradientStop Offset="1" Color="#22000000" />
                 </LinearGradientBrush>
             </Style.Resources>
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Style.Triggers>
                 <Trigger Property="jas:ListViewItemDragState.IsBeingDragged" Value="True">
                     <Setter Property="FontWeight" Value="DemiBold" />
