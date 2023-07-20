@@ -72,5 +72,20 @@ namespace OngekiFumenEditor.Base
 
             return new TGrid(unit, grid);
         }
+
+        public static TGrid operator -(TGrid l, GridOffset r)
+        {
+            var lGrids = l.TotalGrid;
+            var rGrids = r.TotalGrid(l.GridRadix);
+
+            var grid = lGrids - rGrids;
+            if (grid < 0)
+                return null;
+
+            var t = new TGrid(0, grid);
+            t.NormalizeSelf();
+
+            return t;
+        }
     }
 }

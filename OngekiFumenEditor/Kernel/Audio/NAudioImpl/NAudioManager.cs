@@ -82,6 +82,9 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
         public async Task<IAudioPlayer> LoadAudioAsync(string filePath)
         {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return null;
+
             if (filePath.EndsWith(".acb"))
             {
                 filePath = await AcbConverter.ConvertAcbFileToWavFile(filePath);

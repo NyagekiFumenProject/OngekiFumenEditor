@@ -398,6 +398,7 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
-
+        public static IEnumerable<(T, int)> WithIndex<T>(this IEnumerable<T> list)
+            => list.Select((a, b) => (a, b));
     }
 }

@@ -14,6 +14,7 @@
     d:DataContext="{d:DesignInstance Type=vm:FumenConverterViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
     ResizeMode="NoResize"
+    SaveWindowPosition="True"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
     <StackPanel>

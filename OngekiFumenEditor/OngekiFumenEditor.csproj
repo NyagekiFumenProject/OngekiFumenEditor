@@ -186,6 +186,9 @@
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Properties\ProgramSetting.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>ProgramSetting.settings</DependentUpon>
@@ -342,6 +345,9 @@
     <Page Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="UI\Controls\ObjectInspector\Views\CurveInterpolaterFactoryTypeUIView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
