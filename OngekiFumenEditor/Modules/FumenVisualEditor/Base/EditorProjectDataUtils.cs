@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjManager;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
@@ -15,50 +16,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public class EditorProjectDataUtils
     {
-        private static JsonSerializerOptions JsonSerializerOptions;
+        private static EditorProjectFileManager projFileManager = new EditorProjectFileManager();
 
         public record Result(bool IsSuccess, string ErrorMessage);
-
-        private class TimeSpanJsonConverter : JsonConverter<TimeSpan>
-        {
-            public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                var result = default(TimeSpan);
-                if (reader.TokenType == JsonTokenType.StartObject)
-                {
-                    while (reader.Read())
-                    {
-                        if (reader.TokenType == JsonTokenType.EndObject)
-                            break;
-                        if (reader.GetString() == "Ticks")
-                        {
-                            if (!reader.Read())
-                                throw new Exception("Json parse TimeSpan rrror");
-                            var ticks = reader.GetInt64();
-                            result = TimeSpan.FromTicks(ticks);
-                        }
-                    }
-                }
-                return result;
-            }
-
-            public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
-            {
-                writer.WriteStartObject();
-                writer.WriteNumber("Ticks", value.Ticks);
-                writer.WriteEndObject();
-            }
-        }
-
-        static EditorProjectDataUtils()
-        {
-            JsonSerializerOptions = new JsonSerializerOptions()
-            {
-                WriteIndented = true
-            };
-
-            JsonSerializerOptions.Converters.Add(new TimeSpanJsonConverter());
-        }
 
         public static string GetDefaultFumenFilePathForAutoGenerate(string editorProjectFilePath)
             => Path.Combine(Path.GetDirectoryName(editorProjectFilePath), Path.GetFileNameWithoutExtension(editorProjectFilePath) + ".ogkr");
@@ -66,8 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(string filePath)
         {
             Log.LogDebug($"filePath = {filePath}");
-            using var fileStream = File.OpenRead(filePath);
-            var projectData = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(fileStream, JsonSerializerOptions);
+            var projectData = await projFileManager.Load(filePath);
 
             projectData.FumenFilePath = projectData.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(filePath);
 
@@ -132,11 +91,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                     throw new IOException("项目文件被占用或无权限,无法写入数据");
 
                 var tmpProjFilePath = TempFileHelper.GetTempFilePath("FumenProjFile", Path.GetFileNameWithoutExtension(projFileFullPath), Path.GetExtension(projFileFullPath));
-                var fileStream = File.Open(tmpProjFilePath, FileMode.Create);
                 StoreBulletPalleteListEditorData(editorProject);
 
-                await JsonSerializer.SerializeAsync(fileStream, editorProject, JsonSerializerOptions);
-                fileStream.Close();
+                await projFileManager.Save(tmpProjFilePath, editorProject);
 
                 File.Copy(tmpProjFilePath, projFileFullPath, true);
 
@@ -189,10 +146,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 var tmpProjFilePath = TempFileHelper.GetTempFilePath();
 
                 //clone new project object to modify
-                using var ms = new MemoryStream();
-                await JsonSerializer.SerializeAsync(ms, editorProject, JsonSerializerOptions);
-                ms.Seek(0, SeekOrigin.Begin);
-                var cloneProj = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(ms, JsonSerializerOptions);
+                var cloneProj = await projFileManager.Clone(editorProject);
                 cloneProj.Fumen = editorProject.Fumen;
 
                 var fileFolder = Path.GetDirectoryName(projFilePath);

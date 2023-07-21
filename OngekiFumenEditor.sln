@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32126.315
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditor", "OngekiFumenEditor\OngekiFumenEditor.csproj", "{53376E13-B8F4-4B1D-B377-3E938623B3D1}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependences", "Dependences", "{52104FAE-CB77-4569-B3DC-4819A1BE2D34}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgConverter", "Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj", "{D1B291FE-A21B-4C27-930D-39CC2C963E13}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigratableSerializer", "Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj", "{7FD497E0-B0CB-4355-89F1-9C15442F5365}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{D1B291FE-A21B-4C27-930D-39CC2C963E13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1B291FE-A21B-4C27-930D-39CC2C963E13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1B291FE-A21B-4C27-930D-39CC2C963E13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FD497E0-B0CB-4355-89F1-9C15442F5365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FD497E0-B0CB-4355-89F1-9C15442F5365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FD497E0-B0CB-4355-89F1-9C15442F5365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FD497E0-B0CB-4355-89F1-9C15442F5365}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,6 +53,7 @@ Global
 		{A005356B-D652-418D-A970-77E7B704F5F7} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
 		{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
 		{D1B291FE-A21B-4C27-930D-39CC2C963E13} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
+		{7FD497E0-B0CB-4355-89F1-9C15442F5365} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4D0A040C-DC95-444E-A788-FDA822ED2244}
