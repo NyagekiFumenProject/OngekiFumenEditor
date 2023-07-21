@@ -7,3 +7,6 @@
 [submodule "Polyline2D.CSharp"]
 	path = Dependences/Polyline2D.CSharp
 	url = https://github.com/NyagekiFumenProject/Polyline2D.CSharp
+[submodule "MigratableSerializer"]
+	path = Dependences/MigratableSerializer
+	url = https://github.com/MikiraSora/MigratableSerializer
