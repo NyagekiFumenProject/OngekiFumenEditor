@@ -467,6 +467,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Modules\OptionGeneratorTools\Commands\" />
+    <Folder Include="Modules\OptionGeneratorTools\ViewModels\" />
+    <Folder Include="Modules\OptionGeneratorTools\Views\" />
     <Folder Include="Resources\Binaries\" />
   </ItemGroup>
 
