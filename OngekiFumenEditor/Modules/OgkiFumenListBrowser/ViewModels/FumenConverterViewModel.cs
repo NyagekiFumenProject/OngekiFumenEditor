@@ -242,6 +242,11 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
             newProj.AudioFilePath = diff.RefSet.AudioFilePath;
 
             using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath);
+            if (audio is null)
+            {
+                MessageBox.Show($"无法打开{diff.RefSet.Title},找不到音频文件");
+                return;
+            }
             newProj.AudioDuration = audio.Duration;
 
             var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
