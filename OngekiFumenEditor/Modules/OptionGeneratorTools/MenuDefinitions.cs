@@ -4,7 +4,7 @@ using OngekiFumenEditor.Modules.FumenConverter.Commands;
 
 namespace OngekiFumenEditor.Modules.SvgToLaneBrowser
 {
-    public static class FumenConverter
+    public static class MenuDefintions
     {
         [Export]
         public static MenuItemDefinition ViewFumenConverterMenuItem = new CommandMenuItemDefinition<ViewFumenConverterCommandDefinition>(

@@ -21,10 +21,10 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
             get => outputAssetbundleFilePath; set => Set(ref outputAssetbundleFilePath, value);
         }
 
-        private string outputImageFilePath;
-        public string OutputImageFilePath
+        private string inputImageFilePath;
+        public string InputImageFilePath
         {
-            get => outputImageFilePath; set => Set(ref outputImageFilePath, value);
+            get => inputImageFilePath; set => Set(ref inputImageFilePath, value);
         }
 
         private int width;

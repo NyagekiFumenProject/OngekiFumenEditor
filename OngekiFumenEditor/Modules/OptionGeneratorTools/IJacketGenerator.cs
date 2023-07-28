@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Modules.FumenConverter
+namespace OngekiFumenEditor.Modules.OptionGeneratorTools
 {
     public interface IJacketGenerator : IWindow
     {
