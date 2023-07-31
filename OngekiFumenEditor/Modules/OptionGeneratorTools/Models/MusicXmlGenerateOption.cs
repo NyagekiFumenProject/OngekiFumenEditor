@@ -10,18 +10,11 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 {
     public class MusicXmlGenerateOption : PropertyChangedBase
     {
-        private int musicId;
+        private int musicId = -1;
         public int MusicId
         {
             get => musicId;
             set => Set(ref musicId, value);
-        }
-
-        private string outputFilePath;
-        public string OutputFilePath
-        {
-            get => outputFilePath;
-            set => Set(ref outputFilePath, value);
         }
 
         private string title;
@@ -45,11 +38,25 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
             set => Set(ref stage, value);
         }
 
+        private Genre genre;
+        public Genre Genre
+        {
+            get => genre;
+            set => Set(ref genre, value);
+        }
+
         private BossCard bossCard;
         public BossCard BossCard
         {
             get => bossCard;
             set => Set(ref bossCard, value);
+        }
+
+        private VersionID addVersion;
+        public VersionID AddVersion
+        {
+            get => addVersion;
+            set => Set(ref addVersion, value);
         }
 
         private int bossHp = 50000;
@@ -59,7 +66,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
             set => Set(ref bossHp, value);
         }
 
-        private int bossLevel;
+        private int bossLevel = 10;
         public int BossLevel
         {
             get => bossLevel;

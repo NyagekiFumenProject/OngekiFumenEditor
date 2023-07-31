@@ -22,5 +22,12 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs
             get => enable;
             set => Set(ref enable, value);
         }
+
+        private string fileName = null;
+        public string FileName
+        {
+            get => fileName;
+            set => Set(ref fileName, value);
+        }
     }
 }

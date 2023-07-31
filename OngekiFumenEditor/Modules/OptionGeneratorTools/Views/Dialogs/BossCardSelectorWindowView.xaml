@@ -1,0 +1,100 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Modules.OptionGeneratorTools.Views.Dialogs.BossCardSelectorWindowView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels.Dialogs"
+    Title="选择..."
+    Width="700"
+    Height="500"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=vm:BossCardSelectorWindowViewModel}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    IsCloseButtonEnabled="False"
+    SaveWindowPosition="True"
+    Style="{StaticResource MainWindowStyle}"
+    mc:Ignorable="d">
+    <mah:MetroWindow.Resources>
+        <valueconverters:LoadCardImageConverter x:Key="LoadCardImageConverter">
+        </valueconverters:LoadCardImageConverter>
+    </mah:MetroWindow.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,10,0,10" Orientation="Horizontal">
+            <TextBlock Margin="20,5,10,5">过滤:</TextBlock>
+            <TextBox
+                Width="300"
+                VerticalContentAlignment="Center"
+                Text="{Binding FilterString}">
+
+            </TextBox>
+            <Button
+                Margin="10,0,0,0"
+                Padding="20,5,20,5"
+                VerticalAlignment="Center"
+                cal:Message.Attach="ApplyFilter()">
+                刷新
+            </Button>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ListView
+                d:ItemsSource="{d:SampleData ItemCount=5}"
+                ItemsSource="{Binding BossCards}"
+                ScrollViewer.CanContentScroll="True"
+                SelectedItem="{Binding Selected}"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.VirtualizationMode="Recycling">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="true">
+                        <GridViewColumn Width="75" DisplayMemberBinding="{Binding Path=Id}">
+                            <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)">
+                                ID
+                            </GridViewColumnHeader>
+                        </GridViewColumn>
+                        <GridViewColumn Width="350" DisplayMemberBinding="{Binding Path=DisplayName}">
+                            <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)">
+                                DisplayName
+                            </GridViewColumnHeader>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <Grid Grid.Column="1" Width="300">
+                <Image DataContext="{Binding Selected.FilePath, Converter={StaticResource LoadCardImageConverter}}" Source="{Binding AsyncValue}">
+
+                </Image>
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button
+                Margin="30,10,30,10"
+                Padding="0,5,0,5"
+                cal:Message.Attach="Comfirm()">
+                确定
+            </Button>
+            <Button
+                Grid.Column="1"
+                Margin="30,10,30,10"
+                Padding="0,5,0,5"
+                cal:Message.Attach="Cancel()">
+                取消
+            </Button>
+        </Grid>
+    </Grid>
+</mah:MetroWindow>

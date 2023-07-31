@@ -55,13 +55,20 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
+    <None Remove="Resources\Binaries\JacketGenerator.exe" />
     <None Remove="Resources\empty_ogkr_template.ogkr" />
     <None Remove="Resources\Icons\icons8-paint-brush-16.png" />
     <None Remove="Resources\Images\logo.png" />
+    <None Remove="Resources\Music.xml" />
+    <None Remove="Resources\musicTemplate.acb" />
+    <None Remove="Resources\ui_jacket_0666" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
+    <EmbeddedResource Include="Resources\Music.xml" />
+    <EmbeddedResource Include="Resources\musicTemplate.acb" />
+    <EmbeddedResource Include="Resources\ui_jacket_0666" />
   </ItemGroup>
 
   <ItemGroup>
@@ -69,6 +76,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AssetsTools.NET" Version="2.0.12" />
     <PackageReference Include="FontStashSharp" Version="1.2.5" />
     <PackageReference Include="ManagedBass" Version="3.1.1" />
     <PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
@@ -84,6 +92,7 @@
     <PackageReference Include="PixiEditor.ColorPicker" Version="3.2.0" />
     <PackageReference Include="SharpVectors" Version="1.7.7" />
     <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -103,6 +112,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="AcbGeneratorFuck">
+      <HintPath>Dependencies\AcbGeneratorFuck\AcbGeneratorFuck.dll</HintPath>
+    </Reference>
     <Reference Include="DereTore.Common">
       <HintPath>Dependencies\DereTore\DereTore.Common.dll</HintPath>
     </Reference>
@@ -117,6 +129,9 @@
     </Reference>
     <Reference Include="DereTore.Interop.OS">
       <HintPath>Dependencies\DereTore\DereTore.Interop.OS.dll</HintPath>
+    </Reference>
+    <Reference Include="TexturePlugin">
+      <HintPath>Dependencies\JacketGenerator\TexturePlugin.dll</HintPath>
     </Reference>
   </ItemGroup>
 
@@ -190,6 +205,20 @@
     <Compile Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\BossCardSelectorWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Properties\OptionGeneratorToolsSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>OptionGeneratorToolsSetting.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Properties\ProgramSetting.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>ProgramSetting.settings</DependentUpon>
@@ -249,6 +278,10 @@
       <LastGenOutput>AudioPlayerToolViewerSetting.Designer.cs</LastGenOutput>
       <Generator>PublicSettingsSingleFileGenerator</Generator>
     </None>
+    <None Update="Properties\OptionGeneratorToolsSetting.settings">
+      <LastGenOutput>OptionGeneratorToolsSetting.Designer.cs</LastGenOutput>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+    </None>
     <None Update="Properties\AudioSetting.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>AudioSetting.Designer.cs</LastGenOutput>
@@ -266,6 +299,18 @@
       <LastGenOutput>LogSetting.Designer.cs</LastGenOutput>
     </None>
     <None Update="bass_fx.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Binaries\crnlib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Binaries\ispc_texcomp.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Binaries\PVRTexLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Binaries\TexToolWrap.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\sounds\beamend.wav">
@@ -348,6 +393,15 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\OptionGeneratorTools\Views\Dialogs\BossCardSelectorWindowView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="UI\Controls\ObjectInspector\Views\CurveInterpolaterFactoryTypeUIView.xaml">
@@ -467,9 +521,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Modules\OptionGeneratorTools\Commands\" />
-    <Folder Include="Modules\OptionGeneratorTools\ViewModels\" />
-    <Folder Include="Modules\OptionGeneratorTools\Views\" />
     <Folder Include="Resources\Binaries\" />
   </ItemGroup>
 

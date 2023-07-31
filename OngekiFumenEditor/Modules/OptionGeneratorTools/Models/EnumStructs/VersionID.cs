@@ -6,5 +6,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs
 {
-    public class VersionID (string Name,int Id);
+    public record VersionID(string Name, int Id, string Title) : IEnumStruct
+    {
+        public string DisplayName => Name;
+    }
 }
