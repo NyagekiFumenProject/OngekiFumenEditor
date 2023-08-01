@@ -32,39 +32,42 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
             if (option.MusicId < 0)
                 return new(false, $"MusicId({option.MusicId})不合法");
 
-            if (string.IsNullOrWhiteSpace(option.OutputAssetbundleFilePath))
+            if (string.IsNullOrWhiteSpace(option.OutputAssetbundleFolderPath))
                 return new(false, "输出文件夹为空");
             try
             {
-
                 var jacketName = $"ui_jacket_{option.MusicId.ToString().PadLeft(4, '0')}";
                 var tempFolder = TempFileHelper.GetTempFolderPath("JacketGen", jacketName);
 
                 //generate normal
                 var tmpInputImageFilePath = Path.Combine(tempFolder, jacketName);
                 var tmpOutputPath = Path.Combine(tempFolder, "output");
+                Directory.CreateDirectory(tmpOutputPath);
                 File.Copy(option.InputImageFilePath, tmpInputImageFilePath, true);
 
-                var result = await GenerateInternal(tmpInputImageFilePath, option.Width, option.Height, tmpOutputPath);
-                if (!result.IsSuccess)
-                    return result;
+                var outputAbFilePath = Path.Combine(tmpOutputPath, jacketName);
+                var abFilePath = await GenerateJacketFileAsync(tmpInputImageFilePath, outputAbFilePath, option.MusicId, false, new(option.Width, option.Height));
+                if (!File.Exists(abFilePath))
+                    return new(false, "生成ab文件失败");
+                Log.LogDebug($"Generate ab file to {abFilePath}");
 
                 //generate small
-                tmpInputImageFilePath += "_s";
-                File.Copy(option.InputImageFilePath, tmpInputImageFilePath, true);
-                result = await GenerateInternal(tmpInputImageFilePath, option.WidthSmall, option.HeightSmall, tmpOutputPath);
-                if (!result.IsSuccess)
-                    return result;
+                outputAbFilePath = Path.Combine(tmpOutputPath, jacketName + "_s");
+                abFilePath = await GenerateJacketFileAsync(tmpInputImageFilePath, outputAbFilePath, option.MusicId, true, new(option.WidthSmall, option.HeightSmall));
+                Log.LogDebug($"Generate small ab file to {abFilePath}");
+                if (!File.Exists(abFilePath))
+                    return new(false, "生成ab文件失败");
 
                 if (option.UpdateAssetBytesFile)
                 {
-                    result = await UpdateAssetBytesFile(jacketName, jacketName + "_s");
+                    var rawAssetsBytesFilePath = Path.Combine(option.OutputAssetbundleFolderPath, "assets.bytes");
+                    var result = await UpdateAssetBytesFile(rawAssetsBytesFilePath, jacketName, jacketName + "_s");
                     if (!result.IsSuccess)
                         return result;
                 }
 
                 //copy two assetbundle files
-                Directory.GetFiles(tmpOutputPath).ForEach(x => File.Copy(x, Path.Combine(option.OutputAssetbundleFilePath, Path.GetFileNameWithoutExtension(x)), true));
+                Directory.GetFiles(tmpOutputPath).ForEach(x => File.Copy(x, Path.Combine(option.OutputAssetbundleFolderPath, Path.GetFileNameWithoutExtension(x)), true));
 
                 return new(true);
             }
@@ -81,7 +84,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
             var bundlesList = new List<(int id, string name, int[] dependencies)>();
 
             var tmpFile = TempFileHelper.GetTempFilePath("assets.bytes", "assets", ".bytes");
-            using var dstFileStream = File.OpenRead(tmpFile);
+            using var dstFileStream = File.OpenWrite(tmpFile);
             using var writer = new BinaryWriter(dstFileStream);
 
             if (File.Exists(assetBytesFilePath))
@@ -135,31 +138,18 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
             writer.Flush();
             writer.Close();
 
-            File.Copy(tmpFile, assetBytesFilePath);
+            File.Copy(tmpFile, assetBytesFilePath, true);
             return Task.FromResult<GenerateResult>(new(true));
         }
 
-        private static async Task<GenerateResult> GenerateInternal(string inputFileName, int width, int height, string outputPath)
-        {
-            var arg = $"--inputFiles \"{inputFileName}\" --outputFolder \"{outputPath}\" --width {width} --height {height} ";
-            arg += "--gameType SDDT --mode GenerateJacket --addWatermark --watermarkProof \"nyagekiProj\" --noPause";
-            //check file
-            var fileName = Path.GetFileNameWithoutExtension(inputFileName);
-            var isSuccess = File.Exists(Path.Combine(outputPath, fileName));
-            if (isSuccess)
-                return new(true);
-            return new(false, "执行Exe生成封面失败:找不到文件");
-        }
-
-        private async static Task<string> GenerateJacketFileAsync(string inputJacketFilePath, int musicId, bool isSmall, Vector2? targetImgSize = null)
+        private async static Task<string> GenerateJacketFileAsync(string inputJacketFilePath, string outputAbFilePath, int musicId, bool isSmall, Vector2? targetImgSize = null)
         {
             using var resStream = typeof(JacketGenerateWrapper).Assembly.GetManifestResourceStream("OngekiFumenEditor.Resources.ui_jacket_0666");
-            var fs = File.Open(Path.GetTempFileName(), FileMode.CreateNew);
+            var fs = File.Open(Path.GetTempFileName(), FileMode.Truncate);
             await resStream.CopyToAsync(fs);
             fs.Seek(0, SeekOrigin.Begin);
 
             var assetManager = new AssetsManager();
-            var outputFilePath = Path.GetTempFileName();
 
             var assetBundleFile = assetManager.LoadBundleFile(fs);
             var assetsFile = assetManager.LoadAssetsFileFromBundle(assetBundleFile, 0);
@@ -176,7 +166,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 
             AssetsReplacer ReplaceAssetBundleMisc()
             {
-                var name = $"jacket{(isSmall ? "_s" : string.Empty)}/{getName(false)}";
+                var name = $"{getName(false)}";
                 var miscName = origName;
                 var assetInfo = assetsTable.GetAssetInfo(miscName, 142, false); // 0x1C is texture
                 var baseField = assetManager.GetTypeInstance(assetsFile.file, assetInfo).GetBaseField();
@@ -351,14 +341,14 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
             var bundleReplacer = new BundleReplacerFromMemory(assetsFile.name, newCabName, true, newAssetData, -1);
 
             // Save the new output file
-            var bunWriter = new AssetsFileWriter(File.OpenWrite(outputFilePath));
+            var bunWriter = new AssetsFileWriter(File.OpenWrite(outputAbFilePath));
             assetBundleFile.file.Write(bunWriter, new List<BundleReplacer> { bundleReplacer });
             assetBundleFile.file.Close();
             bunWriter.Close();
 
             assetManager.UnloadAll();
 
-            return outputFilePath;
+            return outputAbFilePath;
         }
 
         public class ImageData

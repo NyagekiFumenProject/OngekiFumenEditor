@@ -10,5 +10,9 @@ namespace OngekiFumenEditor.Modules.SvgToLaneBrowser
         [Export]
         public static MenuItemDefinition ViewMusicXmlWindowMenuItem = new CommandMenuItemDefinition<ViewMusicXmlWindowCommandDefinition>(
             Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 0);
+
+        [Export]
+        public static MenuItemDefinition ViewJacketGeneratorWindowMenuItem = new CommandMenuItemDefinition<ViewJacketGeneratorWindowCommandDefinition>(
+            Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 0);
     }
 }

@@ -211,6 +211,9 @@
     <Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -301,17 +304,17 @@
     <None Update="bass_fx.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Binaries\crnlib.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Update="Resources\Binaries\ProgramRoot\crnlib.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Binaries\ispc_texcomp.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Update="Resources\Binaries\ProgramRoot\ispc_texcomp.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Binaries\PVRTexLib.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Update="Resources\Binaries\ProgramRoot\PVRTexLib.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Binaries\TexToolWrap.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Update="Resources\Binaries\ProgramRoot\TexToolWrap.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Resources\sounds\beamend.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -399,6 +402,9 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml">
@@ -520,8 +526,8 @@
     </Page>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Resources\Binaries\" />
-  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(ProjectDir)Resources\Binaries\ProgramRoot\*.*&quot; &quot;$(OutDir)&quot; /s /y" />
+  </Target>
 
 </Project>
