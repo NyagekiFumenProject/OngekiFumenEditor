@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
     {
         public static async Task<GenerateResult> Generate(AcbGenerateOption option)
         {
-            if (!File.Exists(option.f))
+            if (!File.Exists(option.InputAudioFilePath))
                 return new(false, "需要转换的音频文件不存在");
 
             if (option.MusicId < 0)
