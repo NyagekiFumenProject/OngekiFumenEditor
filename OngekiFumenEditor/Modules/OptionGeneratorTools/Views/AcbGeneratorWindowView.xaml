@@ -1,0 +1,73 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Modules.OptionGeneratorTools.Views.AcbGeneratorWindowView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels"
+    Title="音频文件生成器"
+    Width="475"
+    Height="270"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=vm:AcbGeneratorWindowViewModel}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    ResizeMode="NoResize"
+    SaveWindowPosition="True"
+    Style="{StaticResource MainWindowStyle}"
+    mc:Ignorable="d">
+    <StackPanel>
+        <StackPanel Margin="10" Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center">音频文件:</TextBlock>
+            <TextBlock
+                Width="300"
+                Margin="10,0,0,0"
+                VerticalAlignment="Center"
+                Text="{Binding GenerateOption.InputAudioFilePath}">
+            </TextBlock>
+            <Button
+                Margin="10,0,0,0"
+                Padding="20,5,20,5"
+                VerticalAlignment="Center"
+                cal:Message.Attach="SelectAcbFilePath()">
+                浏览
+            </Button>
+        </StackPanel>
+        <GroupBox Margin="10,0,10,10" Header="选项">
+            <StackPanel Margin="5">
+                <StackPanel Margin="5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center">MusicId:</TextBlock>
+                    <TextBox
+                        Width="75"
+                        Margin="10,0,0,0"
+                        Text="{Binding GenerateOption.MusicId}">
+                    </TextBox>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <StackPanel Margin="10" Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center">输出目录:</TextBlock>
+            <TextBlock
+                Width="300"
+                Margin="10,0,0,0"
+                VerticalAlignment="Center"
+                Text="{Binding GenerateOption.OutputFolderPath}">
+            </TextBlock>
+            <Button
+                Margin="10,0,0,0"
+                Padding="20,5,20,5"
+                VerticalAlignment="Center"
+                cal:Message.Attach="SelectOutputFolder()">
+                浏览
+            </Button>
+        </StackPanel>
+        <Button
+            Margin="10"
+            Padding="20,10,20,10"
+            cal:Message.Attach="Generate()"
+            IsEnabled="{Binding IsGeneratable}">
+            生成
+        </Button>
+    </StackPanel>
+</mah:MetroWindow>

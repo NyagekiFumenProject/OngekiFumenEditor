@@ -8,6 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 {
@@ -25,7 +28,8 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                 return new(false, "输出文件夹为空");
             try
             {
-                var musicSourceName = $"musicsource{option.MusicId}";
+                var musicIdStr= option.MusicId.ToString().PadLeft(4,'0');
+                var musicSourceName = $"musicsource{musicIdStr}";
                 var tempFolder = TempFileHelper.GetTempFolderPath("AcbGen", musicSourceName);
 
                 using var fs = typeof(AcbGeneratorFuckWrapper).Assembly.GetManifestResourceStream("OngekiFumenEditor.Resources.musicTemplate.acb");
@@ -34,7 +38,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 
                 var result = await Task.Run(() => AcbGeneratorFuck.Generator.Generate(
                         option.InputAudioFilePath,
-                        musicSourceName,
+                        $"music{musicIdStr}",
                         tempFolder,
                         false,
                         new VGAudio.Cli.Options()
@@ -45,6 +49,10 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                         0,
                         ms.ToArray()
                         ));
+
+                var genResult = await GenerateMusicSourceXmlAsync(tempFolder, option.MusicId);
+                if (!genResult.IsSuccess)
+                    return genResult;
 
                 var genFiles = Directory.GetFiles(tempFolder);
                 if (genFiles.Length < 2)
@@ -63,6 +71,34 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                 Log.LogError($"AcbGenerateProgram.Generate() throw exception:{e.Message}\n{e.StackTrace}");
                 return new(false, $"执行时抛出异常:{e.Message}");
             }
+        }
+
+        private static async Task<GenerateResult> GenerateMusicSourceXmlAsync(string tempFolder, int musicId)
+        {
+            using var resStream = typeof(JacketGenerateWrapper).Assembly.GetManifestResourceStream("OngekiFumenEditor.Resources.MusicSource.xml");
+            var musicSourceXml = await XDocument.LoadAsync(resStream, LoadOptions.None, default);
+
+            var musicIdStr = musicId.ToString().PadLeft(4, '0');
+
+            musicSourceXml.XPathSelectElement("//Name/str").Value = $"{musicIdStr}";
+            musicSourceXml.XPathSelectElement("//Name/id").Value = $"{musicIdStr}";
+
+            musicSourceXml.XPathSelectElement("//acbFile/path").Value = $"music{musicIdStr}.acb";
+            musicSourceXml.XPathSelectElement("//awbFile/path").Value = $"music{musicIdStr}.awb";
+
+            musicSourceXml.XPathSelectElement("//dataName").Value = $"musicsource{musicIdStr}";
+
+            var output = Path.Combine(tempFolder, "MusicSource.xml");
+            using var fs = File.OpenWrite(output);
+            using var writer = XmlWriter.Create(fs, new XmlWriterSettings()
+            {
+                Async = true,
+                Encoding = Encoding.UTF8,
+                Indent = true
+            });
+            await musicSourceXml.SaveAsync(writer, default);
+
+            return new(true);
         }
     }
 }

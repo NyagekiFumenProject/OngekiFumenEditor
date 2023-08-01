@@ -60,6 +60,7 @@
     <None Remove="Resources\Icons\icons8-paint-brush-16.png" />
     <None Remove="Resources\Images\logo.png" />
     <None Remove="Resources\Music.xml" />
+    <None Remove="Resources\MusicSource.xml" />
     <None Remove="Resources\musicTemplate.acb" />
     <None Remove="Resources\ui_jacket_0666" />
   </ItemGroup>
@@ -67,6 +68,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
     <EmbeddedResource Include="Resources\Music.xml" />
+    <EmbeddedResource Include="Resources\MusicSource.xml" />
     <EmbeddedResource Include="Resources\musicTemplate.acb" />
     <EmbeddedResource Include="Resources\ui_jacket_0666" />
   </ItemGroup>
@@ -209,6 +211,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\AcbGeneratorWindowView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml.cs">
@@ -402,6 +407,9 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
+    <Page Update="Modules\OptionGeneratorTools\Views\AcbGeneratorWindowView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml">
