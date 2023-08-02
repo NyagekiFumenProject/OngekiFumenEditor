@@ -34,12 +34,13 @@
 * 重写渲染器，优化性能
 * 音频频谱显示
 * 实现Soflan变速 ([有限支持](https://github.com/MikiraSora/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
-* 优化性能 **<--- we are here! ---**
-* 美化物件美术素材
-* 实现扫描式预览方式
-* 轨道操作简单化
-* 画画专用小工具
-* 修BUG....
+* 优化性能
+* ~~美化物件美术素材~~
+* ~~实现扫描式预览方式~~
+* ~~轨道操作简单化~~
+* ~~画画专用小工具~~
+* 打包生成工具
+* 修BUG.... **<--- we are here! ---**
 ....
 
 https://pastebin.com/hyNyvdwt
