@@ -234,6 +234,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         NextObject?.NotifyRefreshPaths();
                     NotifyRefreshMinMaxTGrid();
                     break;
+                case nameof(XGrid):
+                    if (sender is ConnectableChildObjectBase child2)
+                    {
+                        child2.NotifyRefreshPaths();
+                        child2.NextObject?.NotifyRefreshPaths();
+                    }
+                    break;
                 default:
                     break;
             }
