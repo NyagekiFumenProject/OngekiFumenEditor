@@ -135,6 +135,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Color = Color.FromArgb(255, 204, 0, 0)
         };
 
+        public static ColorId LaneG { get; } = new ColorId()
+        {
+            Id = 18,
+            Name = nameof(LaneG),
+            Color = Color.FromArgb(255, 0, 255, 0)
+        };
+
         public static ColorId Aoi { get; } = new ColorId()
         {
             Id = 19,
@@ -163,6 +170,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Color = Color.FromArgb(255, 0, 0, 255)
         };
 
+
         public static IEnumerable<ColorId> AllColors { get; } = new[]
         {
             Akari,
@@ -185,7 +193,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Akane,
             Aoi,
             LaneRed,
-            LaneGreen,
+            LaneGreen,LaneG,
             LaneBlue,
         };
     }
