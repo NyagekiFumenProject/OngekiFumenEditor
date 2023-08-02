@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Xv2CoreLib.Resource.UndoRedo;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -648,11 +649,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         {
                             var cp = pos;
                             cp.Y = ViewHeight - cp.Y + Rect.MinY;
+                            UndoRedoManager.BeginCombineAction();
                             SelectObjects.ToArray().ForEach(x =>
                             {
                                 var obj = x as OngekiObjectBase;
                                 InteractiveManager.GetInteractive(obj).OnDragEnd(obj, cp, this);
                             });
+                            var compositeAction = UndoRedoManager.EndCombineAction("Îï¼þÍÏ¶¯");
+                            UndoRedoManager.ExecuteAction(compositeAction);
                         }
                         else
                         {

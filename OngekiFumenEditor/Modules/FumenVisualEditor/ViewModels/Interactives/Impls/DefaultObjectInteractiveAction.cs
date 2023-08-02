@@ -29,28 +29,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
             OnDragMove(obj, point, editor);
             var newPos = new Point(x, y);
+            if (dragStartXGridMap.TryGetValue(obj, out var oldXGrid))
+                dragStartXGridMap.Remove(obj);
+            if (dragStartTGridMap.TryGetValue(obj, out var oldTGrid))
+                dragStartTGridMap.Remove(obj);
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("物件拖动",
                 () =>
                 {
                     OnMoveCanvas(obj, newPos, editor);
                 }, () =>
                 {
+                    //不直接move了，直接设置位置就行
                     if (obj is IHorizonPositionObject horizonPositionObject)
-                    {
-                        if (dragStartXGridMap.TryGetValue(obj, out var oldXGrid))
-                        {
-                            horizonPositionObject.XGrid = oldXGrid;
-                            dragStartXGridMap.Remove(obj);
-                        }
-                    }
+                        horizonPositionObject.XGrid = oldXGrid;
                     if (obj is ITimelineObject timelineObject)
-                    {
-                        if (dragStartTGridMap.TryGetValue(obj, out var oldTGrid))
-                        {
-                            timelineObject.TGrid = oldTGrid;
-                            dragStartTGridMap.Remove(obj);
-                        }
-                    }
+                        timelineObject.TGrid = oldTGrid;
                 }));
 
             //Log.LogDebug($"OnObjectDragEnd: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");

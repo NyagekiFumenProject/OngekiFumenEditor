@@ -21,7 +21,6 @@ namespace OngekiFumenEditorPlugins.OngekiFumenSupport.CommandParserImpl
         {
             var dataArr = args.GetDataArray<float>();
 
-            //todo add BeamTrack
             connectObject.TGrid = new TGrid(dataArr[2], (int)dataArr[3]);
             connectObject.XGrid = new XGrid(dataArr[4]);
 
