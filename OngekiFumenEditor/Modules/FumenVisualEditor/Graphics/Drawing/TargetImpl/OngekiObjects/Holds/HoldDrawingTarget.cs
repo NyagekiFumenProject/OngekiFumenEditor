@@ -75,30 +75,58 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var resT = hold.TGrid.ResT;
                 var resX = hold.XGrid.ResX;
 
+                var endPos = ((float)holdEnd.TGrid.TotalUnit, (float)holdEnd.XGrid.TotalUnit);
+
                 Upsert(hold);
                 if (start != null)
                 {
-                    var itor = start.Children.SelectMany(x => x.GetConnectionPaths()).Select(x =>
-                    {
-                        return (x.pos.Y / resT, x.pos.X / resX);
-                    }).Prepend(((float)start.TGrid.TotalUnit, (float)start.XGrid.TotalUnit))
-                    .Where(pos => hold.TGrid.TotalUnit <= pos.Item1 && pos.Item1 <= holdEnd.TGrid.TotalUnit).GetEnumerator();
+                    var nodes = start.Children
+                        .SelectMany(x => x.GetConnectionPaths())
+                        .Select(x => (x.pos.Y / resT, x.pos.X / resX))
+                        .Prepend(((float)start.TGrid.TotalUnit, (float)start.XGrid.TotalUnit))
+                        .DistinctContinuousBy(x => x)
+                        .Where(pos => hold.TGrid.TotalUnit <= pos.Item1 && pos.Item1 <= holdEnd.TGrid.TotalUnit);
+                    //var r = nodes.ToArray();
+                    var itor = nodes.GetEnumerator();
+
                     var hasValue = itor.MoveNext();
                     var cur = itor.Current;
-                    var prev = (-2857f, 0f);
+                    var prev = (float.MinValue, 2857f);
+
+                    bool checkDiscardByHorizon((float, float) prev, (float, float) cur)
+                    {
+                        //判断三个点是否都在一个水平上
+                        if (prev.Item1 == cur.Item1 && endPos.Item1 == cur.Item1)
+                        {
+                            /*
+                                       good                discard
+                            o-----------x---------o----------x----------------
+                            |           |         |          |
+                            prevX     curX_1   endPosX     curX_2
+                             */
+                            var checkX = cur.Item2;
+                            if (checkX < MathF.Min(prev.Item2, endPos.Item2) || checkX > MathF.Max(prev.Item2, endPos.Item2))
+                                return true;
+                        }
+                        return false;
+                    }
 
                     while (itor.MoveNext())
                     {
-                        Upsert2(cur);
+                        if (!checkDiscardByHorizon(prev, cur))
+                            Upsert2(cur);
                         prev = cur;
                         cur = itor.Current;
                     }
 
-                    if (cur.Item1 != prev.Item1 && hasValue)
-                        Upsert2(cur);
+                    if (hasValue)
+                    {
+                        if (!checkDiscardByHorizon(prev, cur))
+                            Upsert2(cur);
+                    }
                 }
 
-                Upsert(holdEnd);
+                Upsert2(endPos);
                 lineDrawing.Draw(target, list, 13);
             }
         }
