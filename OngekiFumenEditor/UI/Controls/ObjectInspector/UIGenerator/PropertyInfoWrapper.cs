@@ -1,6 +1,8 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Attributes;
+using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
@@ -8,7 +10,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
     public class PropertyInfoWrapper : PropertyChangedBase
     {
         public PropertyInfo PropertyInfo { get; set; }
-        public object OwnerObject { get; set; }
+        public virtual object OwnerObject { get; set; }
 
         public virtual object ProxyValue
         {
@@ -39,18 +41,40 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
         public override string ToString() => $"DisplayName:{DisplayPropertyName} PropValue:{ProxyValue}";
     }
 
-    public class PropertyInfoWrapper<T> : PropertyInfoWrapper
+    public class MultiPropertyInfoWrapper : PropertyInfoWrapper
     {
-        public new T ProxyValue
+        private PropertyInfoWrapper[] wrappers;
+
+        public override object OwnerObject
+        {
+            get => new NotSupportedException();
+            set => new NotSupportedException();
+        }
+
+        public MultiPropertyInfoWrapper(PropertyInfoWrapper[] wrappers)
+        {
+            this.wrappers = wrappers;
+        }
+
+        public override object ProxyValue
         {
             get
             {
-                return (T)PropertyInfo.GetValue(OwnerObject);
+                var itor = wrappers.Select(x => x.ProxyValue).GetEnumerator();
+                if (!itor.MoveNext())
+                    return default;
+                var val = itor.Current;
+                while (itor.MoveNext())
+                {
+                    if (val != itor.Current)
+                        return default;
+                }
+                return val;
             }
             set
             {
-                PropertyInfo.SetValue(OwnerObject, value);
-                NotifyOfPropertyChange(() => ProxyValue);
+                foreach (var wrapper in wrappers)
+                    wrapper.ProxyValue = value;
             }
         }
     }
