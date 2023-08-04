@@ -400,5 +400,33 @@ namespace OngekiFumenEditor.Utils
 
         public static IEnumerable<(T, int)> WithIndex<T>(this IEnumerable<T> list)
             => list.Select((a, b) => (a, b));
+
+        public static IEnumerable<T> IntersectMany<T, KEY>(this IEnumerable<IEnumerable<T>> list)
+        {
+            var itor = list.GetEnumerator();
+            if (!itor.MoveNext())
+                return Enumerable.Empty<T>();
+            var cur = itor.Current;
+            while (itor.MoveNext())
+                cur = cur.Intersect(itor.Current);
+            return cur;
+        }
+
+        public static IEnumerable<T> IntersectManyBy<T, KEY>(this IEnumerable<IEnumerable<T>> list, Func<T, KEY> keySelector)
+        {
+            var itor = list.GetEnumerator();
+            if (!itor.MoveNext())
+                return Enumerable.Empty<T>();
+
+            var cur = itor.Current;
+            while (itor.MoveNext())
+                cur = cur.IntersectBy(itor.Current.Select(keySelector), keySelector);
+            return cur;
+        }
+
+        public static bool Empty<T>(this IEnumerable<T> list)
+        {
+            return !list.Any();
+        }
     }
 }
