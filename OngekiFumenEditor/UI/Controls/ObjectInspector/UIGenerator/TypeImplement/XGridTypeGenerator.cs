@@ -20,6 +20,6 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplemen
             typeof(XGrid)
         };
 
-        public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new XGridTypeUIViewModel(wrapper));
+        public UIElement Generate(IObjectPropertyAccessProxy wrapper) => ViewHelper.CreateViewByViewModelType(() => new XGridTypeUIViewModel(wrapper));
     }
 }

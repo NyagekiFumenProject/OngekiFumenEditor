@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
             set => PropertyInfo.ProxyValue = Enum.Parse(PropertyInfo.PropertyInfo.PropertyType, value);
         }
 
-        public EnumValueTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        public EnumValueTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
 
         }

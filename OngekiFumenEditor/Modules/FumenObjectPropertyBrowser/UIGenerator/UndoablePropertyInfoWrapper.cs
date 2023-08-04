@@ -1,38 +1,43 @@
-﻿using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+﻿using Caliburn.Micro;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 {
-    public class UndoablePropertyInfoWrapper : PropertyInfoWrapper
+    public class UndoablePropertyInfoWrapper : PropertyChangedBase, IObjectPropertyAccessProxy
     {
-        private PropertyInfoWrapper propertyWrapperCore;
+        public PropertyInfo PropertyInfo => core.PropertyInfo;
+
+        private IObjectPropertyAccessProxy core;
         private FumenVisualEditorViewModel referenceEditor;
 
-        public UndoablePropertyInfoWrapper(PropertyInfoWrapper propertyWrapperCore, FumenVisualEditorViewModel referenceEditor)
+        public UndoablePropertyInfoWrapper(IObjectPropertyAccessProxy propertyWrapperCore, FumenVisualEditorViewModel referenceEditor)
         {
-            this.propertyWrapperCore = propertyWrapperCore;
-            PropertyInfo = propertyWrapperCore.PropertyInfo;
-            OwnerObject = propertyWrapperCore.OwnerObject;
+            core = propertyWrapperCore;
             this.referenceEditor = referenceEditor;
         }
 
-        public override object ProxyValue
+        public object ProxyValue
         {
-            get => base.ProxyValue;
+            get => core.ProxyValue;
             set
             {
                 var oldValue = ProxyValue;
                 var newValue = value;
-                referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction(PropertyInfo.Name, propertyWrapperCore, oldValue, newValue));
+                referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction(core.PropertyInfo.Name, core, oldValue, newValue));
 
                 NotifyOfPropertyChange(() => ProxyValue);
             }
         }
+
+        public string DisplayPropertyName => core.DisplayPropertyName;
+        public string DisplayPropertyTipText => core.DisplayPropertyTipText;
 
         public void ExecuteSubPropertySetAction<T>(string subPropName, Action<T> setterAction, T oldValue, T newValue)
         {
@@ -41,5 +46,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
         }
 
         public override string ToString() => $"[Undoable]{base.ToString()}";
+
+        public void Dispose()
+        {
+            core.Dispose();
+            core = null;
+        }
     }
 }

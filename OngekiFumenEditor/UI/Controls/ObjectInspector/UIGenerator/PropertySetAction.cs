@@ -24,12 +24,10 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
             this.newValue = newValue;
         }
 
-        public PropertySetAction(string propName, PropertyInfoWrapper propertyWrapperCore, T oldValue, T newValue)
+        public PropertySetAction(string propName, IObjectPropertyAccessProxy propertyWrapperCore, T oldValue, T newValue)
+            : this(propName, (val) => propertyWrapperCore.ProxyValue = val, oldValue, newValue)
         {
-            this.propName = propName;
-            setterAction = (val) => propertyWrapperCore.ProxyValue = val;
-            this.oldValue = oldValue;
-            this.newValue = newValue;
+
         }
 
         public void Execute()
@@ -49,7 +47,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
         {
         }
 
-        public PropertySetAction(string propName, PropertyInfoWrapper propertyWrapperCore, object oldValue, object newValue) : base(propName, propertyWrapperCore, oldValue, newValue)
+        public PropertySetAction(string propName, IObjectPropertyAccessProxy propertyWrapperCore, object oldValue, object newValue) : base(propName, propertyWrapperCore, oldValue, newValue)
         {
         }
     }

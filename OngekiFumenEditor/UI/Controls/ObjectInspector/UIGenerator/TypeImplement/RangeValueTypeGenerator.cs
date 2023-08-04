@@ -20,6 +20,6 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplemen
             typeof(Base.RangeValue)
         };
 
-        public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new RangeValueTypeUIViewModel(wrapper));
+        public UIElement Generate(IObjectPropertyAccessProxy wrapper) => ViewHelper.CreateViewByViewModelType(() => new RangeValueTypeUIViewModel(wrapper));
     }
 }

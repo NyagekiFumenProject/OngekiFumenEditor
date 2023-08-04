@@ -56,20 +56,9 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
             }
         }
 
-        public XGridTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        public XGridTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
-            if (PropertyInfo.OwnerObject is INotifyPropertyChanged notifyProperty)
-            {
-                notifyProperty.PropertyChanged += NotifyProperty_PropertyChanged;
-            }
-        }
 
-        private void NotifyProperty_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(XGrid))
-            {
-                Refresh();
-            }
         }
     }
 }

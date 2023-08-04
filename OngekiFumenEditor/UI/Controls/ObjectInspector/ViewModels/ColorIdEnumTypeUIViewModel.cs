@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
     {
         public IEnumerable<ColorId> EnumValues => ColorIdConst.AllColors;
 
-        public ColorIdEnumTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        public ColorIdEnumTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
 
         }

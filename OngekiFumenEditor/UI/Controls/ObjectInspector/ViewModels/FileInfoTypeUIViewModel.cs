@@ -18,16 +18,12 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
             get => TypedProxyValue;
             set
             {
-                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-                    undoable.ExecuteSubPropertySetAction(nameof(RangeValue.CurrentValue), (val) => TypedProxyValue = val, TypedProxyValue, value);
-                else
-                    TypedProxyValue = value;
-
+                TypedProxyValue = value;
                 NotifyOfPropertyChange(() => File);
             }
         }
 
-        public FileInfoTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        public FileInfoTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
 
         }

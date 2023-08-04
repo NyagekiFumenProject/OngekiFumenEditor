@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
     public class BaseValueTypeUIViewModel : CommonUIViewModelBase
     {
-        public BaseValueTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        public BaseValueTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
         }
     }

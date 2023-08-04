@@ -7,75 +7,90 @@ using System.Reflection;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 {
-    public class PropertyInfoWrapper : PropertyChangedBase
+    public interface IObjectPropertyAccessProxy : INotifyPropertyChanged, IDisposable
     {
-        public PropertyInfo PropertyInfo { get; set; }
-        public virtual object OwnerObject { get; set; }
+        PropertyInfo PropertyInfo { get; }
+        object ProxyValue { get; set; }
+
+        string DisplayPropertyName { get; }
+        string DisplayPropertyTipText { get; }
+    }
+
+    public class PropertyInfoWrapper : PropertyChangedBase, IObjectPropertyAccessProxy
+    {
+        public PropertyInfo PropertyInfo { get; private set; }
+        private object ownerObject;
+
+        public PropertyInfoWrapper(PropertyInfo propertyInfo, object owner)
+        {
+            PropertyInfo = propertyInfo;
+            ownerObject = owner;
+
+            if (ProxyValue is INotifyPropertyChanged np)
+                np.PropertyChanged += Op_PropertyChanged;
+        }
 
         public virtual object ProxyValue
         {
             get
             {
-                return PropertyInfo.GetValue(OwnerObject);
+#if DEBUG
+                if (ownerObject is null)
+                    throw new ObjectDisposedException(nameof(PropertyInfoWrapper));
+#endif
+                return PropertyInfo.GetValue(ownerObject);
             }
             set
             {
+#if DEBUG
+                if (ownerObject is null)
+                    throw new ObjectDisposedException(nameof(PropertyInfoWrapper));
+#endif
                 var valType = value?.GetType() ?? default;
                 if (PropertyInfo.PropertyType == valType || valType is null || valType.IsAssignableTo(PropertyInfo.PropertyType))
                 {
-                    PropertyInfo.SetValue(OwnerObject, value);
+                    SetValueInternal(value);
                 }
                 else
                 {
                     var actualType = TypeDescriptor.GetConverter(PropertyInfo.PropertyType);
-                    PropertyInfo.SetValue(OwnerObject, actualType.ConvertFrom(value));
+                    var actualValue = actualType.ConvertFrom(value);
+                    SetValueInternal(actualValue);
                 }
 
                 NotifyOfPropertyChange(() => ProxyValue);
             }
         }
 
+        private void SetValueInternal(object newValue)
+        {
+            var oldValue = ProxyValue;
+            if (oldValue is INotifyPropertyChanged op)
+                op.PropertyChanged -= Op_PropertyChanged;
+
+            if (newValue is INotifyPropertyChanged np)
+                np.PropertyChanged += Op_PropertyChanged;
+
+            PropertyInfo.SetValue(ownerObject, newValue);
+        }
+
+        private void Op_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            NotifyOfPropertyChange(nameof(ProxyValue));
+        }
+
         public string DisplayPropertyName => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAlias>()?.Alias ?? PropertyInfo.Name;
         public string DisplayPropertyTipText => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserTipText>()?.TipText ?? string.Empty;
 
         public override string ToString() => $"DisplayName:{DisplayPropertyName} PropValue:{ProxyValue}";
-    }
 
-    public class MultiPropertyInfoWrapper : PropertyInfoWrapper
-    {
-        private PropertyInfoWrapper[] wrappers;
-
-        public override object OwnerObject
+        public void Dispose()
         {
-            get => new NotSupportedException();
-            set => new NotSupportedException();
-        }
+            if (ProxyValue is INotifyPropertyChanged np)
+                np.PropertyChanged -= Op_PropertyChanged;
 
-        public MultiPropertyInfoWrapper(PropertyInfoWrapper[] wrappers)
-        {
-            this.wrappers = wrappers;
-        }
-
-        public override object ProxyValue
-        {
-            get
-            {
-                var itor = wrappers.Select(x => x.ProxyValue).GetEnumerator();
-                if (!itor.MoveNext())
-                    return default;
-                var val = itor.Current;
-                while (itor.MoveNext())
-                {
-                    if (val != itor.Current)
-                        return default;
-                }
-                return val;
-            }
-            set
-            {
-                foreach (var wrapper in wrappers)
-                    wrapper.ProxyValue = value;
-            }
+            ownerObject = null;
+            PropertyInfo = null;
         }
     }
 }

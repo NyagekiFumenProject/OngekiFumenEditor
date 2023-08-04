@@ -26,26 +26,25 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         private OngekiObjectBase ongekiObject;
         private FumenVisualEditorViewModel referenceEditor;
 
-        public ObservableCollection<PropertyInfoWrapper> PropertyInfoWrappers { get; } = new ObservableCollection<PropertyInfoWrapper>();
+        public ObservableCollection<IObjectPropertyAccessProxy> PropertyInfoWrappers { get; } = new();
 
         public OngekiObjectBase OngekiObject => ongekiObject;
         public FumenVisualEditorViewModel Editor => referenceEditor;
 
         private void OnObjectChanged()
         {
+            foreach (var wrapper in PropertyInfoWrappers)
+                wrapper.Dispose();
             PropertyInfoWrappers.Clear();
+
             var propertyWrappers = (OngekiObject?.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance) ?? Array.Empty<PropertyInfo>())
                 .Where(x => x.CanRead)
-                .Select(x => new PropertyInfoWrapper()
-                {
-                    OwnerObject = OngekiObject,
-                    PropertyInfo = x
-                })
+                .Select(x => new PropertyInfoWrapper(x, OngekiObject))
                 .Select(x =>
                 {
                     if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() is not null)
-                        return null;
+                        return default(IObjectPropertyAccessProxy);
                     if (x.PropertyInfo.CanWrite)
                         return new UndoablePropertyInfoWrapper(x, referenceEditor);
                     else if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() is not null)

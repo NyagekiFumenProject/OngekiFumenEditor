@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is not PropertyInfoWrapper wrapper)
+            if (value is not IObjectPropertyAccessProxy wrapper)
                 return default;
             return PropertiesUIGenerator.GenerateUI(wrapper);
         }
