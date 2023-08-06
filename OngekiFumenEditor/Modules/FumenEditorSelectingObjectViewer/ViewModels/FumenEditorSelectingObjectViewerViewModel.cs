@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
             set
             {
                 Set(ref currentPickedSelectObject, value);
-                IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(value, Editor);
+                OnItemSingleClick(value);
             }
         }
 
@@ -58,7 +58,10 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
         public void OnItemSingleClick(OngekiObjectBase item)
         {
-            IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(item, Editor);
+            Editor.SelectObjects.Where(x => x != item).ForEach(x => x.IsSelected = false);
+            Editor.SelectObjects.Where(x => x == item).ForEach(x => x.IsSelected = true);
+
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
         }
 
         public void OnItemDoubleClick(OngekiObjectBase item)
@@ -67,6 +70,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
                 Editor.ScrollTo(timelineObject.TGrid);
 
             Editor.SelectObjects.Where(x => x != item).ForEach(x => x.IsSelected = false);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
         }
     }
 }

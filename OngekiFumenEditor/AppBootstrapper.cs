@@ -176,6 +176,18 @@ namespace OngekiFumenEditor
                 window.AllowDrop = true;
                 window.Drop += MainWindow_Drop;
             }
+
+            var genericProperties = new object[]
+                {
+                    new Bell(),new Bullet()
+                }
+                .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                .IntersectManyBy(x => (x.PropertyType, x.Name))
+                .Select(x => new
+                {
+                    x.PropertyType,
+                    PropertyName = x.Name
+                }).ToArray();
         }
 
         private async void MainWindow_Drop(object sender, DragEventArgs e)

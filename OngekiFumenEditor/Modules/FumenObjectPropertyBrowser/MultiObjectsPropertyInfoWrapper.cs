@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,19 +18,32 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
     {
         private List<IObjectPropertyAccessProxy> wrappers;
         private PropertyInfo propertyInfo;
+        private IEqualityComparer comparer;
 
         public PropertyInfo PropertyInfo => propertyInfo;
 
-        public string DisplayPropertyName => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAlias>()?.Alias ?? PropertyInfo.Name;
-        public string DisplayPropertyTipText => string.Empty;
+        public string DisplayPropertyName => wrappers.First().DisplayPropertyName;
+        public string DisplayPropertyTipText => wrappers.Count > 1 ? string.Empty : wrappers.First().DisplayPropertyTipText;
+
+        private readonly Dictionary<Type, IEqualityComparer> cacheComparerMap = new();
 
         private MultiObjectsPropertyInfoWrapper(List<IObjectPropertyAccessProxy> wrappers, PropertyInfo propertyInfo)
         {
             this.wrappers = wrappers;
             this.propertyInfo = propertyInfo;
+
+            if (!cacheComparerMap.TryGetValue(propertyInfo.PropertyType, out var cmp))
+            {
+                cacheComparerMap[propertyInfo.PropertyType] = cmp = typeof(EqualityComparer<>)
+                    .MakeGenericType(propertyInfo.PropertyType)
+                    .GetProperty(nameof(EqualityComparer<object>.Default))
+                    .GetValue(null) as IEqualityComparer;
+            }
+
+            comparer = cmp;
         }
 
-        public static bool TryCreate(string propertyName, Type propertyType, object[] objects, out MultiObjectsPropertyInfoWrapper multiWrapper)
+        public static bool TryCreate(string propertyName, Type propertyType, IEnumerable<object> objects, out MultiObjectsPropertyInfoWrapper multiWrapper)
         {
             //get real propInfo for every object.
             var list = new List<IObjectPropertyAccessProxy>();
@@ -49,6 +63,14 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
                     Log.LogWarn($"object type {objType} property {propertyName} type not match: {propertyInfo.PropertyType} != {propertyType}");
                     continue;
                 }
+
+                if (!propertyInfo.CanWrite)
+                {
+                    if (propertyInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() == null)
+                        continue;
+                }
+                if (propertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() != null)
+                    continue;
 
                 var wrapper = new PropertyInfoWrapper(propertyInfo, obj);
                 list.Add(wrapper);
@@ -79,6 +101,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
             }
         }
 
+        /// <summary>
+        /// 可能返回DependencyProperty.UnsetValue表示不同的值
+        /// </summary>
         public object ProxyValue
         {
             get
@@ -86,17 +111,20 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
                 //如果所有值都是一样的，那就返回正确的值，否则就返回default
                 var itor = wrappers.GetEnumerator();
                 if (!itor.MoveNext())
-                    return DefaultValue;
+                    return DependencyProperty.UnsetValue;
                 var val = itor.Current.ProxyValue;
                 while (itor.MoveNext())
                 {
-                    if (val != itor.Current.ProxyValue)
-                        return DefaultValue;
+                    var cval = itor.Current.ProxyValue;
+                    if (!comparer.Equals(val, cval))
+                        return DependencyProperty.UnsetValue;
                 }
                 return val;
             }
             set
             {
+                if (value == DependencyProperty.UnsetValue)
+                    return;
                 foreach (var wrapper in wrappers)
                     wrapper.ProxyValue = value;
             }

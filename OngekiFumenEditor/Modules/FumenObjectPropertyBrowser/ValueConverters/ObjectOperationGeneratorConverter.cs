@@ -14,9 +14,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ValueConverters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is not OngekiObjectBase obj)
+            if (value is not IReadOnlySet<ISelectableObject> objs)
                 return default;
-            return OngekiObjectOperationGenerator.GenerateUI(obj);
+            if (objs.Count != 1)
+                return default;
+            return OngekiObjectOperationGenerator.GenerateUI(objs.First() as OngekiObjectBase);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

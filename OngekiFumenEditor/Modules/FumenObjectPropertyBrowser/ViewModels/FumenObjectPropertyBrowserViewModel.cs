@@ -1,4 +1,5 @@
-﻿using Gemini.Framework;
+﻿using AngleSharp.Css;
+using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Attributes;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -23,12 +25,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
     {
         public override PaneLocation PreferredLocation => PaneLocation.Right;
 
-        private OngekiObjectBase ongekiObject;
+        private HashSet<ISelectableObject> selectedObjects = new();
+        public IReadOnlySet<ISelectableObject> SelectedObjects => selectedObjects;
+
         private FumenVisualEditorViewModel referenceEditor;
-
         public ObservableCollection<IObjectPropertyAccessProxy> PropertyInfoWrappers { get; } = new();
-
-        public OngekiObjectBase OngekiObject => ongekiObject;
         public FumenVisualEditorViewModel Editor => referenceEditor;
 
         private void OnObjectChanged()
@@ -37,44 +38,64 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 wrapper.Dispose();
             PropertyInfoWrappers.Clear();
 
-            var propertyWrappers = (OngekiObject?.GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance) ?? Array.Empty<PropertyInfo>())
-                .Where(x => x.CanRead)
-                .Select(x => new PropertyInfoWrapper(x, OngekiObject))
-                .Select(x =>
-                {
-                    if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() is not null)
-                        return default(IObjectPropertyAccessProxy);
-                    if (x.PropertyInfo.CanWrite)
-                        return new UndoablePropertyInfoWrapper(x, referenceEditor);
-                    else if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() is not null)
-                        return x;
-                    return null;
-                })
-                .FilterNull()
-                .OrderBy(x => x.DisplayPropertyName)
+            if (SelectedObjects.Count == 0)
+                return;
+
+            var genericProperties = SelectedObjects
+                .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                .IntersectManyBy(x => (x.PropertyType, x.Name))
+                .Select(x => (x.PropertyType, x.Name, x))
                 .ToArray();
 
-            foreach (var wrapper in propertyWrappers)
+            var wrappers = new List<IObjectPropertyAccessProxy>();
+            foreach ((var propType, var propName, var refPropInfo) in genericProperties)
             {
-                PropertyInfoWrappers.Add(wrapper);
+                var wrapper = default(IObjectPropertyAccessProxy);
+                if (SelectedObjects.Count > 1)
+                {
+                    if (MultiObjectsPropertyInfoWrapper.TryCreate(propName, propType, selectedObjects, out var w))
+                        wrapper = w;
+                }
+                else
+                {
+                    if (!refPropInfo.CanWrite)
+                    {
+                        if (refPropInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() == null)
+                            continue;
+                    }
+                    if (refPropInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() != null)
+                        continue;
+                    wrapper = new PropertyInfoWrapper(refPropInfo, SelectedObjects.FirstOrDefault());
+                }
+
+                if (wrapper != null)
+                {
+                    var undoWrapper = new UndoablePropertyInfoWrapper(wrapper, referenceEditor);
+                    wrappers.Add(undoWrapper);
+                }
             }
+
+            foreach (var wrapper in wrappers.OrderBy(x => x.DisplayPropertyName))
+                PropertyInfoWrappers.Add(wrapper);
 
             UpdateDisplayName();
         }
 
         private void UpdateDisplayName()
         {
-            DisplayName = "物件属性" + (OngekiObject is null ? string.Empty : $" - {OngekiObject.Name}");
+            var singleObj = selectedObjects.Count == 1 ? selectedObjects.First() : null;
+            DisplayName = "物件属性" + (singleObj is null ? string.Empty : $" - {((OngekiObjectBase)singleObj).Name}");
         }
 
-        public void SetCurrentOngekiObject(OngekiObjectBase ongekiObject, FumenVisualEditorViewModel referenceEditor)
+        public void RefreshSelected(FumenVisualEditorViewModel referenceEditor)
         {
-            this.ongekiObject = ongekiObject;
+            selectedObjects.Clear();
+            selectedObjects.AddRange(referenceEditor.SelectObjects);
             this.referenceEditor = referenceEditor;
 
             OnObjectChanged();
-            NotifyOfPropertyChange(() => OngekiObject);
+            NotifyOfPropertyChange(nameof(SelectedObjects));
+            UpdateDisplayName();
         }
 
         public FumenObjectPropertyBrowserViewModel()
