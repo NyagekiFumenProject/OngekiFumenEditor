@@ -14,45 +14,78 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
     public class XGridTypeUIViewModel : CommonUIViewModelBase<XGrid>
     {
-        public int Grid
+        private object cacheGrid = DependencyProperty.UnsetValue;
+        public object Grid
         {
-            get => TypedProxyValue.Grid;
+            get
+            {
+                var val = ProxyValue;
+                if (val is XGrid xGrid)
+                    return xGrid.Grid;
+                return cacheGrid;
+            }
             set
             {
-                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-                    undoable.ExecuteSubPropertySetAction(nameof(XGrid.Grid), (val) => TypedProxyValue.Grid = val, Grid, value);
-                else
-                    TypedProxyValue.Grid = value;
-
-                NotifyOfPropertyChange(() => Grid);
+                if (int.TryParse(value?.ToString(), out var v))
+                {
+                    cacheGrid = v;
+                    TryApplyValue(v, Unit, ResX);
+                    NotifyOfPropertyChange(() => Grid);
+                }
             }
         }
 
-        public float Unit
+        private object cacheUnit = DependencyProperty.UnsetValue;
+        public object Unit
         {
-            get => TypedProxyValue.Unit;
+            get
+            {
+                var val = ProxyValue;
+                if (val is XGrid xGrid)
+                    return xGrid.Unit;
+                return cacheUnit;
+            }
             set
             {
-                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-                    undoable.ExecuteSubPropertySetAction(nameof(XGrid.Unit), (val) => TypedProxyValue.Unit = val, Unit, value);
-                else
-                    TypedProxyValue.Unit = value;
-
-                NotifyOfPropertyChange(() => Unit);
+                if (float.TryParse(value?.ToString(), out var v))
+                {
+                    cacheUnit = v;
+                    TryApplyValue(Grid, v, ResX);
+                    NotifyOfPropertyChange(() => Unit);
+                }
             }
         }
 
-        public uint ResX
+        private object cacheResX = XGrid.DEFAULT_RES_X;
+        public object ResX
         {
-            get => TypedProxyValue.ResX;
+            get
+            {
+                var val = ProxyValue;
+                if (val is XGrid xGrid)
+                    return xGrid.ResX;
+                return cacheResX;
+            }
             set
             {
-                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-                    undoable.ExecuteSubPropertySetAction(nameof(XGrid.ResX), (val) => TypedProxyValue.ResX = val, ResX, value);
-                else
-                    TypedProxyValue.ResX = value;
+                if (uint.TryParse(value?.ToString(), out var v))
+                {
+                    cacheUnit = v;
+                    TryApplyValue(Grid, Unit, v);
+                    NotifyOfPropertyChange(() => ResX);
+                }
+            }
+        }
 
-                NotifyOfPropertyChange(() => ResX);
+        private void TryApplyValue(object Grid, object Unit, object ResX)
+        {
+            if (Grid is int grid && Unit is float unit && ResX is uint resX)
+            {
+                var oldVal = TypedProxyValue;
+                var newVal = new XGrid(unit, grid, resX);
+                var refTarget = this;
+
+                TypedProxyValue = newVal;
             }
         }
 
