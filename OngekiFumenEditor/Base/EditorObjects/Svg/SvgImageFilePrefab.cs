@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
+﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
@@ -23,6 +24,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         public override string IDShortName => CommandName;
 
         private FileInfo svgFile = null;
+        [ObjectPropertyBrowserSingleSelectedOnly]
         public FileInfo SvgFile
         {
             get => svgFile;

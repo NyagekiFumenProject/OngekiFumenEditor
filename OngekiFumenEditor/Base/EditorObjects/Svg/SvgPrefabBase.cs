@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows;
+using OngekiFumenEditor.Base.Attributes;
 
 namespace OngekiFumenEditor.Base.EditorObjects.Svg
 {
@@ -44,6 +45,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         }
 
         private RangeValue colorfulLaneBrightness = RangeValue.Create(-3, 3, 0);
+        [ObjectPropertyBrowserSingleSelectedOnly]
         public RangeValue ColorfulLaneBrightness
         {
             get => colorfulLaneBrightness;
@@ -55,6 +57,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         }
 
         private RangeValue rotation = RangeValue.Create(-180, 180f, 0f);
+        [ObjectPropertyBrowserSingleSelectedOnly]
         public RangeValue Rotation
         {
             get => rotation;
@@ -66,6 +69,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         }
 
         private RangeValue offsetX = RangeValue.CreateNormalized(0.5f);
+        [ObjectPropertyBrowserSingleSelectedOnly]
         public RangeValue OffsetX
         {
             get => offsetX;
@@ -77,6 +81,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         }
 
         private RangeValue colorSimilar = RangeValue.Create(1, 1000, 600);
+        [ObjectPropertyBrowserSingleSelectedOnly]
         public RangeValue ColorSimilar
         {
             get => colorSimilar;
@@ -88,6 +93,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         }
 
         private RangeValue offsetY = RangeValue.CreateNormalized(0.5f);
+        [ObjectPropertyBrowserSingleSelectedOnly]
         public RangeValue OffsetY
         {
             get => offsetY;
@@ -126,6 +132,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         }
 
         private RangeValue opacity = RangeValue.CreateNormalized(1);
+        [ObjectPropertyBrowserSingleSelectedOnly]
         public RangeValue Opacity
         {
             get => opacity;
@@ -137,6 +144,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
         }
 
         private RangeValue tolerance = RangeValue.Create(0.001f, 20f, 20f);
+        [ObjectPropertyBrowserSingleSelectedOnly]
         public RangeValue Tolerance
         {
             get => tolerance;
