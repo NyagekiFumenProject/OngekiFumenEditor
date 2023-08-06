@@ -49,6 +49,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
             //get real propInfo for every object.
             var list = new List<IObjectPropertyAccessProxy>();
             multiWrapper = default;
+            var isSingleSelected = objects.IsOnlyOne();
 
             foreach (var obj in objects)
             {
@@ -72,6 +73,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
                 }
                 if (propertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() != null)
                     continue;
+                if (propertyInfo.GetCustomAttribute<ObjectPropertyBrowserSingleSelectedOnly>() != null && !isSingleSelected)
+                    continue;
 
                 var wrapper = new PropertyInfoWrapper(propertyInfo, obj);
                 list.Add(wrapper);
@@ -79,6 +82,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
 
             if (list.Empty())
                 return false;
+            //todo 严格一下？
 
             var propInfo = list.First().PropertyInfo;
             multiWrapper = new MultiObjectsPropertyInfoWrapper(list, propInfo);
