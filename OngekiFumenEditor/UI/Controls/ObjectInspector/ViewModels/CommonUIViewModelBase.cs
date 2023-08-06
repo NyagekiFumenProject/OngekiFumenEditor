@@ -37,7 +37,13 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
     {
         public T TypedProxyValue
         {
-            get => PropertyInfo.ProxyValue as T;
+            get => ProxyValue as T;
+            set => ProxyValue = value;
+        }
+
+        public object ProxyValue
+        {
+            get => PropertyInfo.ProxyValue;
             set => PropertyInfo.ProxyValue = value;
         }
 

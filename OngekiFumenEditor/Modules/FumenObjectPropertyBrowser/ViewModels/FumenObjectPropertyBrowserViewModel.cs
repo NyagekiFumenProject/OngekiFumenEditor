@@ -34,8 +34,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         private void OnObjectChanged()
         {
+            /*
             foreach (var wrapper in PropertyInfoWrappers)
                 wrapper.Dispose();
+            */
             PropertyInfoWrappers.Clear();
 
             if (SelectedObjects.Count == 0)
@@ -54,7 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 if (SelectedObjects.Count > 1)
                 {
                     if (MultiObjectsPropertyInfoWrapper.TryCreate(propName, propType, selectedObjects, out var w))
-                        wrapper = w;
+                        wrapper = new UndoableMultiObjectPropertyInfoWrapper(w, referenceEditor);
                 }
                 else
                 {
@@ -65,13 +67,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     }
                     if (refPropInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() != null)
                         continue;
-                    wrapper = new PropertyInfoWrapper(refPropInfo, SelectedObjects.FirstOrDefault());
+                    wrapper = new UndoablePropertyInfoWrapper(new PropertyInfoWrapper(refPropInfo, SelectedObjects.FirstOrDefault()), referenceEditor);
                 }
 
                 if (wrapper != null)
                 {
-                    var undoWrapper = new UndoablePropertyInfoWrapper(wrapper, referenceEditor);
-                    wrappers.Add(undoWrapper);
+                    wrappers.Add(wrapper);
                 }
             }
 

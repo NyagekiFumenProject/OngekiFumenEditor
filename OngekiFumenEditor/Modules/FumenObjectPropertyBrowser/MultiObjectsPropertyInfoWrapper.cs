@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
         private IEqualityComparer comparer;
 
         public PropertyInfo PropertyInfo => propertyInfo;
+        public IReadOnlyList<IObjectPropertyAccessProxy> Wrappers => wrappers;
 
         public string DisplayPropertyName => wrappers.First().DisplayPropertyName;
         public string DisplayPropertyTipText => wrappers.Count > 1 ? string.Empty : wrappers.First().DisplayPropertyTipText;

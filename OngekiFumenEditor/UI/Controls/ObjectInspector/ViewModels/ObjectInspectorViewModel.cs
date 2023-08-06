@@ -38,8 +38,10 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 
         private void OnObjectChanged()
         {
+            /*
             foreach (var wrapper in PropertyInfoWrappers)
                 wrapper.Dispose();
+            */
             PropertyInfoWrappers.Clear();
 
             var propertyWrappers = (inspectObject?.GetType()
