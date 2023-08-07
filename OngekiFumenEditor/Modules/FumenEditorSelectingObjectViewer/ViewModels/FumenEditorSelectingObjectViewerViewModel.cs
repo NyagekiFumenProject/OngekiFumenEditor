@@ -60,6 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
         {
             if (Editor is null)
                 return;
+
             Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
             Editor.SelectObjects.Where(x => x == item).FilterNull().ForEach(x => x.IsSelected = true);
 

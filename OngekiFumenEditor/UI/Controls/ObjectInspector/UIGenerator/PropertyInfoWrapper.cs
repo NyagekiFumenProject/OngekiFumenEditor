@@ -19,6 +19,8 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 
             if (ProxyValue is INotifyPropertyChanged np)
                 np.PropertyChanged += Op_PropertyChanged;
+            if (ownerObject is INotifyPropertyChanged onp)
+                onp.PropertyChanged += Onp_PropertyChanged;
         }
 
         public virtual object ProxyValue
@@ -67,7 +69,15 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 
         private void Op_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            NotifyOfPropertyChange(nameof(ProxyValue));
+            NotifyOfPropertyChange(() => ProxyValue);
+        }
+
+        private void Onp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == PropertyInfo.Name)
+            {
+                NotifyOfPropertyChange(() => ProxyValue);
+            }
         }
 
         public string DisplayPropertyName => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAlias>()?.Alias ?? PropertyInfo.Name;
@@ -79,6 +89,8 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
         {
             if (ProxyValue is INotifyPropertyChanged np)
                 np.PropertyChanged -= Op_PropertyChanged;
+            if (ownerObject is INotifyPropertyChanged onp)
+                onp.PropertyChanged -= Onp_PropertyChanged;
 
             ownerObject = null;
             PropertyInfo = null;

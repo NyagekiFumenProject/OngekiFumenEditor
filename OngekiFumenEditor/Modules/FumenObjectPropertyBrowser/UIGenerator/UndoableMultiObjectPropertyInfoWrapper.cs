@@ -5,6 +5,7 @@ using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -23,6 +24,20 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
         {
             core = propertyWrapperCore;
             this.referenceEditor = referenceEditor;
+            core.PropertyChanged += Core_PropertyChanged;
+        }
+
+        private void Core_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(IObjectPropertyAccessProxy.ProxyValue):
+                    NotifyOfPropertyChange(() => ProxyValue);
+                    break;
+                default:
+                    NotifyOfPropertyChange(e.PropertyName);
+                    break;
+            }
         }
 
         public object ProxyValue
@@ -55,6 +70,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 
         public void Dispose()
         {
+            core.PropertyChanged -= Core_PropertyChanged;
             core.Dispose();
             core = null;
         }

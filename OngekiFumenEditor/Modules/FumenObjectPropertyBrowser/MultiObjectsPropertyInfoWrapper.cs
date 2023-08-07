@@ -41,7 +41,23 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
                     .GetValue(null) as IEqualityComparer;
             }
 
+            foreach (var wrapper in wrappers)
+                wrapper.PropertyChanged += Wrapper_PropertyChanged;
+
             comparer = cmp;
+        }
+
+        private void Wrapper_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(IObjectPropertyAccessProxy.ProxyValue):
+                    NotifyOfPropertyChange(() => ProxyValue);
+                    break;
+                default:
+                    NotifyOfPropertyChange(e.PropertyName);
+                    break;
+            }
         }
 
         public static bool TryCreate(string propertyName, Type propertyType, IEnumerable<object> objects, out MultiObjectsPropertyInfoWrapper multiWrapper)
@@ -92,7 +108,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
         public void Dispose()
         {
             foreach (var wrapper in wrappers)
+            {
+                wrapper.PropertyChanged += Wrapper_PropertyChanged;
                 wrapper.Dispose();
+            }
             wrappers = null;
         }
 

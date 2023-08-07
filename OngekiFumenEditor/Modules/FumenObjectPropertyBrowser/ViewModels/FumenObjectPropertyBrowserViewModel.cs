@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Css;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
@@ -29,22 +30,22 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         public IReadOnlySet<ISelectableObject> SelectedObjects => selectedObjects;
 
         private FumenVisualEditorViewModel referenceEditor;
+        private HashSet<Type> supportTypes;
+
         public ObservableCollection<IObjectPropertyAccessProxy> PropertyInfoWrappers { get; } = new();
         public FumenVisualEditorViewModel Editor => referenceEditor;
 
         private void OnObjectChanged()
         {
-            /*
             foreach (var wrapper in PropertyInfoWrappers)
                 wrapper.Dispose();
-            */
             PropertyInfoWrappers.Clear();
 
             if (SelectedObjects.Count == 0)
                 return;
 
             var genericProperties = SelectedObjects
-                .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => supportTypes.Contains(x.PropertyType)))
                 .IntersectManyBy(x => (x.PropertyType, x.Name))
                 .Select(x => (x.PropertyType, x.Name, x))
                 .ToArray();
@@ -88,20 +89,25 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             DisplayName = "物件属性" + (singleObj is null ? string.Empty : $" - {((OngekiObjectBase)singleObj).Name}");
         }
 
-        public void RefreshSelected(FumenVisualEditorViewModel referenceEditor)
+        public void RefreshSelected(IEnumerable<ISelectableObject> objects, FumenVisualEditorViewModel referenceEditor)
         {
             selectedObjects.Clear();
-            selectedObjects.AddRange(referenceEditor.SelectObjects);
+            selectedObjects.AddRange(objects);
             this.referenceEditor = referenceEditor;
 
             OnObjectChanged();
+            referenceEditor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.SelectObjects));
             NotifyOfPropertyChange(nameof(SelectedObjects));
             UpdateDisplayName();
         }
 
+        public void RefreshSelected(FumenVisualEditorViewModel referenceEditor)
+            => RefreshSelected(referenceEditor.SelectObjects, referenceEditor);
+
         public FumenObjectPropertyBrowserViewModel()
         {
             UpdateDisplayName();
+            supportTypes = IoC.GetAll<ITypeUIGenerator>().SelectMany(x => x.SupportTypes).ToHashSet();
         }
     }
 }
