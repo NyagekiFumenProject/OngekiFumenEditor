@@ -62,10 +62,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 
         public override string ToString() => $"[Undoable]{base.ToString()}";
 
-        public void Dispose()
+        public void Clear()
         {
             core.PropertyChanged -= Core_PropertyChanged;
-            core.Dispose();
+            core.Clear();
             core = null;
         }
     }

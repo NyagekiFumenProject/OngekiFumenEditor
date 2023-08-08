@@ -85,15 +85,16 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 
         public override string ToString() => $"DisplayName:{DisplayPropertyName} PropValue:{ProxyValue}";
 
-        public void Dispose()
+        public void Clear()
         {
             if (ProxyValue is INotifyPropertyChanged np)
                 np.PropertyChanged -= Op_PropertyChanged;
             if (ownerObject is INotifyPropertyChanged onp)
                 onp.PropertyChanged -= Onp_PropertyChanged;
-
+            /*
             ownerObject = null;
             PropertyInfo = null;
+            */
         }
     }
 }

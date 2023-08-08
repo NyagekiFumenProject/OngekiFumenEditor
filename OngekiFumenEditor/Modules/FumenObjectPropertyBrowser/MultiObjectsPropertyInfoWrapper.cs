@@ -105,14 +105,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
             return true;
         }
 
-        public void Dispose()
+        public void Clear()
         {
             foreach (var wrapper in wrappers)
             {
-                wrapper.PropertyChanged += Wrapper_PropertyChanged;
-                wrapper.Dispose();
+                wrapper.PropertyChanged -= Wrapper_PropertyChanged;
+                wrapper.Clear();
             }
-            wrappers = null;
         }
 
         public object DefaultValue

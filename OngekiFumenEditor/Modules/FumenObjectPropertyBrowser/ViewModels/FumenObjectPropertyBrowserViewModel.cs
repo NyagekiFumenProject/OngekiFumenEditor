@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         private void OnObjectChanged()
         {
             foreach (var wrapper in PropertyInfoWrappers)
-                wrapper.Dispose();
+                wrapper.Clear();
             PropertyInfoWrappers.Clear();
 
             if (SelectedObjects.Count == 0)
