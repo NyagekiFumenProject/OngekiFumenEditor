@@ -12,6 +12,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 {
@@ -22,17 +23,9 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
         public FumenVisualEditorViewModel Editor
         {
             get => editor;
-            set => Set(ref editor, value);
-        }
-
-        private OngekiObjectBase currentPickedSelectObject;
-        public OngekiObjectBase CurrentPickedSelectObject
-        {
-            get => currentPickedSelectObject;
             set
             {
-                Set(ref currentPickedSelectObject, value);
-                OnItemSingleClick(value);
+                Set(ref editor, value);
             }
         }
 
@@ -40,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
         public FumenEditorSelectingObjectViewerViewModel()
         {
-            DisplayName = "当前选择物件查看器";
+            DisplayName = $"当前选择物件查看器";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
         }
@@ -48,7 +41,6 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
         {
             Editor = @new;
-            CurrentPickedSelectObject = null;
         }
 
         public void OnRefresh()
@@ -61,10 +53,10 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
             if (Editor is null)
                 return;
 
-            Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
-            Editor.SelectObjects.Where(x => x == item).FilterNull().ForEach(x => x.IsSelected = true);
+            //Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
+            //Editor.SelectObjects.Where(x => x == item).FilterNull().ForEach(x => x.IsSelected = true);
 
-            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(new[] { item as ISelectableObject }.FilterNull(), Editor);
         }
 
         public void OnItemDoubleClick(OngekiObjectBase item)
