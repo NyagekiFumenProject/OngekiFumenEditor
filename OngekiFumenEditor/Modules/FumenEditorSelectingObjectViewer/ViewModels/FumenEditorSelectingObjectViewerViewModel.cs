@@ -29,6 +29,20 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
             }
         }
 
+        private OngekiObjectBase currentSelect;
+        public OngekiObjectBase CurrentSelect
+        {
+            get => currentSelect;
+            set
+            {
+                var updateClick = currentSelect != value;
+                Set(ref currentSelect, value);
+
+                if (updateClick)
+                    OnItemSingleClick(value);
+            }
+        }
+
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
         public FumenEditorSelectingObjectViewerViewModel()
@@ -69,6 +83,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
             Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+            Editor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.SelectObjects));
         }
     }
 }

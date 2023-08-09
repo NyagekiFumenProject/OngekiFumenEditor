@@ -97,6 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
             OnObjectChanged();
             referenceEditor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.SelectObjects));
+            //todo 解耦
             NotifyOfPropertyChange(nameof(SelectedObjects));
             UpdateDisplayName();
         }

@@ -24,7 +24,8 @@
             Background="Transparent"
             BorderBrush="Transparent"
             ItemsSource="{Binding Editor.SelectObjects}"
-            ScrollViewer.CanContentScroll="True">
+            ScrollViewer.CanContentScroll="True"
+            SelectedValue="{Binding CurrentSelect}">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem cal:Message.Attach="OnRefresh()" Header="刷新" />
