@@ -45,7 +45,15 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 return;
 
             var genericProperties = SelectedObjects
-                .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => supportTypes.Contains(x.PropertyType)))
+                .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x =>
+                {
+                    var type = x.PropertyType;
+                    if (supportTypes.Contains(type))
+                        return true;
+                    if (type.IsEnum)
+                        return true;
+                    return false;
+                }))
                 .IntersectManyBy(x => (x.PropertyType, x.Name))
                 .Select(x => (x.PropertyType, x.Name, x))
                 .ToArray();
