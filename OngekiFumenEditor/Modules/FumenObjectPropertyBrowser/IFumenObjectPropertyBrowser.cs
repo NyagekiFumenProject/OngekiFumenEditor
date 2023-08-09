@@ -15,6 +15,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
         public FumenVisualEditorViewModel Editor { get; }
 
         public void RefreshSelected(FumenVisualEditorViewModel referenceEditor);
-        public void RefreshSelected(IEnumerable<ISelectableObject> objects, FumenVisualEditorViewModel referenceEditor);
+        public void RefreshSelected(FumenVisualEditorViewModel referenceEditor, params object[] ongekiObj);
     }
 }

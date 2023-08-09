@@ -102,6 +102,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             UpdateDisplayName();
         }
 
+        public void RefreshSelected(FumenVisualEditorViewModel referenceEditor, params object[] ongekiObj)
+            => RefreshSelected(ongekiObj.OfType<ISelectableObject>().FilterNull(), referenceEditor);
+
         public void RefreshSelected(FumenVisualEditorViewModel referenceEditor)
             => RefreshSelected(referenceEditor.SelectObjects, referenceEditor);
 

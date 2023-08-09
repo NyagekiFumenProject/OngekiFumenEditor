@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
             //Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
             //Editor.SelectObjects.Where(x => x == item).FilterNull().ForEach(x => x.IsSelected = true);
 
-            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(new[] { item as ISelectableObject }.FilterNull(), Editor);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor, item);
         }
 
         public void OnItemDoubleClick(OngekiObjectBase item)
@@ -83,7 +83,6 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
             Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
-            Editor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.SelectObjects));
         }
     }
 }
