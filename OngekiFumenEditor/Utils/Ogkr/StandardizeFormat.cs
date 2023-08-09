@@ -4,7 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Parser;
-using OngekiFumenEditorPlugins.OngekiFumenSupport.Rules;
+using OngekiFumenEditor.Parser.DefaultImpl.Ogkr.Rules;
 using System;
 using System.Collections.Generic;
 using System.IO;
