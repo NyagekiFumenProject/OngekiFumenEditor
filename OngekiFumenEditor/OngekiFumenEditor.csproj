@@ -535,7 +535,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(ProjectDir)Resources\Binaries\ProgramRoot\*.*&quot; &quot;$(OutDir)&quot; /s /y" />
+    <Exec Command="echo &quot;OutDir= $(OutDir)&quot; &amp; xcopy &quot;$(ProjectDir)Resources\Binaries\ProgramRoot\*.*&quot; &quot;$(OutDir)&quot; /s /y" />
   </Target>
 
 </Project>
