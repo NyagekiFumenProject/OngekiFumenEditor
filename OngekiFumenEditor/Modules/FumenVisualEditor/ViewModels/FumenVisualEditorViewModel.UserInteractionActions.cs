@@ -1103,10 +1103,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (meter is null)
                     (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
 
-                var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
+                var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength) * 2;
                 //Ïû³ý¾«¶ÈÎó²î~
                 var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
-                nextY++;
 
                 var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
                 var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
@@ -1114,7 +1113,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
 
                 var result = arg.Delta > 0 ? nextFirst : downFirst;
-                ScrollTo(result.y);
+                if (result.tGrid is not null)
+                    ScrollTo(result.y);
             }
             else
             {
