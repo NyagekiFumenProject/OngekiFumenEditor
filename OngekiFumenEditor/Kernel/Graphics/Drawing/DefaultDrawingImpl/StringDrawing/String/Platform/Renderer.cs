@@ -8,6 +8,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
     internal class Renderer : IFontStashRenderer2, IDisposable
     {
         private const string frag = @"
+            #version 330
 			#ifdef GL_ES
 				#define LOWP lowp
 				precision mediump float;
@@ -20,26 +21,29 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
 			uniform sampler2D TextureSampler;
 
 			// Varyings
-			varying vec4 v_color;
-			varying vec2 v_texCoords;
+			in vec4 v_color;
+			in vec2 v_texCoords;
+
+            out vec4 FragColor;
 
 			void main()
 			{
-				gl_FragColor = v_color * texture2D(TextureSampler, v_texCoords);
+				FragColor = v_color * texture2D(TextureSampler, v_texCoords);
 			}
 		";
         private const string vert = @"
+            #version 330
             // Attributes
-            attribute vec3 a_position;
-			attribute vec4 a_color;
-			attribute vec2 a_texCoords0;
+            in vec3 a_position;
+			in vec4 a_color;
+			in vec2 a_texCoords0;
 
 			// Uniforms
 			uniform mat4 MVP;
 
 			// Varyings
-			varying vec4 v_color;
-			varying vec2 v_texCoords;
+			out vec4 v_color;
+			out vec2 v_texCoords;
 
 			void main()
 			{

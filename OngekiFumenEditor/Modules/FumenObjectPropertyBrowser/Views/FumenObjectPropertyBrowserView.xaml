@@ -6,7 +6,8 @@
     xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ValueConverters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
     d:DesignHeight="800"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -26,7 +27,7 @@
                     </ItemContainerTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <ContentPresenter Content="{Binding OngekiObject, Converter={StaticResource ObjectOperationGeneratorConverter}}">
+            <ContentPresenter Content="{Binding SelectedObjects, Converter={StaticResource ObjectOperationGeneratorConverter}}">
             </ContentPresenter>
         </StackPanel>
     </ScrollViewer>

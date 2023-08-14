@@ -11,6 +11,6 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
     public interface ITypeUIGenerator
     {
         public IEnumerable<Type> SupportTypes { get; }
-        public UIElement Generate(PropertyInfoWrapper wrapper);
+        public UIElement Generate(IObjectPropertyAccessProxy wrapper);
     }
 }

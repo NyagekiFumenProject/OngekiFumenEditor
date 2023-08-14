@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 
         private object inspectObject;
 
-        public ObservableCollection<PropertyInfoWrapper> PropertyInfoWrappers { get; } = new ObservableCollection<PropertyInfoWrapper>();
+        public ObservableCollection<IObjectPropertyAccessProxy> PropertyInfoWrappers { get; } = new();
 
         public object InspectObject
         {
@@ -38,15 +38,16 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 
         private void OnObjectChanged()
         {
+            /*
+            foreach (var wrapper in PropertyInfoWrappers)
+                wrapper.Dispose();
+            */
             PropertyInfoWrappers.Clear();
+
             var propertyWrappers = (inspectObject?.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance) ?? Array.Empty<PropertyInfo>())
                 .Where(x => x.CanRead)
-                .Select(x => new PropertyInfoWrapper()
-                {
-                    OwnerObject = inspectObject,
-                    PropertyInfo = x
-                })
+                .Select(x => new PropertyInfoWrapper(x, inspectObject))
                 .Select(x =>
                 {
                     if (x.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() is not null)

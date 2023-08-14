@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 {
     public class PropertiesUIGenerator
     {
-        public static UIElement GenerateUI(PropertyInfoWrapper wrapper)
+        public static UIElement GenerateUI(IObjectPropertyAccessProxy wrapper)
         {
             var editable =
                 wrapper.PropertyInfo.CanWrite &&

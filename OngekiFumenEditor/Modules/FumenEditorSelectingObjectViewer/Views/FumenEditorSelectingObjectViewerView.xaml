@@ -24,7 +24,8 @@
             Background="Transparent"
             BorderBrush="Transparent"
             ItemsSource="{Binding Editor.SelectObjects}"
-            ScrollViewer.CanContentScroll="True">
+            ScrollViewer.CanContentScroll="True"
+            SelectedValue="{Binding CurrentSelect}">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem cal:Message.Attach="OnRefresh()" Header="刷新" />
@@ -32,7 +33,7 @@
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
-                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];[Event PreviewMouseDown]=[Action OnItemSingleClick($dataContext)];" />
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)]; [Event MouseDown]=[Action OnItemSingleClick($dataContext)];" />
                     <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                 </Style>
             </ListView.ItemContainerStyle>

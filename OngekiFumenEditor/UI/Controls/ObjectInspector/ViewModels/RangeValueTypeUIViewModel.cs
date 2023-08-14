@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
             }
         }
 
-        public RangeValueTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        public RangeValueTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
 
         }

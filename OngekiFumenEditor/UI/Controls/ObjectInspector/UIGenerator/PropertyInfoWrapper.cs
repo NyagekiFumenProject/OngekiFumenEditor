@@ -1,34 +1,81 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Attributes;
+using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 {
-    public class PropertyInfoWrapper : PropertyChangedBase
+    public class PropertyInfoWrapper : PropertyChangedBase, IObjectPropertyAccessProxy
     {
-        public PropertyInfo PropertyInfo { get; set; }
-        public object OwnerObject { get; set; }
+        public PropertyInfo PropertyInfo { get; private set; }
+        private object ownerObject;
+
+        public PropertyInfoWrapper(PropertyInfo propertyInfo, object owner)
+        {
+            PropertyInfo = propertyInfo;
+            ownerObject = owner;
+
+            if (ProxyValue is INotifyPropertyChanged np)
+                np.PropertyChanged += Op_PropertyChanged;
+            if (ownerObject is INotifyPropertyChanged onp)
+                onp.PropertyChanged += Onp_PropertyChanged;
+        }
 
         public virtual object ProxyValue
         {
             get
             {
-                return PropertyInfo.GetValue(OwnerObject);
+#if DEBUG
+                if (ownerObject is null)
+                    throw new ObjectDisposedException(nameof(PropertyInfoWrapper));
+#endif
+                return PropertyInfo.GetValue(ownerObject);
             }
             set
             {
+#if DEBUG
+                if (ownerObject is null)
+                    throw new ObjectDisposedException(nameof(PropertyInfoWrapper));
+#endif
                 var valType = value?.GetType() ?? default;
                 if (PropertyInfo.PropertyType == valType || valType is null || valType.IsAssignableTo(PropertyInfo.PropertyType))
                 {
-                    PropertyInfo.SetValue(OwnerObject, value);
+                    SetValueInternal(value);
                 }
                 else
                 {
                     var actualType = TypeDescriptor.GetConverter(PropertyInfo.PropertyType);
-                    PropertyInfo.SetValue(OwnerObject, actualType.ConvertFrom(value));
+                    var actualValue = actualType.ConvertFrom(value);
+                    SetValueInternal(actualValue);
                 }
 
+                NotifyOfPropertyChange(() => ProxyValue);
+            }
+        }
+
+        private void SetValueInternal(object newValue)
+        {
+            var oldValue = ProxyValue;
+            if (oldValue is INotifyPropertyChanged op)
+                op.PropertyChanged -= Op_PropertyChanged;
+
+            if (newValue is INotifyPropertyChanged np)
+                np.PropertyChanged += Op_PropertyChanged;
+
+            PropertyInfo.SetValue(ownerObject, newValue);
+        }
+
+        private void Op_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            NotifyOfPropertyChange(() => ProxyValue);
+        }
+
+        private void Onp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == PropertyInfo.Name)
+            {
                 NotifyOfPropertyChange(() => ProxyValue);
             }
         }
@@ -37,21 +84,17 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
         public string DisplayPropertyTipText => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserTipText>()?.TipText ?? string.Empty;
 
         public override string ToString() => $"DisplayName:{DisplayPropertyName} PropValue:{ProxyValue}";
-    }
 
-    public class PropertyInfoWrapper<T> : PropertyInfoWrapper
-    {
-        public new T ProxyValue
+        public void Clear()
         {
-            get
-            {
-                return (T)PropertyInfo.GetValue(OwnerObject);
-            }
-            set
-            {
-                PropertyInfo.SetValue(OwnerObject, value);
-                NotifyOfPropertyChange(() => ProxyValue);
-            }
+            if (ProxyValue is INotifyPropertyChanged np)
+                np.PropertyChanged -= Op_PropertyChanged;
+            if (ownerObject is INotifyPropertyChanged onp)
+                onp.PropertyChanged -= Onp_PropertyChanged;
+            /*
+            ownerObject = null;
+            PropertyInfo = null;
+            */
         }
     }
 }

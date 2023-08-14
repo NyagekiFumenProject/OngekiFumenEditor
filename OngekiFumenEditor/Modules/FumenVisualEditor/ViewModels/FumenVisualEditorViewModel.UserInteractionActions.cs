@@ -153,6 +153,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IsPreventMutualExclusionSelecting = true;
 
             Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
 
             IsPreventMutualExclusionSelecting = false;
         }
@@ -162,6 +163,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IsPreventMutualExclusionSelecting = true;
 
             Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = !x.IsSelected);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
 
             IsPreventMutualExclusionSelecting = false;
         }
@@ -329,6 +331,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             };
 
+            redo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+            undo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("¸´ÖÆÕ³Ìù", redo, undo));
         }
 
@@ -491,8 +496,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (selectObjects.Length == 1)
                 NotifyObjectClicked(selectObjects.FirstOrDefault());
             else
+            {
                 foreach (var o in selectObjects.OfType<ISelectableObject>())
                     o.IsSelected = true;
+                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+            }
         }
 
         public void OnFocusableChanged(ActionExecutionContext e)
@@ -535,8 +543,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Fumen.RemoveObject(obj);
 
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-            if (propertyBrowser != null && propertyBrowser.OngekiObject == obj)
-                propertyBrowser.SetCurrentOngekiObject(default, this);
+            if (IsActive)
+                propertyBrowser.RefreshSelected(this);
         }
 
         public void KeyboardAction_SelectAllObjects()
@@ -545,6 +553,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
         }
 
         public void KeyboardAction_CancelSelectingObjects()
@@ -558,7 +567,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastAddConnectableChild(ActionExecutionContext e)
         {
-            if ((!IsDesignMode) || IoC.Get<IFumenObjectPropertyBrowser>().OngekiObject is not ConnectableObjectBase connectable)
+            if (!IsDesignMode)
+                return;
+            var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+            if (!(propertyBrowser.SelectedObjects.Count == 1 && propertyBrowser.SelectedObjects.FirstOrDefault() is ConnectableObjectBase connectable))
                 return;
 
             var startObj = connectable switch
@@ -940,17 +952,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void TryCancelAllObjectSelecting(params ISelectableObject[] expects)
         {
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-            var curBrowserObj = objBrowser.OngekiObject;
             expects = expects ?? new ISelectableObject[0];
 
             if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
             {
                 foreach (var o in SelectObjects.Where(x => !expects.Contains(x)))
-                {
                     o.IsSelected = false;
-                    if (o == curBrowserObj)
-                        objBrowser.SetCurrentOngekiObject(null, this);
-                }
+                objBrowser.RefreshSelected(this);
             }
         }
 
@@ -960,7 +968,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return default;
 
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-            var curBrowserObj = objBrowser.OngekiObject;
             var count = SelectObjects.Take(2).Count();
             var first = SelectObjects.FirstOrDefault();
 
@@ -968,21 +975,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 TryCancelAllObjectSelecting(obj as ISelectableObject);
                 selectable.IsSelected = true;
-                objBrowser.SetCurrentOngekiObject(obj, this);
             }
             else
             {
                 selectable.IsSelected = !selectable.IsSelected;
-                if (selectable.IsSelected)
-                    objBrowser.SetCurrentOngekiObject(obj, this);
-                else if (obj == curBrowserObj)
-                    objBrowser.SetCurrentOngekiObject(null, this);
                 TryCancelAllObjectSelecting(obj as ISelectableObject);
 
                 if (next != null && !selectable.IsSelected)
                     return NotifyObjectClicked(next);
             }
 
+            objBrowser.RefreshSelected(this);
             return obj;
         }
 
@@ -1100,10 +1103,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (meter is null)
                     (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
 
-                var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
+                var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength) * 2;
                 //Ïû³ý¾«¶ÈÎó²î~
                 var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
-                nextY++;
 
                 var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
                 var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
@@ -1111,7 +1113,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
 
                 var result = arg.Delta > 0 ? nextFirst : downFirst;
-                ScrollTo(result.y);
+                if (result.tGrid is not null)
+                    ScrollTo(result.y);
             }
             else
             {
@@ -1143,6 +1146,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             IsLocked = true;
             SelectObjects.ToArray().ForEach(x => x.IsSelected = false);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
             ToastNotify($"±à¼­Æ÷ÒÑËø×¡");
         }
 

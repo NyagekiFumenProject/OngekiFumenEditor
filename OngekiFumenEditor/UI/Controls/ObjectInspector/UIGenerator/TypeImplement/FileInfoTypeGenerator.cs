@@ -21,6 +21,6 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplemen
             typeof(FileInfo)
         };
 
-        public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new FileInfoTypeUIViewModel(wrapper));
+        public UIElement Generate(IObjectPropertyAccessProxy wrapper) => ViewHelper.CreateViewByViewModelType(() => new FileInfoTypeUIViewModel(wrapper));
     }
 }

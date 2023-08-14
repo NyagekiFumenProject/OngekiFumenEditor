@@ -19,6 +19,6 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplemen
             typeof(TGrid)
         };
 
-        public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new TGridTypeUIViewModel(wrapper));
+        public UIElement Generate(IObjectPropertyAccessProxy wrapper) => ViewHelper.CreateViewByViewModelType(() => new TGridTypeUIViewModel(wrapper));
     }
 }

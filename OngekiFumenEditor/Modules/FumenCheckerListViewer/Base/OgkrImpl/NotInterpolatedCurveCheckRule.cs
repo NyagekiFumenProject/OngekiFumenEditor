@@ -3,7 +3,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditorPlugins.OngekiFumenSupport.Rules;
+using OngekiFumenEditor.Parser.DefaultImpl.Ogkr.Rules;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

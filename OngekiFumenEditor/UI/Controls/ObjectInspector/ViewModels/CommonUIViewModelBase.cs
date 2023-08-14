@@ -10,18 +10,14 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
     public abstract class CommonUIViewModelBase : PropertyChangedBase
     {
-        private PropertyInfoWrapper propertyInfo;
-        private readonly string propName;
+        private IObjectPropertyAccessProxy propertyInfo;
 
-        public CommonUIViewModelBase(PropertyInfoWrapper wrapper)
+        public CommonUIViewModelBase(IObjectPropertyAccessProxy wrapper)
         {
             PropertyInfo = wrapper;
-            propName = wrapper.PropertyInfo.Name;
-            if (wrapper.OwnerObject is PropertyChangedBase changable)
-                changable.PropertyChanged += Wrapper_PropertyChanged;
         }
 
-        public PropertyInfoWrapper PropertyInfo
+        public IObjectPropertyAccessProxy PropertyInfo
         {
             get
             {
@@ -33,26 +29,38 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
                 NotifyOfPropertyChange(() => PropertyInfo);
             }
         }
-
-        private void Wrapper_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName != propName)
-                return;
-
-            NotifyOfPropertyChange(() => PropertyInfo);
-        }
     }
 
     public abstract class CommonUIViewModelBase<T> : CommonUIViewModelBase where T : class
     {
         public T TypedProxyValue
         {
-            get => PropertyInfo.ProxyValue as T;
+            get => ProxyValue as T;
+            set => ProxyValue = value;
+        }
+
+        public object ProxyValue
+        {
+            get => PropertyInfo.ProxyValue;
             set => PropertyInfo.ProxyValue = value;
         }
 
-        protected CommonUIViewModelBase(PropertyInfoWrapper wrapper) : base(wrapper)
+        protected CommonUIViewModelBase(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
+            PropertyInfo.PropertyChanged += PropertyInfo_PropertyChanged;
+        }
+
+        private void PropertyInfo_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(ProxyValue):
+                    Refresh();
+                    break;
+                default:
+                    //NotifyOfPropertyChange(e.PropertyName);
+                    break;
+            }
         }
     }
 }

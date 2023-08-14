@@ -169,7 +169,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("24")]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
         public int XGridDisplayMaxUnit {
             get {
                 return ((int)(this["XGridDisplayMaxUnit"]));

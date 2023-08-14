@@ -12,6 +12,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 {
@@ -22,17 +23,23 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
         public FumenVisualEditorViewModel Editor
         {
             get => editor;
-            set => Set(ref editor, value);
-        }
-
-        private OngekiObjectBase currentPickedSelectObject;
-        public OngekiObjectBase CurrentPickedSelectObject
-        {
-            get => currentPickedSelectObject;
             set
             {
-                Set(ref currentPickedSelectObject, value);
-                IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(value, Editor);
+                Set(ref editor, value);
+            }
+        }
+
+        private OngekiObjectBase currentSelect;
+        public OngekiObjectBase CurrentSelect
+        {
+            get => currentSelect;
+            set
+            {
+                var updateClick = currentSelect != value;
+                Set(ref currentSelect, value);
+
+                if (updateClick)
+                    OnItemSingleClick(value);
             }
         }
 
@@ -40,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
         public FumenEditorSelectingObjectViewerViewModel()
         {
-            DisplayName = "当前选择物件查看器";
+            DisplayName = $"当前选择物件查看器";
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
         }
@@ -48,7 +55,6 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
         {
             Editor = @new;
-            CurrentPickedSelectObject = null;
         }
 
         public void OnRefresh()
@@ -58,15 +64,25 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
         public void OnItemSingleClick(OngekiObjectBase item)
         {
-            IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(item, Editor);
+            if (Editor is null)
+                return;
+
+            //Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
+            //Editor.SelectObjects.Where(x => x == item).FilterNull().ForEach(x => x.IsSelected = true);
+
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor, item);
         }
 
         public void OnItemDoubleClick(OngekiObjectBase item)
         {
+            if (Editor is null)
+                return;
+
             if (item is ITimelineObject timelineObject)
                 Editor.ScrollTo(timelineObject.TGrid);
 
-            Editor.SelectObjects.Where(x => x != item).ForEach(x => x.IsSelected = false);
+            Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
         }
     }
 }

@@ -132,27 +132,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void OnFumenObjectModifiedChanged(OngekiObjectBase sender, PropertyChangedEventArgs e)
         {
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-            var curBrowserObj = objBrowser.OngekiObject;
+            var selectedObjects = objBrowser.SelectedObjects;
 
             switch (e.PropertyName)
             {
                 case nameof(ISelectableObject.IsSelected):
+                    /*
                     if (sender is ISelectableObject selectable)
                     {
-                        if (!selectable.IsSelected)
+                        if (selectable.IsSelected)
                         {
+                            //点击
+                            CurrentSelectedObjects.Add(selectable);
+                        }
+                        else
+                        {
+                            //取消点击
                             if (curBrowserObj == sender)
                                 objBrowser.SetCurrentOngekiObject(null, this);
                             CurrentSelectedObjects.Remove(selectable);
                         }
-                        else
-                        {
-                            CurrentSelectedObjects.Add(selectable);
-                        }
                         NotifyOfPropertyChange(() => SelectObjects);
                     }
+                    */
+                    //IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
                     break;
                 case nameof(ConnectableChildObjectBase.IsAnyControlSelecting):
+                    /*
                     foreach (var controlPoint in ((ConnectableChildObjectBase)sender).PathControls)
                     {
                         var contains = CurrentSelectedObjects.Contains(controlPoint);
@@ -161,6 +167,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         else if ((!controlPoint.IsSelected) && contains)
                             CurrentSelectedObjects.Remove(controlPoint);
                     }
+                    */
                     break;
                 default:
                     IsDirty = true;
@@ -181,8 +188,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 TotalDurationHeight = 0;
             }
         }
-
-        public ObservableCollection<ISelectableObject> CurrentSelectedObjects { get; } = new();
 
         private bool isSelectRangeDragging;
         private bool isLeftMouseDown;

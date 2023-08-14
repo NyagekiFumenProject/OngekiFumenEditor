@@ -19,6 +19,6 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplemen
             typeof(bool),
         };
 
-        public UIElement Generate(PropertyInfoWrapper wrapper) => ViewHelper.CreateViewByViewModelType(() => new BoolValueTypeUIViewModel(wrapper));
+        public UIElement Generate(IObjectPropertyAccessProxy wrapper) => ViewHelper.CreateViewByViewModelType(() => new BoolValueTypeUIViewModel(wrapper));
     }
 }

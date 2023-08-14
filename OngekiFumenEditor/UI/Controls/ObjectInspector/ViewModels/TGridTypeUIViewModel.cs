@@ -14,62 +14,84 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
     public class TGridTypeUIViewModel : CommonUIViewModelBase<TGrid>
     {
-        public int Grid
+        private object cacheGrid = DependencyProperty.UnsetValue;
+        public object Grid
         {
-            get => TypedProxyValue.Grid;
+            get
+            {
+                var val = ProxyValue;
+                if (val is TGrid tGrid)
+                    return tGrid.Grid;
+                return cacheGrid;
+            }
             set
             {
-                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-                    undoable.ExecuteSubPropertySetAction(nameof(TGrid.Grid), (val) => TypedProxyValue.Grid = val, Grid, value);
-                else
-                    TypedProxyValue.Grid = value;
-
-                NotifyOfPropertyChange(() => Grid);
+                if (int.TryParse(value?.ToString(), out var v))
+                {
+                    cacheGrid = v;
+                    TryApplyValue(v, Unit, ResT);
+                    NotifyOfPropertyChange(() => Grid);
+                }
             }
         }
 
-        public float Unit
+        private object cacheUnit = DependencyProperty.UnsetValue;
+        public object Unit
         {
-            get => TypedProxyValue.Unit;
+            get
+            {
+                var val = ProxyValue;
+                if (val is TGrid tGrid)
+                    return tGrid.Unit;
+                return cacheUnit;
+            }
             set
             {
-                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-                    undoable.ExecuteSubPropertySetAction(nameof(TGrid.Unit), (val) => TypedProxyValue.Unit = val, Unit, value);
-                else
-                    TypedProxyValue.Unit = value;
-
-                NotifyOfPropertyChange(() => Unit);
+                if (float.TryParse(value?.ToString(), out var v))
+                {
+                    cacheUnit = v;
+                    TryApplyValue(Grid, v, ResT);
+                    NotifyOfPropertyChange(() => Unit);
+                }
             }
         }
 
-        public uint ResT
+        private object cacheResT = TGrid.DEFAULT_RES_T;
+        public object ResT
         {
-            get => TypedProxyValue.ResT;
+            get
+            {
+                var val = ProxyValue;
+                if (val is TGrid tGrid)
+                    return tGrid.ResT;
+                return cacheResT;
+            }
             set
             {
-                if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-                    undoable.ExecuteSubPropertySetAction(nameof(TGrid.ResT), (val) => TypedProxyValue.ResT = val, ResT, value);
-                else
-                    TypedProxyValue.ResT = value;
-
-                NotifyOfPropertyChange(() => ResT);
+                if (uint.TryParse(value?.ToString(), out var v))
+                {
+                    cacheUnit = v;
+                    TryApplyValue(Grid, Unit, v);
+                    NotifyOfPropertyChange(() => ResT);
+                }
             }
         }
 
-        public TGridTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        private void TryApplyValue(object Grid, object Unit, object ResT)
         {
-            if (PropertyInfo.OwnerObject is INotifyPropertyChanged notifyProperty)
+            if (Grid is int grid && Unit is float unit && ResT is uint resT)
             {
-                notifyProperty.PropertyChanged += NotifyProperty_PropertyChanged;
+                var oldVal = TypedProxyValue;
+                var newVal = new TGrid(unit, grid, resT);
+                var refTarget = this;
+
+                TypedProxyValue = newVal;
             }
         }
 
-        private void NotifyProperty_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        public TGridTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
-            if (e.PropertyName == nameof(TGrid))
-            {
-                Refresh();
-            }
+
         }
     }
 }

@@ -161,12 +161,20 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
 
         public void OnItemSingleClick(DisplayTimeSignatureItem item)
         {
-            IoC.Get<IFumenObjectPropertyBrowser>().SetCurrentOngekiObject(item.StartTGrid == item.BPMChange.TGrid ? item.BPMChange : item.Meter, Editor);
+            OngekiObjectBase obj = item.StartTGrid == item.BPMChange.TGrid ? item.BPMChange : item.Meter;
+
+            /*
+            Editor.SelectObjects.Where(x => x != obj).ForEach(x => x.IsSelected = false);
+            if (obj is ISelectableObject selectable)
+                selectable.IsSelected = true;
+            */
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor, obj);
         }
 
         public void OnItemDoubleClick(DisplayTimeSignatureItem item)
         {
             Editor.ScrollTo(item.StartTGrid);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
         }
     }
 }

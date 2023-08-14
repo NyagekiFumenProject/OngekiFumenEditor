@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
             set => PropertyInfo.ProxyValue = value;
         }
 
-        public CurveInterpolaterFactoryTypeUIViewModel(PropertyInfoWrapper wrapper) : base(wrapper)
+        public CurveInterpolaterFactoryTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
 
         }

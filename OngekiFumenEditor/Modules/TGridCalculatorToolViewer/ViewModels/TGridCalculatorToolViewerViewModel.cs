@@ -125,8 +125,12 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
         {
             switch (e.PropertyName)
             {
-                case nameof(IFumenObjectPropertyBrowser.OngekiObject):
-                    TimelineObject = ((IFumenObjectPropertyBrowser)sender).OngekiObject as ITimelineObject;
+                case nameof(IFumenObjectPropertyBrowser.SelectedObjects):
+                    var objs = ((IFumenObjectPropertyBrowser)sender).SelectedObjects;
+                    if (objs.Count == 1)
+                        TimelineObject = objs.OfType<ITimelineObject>().First();
+                    else
+                        TimelineObject = null;
                     break;
                 default:
                     break;
