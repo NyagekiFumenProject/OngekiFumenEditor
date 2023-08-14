@@ -34,25 +34,17 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    - name: display current work dir
-      run: pwd
-    - name: show version.json
-      run: cat .\OngekiFumenEditor\version.json
-    - name: show version.json2
-      run: cat D:\a\OngekiFumenEditor\OngekiFumenEditor\OngekiFumenEditor\version.json
     - name: get-version-action
       id: project-version
       uses: euberdeveloper/ga-project-version@main
       with:
         path: .\OngekiFumenEditor\version.json
-    - name: logging
-      run: echo "Version=${{ steps.project-version.outputs.version }}"
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o ./bin/githubActions/
     - uses: actions/upload-artifact@v3
       with:
-        name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Configuration}}_${{env.Branch}}
+        name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Configuration}}_${{env.Branch}}_GABuild
         path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
