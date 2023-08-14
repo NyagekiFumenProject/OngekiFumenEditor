@@ -24,7 +24,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             var refRecordId = int.Parse(commData[0]);
             var refLane = fumen.Lanes.FirstOrDefault(x => x.RecordId == refRecordId);
 
-            var hold = (refLane?.IsWallLane ?? false) ? new WallHold() : new Hold();
+            var isWall = (refLane?.IsWallLane ?? false) || (bool.TryParse(commData.ElementAtOrDefault(2), out var w) ? w : false);
+
+            var hold = isWall ? new WallHold() : new Hold();
             hold.ReferenceLaneStart = refLane;
             hold.IsCritical = bool.Parse(commData[1]);
 
@@ -36,7 +38,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 
             if (notes.Length > 1)
             {
-                var end = (refLane?.IsWallLane ?? false) ? new WallHoldEnd() : new HoldEnd();
+                var end = isWall ? new WallHoldEnd() : new HoldEnd();
                 end.TGrid = notes[1]["T"].ParseToTGrid();
                 end.XGrid = notes[1]["X"].ParseToXGrid();
 

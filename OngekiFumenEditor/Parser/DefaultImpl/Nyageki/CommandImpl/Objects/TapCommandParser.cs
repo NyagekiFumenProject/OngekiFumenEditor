@@ -29,7 +29,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             //}
 
             using var d = data[1].GetValuesMapWithDisposable(out var map);
-            var tap = (refLane?.IsWallLane ?? false) ? new WallTap() : new Tap();
+            var isWall = (refLane?.IsWallLane ?? false) || (map.TryGetValue("W", out var w) ? bool.Parse(w) : false);
+            var tap = isWall ? new WallTap() : new Tap();
             tap.ReferenceLaneStart = refLane;
             tap.TGrid = map["T"].ParseToTGrid();
             tap.XGrid = map["X"].ParseToXGrid();
