@@ -534,8 +534,20 @@
     </Page>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="echo &quot;OutDir= $(OutDir)&quot; &amp; xcopy &quot;$(ProjectDir)Resources\Binaries\ProgramRoot\*.*&quot; &quot;$(OutDir)&quot; /s /y" />
-  </Target>
+  <ItemGroup>
+    <ProgramRootFiles Include="Resources/Binaries/ProgramRoot/**/*.*" />
+  </ItemGroup>
 
+  <Target Name="CopyProgramRootFiles" AfterTargets="AfterBuild">
+    <Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="CopyProgramRootFiles" AfterTargets="Publish">
+    <Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+  
+  <!--
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="echo &quot;$(OutDir)&quot; &amp; xcopy &quot;$(ProjectDir)Resources\Binaries\ProgramRoot\*.*&quot; &quot;$(OutDir)&quot; /s /y" />
+  </Target>
+  -->
 </Project>

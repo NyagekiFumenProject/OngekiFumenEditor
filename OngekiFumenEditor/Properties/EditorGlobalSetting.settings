@@ -39,7 +39,7 @@
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="XGridDisplayMaxUnit" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">24</Value>
+      <Value Profile="(Default)">40</Value>
     </Setting>
     <Setting Name="ForceXGridMagneticDock" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
