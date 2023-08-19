@@ -18,6 +18,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

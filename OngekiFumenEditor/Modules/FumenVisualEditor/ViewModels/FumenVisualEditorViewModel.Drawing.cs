@@ -25,6 +25,8 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using System.Windows.Media;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using System.Diagnostics;
+using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -39,6 +41,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private DrawSelectingRangeHelper selectingRangeHelper;
         private DrawPlayableAreaHelper playableAreaHelper;
         private Func<double, FumenVisualEditorViewModel, double> convertToY = TGridCalculator.ConvertTGridUnitToY_DesignMode;
+
+        private Stopwatch inactiveFreshWatch = new Stopwatch();
+        private bool prevIsActive = false;
 
         private StringBuilder stringBuilder = new StringBuilder();
 
@@ -256,6 +261,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Render(TimeSpan ts)
         {
+            //slow down to 2fps if editor is inactived.
+            var skipRender = false;
+            if (!IsActive)
+            {
+                skipRender = true;
+
+                if (!prevIsActive)
+                    inactiveFreshWatch.Restart();
+
+                if (inactiveFreshWatch.ElapsedMilliseconds > 500.0f)
+                {
+                    skipRender = false;
+                    inactiveFreshWatch.Restart();
+                }
+            }
+            prevIsActive = IsActive;
+            if (skipRender)
+                return;
+
             PerfomenceMonitor.PostUIRenderTime(ts);
             PerfomenceMonitor.OnBeforeRender();
 

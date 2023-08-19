@@ -70,5 +70,17 @@ namespace OngekiFumenEditor.Properties {
                 this["UpgradeProcessPriority"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsFirstUse {
+            get {
+                return ((bool)(this["IsFirstUse"]));
+            }
+            set {
+                this["IsFirstUse"] = value;
+            }
+        }
     }
 }

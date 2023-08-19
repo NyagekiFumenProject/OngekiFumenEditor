@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             {
                 MajorVersion = 4,
                 MinorVersion = 5,
-                GraphicsProfile = OpenTK.Windowing.Common.ContextProfile.Core
+                GraphicsProfile = OpenTK.Windowing.Common.ContextProfile.Core,
             });
         }
 
