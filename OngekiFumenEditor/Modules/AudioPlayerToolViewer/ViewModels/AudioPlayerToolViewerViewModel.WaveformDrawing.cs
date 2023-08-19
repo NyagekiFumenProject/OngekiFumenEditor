@@ -220,12 +220,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(TimeSpan ts)
         {
-            if (Editor is null || !IsShowWaveform)
-                return;
-
-            PerfomenceMonitor.PostUIRenderTime(ts);
-            PerfomenceMonitor.OnBeforeRender();
-
 #if DEBUG
             var error = GL.GetError();
             if (error != ErrorCode.NoError)
@@ -234,6 +228,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             GL.ClearColor(16 / 255f, 16 / 255f, 16 / 255f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            if (Editor is null || !IsShowWaveform)
+                return;
+
+            PerfomenceMonitor.PostUIRenderTime(ts);
+            PerfomenceMonitor.OnBeforeRender();
+
             GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
 
             UpdateDrawingContext();

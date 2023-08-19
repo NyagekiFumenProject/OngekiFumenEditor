@@ -64,23 +64,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 Set(ref editor, value);
                 FumenSoundPlayer?.Clean();
                 scrollAnimationClearFunc?.Invoke();
-                LoadAudio();
                 NotifyOfPropertyChange(() => IsAudioButtonEnabled);
-            }
-        }
-
-        private IAudioPlayer audioPlayer = default;
-        public IAudioPlayer AudioPlayer
-        {
-            get => audioPlayer;
-            set
-            {
-                this.RegisterOrUnregisterPropertyChangeEvent(audioPlayer, value, OnAudioPlayerPropChanged);
-                Set(ref audioPlayer, value);
-                NotifyOfPropertyChange(() => IsAudioButtonEnabled);
+                NotifyOfPropertyChange(() => AudioPlayer);
                 PrepareWaveform(AudioPlayer);
             }
         }
+
+        public IAudioPlayer AudioPlayer => Editor?.AudioPlayer;
 
         const int SoundControlLength = 16;
 
@@ -100,7 +90,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
                 //init SoundVolumes
                 var sounds = Enum.GetValues<SoundControl>();
-                SoundVolumes = sounds.Select(x => new SoundVolumeProxy(value, x)).Where(x=>x.IsValid).ToArray();
+                SoundVolumes = sounds.Select(x => new SoundVolumeProxy(value, x)).Where(x => x.IsValid).ToArray();
                 NotifyOfPropertyChange(() => SoundVolumes);
             }
         }
@@ -145,21 +135,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(FumenVisualEditorViewModel.EditorProjectData))
-                return;
-            Editor = Editor;
-        }
-
-        private async void LoadAudio()
-        {
-            if (string.IsNullOrWhiteSpace(Editor?.EditorProjectData?.AudioFilePath))
+            switch (e.PropertyName)
             {
-                AudioPlayer?.Dispose();
-                AudioPlayer = null;
-                return;
+                case nameof(FumenVisualEditorViewModel.EditorProjectData):
+                    Editor = Editor;
+                    break;
+                case nameof(FumenVisualEditorViewModel.AudioPlayer):
+                    PrepareWaveform(AudioPlayer);
+                    break;
+                default:
+                    break;
             }
-            var audioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(Editor.EditorProjectData.AudioFilePath);
-            AudioPlayer = audioPlayer;
         }
 
         private async void InitPreviewActions()

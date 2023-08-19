@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
@@ -48,9 +49,44 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             set
             {
+                var prevFumen = editorProjectData?.Fumen;
                 Set(ref editorProjectData, value);
                 RecalculateTotalDurationHeight();
-                Fumen = EditorProjectData.Fumen;
+
+                void setupFumen(OngekiFumen cur, OngekiFumen prev)
+                {
+                    if (prev is not null)
+                    {
+                        prev.BpmList.OnChangedEvent -= OnTimeSignatureListChanged;
+                        prev.MeterChanges.OnChangedEvent -= OnTimeSignatureListChanged;
+                        prev.ObjectModifiedChanged -= OnFumenObjectModifiedChanged;
+                    }
+                    if (cur is not null)
+                    {
+                        cur.BpmList.OnChangedEvent += OnTimeSignatureListChanged;
+                        cur.MeterChanges.OnChangedEvent += OnTimeSignatureListChanged;
+                        cur.ObjectModifiedChanged += OnFumenObjectModifiedChanged;
+                    }
+                    NotifyOfPropertyChange(() => Fumen);
+                }
+
+                setupFumen(editorProjectData?.Fumen, prevFumen);
+            }
+        }
+
+        private IAudioPlayer audioPlayer;
+        public IAudioPlayer AudioPlayer
+        {
+            get
+            {
+                return audioPlayer;
+            }
+            set
+            {
+                if (audioPlayer != value)
+                    audioPlayer?.Dispose();
+
+                Set(ref audioPlayer, value);
             }
         }
 
@@ -105,30 +141,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public OngekiFumen Fumen
-        {
-            get
-            {
-                return EditorProjectData.Fumen;
-            }
-            set
-            {
-                if (EditorProjectData.Fumen is not null)
-                {
-                    EditorProjectData.Fumen.BpmList.OnChangedEvent -= OnTimeSignatureListChanged;
-                    EditorProjectData.Fumen.MeterChanges.OnChangedEvent -= OnTimeSignatureListChanged;
-                    EditorProjectData.Fumen.ObjectModifiedChanged -= OnFumenObjectModifiedChanged;
-                }
-                if (value is not null)
-                {
-                    value.BpmList.OnChangedEvent += OnTimeSignatureListChanged;
-                    value.MeterChanges.OnChangedEvent += OnTimeSignatureListChanged;
-                    value.ObjectModifiedChanged += OnFumenObjectModifiedChanged;
-                }
-                EditorProjectData.Fumen = value;
-                NotifyOfPropertyChange(() => Fumen);
-            }
-        }
+        public OngekiFumen Fumen => EditorProjectData.Fumen;
 
         private void OnFumenObjectModifiedChanged(OngekiObjectBase sender, PropertyChangedEventArgs e)
         {
@@ -237,6 +250,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     projectData.Fumen = fumen;
                 }
                 EditorProjectData = dialogViewModel.EditorProjectData;
+                AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(editorProjectData.AudioFilePath);
                 Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
                 await Dispatcher.Yield();
             }
@@ -268,13 +282,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public Task Load(EditorProjectDataModel projModel)
+        public async Task Load(EditorProjectDataModel projModel)
         {
-            EditorProjectData = projModel;
-            var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
-            ScrollTo(dispTGrid);
+            try
+            {
+                EditorProjectData = projModel;
+                AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(editorProjectData.AudioFilePath);
 
-            return Task.CompletedTask;
+                var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
+                ScrollTo(dispTGrid);
+            }
+            catch (Exception e)
+            {
+                var errMsg = $"无法加载项目:{e.Message}";
+                Log.LogError(errMsg);
+                MessageBox.Show(errMsg);
+                await TryCloseAsync(false);
+            }
         }
 
         protected override async Task DoSave(string filePath)
@@ -329,6 +353,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             await base.OnDeactivateAsync(close, cancellationToken);
             await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
             EditorManager.NotifyDeactivate(this);
+            AudioPlayer?.Pause();
         }
 
         protected override async Task OnInitializeAsync(CancellationToken cancellationToken)
@@ -340,6 +365,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public override async Task TryCloseAsync(bool? dialogResult = null)
         {
             await base.TryCloseAsync(dialogResult);
+
+            AudioPlayer?.Pause();
+            AudioPlayer?.Dispose();
+            AudioPlayer = null;
+
             if (dialogResult != false)
                 EditorManager.NotifyDestory(this);
         }

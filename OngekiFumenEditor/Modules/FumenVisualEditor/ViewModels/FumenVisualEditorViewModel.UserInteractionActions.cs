@@ -1165,7 +1165,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void ToastNotify(string message)
         {
-            Toast.ShowMessage(message);
+            Toast?.ShowMessage(message);
             Log.LogInfo(message);
         }
 
