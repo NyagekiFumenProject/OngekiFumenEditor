@@ -217,7 +217,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
              这里考虑到有spd<1的子弹/Bell会提前出现的情况，因此得分状态分别去选择
              */
             obj.Clear();
-            if (Editor.EditorObjectVisibility != Visibility.Visible)
+            if (Editor.IsPreviewMode)
             {
                 //todo 还能再次优化
                 bool check(IBulletPalleteReferencable bell)

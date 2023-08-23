@@ -9,6 +9,7 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Windows.Controls;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls
@@ -37,6 +38,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         private static readonly System.Numerics.Vector4 IndirectorColor = new(1, 1, 0, 1);
         private static readonly System.Numerics.Vector4 BeatColor = new(1, 0, 0, 1);
         private static readonly System.Numerics.Vector4 ObjectPlaceColor = new(1, 1, 0, 1);
+        private static readonly System.Numerics.Vector4 HoldColor = new(1, 1f, 0f, 0.75f);
         private static readonly System.Numerics.Vector4 WaveformFillColor = new(100 / 255.0f, 149 / 255.0f, 237 / 255.0f, 1);
 
         private static readonly List<(float, string)> cachedPostDrawList = new();
@@ -133,28 +135,44 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     applyObjCounting(fumen.Bells.BinaryFindRange(beginTGrid, endTGrid), ObjType.Bell);
                     applyObjCounting(fumen.Beams.GetVisibleStartObjects(beginTGrid, endTGrid), ObjType.Default);
                     applyObjCounting(fumen.Flicks.BinaryFindRange(beginTGrid, endTGrid), ObjType.Flick);
+
+                    float calcX(TGrid tGrid)
+                    {
+                        var bx = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, dummySoflanList, bpmList, 1, editor.Setting.TGridUnitLength);
+                        var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
+
+                        return x;
+                    }
+
+                    var beatHeightWeight = 0.75f;
+                    lineDrawing.Begin(target, 4);
                     foreach (var hold in fumen.Holds.GetVisibleStartObjects(beginTGrid, endTGrid))
                     {
                         var t = cachedObjTimeMap.TryGetValue(hold.TGrid, out var _t) ? _t : 0;
                         cachedObjTimeMap[hold.TGrid] = t | ObjType.Default;
                         if (hold?.HoldEnd?.TGrid is TGrid et)
                         {
-                            t = cachedObjTimeMap.TryGetValue(et, out _t) ? _t : 0;
-                            cachedObjTimeMap[et] = t | ObjType.Default;//todo add HoldEnd
+                            var fromX = calcX(hold.TGrid);
+                            var toX = calcX(et);
+                            var y = 0;
+
+                            lineDrawing.PostPoint(new(fromX, y), TransparentColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(fromX, y), HoldColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(toX, y), HoldColor, VertexDash.Solider);
+                            lineDrawing.PostPoint(new(toX, y), TransparentColor, VertexDash.Solider);
                         }
                     }
+                    lineDrawing.End();
 
                     lineDrawing.Begin(target, 2);
                     {
-                        var beatHeightWeight = 0.75f;
                         var topY = height / 2 * beatHeightWeight;
                         var buttomY = -topY;
 
                         foreach (var pair in cachedObjTimeMap)
                         {
                             var tGrid = pair.Key;
-                            var bx = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, dummySoflanList, bpmList, 1, editor.Setting.TGridUnitLength);
-                            var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
+                            var x = calcX(tGrid);
 
                             var type = pair.Value;
 
