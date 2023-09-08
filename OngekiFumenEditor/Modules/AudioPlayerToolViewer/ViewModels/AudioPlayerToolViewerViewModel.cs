@@ -142,6 +142,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                     break;
                 case nameof(FumenVisualEditorViewModel.AudioPlayer):
                     PrepareWaveform(AudioPlayer);
+                    NotifyOfPropertyChange(() => IsAudioButtonEnabled);
                     break;
                 default:
                     break;
