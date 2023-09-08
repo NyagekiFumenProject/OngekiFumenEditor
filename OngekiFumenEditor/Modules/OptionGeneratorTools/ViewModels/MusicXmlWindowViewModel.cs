@@ -24,6 +24,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
     {
         public Difficult[] Difficults => Enum.GetValues<Difficult>().OrderBy(x => x).ToArray();
         public VersionID[] VersionIDs => enumManager.Versions.Values.OrderBy(x => x.Id).ToArray();
+        public Genre[] Genres => enumManager.Genres.Values.OrderBy(x => x.Id).ToArray();
 
         private EnumFetchManager enumManager = new EnumFetchManager();
         public EnumFetchManager EnumManager => enumManager;

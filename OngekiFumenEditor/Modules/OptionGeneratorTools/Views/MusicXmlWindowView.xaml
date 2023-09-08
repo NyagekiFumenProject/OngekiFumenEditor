@@ -154,6 +154,23 @@
                         VerticalAlignment="Center"
                         Text="{Binding MusicXmlOption.SortOrder}">
                     </TextBox>
+                    <!--    -->
+                    <TextBlock
+                        Grid.Row="6"
+                        Margin="0,5,10,5"
+                        HorizontalAlignment="Right">
+                        音乐分类:
+                    </TextBlock>
+                    <ComboBox
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Width="150"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        DisplayMemberPath="DisplayName"
+                        ItemsSource="{Binding Genres}"
+                        SelectedValue="{Binding MusicXmlOption.Genre}">
+                    </ComboBox>
                 </Grid>
                 <GroupBox Header="Boss">
                     <Grid>
