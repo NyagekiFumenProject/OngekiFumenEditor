@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                 WallHold => new WallHoldObjectInteractiveAction(),
                 Hold => new HoldObjectInteractiveAction(),
                 ILaneDockable => new DockableObjectInteractiveAction(),
-                ConnectableChildObjectBase => new ConnectableObjectInteractiveAction(),
+                ConnectableObjectBase => new ConnectableObjectInteractiveAction(),
                 IHorizonPositionObject => new HorizonObjectInteractiveAction(),
                 _ => defaultAction,
             };
