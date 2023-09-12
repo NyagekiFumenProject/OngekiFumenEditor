@@ -24,11 +24,11 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
     {
         public class DisplayTimeSignatureItem : PropertyChangedBase
         {
-            private float startY;
-            public float StartY
+            private TimeSpan startAudioTime;
+            public TimeSpan StartAudioTime
             {
-                get => startY;
-                set => Set(ref startY, value);
+                get => startAudioTime;
+                set => Set(ref startAudioTime, value);
             }
 
             private TGrid startTGrid;
@@ -145,6 +145,7 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
                     removeList.RemoveAt(0);
                 }
 
+                cacheObj.StartAudioTime = ts.audioTime;
                 cacheObj.BPMChange = ts.bpm;
                 cacheObj.Meter = ts.meter;
                 cacheObj.StartTGrid = ts.startTGrid;

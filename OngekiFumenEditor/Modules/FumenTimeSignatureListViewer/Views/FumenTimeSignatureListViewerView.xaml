@@ -48,7 +48,7 @@
                     </GridView.ColumnHeaderContainerStyle>
                     <GridViewColumn
                         Width="100"
-                        DisplayMemberBinding="{Binding StartY, Converter={StaticResource IntToTimeDisplayConverter}}"
+                        DisplayMemberBinding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
                         Header="音频时间" />
 
                     <GridViewColumn
