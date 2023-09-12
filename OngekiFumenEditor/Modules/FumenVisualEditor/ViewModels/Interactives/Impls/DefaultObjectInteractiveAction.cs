@@ -1,6 +1,7 @@
 ﻿using Gemini.Modules.UndoRedo.Services;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Utils;
@@ -16,23 +17,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 {
     public class DefaultObjectInteractiveAction : ObjectInteractiveActionBase
     {
-        private Dictionary<OngekiObjectBase, Point> dragStartCanvasPointMap = new();
-        private Dictionary<OngekiObjectBase, Point> dragStartPointMap = new();
-        private Dictionary<OngekiObjectBase, XGrid> dragStartXGridMap = new();
-        private Dictionary<OngekiObjectBase, TGrid> dragStartTGridMap = new();
+        private Dictionary<OngekiObjectBase, DragInfo> dragInfoMap = new();
+
+        private struct DragInfo
+        {
+            public Point CanvasPoint { get; set; }
+            public Point Point { get; set; }
+
+            public XGrid XGrid { get; set; }
+            public TGrid TGrid { get; set; }
+
+            public LaneStartBase RefLane { get; set; }
+        }
 
         public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
         {
-            var dragStartCanvasPoint = dragStartCanvasPointMap[obj];
+            if (dragInfoMap.TryGetValue(obj, out var info))
+                dragInfoMap.Remove(obj);
+            else
+                return;//不应该走到这
+
+            var dragStartCanvasPoint = info.CanvasPoint;
             var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor) : 0;
             var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, editor) : 0;
 
             OnDragMove(obj, point, editor);
             var newPos = new Point(x, y);
-            if (dragStartXGridMap.TryGetValue(obj, out var oldXGrid))
-                dragStartXGridMap.Remove(obj);
-            if (dragStartTGridMap.TryGetValue(obj, out var oldTGrid))
-                dragStartTGridMap.Remove(obj);
+
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("物件拖动",
                 () =>
                 {
@@ -41,21 +52,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 {
                     //不直接move了，直接设置位置就行
                     if (obj is IHorizonPositionObject horizonPositionObject)
-                        horizonPositionObject.XGrid = oldXGrid;
+                        horizonPositionObject.XGrid = info.XGrid;
                     if (obj is ITimelineObject timelineObject)
-                        timelineObject.TGrid = oldTGrid;
+                        timelineObject.TGrid = info.TGrid;
+                    if (obj is ILaneDockable dockable)
+                        dockable.ReferenceLaneStart = info.RefLane;
                 }));
 
             //Log.LogDebug($"OnObjectDragEnd: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
-
-            dragStartCanvasPointMap.Remove(obj);
-            dragStartPointMap.Remove(obj);
         }
 
         public override void OnDragMove(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
         {
-            var dragStartCanvasPoint = dragStartCanvasPointMap[obj];
-            var dragStartPoint = dragStartPointMap[obj];
+            if (!dragInfoMap.TryGetValue(obj, out var info))
+                return;//不应该走到这
+
+            var dragStartCanvasPoint = info.CanvasPoint;
+            var dragStartPoint = info.Point;
 
             var movePoint = new Point(
                 dragStartCanvasPoint.X + (pos.X - dragStartPoint.X),
@@ -73,13 +86,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         public override void OnDragStart(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
         {
+            var info = new DragInfo();
+
             var x = 0d;
             if (obj is IHorizonPositionObject horizonPositionObject)
             {
                 x = XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor);
                 if (double.IsNaN(x))
                     x = default;
-                dragStartXGridMap[obj] = horizonPositionObject.XGrid.CopyNew();
+                info.XGrid = horizonPositionObject.XGrid.CopyNew();
             }
 
             var y = 0d;
@@ -88,11 +103,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 y = TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, editor);
                 if (double.IsNaN(y))
                     y = default;
-                dragStartTGridMap[obj] = timelineObject.TGrid.CopyNew();
+                info.TGrid = timelineObject.TGrid.CopyNew();
             }
 
-            dragStartCanvasPointMap[obj] = new Point(x, y);
-            dragStartPointMap[obj] = pos;
+            if (obj is ILaneDockable dockable)
+            {
+                info.RefLane = dockable.ReferenceLaneStart;
+            }
+
+            info.CanvasPoint = new Point(x, y);
+            info.Point = pos;
+
+            dragInfoMap[obj] = info;
 
             //Log.LogDebug($"OnObjectDragStart: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
         }
