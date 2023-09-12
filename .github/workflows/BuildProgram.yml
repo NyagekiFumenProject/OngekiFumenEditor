@@ -29,8 +29,12 @@ jobs:
       uses: josStorer/get-current-time@v2
       id: current-time
       with:
-        format: YYYYMMDD-HHMMSS
+        format: YYYYMMDDHHMMSS
         utcOffset: "+08:00"
+    - uses: benjlevesque/short-sha@v2.2
+      id: short-sha
+      with:
+        length: 6
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -51,6 +55,6 @@ jobs:
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o ./bin/githubActions/
     - uses: actions/upload-artifact@v3
       with:
-        name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Configuration}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }})
+        name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
         path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
