@@ -25,6 +25,12 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+    - name: Get current time
+      uses: josStorer/get-current-time@v2
+      id: current-time
+      with:
+        format: YYYYMMDD-HHMMSS
+        utcOffset: "+08:00"
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -45,6 +51,6 @@ jobs:
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o ./bin/githubActions/
     - uses: actions/upload-artifact@v3
       with:
-        name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Configuration}}_${{env.Branch}}_GABuild
+        name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Configuration}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }})
         path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
