@@ -26,7 +26,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             var forceMagnetic = editor.Setting.ForceMagneticDock;
             var enableMoveTo = !forceMagneticToLane;
 
-            if (CheckAndAdjustY(relativePoint.Y, editor) is double y && TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is TGrid tGrid)
+            var dockable = (ILaneDockable)obj;
+
+            if (CheckAndAdjustY(dockable, relativePoint.Y, editor) is double y && TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is TGrid tGrid)
             {
                 var closestLaneObject = PickDockableObjects(editor)
                     .Select(x => x switch
@@ -45,13 +47,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
                 var magneticDockDistance = forceMagneticToLane || forceMagnetic ? int.MaxValue : 8;
 
-                if (closestLaneObject.startObject is not null && closestLaneObject.Item1 < magneticDockDistance)
+                if (closestLaneObject.startObject is not null)
                 {
-                    relativePoint.X = closestLaneObject.Value;
-                    ((ILaneDockable)obj).ReferenceLaneStart = closestLaneObject.startObject;
-                    //Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
-
-                    enableMoveTo = true;
+                    //如果已经附着到轨道的话，那就考虑如果拖动到另一条线上过近，或者最近的线依旧是自己附属的，
+                    //那么就强制更新物件的水平位置成对应轨道的
+                    if (closestLaneObject.Item1 < magneticDockDistance || //可能拖动到另一条线上
+                        closestLaneObject.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
+                    {
+                        relativePoint.X = closestLaneObject.Value;
+                        dockable.ReferenceLaneStart = closestLaneObject.startObject;
+                        //Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
+                        enableMoveTo = true;
+                    }
                 }
             }
 
@@ -60,13 +67,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 base.OnMoveCanvas(obj, relativePoint, editor);
         }
 
-        public override double? CheckAndAdjustX(double x, FumenVisualEditorViewModel editor)
+        public override double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
         {
-            /*
-            if (((ILaneDockable)obj).ReferenceLaneStart is ConnectableStartObject start)
+            if (((ILaneDockable)obj).ReferenceLaneStart is ConnectableStartObject)
                 return x;
-            */
-            return base.CheckAndAdjustX(x, editor);
+            return base.CheckAndAdjustX(obj, x, editor);
         }
 
         protected virtual double? CalculateConnectableObjectCurrentRelativeX(ConnectableStartObject startObject, TGrid tGrid, FumenVisualEditorViewModel editor)

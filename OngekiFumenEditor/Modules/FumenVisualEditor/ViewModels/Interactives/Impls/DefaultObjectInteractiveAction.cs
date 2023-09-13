@@ -123,7 +123,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         {
             if (obj is ITimelineObject timeObj)
             {
-                var ry = CheckAndAdjustY(point.Y, editor);
+                var ry = CheckAndAdjustY(timeObj, point.Y, editor);
                 if (ry is double dry && TGridCalculator.ConvertYToTGrid_DesignMode(dry, editor) is TGrid tGrid)
                 {
                     timeObj.TGrid = tGrid;
@@ -133,7 +133,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
             if (obj is IHorizonPositionObject posObj)
             {
-                var rx = CheckAndAdjustX(point.X, editor);
+                var rx = CheckAndAdjustX(posObj, point.X, editor);
                 if (rx is double drx)
                 {
                     var xGrid = XGridCalculator.ConvertXToXGrid(drx, editor);
@@ -144,7 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             }
         }
 
-        public virtual double? CheckAndAdjustY(double y, FumenVisualEditorViewModel editor)
+        public virtual double? CheckAndAdjustY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
         {
             var enableMagneticAdjust = !editor.Setting.DisableTGridMagneticDock;
             if (!enableMagneticAdjust)
@@ -159,7 +159,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             return ry;
         }
 
-        public virtual double? CheckAndAdjustX(double x, FumenVisualEditorViewModel editor)
+        public virtual double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
         {
             //todo 基于二分法查询最近
             var enableMagneticAdjust = !editor.Setting.DisableXGridMagneticDock;
