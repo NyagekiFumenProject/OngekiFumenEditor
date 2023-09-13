@@ -74,6 +74,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             return base.CheckAndAdjustX(obj, x, editor);
         }
 
+        public override double? CheckAndAdjustY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
+        {
+            var dockable = (ILaneDockable)obj;
+            if (dockable.ReferenceLaneStart is not null)
+            {
+                if (TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is not TGrid tGrid)
+                    return default;
+                if (tGrid < dockable.ReferenceLaneStart.MinTGrid)
+                    return TGridCalculator.ConvertTGridToY_DesignMode(dockable.ReferenceLaneStart.MinTGrid, editor);
+                if (tGrid > dockable.ReferenceLaneStart.MaxTGrid)
+                    return TGridCalculator.ConvertTGridToY_DesignMode(dockable.ReferenceLaneStart.MaxTGrid, editor);
+            }
+
+            return base.CheckAndAdjustY(obj, y, editor);
+        }
+
         protected virtual double? CalculateConnectableObjectCurrentRelativeX(ConnectableStartObject startObject, TGrid tGrid, FumenVisualEditorViewModel editor)
         {
             if (tGrid < startObject.TGrid)
