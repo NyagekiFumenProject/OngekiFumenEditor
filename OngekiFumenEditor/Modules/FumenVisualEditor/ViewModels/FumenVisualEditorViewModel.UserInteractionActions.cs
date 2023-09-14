@@ -6,6 +6,7 @@ using Gemini.Modules.Toolbox.Models;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
@@ -184,7 +185,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var obj in SelectObjects.Where(x => x switch
             {
                 //不允许被复制
-                ConnectableObjectBase => false,
+                ConnectableObjectBase and not (Hold) => false,
                 LaneCurvePathControlObject => false,
                 //允许被复制
                 _ => true,
@@ -326,6 +327,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var copied = source.CopyNew();
                 if (copied is null)
                     continue;
+
+                //特殊处理Hold:清除Id
+                if (copied is Hold hold)
+                {
+                    hold.RecordId = -1;
+                    undo += () => hold.RecordId = -1;
+                }
 
                 TGrid newTGrid = default;
                 if (copied is ITimelineObject timelineObject)
