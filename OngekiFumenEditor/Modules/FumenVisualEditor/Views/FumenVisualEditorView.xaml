@@ -61,11 +61,11 @@
                 </MenuItem>
                 <MenuItem Header="对已复制物件...">
                     <MenuItem Header="粘贴...">
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects()" Header="直接粘贴" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="直接粘贴" />
                         <Separator />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror()" Header="按整体全体范围水平镜像粘贴" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror()" Header="按整体全体范围垂直镜像粘贴" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror()" Header="按X[0,0]为基准水平镜像粘贴" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="按整体全体范围水平镜像粘贴" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="按整体全体范围垂直镜像粘贴" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)" Header="按X[0,0]为基准水平镜像粘贴" />
                     </MenuItem>
                 </MenuItem>
                 <Separator />

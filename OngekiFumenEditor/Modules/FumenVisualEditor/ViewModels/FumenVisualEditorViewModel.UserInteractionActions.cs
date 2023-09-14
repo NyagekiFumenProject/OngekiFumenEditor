@@ -23,6 +23,7 @@ using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Numerics;
@@ -30,6 +31,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
 using Xv2CoreLib.Resource.UndoRedo;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
@@ -220,23 +222,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             None
         }
 
-        public void MenuItemAction_PasteCopiesObjects()
-            => PasteCopiesObjects(PasteMirrorOption.None);
-        public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror()
-            => PasteCopiesObjects(PasteMirrorOption.SelectedRangeCenterXGridMirror);
-        public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror()
-            => PasteCopiesObjects(PasteMirrorOption.SelectedRangeCenterTGridMirror);
-        public void MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror()
-            => PasteCopiesObjects(PasteMirrorOption.XGridZeroMirror);
+        public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
+            => PasteCopiesObjects(PasteMirrorOption.None, ctx);
+        public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror(ActionExecutionContext ctx)
+            => PasteCopiesObjects(PasteMirrorOption.SelectedRangeCenterXGridMirror, ctx);
+        public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror(ActionExecutionContext ctx)
+            => PasteCopiesObjects(PasteMirrorOption.SelectedRangeCenterTGridMirror, ctx);
+        public void MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror(ActionExecutionContext ctx)
+            => PasteCopiesObjects(PasteMirrorOption.XGridZeroMirror, ctx);
 
-        public void PasteCopiesObjects(PasteMirrorOption mirrorOption)
+        public void PasteCopiesObjects(PasteMirrorOption mirrorOption, ActionExecutionContext ctx)
+        {
+            var contextMenu = VisualTreeUtility.FindParent<ContextMenu>(ctx.Source);
+            Point relativeLocation = control.TranslatePoint(new Point(0, 0), contextMenu);
+            PasteCopiesObjects(mirrorOption);
+        }
+
+        public void PasteCopiesObjects(PasteMirrorOption mirrorOption, Point? placePoint = default)
         {
             if (IsLocked)
                 return;
-
-            //获取当前鼠标位置
-            var mousePos = Mouse.GetPosition((FrameworkElement)GetView());
-            mousePos.Y = ViewHeight - mousePos.Y + Rect.MinY;
 
             //先取消选择所有的物件
             TryCancelAllObjectSelecting();
@@ -306,11 +311,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var mirrorXOpt = CalculateXMirror(currentCopiedSources.Keys, mirrorOption);
 
             var sourceCenterPos = CalculateRangeCenter(currentCopiedSources.Keys);
-            var offset = mousePos - sourceCenterPos;
+            var offset = (placePoint ?? sourceCenterPos) - sourceCenterPos;
 
             var redo = new System.Action(() => { });
             var undo = new System.Action(() => { });
-            
+
             foreach (var pair in currentCopiedSources)
             {
                 var source = pair.Key as OngekiObjectBase;
