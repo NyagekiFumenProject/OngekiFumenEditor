@@ -6,7 +6,9 @@ using Gemini.Modules.Toolbox.Models;
 using MahApps.Metro.Controls;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
@@ -129,8 +131,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public Toast Toast => (GetView() as FumenVisualEditorView)?.mainToast;
 
-        private HashSet<ISelectableObject> currentCopiedSources = new();
-        public IEnumerable<ISelectableObject> CurrentCopiedSources => currentCopiedSources;
+        private Dictionary<ISelectableObject, Point> currentCopiedSources = new();
+        public IEnumerable<ISelectableObject> CurrentCopiedSources => currentCopiedSources.Keys;
         public ObjectInteractiveManager InteractiveManager { get; private set; } = new();
 
         #region provide extra MenuItem by plugins
@@ -172,9 +174,37 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (IsLocked)
                 return;
+            if (SelectObjects.None())
+            {
+                ToastNotify($"清空复制列表");
+                return;
+            }
+
             //复制所选物件
             currentCopiedSources.Clear();
-            currentCopiedSources.AddRange(SelectObjects);
+
+            foreach (var obj in SelectObjects.Where(x => x switch
+            {
+                //不允许被复制
+                ConnectableObjectBase => false,
+                LaneCurvePathControlObject => false,
+                //允许被复制
+                _ => true,
+            }))
+            {
+                var x = 0d;
+                if (obj is IHorizonPositionObject horizon)
+                    x = XGridCalculator.ConvertXGridToX(horizon.XGrid, this);
+
+                var y = 0d;
+                if (obj is ITimelineObject timeline)
+                    y = TGridCalculator.ConvertTGridToY_DesignMode(timeline.TGrid, this);
+
+                var canvasPos = new Point(x, y);
+
+                //注册,并记录当前位置
+                currentCopiedSources[obj] = canvasPos;
+            }
 
             if (currentCopiedSources.Count == 0)
                 ToastNotify($"清空复制列表");
@@ -203,187 +233,180 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (IsLocked)
                 return;
+
+            //获取当前鼠标位置
+            var mousePos = Mouse.GetPosition((FrameworkElement)GetView());
+            mousePos.Y = ViewHeight - mousePos.Y + Rect.MinY;
+
             //先取消选择所有的物件
             TryCancelAllObjectSelecting();
-            var newObjects = currentCopiedSources.OfType<OngekiObjectBase>().Select(x => x.CopyNew()).FilterNull().ToList();
-            var mirrorTGrid = CalculateTGridMirror(newObjects, mirrorOption);
-            var mirrorXGrid = CalculateXGridMirror(newObjects, mirrorOption);
+
+            Point CalculateRangeCenter(IEnumerable<ISelectableObject> objects)
+            {
+                (var minX, var maxX) = objects
+                        .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
+                        .Where(x => x.Item1)
+                        .Select(x => x.X)
+                        .MaxMinBy(x => x);
+
+                var diffX = maxX - minX;
+                var x = minX + diffX / 2f;
+
+                (var minY, var maxY) = objects
+                        .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
+                        .Where(x => x.Item1)
+                        .Select(x => x.Y)
+                        .MaxMinBy(x => x);
+
+                var diffY = maxY - minY;
+                var y = minY + diffY / 2f;
+
+                return new(x, y);
+            }
+
+            double? CalculateXMirror(IEnumerable<ISelectableObject> objects, PasteMirrorOption mirrorOption)
+            {
+                if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
+                    return 0;
+
+                if (mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
+                {
+                    (var minX, var maxX) = objects
+                        .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
+                        .Where(x => x.Item1)
+                        .Select(x => x.X)
+                        .MaxMinBy(x => x);
+
+                    var diffX = maxX - minX;
+                    var mirrorX = minX + diffX / 2f;
+                    return mirrorX;
+                }
+
+                return null;
+            }
+
+            double? CalculateYMirror(IEnumerable<ISelectableObject> objects, PasteMirrorOption mirrorOption)
+            {
+                if (mirrorOption != PasteMirrorOption.SelectedRangeCenterTGridMirror)
+                    return null;
+
+                (var minY, var maxY) = objects
+                        .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
+                        .Where(x => x.Item1)
+                        .Select(x => x.Y)
+                        .MaxMinBy(x => x);
+
+                var diffY = maxY - minY;
+                var mirrorY = minY + diffY / 2f;
+                return mirrorY;
+            }
+
+            //计算出镜像中心位置
+            var mirrorYOpt = CalculateYMirror(currentCopiedSources.Keys, mirrorOption);
+            var mirrorXOpt = CalculateXMirror(currentCopiedSources.Keys, mirrorOption);
+
+            var sourceCenterPos = CalculateRangeCenter(currentCopiedSources.Keys);
+            var offset = mousePos - sourceCenterPos;
 
             var redo = new System.Action(() => { });
             var undo = new System.Action(() => { });
-
-            var idMap = new Dictionary<int, int>();
-
-            var partOfConnectableObjects = newObjects
-                .Select(x => x)
-                .OfType<ConnectableObjectBase>()
-                .GroupBy(x => x.RecordId);
-
-            foreach (var lane in partOfConnectableObjects.Where(x => !x.OfType<ConnectableStartObject>().Any()).ToArray())
+            
+            foreach (var pair in currentCopiedSources)
             {
-                if (lane.IsOnlyOne(out var headChildObject))
-                {
-                    //同id组里面只有单个子节点，那就不给它单独转换和复制粘贴了
-                    newObjects.RemoveAll(x => x == headChildObject);
-                    Log.LogDebug($"detect only one child in same recordId ,remove it. headChildObject : {headChildObject}");
+                var source = pair.Key as OngekiObjectBase;
+                var sourceCanvasPos = pair.Value;
+
+                var copied = source.CopyNew();
+                if (copied is null)
                     continue;
-                }
 
-                var refRecordId = -headChildObject.RecordId;
-                var refSourceHeadChildObject = currentCopiedSources.Select(x => x).OfType<ConnectableChildObjectBase>().FirstOrDefault(x => x.RecordId == refRecordId);
-
-                var newStartObject = LambdaActivator.CreateInstance(refSourceHeadChildObject.ReferenceStartObject.GetType()) as OngekiObjectBase;
-
-                newStartObject.Copy(headChildObject);
-
-                newObjects.RemoveAll(x => x == headChildObject);
-                newObjects.Insert(0, newStartObject);
-
-                Log.LogDebug($"detect non-include start object copying , remove head of children and add new start object, headChildObject : {headChildObject}");
-            }
-
-            foreach (var displayObjectView in newObjects)
-            {
-                if (displayObjectView is ITimelineObject timelineObject)
+                TGrid newTGrid = default;
+                if (copied is ITimelineObject timelineObject)
                 {
                     var tGrid = timelineObject.TGrid.CopyNew();
                     undo += () => timelineObject.TGrid = tGrid.CopyNew();
 
-                    if (mirrorTGrid is not null)
-                    {
-                        var offset = mirrorTGrid - tGrid;
-                        var newTGrid = mirrorTGrid + offset;
+                    var y = sourceCanvasPos.Y;
+                    var mirrorBaseY = mirrorYOpt is double _mirrorY ? _mirrorY : y;
+                    var mirroredY = mirrorBaseY + mirrorBaseY - y;
+                    var offsetedY = mirroredY + offset.Y;
 
-                        redo += () => timelineObject.TGrid = newTGrid.CopyNew();
+                    if (TGridCalculator.ConvertYToTGrid_DesignMode(offsetedY, this) is not TGrid nt)
+                    {
+                        //todo warn
+                        return;
                     }
-                    else
-                        redo += () => timelineObject.TGrid = tGrid.CopyNew();
+
+                    newTGrid = nt;
+                    redo += () => timelineObject.TGrid = newTGrid.CopyNew();
                 }
 
-                if (displayObjectView is IHorizonPositionObject horizonPositionObject)
+                XGrid newXGrid = default;
+                var offsetedX = 0d; //后面会用到,因此提出来
+                if (copied is IHorizonPositionObject horizonPositionObject)
                 {
                     var xGrid = horizonPositionObject.XGrid.CopyNew();
                     undo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
 
-                    if (mirrorXGrid is not null)
-                    {
-                        var offset = mirrorXGrid - xGrid;
-                        var newXGrid = mirrorXGrid + offset;
+                    var x = sourceCanvasPos.X;
+                    var mirrorBaseX = mirrorXOpt is double _mirrorX ? _mirrorX : x;
+                    var mirroredX = mirrorBaseX + mirrorBaseX - x;
+                    offsetedX = mirroredX + offset.X;
 
-                        redo += () => horizonPositionObject.XGrid = newXGrid.CopyNew();
+                    if (XGridCalculator.ConvertXToXGrid(offsetedX, this) is not XGrid nx)
+                    {
+                        //todo warn
+                        return;
                     }
-                    else
-                        redo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
+
+                    newXGrid = nx;
+                    redo += () => horizonPositionObject.XGrid = newXGrid.CopyNew();
                 }
 
-                var selectObj = displayObjectView as ISelectableObject;
+                if (copied is ILaneDockable dockable)
+                {
+                    //这里做个检查吧:如果复制新的位置刚好也(靠近)在原来附着的轨道上，那就不变，否则就得清除ReferenceLaneStart
+                    //todo 后面可以做更细节的检查和变动
+                    if (dockable.ReferenceLaneStart is LaneStartBase beforeStart)
+                    {
+                        var xGrid = beforeStart.CalulateXGrid(newTGrid);
+                        var x = XGridCalculator.ConvertXGridToX(xGrid, this);
+                        var diff = offsetedX - x;
+
+                        if (Math.Abs(diff) < 8)
+                        {
+                            //那就是在轨道上，不用动了！
+                        }
+                        else
+                        {
+                            //不在轨道上，那就清除惹
+                            redo += () => dockable.ReferenceLaneStart = null;
+                        }
+
+                        undo += () => dockable.ReferenceLaneStart = beforeStart;
+                    }
+                }
+
+                var selectObj = copied as ISelectableObject;
                 var isSelect = selectObj.IsSelected;
 
-                switch (displayObjectView)
+                redo += () =>
                 {
-                    case ConnectableStartObject startObject:
-                        var rawId = startObject.RecordId;
-                        redo += () =>
-                        {
-                            Fumen.AddObject(displayObjectView);
-                            var newId = startObject.RecordId;
-                            idMap[rawId] = newId;
-                            selectObj.IsSelected = true;
-                        };
+                    Fumen.AddObject(copied);
+                    selectObj.IsSelected = true;
+                };
 
-                        undo += () =>
-                        {
-                            RemoveObject(displayObjectView);
-                            startObject.RecordId = rawId;
-                            selectObj.IsSelected = isSelect;
-                        };
-                        break;
-                    case ConnectableChildObjectBase childObject:
-                        var rawChildId = childObject.RecordId;
-                        redo += () =>
-                        {
-                            if (idMap.TryGetValue(rawChildId, out var newChildId))
-                                childObject.RecordId = newChildId;
-                            Fumen.AddObject(displayObjectView);
-                            selectObj.IsSelected = true;
-                        };
-
-                        undo += () =>
-                        {
-                            RemoveObject(displayObjectView);
-                            childObject.RecordId = rawChildId;
-                            selectObj.IsSelected = isSelect;
-                        };
-                        break;
-                    default:
-                        redo += () =>
-                        {
-                            Fumen.AddObject(displayObjectView);
-                            selectObj.IsSelected = true;
-                        };
-
-                        undo += () =>
-                        {
-                            RemoveObject(displayObjectView);
-                            selectObj.IsSelected = isSelect;
-                        };
-                        break;
-                }
+                undo += () =>
+                {
+                    RemoveObject(copied);
+                    selectObj.IsSelected = isSelect;
+                };
             };
 
             redo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
             undo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
 
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("复制粘贴", redo, undo));
-        }
-
-        private XGrid CalculateXGridMirror(IEnumerable<OngekiObjectBase> newObjects, PasteMirrorOption mirrorOption)
-        {
-            if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
-                return XGrid.Zero;
-
-            if (mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
-            {
-                (var min, var max) = newObjects
-                .Select(x => x as IHorizonPositionObject)
-                .FilterNull()
-                .MaxMinBy(x => x.XGrid, (a, b) =>
-                {
-                    if (a > b)
-                        return 1;
-                    if (a < b)
-                        return -1;
-                    return 0;
-                });
-
-                var diff = max - min;
-                var mirror = min + new GridOffset(0, diff.TotalGrid(min.ResX) / 2);
-                return mirror;
-            }
-
-            return default;
-        }
-
-        private TGrid CalculateTGridMirror(IEnumerable<OngekiObjectBase> newObjects, PasteMirrorOption mirrorOption)
-        {
-            if (mirrorOption != PasteMirrorOption.SelectedRangeCenterTGridMirror)
-                return default;
-
-            (var min, var max) = newObjects
-                .Select(x => x as ITimelineObject)
-                .FilterNull()
-                .MaxMinBy(x => x.TGrid, (a, b) =>
-                {
-                    if (a > b)
-                        return 1;
-                    if (a < b)
-                        return -1;
-                    return 0;
-                });
-
-            var diff = max - min;
-            var mirror = min + new GridOffset(0, diff.TotalGrid(min.ResT) / 2);
-            return mirror;
         }
 
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
