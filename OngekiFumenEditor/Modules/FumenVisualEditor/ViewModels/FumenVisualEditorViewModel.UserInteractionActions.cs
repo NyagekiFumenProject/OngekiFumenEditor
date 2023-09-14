@@ -3,7 +3,6 @@ using DereTore.Common;
 using Gemini.Framework;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
-using MahApps.Metro.Controls;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
@@ -31,10 +30,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
-using Xv2CoreLib.Resource.UndoRedo;
-using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -222,6 +218,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             None
         }
 
+        public void MenuItemAction_PasteCopiesObjects()
+        {
+            var placePos = Mouse.GetPosition(GetView() as FrameworkElement);
+            placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
+            PasteCopiesObjects(PasteMirrorOption.None, placePos);
+        }
         public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
             => PasteCopiesObjects(PasteMirrorOption.None, ctx);
         public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror(ActionExecutionContext ctx)
@@ -233,9 +235,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void PasteCopiesObjects(PasteMirrorOption mirrorOption, ActionExecutionContext ctx)
         {
-            var contextMenu = VisualTreeUtility.FindParent<ContextMenu>(ctx.Source);
-            Point relativeLocation = control.TranslatePoint(new Point(0, 0), contextMenu);
-            PasteCopiesObjects(mirrorOption);
+            var placePos = contextMenuPosition;
+            placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
+            PasteCopiesObjects(mirrorOption, placePos);
         }
 
         public void PasteCopiesObjects(PasteMirrorOption mirrorOption, Point? placePoint = default)
@@ -675,6 +677,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var pos = arg.GetPosition(parent);
 
+            if (arg.RightButton == MouseButtonState.Released || prevRightButtonState == MouseButtonState.Pressed)
+                contextMenuPosition = pos;
+            prevRightButtonState = arg.RightButton;
+
             if (IsDesignMode)
             {
                 if (isLeftMouseDown)
@@ -749,6 +755,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseDown(ActionExecutionContext e)
         {
             var arg = e.EventArgs as MouseEventArgs;
+
+            prevRightButtonState = arg.RightButton;
 
             if (IsLocked || IsPreviewMode)
                 return;
@@ -1104,6 +1112,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private double startScrollOffset;
         private bool isCanvasDragging;
         private bool isMiddleMouseDown;
+        private MouseButtonState prevRightButtonState;
+        private Point contextMenuPosition;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size)
