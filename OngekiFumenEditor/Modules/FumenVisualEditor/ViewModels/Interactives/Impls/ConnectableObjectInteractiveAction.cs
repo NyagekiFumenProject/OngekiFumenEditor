@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
@@ -28,10 +29,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         private Dictionary<OngekiObjectBase, HashSet<DragInfo>> dragInfoMap = new();
 
-        public override void OnMoveCanvas(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        public override void OnMoveCanvas(OngekiObjectBase o, Point point, FumenVisualEditorViewModel editor)
         {
-            base.OnMoveCanvas(obj, point, editor);
-
+            base.OnMoveCanvas(o, point, editor);
+            var obj = o switch
+            {
+                ConnectableObjectBase co => co,
+                LaneCurvePathControlObject ctrl => ctrl.RefCurveObject,
+                _ => default
+            };
             RelocateDockableObjects(editor, obj);
         }
 
@@ -39,7 +45,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         {
             base.OnDragStart(o, pos, editor);
 
-            var obj = o as ConnectableObjectBase;
+            var obj = o switch
+            {
+                ConnectableObjectBase co => co,
+                LaneCurvePathControlObject ctrl => ctrl.RefCurveObject,
+                _ => default
+            };
+
             var start = obj switch
             {
                 ConnectableChildObjectBase c => c.ReferenceStartObject,
@@ -75,15 +87,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 })
                 .ToHashSet();
 
-            dragInfoMap[obj] = infoList;
+            dragInfoMap[o] = infoList;
         }
 
-        public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        public override void OnDragEnd(OngekiObjectBase o, Point point, FumenVisualEditorViewModel editor)
         {
-            base.OnDragEnd(obj, point, editor);
+            base.OnDragEnd(o, point, editor);
 
-            if (dragInfoMap.TryGetValue(obj, out var infoList))
-                dragInfoMap.Remove(obj);
+            var obj = o switch
+            {
+                ConnectableObjectBase co => co,
+                LaneCurvePathControlObject ctrl => ctrl.RefCurveObject,
+                _ => default
+            };
+
+            if (dragInfoMap.TryGetValue(o, out var infoList))
+                dragInfoMap.Remove(o);
             else
                 return;//YOU SHOULD NOT BE HERE
 

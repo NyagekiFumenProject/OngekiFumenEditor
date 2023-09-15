@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls;
@@ -32,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                 WallHold => new WallHoldObjectInteractiveAction(),
                 Hold => new HoldObjectInteractiveAction(),
                 ILaneDockable => new DockableObjectInteractiveAction(),
-                ConnectableObjectBase => new ConnectableObjectInteractiveAction(),
+                ConnectableObjectBase or LaneCurvePathControlObject => new ConnectableObjectInteractiveAction(),
                 IHorizonPositionObject => new HorizonObjectInteractiveAction(),
                 _ => defaultAction,
             };
