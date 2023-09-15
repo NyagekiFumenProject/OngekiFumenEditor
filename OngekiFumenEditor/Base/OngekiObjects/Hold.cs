@@ -63,7 +63,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public HoldEnd HoldEnd => Children.LastOrDefault() as HoldEnd;
 
-
         public override string IDShortName => IsCritical ? "CHD" : "HLD";
 
         public override ConnectableNextObject CreateNextObject() => null;

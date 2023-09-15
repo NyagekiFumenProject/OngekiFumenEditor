@@ -185,12 +185,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var obj in SelectObjects.Where(x => x switch
             {
                 //不允许被复制
-                ConnectableObjectBase and not (Hold) => false,
+                ConnectableObjectBase and not (ConnectableStartObject) => false,
                 LaneCurvePathControlObject => false,
                 //允许被复制
                 _ => true,
             }))
             {
+                //这里还是得再次详细过滤:
+                // * Hold头可以直接被复制
+                // * 轨道如果是整个轨道节点都被选中，那么它也可以被复制，否则就不准
+                if (obj is ConnectableStartObject start && obj is not Hold)
+                {
+                    //检查start轨道节点是否全被选中了
+                    if (!start.Children.OfType<ConnectableObjectBase>().Append(start).All(x => x.IsSelected))
+                        continue;
+                }
+
                 var x = 0d;
                 if (obj is IHorizonPositionObject horizon)
                     x = XGridCalculator.ConvertXGridToX(horizon.XGrid, this);
@@ -328,6 +338,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (copied is null)
                     continue;
 
+                //特殊处理ConnectableStart:连Child和Control一起复制了
+                if (copied is ConnectableStartObject _s)
+                {
+                    _s.CopyEntireConnectableObject((ConnectableStartObject)source);
+                }
+
                 //特殊处理Hold:清除Id
                 if (copied is Hold hold)
                 {
@@ -339,14 +355,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (copied is ITimelineObject timelineObject)
                 {
                     var tGrid = timelineObject.TGrid.CopyNew();
-                    undo += () => timelineObject.TGrid = tGrid.CopyNew();
 
-                    var y = sourceCanvasPos.Y;
-                    var mirrorBaseY = mirrorYOpt is double _mirrorY ? _mirrorY : y;
-                    var mirroredY = mirrorBaseY + mirrorBaseY - y;
-                    var offsetedY = mirroredY + offset.Y;
+                    double CalcY(double y)
+                    {
+                        var mirrorBaseY = mirrorYOpt is double _mirrorY ? _mirrorY : y;
+                        var mirroredY = mirrorBaseY + mirrorBaseY - y;
+                        var offsetedY = mirroredY + offset.Y;
 
-                    if (TGridCalculator.ConvertYToTGrid_DesignMode(offsetedY, this) is not TGrid nt)
+                        return offsetedY;
+                    }
+
+                    var newY = CalcY(sourceCanvasPos.Y);
+
+                    if (TGridCalculator.ConvertYToTGrid_DesignMode(newY, this) is not TGrid nt)
                     {
                         //todo warn
                         return;
@@ -354,6 +375,44 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                     newTGrid = nt;
                     redo += () => timelineObject.TGrid = newTGrid.CopyNew();
+                    undo += () => timelineObject.TGrid = tGrid.CopyNew();
+
+                    //apply child objects
+                    if (copied is ConnectableStartObject start)
+                    {
+                        foreach (var child in start.Children)
+                        {
+                            var oldChildTGrid = child.TGrid.CopyNew();
+                            var y = TGridCalculator.ConvertTGridToY_DesignMode(oldChildTGrid, this);
+                            var newChildY = CalcY(y);
+
+                            if (TGridCalculator.ConvertYToTGrid_DesignMode(newChildY, this) is not TGrid newChildTGrid)
+                            {
+                                //todo warn
+                                return;
+                            }
+
+                            redo += () => child.TGrid = newChildTGrid.CopyNew();
+                            undo += () => child.TGrid = oldChildTGrid.CopyNew();
+
+                            foreach (var control in child.PathControls)
+                            {
+                                var oldControlTGrid = control.TGrid.CopyNew();
+                                var cy = TGridCalculator.ConvertTGridToY_DesignMode(oldControlTGrid, this);
+                                var newControlY = CalcY(cy);
+
+
+                                if (TGridCalculator.ConvertYToTGrid_DesignMode(newControlY, this) is not TGrid newControlTGrid)
+                                {
+                                    //todo warn
+                                    return;
+                                }
+
+                                redo += () => control.TGrid = newControlTGrid.CopyNew();
+                                undo += () => control.TGrid = oldControlTGrid.CopyNew();
+                            }
+                        }
+                    }
                 }
 
                 XGrid newXGrid = default;
@@ -361,12 +420,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (copied is IHorizonPositionObject horizonPositionObject)
                 {
                     var xGrid = horizonPositionObject.XGrid.CopyNew();
-                    undo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
 
-                    var x = sourceCanvasPos.X;
-                    var mirrorBaseX = mirrorXOpt is double _mirrorX ? _mirrorX : x;
-                    var mirroredX = mirrorBaseX + mirrorBaseX - x;
-                    offsetedX = mirroredX + offset.X;
+                    double CalcX(double x)
+                    {
+                        var mirrorBaseX = mirrorXOpt is double _mirrorX ? _mirrorX : x;
+                        var mirroredX = mirrorBaseX + mirrorBaseX - x;
+                        offsetedX = mirroredX + offset.X;
+
+                        return offsetedX;
+                    }
+
+                    var newX = CalcX(sourceCanvasPos.X);
 
                     if (XGridCalculator.ConvertXToXGrid(offsetedX, this) is not XGrid nx)
                     {
@@ -375,31 +439,93 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     }
 
                     newXGrid = nx;
+                    undo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
                     redo += () => horizonPositionObject.XGrid = newXGrid.CopyNew();
+
+                    //apply child objects
+                    if (copied is ConnectableStartObject start)
+                    {
+                        foreach (var child in start.Children)
+                        {
+                            var oldChildXGrid = child.XGrid.CopyNew();
+                            var x = XGridCalculator.ConvertXGridToX(oldChildXGrid, this);
+                            var newChildX = CalcX(x);
+
+                            if (XGridCalculator.ConvertXToXGrid(newChildX, this) is not XGrid newChildXGrid)
+                            {
+                                //todo warn
+                                return;
+                            }
+
+                            redo += () => child.XGrid = newChildXGrid.CopyNew();
+                            undo += () => child.XGrid = oldChildXGrid.CopyNew();
+
+                            foreach (var control in child.PathControls)
+                            {
+                                var oldControlXGrid = control.XGrid.CopyNew();
+                                var cx = XGridCalculator.ConvertXGridToX(oldControlXGrid, this);
+                                var newControlX = CalcX(cx);
+
+
+                                if (XGridCalculator.ConvertXToXGrid(newControlX, this) is not XGrid newControlXGrid)
+                                {
+                                    //todo warn
+                                    return;
+                                }
+
+                                redo += () => control.XGrid = newControlXGrid.CopyNew();
+                                undo += () => control.XGrid = oldControlXGrid.CopyNew();
+                            }
+                        }
+                    }
                 }
 
                 if (copied is ILaneDockable dockable)
                 {
-                    //这里做个检查吧:如果复制新的位置刚好也(靠近)在原来附着的轨道上，那就不变，否则就得清除ReferenceLaneStart
-                    //todo 后面可以做更细节的检查和变动
-                    if (dockable.ReferenceLaneStart is LaneStartBase beforeStart)
-                    {
-                        var xGrid = beforeStart.CalulateXGrid(newTGrid);
-                        var x = XGridCalculator.ConvertXGridToX(xGrid, this);
-                        var diff = offsetedX - x;
+                    var before = dockable.ReferenceLaneStart;
 
-                        if (Math.Abs(diff) < 8)
+                    redo += () =>
+                    {
+                        //这里做个检查吧:如果复制新的位置刚好也(靠近)在原来附着的轨道上，那就不变，否则就得清除ReferenceLaneStart
+                        //todo 后面可以做更细节的检查和变动
+                        if (dockable.ReferenceLaneStart is LaneStartBase beforeStart)
                         {
-                            //那就是在轨道上，不用动了！
+                            var needRedockLane = true;
+                            if (beforeStart.CalulateXGrid(newTGrid) is XGrid xGrid)
+                            {
+                                var x = XGridCalculator.ConvertXGridToX(xGrid, this);
+                                var diff = offsetedX - x;
+
+                                if (Math.Abs(diff) < 8)
+                                {
+                                    //那就是在轨道上，不用动了！
+                                    needRedockLane = false;
+                                }
+                                else
+                                {
+                                    dockable.ReferenceLaneStart = default;
+                                }
+                            }
+
+                            if (needRedockLane)
+                            {
+                                var dockableLanes = Fumen.Lanes
+                                    .GetVisibleStartObjects(newTGrid, newTGrid)
+                                    .Where(x => x.IsDockableLane && x != beforeStart)
+                                    .OrderBy(x => Math.Abs(x.LaneType - beforeStart.LaneType));
+
+                                var pickLane = dockableLanes.FirstOrDefault();
+
+                                //不在轨道上，那就清除惹
+                                //todo 重新钦定一个轨道
+                                dockable.ReferenceLaneStart = pickLane;
+                            }
                         }
                         else
-                        {
-                            //不在轨道上，那就清除惹
-                            redo += () => dockable.ReferenceLaneStart = null;
-                        }
+                            dockable.ReferenceLaneStart = default;
+                    };
 
-                        undo += () => dockable.ReferenceLaneStart = beforeStart;
-                    }
+                    undo += () => dockable.ReferenceLaneStart = before;
                 }
 
                 var selectObj = copied as ISelectableObject;

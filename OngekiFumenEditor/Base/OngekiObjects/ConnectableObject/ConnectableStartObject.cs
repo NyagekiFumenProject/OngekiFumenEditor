@@ -433,5 +433,18 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
             RecordId = -Math.Abs(from.RecordId);
         }
+
+        public void CopyEntireConnectableObject(ConnectableStartObject from)
+        {
+            Copy(from);
+
+            RecordId = -Math.Abs(from.RecordId);
+
+            foreach (var child in from.Children)
+            {
+                var copyChild = child.CopyNew() as ConnectableChildObjectBase;
+                AddChildObject(copyChild);
+            }
+        }
     }
 }

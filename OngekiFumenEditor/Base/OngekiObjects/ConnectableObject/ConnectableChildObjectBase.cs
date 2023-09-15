@@ -273,7 +273,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             PrevObject = null;
             CurvePrecision = from.CurvePrecision;
             CurveInterpolaterFactory = from.CurveInterpolaterFactory;
-            foreach (var cp in PathControls)
+            foreach (var cp in from.PathControls)
             {
                 var newCP = new LaneCurvePathControlObject();
                 newCP.Copy(cp);
