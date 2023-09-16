@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Utils
         /// <param name="o"></param>
         /// <param name="repeatCount"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> Repeat<T>(this T o, int repeatCount) => Enumerable.Repeat(o, repeatCount);
 
         public static void ForEach<T>(this IEnumerable<T> list, Action<T> fun)
@@ -57,13 +58,18 @@ namespace OngekiFumenEditor.Utils
                 collection.Remove(rm);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Remove(x));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Remove(x));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
+        
         /*
         public static IEnumerable<T> DistinctBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
 
@@ -77,6 +83,7 @@ namespace OngekiFumenEditor.Utils
         /// <param name="collection"></param>
         /// <param name="compFunc"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> DistinctContinuousBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctContinuousBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
 
         /// <summary>
@@ -107,6 +114,7 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> FilterNull<T>(this IEnumerable<T> collection) => collection.Where(x => x != null);
 
         public static T FindNextOrDefault<T>(this IEnumerable<T> collection, T taget)
@@ -124,10 +132,13 @@ namespace OngekiFumenEditor.Utils
             return default;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MinByOrDefault<T>(this IEnumerable<T> collection)
-            => collection.MinByOrDefault(x => x, (a, b) => Comparer<T>.Default.Compare(a, b));
+            => collection.MinByOrDefault(x => x, Comparer<T>.Default.Compare);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MinByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
             => collection.MinByOrDefault((a, b) => keySelector(a).CompareTo(keySelector(b)));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MinByOrDefault<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
             => collection.MinByOrDefault(x => x, comparer);
         public static T MinByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
@@ -155,10 +166,13 @@ namespace OngekiFumenEditor.Utils
             return minValue;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MaxByOrDefault<T>(this IEnumerable<T> collection)
-            => collection.MaxByOrDefault(x => x, (a, b) => Comparer<T>.Default.Compare(a, b));
+            => collection.MaxByOrDefault(x => x, Comparer<T>.Default.Compare);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MaxByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
             => collection.MaxByOrDefault((a, b) => keySelector(a).CompareTo(keySelector(b)));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MaxByOrDefault<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
             => collection.MaxByOrDefault(x => x, comparer);
         public static T MaxByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
@@ -226,8 +240,10 @@ namespace OngekiFumenEditor.Utils
             return disposable;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T>(this List<T> list, Func<T, T, int> compFunc) => list.Sort(new ComparerWrapper<T>(compFunc));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SortBy<T, X>(this List<T> list, Func<T, X> keySelect) => list.Sort((a, b) => Comparer<X>.Default.Compare(keySelect(a), keySelect(b)));
 
         public static int BinarySearchBy<T, X>(this IList<T> insertable, X value, Func<T, X> keySelect, int lo = 0) where X : IComparable<X>
@@ -289,10 +305,13 @@ namespace OngekiFumenEditor.Utils
             return insertable.Count - 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (T min, T max) MaxMinBy<T>(this IEnumerable<T> collection)
             => collection.MaxMinBy(x => x, Comparer<T>.Default.Compare);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (T min, T max) MaxMinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
             => collection.MaxMinBy((a, b) => keySelector(a).CompareTo(keySelector(b)));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (T min, T max) MaxMinBy<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
             => collection.MaxMinBy(x => x, comparer);
         public static (X min, X max) MaxMinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
@@ -371,6 +390,7 @@ namespace OngekiFumenEditor.Utils
                 yield return link.Take(wrapCount);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> UnionBy<T, X>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, X> keySelector)
             => a.Union(b, new EqualsComparerWrapper<T>((x, y) =>
             {
@@ -379,6 +399,7 @@ namespace OngekiFumenEditor.Utils
                 return (kx?.Equals(ky) ?? false) && (ky?.Equals(kx) ?? false);
             }));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> UnionBy<T>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, T, bool> compFunc)
             => a.Union(b, new EqualsComparerWrapper<T>(compFunc));
 
@@ -390,6 +411,7 @@ namespace OngekiFumenEditor.Utils
                 return (kx?.Equals(ky) ?? false) && (ky?.Equals(kx) ?? false);
             }));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> ExceptBy<T>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, T, bool> compFunc)
             => a.Except(b, new EqualsComparerWrapper<T>(compFunc));
 
@@ -401,7 +423,7 @@ namespace OngekiFumenEditor.Utils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(this IEnumerable<T> a, Func<T, float> valMapFunc) => 
+        public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(this IEnumerable<T> a, Func<T, float> valMapFunc) =>
             MathUtils.SplitByTurningGradient(a, valMapFunc);
 
         /// <summary>
