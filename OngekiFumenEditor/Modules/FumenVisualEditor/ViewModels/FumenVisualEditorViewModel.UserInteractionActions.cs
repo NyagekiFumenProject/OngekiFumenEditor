@@ -173,7 +173,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (IsLocked)
                 return;
-            if (SelectObjects.None())
+            if (SelectObjects.IsEmpty())
             {
                 ToastNotify($"清空复制列表");
                 return;

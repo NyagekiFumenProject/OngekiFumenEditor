@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
                 list.Add(wrapper);
             }
 
-            if (list.Empty())
+            if (list.IsEmpty())
                 return false;
             //todo 严格一下？
 

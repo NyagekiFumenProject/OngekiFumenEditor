@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,13 @@ namespace OngekiFumenEditor.Utils
 {
     public static class LinqExtensionMethod
     {
+        /// <summary>
+        /// 重复某个元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="o"></param>
+        /// <param name="repeatCount"></param>
+        /// <returns></returns>
         public static IEnumerable<T> Repeat<T>(this T o, int repeatCount) => Enumerable.Repeat(o, repeatCount);
 
         public static void ForEach<T>(this IEnumerable<T> list, Action<T> fun)
@@ -23,6 +31,11 @@ namespace OngekiFumenEditor.Utils
                 fun(item);
         }
 
+        /// <summary>
+        /// 使用默认比较器，过滤掉重复的元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection"></param>
         public static void DistinctSelf<T>(this ICollection<T> collection)
         {
             using var d = collection.Except(collection.Distinct()).ToListWithObjectPool(out var removes);
@@ -30,6 +43,13 @@ namespace OngekiFumenEditor.Utils
                 collection.Remove(rm);
         }
 
+        /// <summary>
+        /// 使用默认的比较器，根据某个条件进行过滤
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <param name="collection"></param>
+        /// <param name="keySelect"></param>
         public static void DistinctBySelf<T, Y>(this ICollection<T> collection, Func<T, Y> keySelect)
         {
             using var d = collection.Except(collection.DistinctBy(keySelect)).ToListWithObjectPool(out var removes);
@@ -234,6 +254,15 @@ namespace OngekiFumenEditor.Utils
             return ~lo;
         }
 
+        /// <summary>
+        /// 使用二分法实现LastOrDefault()的选值(假设集合已排序)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="X"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="value"></param>
+        /// <param name="keySelect"></param>
+        /// <returns></returns>
         public static T LastOrDefaultByBinarySearch<T, X>(this IList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
         {
             var idx = source.BinarySearchBy(value, keySelect);
@@ -284,6 +313,14 @@ namespace OngekiFumenEditor.Utils
             return (min, max);
         }
 
+        /// <summary>
+        /// 将集合分成一组组的子集合
+        /// [1,2,3,4,5,6,7,8] --3--> [1,2,3],[4,5,6],[7,8]
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection"></param>
+        /// <param name="wrapCount">子集合最大数量</param>
+        /// <returns></returns>
         public static IEnumerable<IEnumerable<T>> SequenceWrap<T>(this IEnumerable<T> collection, int wrapCount)
         {
             var i = 0;
@@ -307,6 +344,14 @@ namespace OngekiFumenEditor.Utils
             ArrayPool<T>.Shared.Return(arr);
         }
 
+        /// <summary>
+        /// 将集合分成一组组的子集合,但子集合是连续的
+        /// [1,2,3,4,5] --3--> [1,2,3],[2,3,4],[3,4,5]
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection"></param>
+        /// <param name="wrapCount">子集合最大数量</param>
+        /// <returns></returns>
         public static IEnumerable<IEnumerable<T>> SequenceConsecutivelyWrap<T>(this IEnumerable<T> collection, int wrapCount)
         {
             var link = new LinkedList<T>();
@@ -355,11 +400,27 @@ namespace OngekiFumenEditor.Utils
             return val;
         }
 
-        public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(this IEnumerable<T> a, Func<T, float> valMapFunc) => MathUtils.SplitByTurningGradient(a, valMapFunc);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(this IEnumerable<T> a, Func<T, float> valMapFunc) => 
+            MathUtils.SplitByTurningGradient(a, valMapFunc);
 
+        /// <summary>
+        /// 判断集合是否只有一个元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsOnlyOne<T>(this IEnumerable<T> a)
             => IsOnlyOne(a, out _);
 
+        /// <summary>
+        /// 判断集合是否只有一个
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="a"></param>
+        /// <param name="firstElement"></param>
+        /// <returns></returns>
         public static bool IsOnlyOne<T>(this IEnumerable<T> a, out T firstElement)
         {
             firstElement = default;
@@ -371,17 +432,33 @@ namespace OngekiFumenEditor.Utils
             return !itor.MoveNext();
         }
 
+        /// <summary>
+        /// 判断集合是否至少有一定数量的元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="a"></param>
+        /// <param name="minCount"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AtLeastCount<T>(this IEnumerable<T> a, int minCount)
         {
             return a.Take(minCount).Count() == minCount;
         }
 
-        public static bool None<T>(this IEnumerable<T> a)
+        /// <summary>
+        /// 判断集合是否为空
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsEmpty<T>(this IEnumerable<T> a)
         {
-            return !a.GetEnumerator().MoveNext();
+            return !a.Any();
         }
 
-        public static bool None<T>(this IEnumerable<T> a, Predicate<T> predicate) => a.Where(x => predicate(x)).None();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsEmpty<T>(this IEnumerable<T> a, Predicate<T> predicate) => a.Where(x => predicate(x)).IsEmpty();
 
         public delegate OUT IntervalByProcFunc<IN, OUT>(IN prev, IN cur);
         /// <summary>
@@ -406,6 +483,7 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<(T, int)> WithIndex<T>(this IEnumerable<T> list)
             => list.Select((a, b) => (a, b));
 
@@ -430,11 +508,6 @@ namespace OngekiFumenEditor.Utils
             while (itor.MoveNext())
                 cur = cur.IntersectBy(itor.Current.Select(keySelector), keySelector);
             return cur;
-        }
-
-        public static bool Empty<T>(this IEnumerable<T> list)
-        {
-            return !list.Any();
         }
     }
 }
