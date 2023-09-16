@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Windows;
 
 namespace OngekiFumenEditor.Base.Collections.Base
 {
@@ -35,6 +37,12 @@ namespace OngekiFumenEditor.Base.Collections.Base
         {
             base.Remove(obj);
             obj.PropertyChanged -= OnItemPropChanged;
+        }
+
+        public void Clear()
+        {
+            foreach (var obj in this.ToArray())
+                Remove(obj);
         }
     }
 }

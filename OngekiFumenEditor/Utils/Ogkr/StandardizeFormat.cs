@@ -41,6 +41,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 
             //directly removes objects which not belong to ongeki.
             fumen.SvgPrefabs.Clear();
+            fumen.Comments.Clear();
 
             if (!CheckFumenIsSerializable(fumen, out var msg))
                 return new(false) { Message = msg };
