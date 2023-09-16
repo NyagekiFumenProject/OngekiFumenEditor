@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils.ObjectPool;
+﻿using Mono.Cecil;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -231,6 +232,13 @@ namespace OngekiFumenEditor.Utils
             }
 
             return ~lo;
+        }
+
+        public static T LastOrDefaultByBinarySearch<T, X>(this IList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
+        {
+            var idx = source.BinarySearchBy(value, keySelect);
+            var i = idx < 0 ? ((~idx) - 1) : idx;
+            return source[i];
         }
 
         public static int InsertBySortBy<T, X>(this IList<T> insertable, T needInsert, Func<T, X> keySelect)

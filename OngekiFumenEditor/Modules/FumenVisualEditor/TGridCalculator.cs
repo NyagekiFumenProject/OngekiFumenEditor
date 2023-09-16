@@ -81,7 +81,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var positionBpmList = soflanList.GetCachedSoflanPositionList_DesignMode(tUnitLength, bpmList);
 
             //获取pickY对应的bpm和bpm起始位置
-            (var pickStartY, var tGrid, var speed, var pickBpm) = positionBpmList.LastOrDefault(x => x.startTGrid.TotalUnit <= tGridUnit);
+            (var pickStartY, var tGrid, var speed, var pickBpm) = positionBpmList.LastOrDefaultByBinarySearch(tGridUnit, x => x.startTGrid.TotalUnit);
+
             if (pickBpm is null)
                 if (positionBpmList.FirstOrDefault().bpmChange?.TGrid is TGrid first && tGridUnit < first.TotalUnit)
                     return 0;

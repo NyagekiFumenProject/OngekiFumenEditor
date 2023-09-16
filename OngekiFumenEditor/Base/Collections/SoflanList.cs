@@ -198,13 +198,13 @@ namespace OngekiFumenEditor.Base.Collections
             }
         }
 
-        public IReadOnlyList<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_DesignMode(double tUnitLength, BpmList bpmList)
+        public IList<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_DesignMode(double tUnitLength, BpmList bpmList)
         {
             CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
             return cachedSoflanPositionList_DesignMode;
         }
 
-        public IReadOnlyList<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_PreviewMode(double tUnitLength, BpmList bpmList)
+        public IList<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_PreviewMode(double tUnitLength, BpmList bpmList)
         {
             CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
             return cachedSoflanPositionList_PreviewMode;
