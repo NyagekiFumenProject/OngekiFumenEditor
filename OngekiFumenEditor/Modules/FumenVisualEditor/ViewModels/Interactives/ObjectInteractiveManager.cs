@@ -29,8 +29,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
         {
             return ongeki switch
             {
-                WallHoldEnd or HoldEnd => new HoldEndObjectInteractiveAction(),
-                WallHold => new WallHoldObjectInteractiveAction(),
+                HoldEnd { ReferenceLaneStart: { IsWallLane: false } } => new HoldEndObjectInteractiveAction(),
+                HoldEnd { ReferenceLaneStart: { IsWallLane: true } } => new WallHoldObjectInteractiveAction(),
                 Hold => new HoldObjectInteractiveAction(),
                 ILaneDockable => new DockableObjectInteractiveAction(),
                 ConnectableObjectBase or LaneCurvePathControlObject => new ConnectableObjectInteractiveAction(),

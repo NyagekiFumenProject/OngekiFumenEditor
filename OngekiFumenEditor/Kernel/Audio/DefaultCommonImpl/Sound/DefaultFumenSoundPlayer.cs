@@ -234,18 +234,26 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             foreach (var tGrid in CalculateDefaultClickSEs(fumen))
                 AddSound(SoundControl.ClickSE, tGrid);
 
+            using var _d = ObjectPool<HashSet<Type>>.GetWithUsingDisposable(out var typeSet, out _);
+
             foreach (var group in soundObjects.GroupBy(x => x.TGrid))
             {
                 var sounds = (SoundControl)0;
+                typeSet.Clear();
 
-                foreach (var obj in group.DistinctBy(x => x.GetType()))
+                foreach (var obj in group.Where(x =>
+                {
+                    if (x is Tap)
+                        return true;
+                    return typeSet.Add(x.GetType());
+                }))
                 {
                     sounds = sounds | obj switch
                     {
-                        WallTap { IsCritical: false } => SoundControl.WallTap,
-                        WallTap { IsCritical: true } => SoundControl.CriticalWallTap,
-                        Tap { IsCritical: false } or Hold { IsCritical: false } => SoundControl.Tap,
-                        Tap { IsCritical: true } or Hold { IsCritical: true } => SoundControl.CriticalTap,
+                        Tap { ReferenceLaneStart: { IsWallLane: true }, IsCritical: false } or Hold { ReferenceLaneStart: { IsWallLane: true }, IsCritical: false } => SoundControl.WallTap,
+                        Tap { ReferenceLaneStart: { IsWallLane: true }, IsCritical: true } or Hold { ReferenceLaneStart: { IsWallLane: true }, IsCritical: true } => SoundControl.CriticalWallTap,
+                        Tap { ReferenceLaneStart: { IsWallLane: false }, IsCritical: false } or Hold { ReferenceLaneStart: { IsWallLane: false }, IsCritical: false } => SoundControl.Tap,
+                        Tap { ReferenceLaneStart: { IsWallLane: false }, IsCritical: true } or Hold { ReferenceLaneStart: { IsWallLane: false }, IsCritical: true } => SoundControl.CriticalTap,
                         Bell => SoundControl.Bell,
                         Bullet => SoundControl.Bullet,
                         Flick { IsCritical: false } => SoundControl.Flick,

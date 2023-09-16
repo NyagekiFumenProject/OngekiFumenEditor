@@ -1,17 +1,12 @@
 ﻿using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class Tap : OngekiMovableObjectBase, ILaneDockableChangable
     {
+        public bool IsWallTap => ReferenceLaneStart?.IsWallLane ?? false;
+
         private bool isCritical = false;
         public bool IsCritical
         {

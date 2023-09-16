@@ -15,6 +15,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class Hold : ConnectableStartObject, ILaneDockableChangable
     {
+        public bool IsWallHold => ReferenceLaneStart?.IsWallLane ?? false;
+
         private bool isCritical = false;
         public bool IsCritical
         {

@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl
             return ParseParams(paramsDataStr).ToDictionaryWithObjectPool(x => x.name, x => x.value, out map);
         }
 
-        private static Regex s = new Regex(@"(\w+)\[(.*?)\]");
+        private static Regex s = new Regex(@"(\w+)\[(.*?)\]\s*(,|$)");
 
         public static IEnumerable<(string name, string value)> ParseParams(string content)
         {

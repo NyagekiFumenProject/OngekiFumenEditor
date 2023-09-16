@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 {
                     var laneType = ConnectableObject.ReferenceLaneStart?.LaneType;
                     var isWall = laneType == LaneType.WallLeft || laneType == LaneType.WallRight;
-                    var genWallChild = isWall ? new WallHoldEnd() : new HoldEnd();
+                    var genWallChild = new HoldEnd();
 
                     ConnectableObject.AddChildObject(genWallChild);
 

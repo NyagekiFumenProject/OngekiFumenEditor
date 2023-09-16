@@ -316,11 +316,11 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
                 switch (u)
                 {
                     case Tap t:
-                        sb.AppendLine($"{t.IDShortName}\t{t.ReferenceLaneStart?.RecordId ?? (t is WallTap ? -2 : -1)}\t{t.TGrid.Serialize()}\t{t.XGrid.Unit}\t{t.XGrid.Grid}");
+                        sb.AppendLine($"{t.IDShortName}\t{t.ReferenceLaneStart?.RecordId ?? -1}\t{t.TGrid.Serialize()}\t{t.XGrid.Unit}\t{t.XGrid.Grid}");
                         break;
                     case Hold h:
                         var end = h.Children.LastOrDefault();
-                        sb.AppendLine($"{h.IDShortName}\t{h.ReferenceLaneStart?.RecordId ?? (h is WallHold ? -2 : -1)}\t{h.TGrid.Serialize()}\t{h.XGrid.Unit}\t{h.XGrid.Grid}\t{end?.TGrid.Serialize()}\t{end?.XGrid.Unit}\t{end?.XGrid.Grid}");
+                        sb.AppendLine($"{h.IDShortName}\t{h.ReferenceLaneStart?.RecordId ?? -1}\t{h.TGrid.Serialize()}\t{h.XGrid.Unit}\t{h.XGrid.Grid}\t{end?.TGrid.Serialize()}\t{end?.XGrid.Unit}\t{end?.XGrid.Grid}");
                         break;
                     default:
                         break;

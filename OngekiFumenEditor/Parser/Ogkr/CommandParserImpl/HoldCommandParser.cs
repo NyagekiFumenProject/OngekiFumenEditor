@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
             {
                 Log.LogWarn($"Tap parse can't find lane/wallLane RecordId = {laneId}");
             }
-            var hold = (refLaneStart?.IsWallLane ?? false) ? new WallHold() : new Hold();
+            var hold = new Hold();
 
             hold.ReferenceLaneStart = refLaneStart;
 
@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 
             if (dataArr.Length > 6)
             {
-                var holdEnd = (refLaneStart?.IsWallLane ?? false) ? new WallHoldEnd() : new HoldEnd();
+                var holdEnd = new HoldEnd();
                 hold.AddChildObject(holdEnd);
 
                 holdEnd.TGrid.Unit = dataArr[6];

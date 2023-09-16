@@ -117,8 +117,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 
         private static int CalculateSideObjectsAsync(OngekiFumen fumen)
         {
-            var wallTapsCount = fumen.Taps.Where(x => x.ReferenceLaneStart?.IsWallLane == true).Count();
-            var wallHoldCount = fumen.Holds.Where(x => x.ReferenceLaneStart?.IsWallLane == true).Count();
+            var wallTapsCount = fumen.Taps.Where(x => x.IsWallTap).Count();
+            var wallHoldCount = fumen.Holds.Where(x => x.IsWallHold).Count();
             return wallTapsCount + wallHoldCount;
         }
 

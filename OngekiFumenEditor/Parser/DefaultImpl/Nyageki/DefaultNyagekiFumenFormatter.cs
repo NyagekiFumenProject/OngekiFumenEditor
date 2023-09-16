@@ -321,11 +321,11 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         public void ProcessNOTES(OngekiFumen fumen, StreamWriter sb)
         {
             foreach (var tap in fumen.Taps.OrderBy(x => x.TGrid))
-                sb.WriteLine($"Tap\t:\t{tap.ReferenceLaneStrId}\t:\tX[{tap.XGrid.Unit},{tap.XGrid.Grid}], T[{tap.TGrid.Unit},{tap.TGrid.Grid}], C[{tap.IsCritical}], W[{tap is WallTap}]");
+                sb.WriteLine($"Tap\t:\t{tap.ReferenceLaneStrId}\t:\tX[{tap.XGrid.Unit},{tap.XGrid.Grid}], T[{tap.TGrid.Unit},{tap.TGrid.Grid}], C[{tap.IsCritical}]");
             sb.WriteLine();
             foreach (var hold in fumen.Holds.OrderBy(x => x.TGrid))
             {
-                sb.Write($"Hold\t:\t{hold.ReferenceLaneStrId}, {hold.IsCritical}, {hold is WallHold}\t:\t(X[{hold.XGrid.Unit},{hold.XGrid.Grid}], T[{hold.TGrid.Unit}, {hold.TGrid.Grid}])");
+                sb.Write($"Hold\t:\t{hold.ReferenceLaneStrId}, {hold.IsCritical}, {hold.IsWallHold}\t:\t(X[{hold.XGrid.Unit},{hold.XGrid.Grid}], T[{hold.TGrid.Unit}, {hold.TGrid.Grid}])");
                 if (hold.HoldEnd is HoldEnd end)
                     sb.Write($"\t->\t(X[{end.XGrid.Unit},{end.XGrid.Grid}], T[{end.TGrid.Unit},{end.TGrid.Grid}])");
                 sb.WriteLine();
