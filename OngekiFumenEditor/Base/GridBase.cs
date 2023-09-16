@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Base
             {
                 grid = value;
                 RecalculateTotalValues();
-                NotifyOfPropertyChange(() => Grid);
+                NotifyOfPropertyChange(nameof(Grid));
             }
         }
 
@@ -67,7 +67,7 @@ namespace OngekiFumenEditor.Base
             {
                 unit = value;
                 RecalculateTotalValues();
-                NotifyOfPropertyChange(() => Unit);
+                NotifyOfPropertyChange(nameof(Unit));
             }
         }
 
