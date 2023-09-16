@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             var ry = CheckAndAdjustY((ITimelineObject)obj, relativePoint.Y, editor);
             if (ry is double y && TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is TGrid tGrid)
             {
-                if (((obj as HoldEnd)?.ReferenceStartObject as Hold)?.ReferenceLaneStart is LaneStartBase start)
+                if (((obj as HoldEnd)?.RefHold)?.ReferenceLaneStart is LaneStartBase start)
                 {
                     var x = CalculateConnectableObjectCurrentRelativeX(start, tGrid, editor) ?? relativePoint.X;
                     relativePoint.X = x;

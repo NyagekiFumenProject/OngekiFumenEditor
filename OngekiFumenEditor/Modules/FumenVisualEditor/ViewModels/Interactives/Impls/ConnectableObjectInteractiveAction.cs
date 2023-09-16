@@ -158,7 +158,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
                 if (dockable is Hold hold && hold.HoldEnd is HoldEnd end)
                 {
-                    if (end.CalulateXGrid(end.TGrid) is XGrid xGrid2)
+                    if (end.RefHold?.ReferenceLaneStart?.CalulateXGrid(end.TGrid) is XGrid xGrid2)
                         end.XGrid = xGrid2;
                 }
             }

@@ -56,11 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         private void CheckEnableDrag()
         {
-            IsEnableDrag = !((ConnectableObject switch
-            {
-                Hold start => start,
-                _ => default,
-            })?.Children.OfType<ConnectableEndObject>().Any() ?? false);
+            IsEnableDrag = !(ConnectableObject.HoldEnd is not null);
         }
 
         public HoldOperationViewModel(Hold obj)
@@ -88,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                     var isWall = laneType == LaneType.WallLeft || laneType == LaneType.WallRight;
                     var genWallChild = new HoldEnd();
 
-                    ConnectableObject.AddChildObject(genWallChild);
+                    ConnectableObject.SetHold(genWallChild);
 
                     CheckEnableDrag();
                     return genWallChild;

@@ -26,8 +26,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
 
             return ongeki switch
             {
-                HoldEnd { ReferenceLaneStart: { IsWallLane: false } } => holdEndAction,
-                HoldEnd { ReferenceLaneStart: { IsWallLane: true } } => wallHoldEndAction,
+                HoldEnd { RefHold: { IsWallHold: false } } => holdEndAction,
+                HoldEnd { RefHold: { IsWallHold: true } } => wallHoldEndAction,
                 _ => actionProcessMap.TryGetValue(type, out var action) ? action : (actionProcessMap[type] = GetInteractiveInternal(ongeki))
             };
         }

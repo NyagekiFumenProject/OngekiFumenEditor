@@ -33,8 +33,8 @@ namespace OngekiFumenEditor.Utils.Ogkr
         {
             return fumen.Taps
                 .AsEnumerable<ILaneDockable>()
-                .Concat(fumen.Holds.SelectMany(x => new ILaneDockable[] { x, x.HoldEnd }))
-                .FilterNull() //可能有些hold没留end物件,过滤一下
+                //.Concat(fumen.Holds.SelectMany(x => new ILaneDockable[] { x, x.HoldEnd }))
+                .FilterNull()
                 .Where(x => x.ReferenceLaneStart?.RecordId is int id && curveStarts.Any(y => y.RecordId == id));
         }
     }

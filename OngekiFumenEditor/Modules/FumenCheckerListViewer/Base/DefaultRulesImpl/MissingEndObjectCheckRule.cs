@@ -50,8 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
             }
 
             var starts = Enumerable.Empty<ConnectableStartObject>()
-                .Concat(fumen.Lanes)
-                .Concat(fumen.Holds);
+                .Concat(fumen.Lanes);
 
             foreach (var start in CheckList(starts))
             {

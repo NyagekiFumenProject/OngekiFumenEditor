@@ -13,8 +13,10 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Hold : ConnectableStartObject, ILaneDockableChangable
+    public class Hold : OngekiMovableObjectBase, ILaneDockableChangable
     {
+        private HoldEnd holdEnd;
+
         public bool IsWallHold => ReferenceLaneStart?.IsWallLane ?? false;
 
         private bool isCritical = false;
@@ -26,7 +28,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 isCritical = value;
                 NotifyOfPropertyChange(() => IDShortName);
                 NotifyOfPropertyChange(() => IsCritical);
-                Children.ForEach(x => x.NotifyOfPropertyChange(() => IsCritical));
             }
         }
 
@@ -39,14 +40,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 referenceLaneStart = value;
                 NotifyOfPropertyChange(() => ReferenceLaneStart);
                 NotifyOfPropertyChange(() => ReferenceLaneStrId);
-                Children?.FirstOrDefault()?.NotifyOfPropertyChange(() => ReferenceLaneStart);
             }
         }
 
         [ObjectPropertyBrowserShow]
         [ObjectPropertyBrowserAlias("RefLaneId")]
         public int ReferenceLaneStrId => ReferenceLaneStart?.RecordId ?? -1;
-
 
         private int? referenceLaneStrIdManualSet = default;
         [ObjectPropertyBrowserShow]
@@ -63,11 +62,37 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public HoldEnd HoldEnd => Children.LastOrDefault() as HoldEnd;
+        public HoldEnd HoldEnd => holdEnd;
+
+        public TGrid EndTGrid => HoldEnd?.TGrid ?? TGrid;
 
         public override string IDShortName => IsCritical ? "CHD" : "HLD";
 
-        public override ConnectableNextObject CreateNextObject() => null;
-        public override ConnectableEndObject CreateEndObject() => new HoldEnd();
+        public void SetHold(HoldEnd end)
+        {
+            if (holdEnd is not null)
+                holdEnd.PropertyChanged -= HoldEnd_PropertyChanged;
+            if (end is not null)
+                end.PropertyChanged += HoldEnd_PropertyChanged;
+
+            holdEnd = end;
+
+            if (end is not null)
+            {
+                end.RefHold?.SetHold(null);
+                end.RefHold = this;
+            }
+        }
+
+        private void HoldEnd_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            //todo?
+        }
+
+        public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
+        {
+            yield return this;
+            yield return HoldEnd;
+        }
     }
 }

@@ -161,7 +161,8 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is HoldEnd holdEnd)
             {
-                Holds.Add(holdEnd);
+                if (holdEnd.RefHold is null && Holds.FirstOrDefault(x => x.Id == holdEnd.CacheRecoveryHoldObjectID) is Hold h)
+                    h.SetHold(holdEnd);
             }
             else if (obj is Comment comment)
             {
@@ -251,7 +252,9 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is HoldEnd holdEnd)
             {
-                Holds.Remove(holdEnd);
+                holdEnd.CacheRecoveryHoldObjectID = holdEnd.RefHold?.Id;
+                holdEnd.RefHold?.SetHold(null);
+                holdEnd.RefHold = null;
             }
             else if (obj is SvgPrefabBase prefab)
             {

@@ -1,29 +1,32 @@
 ﻿using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
+using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class HoldEnd : ConnectableEndObject, ILaneDockable
+    public class HoldEnd : OngekiMovableObjectBase, ILaneDockable
     {
-        public bool IsCritical => (ReferenceStartObject as Hold)?.IsCritical ?? false;
-
         public override string IDShortName => "[HoldEnd]";
 
-        public LaneStartBase ReferenceLaneStart
+        private Hold refHold;
+        public Hold RefHold
         {
-            get => (ReferenceStartObject as Hold)?.ReferenceLaneStart;
-            set
-            {
-                NotifyOfPropertyChange(() => ReferenceLaneStart);
-            }
+            get => refHold;
+            internal set => Set(ref refHold, value);
         }
 
-        [ObjectPropertyBrowserAlias("RefLaneId")]
-        public int ReferenceLaneStrId
+        [ObjectPropertyBrowserHide]
+        public LaneStartBase ReferenceLaneStart
         {
-            get => (ReferenceStartObject as Hold)?.ReferenceLaneStrId ?? -1;
-            set => NotifyOfPropertyChange(() => ReferenceLaneStrId);
+            get => RefHold?.ReferenceLaneStart;
+            set { }
         }
+
+        [ObjectPropertyBrowserHide]
+        public int ReferenceLaneStrId => ReferenceLaneStart?.RecordId ?? -1;
+
+        internal int? CacheRecoveryHoldObjectID { get; set; } = null;
     }
 }

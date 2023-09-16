@@ -347,8 +347,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //特殊处理Hold:清除Id
                 if (copied is Hold hold)
                 {
-                    hold.RecordId = -1;
-                    undo += () => hold.RecordId = -1;
+                    hold.ReferenceLaneStart = default;
+                    undo += () => hold.ReferenceLaneStart = default;
                 }
 
                 TGrid newTGrid = default;
@@ -694,9 +694,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }, () =>
             {
                 foreach (var obj in selectedObject)
-                {
                     Fumen.AddObject(obj);
-                }
             }));
         }
 

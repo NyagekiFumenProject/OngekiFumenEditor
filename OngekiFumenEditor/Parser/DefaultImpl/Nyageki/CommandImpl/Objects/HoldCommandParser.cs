@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
                 end.TGrid = notes[1]["T"].ParseToTGrid();
                 end.XGrid = notes[1]["X"].ParseToXGrid();
 
-                hold.AddChildObject(end);
+                hold.SetHold(end);
             }
 
             foreach ((var d, _) in maps)
