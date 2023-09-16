@@ -13,8 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
     {
         public override IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = null)
         {
-            return base.PickDockableObjects(editor)
-                    .Where(x => x.IDShortName[0] == 'L');
+            return base.PickDockableObjects(editor);
         }
     }
 }

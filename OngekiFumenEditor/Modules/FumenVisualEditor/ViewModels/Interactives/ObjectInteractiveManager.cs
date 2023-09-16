@@ -15,22 +15,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
     public class ObjectInteractiveManager
     {
         private Dictionary<Type, ObjectInteractiveActionBase> actionProcessMap = new();
-        private ObjectInteractiveActionBase defaultAction = new DefaultObjectInteractiveAction();
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ObjectInteractiveActionBase defaultAction = new DefaultObjectInteractiveAction();
+        private ObjectInteractiveActionBase holdEndAction = new HoldEndObjectInteractiveAction();
+        private ObjectInteractiveActionBase wallHoldEndAction = new WallHoldObjectInteractiveAction();
+
         public ObjectInteractiveActionBase GetInteractive(OngekiObjectBase ongeki)
         {
             var type = ongeki.GetType();
-            return actionProcessMap.TryGetValue(type, out var action) ? action : (actionProcessMap[type] = GetInteractiveInternal(ongeki));
+
+            return ongeki switch
+            {
+                HoldEnd { ReferenceLaneStart: { IsWallLane: false } } => holdEndAction,
+                HoldEnd { ReferenceLaneStart: { IsWallLane: true } } => wallHoldEndAction,
+                _ => actionProcessMap.TryGetValue(type, out var action) ? action : (actionProcessMap[type] = GetInteractiveInternal(ongeki))
+            };
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ObjectInteractiveActionBase GetInteractiveInternal(OngekiObjectBase ongeki)
         {
             return ongeki switch
             {
-                HoldEnd { ReferenceLaneStart: { IsWallLane: false } } => new HoldEndObjectInteractiveAction(),
-                HoldEnd { ReferenceLaneStart: { IsWallLane: true } } => new WallHoldObjectInteractiveAction(),
+                // HoldEnd { ReferenceLaneStart: { IsWallLane: false } } => new HoldEndObjectInteractiveAction(),
+                // HoldEnd { ReferenceLaneStart: { IsWallLane: true } } => new WallHoldObjectInteractiveAction(),
                 Hold => new HoldObjectInteractiveAction(),
                 ILaneDockable => new DockableObjectInteractiveAction(),
                 ConnectableObjectBase or LaneCurvePathControlObject => new ConnectableObjectInteractiveAction(),
