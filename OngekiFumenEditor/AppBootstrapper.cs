@@ -136,7 +136,7 @@ namespace OngekiFumenEditor
         protected void LogBaseInfos()
         {
             Log.LogInfo($"Application verison : {GetType().Assembly.GetName().Version} , Product Version+CommitHash : {FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).ProductVersion}");
-            Log.LogInfo($"User current CultureInfo : {CultureInfo.CurrentCulture} , UI CultureInfo : {CultureInfo.CurrentUICulture}");
+            Log.LogInfo($"User CurrentCulture: {CultureInfo.CurrentCulture}, CurrentUICulture: {CultureInfo.CurrentUICulture}, DefaultThreadCurrentCulture: {CultureInfo.DefaultThreadCurrentCulture}, DefaultThreadCurrentUICulture: {CultureInfo.DefaultThreadCurrentUICulture}");
         }
 
         protected async override void OnStartup(object sender, StartupEventArgs e)
