@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
                 {
                     filePath = Path.Combine(logDir, FileHelper.FilterFileName(DateTime.Now.ToString() + ".log"));
                 } while (File.Exists(filePath));
-                writer = new StreamWriter(File.OpenWrite(filePath));
+                writer = new StreamWriter(File.OpenWrite(filePath), Encoding.UTF8);
 
                 WriteLog("----------BEGIN FILE LOG OUTPUT----------\n");
             }
@@ -56,16 +56,16 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
                 Thread.Sleep(0);
         }
 
-        public static void WriteLog(string content)
+        public static Task WriteLog(string content)
         {
             if (writer is null)
-                return;
+                return Task.CompletedTask;
             contents.Enqueue(content);
 
-            NotifyWrite();
+            return NotifyWrite();
         }
 
-        private static async void NotifyWrite()
+        private static async Task NotifyWrite()
         {
             if (writing)
                 return;
