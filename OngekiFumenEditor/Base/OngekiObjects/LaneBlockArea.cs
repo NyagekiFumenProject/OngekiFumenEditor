@@ -26,10 +26,24 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
             public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => IDisplayableObject.EmptyDisplayable;
 
+            private bool tGridHasSet;
+
             public override TGrid TGrid
             {
-                get => base.TGrid.TotalGrid <= 0 ? (TGrid = RefLaneBlockArea.TGrid.CopyNew()) : base.TGrid;
-                set => base.TGrid = value is not null ? MathUtils.Max(value, RefLaneBlockArea.TGrid.CopyNew()) : value;
+                get
+                {
+                    if (!tGridHasSet)
+                    {
+                        TGrid = RefLaneBlockArea.TGrid.CopyNew();
+                        return TGrid;
+                    }
+                    return base.TGrid;
+                }
+                set
+                {
+                    base.TGrid = value is not null ? MathUtils.Max(value, RefLaneBlockArea.TGrid.CopyNew()) : value;
+                    tGridHasSet = true;
+                }
             }
 
             public override string ToString() => $"{base.ToString()}";
