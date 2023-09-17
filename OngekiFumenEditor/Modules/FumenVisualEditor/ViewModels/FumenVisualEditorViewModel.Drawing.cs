@@ -1,4 +1,4 @@
-using Caliburn.Micro;
+ï»¿using Caliburn.Micro;
 using Gemini.Framework;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Scheduler;
@@ -214,12 +214,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
 
             /*
-             ÕâÀï¿¼ÂÇµ½ÓÐspd<1µÄ×Óµ¯/Bell»áÌáÇ°³öÏÖµÄÇé¿ö£¬Òò´ËµÃ·Ö×´Ì¬·Ö±ðÈ¥Ñ¡Ôñ
+             * è¿™é‡Œè€ƒè™‘åˆ°æœ‰spd<1çš„å­å¼¹/Bellä¼šæå‰å‡ºçŽ°çš„æƒ…å†µï¼Œå› æ­¤å¾—åˆ†çŠ¶æ€åˆ†åˆ«åŽ»é€‰æ‹©
              */
             obj.Clear();
             if (Editor.IsPreviewMode)
             {
-                //todo »¹ÄÜÔÙ´ÎÓÅ»¯
+                //todo è¿˜èƒ½å†æ¬¡ä¼˜åŒ–
                 bool check(IBulletPalleteReferencable bell)
                 {
                     var appearOffsetTime = ViewHeight / (bell.ReferenceBulletPallete?.Speed ?? 1f);
@@ -284,7 +284,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var minTGrid = convertToTGrid(minY, this) ?? TGrid.Zero;
             var maxTGrid = convertToTGrid(minY + ViewHeight, this);
 
-            //todo ÕâÀï¾ÍÒª¼ÆËã¿ÉÊÓÇøÓòÁË
+            //todo è¿™é‡Œå°±è¦è®¡ç®—å¯è§†åŒºåŸŸäº†
             Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));
             TGridRange = new VisibleTGridRange(minTGrid, maxTGrid);
 
@@ -347,7 +347,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void RecalculateMagaticXGridLines()
         {
-            //todo ¿ÉÒÔÓÅ»¯
+            //todo å¯ä»¥ä¼˜åŒ–
             cachedMagneticXGridLines.Clear();
 
             var xOffset = (float)Setting.XOffset;

@@ -1,4 +1,4 @@
-using Caliburn.Micro;
+ï»¿using Caliburn.Micro;
 using Gemini.Framework.Results;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base.Collections;
@@ -72,7 +72,7 @@ namespace OngekiFumenEditor
             foreach (var path in pluginsDirPaths)
             {
                 Debug.WriteLine($"----------------");
-                Debug.WriteLine($"¼ÓÔØ²å¼ş×ÓÄ¿Â¼:{path}");
+                Debug.WriteLine($"åŠ è½½æ’ä»¶å­ç›®å½•:{path}");
                 try
                 {
                     var directoryCatalog = new DirectoryCatalog(path);
@@ -87,7 +87,7 @@ namespace OngekiFumenEditor
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine($"¼ÓÔØ²å¼ş×ÓÄ¿Â¼³ö´í:{e.Message}");
+                    Debug.WriteLine($"åŠ è½½æ’ä»¶å­ç›®å½•å‡ºé”™:{e.Message}");
                 }
                 Debug.WriteLine($"----------------");
             }
@@ -160,7 +160,7 @@ namespace OngekiFumenEditor
             if (ProgramSetting.Default.UpgradeProcessPriority)
             {
                 var curProc = Process.GetCurrentProcess();
-                //ÌáÉı
+                //æå‡
                 var before = curProc.PriorityClass;
                 var after = ProcessPriorityClass.High;
                 curProc.PriorityClass = after;

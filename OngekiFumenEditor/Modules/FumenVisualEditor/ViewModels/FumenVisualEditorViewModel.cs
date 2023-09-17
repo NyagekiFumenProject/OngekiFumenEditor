@@ -1,4 +1,4 @@
-using Caliburn.Micro;
+ï»¿using Caliburn.Micro;
 using Gemini.Framework;
 using Microsoft.Win32;
 using OngekiFumenEditor.Base;
@@ -144,12 +144,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     {
                         if (selectable.IsSelected)
                         {
-                            //µã»÷
+                            //ÂµÃ£Â»Ã·
                             CurrentSelectedObjects.Add(selectable);
                         }
                         else
                         {
-                            //È¡Ïûµã»÷
+                            //ÃˆÂ¡ÃÃ»ÂµÃ£Â»Ã·
                             if (curBrowserObj == sender)
                                 objBrowser.SetCurrentOngekiObject(null, this);
                             CurrentSelectedObjects.Remove(selectable);
@@ -201,7 +201,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 Set(ref brushMode, value);
-                ToastNotify($"±ÊË¢Ä£Ê½:{(BrushMode ? "¿ªÆô" : "¹Ø±Õ")}");
+                ToastNotify($"ç¬”åˆ·æ¨¡å¼:{(BrushMode ? "å¼€å¯" : "å…³é—­")}");
             }
         }
 
@@ -234,7 +234,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialogViewModel);
                 if (result != true)
                 {
-                    Log.LogInfo($"ÓÃ»§ÎŞ·¨Íê³ÉĞÂ½¨ÏîÄ¿Ïòµ¼£¬¹Ø±Õ´Ë±à¼­Æ÷");
+                    Log.LogInfo($"ç”¨æˆ·æ— æ³•å®Œæˆæ–°å»ºé¡¹ç›®å‘å¯¼ï¼Œå…³é—­æ­¤ç¼–è¾‘å™¨");
                     await TryCloseAsync(false);
                     return;
                 }
@@ -244,7 +244,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
                     var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
                     if (fumenDeserializer is null)
-                        throw new NotSupportedException($"²»Ö§³Ö´ËÆ×ÃæÎÄ¼şµÄ½âÎö:{projectData.FumenFilePath}");
+                        throw new NotSupportedException($"ä¸æ”¯æŒæ­¤è°±é¢æ–‡ä»¶çš„è§£æ:{projectData.FumenFilePath}");
                     var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
                     projectData.Fumen = fumen;
                 }
@@ -255,7 +255,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             catch (Exception e)
             {
-                var errMsg = $"ÎŞ·¨ĞÂ½¨ÏîÄ¿:{e.Message}";
+                var errMsg = $"æ— æ³•æ–°å»ºé¡¹ç›®:{e.Message}";
                 Log.LogError(errMsg);
                 MessageBox.Show(errMsg);
                 await TryCloseAsync(false);
@@ -270,11 +270,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
                 var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
                 await Load(projectData);
-                ToastNotify("Æ×ÃæÏîÄ¿ºÍÎÄ¼ş¼ÓÔØ³É¹¦");
+                ToastNotify("è°±é¢é¡¹ç›®å’Œæ–‡ä»¶åŠ è½½æˆåŠŸ");
             }
             catch (Exception e)
             {
-                var errMsg = $"ÎŞ·¨¼ÓÔØÏîÄ¿:{e.Message}";
+                var errMsg = $"æ— æ³•åŠ è½½é¡¹ç›®:{e.Message}";
                 Log.LogError(errMsg);
                 MessageBox.Show(errMsg);
                 await TryCloseAsync(false);
@@ -293,7 +293,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             catch (Exception e)
             {
-                var errMsg = $"ÎŞ·¨¼ÓÔØÏîÄ¿:{e.Message}";
+                var errMsg = $"æ— æ³•åŠ è½½é¡¹ç›®:{e.Message}";
                 Log.LogError(errMsg);
                 MessageBox.Show(errMsg);
                 await TryCloseAsync(false);
@@ -319,7 +319,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 if (dialog.ShowDialog() != true)
                 {
-                    MessageBox.Show("ÎŞ·¨±£´æÆ×Ãæ,ÏîÄ¿±£´æÈ¡Ïû");
+                    MessageBox.Show("æ— æ³•ä¿å­˜è°±é¢,é¡¹ç›®ä¿å­˜å–æ¶ˆ");
                     return;
                 }
 
@@ -333,7 +333,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 MessageBox.Show(saveTaskResult.ErrorMessage);
             }
             else
-                ToastNotify("Æ×ÃæÏîÄ¿ºÍÎÄ¼ş±£´æ³É¹¦");
+                ToastNotify("è°±é¢é¡¹ç›®å’Œæ–‡ä»¶ä¿å­˜æˆåŠŸ");
         }
 
         #endregion

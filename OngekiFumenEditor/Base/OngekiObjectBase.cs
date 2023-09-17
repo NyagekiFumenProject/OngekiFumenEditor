@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Base
         /// <summary>
         /// 
         /// </summary>
-        [ObjectPropertyBrowserTipText("±íÊ¾ÓÃ»§×Ô¼º×Ô¶¨ÒåµÄ±êÇ©£¬Ò»°ãÓÃÓÚ½Å±¾Çø·Ö")]
+        [ObjectPropertyBrowserTipText("è¡¨ç¤ºç”¨æˆ·è‡ªå·±è‡ªå®šä¹‰çš„æ ‡ç­¾ï¼Œä¸€èˆ¬ç”¨äºè„šæœ¬åŒºåˆ†")]
         public string Tag
         {
             get => tag;
@@ -48,15 +48,15 @@ namespace OngekiFumenEditor.Base
         }
 
         /// <summary>
-        /// ¸´ÖÆÎï¼ş²ÎÊıºÍÄÚÈİ
+        /// å¤åˆ¶ç‰©ä»¶å‚æ•°å’Œå†…å®¹
         /// </summary>
-        /// <param name="fromObj">¸´ÖÆÔ´£¬±¾¶ÔÏóµÄ·ÂÖÆÄ¿±ê</param>
+        /// <param name="fromObj">å¤åˆ¶æºï¼Œæœ¬å¯¹è±¡çš„ä»¿åˆ¶ç›®æ ‡</param>
         public abstract void Copy(OngekiObjectBase fromObj);
 
         public OngekiObjectBase CopyNew()
         {
             if (this is not IDisplayableObject displayable
-                //Ôİ²»Ö§³Ö ÒÔÏÂÀàĞÍµÄ¸´ÖÆÕ³Ìù
+                //æš‚ä¸æ”¯æŒ ä»¥ä¸‹ç±»å‹çš„å¤åˆ¶ç²˜è´´
                 //|| obj is ConnectableObjectBase
                 )
                 return default;

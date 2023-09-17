@@ -14,6 +14,7 @@ using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDrawing
 {
     [Export(typeof(ICircleDrawing))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     internal class DefaultInstancedCircleDrawing : CommonDrawingBase, ICircleDrawing
     {
         private Base.Shader shader;

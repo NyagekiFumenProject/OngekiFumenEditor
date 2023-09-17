@@ -71,8 +71,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             ? Visibility.Hidden : Visibility.Visible;
 
         public Visibility EditorObjectVisibility =>
-            IsLocked || // ±à¼­Æ÷±»Ëø×¡
-            IsUserRequestHideEditorObject // ÓÃ»§ÒªÇóÒş²Ø(±ÈÈç°´ÏÂQ)
+            IsLocked || // ç¼–è¾‘å™¨è¢«é”ä½
+            IsUserRequestHideEditorObject // ç”¨æˆ·è¦æ±‚éšè—(æ¯”å¦‚æŒ‰ä¸‹Q)
             ? Visibility.Hidden : Visibility.Visible;
 
         public bool IsDesignMode => EditorObjectVisibility == Visibility.Visible;
@@ -175,28 +175,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             if (SelectObjects.IsEmpty())
             {
-                ToastNotify($"Çå¿Õ¸´ÖÆÁĞ±í");
+                ToastNotify($"æ¸…ç©ºå¤åˆ¶åˆ—è¡¨");
                 return;
             }
 
-            //¸´ÖÆËùÑ¡Îï¼ş
+            //å¤åˆ¶æ‰€é€‰ç‰©ä»¶
             currentCopiedSources.Clear();
 
             foreach (var obj in SelectObjects.Where(x => x switch
             {
-                //²»ÔÊĞí±»¸´ÖÆ
+                //ä¸å…è®¸è¢«å¤åˆ¶
                 ConnectableObjectBase and not (ConnectableStartObject) => false,
                 LaneCurvePathControlObject => false,
-                //ÔÊĞí±»¸´ÖÆ
+                //å…è®¸è¢«å¤åˆ¶
                 _ => true,
             }))
             {
-                //ÕâÀï»¹ÊÇµÃÔÙ´ÎÏêÏ¸¹ıÂË:
-                // * HoldÍ·¿ÉÒÔÖ±½Ó±»¸´ÖÆ
-                // * ¹ìµÀÈç¹ûÊÇÕû¸ö¹ìµÀ½Úµã¶¼±»Ñ¡ÖĞ£¬ÄÇÃ´ËüÒ²¿ÉÒÔ±»¸´ÖÆ£¬·ñÔò¾Í²»×¼
+                //è¿™é‡Œè¿˜æ˜¯å¾—å†æ¬¡è¯¦ç»†è¿‡æ»¤:
+                // * Holdå¤´å¯ä»¥ç›´æ¥è¢«å¤åˆ¶
+                // * è½¨é“å¦‚æœæ˜¯æ•´ä¸ªè½¨é“èŠ‚ç‚¹éƒ½è¢«é€‰ä¸­ï¼Œé‚£ä¹ˆå®ƒä¹Ÿå¯ä»¥è¢«å¤åˆ¶ï¼Œå¦åˆ™å°±ä¸å‡†
                 if (obj is ConnectableStartObject start && obj is not Hold)
                 {
-                    //¼ì²éstart¹ìµÀ½ÚµãÊÇ·ñÈ«±»Ñ¡ÖĞÁË
+                    //æ£€æŸ¥startè½¨é“èŠ‚ç‚¹æ˜¯å¦å…¨è¢«é€‰ä¸­äº†
                     if (!start.Children.OfType<ConnectableObjectBase>().Append(start).All(x => x.IsSelected))
                         continue;
                 }
@@ -211,14 +211,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var canvasPos = new Point(x, y);
 
-                //×¢²á,²¢¼ÇÂ¼µ±Ç°Î»ÖÃ
+                //æ³¨å†Œ,å¹¶è®°å½•å½“å‰ä½ç½®
                 currentCopiedSources[obj] = canvasPos;
             }
 
             if (currentCopiedSources.Count == 0)
-                ToastNotify($"Çå¿Õ¸´ÖÆÁĞ±í");
+                ToastNotify($"æ¸…ç©ºå¤åˆ¶åˆ—è¡¨");
             else
-                ToastNotify($"ÇÕ¶¨ {currentCopiedSources.Count} ¸öÎï¼ş×÷Îª¸´ÖÆÔ´ {(currentCopiedSources.Count == 1 ? ",²¢×÷ÎªË¢×ÓÄ£Ê½µÄÅúÁ¿Éú³ÉÔ´" : string.Empty)}");
+                ToastNotify($"é’¦å®š {currentCopiedSources.Count} ä¸ªç‰©ä»¶ä½œä¸ºå¤åˆ¶æº {(currentCopiedSources.Count == 1 ? ",å¹¶ä½œä¸ºåˆ·å­æ¨¡å¼çš„æ‰¹é‡ç”Ÿæˆæº" : string.Empty)}");
         }
 
         public enum PasteMirrorOption
@@ -256,7 +256,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //ÏÈÈ¡ÏûÑ¡ÔñËùÓĞµÄÎï¼ş
+            //å…ˆå–æ¶ˆé€‰æ‹©æ‰€æœ‰çš„ç‰©ä»¶
             TryCancelAllObjectSelecting();
 
             Point CalculateRangeCenter(IEnumerable<ISelectableObject> objects)
@@ -319,7 +319,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return mirrorY;
             }
 
-            //¼ÆËã³ö¾µÏñÖĞĞÄÎ»ÖÃ
+            //è®¡ç®—å‡ºé•œåƒä¸­å¿ƒä½ç½®
             var mirrorYOpt = CalculateYMirror(currentCopiedSources.Keys, mirrorOption);
             var mirrorXOpt = CalculateXMirror(currentCopiedSources.Keys, mirrorOption);
 
@@ -338,13 +338,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (copied is null)
                     continue;
 
-                //ÌØÊâ´¦ÀíConnectableStart:Á¬ChildºÍControlÒ»Æğ¸´ÖÆÁË
+                //ç‰¹æ®Šå¤„ç†ConnectableStart:è¿Childå’ŒControlä¸€èµ·å¤åˆ¶äº†
                 if (copied is ConnectableStartObject _s)
                 {
                     _s.CopyEntireConnectableObject((ConnectableStartObject)source);
                 }
 
-                //ÌØÊâ´¦ÀíHold:Çå³ıId
+                //ç‰¹æ®Šå¤„ç†Hold:æ¸…é™¤Id
                 if (copied is Hold hold)
                 {
                     hold.ReferenceLaneStart = default;
@@ -416,7 +416,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
 
                 XGrid newXGrid = default;
-                var offsetedX = 0d; //ºóÃæ»áÓÃµ½,Òò´ËÌá³öÀ´
+                var offsetedX = 0d; //åé¢ä¼šç”¨åˆ°,å› æ­¤æå‡ºæ¥
                 if (copied is IHorizonPositionObject horizonPositionObject)
                 {
                     var xGrid = horizonPositionObject.XGrid.CopyNew();
@@ -486,8 +486,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                     redo += () =>
                     {
-                        //ÕâÀï×ö¸ö¼ì²é°É:Èç¹û¸´ÖÆĞÂµÄÎ»ÖÃ¸ÕºÃÒ²(¿¿½ü)ÔÚÔ­À´¸½×ÅµÄ¹ìµÀÉÏ£¬ÄÇ¾Í²»±ä£¬·ñÔò¾ÍµÃÇå³ıReferenceLaneStart
-                        //todo ºóÃæ¿ÉÒÔ×ö¸üÏ¸½ÚµÄ¼ì²éºÍ±ä¶¯
+                        //è¿™é‡Œåšä¸ªæ£€æŸ¥å§:å¦‚æœå¤åˆ¶æ–°çš„ä½ç½®åˆšå¥½ä¹Ÿ(é è¿‘)åœ¨åŸæ¥é™„ç€çš„è½¨é“ä¸Šï¼Œé‚£å°±ä¸å˜ï¼Œå¦åˆ™å°±å¾—æ¸…é™¤ReferenceLaneStart
+                        //todo åé¢å¯ä»¥åšæ›´ç»†èŠ‚çš„æ£€æŸ¥å’Œå˜åŠ¨
                         if (dockable.ReferenceLaneStart is LaneStartBase beforeStart)
                         {
                             var needRedockLane = true;
@@ -498,7 +498,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                                 if (Math.Abs(diff) < 8)
                                 {
-                                    //ÄÇ¾ÍÊÇÔÚ¹ìµÀÉÏ£¬²»ÓÃ¶¯ÁË£¡
+                                    //é‚£å°±æ˜¯åœ¨è½¨é“ä¸Šï¼Œä¸ç”¨åŠ¨äº†ï¼
                                     needRedockLane = false;
                                 }
                                 else
@@ -516,8 +516,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                                 var pickLane = dockableLanes.FirstOrDefault();
 
-                                //²»ÔÚ¹ìµÀÉÏ£¬ÄÇ¾ÍÇå³ıÈÇ
-                                //todo ÖØĞÂÇÕ¶¨Ò»¸ö¹ìµÀ
+                                //ä¸åœ¨è½¨é“ä¸Šï¼Œé‚£å°±æ¸…é™¤æƒ¹
+                                //todo é‡æ–°é’¦å®šä¸€ä¸ªè½¨é“
                                 dockable.ReferenceLaneStart = pickLane;
                             }
                         }
@@ -547,7 +547,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             redo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
             undo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
 
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("¸´ÖÆÕ³Ìù", redo, undo));
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("å¤åˆ¶ç²˜è´´", redo, undo));
         }
 
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
@@ -555,7 +555,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private Point? mouseDownHitObjectPosition;
         private Point mouseSelectRangeStartPosition;
         /// <summary>
-        /// ±íÊ¾Ö¸ÕëÊÇ·ñ³öÍÏ¶¯³ö¹ö¶¯·¶Î§
+        /// è¡¨ç¤ºæŒ‡é’ˆæ˜¯å¦å‡ºæ‹–åŠ¨å‡ºæ»šåŠ¨èŒƒå›´
         /// </summary>
         private bool dragOutBound;
         private int currentDraggingActionId;
@@ -564,7 +564,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (!IsDesignMode)
             {
-                ToastNotify("ÇëÏÈ½«±à¼­Æ÷ÇĞ»»µ½Éè¼ÆÄ£Ê½");
+                ToastNotify("è¯·å…ˆå°†ç¼–è¾‘å™¨åˆ‡æ¢åˆ°è®¾è®¡æ¨¡å¼");
                 return;
             }
 
@@ -574,17 +574,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (obj is ITimelineObject timelineObject)
                     cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, this);
                 else
-                    ToastNotify($"ÎŞ·¨¼ÇÒä´ËÎï¼ş£¬ÒòÎª´ËÎï¼şÃ»ÓĞÊµÏÖITimelineObject : {obj}");
+                    ToastNotify($"æ— æ³•è®°å¿†æ­¤ç‰©ä»¶ï¼Œå› ä¸ºæ­¤ç‰©ä»¶æ²¡æœ‰å®ç°ITimelineObject : {obj}");
             }
 
-            ToastNotify($"ÒÑ¼ÇÒä {cacheObjectAudioTime.Count} ¸öÎï¼şµÄÒôÆµÊ±¼ä");
+            ToastNotify($"å·²è®°å¿† {cacheObjectAudioTime.Count} ä¸ªç‰©ä»¶çš„éŸ³é¢‘æ—¶é—´");
         }
 
         public void MenuItemAction_RecoverySelectedObjectToAudioTime()
         {
             if (!IsDesignMode)
             {
-                ToastNotify("ÇëÏÈ½«±à¼­Æ÷ÇĞ»»µ½Éè¼ÆÄ£Ê½");
+                ToastNotify("è¯·å…ˆå°†ç¼–è¾‘å™¨åˆ‡æ¢åˆ°è®¾è®¡æ¨¡å¼");
                 return;
             }
 
@@ -597,19 +597,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var undoTargets = recoverTargets.Select(x => x.x).Select(x => (x, x.TGrid)).ToList();
 
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("»Ö¸´Îï¼şµ½ÒôÆµÊ±¼ä",
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("æ¢å¤ç‰©ä»¶åˆ°éŸ³é¢‘æ—¶é—´",
                 () =>
                 {
-                    Log.LogInfo($"¿ªÊ¼»Ö¸´Îï¼şÊ±¼ä...");
+                    Log.LogInfo($"å¼€å§‹æ¢å¤ç‰©ä»¶æ—¶é—´...");
                     foreach ((var timelineObject, var audioTime) in recoverTargets)
                         timelineObject.TGrid = TGridCalculator.ConvertYToTGrid_DesignMode(audioTime, this);
 
-                    ToastNotify($"ÒÑ»Ö¸´ {recoverTargets.Count} ¸öÎï¼şµ½ÒôÆµÊ±¼ä...");
+                    ToastNotify($"å·²æ¢å¤ {recoverTargets.Count} ä¸ªç‰©ä»¶åˆ°éŸ³é¢‘æ—¶é—´...");
                 }, () =>
                 {
                     foreach ((var timelineObject, var undoTGrid) in undoTargets)
                         timelineObject.TGrid = undoTGrid;
-                    ToastNotify($"ÒÑ³·»Ø»Ö¸´ {recoverTargets.Count} ¸öÎï¼şµ½ÒôÆµÊ±¼ä...");
+                    ToastNotify($"å·²æ’¤å›æ¢å¤ {recoverTargets.Count} ä¸ªç‰©ä»¶åˆ°éŸ³é¢‘æ—¶é—´...");
                 }
             ));
         }
@@ -620,7 +620,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (!IsDesignMode)
             {
-                ToastNotify("ÇëÏÈ½«±à¼­Æ÷ÇĞ»»µ½Éè¼ÆÄ£Ê½");
+                ToastNotify("è¯·å…ˆå°†ç¼–è¾‘å™¨åˆ‡æ¢åˆ°è®¾è®¡æ¨¡å¼");
                 return;
             }
 
@@ -684,10 +684,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //É¾³ıÒÑÑ¡ÔñµÄÎï¼ş
+            //åˆ é™¤å·²é€‰æ‹©çš„ç‰©ä»¶
             var selectedObject = SelectObjects.OfType<OngekiObjectBase>().ToArray();
 
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("É¾³ıÎï¼ş", () =>
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("åˆ é™¤ç‰©ä»¶", () =>
             {
                 foreach (var obj in selectedObject)
                     RemoveObject(obj);
@@ -723,7 +723,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //È¡ÏûÑ¡Ôñ
+            //å–æ¶ˆé€‰æ‹©
             SelectObjects.ForEach(x => x.IsSelected = false);
         }
 
@@ -833,7 +833,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                                 var obj = x as OngekiObjectBase;
                                 InteractiveManager.GetInteractive(obj).OnDragEnd(obj, cp, this);
                             });
-                            var compositeAction = UndoRedoManager.EndCombineAction("Îï¼şÍÏ¶¯");
+                            var compositeAction = UndoRedoManager.EndCombineAction("ç‰©ä»¶æ‹–åŠ¨");
                             UndoRedoManager.ExecuteAction(compositeAction);
                         }
                         else
@@ -908,7 +908,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var idx = Math.Max(0, hitResult.IndexOf(mouseDownHitObject));
                 var hitOngekiObject = hitResult.ElementAtOrDefault(idx);
 
-                Log.LogDebug($"mousePos = £¨{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject}");
+                Log.LogDebug($"mousePos = ï¼ˆ{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject}");
 
                 mouseDownHitObject = null;
                 mouseDownNextHitObject = null;
@@ -928,7 +928,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    //ÕâÀïÈç¹ûÒÑ¾­ÓĞÎï¼şÑ¡ÔñÁË¾ÍÅĞ¶ÏÊÇ·ñ»¹ÓĞÆäËûÎï¼ş¿ÉÒÔÑ¡Ôñ
+                    //è¿™é‡Œå¦‚æœå·²ç»æœ‰ç‰©ä»¶é€‰æ‹©äº†å°±åˆ¤æ–­æ˜¯å¦è¿˜æœ‰å…¶ä»–ç‰©ä»¶å¯ä»¥é€‰æ‹©
                     SelectionVisibility = Visibility.Collapsed;
                     mouseDownHitObject = hitOngekiObject;
                     mouseDownHitObjectPosition = position;
@@ -1014,7 +1014,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 else if (rp <= trigPrecent && dragOutBound)
                     offsetYAcc = rp / trigPrecent - 1;
                 else if (rp < 1 - trigPrecent && rp > trigPrecent)
-                    dragOutBound = true; //µ±Ö¸ÕëÔÚ»¬¶¯·¶Î§ÍâÃæ£¬ÄÇÃ´¾Í¿ÉÒÔ½øĞĞÈÎºÎµÄ»¬¶¯²Ù×÷ÁË£¬±ÜÃâÖ¸Õë´Ó»¬¶¯·¶Î§ÄÚ¿ªÊ¼¾Í¹ö¶¯
+                    dragOutBound = true; //å½“æŒ‡é’ˆåœ¨æ»‘åŠ¨èŒƒå›´å¤–é¢ï¼Œé‚£ä¹ˆå°±å¯ä»¥è¿›è¡Œä»»ä½•çš„æ»‘åŠ¨æ“ä½œäº†ï¼Œé¿å…æŒ‡é’ˆä»æ»‘åŠ¨èŒƒå›´å†…å¼€å§‹å°±æ»šåŠ¨
                 offsetY = offsetYAcc * autoScrollSpeed;
 
                 var prev = CurrentPlayTime;
@@ -1025,24 +1025,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (offsetY != 0)
                     ScrollTo(y);
 
-                //¼ì²éÅĞ¶Ï£¬È·¶¨ÊÇÍÏ¶¯ÒÑÑ¡ÎïÆ·Î»ÖÃ£¬»¹ÊÇËµÀ­¿òÑ¡ÔñÇøÓò
+                //æ£€æŸ¥åˆ¤æ–­ï¼Œç¡®å®šæ˜¯æ‹–åŠ¨å·²é€‰ç‰©å“ä½ç½®ï¼Œè¿˜æ˜¯è¯´æ‹‰æ¡†é€‰æ‹©åŒºåŸŸ
                 if (IsRangeSelecting)
                 {
-                    //À­¿ò
+                    //æ‹‰æ¡†
                     var p = pos;
                     p.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - p.Y + offsetY));
                     SelectionCurrentCursorPosition = new Vector2((float)p.X, (float)p.Y);
                 }
                 else
                 {
-                    //ÍÏ¶¯ÒÑÑ¡Îï¼ş
+                    //æ‹–åŠ¨å·²é€‰ç‰©ä»¶
                     var cp = pos;
                     cp.Y = ViewHeight - cp.Y + Rect.MinY;
                     //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
                     SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
                 }
 
-                //³ÖĞøĞÔµÄ
+                //æŒç»­æ€§çš„
                 if (offsetY != 0)
                 {
                     var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
@@ -1060,11 +1060,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var newObject = copySouceObj.CopyNew();
             if (newObject is null
-                //²»Ö§³Ö±ÊË¢Ä£Ê½ÏÂĞÂ½¨ÒÔÏÂÍæÒâ
+                //ä¸æ”¯æŒç¬”åˆ·æ¨¡å¼ä¸‹æ–°å»ºä»¥ä¸‹ç©æ„
                 || newObject is ConnectableStartObject
                 || newObject is ConnectableEndObject)
             {
-                ToastNotify($"±ÊË¢Ä£Ê½ÏÂ²»Ö§³Ö{copySouceObj?.Name}");
+                ToastNotify($"ç¬”åˆ·æ¨¡å¼ä¸‹ä¸æ”¯æŒ{copySouceObj?.Name}");
                 return;
             }
 
@@ -1112,7 +1112,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             };
 
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Ë¢×ÓÎï¼şÌí¼Ó", redo, undo));
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("åˆ·å­ç‰©ä»¶æ·»åŠ ", redo, undo));
         }
 
         #region Object Click&Selection
@@ -1139,7 +1139,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var count = SelectObjects.Take(2).Count();
             var first = SelectObjects.FirstOrDefault();
 
-            if ((count > 1) || (count == 1 && first != obj)) //±ÈÈçÄãÄ¿Ç°ÓĞ¶à¸öÒÑÑ¡ÔñµÄ£¬µ«Äãµ¥µãÁËÒ»¸ö
+            if ((count > 1) || (count == 1 && first != obj)) //æ¯”å¦‚ä½ ç›®å‰æœ‰å¤šä¸ªå·²é€‰æ‹©çš„ï¼Œä½†ä½ å•ç‚¹äº†ä¸€ä¸ª
             {
                 TryCancelAllObjectSelecting(obj as ISelectableObject);
                 selectable.IsSelected = true;
@@ -1213,7 +1213,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             if (!IsDesignMode)
             {
-                Log.LogWarn($"ÇëÏÈ½«±à¼­Æ÷ÇĞ»»µ½±à¼­Ä£Ê½");
+                Log.LogWarn($"è¯·å…ˆå°†ç¼–è¾‘å™¨åˆ‡æ¢åˆ°ç¼–è¾‘æ¨¡å¼");
                 return;
             }
 
@@ -1274,7 +1274,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
 
                 var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength) * 2;
-                //Ïû³ı¾«¶ÈÎó²î~
+                //æ¶ˆé™¤ç²¾åº¦è¯¯å·®~
                 var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
 
                 var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale, Setting.TGridUnitLength);
@@ -1308,7 +1308,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         #region Lock/Unlock User Interaction
 
         /// <summary>
-        /// Ëø×¡±à¼­Æ÷ËùÓĞ½»»¥²Ù×÷£¬ÓÃ»§ÎŞ·¨¶Ô´Ë±à¼­Æ÷×öÈÎºÎµÄ²Ù×÷
+        /// é”ä½ç¼–è¾‘å™¨æ‰€æœ‰äº¤äº’æ“ä½œï¼Œç”¨æˆ·æ— æ³•å¯¹æ­¤ç¼–è¾‘å™¨åšä»»ä½•çš„æ“ä½œ
         /// </summary>
         public void LockAllUserInteraction()
         {
@@ -1317,18 +1317,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IsLocked = true;
             SelectObjects.ToArray().ForEach(x => x.IsSelected = false);
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
-            ToastNotify($"±à¼­Æ÷ÒÑËø×¡");
+            ToastNotify($"ç¼–è¾‘å™¨å·²é”ä½");
         }
 
         /// <summary>
-        /// ½Ó´¥¶Ô±à¼­Æ÷ÓÃ»§²Ù×÷µÄ·âËø
+        /// æ¥è§¦å¯¹ç¼–è¾‘å™¨ç”¨æˆ·æ“ä½œçš„å°é”
         /// </summary>
         public void UnlockAllUserInteraction()
         {
             if (!IsLocked)
                 return;
             IsLocked = false;
-            ToastNotify($"±à¼­Æ÷ÒÑ½âËø");
+            ToastNotify($"ç¼–è¾‘å™¨å·²è§£é”");
         }
 
         #endregion

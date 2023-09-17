@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -17,7 +17,7 @@ namespace OngekiFumenEditor
     {
         public App()
         {
-            // 设置工作目录为执行文件所在的目录
+            // 璁剧疆宸ヤ綔鐩綍涓烘墽琛屾枃浠舵墍鍦ㄧ殑鐩綍
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
         }
     }
