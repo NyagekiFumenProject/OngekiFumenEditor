@@ -107,12 +107,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             if (prepareWarn)
             {
-                var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION), target.Editor);
-                if (leadInTGrid is not null)
-                {
-                    var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 0.25;
-                    lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f));
-                }
+                var audioTime = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor);
+                var leadAudioTime = audioTime - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION);
+                var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(leadAudioTime, target.Editor);
+                if (leadInTGrid is null)
+                    leadInTGrid = TGrid.Zero;
+                var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 0.25;
+                lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f));
             }
 
             lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One);
