@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Utils
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
-        
+
         /*
         public static IEnumerable<T> DistinctBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
 
@@ -282,7 +282,7 @@ namespace OngekiFumenEditor.Utils
         public static T LastOrDefaultByBinarySearch<T, X>(this IList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
         {
             var idx = source.BinarySearchBy(value, keySelect);
-            var i = idx < 0 ? ((~idx) - 1) : idx;
+            var i = Math.Max(0, idx < 0 ? ((~idx) - 1) : idx);
             return source[i];
         }
 

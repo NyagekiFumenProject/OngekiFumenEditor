@@ -82,6 +82,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
             //获取pickY对应的bpm和bpm起始位置
             (var pickStartY, var tGrid, var speed, var pickBpm) = positionBpmList.LastOrDefaultByBinarySearch(tGridUnit, x => x.startTGrid.TotalUnit);
+            //(var pickStartY, var tGrid, var speed, var pickBpm) = positionBpmList.LastOrDefault(x => x.startTGrid.TotalUnit <= tGridUnit);
 
             if (pickBpm is null)
                 if (positionBpmList.FirstOrDefault().bpmChange?.TGrid is TGrid first && tGridUnit < first.TotalUnit)
