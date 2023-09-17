@@ -74,7 +74,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var maxDispAlpha = 0.3f;
             var minDispAlpha = 0f;
 
-            if (target.Editor.IsPreviewMode)
+            var isPreviewMode = target.Editor.IsPreviewMode;
+
+            if (isPreviewMode)
                 timelines = timelines.Where(x => x.beatIndex == 0);
             else
                 minDispAlpha = maxDispAlpha;
@@ -85,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             var displayAudioTime = target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime;
 
-            foreach ((var t, var y, _, _, _) in timelines)
+            foreach ((var t, var y, var beatIndex, _, _) in timelines)
             {
                 var str = string.Empty;
                 if (displayAudioTime)
@@ -104,11 +106,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 var fy = (float)y;
 
+                var maxAlpha = beatIndex == 0 && !isPreviewMode ? 1 : maxDispAlpha;
+                var minAlpha = beatIndex == 0 && !isPreviewMode ? 1 : minDispAlpha;
+
                 list.Add(new(new(0, fy), new(1, 1, 1, 0), VertexDash.Solider));
-                list.Add(new(new(0, fy), new(1, 1, 1, maxDispAlpha), VertexDash.Solider));
-                list.Add(new(new(transDisp, fy), new(1, 1, 1, minDispAlpha), VertexDash.Solider));
-                list.Add(new(new(eDisp, fy), new(1, 1, 1, minDispAlpha), VertexDash.Solider));
-                list.Add(new(new(target.ViewWidth, fy), new(1, 1, 1, maxDispAlpha), VertexDash.Solider));
+                list.Add(new(new(0, fy), new(1, 1, 1, maxAlpha), VertexDash.Solider));
+                list.Add(new(new(transDisp, fy), new(1, 1, 1, minAlpha), VertexDash.Solider));
+                list.Add(new(new(eDisp, fy), new(1, 1, 1, minAlpha), VertexDash.Solider));
+                list.Add(new(new(target.ViewWidth, fy), new(1, 1, 1, maxAlpha), VertexDash.Solider));
                 list.Add(new(new(target.ViewWidth, fy), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
