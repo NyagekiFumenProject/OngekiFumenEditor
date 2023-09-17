@@ -205,6 +205,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        private bool isShowCurveControlAlways = false;
+        public bool IsShowCurveControlAlways
+        {
+            get => isShowCurveControlAlways;
+            set
+            {
+                Set(ref isShowCurveControlAlways, value);
+                ToastNotify($"IsShowCurveControlAlways = {IsShowCurveControlAlways}");
+            }
+        }
+
         public EditorSetting Setting { get; } = new EditorSetting();
 
         public FumenVisualEditorViewModel() : base()

@@ -1,5 +1,6 @@
 ﻿using Gemini.Framework.ToolBars;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ShowCurveControlAlways;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -20,5 +21,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolbars
         [Export]
         public static ToolBarItemDefinition BrushModeSwitchToolBarItem = new CommandToolBarItemDefinition<BrushModeSwitchCommandDefinition>(
             EditorStatusToolBarGroup, 0);
+
+        [Export]
+        public static ToolBarItemDefinition ShowCurveControlAlwaysToolBarItem = new CommandToolBarItemDefinition<ShowCurveControlAlwaysCommandDefinition>(
+            EditorStatusToolBarGroup, 1);
     }
 }
