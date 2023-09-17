@@ -144,12 +144,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     {
                         if (selectable.IsSelected)
                         {
-                            //µã»÷
+                            //点击
                             CurrentSelectedObjects.Add(selectable);
                         }
                         else
                         {
-                            //È¡Ïûµã»÷
+                            //取消点击
                             if (curBrowserObj == sender)
                                 objBrowser.SetCurrentOngekiObject(null, this);
                             CurrentSelectedObjects.Remove(selectable);
