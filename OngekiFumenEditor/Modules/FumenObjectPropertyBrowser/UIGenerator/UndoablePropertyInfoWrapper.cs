@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
         {
             core.PropertyChanged -= Core_PropertyChanged;
             core.Clear();
-            core = null;
+            //core = null;
         }
     }
 }

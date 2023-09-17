@@ -196,12 +196,18 @@ namespace OngekiFumenEditor
             e.Handled = false;
         }
 
+        private bool exceptionHandling = false;
+
         private void InitExceptionCatcher()
         {
             var recHandle = new HashSet<IntPtr>();
 
             void LogException(object sender, Exception exception)
             {
+                if (exceptionHandling)
+                    return;
+                exceptionHandling = true;
+
                 var sb = new StringBuilder();
                 void exceptionDump(Exception e, int level = 0)
                 {
@@ -234,6 +240,7 @@ namespace OngekiFumenEditor
                 FileLogOutput.WriteLog("FumenRescue.Rescue() End");
                 FileLogOutput.WaitForWriteDone();
 #endif
+                exceptionHandling = true;
             }
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) => LogException(sender, e.ExceptionObject as Exception);
