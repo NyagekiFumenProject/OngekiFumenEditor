@@ -86,6 +86,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         private void HoldEnd_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            switch (e.PropertyName)
+            {
+                case nameof(HoldEnd.TGrid):
+                    NotifyOfPropertyChange(nameof(EndTGrid));
+                    break;
+                default:
+                    break;
+            }
             //todo?
         }
 
