@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:m="clr-namespace:OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.OgkiFumenListBrowser.ValueConverters"

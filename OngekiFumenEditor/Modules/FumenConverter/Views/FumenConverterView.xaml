@@ -18,7 +18,10 @@
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
     <StackPanel>
-        <GroupBox Margin="5" Header="谱面来源">
+        <GroupBox
+            Margin="5"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Header="谱面来源">
             <StackPanel>
                 <RadioButton
                     Margin="0,5,0,5"
@@ -29,18 +32,21 @@
                         <TextBlock
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
                             Text="从文件加载:">
                         </TextBlock>
                         <TextBlock
                             Width="280"
                             VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
                             Text="{Binding InputFumenFilePath}"
                             ToolTip="{Binding InputFumenFilePath}">
                         </TextBlock>
                         <Button
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
-                            cal:Message.Attach="OnOpenSelectInputFileDialog()">
+                            cal:Message.Attach="OnOpenSelectInputFileDialog()"
+                            Foreground="{StaticResource EnvironmentToolWindowText}">
                             浏览
                         </Button>
                     </StackPanel>
@@ -54,28 +60,34 @@
                         <TextBlock
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
                             Text="从当前谱面编辑器加载:">
                         </TextBlock>
-                        <TextBlock Text="{Binding CurrentEditorName}">
+                        <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding CurrentEditorName}">
                         </TextBlock>
                     </StackPanel>
                 </RadioButton>
             </StackPanel>
         </GroupBox>
 
-        <GroupBox Margin="5" Header="输出">
+        <GroupBox
+            Margin="5"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Header="输出">
             <StackPanel Orientation="Horizontal">
                 <TextBlock
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
+                    Foreground="{StaticResource EnvironmentToolWindowText}"
                     Text="保存到文件:">
                 </TextBlock>
-                <TextBlock Text="{Binding OutputFumenFilePath}">
+                <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding OutputFumenFilePath}">
                 </TextBlock>
                 <Button
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
-                    cal:Message.Attach="OnOpenSelectOutputFileDialog()">
+                    cal:Message.Attach="OnOpenSelectOutputFileDialog()"
+                    Foreground="{StaticResource EnvironmentToolWindowText}">
                     浏览
                 </Button>
             </StackPanel>
@@ -84,7 +96,8 @@
         <Button
             Margin="5,10,5,5"
             Padding="0,10,0,10"
-            cal:Message.Attach="OnExecuteConverter()">
+            cal:Message.Attach="OnExecuteConverter()"
+            Foreground="{StaticResource EnvironmentToolWindowText}">
             开转！
         </Button>
     </StackPanel>
