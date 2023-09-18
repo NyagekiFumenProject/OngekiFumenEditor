@@ -64,13 +64,40 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 Set(ref editor, value);
                 FumenSoundPlayer?.Clean();
                 scrollAnimationClearFunc?.Invoke();
-                NotifyOfPropertyChange(() => IsAudioButtonEnabled);
-                NotifyOfPropertyChange(() => AudioPlayer);
-                PrepareWaveform(AudioPlayer);
+                AudioPlayer = Editor?.AudioPlayer;
             }
         }
 
-        public IAudioPlayer AudioPlayer => Editor?.AudioPlayer;
+        private IAudioPlayer audioPlayer;
+        public IAudioPlayer AudioPlayer
+        {
+            get => audioPlayer;
+            private set
+            {
+                if (audioPlayer is not null)
+                    audioPlayer.OnPlaybackFinished -= OnPlaybackFinished;
+                Set(ref audioPlayer, value);
+                if (audioPlayer is not null)
+                    audioPlayer.OnPlaybackFinished += OnPlaybackFinished;
+
+                PrepareWaveform(AudioPlayer);
+                NotifyOfPropertyChange(() => IsAudioButtonEnabled);
+            }
+        }
+
+        private void OnPlaybackFinished()
+        {
+            Dispatcher.CurrentDispatcher.Invoke(() =>
+            {
+                Log.LogInfo($"OnPlaybackFinished()~~");
+                OnStopButtonClicked();
+                if (AudioPlayer is not null)
+                {
+                    var audioTime = AudioPlayer.Duration - TimeSpan.FromSeconds(1);
+                    Editor.ScrollTo(audioTime);
+                }
+            });
+        }
 
         const int SoundControlLength = 16;
 
@@ -109,12 +136,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
-        private void OnAudioPlayerPropChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IAudioPlayer.CurrentTime))
-                NotifyOfPropertyChange(() => SliderValue);
-        }
-
         private System.Action scrollAnimationClearFunc = default;
 
         public bool IsAudioButtonEnabled => AudioPlayer is not null;
@@ -141,15 +162,14 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                     Editor = Editor;
                     break;
                 case nameof(FumenVisualEditorViewModel.AudioPlayer):
-                    PrepareWaveform(AudioPlayer);
-                    NotifyOfPropertyChange(() => IsAudioButtonEnabled);
+                    AudioPlayer = Editor?.AudioPlayer;
                     break;
                 default:
                     break;
             }
         }
 
-        private async void InitPreviewActions()
+        private async Task InitPreviewActions()
         {
             scrollAnimationClearFunc?.Invoke();
             await FumenSoundPlayer.Prepare(Editor, AudioPlayer);
@@ -178,27 +198,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void OnStopButtonClicked()
         {
-            if (AudioPlayer is null)
-                return;
-
-            Editor.UnlockAllUserInteraction();
+            //Editor.UnlockAllUserInteraction();
             scrollAnimationClearFunc?.Invoke();
-            FumenSoundPlayer.Stop();
-            AudioPlayer.Stop();
-        }
-
-        public void OnSliderValueChanged()
-        {
-            Log.LogDebug($"seek by OnSliderValueChanged()");
-
-            if (scrollAnimationClearFunc is null)
-                InitPreviewActions();
-            var seekTo = TimeSpan.FromMilliseconds(SliderValue);
-            AudioPlayer.Seek(seekTo, true);
-            FumenSoundPlayer.Seek(seekTo, true);
-
-            Log.LogDebug($"Drag done, seek : {seekTo}");
-            isSliderDragging = false;
+            FumenSoundPlayer?.Stop();
+            AudioPlayer?.Stop();
         }
 
         public void OnSliderValueStartChanged()
@@ -208,7 +211,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             Log.LogDebug($"Begin drag, from : {SliderValue}");
         }
 
-        public void RequestPlayOrPause()
+        public async void RequestPlayOrPause()
         {
             if (AudioPlayer is null)
             {
@@ -229,10 +232,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             else
             {
                 if (scrollAnimationClearFunc is null)
-                    InitPreviewActions();
-                Log.LogDebug($"seek by RequestPlayOrPause()");
+                    await InitPreviewActions();
                 var tgrid = Editor.GetCurrentTGrid();
                 var seekTo = TGridCalculator.ConvertTGridToAudioTime(tgrid, Editor);
+                Log.LogDebug($"seek to {tgrid}({seekTo})");
                 AudioPlayer.Seek(seekTo, false);
                 FumenSoundPlayer.Seek(seekTo, false);
             }

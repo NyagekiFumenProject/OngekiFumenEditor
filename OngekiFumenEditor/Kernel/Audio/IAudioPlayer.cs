@@ -44,6 +44,9 @@ namespace OngekiFumenEditor.Kernel.Audio
         void Pause();
         void Seek(TimeSpan TimeSpan, bool pause);
 
+        public delegate void OnPlaybackFinishedFunc();
+        public event OnPlaybackFinishedFunc OnPlaybackFinished;
+
         Task<SampleData> GetSamplesAsync();
     }
 }

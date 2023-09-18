@@ -2,6 +2,7 @@
 using NAudio.Wave;
 using NAudio.Wave.Compression;
 using NAudio.Wave.SampleProviders;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Utils;
 using System;
@@ -18,6 +19,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 {
     internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
     {
+        private FinishedListenerProvider finishProvider = new();
+
         private AudioFileReader audioFileReader;
         private VolumeSampleProvider currentVolumeProvider;
         private WaveOut currentOut;
@@ -27,6 +30,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
         private float volume = 1;
         private bool isAvaliable;
         private byte[] samples;
+
+        public event IAudioPlayer.OnPlaybackFinishedFunc OnPlaybackFinished;
 
         public TimeSpan Duration { get => audioFileReader.TotalTime; }
 
@@ -59,6 +64,17 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
             }
         }
 
+        public DefaultMusicPlayer()
+        {
+            finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
+        }
+
+        private void Provider_OnReturnEmptySamples()
+        {
+            finishProvider.StopListen();
+            OnPlaybackFinished?.Invoke();
+        }
+
         public async Task Load(string audio_file)
         {
             //release resource before loading new one.
@@ -72,7 +88,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
                 await audioFileReader.CopyToAsync(ms);
                 audioFileReader.Seek(0, SeekOrigin.Begin);
                 samples = ms.ToArray();
-                currentOut?.Init(audioFileReader);
+                finishProvider.Provider = audioFileReader;
+                finishProvider.StartListen();
+                currentOut?.Init(finishProvider);
                 NotifyOfPropertyChange(() => Duration);
                 IsAvaliable = true;
             }
@@ -105,7 +123,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 
             currentVolumeProvider = provider;
             currentOut = new WaveOut();
-            currentOut.Init(provider);
+            finishProvider.Provider = provider;
+            finishProvider.StartListen();
+            currentOut.Init(finishProvider);
             UpdatePropsManually();
 
             if (!pause)
@@ -169,7 +189,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
         public Task OnScheduleCall(CancellationToken cancellationToken)
         {
             if (!cancellationToken.IsCancellationRequested)
+            {
                 UpdatePropsManually();
+            }
             return Task.CompletedTask;
         }
 

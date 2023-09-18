@@ -291,7 +291,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             events = new LinkedList<SoundEvent>(list.OrderBy(x => x.Time));
             foreach (var durationEvent in durationList)
                 durationEvents.Add(durationEvent.Time, durationEvent.EndTime, durationEvent);
-            itor = events.First;
+            itor = null;
         }
 
         private void UpdateInternal(CancellationToken token)
@@ -314,7 +314,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 var ct = currentTime.TotalMilliseconds - nextBeatTime;
                 if (ct >= 0)
                 {
-                    //Debug.WriteLine($"diff:{ct:F2}ms target:{itor.Value}");
+                    //Debug.WriteLine($"diff:{ct:F2}ms, target:{itor.Value}, currentTime:{currentTime}");
                     ProcessSoundEvent(itor.Value);
                     itor = itor.Next;
                 }
@@ -396,7 +396,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             itor = events.Find(events.FirstOrDefault(x => msec < x.Time));
 
             if (!pause)
-                Play();
+                PlayInternal();
         }
 
         private void StopAllLoop()
@@ -418,11 +418,19 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             isPlaying = false;
         }
 
-        public void Play()
+        public void PlayInternal()
         {
             if (player is null)
                 return;
             isPlaying = true;
+        }
+
+        public void Play()
+        {
+            if (player is null)
+                return;
+            itor = itor ?? events.First;
+            PlayInternal();
         }
 
         public void Pause()
