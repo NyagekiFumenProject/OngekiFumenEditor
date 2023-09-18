@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 {
                     var refConnectableObject = item.Key;
 
-                    var hash = refConnectableObject.GetHashCode();
+                    var hash = refConnectableObject.ReferenceStartObject.GetHashCode();
                     var alpha = (byte)((hash >> 24) & 0xFF);
                     var color = new Vector4((((hash >> 16) & 0xFF) ^ alpha) / 255f / 2 + 0.5f, (((hash >> 8) & 0xFF) ^ alpha) / 255f / 2 + 0.5f, ((hash & 0xFF) ^ alpha) / 255f / 2 + 0.5f, 1f);
                     //var color = new Vector4(1, 1, 1, 1f);
