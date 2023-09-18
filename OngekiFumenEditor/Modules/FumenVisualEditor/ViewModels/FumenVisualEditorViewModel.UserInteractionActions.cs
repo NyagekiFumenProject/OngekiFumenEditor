@@ -1,6 +1,7 @@
 using Caliburn.Micro;
 using DereTore.Common;
 using Gemini.Framework;
+using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
 using NAudio.Gui;
@@ -1236,6 +1237,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
 
             objBrowser.RefreshSelected(this);
+            IoC.Get<IShell>().ActiveLayoutItem = this;
             return obj;
         }
 

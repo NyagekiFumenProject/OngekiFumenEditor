@@ -23,6 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch
         {
             base.Update(command);
             command.Checked = editorDocumentManager.CurrentActivatedEditor?.IsPreviewMode ?? false;
+            command.Enabled = editorDocumentManager.CurrentActivatedEditor is not null;
         }
 
         public override Task Run(Command command)
