@@ -31,6 +31,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
     {
         private IntervalTree<TimeSpan, DurationSoundEvent> durationEvents = new();
         private HashSet<DurationSoundEvent> currentPlayingDurationEvents = new();
+        private object locker = new object();
 
         private LinkedList<SoundEvent> events = new();
         private LinkedListNode<SoundEvent> itor;
@@ -322,28 +323,32 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            var queryDurationEvents = durationEvents.Query(currentTime);
-            foreach (var durationEvent in queryDurationEvents)
+            lock (locker)
             {
-                //检查是否正在播放了
-                if (!currentPlayingDurationEvents.Contains(durationEvent))
+                var queryDurationEvents = durationEvents.Query(currentTime);
+                foreach (var durationEvent in queryDurationEvents)
                 {
-                    if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                    //检查是否正在播放了
+                    if (!currentPlayingDurationEvents.Contains(durationEvent))
                     {
-                        var initPlayTime = currentTime - durationEvent.Time;
-                        soundPlayer.PlayLoop(durationEvent.LoopId, initPlayTime);
-                        currentPlayingDurationEvents.Add(durationEvent);
+                        if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                        {
+                            var initPlayTime = currentTime - durationEvent.Time;
+                            soundPlayer.PlayLoop(durationEvent.LoopId, initPlayTime);
+
+                            currentPlayingDurationEvents.Add(durationEvent);
+
+                        }
                     }
                 }
-            }
-
-            //检查是否已经播放完成
-            foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
-            {
-                if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                //检查是否已经播放完成
+                foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
                 {
-                    soundPlayer.StopLoop(durationEvent.LoopId);
-                    currentPlayingDurationEvents.Remove(durationEvent);
+                    if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                    {
+                        soundPlayer.StopLoop(durationEvent.LoopId);
+                        currentPlayingDurationEvents.Remove(durationEvent);
+                    }
                 }
             }
 
@@ -401,12 +406,17 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         private void StopAllLoop()
         {
-            foreach (var durationEvent in currentPlayingDurationEvents.ToArray())
+            lock (locker)
             {
-                if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                foreach (var durationEvent in currentPlayingDurationEvents.ToArray())
                 {
-                    soundPlayer.StopLoop(durationEvent.LoopId);
-                    currentPlayingDurationEvents.Remove(durationEvent);
+                    if (durationEvent is null)
+                        continue;
+                    if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
+                    {
+                        soundPlayer.StopLoop(durationEvent.LoopId);
+                        currentPlayingDurationEvents.Remove(durationEvent);
+                    }
                 }
             }
         }
