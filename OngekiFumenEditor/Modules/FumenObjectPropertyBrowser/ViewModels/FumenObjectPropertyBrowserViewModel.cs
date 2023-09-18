@@ -6,6 +6,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Utils;
@@ -104,7 +105,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             this.referenceEditor = referenceEditor;
 
             OnObjectChanged();
-            referenceEditor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.SelectObjects));
+            referenceEditor?.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.SelectObjects));
             //todo 解耦
             NotifyOfPropertyChange(nameof(SelectedObjects));
             UpdateDisplayName();
@@ -114,12 +115,20 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             => RefreshSelected(ongekiObj.OfType<ISelectableObject>().FilterNull(), referenceEditor);
 
         public void RefreshSelected(FumenVisualEditorViewModel referenceEditor)
-            => RefreshSelected(referenceEditor.SelectObjects, referenceEditor);
+            => RefreshSelected(referenceEditor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>(), referenceEditor);
 
         public FumenObjectPropertyBrowserViewModel()
         {
             UpdateDisplayName();
             supportTypes = IoC.GetAll<ITypeUIGenerator>().SelectMany(x => x.SupportTypes).ToHashSet();
+
+            IoC.Get<IEditorDocumentManager>().OnNotifyDestoryed += OnEditorDestoryed;
+        }
+
+        private void OnEditorDestoryed(FumenVisualEditorViewModel sender)
+        {
+            if (sender == referenceEditor)
+                RefreshSelected(null);
         }
     }
 }
