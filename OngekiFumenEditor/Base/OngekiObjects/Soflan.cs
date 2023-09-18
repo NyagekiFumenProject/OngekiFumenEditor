@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static OngekiFumenEditor.Base.OngekiObjects.LaneBlockArea;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
@@ -106,6 +107,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 return false;
 
             return true;
+        }
+
+        public void CopyEntire(Soflan from)
+        {
+            Copy(from);
+
+            Speed = from.Speed;
+            ApplySpeedInDesignMode = from.ApplySpeedInDesignMode;
+
+            EndIndicator.Copy(from.EndIndicator);
         }
     }
 }

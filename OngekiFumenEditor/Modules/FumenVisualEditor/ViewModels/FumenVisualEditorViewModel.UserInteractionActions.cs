@@ -187,6 +187,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //不允许被复制
                 ConnectableObjectBase and not (ConnectableStartObject) => false,
                 LaneCurvePathControlObject => false,
+                LaneBlockArea.LaneBlockAreaEndIndicator => false,
+                Soflan.SoflanEndIndicator => false,
                 //允许被复制
                 _ => true,
             }))
@@ -338,17 +340,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (copied is null)
                     continue;
 
-                //特殊处理ConnectableStart:连Child和Control一起复制了
-                if (copied is ConnectableStartObject _s)
+                switch (copied)
                 {
-                    _s.CopyEntireConnectableObject((ConnectableStartObject)source);
-                }
-
-                //特殊处理Hold:清除Id
-                if (copied is Hold hold)
-                {
-                    hold.ReferenceLaneStart = default;
-                    undo += () => hold.ReferenceLaneStart = default;
+                    //特殊处理ConnectableStart:连Child和Control一起复制了
+                    case ConnectableStartObject _start:
+                        _start.CopyEntireConnectableObject((ConnectableStartObject)source);
+                        break;
+                    //特殊处理LBK:连End物件一起复制了
+                    case LaneBlockArea _lbk:
+                        _lbk.CopyEntire((LaneBlockArea)source);
+                        break;
+                    //特殊处理SFL:连End物件一起复制了
+                    case Soflan _sfl:
+                        _sfl.CopyEntire((Soflan)source);
+                        break;
+                    //特殊处理Hold:清除Id
+                    case Hold hold:
+                        hold.ReferenceLaneStart = default;
+                        undo += () => hold.ReferenceLaneStart = default;
+                        break;
+                    default:
+                        break;
                 }
 
                 TGrid newTGrid = default;
@@ -377,41 +389,65 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     redo += () => timelineObject.TGrid = newTGrid.CopyNew();
                     undo += () => timelineObject.TGrid = tGrid.CopyNew();
 
-                    //apply child objects
-                    if (copied is ConnectableStartObject start)
+                    switch (copied)
                     {
-                        foreach (var child in start.Children)
-                        {
-                            var oldChildTGrid = child.TGrid.CopyNew();
-                            var y = TGridCalculator.ConvertTGridToY_DesignMode(oldChildTGrid, this);
-                            var newChildY = CalcY(y);
+                        case Soflan or LaneBlockArea:
+                            ITimelineObject endIndicator = copied switch
+                            {
+                                Soflan _sfl => _sfl.EndIndicator,
+                                LaneBlockArea _lbk => _lbk.EndIndicator,
+                                _ => throw new Exception("这都能炸真的牛皮")
+                            };
+                            var oldEndIndicatorTGrid = endIndicator.TGrid.CopyNew();
+                            var endIndicatorY = TGridCalculator.ConvertTGridToY_DesignMode(oldEndIndicatorTGrid, this);
+                            var newEndIndicatorY = CalcY(endIndicatorY);
 
-                            if (TGridCalculator.ConvertYToTGrid_DesignMode(newChildY, this) is not TGrid newChildTGrid)
+                            if (TGridCalculator.ConvertYToTGrid_DesignMode(newEndIndicatorY, this) is not TGrid newEndIndicatorTGrid)
                             {
                                 //todo warn
                                 return;
                             }
 
-                            redo += () => child.TGrid = newChildTGrid.CopyNew();
-                            undo += () => child.TGrid = oldChildTGrid.CopyNew();
+                            redo += () => endIndicator.TGrid = newEndIndicatorTGrid.CopyNew();
+                            undo += () => endIndicator.TGrid = oldEndIndicatorTGrid.CopyNew();
 
-                            foreach (var control in child.PathControls)
+                            break;
+                        case ConnectableStartObject start:
+                            //apply child objects
+                            foreach (var child in start.Children)
                             {
-                                var oldControlTGrid = control.TGrid.CopyNew();
-                                var cy = TGridCalculator.ConvertTGridToY_DesignMode(oldControlTGrid, this);
-                                var newControlY = CalcY(cy);
+                                var oldChildTGrid = child.TGrid.CopyNew();
+                                var y = TGridCalculator.ConvertTGridToY_DesignMode(oldChildTGrid, this);
+                                var newChildY = CalcY(y);
 
-
-                                if (TGridCalculator.ConvertYToTGrid_DesignMode(newControlY, this) is not TGrid newControlTGrid)
+                                if (TGridCalculator.ConvertYToTGrid_DesignMode(newChildY, this) is not TGrid newChildTGrid)
                                 {
                                     //todo warn
                                     return;
                                 }
 
-                                redo += () => control.TGrid = newControlTGrid.CopyNew();
-                                undo += () => control.TGrid = oldControlTGrid.CopyNew();
+                                redo += () => child.TGrid = newChildTGrid.CopyNew();
+                                undo += () => child.TGrid = oldChildTGrid.CopyNew();
+
+                                foreach (var control in child.PathControls)
+                                {
+                                    var oldControlTGrid = control.TGrid.CopyNew();
+                                    var cy = TGridCalculator.ConvertTGridToY_DesignMode(oldControlTGrid, this);
+                                    var newControlY = CalcY(cy);
+
+                                    if (TGridCalculator.ConvertYToTGrid_DesignMode(newControlY, this) is not TGrid newControlTGrid)
+                                    {
+                                        //todo warn
+                                        return;
+                                    }
+
+                                    redo += () => control.TGrid = newControlTGrid.CopyNew();
+                                    undo += () => control.TGrid = oldControlTGrid.CopyNew();
+                                }
                             }
-                        }
+                            break;
+                        default:
+                            break;
                     }
                 }
 

@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
@@ -87,7 +88,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             set => Set(ref direction, value);
         }
 
-
         public (LaneStartBase startWallLane, LaneStartBase endWallLane) CalculateReferenceWallLanes(OngekiFumen fumen)
         {
             var wallType = Direction == BlockDirection.Left ? LaneType.WallLeft : LaneType.WallRight;
@@ -120,6 +120,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 return false;
 
             return true;
+        }
+
+        public void CopyEntire(LaneBlockArea from)
+        {
+            Copy(from);
+            Direction = from.Direction;
+            EndIndicator.Copy(from.EndIndicator);
         }
     }
 }
