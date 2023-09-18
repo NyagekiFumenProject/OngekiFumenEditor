@@ -22,15 +22,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
     {
         public double[] UnitCloseSizeValues { get; } = new[]
         {
-            1,
-            1.5,
+            1d,
             2,
             3,
             4,
-            4.5,
+            5,
             6,
+            7,
             8,
             9,
+            10,
+            11,
             12,
         };
 
