@@ -131,5 +131,19 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
             ApplySvgContent(group);
         }
+
+        public override void Copy(OngekiObjectBase fromObj)
+        {
+            base.Copy(fromObj);
+
+            if (fromObj is not SvgStringPrefab from)
+                return;
+
+            Content = from.Content;
+            TypefaceName = from.TypefaceName;
+            ContentLineHeight = from.ContentLineHeight;
+            FontSize = from.FontSize;
+            ContentFlowDirection = from.ContentFlowDirection;
+        }
     }
 }

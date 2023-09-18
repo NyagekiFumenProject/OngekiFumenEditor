@@ -36,6 +36,17 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 
         }
 
+        public override void Copy(OngekiObjectBase fromObj)
+        {
+            base.Copy(fromObj);
+
+            if (fromObj is not SvgImageFilePrefab from)
+                return;
+
+            if (from.SvgFile?.FullName is string path)
+                SvgFile = new FileInfo(path);
+        }
+
         public override void NotifyOfPropertyChange([CallerMemberName] string propertyName = null)
         {
             switch (propertyName)

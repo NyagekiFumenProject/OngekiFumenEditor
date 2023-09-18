@@ -175,6 +175,25 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
             ColorfulLaneBrightness = ColorfulLaneBrightness;
         }
 
+        public override void Copy(OngekiObjectBase fromObj)
+        {
+            base.Copy(fromObj);
+            if (fromObj is not SvgPrefabBase from)
+                return;
+
+            Tolerance = from.Tolerance;
+            Opacity = from.Opacity;
+            Rotation = from.Rotation;
+            OffsetX = from.OffsetX;
+            OffsetY = from.OffsetY;
+            ColorSimilar = from.ColorSimilar;
+            ShowOriginColor = from.ShowOriginColor;
+            IsForceColorful = from.IsForceColorful;
+            CurveInterpolaterFactory = from.CurveInterpolaterFactory;
+            ColorfulLaneColor = from.ColorfulLaneColor;
+            EnableColorfulLaneSimilar = from.EnableColorfulLaneSimilar;
+        }
+
         public override void NotifyOfPropertyChange([CallerMemberName] string propertyName = null)
         {
             base.NotifyOfPropertyChange(propertyName);
