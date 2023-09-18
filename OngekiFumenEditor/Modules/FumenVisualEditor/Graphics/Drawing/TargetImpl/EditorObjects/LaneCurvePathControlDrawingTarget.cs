@@ -31,6 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         };
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { LaneCurvePathControlObject.CommandName };
+        public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
         public override int DefaultRenderOrder => 2000;
 
@@ -87,7 +88,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
                 return gen();
             });
-            lineDrawing.Draw(target, lineVertices, 3);
+            lineDrawing.Draw(target, lineVertices, 2);
 
             highlightDrawing.Draw(target, texture, list.Where(x => x.obj.IsSelected).Select(x => (size * 1.25f, new Vector2(x.x, x.y), 0f)));
             textureDrawing.Draw(target, texture, list.Select(x => (size, new Vector2(x.x, x.y), 0f)));
