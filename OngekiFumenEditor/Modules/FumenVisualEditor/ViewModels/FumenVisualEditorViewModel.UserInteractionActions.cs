@@ -329,10 +329,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var sourceCenterPos = CalculateRangeCenter(currentCopiedSources.Keys);
             var offset = (placePoint ?? sourceCenterPos) - sourceCenterPos;
-            
+
             if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
                 offset.X = 0;
-            
+
             var redo = new System.Action(() => { });
             var undo = new System.Action(() => { });
 
@@ -347,9 +347,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 switch (copied)
                 {
-                    //特殊处理ConnectableStart:连Child和Control一起复制了
+                    //特殊处理ConnectableStart:连Child和Control一起复制了,顺便删除RecordId(添加时需要重新分配而已)
                     case ConnectableStartObject _start:
                         _start.CopyEntireConnectableObject((ConnectableStartObject)source);
+                        redo += () => _start.RecordId = -1;
                         break;
                     //特殊处理LBK:连End物件一起复制了
                     case LaneBlockArea _lbk:
@@ -578,19 +579,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     undo += () => dockable.ReferenceLaneStart = before;
                 }
 
-                var selectObj = copied as ISelectableObject;
-                var isSelect = selectObj.IsSelected;
+                var map = new Dictionary<ISelectableObject, bool>();
+                foreach (var selectObj in ((copied as IDisplayableObject)?.GetDisplayableObjects() ?? Enumerable.Empty<IDisplayableObject>()).OfType<ISelectableObject>())
+                    map[selectObj] = selectObj.IsSelected;
 
                 redo += () =>
                 {
                     Fumen.AddObject(copied);
-                    selectObj.IsSelected = true;
+                    foreach (var selectObj in map.Keys)
+                        selectObj.IsSelected = true;
                 };
 
                 undo += () =>
                 {
                     RemoveObject(copied);
-                    selectObj.IsSelected = isSelect;
+                    foreach (var pair in map)
+                        pair.Key.IsSelected = pair.Value;
                 };
             };
 
