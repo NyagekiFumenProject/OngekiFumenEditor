@@ -727,6 +727,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             SelectObjects.ForEach(x => x.IsSelected = false);
         }
 
+        public void KeyboardAction_FastSetObjectIsCritical()
+        {
+            var selectables = SelectObjects.ToArray();
+            var map = new Dictionary<ICriticalableObject, bool>();
+
+            var isAllCritical = true;
+            foreach (var selectable in selectables.OfType<ICriticalableObject>())
+                isAllCritical &= map[selectable] = selectable.IsCritical;
+
+            if (map.Count == 0)
+            {
+                ToastNotify("无合适物件批量设置IsCritical属性");
+                return;
+            }
+
+            var setVal = !isAllCritical;
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("快速批量设置IsCritical", () =>
+            {
+                foreach (var pair in map)
+                    pair.Key.IsCritical = setVal;
+            }, () =>
+            {
+                foreach (var pair in map)
+                    pair.Key.IsCritical = pair.Value;
+            }));
+        }
+
         public void KeyboardAction_FastAddConnectableChild(ActionExecutionContext e)
         {
             if (!IsDesignMode)

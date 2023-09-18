@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Flick : OngekiMovableObjectBase
+    public class Flick : OngekiMovableObjectBase, ICriticalableObject
     {
         public enum FlickDirection
         {

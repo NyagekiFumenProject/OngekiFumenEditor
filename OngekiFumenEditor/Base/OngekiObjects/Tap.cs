@@ -3,7 +3,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Tap : OngekiMovableObjectBase, ILaneDockableChangable
+    public class Tap : OngekiMovableObjectBase, ILaneDockableChangable, ICriticalableObject
     {
         public bool IsWallTap => ReferenceLaneStart?.IsWallLane ?? false;
 

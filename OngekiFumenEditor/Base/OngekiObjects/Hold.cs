@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Hold : OngekiMovableObjectBase, ILaneDockableChangable
+    public class Hold : OngekiMovableObjectBase, ILaneDockableChangable, ICriticalableObject
     {
         private HoldEnd holdEnd;
 
