@@ -18,20 +18,20 @@
     mc:Ignorable="d">
     <ScrollViewer>
         <StackPanel Margin="5">
-            <GroupBox Header="选项">
+            <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="选项">
                 <StackPanel>
                     <StackPanel Margin="5" Orientation="Horizontal">
-                        <TextBlock
+                        <Label
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
-                            Text="游戏根目录:">
-                        </TextBlock>
-                        <TextBlock
+                            Content="游戏根目录:">
+                        </Label>
+                        <Label
                             Width="280"
                             VerticalAlignment="Center"
-                            Text="{Binding GamePath}"
+                            Content="{Binding GamePath}"
                             ToolTip="{Binding GamePath}">
-                        </TextBlock>
+                        </Label>
                         <Button
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
@@ -65,12 +65,12 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="0"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         ID:
-                    </TextBlock>
+                    </Label>
                     <TextBox
                         Grid.Row="0"
                         Grid.Column="1"
@@ -80,12 +80,12 @@
                         Text="{Binding MusicXmlOption.MusicId}">
                     </TextBox>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="1"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         标题:
-                    </TextBlock>
+                    </Label>
                     <TextBox
                         Grid.Row="1"
                         Grid.Column="1"
@@ -95,12 +95,12 @@
                         Text="{Binding MusicXmlOption.Title}">
                     </TextBox>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="2"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         艺术家:
-                    </TextBlock>
+                    </Label>
                     <TextBox
                         Grid.Row="2"
                         Grid.Column="1"
@@ -110,12 +110,12 @@
                         Text="{Binding MusicXmlOption.Artist}">
                     </TextBox>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="3"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         结算奖励:
-                    </TextBlock>
+                    </Label>
                     <TextBox
                         Grid.Row="3"
                         Grid.Column="1"
@@ -125,12 +125,12 @@
                         Text="{Binding MusicXmlOption.FinishBouns}">
                     </TextBox>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="4"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         解锁消耗:
-                    </TextBlock>
+                    </Label>
                     <TextBox
                         Grid.Row="4"
                         Grid.Column="1"
@@ -140,12 +140,12 @@
                         Text="{Binding MusicXmlOption.CostToUnlock}">
                     </TextBox>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="5"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         列表排序:
-                    </TextBlock>
+                    </Label>
                     <TextBox
                         Grid.Row="5"
                         Grid.Column="1"
@@ -155,12 +155,12 @@
                         Text="{Binding MusicXmlOption.SortOrder}">
                     </TextBox>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="6"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         音乐分类:
-                    </TextBlock>
+                    </Label>
                     <ComboBox
                         Grid.Row="6"
                         Grid.Column="1"
@@ -172,7 +172,7 @@
                         SelectedValue="{Binding MusicXmlOption.Genre}">
                     </ComboBox>
                 </Grid>
-                <GroupBox Header="Boss">
+                <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="Boss">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -188,22 +188,22 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <!--    -->
-                        <TextBlock
+                        <Label
                             Grid.Row="0"
                             Margin="0,5,10,5"
                             HorizontalAlignment="Right">
                             卡片:
-                        </TextBlock>
+                        </Label>
                         <StackPanel
                             Grid.Row="0"
                             Grid.Column="1"
                             Orientation="Horizontal">
-                            <TextBlock
+                            <Label
                                 Width="250"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                Text="{Binding MusicXmlOption.BossCard.Name, Mode=OneWay}">
-                            </TextBlock>
+                                Content="{Binding MusicXmlOption.BossCard.Name, Mode=OneWay}">
+                            </Label>
                             <Button
                                 Margin="10,0,0,0"
                                 Padding="20,2,20,2"
@@ -213,12 +213,12 @@
                             </Button>
                         </StackPanel>
                         <!--    -->
-                        <TextBlock
+                        <Label
                             Grid.Row="1"
                             Margin="0,5,10,5"
                             HorizontalAlignment="Right">
                             血量:
-                        </TextBlock>
+                        </Label>
                         <TextBox
                             Grid.Row="1"
                             Grid.Column="1"
@@ -228,12 +228,12 @@
                             Text="{Binding MusicXmlOption.BossHp}">
                         </TextBox>
                         <!--    -->
-                        <TextBlock
+                        <Label
                             Grid.Row="2"
                             Margin="0,5,10,5"
                             HorizontalAlignment="Right">
                             等级:
-                        </TextBlock>
+                        </Label>
                         <TextBox
                             Grid.Row="2"
                             Grid.Column="1"
@@ -243,12 +243,12 @@
                             Text="{Binding MusicXmlOption.BossLevel}">
                         </TextBox>
                         <!--    -->
-                        <TextBlock
+                        <Label
                             Grid.Row="3"
                             Margin="0,5,10,5"
                             HorizontalAlignment="Right">
                             语音序号:
-                        </TextBlock>
+                        </Label>
                         <TextBox
                             Grid.Row="3"
                             Grid.Column="1"
@@ -260,7 +260,7 @@
                     </Grid>
                 </GroupBox>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">ProcessingFromTheBeginning:</TextBlock>
+                    <Label VerticalAlignment="Center">ProcessingFromTheBeginning:</Label>
                     <CheckBox
                         Margin="10,0,0,0"
                         HorizontalAlignment="Left"
@@ -269,7 +269,7 @@
                         IsChecked="{Binding MusicXmlOption.ProcessingFromTheBeginning}" />
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">IsLockedAtTheBeginning:</TextBlock>
+                    <Label VerticalAlignment="Center">IsLockedAtTheBeginning:</Label>
                     <CheckBox
                         Margin="10,0,0,0"
                         HorizontalAlignment="Left"
@@ -292,22 +292,22 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="0"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         场景:
-                    </TextBlock>
+                    </Label>
                     <StackPanel
                         Grid.Row="0"
                         Grid.Column="1"
                         Orientation="Horizontal">
-                        <TextBlock
+                        <Label
                             Width="250"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Text="{Binding MusicXmlOption.Stage.Name, Mode=OneWay}">
-                        </TextBlock>
+                            Content="{Binding MusicXmlOption.Stage.Name, Mode=OneWay}">
+                        </Label>
                         <Button
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
@@ -317,22 +317,22 @@
                         </Button>
                     </StackPanel>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="1"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         版权:
-                    </TextBlock>
+                    </Label>
                     <StackPanel
                         Grid.Row="1"
                         Grid.Column="1"
                         Orientation="Horizontal">
-                        <TextBlock
+                        <Label
                             Width="250"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Text="{Binding MusicXmlOption.MusicRightName.DisplayName}">
-                        </TextBlock>
+                            Content="{Binding MusicXmlOption.MusicRightName.DisplayName}">
+                        </Label>
                         <Button
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
@@ -342,12 +342,12 @@
                         </Button>
                     </StackPanel>
                     <!--    -->
-                    <TextBlock
+                    <Label
                         Grid.Row="2"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right">
                         游戏版本:
-                    </TextBlock>
+                    </Label>
                     <StackPanel
                         Grid.Row="2"
                         Grid.Column="1"
@@ -362,10 +362,10 @@
                         </ComboBox>
                     </StackPanel>
                     <Grid Grid.Row="3" Grid.ColumnSpan="2">
-                        <GroupBox Header="谱面信息">
+                        <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="谱面信息">
                             <StackPanel>
                                 <StackPanel Margin="10,5,10,5" Orientation="Horizontal">
-                                    <TextBlock VerticalAlignment="Center" Text="选择难度:" />
+                                    <Label VerticalAlignment="Center" Content="选择难度:" />
                                     <ComboBox
                                         Width="100"
                                         Margin="10,0,0,0"
@@ -380,7 +380,7 @@
                                     Background="LightGray" />
                                 <StackPanel Margin="10,5,10,5" DataContext="{Binding CurrentSelectedFumenData}">
                                     <StackPanel Margin="0,5,0,5" Orientation="Horizontal">
-                                        <TextBlock VerticalAlignment="Center">启用:</TextBlock>
+                                        <Label VerticalAlignment="Center">启用:</Label>
                                         <CheckBox
                                             Margin="10,5,0,5"
                                             HorizontalAlignment="Left"
@@ -389,7 +389,7 @@
                                             IsChecked="{Binding Enable}" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock VerticalAlignment="Center">难度定数:</TextBlock>
+                                        <Label VerticalAlignment="Center">难度定数:</Label>
                                         <TextBox
                                             Width="50"
                                             Margin="10,5,0,5"
@@ -397,7 +397,7 @@
                                         </TextBox>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock VerticalAlignment="Center">谱面文件名(选填):</TextBlock>
+                                        <Label VerticalAlignment="Center">谱面文件名(选填):</Label>
                                         <TextBox
                                             Width="100"
                                             Margin="10,5,0,5"

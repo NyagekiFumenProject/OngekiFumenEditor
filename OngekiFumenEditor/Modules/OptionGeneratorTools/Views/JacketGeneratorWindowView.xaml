@@ -8,8 +8,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels"
     Title="封面文件生成器"
-    Width="475"
-    Height="350"
+    Width="500"
+    Height="375"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:JacketGeneratorWindowViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
@@ -19,13 +19,13 @@
     mc:Ignorable="d">
     <StackPanel>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center">图片文件:</TextBlock>
-            <TextBlock
+            <Label VerticalAlignment="Center">图片文件:</Label>
+            <Label
                 Width="300"
                 Margin="10,0,0,0"
                 VerticalAlignment="Center"
-                Text="{Binding GenerateOption.InputImageFilePath}">
-            </TextBlock>
+                Content="{Binding GenerateOption.InputImageFilePath}">
+            </Label>
             <Button
                 Margin="10,0,0,0"
                 Padding="20,5,20,5"
@@ -34,10 +34,13 @@
                 浏览
             </Button>
         </StackPanel>
-        <GroupBox Margin="10,0,10,10" Header="选项">
+        <GroupBox
+            Margin="10,0,10,10"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Header="选项">
             <StackPanel Margin="5">
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">MusicId:</TextBlock>
+                    <Label VerticalAlignment="Center">MusicId:</Label>
                     <TextBox
                         Width="75"
                         Margin="10,0,0,0"
@@ -45,29 +48,29 @@
                     </TextBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">更新assets.bytes文件(如果存在的话):</TextBlock>
+                    <Label VerticalAlignment="Center">更新assets.bytes文件(如果存在的话):</Label>
                     <CheckBox Margin="10,0,0,0" IsChecked="{Binding GenerateOption.UpdateAssetBytesFile}">
                     </CheckBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">大图尺寸(通常520x520):</TextBlock>
+                    <Label VerticalAlignment="Center">大图尺寸(通常520x520):</Label>
                     <TextBox
                         Width="40"
                         Margin="10,0,5,0"
                         Text="{Binding GenerateOption.Width}" />
-                    <TextBlock VerticalAlignment="Center">x</TextBlock>
+                    <Label VerticalAlignment="Center">x</Label>
                     <TextBox
                         Width="40"
                         Margin="5,0,5,0"
                         Text="{Binding GenerateOption.Height}" />
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">小图尺寸(通常220x220):</TextBlock>
+                    <Label VerticalAlignment="Center">小图尺寸(通常220x220):</Label>
                     <TextBox
                         Width="40"
                         Margin="10,0,5,0"
                         Text="{Binding GenerateOption.WidthSmall}" />
-                    <TextBlock VerticalAlignment="Center">x</TextBlock>
+                    <Label VerticalAlignment="Center">x</Label>
                     <TextBox
                         Width="40"
                         Margin="5,0,5,0"
@@ -76,13 +79,13 @@
             </StackPanel>
         </GroupBox>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center">输出目录:</TextBlock>
-            <TextBlock
+            <Label VerticalAlignment="Center">输出目录:</Label>
+            <Label
                 Width="300"
                 Margin="10,0,0,0"
                 VerticalAlignment="Center"
-                Text="{Binding GenerateOption.OutputAssetbundleFolderPath}">
-            </TextBlock>
+                Content="{Binding GenerateOption.OutputAssetbundleFolderPath}">
+            </Label>
             <Button
                 Margin="10,0,0,0"
                 Padding="20,5,20,5"

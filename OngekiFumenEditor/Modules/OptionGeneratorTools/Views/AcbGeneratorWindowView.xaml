@@ -19,13 +19,13 @@
     mc:Ignorable="d">
     <StackPanel>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center">音频文件:</TextBlock>
-            <TextBlock
+            <Label VerticalAlignment="Center">音频文件:</Label>
+            <Label
                 Width="300"
                 Margin="10,0,0,0"
                 VerticalAlignment="Center"
-                Text="{Binding GenerateOption.InputAudioFilePath}">
-            </TextBlock>
+                Content="{Binding GenerateOption.InputAudioFilePath}">
+            </Label>
             <Button
                 Margin="10,0,0,0"
                 Padding="20,5,20,5"
@@ -34,26 +34,29 @@
                 浏览
             </Button>
         </StackPanel>
-        <GroupBox Margin="10,0,10,10" Header="选项">
+        <GroupBox
+            Margin="10,0,10,10"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Header="选项">
             <StackPanel Margin="5">
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">MusicId:</TextBlock>
-                    <TextBox
+                    <Label VerticalAlignment="Center">MusicId:</Label>
+                    <Label
                         Width="75"
                         Margin="10,0,0,0"
-                        Text="{Binding GenerateOption.MusicId}">
-                    </TextBox>
+                        Content="{Binding GenerateOption.MusicId}">
+                    </Label>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center">输出目录:</TextBlock>
-            <TextBlock
+            <Label VerticalAlignment="Center">输出目录:</Label>
+            <Label
                 Width="300"
                 Margin="10,0,0,0"
                 VerticalAlignment="Center"
-                Text="{Binding GenerateOption.OutputFolderPath}">
-            </TextBlock>
+                Content="{Binding GenerateOption.OutputFolderPath}">
+            </Label>
             <Button
                 Margin="10,0,0,0"
                 Padding="20,5,20,5"

@@ -51,6 +51,8 @@
             </Grid.ColumnDefinitions>
             <ListView
                 d:ItemsSource="{d:SampleData ItemCount=5}"
+                Background="{StaticResource EnvironmentWindowBackground}"
+                Foreground="{StaticResource EnvironmentToolWindowText}"
                 ItemsSource="{Binding BossCards}"
                 ScrollViewer.CanContentScroll="True"
                 SelectedItem="{Binding Selected}"

@@ -42,6 +42,8 @@
         <ListView
             Grid.Row="1"
             d:ItemsSource="{d:SampleData ItemCount=5}"
+            Background="{StaticResource EnvironmentWindowBackground}"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
             ItemsSource="{Binding EnumStructs}"
             ScrollViewer.CanContentScroll="True"
             SelectedItem="{Binding Selected}"
