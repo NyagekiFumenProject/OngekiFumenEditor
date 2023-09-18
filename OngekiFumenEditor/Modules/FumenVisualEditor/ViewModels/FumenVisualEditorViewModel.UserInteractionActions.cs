@@ -31,7 +31,9 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
+using static OngekiFumenEditor.Base.OngekiObjects.Flick;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -287,7 +289,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             double? CalculateXMirror(IEnumerable<ISelectableObject> objects, PasteMirrorOption mirrorOption)
             {
                 if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
-                    return 0;
+                    return XGridCalculator.ConvertXGridToX(0, this);
 
                 if (mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
                 {
@@ -327,7 +329,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var sourceCenterPos = CalculateRangeCenter(currentCopiedSources.Keys);
             var offset = (placePoint ?? sourceCenterPos) - sourceCenterPos;
-
+            
+            if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
+                offset.X = 0;
+            
             var redo = new System.Action(() => { });
             var undo = new System.Action(() => { });
 
@@ -358,6 +363,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     case Hold hold:
                         hold.ReferenceLaneStart = default;
                         undo += () => hold.ReferenceLaneStart = default;
+                        break;
+                    case Flick flick:
+                        if (mirrorOption == PasteMirrorOption.XGridZeroMirror
+                            || mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
+                        {
+                            var beforeDirection = flick.Direction;
+                            redo += () => flick.Direction = (FlickDirection)(-(int)beforeDirection);
+                            undo += () => flick.Direction = beforeDirection;
+                        }
                         break;
                     default:
                         break;
