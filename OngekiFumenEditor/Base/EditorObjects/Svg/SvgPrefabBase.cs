@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 {
     public abstract class SvgPrefabBase : OngekiMovableObjectBase
     {
-        private ICurveInterpolaterFactory curveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default;
+        private ICurveInterpolaterFactory curveInterpolaterFactory = XGridLimitedCurveInterpolaterFactory.Default;
         public ICurveInterpolaterFactory CurveInterpolaterFactory
         {
             get => curveInterpolaterFactory;

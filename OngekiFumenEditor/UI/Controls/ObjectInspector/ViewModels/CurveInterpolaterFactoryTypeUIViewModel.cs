@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
-    public class CurveInterpolaterFactoryTypeUIViewModel : CommonUIViewModelBase<ICurveInterpolaterFactory>
+    public class CurveInterpolaterFactoryTypeUIViewModel : CommonUIViewModelBase
     {
         public IEnumerable<ICurveInterpolaterFactory> EnumValues => IoC.GetAll<ICurveInterpolaterFactory>();
 
