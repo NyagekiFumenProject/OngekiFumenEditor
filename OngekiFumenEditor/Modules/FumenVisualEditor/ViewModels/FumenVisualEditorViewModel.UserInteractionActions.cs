@@ -846,7 +846,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             SwitchMode(!IsPreviewMode);
         }
 
-        private void SwitchMode(bool isPreviewMode)
+        public void SwitchMode(bool isPreviewMode)
         {
             var tGrid = GetCurrentTGrid();
             IsUserRequestHideEditorObject = isPreviewMode;

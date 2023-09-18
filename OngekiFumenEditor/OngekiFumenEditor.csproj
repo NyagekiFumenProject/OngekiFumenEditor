@@ -59,6 +59,8 @@
     <None Remove="Resources\empty_ogkr_template.ogkr" />
     <None Remove="Resources\Icons\ease.png" />
     <None Remove="Resources\Icons\icons8-paint-brush-16.png" />
+    <None Remove="Resources\Icons\preview.png" />
+    <None Remove="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
     <None Remove="Resources\Images\logo.png" />
     <None Remove="Resources\Music.xml" />
     <None Remove="Resources\MusicSource.xml" />
@@ -175,6 +177,8 @@
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
     <Resource Include="Resources\Icons\ease.png" />
     <Resource Include="Resources\Icons\icons8-paint-brush-16.png" />
+    <Resource Include="Resources\Icons\preview.png" />
+    <Resource Include="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
     <Resource Include="Resources\logo.png" />
   </ItemGroup>
 

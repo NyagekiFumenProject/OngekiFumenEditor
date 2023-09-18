@@ -2,6 +2,7 @@
 using Gemini.Framework.ToolBars;
 using Gemini.Modules.UndoRedo.Commands;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ShowCurveControlAlways;
 using System;
 using System.Collections.Generic;
@@ -28,5 +29,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolbars
         [Export]
         public static ToolBarItemDefinition ShowCurveControlAlwaysToolBarItem = new CommandToolBarItemDefinition<ShowCurveControlAlwaysCommandDefinition>(
             EditorStatusToolBarGroup, 1);
+
+        [Export]
+        public static ToolBarItemDefinition EditorModeSwitchToolBarItem = new CommandToolBarItemDefinition<EditorModeSwitchCommandDefinition>(
+            EditorStatusToolBarGroup, 2);
     }
 }
