@@ -292,7 +292,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                             rightWall.Wall.Children.AsEnumerable<ConnectableObjectBase>().Prepend(rightWall.Wall)
                             .Select(x => new Point() { x = x.XGrid.TotalGrid, y = x.TGrid.TotalGrid });
 
-                        var leftLines = leftPoints
+                        var leftLines = leftPoints.IsOnlyOne() ? Enumerable.Empty<Line>() : leftPoints
                             .SequenceConsecutivelyWrap(2)
                             .Select(x => x.ToArray())
                             .Select(x => new Line()
@@ -302,7 +302,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                                 x2 = x[1].x,
                                 y2 = x[1].y
                             }).ToArray();
-                        var rightLines = rightPoints
+                        var rightLines = rightPoints.IsOnlyOne() ? Enumerable.Empty<Line>() : rightPoints
                             .SequenceConsecutivelyWrap(2)
                             .Select(x => x.ToArray())
                             .Select(x => new Line()
