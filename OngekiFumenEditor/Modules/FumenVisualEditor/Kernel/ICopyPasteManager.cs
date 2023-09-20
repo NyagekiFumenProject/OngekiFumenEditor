@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel
     {
         bool ContainPastableObjects { get; }
 
-        Task<bool> PasteObjects(FumenVisualEditorViewModel targetEditor, PasteMirrorOption mirrorOption, Point? placePoint = default);
-        Task<bool> CopyObjects(FumenVisualEditorViewModel sourceEditor,IEnumerable<ISelectableObject> objects);
+        Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteMirrorOption mirrorOption, Point? placePoint = default);
+        Task CopyObjects(FumenVisualEditorViewModel sourceEditor,IEnumerable<ISelectableObject> objects);
     }
 }
