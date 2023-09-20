@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
@@ -55,12 +56,6 @@ namespace OngekiFumenEditor.Base
 
         public OngekiObjectBase CopyNew()
         {
-            if (this is not IDisplayableObject displayable
-                //暂不支持 以下类型的复制粘贴
-                //|| obj is ConnectableObjectBase
-                )
-                return default;
-
             var newObj = CacheLambdaActivator.CreateInstance(GetType()) as OngekiObjectBase;
             newObj.Copy(this);
             return newObj;
