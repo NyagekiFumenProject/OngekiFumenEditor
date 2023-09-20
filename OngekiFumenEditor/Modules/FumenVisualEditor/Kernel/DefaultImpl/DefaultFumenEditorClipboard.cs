@@ -274,7 +274,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                             {
                                 var oldChildTGrid = child.TGrid.CopyNew();
                                 var y = TGridCalculator.ConvertTGridToY_DesignMode(oldChildTGrid, sourceEditor);
-                                var y2 = newY + (y - sourceCanvasPos.Y);
                                 var newChildY = CalcY(y);
 
                                 if (TGridCalculator.ConvertYToTGrid_DesignMode(newChildY, targetEditor) is not TGrid newChildTGrid)
