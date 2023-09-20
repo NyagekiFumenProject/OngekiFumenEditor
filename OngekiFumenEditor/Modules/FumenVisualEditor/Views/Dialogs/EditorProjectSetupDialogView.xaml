@@ -24,7 +24,10 @@
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="5">
-                <GroupBox BorderBrush="Black" Header="音频设置">
+                <GroupBox
+                    BorderBrush="Black"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Header="音频设置">
                     <StackPanel Margin="10,5,10,5">
                         <Label>音频文件路径:</Label>
                         <Grid>
@@ -50,21 +53,33 @@
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox BorderBrush="Black" Header="谱面初始设置">
+                <GroupBox
+                    BorderBrush="Black"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Header="谱面初始设置">
                     <StackPanel Margin="10,5,10,5">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">初始Bpm:</TextBlock>
                             <TextBox
                                 Width="150"
                                 VerticalAlignment="Center"
+                                Foreground="{DynamicResource EnvironmentToolWindowText}"
                                 IsEnabled="{Binding EditorProjectData.FumenFilePath}"
                                 Text="{Binding EditorProjectData.BaseBPM}">
                             </TextBox>
                         </StackPanel>
                         <Grid Margin="0,5,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">谱面文件(可选):</TextBlock>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding EditorProjectData.FumenFilePath}" />
+                                <TextBlock
+                                    Margin="0,0,10,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource EnvironmentToolWindowText}">
+                                    谱面文件(可选):
+                                </TextBlock>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                                    Text="{Binding EditorProjectData.FumenFilePath}" />
                             </StackPanel>
 
                             <Button
