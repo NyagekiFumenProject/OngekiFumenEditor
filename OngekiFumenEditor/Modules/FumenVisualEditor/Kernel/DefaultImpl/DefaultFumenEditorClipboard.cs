@@ -51,6 +51,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             currentCopiedSources.Clear();
             this.sourceEditor = default;
 
+            Point CalcPos(ISelectableObject obj)
+            {
+                var x = 0d;
+                if (obj is IHorizonPositionObject horizon)
+                    x = XGridCalculator.ConvertXGridToX(horizon.XGrid, sourceEditor);
+
+                var y = 0d;
+                if (obj is ITimelineObject timeline)
+                    y = TGridCalculator.ConvertTGridToY_DesignMode(timeline.TGrid, sourceEditor);
+
+                return new Point(x, y);
+            }
+
             foreach (var obj in objects.Where(x => x switch
             {
                 //不允许被复制
@@ -72,15 +85,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                         continue;
                 }
 
-                var x = 0d;
-                if (obj is IHorizonPositionObject horizon)
-                    x = XGridCalculator.ConvertXGridToX(horizon.XGrid, sourceEditor);
-
-                var y = 0d;
-                if (obj is ITimelineObject timeline)
-                    y = TGridCalculator.ConvertTGridToY_DesignMode(timeline.TGrid, sourceEditor);
-
-                var canvasPos = new Point(x, y);
+                var canvasPos = CalcPos(obj);
 
                 var source = obj as OngekiObjectBase;
                 var copied = source?.CopyNew();
@@ -269,6 +274,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                             {
                                 var oldChildTGrid = child.TGrid.CopyNew();
                                 var y = TGridCalculator.ConvertTGridToY_DesignMode(oldChildTGrid, sourceEditor);
+                                var y2 = newY + (y - sourceCanvasPos.Y);
                                 var newChildY = CalcY(y);
 
                                 if (TGridCalculator.ConvertYToTGrid_DesignMode(newChildY, targetEditor) is not TGrid newChildTGrid)
