@@ -14,6 +14,21 @@ namespace OngekiFumenEditor.Utils
 {
     public static class LinqExtensionMethod
     {
+        public static IEnumerable<T> OrderBy<T>(this IEnumerable<T> list, params Func<T, T, int>[] cmpFuncs)
+        {
+            var comparer = new ComparerWrapper<T>((a, b) =>
+            {
+                foreach (var cmpFunc in cmpFuncs)
+                {
+                    var result = cmpFunc(a, b);
+                    if (result != 0)
+                        return result;
+                }
+                return 0;
+            });
+            return list.OrderBy(x => x, comparer);
+        }
+
         /// <summary>
         /// 重复某个元素
         /// </summary>
@@ -116,6 +131,9 @@ namespace OngekiFumenEditor.Utils
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> FilterNull<T>(this IEnumerable<T> collection) => collection.Where(x => x != null);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IEnumerable<T> FilterNullBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector) => collection.Where(x => keySelector(x) != null);
 
         public static T FindNextOrDefault<T>(this IEnumerable<T> collection, T taget)
         {
