@@ -500,6 +500,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 return null;
 
             (var minY, var maxY) = objects
+                    .Where(x => x is not ConnectableObjectBase)
                     .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
                     .Where(x => x.Item1)
                     .Select(x => x.Y)
@@ -518,6 +519,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             if (mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
             {
                 (var minX, var maxX) = objects
+                    .Where(x => x is not ConnectableObjectBase)
                     .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
                     .Where(x => x.Item1)
                     .Select(x => x.X)
