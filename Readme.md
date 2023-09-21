@@ -40,7 +40,7 @@
 * ~~轨道操作简单化~~
 * ~~画画专用小工具~~
 * 打包生成工具
-* 修BUG.... **<--- we are here! ---**
+* 塞小功能&修BUG.... **<--- we are here! ---**
 ....
 
 https://pastebin.com/hyNyvdwt
