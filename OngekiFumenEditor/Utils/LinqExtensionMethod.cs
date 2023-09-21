@@ -468,6 +468,29 @@ namespace OngekiFumenEditor.Utils
         }
 
         /// <summary>
+        /// 判断集合数量是否刚好
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="a"></param>
+        /// <param name="minCount"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool AtCount<T>(this IEnumerable<T> a, int minCount)
+        {
+            var i = 0;
+            var itor = a.GetEnumerator();
+
+            while (itor.MoveNext())
+            {
+                i++;
+                if (i > minCount)
+                    return false;
+            }
+
+            return minCount == i;
+        }
+
+        /// <summary>
         /// 判断集合是否为空
         /// </summary>
         /// <typeparam name="T"></typeparam>

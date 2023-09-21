@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
+namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 {
     public interface IOngekiObjectOperationGenerator
     {

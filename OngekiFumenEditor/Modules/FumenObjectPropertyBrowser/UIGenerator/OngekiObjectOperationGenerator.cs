@@ -1,11 +1,11 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using System;
 using System.Linq;
 using System.Windows;
 
-namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
+namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 {
     public class OngekiObjectOperationGenerator
     {

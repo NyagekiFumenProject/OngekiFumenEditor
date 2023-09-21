@@ -10,15 +10,15 @@ using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ValueConverters
 {
-    public class ObjectOperationGeneratorConverter : IValueConverter
+    public class MultiObjectsOperationGeneratorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not IReadOnlySet<ISelectableObject> objs)
                 return default;
-            if (objs.Count != 1)
+            if (objs.Count <= 1)
                 return default;
-            return OngekiObjectOperationGenerator.GenerateUI(objs.First() as OngekiObjectBase);
+            return OngekiMultiObjectsOperationGenerator.GenerateUI(objs.OfType<OngekiObjectBase>());
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

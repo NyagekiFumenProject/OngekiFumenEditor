@@ -12,10 +12,9 @@
     d:DesignWidth="300"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <valueconverters:PropertyGeneratorConverter x:Key="PropertyGeneratorConverter">
-        </valueconverters:PropertyGeneratorConverter>
-        <converters1:ObjectOperationGeneratorConverter x:Key="ObjectOperationGeneratorConverter">
-        </converters1:ObjectOperationGeneratorConverter>
+        <valueconverters:PropertyGeneratorConverter x:Key="PropertyGeneratorConverter" />
+        <converters1:ObjectOperationGeneratorConverter x:Key="ObjectOperationGeneratorConverter" />
+        <converters1:MultiObjectsOperationGeneratorConverter x:Key="MultiObjectsOperationGeneratorConverter" />
     </UserControl.Resources>
     <ScrollViewer Name="HostContent" VerticalScrollBarVisibility="Auto">
         <StackPanel>
@@ -28,6 +27,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <ContentPresenter Content="{Binding SelectedObjects, Converter={StaticResource ObjectOperationGeneratorConverter}}">
+            </ContentPresenter>
+            <ContentPresenter Content="{Binding SelectedObjects, Converter={StaticResource MultiObjectsOperationGeneratorConverter}}">
             </ContentPresenter>
         </StackPanel>
     </ScrollViewer>

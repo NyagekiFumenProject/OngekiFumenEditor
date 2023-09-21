@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;

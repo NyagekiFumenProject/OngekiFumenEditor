@@ -5,6 +5,7 @@ using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
