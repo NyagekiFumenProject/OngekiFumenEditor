@@ -41,23 +41,21 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
             }
 
             var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
-            var backupStores = new HashSet<ConnectableChildObjectBase>();
-            var backupIdxStores = new Dictionary<ConnectableChildObjectBase, int>();
+            var splitOutChildren = new List<ConnectableChildObjectBase>();
             var affactedObjects = new HashSet<ILaneDockable>();
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("划分轨道", () =>
             {
-                //计算出需要划分出来的后边子物件
-                backupStores.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
+                //计算出需要被划分出来的后边子物件集合
+                splitOutChildren.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
                 affactedObjects.AddRange(editor.Fumen.Taps.AsEnumerable<ILaneDockable>()
                     .Concat(editor.Fumen.Holds)
                     .Where(x => x.ReferenceLaneStart == startObject));
 
-                //前面删除，后面添加
-                foreach (var item in backupStores)
+                //被划分的子物件删除出来
+                foreach (var item in splitOutChildren)
                 {
                     startObject.RemoveChildObject(item);
-                    backupIdxStores[item] = item.CacheRecoveryChildIndex;
                     item.CacheRecoveryChildIndex = -1;//force add to end
                     nextStartObject.InsertChildObject(item.TGrid, item);
                 }
@@ -80,10 +78,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 editor.RemoveObject(nextStartObject);
                 startObject.RemoveChildObject(prevEndObject);
 
-                foreach (var item in backupStores)
+                foreach (var item in splitOutChildren)
                 {
                     nextStartObject.RemoveChildObject(item);
-                    item.CacheRecoveryChildIndex = backupIdxStores[item];
+                    item.CacheRecoveryChildIndex = -1;
                     startObject.InsertChildObject(item.TGrid, item);
                 }
 
@@ -92,7 +90,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                     affactedObj.ReferenceLaneStart = startObject as LaneStartBase;
                 }
 
-                backupStores.Clear();
+                splitOutChildren.Clear();
                 affactedObjects.Clear();
                 callback?.Invoke();
             }));
