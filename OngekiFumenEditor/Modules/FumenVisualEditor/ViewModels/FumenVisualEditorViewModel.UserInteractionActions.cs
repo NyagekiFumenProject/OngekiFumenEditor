@@ -403,6 +403,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     .Where(x => x.XGrid >= curXGrid)
                     .Select(x => x.Lane);
 
+                //这里考虑如果是切换到其他颜色轨道，那么可以直接原地变色。
                 var pick = beforeLane.LaneType == targetType ? r.FindNextOrDefault(beforeLane) : r.FirstOrDefault();
 
                 //如果pick为空，说明右侧再也没有合适的轨道可以放了，那么就尝试直接获取最左侧的轨道，重新开始

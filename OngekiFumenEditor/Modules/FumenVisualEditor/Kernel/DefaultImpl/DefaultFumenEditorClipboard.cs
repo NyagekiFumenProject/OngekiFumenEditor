@@ -534,6 +534,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
         private Point CalculateRangeCenter(IEnumerable<OngekiObjectBase> objects)
         {
             (var minX, var maxX) = objects
+                    .Where(x => x is not ConnectableObjectBase)
                     .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
                     .Where(x => x.Item1)
                     .Select(x => x.X)
@@ -543,6 +544,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             var x = minX + diffX / 2f;
 
             (var minY, var maxY) = objects
+                    .Where(x => x is not ConnectableObjectBase)
                     .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
                     .Where(x => x.Item1)
                     .Select(x => x.Y)
