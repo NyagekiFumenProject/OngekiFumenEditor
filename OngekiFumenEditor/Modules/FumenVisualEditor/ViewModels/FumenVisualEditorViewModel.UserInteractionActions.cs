@@ -34,6 +34,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using Xv2CoreLib.ACB;
 using static OngekiFumenEditor.Base.OngekiObjects.Flick;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -171,6 +172,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             IsPreventMutualExclusionSelecting = false;
         }
+
+
 
         public async void MenuItemAction_CopySelectedObjects()
         {
@@ -346,6 +349,90 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         #region Keyboard Actions
+
+        public void KeyboardAction_FastPlaceDockableObjectToCenter()
+            => KeyboardAction_FastPlaceDockableObject(LaneType.Center);
+        public void KeyboardAction_FastPlaceDockableObjectToLeft()
+            => KeyboardAction_FastPlaceDockableObject(LaneType.Left);
+        public void KeyboardAction_FastPlaceDockableObjectToRight()
+            => KeyboardAction_FastPlaceDockableObject(LaneType.Right);
+        public void KeyboardAction_FastPlaceDockableObjectToWallLeft()
+            => KeyboardAction_FastPlaceDockableObject(LaneType.WallLeft);
+        public void KeyboardAction_FastPlaceDockableObjectToWallRight()
+            => KeyboardAction_FastPlaceDockableObject(LaneType.WallRight);
+
+        public void KeyboardAction_FastPlaceDockableObject(LaneType targetType)
+        {
+            if ((!SelectObjects.AtCount(1)) || SelectObjects.FirstOrDefault() is not ILaneDockable dockable)
+            {
+                ToastNotify("需要单选一个Tap/Hold物件");
+                return;
+            }
+
+            KeyboardAction_FastPlaceDockableObject(targetType, dockable);
+        }
+
+        public void KeyboardAction_FastPlaceDockableObject(LaneType targetType, ILaneDockable dockable)
+        {
+            var dockableLanes = Fumen.Lanes
+                .GetVisibleStartObjects(dockable.TGrid, dockable.TGrid)
+                .Where(x => x.LaneType == targetType);
+
+            var pickLane = dockableLanes.FirstOrDefault();
+
+            var beforeXGrid = dockable.XGrid;
+            var beforeHoldEndXGrid = (dockable as Hold)?.HoldEnd.XGrid;
+            var beforeLane = dockable.ReferenceLaneStart;
+
+            if (beforeLane is not null && beforeLane.LaneType == targetType)
+            {
+                //如果本身已经有轨道引用且是同一个类型的轨道，那么就判断一下位置,钦定下一条同类型轨道
+                var curXGrid = dockable.XGrid;
+                var pick = dockableLanes.Select(x =>
+                new
+                {
+                    Lane = x,
+                    XGrid = x.CalulateXGrid(dockable.TGrid)
+                })
+                    .Where(x => x.XGrid > curXGrid)
+                    .OrderBy(x => x.XGrid)
+                    .Select(x => x.Lane)
+                    .FirstOrDefault();
+
+                if (pick is not null)
+                    pickLane = pick;
+            }
+
+            if (pickLane is null)
+            {
+                ToastNotify($"无合适的{targetType}轨道放置物件");
+                return;
+            }
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create($"快速放置{dockable.GetType().Name}到{targetType}轨道", () =>
+            {
+                dockable.ReferenceLaneStart = pickLane;
+                if (dockable.ReferenceLaneStart is not null)
+                {
+                    if (dockable.ReferenceLaneStart.CalulateXGrid(dockable.TGrid) is XGrid xGrid)
+                        dockable.XGrid = xGrid;
+
+                    //如果是Hold还得他整理一下尾巴呢
+                    if (dockable is Hold hold)
+                    {
+                        if (dockable.ReferenceLaneStart.CalulateXGrid(hold.HoldEnd.TGrid) is XGrid holdXGrid)
+                            hold.HoldEnd.XGrid = holdXGrid;
+                    }
+                }
+            }, () =>
+            {
+                dockable.ReferenceLaneStart = beforeLane;
+                dockable.XGrid = beforeXGrid;
+
+                if (dockable is Hold hold)
+                    hold.HoldEnd.XGrid = beforeHoldEndXGrid;
+            }));
+        }
 
         public void KeyboardAction_DeleteSelectingObjects()
         {

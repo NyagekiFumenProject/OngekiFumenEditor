@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
             if (CheckAndAdjustY(dockable, relativePoint.Y, editor) is double y && TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is TGrid tGrid)
             {
-                var closestLaneObject = PickDockableObjects(editor)
+                var closestLaneObjects = PickDockableObjects(editor)
                     .Select(x => x switch
                     {
                         ConnectableChildObjectBase child => child.ReferenceStartObject as LaneStartBase,
@@ -43,7 +43,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                     .Select(x => (Math.Abs(x.Item1.Value - relativePoint.X), x.Item1.Value, x.startObject))
                     .GroupBy(x => x.Item1)
                     .OrderBy(x => x.Key)
-                    .FirstOrDefault()
+                    .FirstOrDefault();
+
+                var closestLaneObject = closestLaneObjects?
                     .OrderByDescending(x => x.startObject.RecordId)
                     .FirstOrDefault();
 
@@ -66,15 +68,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
                 var magneticDockDistance = forceMagneticToLane || forceMagnetic ? int.MaxValue : 8;
 
-                if (closestLaneObject.startObject is not null)
+                if (closestLaneObject?.startObject is not null)
                 {
                     //如果已经附着到轨道的话，那就考虑如果拖动到另一条线上过近，或者最近的线依旧是自己附属的，
                     //那么就强制更新物件的水平位置成对应轨道的
-                    if (closestLaneObject.Item1 < magneticDockDistance || //可能拖动到另一条线上
-                        closestLaneObject.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
+                    if (closestLaneObject?.Item1 < magneticDockDistance || //可能拖动到另一条线上
+                        closestLaneObject?.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
                     {
-                        relativePoint.X = closestLaneObject.Value;
-                        dockable.ReferenceLaneStart = closestLaneObject.startObject;
+                        relativePoint.X = closestLaneObject?.Value ?? default;
+                        dockable.ReferenceLaneStart = closestLaneObject?.startObject;
                         //Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
                         enableMoveTo = true;
                     }
