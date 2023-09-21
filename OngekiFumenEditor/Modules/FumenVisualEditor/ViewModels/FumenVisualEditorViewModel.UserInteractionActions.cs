@@ -385,7 +385,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var beforeLane = dockable.ReferenceLaneStart;
 
             //如果本身已经有轨道引用且是同一个类型的轨道，那么就判断一下位置,钦定下一条同类型轨道
-            if (beforeLane is not null && beforeLane.LaneType == targetType)
+            if (beforeLane is not null)
             {
                 var curXGrid = dockable.XGrid;
                 //获取轨道并计算对应的位置，然后排序，如果位置相同那么就再按RecordId去排序
@@ -399,10 +399,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     .FilterNullBy(x => x.XGrid)
                     .OrderBy((a, b) => a.XGrid.CompareTo(b.XGrid), (a, b) => a.Lane.RecordId.CompareTo(b.Lane.RecordId));
 
-                var pick = pickableLanes
+                var r = pickableLanes
                     .Where(x => x.XGrid >= curXGrid)
-                    .Select(x => x.Lane)
-                    .FindNextOrDefault(beforeLane);
+                    .Select(x => x.Lane);
+
+                var pick = beforeLane.LaneType == targetType ? r.FindNextOrDefault(beforeLane) : r.FirstOrDefault();
 
                 //如果pick为空，说明右侧再也没有合适的轨道可以放了，那么就尝试直接获取最左侧的轨道，重新开始
                 if (pick is null)
