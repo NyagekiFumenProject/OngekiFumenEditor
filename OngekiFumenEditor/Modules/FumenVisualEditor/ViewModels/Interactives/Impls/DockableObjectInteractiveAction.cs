@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
     {
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
-            return editor.Fumen.Lanes.FilterNull();
+            return editor.Fumen.Lanes.Where(x => x.IsDockableLane).FilterNull();
         }
 
         public override void OnMoveCanvas(OngekiObjectBase obj, Point relativePoint, FumenVisualEditorViewModel editor)
@@ -38,12 +38,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                         _ => default
                     })
                     .FilterNull()
+                    .Select(startObject => (CalculateConnectableObjectCurrentRelativeX(startObject, tGrid, editor), startObject))
+                    .Where(x => x.Item1 != null)
+                    .Select(x => (Math.Abs(x.Item1.Value - relativePoint.X), x.Item1.Value, x.startObject))
+                    .GroupBy(x => x.Item1)
+                    .OrderBy(x => x.Key)
+                    .FirstOrDefault()
+                    .OrderByDescending(x => x.startObject.RecordId)
+                    .FirstOrDefault();
+
+                /*
+                var closestLaneObject = PickDockableObjects(editor)
+                    .Select(x => x switch
+                    {
+                        ConnectableChildObjectBase child => child.ReferenceStartObject as LaneStartBase,
+                        LaneStartBase start => start,
+                        _ => default
+                    })
+                    .FilterNull()
                     .Where(x => x is not IColorfulLane)
                     .Select(startObject => (CalculateConnectableObjectCurrentRelativeX(startObject, tGrid, editor), startObject))
                     .Where(x => x.Item1 != null)
                     .Select(x => (Math.Abs(x.Item1.Value - relativePoint.X), x.Item1.Value, x.startObject))
                     .OrderBy(x => x.Item1)
                     .FirstOrDefault();
+                */
 
                 var magneticDockDistance = forceMagneticToLane || forceMagnetic ? int.MaxValue : 8;
 
