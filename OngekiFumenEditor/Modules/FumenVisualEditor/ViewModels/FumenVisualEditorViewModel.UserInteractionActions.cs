@@ -215,9 +215,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //先取消选择所有的物件
-            TryCancelAllObjectSelecting();
-
             await IoC.Get<IFumenEditorClipboard>().PasteObjects(this, mirrorOption, placePoint);
         }
 

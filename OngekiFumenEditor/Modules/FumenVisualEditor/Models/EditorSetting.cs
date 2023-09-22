@@ -240,6 +240,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private bool adjustPastedObjects = Properties.EditorGlobalSetting.Default.AdjustPastedObjects;
+        public bool AdjustPastedObjects
+        {
+            get => adjustPastedObjects;
+            set
+            {
+                adjustPastedObjects = Properties.EditorGlobalSetting.Default.AdjustPastedObjects = value;
+                RequestSave();
+                NotifyOfPropertyChange(() => AdjustPastedObjects);
+            }
+        }
+
         public enum TimeFormat
         {
             TGrid,
@@ -315,6 +327,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.EnableXOffset):
                     enableXOffset = Properties.EditorGlobalSetting.Default.EnableXOffset;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.AdjustPastedObjects):
+                    adjustPastedObjects = Properties.EditorGlobalSetting.Default.AdjustPastedObjects;
                     break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");

@@ -274,5 +274,17 @@ namespace OngekiFumenEditor.Properties {
                 this["EnableXOffset"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AdjustPastedObjects {
+            get {
+                return ((bool)(this["AdjustPastedObjects"]));
+            }
+            set {
+                this["AdjustPastedObjects"] = value;
+            }
+        }
     }
 }

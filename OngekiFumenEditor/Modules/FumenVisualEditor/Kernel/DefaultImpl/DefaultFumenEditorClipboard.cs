@@ -16,6 +16,8 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using static OngekiFumenEditor.Base.OngekiObjects.Flick;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives;
+using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {
@@ -174,8 +176,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
                 offset.X = 0;
 
-            var redo = new System.Action(() => { });
-            var undo = new System.Action(() => { });
+            var redo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
+            var undo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
 
             foreach (var pair in currentCopiedSources)
             {
@@ -185,6 +187,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 var copied = source.CopyNew();
                 if (copied is null)
                     continue;
+
+                var posMap = new Dictionary<object, (Point pos, TGrid tGrid, XGrid xGrid)>();
+                void updateY(object obj, double y, TGrid tGrid)
+                {
+                    var pos = posMap.TryGetValue(obj, out var p) ? p : default;
+                    pos.pos.Y = y;
+                    pos.tGrid = tGrid;
+                    posMap[obj] = pos;
+                }
+
+                void updateX(object obj, double x, XGrid xGrid)
+                {
+                    var pos = posMap.TryGetValue(obj, out var p) ? p : default;
+                    pos.pos.X = x;
+                    pos.xGrid = xGrid;
+                    posMap[obj] = pos;
+                }
+
 
                 switch (copied)
                 {
@@ -242,9 +262,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                         //todo warn
                         return;
                     }
+                    updateY(timelineObject, newY, nt);
 
                     newTGrid = nt;
-                    redo += () => timelineObject.TGrid = newTGrid.CopyNew();
+                    //redo += () => timelineObject.TGrid = newTGrid.CopyNew();
                     undo += () => timelineObject.TGrid = tGrid.CopyNew();
 
                     switch (copied)
@@ -266,7 +287,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                 return;
                             }
 
-                            redo += () => endIndicator.TGrid = newEndIndicatorTGrid.CopyNew();
+                            updateY(endIndicator, newEndIndicatorY, newEndIndicatorTGrid);
+                            //redo += () => endIndicator.TGrid = newEndIndicatorTGrid.CopyNew();
                             undo += () => endIndicator.TGrid = oldEndIndicatorTGrid.CopyNew();
 
                             break;
@@ -284,7 +306,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                     return;
                                 }
 
-                                redo += () => child.TGrid = newChildTGrid.CopyNew();
+                                updateY(child, newChildY, newChildTGrid);
+                                //redo += () => child.TGrid = newChildTGrid.CopyNew();
                                 undo += () => child.TGrid = oldChildTGrid.CopyNew();
 
                                 foreach (var control in child.PathControls)
@@ -299,7 +322,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                         return;
                                     }
 
-                                    redo += () => control.TGrid = newControlTGrid.CopyNew();
+                                    updateY(control, newControlY, newControlTGrid);
+                                    //redo += () => control.TGrid = newControlTGrid.CopyNew();
                                     undo += () => control.TGrid = oldControlTGrid.CopyNew();
                                 }
                             }
@@ -326,15 +350,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                     var newX = CalcX(sourceCanvasPos.X);
 
-                    if (XGridCalculator.ConvertXToXGrid(offsetedX, targetEditor) is not XGrid nx)
+                    if (XGridCalculator.ConvertXToXGrid(newX, targetEditor) is not XGrid nx)
                     {
                         //todo warn
                         return;
                     }
+                    updateX(horizonPositionObject, newX, nx);
 
                     newXGrid = nx;
+                    //redo += () => horizonPositionObject.XGrid = newXGrid.CopyNew();
                     undo += () => horizonPositionObject.XGrid = xGrid.CopyNew();
-                    redo += () => horizonPositionObject.XGrid = newXGrid.CopyNew();
 
                     //apply child objects
                     if (copied is ConnectableStartObject start)
@@ -350,8 +375,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                 //todo warn
                                 return;
                             }
+                            updateX(child, newChildX, newChildXGrid);
 
-                            redo += () => child.XGrid = newChildXGrid.CopyNew();
+                            //redo += () => child.XGrid = newChildXGrid.CopyNew();
                             undo += () => child.XGrid = oldChildXGrid.CopyNew();
 
                             foreach (var control in child.PathControls)
@@ -360,14 +386,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                 var cx = XGridCalculator.ConvertXGridToX(oldControlXGrid, targetEditor);
                                 var newControlX = CalcX(cx);
 
-
                                 if (XGridCalculator.ConvertXToXGrid(newControlX, targetEditor) is not XGrid newControlXGrid)
                                 {
                                     //todo warn
                                     return;
                                 }
+                                updateX(control, newControlX, newControlXGrid);
 
-                                redo += () => control.XGrid = newControlXGrid.CopyNew();
+                                //redo += () => control.XGrid = newControlXGrid.CopyNew();
                                 undo += () => control.XGrid = oldControlXGrid.CopyNew();
                             }
                         }
@@ -478,6 +504,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 redo += () =>
                 {
                     targetEditor.Fumen.AddObject(copied);
+                    foreach ((var obj, var tuple) in posMap)
+                    {
+                        (var pos, var tGrid, var xGrid) = tuple;
+                        if (targetEditor.Setting.AdjustPastedObjects)
+                        {
+                            var interaction = targetEditor.InteractiveManager.GetInteractive(copied);
+                            interaction?.OnMoveCanvas(obj as OngekiObjectBase, pos, targetEditor);
+                        }
+                        else
+                        {
+                            if (obj is ITimelineObject timeline)
+                                timeline.TGrid = tGrid.CopyNew();
+                            if (obj is IHorizonPositionObject horizon)
+                                horizon.XGrid = xGrid.CopyNew();
+                        }
+                    }
+
                     foreach (var selectObj in map.Keys)
                         selectObj.IsSelected = true;
                 };
