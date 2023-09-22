@@ -36,13 +36,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public IEnumerable<ConnectableChildObjectBase> Children => children;
 
         private TGrid cachedMinTGrid = default;
-        public TGrid MinTGrid {
+        public TGrid MinTGrid
+        {
             get
             {
                 if (cachedMinTGrid is null)
                 {
                     var minTGrid = TGrid;
-                    if (!Children.All(x=>x.IsVaildPath))
+                    if (!Children.All(x => x.IsVaildPath))
                     {
                         var shareTGrid = new TGrid();
                         foreach (var child in Children)
@@ -292,7 +293,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             };
         }
 
-        public XGrid CalulateXGrid(TGrid tGrid)
+        public ConnectableChildObjectBase GetChildObjectFromTGrid(TGrid tGrid)
         {
             if (tGrid < TGrid)
                 return default;
@@ -300,14 +301,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             foreach (var cur in Children)
             {
                 if (tGrid <= cur.TGrid)
-                {
-                    var xGrid = cur.CalulateXGrid(tGrid);
-                    if (xGrid == null)
-                        return default;
-                    return xGrid;
-                }
+                    return cur;
             }
 
+            return default;
+        }
+
+        public XGrid CalulateXGrid(TGrid tGrid)
+        {
+            if (GetChildObjectFromTGrid(tGrid) is ConnectableChildObjectBase child)
+                return child.CalulateXGrid(tGrid);
             return default;
         }
 

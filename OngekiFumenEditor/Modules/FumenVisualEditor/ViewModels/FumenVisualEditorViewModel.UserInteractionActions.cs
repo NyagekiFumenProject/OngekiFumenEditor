@@ -4,38 +4,27 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
-using NAudio.Gui;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
-using Xv2CoreLib.ACB;
-using static OngekiFumenEditor.Base.OngekiObjects.Flick;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -698,10 +687,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 isSelectRangeDragging = false;
 
                 var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToArray();
+                if (TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this) is TGrid tGrid)
+                {
+                    var lanes = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
+                    {
+                        var child = start.GetChildObjectFromTGrid(tGrid);
+                        if (child?.CalulateXGrid(tGrid) is not XGrid xGrid)
+                            return default;
+
+                        var laneX = XGridCalculator.ConvertXGridToX(xGrid, this);
+                        var diff = Math.Abs(laneX - position.X);
+                        if (diff > 8)
+                            return default;
+
+                        return child as OngekiObjectBase;
+                    }).FilterNull().OrderBy(x => x.Id);
+
+                    hitResult = hitResult.Concat(lanes).Distinct().ToArray();
+                }
                 var idx = Math.Max(0, hitResult.IndexOf(mouseDownHitObject));
                 var hitOngekiObject = hitResult.ElementAtOrDefault(idx);
-
-                Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject}");
 
                 mouseDownHitObject = null;
                 mouseDownNextHitObject = null;
@@ -732,6 +737,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         mouseDownNextHitObject = hitResult[nextIdx];
                     }
                 }
+
+                Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject}");
             }
 
             if (arg.MiddleButton == MouseButtonState.Pressed)
