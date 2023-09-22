@@ -10,10 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using OngekiFumenEditor.Utils;
-using Mono.Cecil;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel;
 using Caliburn.Micro;
-using Gemini.Modules.UndoRedo.Services;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -164,10 +162,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             var mirrorYOpt = CalculateYMirror(currentCopiedSources.Keys, mirrorOption);
             var mirrorXOpt = CalculateXMirror(targetEditor, currentCopiedSources.Keys, mirrorOption);
 
+            //获取源中心点
             var sourceCenterPos = CalculateRangeCenter(currentCopiedSources.Keys);
             var fixedY = adjustY(sourceCenterPos.Y);
             var fixedCenterPos = new Point(sourceCenterPos.X, fixedY);
-            var offset = (placePoint ?? fixedCenterPos) - fixedCenterPos;
+            //获取目标中心点
+            var targetPoint = placePoint ?? fixedCenterPos;
+            //计算出偏移量
+            var offset = (Point)(targetPoint - fixedCenterPos);
 
             if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
                 offset.X = 0;
@@ -535,8 +537,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
         private Point CalculateRangeCenter(IEnumerable<OngekiObjectBase> objects)
         {
-            (var minX, var maxX) = objects
-                    .Where(x => x is not ConnectableObjectBase)
+            var mesureObjects = objects;
+
+            //如果是纯轨道复制，那么给所有轨道都计算,如果不是，就过滤掉所有轨道
+            if (!mesureObjects.All(x => x is ConnectableObjectBase))
+                mesureObjects = mesureObjects.Where(x => x is not ConnectableObjectBase);
+            else
+                mesureObjects = mesureObjects.Where(x => x is ConnectableStartObject);
+
+            (var minX, var maxX) = mesureObjects
                     .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
                     .Where(x => x.Item1)
                     .Select(x => x.X)
@@ -545,8 +554,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             var diffX = maxX - minX;
             var x = minX + diffX / 2f;
 
-            (var minY, var maxY) = objects
-                    .Where(x => x is not ConnectableObjectBase)
+            (var minY, var maxY) = mesureObjects
                     .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
                     .Where(x => x.Item1)
                     .Select(x => x.Y)
