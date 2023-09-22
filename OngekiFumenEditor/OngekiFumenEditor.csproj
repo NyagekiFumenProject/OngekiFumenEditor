@@ -12,12 +12,16 @@
   <ItemGroup>
     <Compile Remove="Dependencies\**" />
     <Compile Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+    <Compile Remove="_bin\**" />
     <EmbeddedResource Remove="Dependencies\**" />
     <EmbeddedResource Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+    <EmbeddedResource Remove="_bin\**" />
     <None Remove="Dependencies\**" />
     <None Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+    <None Remove="_bin\**" />
     <Page Remove="Dependencies\**" />
     <Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+    <Page Remove="_bin\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -79,10 +83,15 @@
 
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="FodyWeavers.xsd" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AssetsTools.NET" Version="2.0.12" />
+    <PackageReference Include="Costura.Fody" Version="5.7.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="FontStashSharp" Version="1.2.8" />
     <PackageReference Include="ManagedBass" Version="3.1.1" />
     <PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
@@ -550,6 +559,10 @@
 
   <ItemGroup>
     <ProgramRootFiles Include="Resources/Binaries/ProgramRoot/**/*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProgramRootFiles Remove="_bin\**" />
   </ItemGroup>
 
   <Target Name="CopyProgramRootFiles" AfterTargets="AfterBuild">

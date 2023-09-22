@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Results;
 using Gemini.Framework.Services;
+using Gemini.Modules.Output;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.ArgProcesser;
@@ -33,6 +34,8 @@ namespace OngekiFumenEditor
 {
     public class AppBootstrapper : Gemini.AppBootstrapper
     {
+        public override bool IsPublishSingleFileHandled => true;
+
         public AppBootstrapper() : this(true)
         {
 
@@ -130,7 +133,10 @@ namespace OngekiFumenEditor
 
         protected override IEnumerable<Assembly> SelectAssemblies()
         {
-            return base.SelectAssemblies();
+            return base.SelectAssemblies()
+                .Append(typeof(IOutput).Assembly)
+                .Append(typeof(IMainWindow).Assembly)
+                .Distinct();
         }
 
         protected void LogBaseInfos()
