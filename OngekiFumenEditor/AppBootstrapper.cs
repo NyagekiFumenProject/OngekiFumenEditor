@@ -38,7 +38,6 @@ namespace OngekiFumenEditor
 
         public AppBootstrapper() : this(true)
         {
-
         }
 
         public AppBootstrapper(bool useApplication = true) : base(useApplication)

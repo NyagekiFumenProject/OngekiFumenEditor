@@ -25,6 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Costura64\crnlib.dll" />
+    <None Remove="Costura64\ispc_texcomp.dll" />
+    <None Remove="Costura64\PVRTexLib.dll" />
+    <None Remove="Costura64\TexToolWrap.dll" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
@@ -59,7 +63,6 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
-    <None Remove="Resources\Binaries\JacketGenerator.exe" />
     <None Remove="Resources\empty_ogkr_template.ogkr" />
     <None Remove="Resources\Icons\close.png" />
     <None Remove="Resources\Icons\ease.png" />
@@ -74,6 +77,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Costura64\crnlib.dll">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Costura64\ispc_texcomp.dll">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Costura64\PVRTexLib.dll">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Costura64\TexToolWrap.dll">
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
     <EmbeddedResource Include="Resources\Music.xml" />
     <EmbeddedResource Include="Resources\MusicSource.xml" />
@@ -90,7 +101,7 @@
     <PackageReference Include="AssetsTools.NET" Version="2.0.12" />
     <PackageReference Include="Costura.Fody" Version="5.7.0">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="FontStashSharp" Version="1.2.8" />
     <PackageReference Include="ManagedBass" Version="3.1.1" />
@@ -328,18 +339,6 @@
     </None>
     <None Update="bass_fx.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Binaries\ProgramRoot\crnlib.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Binaries\ProgramRoot\ispc_texcomp.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Binaries\ProgramRoot\PVRTexLib.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Binaries\ProgramRoot\TexToolWrap.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Resources\sounds\beamend.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
