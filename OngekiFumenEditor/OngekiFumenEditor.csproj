@@ -7,6 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>embedded</DebugType>
     <LangVersion>preview</LangVersion>
+    <ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -67,6 +68,8 @@
     <None Remove="Resources\Icons\close.png" />
     <None Remove="Resources\Icons\ease.png" />
     <None Remove="Resources\Icons\icons8-paint-brush-16.png" />
+    <None Remove="Resources\Icons\logo.ico" />
+    <None Remove="Resources\Icons\logo32.ico" />
     <None Remove="Resources\Icons\preview.png" />
     <None Remove="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
     <None Remove="Resources\Images\logo.png" />
@@ -199,8 +202,9 @@
     <Resource Include="Resources\Icons\close.png" />
     <Resource Include="Resources\Icons\ease.png" />
     <Resource Include="Resources\Icons\icons8-paint-brush-16.png" />
+    <Resource Include="Resources\Icons\logo.ico" />
+    <Resource Include="Resources\Icons\logo32.ico" />
     <Resource Include="Resources\Icons\preview.png" />
-    <Resource Include="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
     <Resource Include="Resources\logo.png" />
   </ItemGroup>
 

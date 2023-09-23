@@ -155,7 +155,7 @@ namespace OngekiFumenEditor
 
             BitmapImage logo = new BitmapImage();
             logo.BeginInit();
-            logo.UriSource = new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/logo.png");
+            logo.UriSource = new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/logo32.ico");
             logo.EndInit();
             IoC.Get<WindowTitleHelper>().Icon = logo;
 
