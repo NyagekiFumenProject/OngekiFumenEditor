@@ -41,11 +41,12 @@
             <StackPanel Margin="5">
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Label VerticalAlignment="Center">MusicId:</Label>
-                    <Label
+                    <TextBox
+                        VerticalAlignment="Center"
                         Width="75"
                         Margin="10,0,0,0"
-                        Content="{Binding GenerateOption.MusicId}">
-                    </Label>
+                        Text="{Binding GenerateOption.MusicId}">
+                    </TextBox>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
