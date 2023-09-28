@@ -153,7 +153,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public static double ConvertTGridToY_PreviewMode(TGrid tGrid, FumenVisualEditorViewModel editor)
             => ConvertTGridToY_PreviewMode(tGrid, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static double ConvertTGridToY_PreviewMode(TGrid tGrid, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
+        public static double ConvertTGridToY_PreviewMode(TGrid tGrid, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
             => ConvertTGridUnitToY_PreviewMode(tGrid.TotalUnit, soflanList, bpmList, scale, tUnitLength);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ConvertTGridUnitToY_PreviewMode(double tGridUnit, FumenVisualEditorViewModel editor)
@@ -172,8 +172,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
             var relativeBpmLenOffset = MathUtils.CalculateBPMLength(tGrid.TotalUnit, tGridUnit, pickBpm.BPM, tUnitLength);
 
-            var absSpeed = Math.Abs(speed);
-            var y = (pickStartY + relativeBpmLenOffset * absSpeed) * scale;
+            var y = (pickStartY + relativeBpmLenOffset * speed) * scale;
             return y;
         }
 
