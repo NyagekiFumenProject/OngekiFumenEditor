@@ -19,9 +19,11 @@ namespace OngekiFumenEditor.Base.Collections
         private List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> cachedSoflanPositionList_DesignMode = new();
         private List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> cachedSoflanPositionList_PreviewMode = new();
 
-        private record PositionListTreeNode((double canvasY, TGrid tGrid) begin, (double canvasY, TGrid tGrid) end);
-        private IIntervalTree<double, PositionListTreeNode> cachePostionList_DesignMode;
-        private IIntervalTree<double, PositionListTreeNode> cachePostionList_PreviewMode;
+        public record VisibleTGridRange(TGrid minTGrid, TGrid maxTGrid);
+        private record VisibleRange(double minY, TGrid minTGrid, double maxY, TGrid maxTGrid);
+
+        private IIntervalTree<double, VisibleRange> cachePostionList_DesignMode;
+        private IIntervalTree<double, VisibleRange> cachePostionList_PreviewMode;
 
         [Flags]
         public enum ChgEvt
@@ -143,13 +145,29 @@ namespace OngekiFumenEditor.Base.Collections
             var tree = RebuildIntervalTreePositionList(list);
             if (isDesignMode)
                 cachePostionList_DesignMode = tree;
-            if (isDesignMode)
+            else
                 cachePostionList_PreviewMode = tree;
         }
 
-        private IIntervalTree<double, PositionListTreeNode> RebuildIntervalTreePositionList(List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list)
+        private IIntervalTree<double, VisibleRange> RebuildIntervalTreePositionList(List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list)
         {
-            throw new NotImplementedException();
+            var tree = new IntervalTree<double, VisibleRange>();
+
+            foreach (var pair in list.SequenceConsecutivelyWrap(2))
+            {
+                var prev = pair.First();
+                var next = pair.Last();
+
+                var beginY = Math.Min(prev.startY, next.startY);
+                var endY = Math.Max(prev.startY, next.startY);
+
+                var beginTGrid = MathUtils.Min(prev.startTGrid, next.startTGrid);
+                var endTGrid = MathUtils.Max(prev.startTGrid, next.startTGrid);
+
+                tree.Add(beginY, endY, new(beginY, beginTGrid, endY, endTGrid));
+            }
+
+            return tree;
         }
 
         private void CheckAndUpdateSoflanPositionList(double tUnitLength, BpmList bpmList)
@@ -175,6 +193,57 @@ namespace OngekiFumenEditor.Base.Collections
         {
             CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
             return cachedSoflanPositionList_PreviewMode;
+        }
+
+        public IEnumerable<VisibleTGridRange> GetVisibleRanges_PreviewMode(double minY, double maxY)
+        {
+            VisibleTGridRange TrimedTGridRange(VisibleRange visibleRange)
+            {
+                var trimedMinTGrid = visibleRange.minTGrid;
+                var trimedMaxTGrid = visibleRange.maxTGrid;
+
+                var yLen = visibleRange.maxY - visibleRange.minY;
+                var gridLen = (visibleRange.maxTGrid - visibleRange.minTGrid).TotalGrid(visibleRange.minTGrid.GridRadix);
+
+                if (visibleRange.minY < minY)
+                {
+                    var diff = minY - visibleRange.minY;
+                    var p = diff / yLen;
+                    trimedMinTGrid = trimedMinTGrid + new GridOffset(0, (int)(p * gridLen));
+                }
+
+                if (maxY < visibleRange.maxY)
+                {
+                    var diff = visibleRange.maxY - maxY;
+                    var p = diff / yLen;
+                    trimedMaxTGrid = trimedMaxTGrid - new GridOffset(0, (int)(p * gridLen));
+                }
+
+                return new(trimedMinTGrid, trimedMaxTGrid);
+            }
+
+            var result = cachePostionList_PreviewMode.Query(minY, maxY)
+                .Select(TrimedTGridRange)
+                .OrderBy(x => x.minTGrid);
+            var itor = result.GetEnumerator();
+            if (!itor.MoveNext())
+                yield break;
+            var cur = itor.Current;
+            while (itor.MoveNext())
+            {
+                var next = itor.Current;
+                if (next.minTGrid <= cur.maxTGrid)
+                {
+                    //combinable
+                    cur = new(MathUtils.Min(cur.minTGrid, next.minTGrid), MathUtils.Max(cur.maxTGrid, next.maxTGrid));
+                }
+                else
+                {
+                    yield return cur;
+                    cur = next;
+                }
+            }
+            yield return cur;
         }
 
         #endregion

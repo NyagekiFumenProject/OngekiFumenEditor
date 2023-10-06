@@ -14,7 +14,7 @@ using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-    public class SoflanList : TGridSortList<Soflan>
+    public partial class SoflanList : TGridSortList<Soflan>
     {
         public event Action OnChangedEvent;
 
