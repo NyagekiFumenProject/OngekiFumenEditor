@@ -24,7 +24,9 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Base.EditorProjectDataUtils;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -548,7 +550,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void SwitchMode(bool isPreviewMode)
         {
-            var tGrid = GetCurrentTGrid();
+            var tGrid = GetCurrentAudioTime();
             IsUserRequestHideEditorObject = isPreviewMode;
             convertToY = IsDesignMode ?
                 TGridCalculator.ConvertTGridUnitToY_DesignMode :
@@ -653,7 +655,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                         var curY = pos.Y;
                         var diffY = curY - mouseCanvasStartPosition.Y;
-                        ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
+
+                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(startScrollOffset + diffY, this);
+                        //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
+                        ScrollTo(audioTime);
                     }
                     else
                     {
@@ -782,7 +787,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var curY = pos.Y;
                 var diffY = curY - mouseCanvasStartPosition.Y;
-                ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
+
+                var canvasY = startScrollOffset + diffY;
+                var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(canvasY, this);
+                //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
+                ScrollTo(audioTime);
 
                 //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
             }
@@ -823,7 +832,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
 
                 if (offsetY != 0)
-                    ScrollTo(y);
+                {
+                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(offsetY, this);
+                    ScrollTo(audioTime);
+                }
 
                 //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
                 if (IsRangeSelecting)
@@ -984,9 +996,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var canvasX = pos.X;
             CurrentCursorPosition = new(canvasX, canvasY);
 
-            var tGrid = IsDesignMode ?
-                    TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this) :
-                    TGridCalculator.ConvertYToTGrid_PreviewMode(canvasY, this);
+            var tGrid = default(TGrid);
+            if (IsDesignMode)
+                tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this);
+            else
+            {
+                var result = TGridCalculator.ConvertYToTGrid_PreviewMode(canvasY, this);
+                if (result.IsOnlyOne())
+                    tGrid = result.FirstOrDefault();
+            }
             TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
             var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
             contentObject.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff")}]";
@@ -1085,7 +1103,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var result = arg.Delta > 0 ? nextFirst : downFirst;
                 if (result.tGrid is not null)
-                    ScrollTo(result.y);
+                {
+                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(result.y, this);
+                    ScrollTo(audioTime);
+                    //ScrollTo(result.y);
+                }
             }
             else
             {
@@ -1101,7 +1123,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    ScrollTo(ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength);
+                    var y = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength;
+                    y = Math.Max(Math.Min(y, TotalDurationHeight), 0);
+                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                    ScrollTo(audioTime);
+                    //ScrollTo(ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength);
                 }
             }
         }

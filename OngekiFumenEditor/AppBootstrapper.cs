@@ -194,6 +194,8 @@ namespace OngekiFumenEditor
             var previewList = soflanList.GetCachedSoflanPositionList_PreviewMode(240, bpmList);
 
             var y = TGridCalculator.ConvertTGridToY_PreviewMode(new(1, 0), soflanList, bpmList, 1, 240);
+
+            var ranges = soflanList.GetVisibleRanges_PreviewMode(500, 500).ToList();
         }
 
         private async void MainWindow_Drop(object sender, DragEventArgs e)

@@ -35,6 +35,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
         #endregion
 
+        #region [DesignMode] Y -> AudioTime
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TimeSpan ConvertYToAudioTime_DesignMode(double pickY, FumenVisualEditorViewModel editor)
+            => ConvertYToAudioTime_DesignMode(pickY, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
+        private static TimeSpan ConvertYToAudioTime_DesignMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
+        {
+            var tGrid = ConvertYToTGrid_DesignMode(pickY, soflanList, bpmList, scale, tUnitLength);
+            return ConvertTGridToAudioTime(tGrid, bpmList, tUnitLength);
+        }
+
+        #endregion
+
         #region [DesignMode] AudioTime -> Y
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,22 +140,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         #region [PreviewMode] Y -> TGrid
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TGrid ConvertYToTGrid_PreviewMode(double pickY, FumenVisualEditorViewModel editor)
+        public static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, FumenVisualEditorViewModel editor)
             => ConvertYToTGrid_PreviewMode(pickY, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
-        private static TGrid ConvertYToTGrid_PreviewMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
+        private static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
         {
             pickY = pickY / scale;
-            var list = soflanList.GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
+            _ = soflanList.GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
 
-            //获取pickY对应的bpm和bpm起始位置
-            (var pickStartY, var tGrid, var speed, var pickBpm) = list.LastOrDefault(x => x.startY <= pickY);
-            if (pickBpm is null)
-                return default;
-            var absSpeed = Math.Abs(speed);
-            var relativeBpmLenOffset = pickBpm.LengthConvertToOffset((pickY - pickStartY) / absSpeed, tUnitLength);
-
-            var pickTGrid = tGrid + relativeBpmLenOffset;
-            return pickTGrid;
+            var result = soflanList.GetVisibleRanges_PreviewMode(pickY, pickY).OrderBy(x => x.minTGrid).Select(x => x.minTGrid);
+            return result;
         }
 
         #endregion
@@ -193,86 +199,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => GetVisbleTimelines_PreviewMode(editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Rect.MinY, editor.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale, tUnitLength);
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
         {
-            minVisibleCanvasY = Math.Max(0, minVisibleCanvasY);
-            var minVisibleCanvasTGrid = ConvertYToTGrid_PreviewMode(minVisibleCanvasY, soflans, bpmList, scale, tUnitLength);
+            var queryFromDesignMode = GetVisbleTimelines_DesignMode(soflans, bpmList, meterList, minVisibleCanvasY, maxVisibleCanvasY, judgeLineOffsetY, 1, scale, tUnitLength);
 
-            //划线的中止位置
-            var endTGrid = ConvertYToTGrid_PreviewMode(maxVisibleCanvasY, soflans, bpmList, scale, tUnitLength);
-            //可显示划线的起始位置 
-            var currentTGridBaseOffset = ConvertYToTGrid_PreviewMode(minVisibleCanvasY, soflans, bpmList, scale, tUnitLength)
-                ?? ConvertYToTGrid_PreviewMode(minVisibleCanvasY + judgeLineOffsetY, soflans, bpmList, 1, tUnitLength);
-
-            var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
-            var currentTimeSignatureIndex = 0;
-            //快速定位,尽量避免计算完全不用画的timesignature(
-            for (int i = 0; i < timeSignatures.Count; i++)
+            foreach (var item in queryFromDesignMode)
             {
-                var cur = timeSignatures[i];
-                if (cur.startTGrid > minVisibleCanvasTGrid)
-                    break;
-                currentTimeSignatureIndex = i;
-            }
+                if (item.beatIndex != 0)
+                    continue;
 
-            //钦定好要画的起始timeSignatrue
-            (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) currentTimeSignature = timeSignatures[currentTimeSignatureIndex];
+                var cpItem = item;
+                cpItem.y = ConvertTGridToY_PreviewMode(cpItem.tGrid, soflans, bpmList, scale, tUnitLength);
 
-            if (endTGrid is null)
-                yield break;
-
-            while (currentTGridBaseOffset is not null)
-            {
-                var nextTimeSignatureIndex = currentTimeSignatureIndex + 1;
-                var nextTimeSignature = timeSignatures.Count > nextTimeSignatureIndex ? timeSignatures[nextTimeSignatureIndex] : default;
-
-                //钦定好要画的相对于当前timeSignature的偏移Y，节拍信息，节奏速度
-                (_, var currentTGridBase, var currentMeter, var currentBpm) = currentTimeSignature;
-                var currentStartY = ConvertTGridToY_PreviewMode(currentTGridBase, soflans, bpmList, scale, tUnitLength);
-                (_, var nextTGridBase, _, var nextBpm) = nextTimeSignature;
-
-                //计算每一拍的(grid)长度
-                var resT = currentTGridBase.ResT;
-                var beatCount = currentMeter.BunShi * beatSplit;
-                var lengthPerBeat = resT * 1.0d / beatCount;
-
-                //这里也可以跳过添加完全看不到的线
-                var diff = currentTGridBaseOffset - currentTGridBase;
-                var totalGrid = diff.Unit * resT + diff.Grid;
-                var i = (int)Math.Max(0, totalGrid / lengthPerBeat);
-
-                //检测是否可以绘制线
-                var isDrawable = !(double.IsInfinity(lengthPerBeat) || (beatCount == 0));
-
-                while (isDrawable)
-                {
-                    var tGrid = currentTGridBase + new GridOffset(0, (int)(lengthPerBeat * i));
-                    //因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
-                    var y = ConvertTGridToY_PreviewMode(tGrid, soflans, bpmList, 1, tUnitLength);
-                    //var y = currentStartY + len;
-
-                    //超过当前timeSignature范围，切换到下一个timeSignature画新的线
-                    if (nextBpm is not null && tGrid >= nextTGridBase)
-                        break;
-                    //超过编辑器谱面范围，后面都不用画了
-                    if (tGrid > endTGrid)
-                        yield break;
-                    //节奏线在最低可见线的后面
-                    if (tGrid < currentTGridBaseOffset)
-                    {
-                        i++;
-                        continue;
-                    }
-
-                    yield return (tGrid, y * scale, i % beatCount, currentMeter, currentBpm);
-                    i++;
-                }
-                currentTGridBaseOffset = nextTGridBase;
-                currentTimeSignatureIndex = nextTimeSignatureIndex;
-                currentTimeSignature = timeSignatures.Count > currentTimeSignatureIndex ? timeSignatures[currentTimeSignatureIndex] : default;
+                yield return cpItem;
             }
         }
 
-
         #endregion
+
+        public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, BpmList bpmList, MeterChangeList meterList, int tUnitLength = 240)
+        {
+            var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
+            var idx = timeSignatures.BinarySearchBy(tGrid, x => x.startTGrid);
+            idx = idx < 0 ? Math.Max(0, ((~idx) - 1)) : idx;
+            return timeSignatures[idx];
+        }
 
         #region [DesignMode] VisbleTimelines
 
@@ -357,14 +306,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
                 currentTimeSignatureIndex = nextTimeSignatureIndex;
                 currentTimeSignature = timeSignatures.Count > currentTimeSignatureIndex ? timeSignatures[currentTimeSignatureIndex] : default;
             }
-        }
-
-        public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, BpmList bpmList, MeterChangeList meterList, int tUnitLength = 240)
-        {
-            var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
-            var idx = timeSignatures.BinarySearchBy(tGrid, x => x.startTGrid);
-            idx = idx < 0 ? Math.Max(0, ((~idx) - 1)) : idx;
-            return timeSignatures[idx];
         }
 
         #endregion

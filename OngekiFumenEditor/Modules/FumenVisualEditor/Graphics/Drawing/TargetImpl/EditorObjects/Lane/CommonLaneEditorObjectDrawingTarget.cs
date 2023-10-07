@@ -37,14 +37,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             {
-                var previewMinTGrid = target.TGridRange.VisiableMinTGrid;
-                var previewMaxTGrid = target.TGridRange.VisiableMaxTGrid;
-
                 void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {
                     foreach (var item in o)
                     {
-                        if (item.TGrid < previewMinTGrid || item.TGrid > previewMaxTGrid)
+                        if (!target.CheckVisible(item.TGrid))
                             continue;
 
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);

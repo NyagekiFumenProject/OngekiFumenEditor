@@ -50,13 +50,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            bool isVisible(TGrid tGrid) => target.TGridRange.VisiableMinTGrid <= tGrid || tGrid <= target.TGridRange.VisiableMaxTGrid;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             bool getNextIsVaild(ConnectableObjectBase o) => o.NextObject?.IsVaildPath ?? true;
 
-            var prevVisible = isVisible(obj.TGrid);
-            var alwaysDrawing = isVisible(obj.MinTGrid) && isVisible(obj.MaxTGrid);
+            var prevVisible = target.CheckVisible(obj.TGrid);
+            var alwaysDrawing = target.CheckVisible(obj.MinTGrid) && target.CheckVisible(obj.MaxTGrid);
 
             PostPoint(obj.TGrid, obj.XGrid, getNextIsVaild(obj));
             var prevInvaild = true;
@@ -65,7 +62,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             foreach (var childObj in obj.Children)
             {
-                var visible = alwaysDrawing || isVisible(childObj.TGrid);
+                var visible = alwaysDrawing || target.CheckVisible(childObj.TGrid);
                 var curIsVaild = childObj.IsVaildPath;
                 if (prevInvaild != curIsVaild)
                 {

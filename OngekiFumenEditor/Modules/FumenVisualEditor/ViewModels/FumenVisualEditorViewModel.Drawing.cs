@@ -25,6 +25,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using System.Windows.Media;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using static OngekiFumenEditor.Base.Collections.SoflanList;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -105,7 +106,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public FumenVisualEditorViewModel Editor => this;
 
         public VisibleRect Rect { get; set; } = default;
-        public VisibleTGridRange TGridRange { get; set; } = default;
 
         public IPerfomenceMonitor PerfomenceMonitor { get; private set; } = new DummyPerformenceMonitor();
 
@@ -254,6 +254,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
+        private List<(TGrid minTGrid, TGrid maxTGrid)> visibleTGridRanges = new List<(TGrid minTGrid, TGrid maxTGrid)>();
+
         public void Render(TimeSpan ts)
         {
             PerfomenceMonitor.PostUIRenderTime(ts);
@@ -273,20 +275,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (fumen is null)
                 return;
 
-            Func<double, FumenVisualEditorViewModel, TGrid> convertToTGrid = IsDesignMode ?
-                TGridCalculator.ConvertYToTGrid_DesignMode :
-                TGridCalculator.ConvertYToTGrid_PreviewMode;
-
             var tGrid = GetCurrentTGrid();
-            var curY = ConvertToY(tGrid.TotalUnit);
 
+            var curY = ConvertToY(tGrid.TotalUnit);
             var minY = (float)(curY - Setting.JudgeLineOffsetY);
-            var minTGrid = convertToTGrid(minY, this) ?? TGrid.Zero;
-            var maxTGrid = convertToTGrid(minY + ViewHeight, this);
+            var maxY = (float)(minY + ViewHeight);
+
+            visibleTGridRanges.Clear();
+            if (IsDesignMode)
+            {
+                var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this) ?? TGrid.Zero;
+                var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(maxY, this);
+
+                visibleTGridRanges.Add((minTGrid, maxTGrid));
+            }
+            else
+            {
+                var ranges = Fumen.Soflans.GetVisibleRanges_PreviewMode(minY, maxY);
+                visibleTGridRanges.AddRange(ranges.Select(x => (x.minTGrid, x.maxTGrid)));
+            }
 
             //todo 这里就要计算可视区域了
             Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));
-            TGridRange = new VisibleTGridRange(minTGrid, maxTGrid);
 
             RecalculateMagaticXGridLines();
 
@@ -294,7 +304,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             timeSignatureHelper.DrawLines(this);
             xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
-            foreach (var objGroup in GetDisplayableObjects(fumen, minTGrid, maxTGrid).OfType<OngekiTimelineObjectBase>().GroupBy(x => x.IDShortName))
+            var renderObjects = visibleTGridRanges
+                .SelectMany(x => GetDisplayableObjects(fumen, x.minTGrid, x.maxTGrid))
+                .OfType<OngekiTimelineObjectBase>()
+                .GroupBy(x => x.IDShortName);
+
+            foreach (var objGroup in renderObjects)
             {
                 if (GetDrawingTarget(objGroup.Key) is not IFumenEditorDrawingTarget[] drawingTargets)
                     continue;
@@ -424,6 +439,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public double ConvertToY(double tGridUnit)
         {
             return convertToY(tGridUnit, this);
+        }
+
+        public bool CheckVisible(TGrid tGrid)
+        {
+            foreach ((var minTGrid, var maxTGrid) in visibleTGridRanges)
+                if (minTGrid <= tGrid && tGrid <= maxTGrid)
+                    return true;
+            return false;
         }
     }
 }

@@ -5,7 +5,9 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
+using OpenTK.Audio.OpenAL;
 using System;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
-        private TGrid currentTGrid = new TGrid(0, 0);
+        private TimeSpan currentAudioTime = TimeSpan.FromSeconds(0);
 
         private double totalDurationHeight;
         public double TotalDurationHeight
@@ -34,6 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public double ScrollViewerVerticalOffset
         {
             get => scrollViewerVerticalOffset;
+            /*
             set
             {
                 var val = Math.Min(TotalDurationHeight, Math.Max(0, value));
@@ -44,12 +47,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 RecalcViewProjectionMatrix();
                 currentTGrid = convertToTGrid(scrollViewerVerticalOffset, this);
             }
+            */
         }
 
         public double ReverseScrollViewerVerticalOffset
         {
             get => TotalDurationHeight - ScrollViewerVerticalOffset;
-            set => ScrollViewerVerticalOffset = TotalDurationHeight - value;
+            set
+            {
+                //ScrollViewerVerticalOffset = TotalDurationHeight - value;
+                var val = TotalDurationHeight - value;
+                if (IsDesignMode)
+                {
+                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(val, this);
+                    ScrollTo(audioTime);
+                }
+                else
+                {
+                    //todo 
+                }
+            }
         }
 
         #region ScrollTo
@@ -63,26 +80,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (startTGrid is null)
                 return;
-            var y = ConvertToY(startTGrid.TotalUnit);
-            ScrollTo(y);
+            var audioTime = TGridCalculator.ConvertTGridToAudioTime(startTGrid, this);
+            ScrollTo(audioTime);
         }
 
         public void ScrollTo(TimeSpan audioTime)
         {
-            var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(audioTime, this);
-            ScrollTo(tGrid);
-        }
+            var fixedAudioTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(audioTime, EditorProjectData.AudioDuration));
+            currentAudioTime = fixedAudioTime;
 
-        public void ScrollTo(double y)
-        {
-            ScrollViewerVerticalOffset = (float)y;
+            var val = IsDesignMode ?
+                TGridCalculator.ConvertAudioTimeToY_DesignMode(fixedAudioTime, this) :
+                TGridCalculator.ConvertAudioTimeToY_PreviewMode(fixedAudioTime, this);
+            val = Math.Min(TotalDurationHeight, Math.Max(0, val));
+
+            scrollViewerVerticalOffset = val;
+            NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
+            RecalcViewProjectionMatrix();
         }
 
         #endregion
 
-        public TGrid GetCurrentTGrid()
-        {
-            return currentTGrid;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TimeSpan GetCurrentAudioTime() => currentAudioTime;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(GetCurrentAudioTime(), this);
     }
 }
