@@ -198,17 +198,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => GetVisbleTimelines_PreviewMode(editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Rect.MinY, editor.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale, tUnitLength);
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
         {
-            var queryFromDesignMode = GetVisbleTimelines_DesignMode(soflans, bpmList, meterList, minVisibleCanvasY, maxVisibleCanvasY, judgeLineOffsetY, 1, scale, tUnitLength);
+            var minY = minVisibleCanvasY / scale;
+            var maxY = maxVisibleCanvasY / scale;
+            var tGridRanges = soflans.GetVisibleRanges_PreviewMode(minY, maxY, bpmList, tUnitLength);
 
-            foreach (var item in queryFromDesignMode)
+            foreach (var range in tGridRanges)
             {
-                if (item.beatIndex != 0)
-                    continue;
+                var rMinY = ConvertTGridToY_DesignMode(range.minTGrid, soflans, bpmList, scale, tUnitLength);
+                var rMaxY = ConvertTGridToY_DesignMode(range.maxTGrid, soflans, bpmList, scale, tUnitLength);
 
-                var cpItem = item;
-                cpItem.y = ConvertTGridToY_PreviewMode(cpItem.tGrid, soflans, bpmList, scale, tUnitLength);
+                var queryFromDesignMode = GetVisbleTimelines_DesignMode(soflans, bpmList, meterList, rMinY, rMaxY, judgeLineOffsetY, 1, scale, tUnitLength);
+                foreach (var item in queryFromDesignMode)
+                {
+                    if (item.beatIndex != 0)
+                        continue;
 
-                yield return cpItem;
+                    var cpItem = item;
+                    cpItem.y = ConvertTGridToY_PreviewMode(cpItem.tGrid, soflans, bpmList, scale, tUnitLength);
+
+                    yield return cpItem;
+                }
             }
         }
 
