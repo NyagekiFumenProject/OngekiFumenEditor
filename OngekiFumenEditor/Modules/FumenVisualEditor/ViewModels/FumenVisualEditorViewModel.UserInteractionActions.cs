@@ -833,7 +833,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 if (offsetY != 0)
                 {
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(offsetY, this);
+                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
                     ScrollTo(audioTime);
                 }
 

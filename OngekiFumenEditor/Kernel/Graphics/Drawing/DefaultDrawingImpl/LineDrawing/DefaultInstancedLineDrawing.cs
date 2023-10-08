@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 using static OngekiFumenEditor.Kernel.Graphics.IStaticVBODrawing;
 
@@ -63,6 +64,27 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
         private int postDataFillCount = 0;
         private IDrawingContext target;
         private float lineWidth;
+
+#if DEBUG
+        private struct VertexData
+        {
+            public float x;
+            public float y;
+            public float z;
+
+            public float lineWidth;
+
+            public float r;
+            public float g;
+            public float b;
+            public float a;
+
+            public float dashSize;
+            public float gapSize;
+        }
+
+        private ReadOnlySpan<VertexData> vertices => MemoryMarshal.Cast<float, VertexData>(PostData.AsMemory().Slice(0, postDataFillIndex).Span);
+#endif
 
         private OpenTK.Mathematics.Vector2 aa_radius_val = new OpenTK.Mathematics.Vector2(2, 2);
 

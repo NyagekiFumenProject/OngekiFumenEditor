@@ -23,8 +23,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public virtual int LineWidth { get; } = 2;
         private ISimpleLineDrawing lineDrawing;
-        TGrid shareTGrid = new TGrid();
-        XGrid shareXGrid = new XGrid();
         private static VertexDash invailedDash = new VertexDash() { DashSize = 6, GapSize = 3 };
 
         public CommonLinesDrawTargetBase()
@@ -34,41 +32,47 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
 
-        public void FillLine(IFumenEditorDrawingContext target, T obj)
+        public void FillLine(IFumenEditorDrawingContext target, T start)
         {
-            var color = GetLanePointColor(obj);
-            var resT = obj.TGrid.ResT;
-            var resX = obj.XGrid.ResX;
+            var color = GetLanePointColor(start);
+            var resT = start.TGrid.ResT;
+            var resX = start.XGrid.ResX;
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-            void PostPoint(TGrid tGrid, XGrid xGrid, bool isVailed)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)
             {
-                var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-                var y = (float)target.ConvertToY(tGrid);
+                var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
+                var y = (float)target.ConvertToY(tGridUnit);
 
                 lineDrawing.PostPoint(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash);
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void PostPoint(TGrid tGrid, XGrid xGrid, bool isVailed) => PostPoint2(tGrid.TotalUnit, xGrid.TotalUnit, isVailed);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void PostObject(OngekiMovableObjectBase obj, bool isVailed) => PostPoint(obj.TGrid, obj.XGrid, isVailed);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             bool getNextIsVaild(ConnectableObjectBase o) => o.NextObject?.IsVaildPath ?? true;
 
-            var prevVisible = target.CheckVisible(obj.TGrid);
-            var alwaysDrawing = target.CheckVisible(obj.MinTGrid) && target.CheckVisible(obj.MaxTGrid);
+            var prevVisible = target.CheckVisible(start.TGrid);
+            var alwaysDrawing = target.CheckVisible(start.MinTGrid) && target.CheckVisible(start.MaxTGrid);
 
-            PostPoint(obj.TGrid, obj.XGrid, getNextIsVaild(obj));
+            PostObject(start, getNextIsVaild(start));
             var prevInvaild = true;
+            var prevObj = start as ConnectableObjectBase;
 
-            ConnectableObjectBase prevObj = obj;
-
-            foreach (var childObj in obj.Children)
+            foreach (var childObj in start.Children)
             {
                 var visible = alwaysDrawing || target.CheckVisible(childObj.TGrid);
                 var curIsVaild = childObj.IsVaildPath;
                 if (prevInvaild != curIsVaild)
                 {
-                    PostPoint(prevObj.TGrid, prevObj.XGrid, curIsVaild);
+                    PostObject(prevObj, curIsVaild);
                     prevInvaild = curIsVaild;
                 }
+
+                if (prevVisible != visible && prevVisible == false)
+                    PostObject(prevObj, prevInvaild);
 
                 if (visible || prevVisible)
                 {
@@ -76,13 +80,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     {
                         foreach (var item in childObj.GetConnectionPaths())
                         {
-                            shareTGrid.Unit = item.pos.Y / resT;
-                            shareXGrid.Unit = item.pos.X / resX;
-                            PostPoint(shareTGrid, shareXGrid, curIsVaild);
+                            PostPoint2(item.pos.Y / resT, item.pos.X / resX, curIsVaild);
                         }
                     }
                     else
-                        PostPoint(childObj.TGrid, childObj.XGrid, curIsVaild);
+                        PostObject(childObj, curIsVaild);
                 }
 
                 prevObj = childObj;
