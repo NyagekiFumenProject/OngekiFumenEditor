@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             bool getNextIsVaild(ConnectableObjectBase o) => o.NextObject?.IsVaildPath ?? true;
 
             var prevVisible = target.CheckVisible(start.TGrid);
-            var alwaysDrawing = target.CheckVisible(start.MinTGrid) && target.CheckVisible(start.MaxTGrid);
+            var alwaysDrawing = target.CheckRangeVisible(start.MinTGrid, start.MaxTGrid);
 
             PostObject(start, getNextIsVaild(start));
             var prevInvaild = true;

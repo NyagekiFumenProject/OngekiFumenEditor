@@ -261,7 +261,7 @@ namespace OngekiFumenEditor.Base.Collections
 
             if (genDefault)
             {
-                (var startY, var startTGrid, var speed, var bpm) = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList).First();
+                (var startY, var startTGrid, var speed, var bpm) = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList).Last();
 
                 var gridOffset = bpm.LengthConvertToOffset(nonScaleMinY - startY, (int)tUnitLength);
                 var minTGrid = startTGrid + gridOffset;

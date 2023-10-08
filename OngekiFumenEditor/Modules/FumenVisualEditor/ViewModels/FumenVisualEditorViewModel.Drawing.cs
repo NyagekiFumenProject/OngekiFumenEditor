@@ -452,5 +452,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     return true;
             return false;
         }
+
+        public bool CheckRangeVisible(TGrid minTGrid, TGrid maxTGrid)
+        {
+            foreach (var visibleRange in visibleTGridRanges)
+            {
+                var result = !(minTGrid > visibleRange.maxTGrid || maxTGrid < visibleRange.minTGrid);
+                if (result)
+                    return true;
+            }
+            return false;
+        }
     }
 }
