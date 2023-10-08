@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void Draw(IFumenEditorDrawingContext target)
         {
-            var y = (float)TGridCalculator.ConvertAudioTimeToY_DesignMode(target.CurrentPlayTime, target.Editor);
+            var y = (float)target.ConvertToY(target.Editor.GetCurrentTGrid().TotalUnit);
 
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
             vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);

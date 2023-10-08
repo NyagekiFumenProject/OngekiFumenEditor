@@ -557,6 +557,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 TGridCalculator.ConvertTGridUnitToY_PreviewMode;
             RecalculateTotalDurationHeight();
             ScrollTo(tGrid);
+            var mousePos = Mouse.GetPosition(GetView() as FrameworkElement);
+            UpdateCurrentCursorPosition(mousePos);
         }
 
         #endregion

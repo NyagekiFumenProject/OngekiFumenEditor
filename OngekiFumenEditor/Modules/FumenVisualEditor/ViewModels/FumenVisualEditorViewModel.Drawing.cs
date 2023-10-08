@@ -122,7 +122,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void RecalcViewProjectionMatrix()
         {
             var xOffset = 0;
-            var y = (float)TGridCalculator.ConvertAudioTimeToY_DesignMode(CurrentPlayTime, this);
+
+            var y = (float)convertToY(GetCurrentTGrid().TotalUnit, this);
 
             ProjectionMatrix =
                 Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);

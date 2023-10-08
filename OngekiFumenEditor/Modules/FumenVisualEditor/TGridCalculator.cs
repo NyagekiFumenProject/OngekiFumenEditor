@@ -213,6 +213,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         }
 
         #endregion
+        public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, FumenVisualEditorViewModel editor)
+        {
+            return GetCurrentTimeSignature(tGrid, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Setting.TGridUnitLength);
+        }
 
         public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, BpmList bpmList, MeterChangeList meterList, int tUnitLength = 240)
         {
