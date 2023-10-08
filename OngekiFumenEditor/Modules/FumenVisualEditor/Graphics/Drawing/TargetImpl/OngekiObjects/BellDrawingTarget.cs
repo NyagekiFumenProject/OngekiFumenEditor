@@ -95,7 +95,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
 
-            var currentTime = target.CurrentPlayTime;
+            var currentTime = target.ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
 
             var precent = (currentTime - fromTime) / appearOffsetTime;
 

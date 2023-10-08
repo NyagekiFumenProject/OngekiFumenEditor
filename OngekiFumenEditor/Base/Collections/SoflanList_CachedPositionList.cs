@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 
 namespace OngekiFumenEditor.Base.Collections
 {
@@ -23,6 +24,7 @@ namespace OngekiFumenEditor.Base.Collections
         private record VisibleRange(double minY, TGrid minTGrid, double maxY, TGrid maxTGrid);
 
         private IIntervalTree<double, VisibleRange> cachePostionList_DesignMode;
+        private double maxEndY;
         private IIntervalTree<double, VisibleRange> cachePostionList_PreviewMode;
 
         [Flags]
@@ -141,25 +143,21 @@ namespace OngekiFumenEditor.Base.Collections
                 list.Add((0, TGrid.Zero, 1.0d, bpmList.FirstBpm));
             else if (prevEvent.TGrid != list.First().startTGrid)
                 list.Add((currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
-
-            var tree = RebuildIntervalTreePositionList(list);
-            if (isDesignMode)
-                cachePostionList_DesignMode = tree;
-            else
-                cachePostionList_PreviewMode = tree;
         }
 
         private IIntervalTree<double, VisibleRange> RebuildIntervalTreePositionList(List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list)
         {
             var tree = new IntervalTree<double, VisibleRange>();
+            maxEndY = int.MinValue;
 
-            foreach (var pair in list.SequenceConsecutivelyWrap(2))
+            foreach (var pair in list.SequenceConsecutivelyWrap(2).Where(x => !x.IsOnlyOne()))
             {
                 var prev = pair.First();
                 var next = pair.Last();
 
                 var beginY = Math.Min(prev.startY, next.startY);
                 var endY = Math.Max(prev.startY, next.startY);
+                maxEndY = Math.Max(maxEndY, endY);
 
                 var beginTGrid = MathUtils.Min(prev.startTGrid, next.startTGrid);
                 var endTGrid = MathUtils.Max(prev.startTGrid, next.startTGrid);
@@ -176,10 +174,12 @@ namespace OngekiFumenEditor.Base.Collections
 
             if (cachedSoflanListCacheHash != hash)
             {
+                cachedSoflanListCacheHash = hash;
+
                 Log.LogDebug("recalculate all.");
                 UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_DesignMode, true);
                 UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_PreviewMode, false);
-                cachedSoflanListCacheHash = hash;
+                cachePostionList_PreviewMode = RebuildIntervalTreePositionList(cachedSoflanPositionList_PreviewMode);
             }
         }
 
@@ -195,8 +195,10 @@ namespace OngekiFumenEditor.Base.Collections
             return cachedSoflanPositionList_PreviewMode;
         }
 
-        public IEnumerable<VisibleTGridRange> GetVisibleRanges_PreviewMode(double minY, double maxY)
+        public IEnumerable<VisibleTGridRange> GetVisibleRanges_PreviewMode(double nonScaleMinY, double nonScaleMaxY, BpmList bpmList, double tUnitLength)
         {
+            CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
+
             VisibleTGridRange TrimedTGridRange(VisibleRange visibleRange)
             {
                 var trimedMinTGrid = visibleRange.minTGrid;
@@ -205,16 +207,16 @@ namespace OngekiFumenEditor.Base.Collections
                 var yLen = visibleRange.maxY - visibleRange.minY;
                 var gridLen = (visibleRange.maxTGrid - visibleRange.minTGrid).TotalGrid(visibleRange.minTGrid.GridRadix);
 
-                if (visibleRange.minY < minY)
+                if (visibleRange.minY < nonScaleMinY)
                 {
-                    var diff = minY - visibleRange.minY;
+                    var diff = nonScaleMinY - visibleRange.minY;
                     var p = diff / yLen;
                     trimedMinTGrid = trimedMinTGrid + new GridOffset(0, (int)(p * gridLen));
                 }
 
-                if (maxY < visibleRange.maxY)
+                if (nonScaleMaxY < visibleRange.maxY)
                 {
-                    var diff = visibleRange.maxY - maxY;
+                    var diff = visibleRange.maxY - nonScaleMaxY;
                     var p = diff / yLen;
                     trimedMaxTGrid = trimedMaxTGrid - new GridOffset(0, (int)(p * gridLen));
                 }
@@ -222,28 +224,55 @@ namespace OngekiFumenEditor.Base.Collections
                 return new(trimedMinTGrid, trimedMaxTGrid);
             }
 
-            var result = cachePostionList_PreviewMode.Query(minY, maxY)
-                .Select(TrimedTGridRange)
-                .OrderBy(x => x.minTGrid);
-            var itor = result.GetEnumerator();
-            if (!itor.MoveNext())
-                yield break;
-            var cur = itor.Current;
-            while (itor.MoveNext())
+            var genDefault = false;
+            if (cachePostionList_PreviewMode.Count > 0)
             {
-                var next = itor.Current;
-                if (next.minTGrid <= cur.maxTGrid)
+                var result = cachePostionList_PreviewMode.Query(nonScaleMinY, nonScaleMaxY)
+                    .Select(TrimedTGridRange)
+                    .OrderBy(x => x.minTGrid);
+                var itor = result.GetEnumerator();
+                if (!itor.MoveNext())
                 {
-                    //combinable
-                    cur = new(MathUtils.Min(cur.minTGrid, next.minTGrid), MathUtils.Max(cur.maxTGrid, next.maxTGrid));
+                    if (nonScaleMinY > maxEndY && nonScaleMaxY > maxEndY)
+                        genDefault = true;
+                    else
+                        yield break;
                 }
-                else
+                var cur = itor.Current;
+                while (itor.MoveNext())
                 {
+                    var next = itor.Current;
+                    if (next.minTGrid <= cur.maxTGrid)
+                    {
+                        //combinable
+                        cur = new(MathUtils.Min(cur.minTGrid, next.minTGrid), MathUtils.Max(cur.maxTGrid, next.maxTGrid));
+                    }
+                    else
+                    {
+                        yield return cur;
+                        cur = next;
+                    }
+                }
+                if (cur is not null)
                     yield return cur;
-                    cur = next;
-                }
             }
-            yield return cur;
+            else
+                genDefault = true;
+
+            if (genDefault)
+            {
+                (var startY, var startTGrid, var speed, var bpm) = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList).First();
+
+                var gridOffset = bpm.LengthConvertToOffset(nonScaleMinY - startY, (int)tUnitLength);
+                var minTGrid = startTGrid + gridOffset;
+
+                gridOffset = bpm.LengthConvertToOffset(nonScaleMaxY - startY, (int)tUnitLength);
+                var maxTGrid = startTGrid + gridOffset;
+
+                var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
+
+                yield return range;
+            }
         }
 
         #endregion

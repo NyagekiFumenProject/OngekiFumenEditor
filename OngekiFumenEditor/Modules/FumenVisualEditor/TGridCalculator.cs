@@ -144,10 +144,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => ConvertYToTGrid_PreviewMode(pickY, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
         private static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
         {
-            pickY = pickY / scale;
-            _ = soflanList.GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
-
-            var result = soflanList.GetVisibleRanges_PreviewMode(pickY, pickY).OrderBy(x => x.minTGrid).Select(x => x.minTGrid);
+            var nsPickY = pickY / scale;
+            var r = soflanList.GetVisibleRanges_PreviewMode(nsPickY, nsPickY, bpmList, tUnitLength);
+            var result = r.OrderBy(x => x.minTGrid).Select(x => x.minTGrid);
             return result;
         }
 

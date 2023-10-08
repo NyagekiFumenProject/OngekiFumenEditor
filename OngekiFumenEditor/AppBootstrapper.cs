@@ -182,20 +182,6 @@ namespace OngekiFumenEditor
                 window.AllowDrop = true;
                 window.Drop += MainWindow_Drop;
             }
-
-            /**/
-            var bpmList = new BpmList();
-            var soflanList = new SoflanList(new Soflan[] {
-                new (){ TGrid = new(1,0),EndTGrid = new(2,0),Speed = -1 },
-                new (){ TGrid = new(2,0),EndTGrid = new(3,0),Speed = 2 }
-            });
-
-            var designList = soflanList.GetCachedSoflanPositionList_DesignMode(240, bpmList);
-            var previewList = soflanList.GetCachedSoflanPositionList_PreviewMode(240, bpmList);
-
-            var y = TGridCalculator.ConvertTGridToY_PreviewMode(new(1, 0), soflanList, bpmList, 1, 240);
-
-            var ranges = soflanList.GetVisibleRanges_PreviewMode(500, 500).ToList();
         }
 
         private async void MainWindow_Drop(object sender, DragEventArgs e)

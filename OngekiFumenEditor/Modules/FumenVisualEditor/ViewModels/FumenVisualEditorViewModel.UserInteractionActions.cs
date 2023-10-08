@@ -550,7 +550,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void SwitchMode(bool isPreviewMode)
         {
-            var tGrid = GetCurrentAudioTime();
+            var tGrid = GetCurrentTGrid();
             IsUserRequestHideEditorObject = isPreviewMode;
             convertToY = IsDesignMode ?
                 TGridCalculator.ConvertTGridUnitToY_DesignMode :

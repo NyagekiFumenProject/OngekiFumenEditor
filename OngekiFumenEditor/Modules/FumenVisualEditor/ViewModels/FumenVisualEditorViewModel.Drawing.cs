@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public float CurrentPlayTime => (float)(ScrollViewerVerticalOffset);
+        public TimeSpan CurrentPlayTime { get; private set; } = TimeSpan.FromSeconds(0);
 
         private bool isDisplayFPS = false;
         public bool IsDisplayFPS
@@ -122,11 +122,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void RecalcViewProjectionMatrix()
         {
             var xOffset = 0;
+            var y = (float)TGridCalculator.ConvertAudioTimeToY_DesignMode(CurrentPlayTime, this);
 
             ProjectionMatrix =
                 Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
             ViewMatrix =
-                Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2 + xOffset, -CurrentPlayTime - ViewHeight / 2 + (float)Setting.JudgeLineOffsetY, 0));
+                Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2 + xOffset, -y - ViewHeight / 2 + (float)Setting.JudgeLineOffsetY, 0));
 
             ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
         }
@@ -291,7 +292,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             else
             {
-                var ranges = Fumen.Soflans.GetVisibleRanges_PreviewMode(minY, maxY);
+                var scale = Setting.VerticalDisplayScale;
+                var nsMinY = minY / scale;
+                var nsMaxY = maxY / scale;
+                var ranges = Fumen.Soflans.GetVisibleRanges_PreviewMode(nsMinY, nsMaxY, fumen.BpmList, 240);
                 visibleTGridRanges.AddRange(ranges.Select(x => (x.minTGrid, x.maxTGrid)));
             }
 

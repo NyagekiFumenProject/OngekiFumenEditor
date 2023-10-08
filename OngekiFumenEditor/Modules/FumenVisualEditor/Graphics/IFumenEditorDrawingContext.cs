@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics
 {
     public interface IFumenEditorDrawingContext : IDrawingContext
     {
-        float CurrentPlayTime { get; }
+        TimeSpan CurrentPlayTime { get; }
         FumenVisualEditorViewModel Editor { get; }
         void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size);
 

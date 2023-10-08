@@ -7,6 +7,7 @@ using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using OpenTK.Audio.OpenAL;
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Windows;
@@ -18,8 +19,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     public partial class FumenVisualEditorViewModel : PersistedDocument
     {
-        private TimeSpan currentAudioTime = TimeSpan.FromSeconds(0);
-
         private double totalDurationHeight;
         public double TotalDurationHeight
         {
@@ -64,7 +63,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    //todo 
+                    var curTGrid = GetCurrentTGrid();
+                    var nextTGrid = TGridCalculator.ConvertYToTGrid_PreviewMode(val, this).OrderBy(x => Math.Abs(x.TotalGrid - curTGrid.TotalGrid)).FirstOrDefault();
+                    
+                    if (nextTGrid is not null)
+                    {
+                        var audioTime = TGridCalculator.ConvertTGridToAudioTime(nextTGrid, this);
+                        ScrollTo(audioTime);
+                    }
                 }
             }
         }
@@ -87,7 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void ScrollTo(TimeSpan audioTime)
         {
             var fixedAudioTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(audioTime, EditorProjectData.AudioDuration));
-            currentAudioTime = fixedAudioTime;
+            CurrentPlayTime = fixedAudioTime;
 
             var val = IsDesignMode ?
                 TGridCalculator.ConvertAudioTimeToY_DesignMode(fixedAudioTime, this) :
@@ -102,8 +108,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         #endregion
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TimeSpan GetCurrentAudioTime() => currentAudioTime;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(GetCurrentAudioTime(), this);
+        public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
     }
 }

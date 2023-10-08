@@ -122,10 +122,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             //计算向量化的物件运动时间
             var toTime = target.ConvertToY(obj.TGrid);
             var fromTime = toTime - appearOffsetTime;
-            var currentTime = target.CurrentPlayTime;
+            var currentTime = target.ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
             var precent = (currentTime - fromTime) / appearOffsetTime;
             //Log.LogDebug($"precent : {precent * 100:F2}");
-            if (target.CurrentPlayTime < fromTime)
+            if (currentTime < fromTime)
                 return;
 
             var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
