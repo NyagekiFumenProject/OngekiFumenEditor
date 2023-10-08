@@ -12,6 +12,52 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
     public static class TGridCalculator
     {
+        #region AudioTime -> TGrid
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor)
+           => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, BpmList bpmList, int tUnitLength = 240)
+        {
+            var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
+
+            //获取pickY对应的bpm和bpm起始位置
+            (var pickStartY, var pickBpm) = positionBpmList.LastOrDefault(x => x.audioTime <= audioTime);
+            if (pickBpm is null)
+                return default;
+            var relativeBpmLenOffset = pickBpm.LengthConvertToOffset((audioTime - pickStartY).TotalMilliseconds, tUnitLength);
+
+            var pickTGrid = pickBpm.TGrid + relativeBpmLenOffset;
+            return pickTGrid;
+        }
+
+        #endregion
+
+        #region TGrid -> AudioTime
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TimeSpan ConvertTGridToAudioTime(TGrid tGrid, FumenVisualEditorViewModel editor)
+            => ConvertTGridToAudioTime(tGrid, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
+        public static TimeSpan ConvertTGridToAudioTime(TGrid tGrid, BpmList bpmList, int tUnitLength = 240)
+        {
+            var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
+
+            //获取pickY对应的bpm和bpm起始位置
+            (var audioTimeMsecBase, var pickBpm) = positionBpmList.LastOrDefault(x => x.bpm.TGrid <= tGrid);
+            if (pickBpm is null)
+                if (positionBpmList.FirstOrDefault().bpm?.TGrid is TGrid first && tGrid < first)
+                    return TimeSpan.FromMilliseconds(0);
+                else
+                    return default;
+            var relativeBpmLenOffset = TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(pickBpm, tGrid, tUnitLength));
+
+            var audioTimeMsec = audioTimeMsecBase + relativeBpmLenOffset;
+            return audioTimeMsec;
+        }
+
+        #endregion
+
         #region [DesignMode] Y -> TGrid
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,28 +102,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
         #endregion
 
-        #region AudioTime -> TGrid
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor)
-           => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, BpmList bpmList, int tUnitLength = 240)
-        {
-            var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
-
-            //获取pickY对应的bpm和bpm起始位置
-            (var pickStartY, var pickBpm) = positionBpmList.LastOrDefault(x => x.audioTime <= audioTime);
-            if (pickBpm is null)
-                return default;
-            var relativeBpmLenOffset = pickBpm.LengthConvertToOffset((audioTime - pickStartY).TotalMilliseconds, tUnitLength);
-
-            var pickTGrid = pickBpm.TGrid + relativeBpmLenOffset;
-            return pickTGrid;
-        }
-
-        #endregion
-
         #region [DesignMode] TGrid -> Y
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -109,30 +133,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var y = (pickStartY + relativeBpmLenOffset * absSpeed) * scale;
 
             return y;
-        }
-
-        #endregion
-
-        #region TGrid -> AudioTime
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static TimeSpan ConvertTGridToAudioTime(TGrid tGrid, FumenVisualEditorViewModel editor)
-            => ConvertTGridToAudioTime(tGrid, editor.Fumen.BpmList, editor.Setting.TGridUnitLength);
-        public static TimeSpan ConvertTGridToAudioTime(TGrid tGrid, BpmList bpmList, int tUnitLength = 240)
-        {
-            var positionBpmList = GetAllBpmUniformPositionList(bpmList, tUnitLength);
-
-            //获取pickY对应的bpm和bpm起始位置
-            (var audioTimeMsecBase, var pickBpm) = positionBpmList.LastOrDefault(x => x.bpm.TGrid <= tGrid);
-            if (pickBpm is null)
-                if (positionBpmList.FirstOrDefault().bpm?.TGrid is TGrid first && tGrid < first)
-                    return TimeSpan.FromMilliseconds(0);
-                else
-                    return default;
-            var relativeBpmLenOffset = TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(pickBpm, tGrid, tUnitLength));
-
-            var audioTimeMsec = audioTimeMsecBase + relativeBpmLenOffset;
-            return audioTimeMsec;
         }
 
         #endregion
@@ -222,18 +222,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         }
 
         #endregion
-        public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, FumenVisualEditorViewModel editor)
-        {
-            return GetCurrentTimeSignature(tGrid, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Setting.TGridUnitLength);
-        }
-
-        public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, BpmList bpmList, MeterChangeList meterList, int tUnitLength = 240)
-        {
-            var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
-            var idx = timeSignatures.BinarySearchBy(tGrid, x => x.startTGrid);
-            idx = idx < 0 ? Math.Max(0, ((~idx) - 1)) : idx;
-            return timeSignatures[idx];
-        }
 
         #region [DesignMode] VisbleTimelines
 
@@ -321,6 +309,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         }
 
         #endregion
+
+        public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, FumenVisualEditorViewModel editor)
+        {
+            return GetCurrentTimeSignature(tGrid, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Setting.TGridUnitLength);
+        }
+
+        public static (TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) GetCurrentTimeSignature(TGrid tGrid, BpmList bpmList, MeterChangeList meterList, int tUnitLength = 240)
+        {
+            var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
+            var idx = timeSignatures.BinarySearchBy(tGrid, x => x.startTGrid);
+            idx = idx < 0 ? Math.Max(0, ((~idx) - 1)) : idx;
+            return timeSignatures[idx];
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static List<(TimeSpan audioTime, BPMChange bpm)> GetAllBpmUniformPositionList(FumenVisualEditorViewModel editor)
