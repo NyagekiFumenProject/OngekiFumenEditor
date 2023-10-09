@@ -137,7 +137,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
         #endregion
 
-        #region [PreviewMode] Y -> TGrid
+        #region [PreviewMode] Y -> TGrid[]
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, FumenVisualEditorViewModel editor)
