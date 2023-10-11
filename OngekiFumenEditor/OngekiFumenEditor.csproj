@@ -8,6 +8,7 @@
     <DebugType>embedded</DebugType>
     <LangVersion>preview</LangVersion>
     <ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
+    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
   </PropertyGroup>
 
   <ItemGroup>
@@ -111,8 +112,8 @@
     <PackageReference Include="ManagedBass" Version="3.1.1" />
     <PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
     <PackageReference Include="ManagedBass.Mix" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Build" Version="17.7.2" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="17.7.2" />
+    <PackageReference Include="Microsoft.Build" Version="17.3.2" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="17.3.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.7.0" />
@@ -129,6 +130,7 @@
     <PackageReference Include="SharpVectors" Version="1.8.1" />
     <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

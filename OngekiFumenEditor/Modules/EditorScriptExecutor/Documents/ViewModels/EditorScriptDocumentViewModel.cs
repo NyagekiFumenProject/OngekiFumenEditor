@@ -272,7 +272,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
                 return;
             }
 
-            var scriptName = Path.GetFileNameWithoutExtension(FilePath);
+            var scriptName = Path.GetFileNameWithoutExtension(FilePath) ?? RandomHepler.RandomString(6);
             var projOutputDirPath = TempFileHelper.GetTempFolderPath("ScriptTempProjects", scriptName);
             var csFileName = $"Script.{scriptName}.cs";
             var csFilePath = Path.Combine(projOutputDirPath, csFileName);
