@@ -1,24 +1,45 @@
 ﻿using IntervalTree;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Documents;
 
 namespace OngekiFumenEditor.Base.Collections
 {
     public partial class SoflanList
     {
+        public struct SoflanPoint
+        {
+            public SoflanPoint(double y, TGrid tGrid, double speed, BPMChange bpm)
+            {
+                Y = y;
+                TGrid = tGrid;
+                Speed = speed;
+                Bpm = bpm;
+            }
+
+            public double Y { get; set; }
+            public TGrid TGrid { get; set; }
+            public double Speed { get; set; }
+            public BPMChange Bpm { get; set; }
+
+            public override string ToString() => $"Y:{Y} TGrid:{TGrid} SPD:{Speed} BPM:{Bpm.BPM}";
+        }
+
         #region SoflanPositionList
 
         private double cachedSoflanListCacheHash = int.MinValue;
 
-        private List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> cachedSoflanPositionList_DesignMode = new();
-        private List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> cachedSoflanPositionList_PreviewMode = new();
+        private List<SoflanPoint> cachedSoflanPositionList_DesignMode = new();
+        private List<SoflanPoint> cachedSoflanPositionList_PreviewMode = new();
 
         public record VisibleTGridRange(TGrid minTGrid, TGrid maxTGrid);
         private record VisibleRange(double minY, TGrid minTGrid, double maxY, TGrid maxTGrid);
@@ -104,7 +125,7 @@ namespace OngekiFumenEditor.Base.Collections
             return s;
         }
 
-        private void UpdateCachedSoflanPositionList(double tUnitLength, BpmList bpmList, List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list, bool isDesignMode)
+        private void UpdateCachedSoflanPositionList(double tUnitLength, BpmList bpmList, List<SoflanPoint> list, bool isDesignMode)
         {
             list.Clear();
 
@@ -133,19 +154,19 @@ namespace OngekiFumenEditor.Base.Collections
                 var fromY = currentY;
                 var toY = currentY + scaledLen;
 
-                list.Add((fromY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
+                list.Add(new(fromY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
 
                 currentY = toY;
                 prevEvent = curEvent;
             }
 
             if (list.Count == 0)
-                list.Add((0, TGrid.Zero, 1.0d, bpmList.FirstBpm));
-            else if (prevEvent.TGrid != list.First().startTGrid)
-                list.Add((currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
+                list.Add(new(0, TGrid.Zero, 1.0d, bpmList.FirstBpm));
+            else if (prevEvent.TGrid != list.First().TGrid)
+                list.Add(new(currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
         }
 
-        private IIntervalTree<double, VisibleRange> RebuildIntervalTreePositionList(List<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> list)
+        private IIntervalTree<double, VisibleRange> RebuildIntervalTreePositionList(List<SoflanPoint> list)
         {
             var tree = new IntervalTree<double, VisibleRange>();
             maxEndY = int.MinValue;
@@ -155,12 +176,12 @@ namespace OngekiFumenEditor.Base.Collections
                 var prev = pair.First();
                 var next = pair.Last();
 
-                var beginY = Math.Min(prev.startY, next.startY);
-                var endY = Math.Max(prev.startY, next.startY);
+                var beginY = Math.Min(prev.Y, next.Y);
+                var endY = Math.Max(prev.Y, next.Y);
                 maxEndY = Math.Max(maxEndY, endY);
 
-                var beginTGrid = MathUtils.Min(prev.startTGrid, next.startTGrid);
-                var endTGrid = MathUtils.Max(prev.startTGrid, next.startTGrid);
+                var beginTGrid = MathUtils.Min(prev.TGrid, next.TGrid);
+                var endTGrid = MathUtils.Max(prev.TGrid, next.TGrid);
 
                 tree.Add(beginY, endY, new(beginY, beginTGrid, endY, endTGrid));
             }
@@ -183,13 +204,13 @@ namespace OngekiFumenEditor.Base.Collections
             }
         }
 
-        public IList<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_DesignMode(double tUnitLength, BpmList bpmList)
+        public IList<SoflanPoint> GetCachedSoflanPositionList_DesignMode(double tUnitLength, BpmList bpmList)
         {
             CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
             return cachedSoflanPositionList_DesignMode;
         }
 
-        public IList<(double startY, TGrid startTGrid, double speed, BPMChange bpmChange)> GetCachedSoflanPositionList_PreviewMode(double tUnitLength, BpmList bpmList)
+        public IList<SoflanPoint> GetCachedSoflanPositionList_PreviewMode(double tUnitLength, BpmList bpmList)
         {
             CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
             return cachedSoflanPositionList_PreviewMode;
@@ -261,13 +282,13 @@ namespace OngekiFumenEditor.Base.Collections
 
             if (genDefault)
             {
-                (var startY, var startTGrid, var speed, var bpm) = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList).Last();
+                var pos = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList).Last();
 
-                var gridOffset = bpm.LengthConvertToOffset(nonScaleMinY - startY, (int)tUnitLength);
-                var minTGrid = startTGrid + gridOffset;
+                var gridOffset = pos.Bpm.LengthConvertToOffset(nonScaleMinY - pos.Y, (int)tUnitLength);
+                var minTGrid = pos.TGrid + gridOffset;
 
-                gridOffset = bpm.LengthConvertToOffset(nonScaleMaxY - startY, (int)tUnitLength);
-                var maxTGrid = startTGrid + gridOffset;
+                gridOffset = pos.Bpm.LengthConvertToOffset(nonScaleMaxY - pos.Y, (int)tUnitLength);
+                var maxTGrid = pos.TGrid + gridOffset;
 
                 var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
 
@@ -275,6 +296,157 @@ namespace OngekiFumenEditor.Base.Collections
             }
         }
 
-        #endregion
+        public IEnumerable<VisibleTGridRange> _GetVisibleRanges_PreviewMode(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale, int tUnitLength)
+        {
+            var list = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
+
+            IEnumerable<VisibleTGridRange> TryMerge(IEnumerable<VisibleTGridRange> sortedList)
+            {
+                var itor = sortedList.OrderBy(x => x.minTGrid).GetEnumerator();
+                if (!itor.MoveNext())
+                    yield break;
+                var cur = itor.Current;
+                while (itor.MoveNext())
+                {
+                    var next = itor.Current;
+                    if (next.minTGrid <= cur.maxTGrid)
+                    {
+                        //combinable
+                        cur = new(MathUtils.Min(cur.minTGrid, next.minTGrid), MathUtils.Max(cur.maxTGrid, next.maxTGrid));
+                    }
+                    else
+                    {
+                        yield return cur;
+                        cur = next;
+                    }
+                }
+                if (cur is not null)
+                    yield return cur;
+            }
+
+            IEnumerable<VisibleTGridRange> CalcSegment(int posIdx, double y, double leftRemain, double rightRemain)
+            {
+                var cur = list[posIdx];
+                var next = list[posIdx + 1];
+
+                if (posIdx == 114)
+                {
+
+                }
+
+                var leftMergeds = Enumerable.Empty<VisibleTGridRange>();
+                var curTGrid = default(VisibleTGridRange);
+                var leftTGrid = default(TGrid);
+                var rightTGrid = default(TGrid);
+                var rightMergeds = Enumerable.Empty<VisibleTGridRange>();
+
+                var left = 0d;
+                var right = 0d;
+                var newLeftRemain = 0d;
+                var newRightRemain = 0d;
+
+                var absSpeed = Math.Abs(cur.Speed);
+
+                if (cur.Speed > 0)
+                {
+                    var calcLeftY = y - leftRemain;
+                    left = Math.Max(calcLeftY, cur.Y);
+                    newLeftRemain = Math.Max(cur.Y - calcLeftY, 0);
+                    leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed, tUnitLength));
+
+                    var calcRightY = y + rightRemain;
+                    right = Math.Min(next.Y, calcRightY);
+                    newRightRemain = Math.Max(calcRightY - next.Y, 0);
+                    rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
+
+                    curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
+                }
+                else
+                {
+                    var calcLeftY = y + leftRemain;
+                    left = Math.Min(calcLeftY, cur.Y);
+                    newLeftRemain = Math.Max(-cur.Y + left, 0);
+                    leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - left) / absSpeed, tUnitLength));
+
+                    var calcRightY = y - rightRemain;
+                    right = Math.Max(next.Y, calcRightY);
+                    newRightRemain = Math.Max(next.Y - calcRightY, 0);
+                    rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed, tUnitLength));
+
+                    curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
+                }
+
+                //Log.LogDebug($"{{{cur.TGrid}({cur.Y})  -->  {next.TGrid}({next.Y})}}  calc({leftRemain}|{y}|{rightRemain})  {{{leftTGrid}({left}){newLeftRemain}  -->  {rightTGrid}({right}){newRightRemain}}}");
+
+                if (newLeftRemain > 0)
+                {
+                    if (posIdx > 0)
+                        leftMergeds = CalcSegment(posIdx - 1, left, newLeftRemain, 0);
+                    else
+                    {
+                        var overLeftTGrid = leftTGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newLeftRemain / absSpeed, tUnitLength));
+                        overLeftTGrid = overLeftTGrid ?? TGrid.Zero;
+                        leftMergeds = leftMergeds.Append(new VisibleTGridRange(overLeftTGrid, leftTGrid));
+                    }
+                }
+
+                if (newRightRemain > 0)
+                {
+                    if (posIdx < list.Count - 2)
+                        rightMergeds = CalcSegment(posIdx + 1, right, 0, newRightRemain);
+                    else
+                    {
+                        var overRightTGrid = rightTGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newRightRemain / absSpeed, tUnitLength));
+                        rightMergeds = rightMergeds.Append(new VisibleTGridRange(rightTGrid, overRightTGrid));
+                    }
+                }
+
+                return leftMergeds.Append(curTGrid).Concat(rightMergeds);
+            }
+
+            IEnumerable<VisibleTGridRange> _internal()
+            {
+                var minY = 0d;
+                var maxY = 0d;
+
+                for (int i = 0; i < list.Count - 1; i++)
+                {
+                    var cur = list[i];
+                    var next = list[i + 1];
+
+                    minY = Math.Min(cur.Y, next.Y);
+                    maxY = Math.Max(cur.Y, next.Y);
+
+                    if (minY <= currentY && currentY <= maxY)
+                    {
+                        var mergeds = CalcSegment(i, currentY, preOffset, viewHeight - preOffset);
+                        foreach (var range in mergeds)
+                        {
+                            yield return range;
+                        }
+                    }
+                }
+
+                var pos = list.Last();
+                maxY = currentY + (viewHeight - preOffset);
+                minY = currentY - preOffset;
+
+                if (pos.Y <= minY)
+                {
+                    var gridOffset = pos.Bpm.LengthConvertToOffset(minY - pos.Y, (int)tUnitLength);
+                    var minTGrid = pos.TGrid + gridOffset;
+
+                    gridOffset = pos.Bpm.LengthConvertToOffset(maxY - pos.Y, (int)tUnitLength);
+                    var maxTGrid = pos.TGrid + gridOffset;
+
+                    var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
+                    yield return range;
+                }
+            }
+
+            return TryMerge(_internal());
+        }
     }
+
+    #endregion
 }

@@ -69,13 +69,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var list = soflanList.GetCachedSoflanPositionList_DesignMode(tUnitLength, bpmList);
 
             //获取pickY对应的bpm和bpm起始位置
-            (var pickStartY, var tGrid, var speed, var pickBpm) = list.LastOrDefault(x => x.startY <= pickY);
-            if (pickBpm is null)
+            var pos = list.LastOrDefault(x => x.Y <= pickY);
+            if (pos.Bpm is null)
                 return default;
-            var absSpeed = Math.Abs(speed);
-            var relativeBpmLenOffset = pickBpm.LengthConvertToOffset((pickY - pickStartY) / absSpeed, tUnitLength);
+            var absSpeed = Math.Abs(pos.Speed);
+            var relativeBpmLenOffset = pos.Bpm.LengthConvertToOffset((pickY - pos.Y) / absSpeed, tUnitLength);
 
-            var pickTGrid = tGrid + relativeBpmLenOffset;
+            var pickTGrid = pos.TGrid + relativeBpmLenOffset;
             return pickTGrid;
         }
 
@@ -118,19 +118,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var positionBpmList = soflanList.GetCachedSoflanPositionList_DesignMode(tUnitLength, bpmList);
 
             //获取pickY对应的bpm和bpm起始位置
-            (var pickStartY, var tGrid, var speed, var pickBpm) = positionBpmList.LastOrDefaultByBinarySearch(tGridUnit, x => x.startTGrid.TotalUnit);
+            var pos = positionBpmList.LastOrDefaultByBinarySearch(tGridUnit, x => x.TGrid.TotalUnit);
             //(var pickStartY, var tGrid, var speed, var pickBpm) = positionBpmList.LastOrDefault(x => x.startTGrid.TotalUnit <= tGridUnit);
 
-            if (pickBpm is null)
-                if (positionBpmList.FirstOrDefault().bpmChange?.TGrid is TGrid first && tGridUnit < first.TotalUnit)
+            if (pos.Bpm is null)
+                if (positionBpmList.FirstOrDefault().Bpm?.TGrid is TGrid first && tGridUnit < first.TotalUnit)
                     return 0;
                 else
                     return default;
 
-            var relativeBpmLenOffset = MathUtils.CalculateBPMLength(tGrid.TotalUnit, tGridUnit, pickBpm.BPM, tUnitLength);
+            var relativeBpmLenOffset = MathUtils.CalculateBPMLength(pos.TGrid.TotalUnit, tGridUnit, pos.Bpm.BPM, tUnitLength);
 
-            var absSpeed = Math.Abs(speed);
-            var y = (pickStartY + relativeBpmLenOffset * absSpeed) * scale;
+            var absSpeed = Math.Abs(pos.Speed);
+            var y = (pos.Y + relativeBpmLenOffset * absSpeed) * scale;
 
             return y;
         }
@@ -168,16 +168,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var positionBpmList = soflanList.GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
 
             //获取pickY对应的bpm和bpm起始位置
-            (var pickStartY, var tGrid, var speed, var pickBpm) = positionBpmList.LastOrDefault(x => x.startTGrid.TotalUnit <= tGridUnit);
-            if (pickBpm is null)
-                if (positionBpmList.FirstOrDefault().bpmChange?.TGrid is TGrid first && tGridUnit < first.TotalUnit)
+            var pos = positionBpmList.LastOrDefault(x => x.TGrid.TotalUnit <= tGridUnit);
+            if (pos.Bpm is null)
+                if (positionBpmList.FirstOrDefault().Bpm?.TGrid is TGrid first && tGridUnit < first.TotalUnit)
                     return 0;
                 else
                     return default;
 
-            var relativeBpmLenOffset = MathUtils.CalculateBPMLength(tGrid.TotalUnit, tGridUnit, pickBpm.BPM, tUnitLength);
+            var relativeBpmLenOffset = MathUtils.CalculateBPMLength(pos.TGrid.TotalUnit, tGridUnit, pos.Bpm.BPM, tUnitLength);
 
-            var y = (pickStartY + relativeBpmLenOffset * speed) * scale;
+            var y = (pos.Y + relativeBpmLenOffset * pos.Speed) * scale;
             return y;
         }
 
@@ -196,11 +196,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(FumenVisualEditorViewModel editor, int tUnitLength = 240)
             => GetVisbleTimelines_PreviewMode(editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Rect.MinY, editor.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale, tUnitLength);
-        public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
+        public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double currentY, double viewHeight, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
         {
-            var minY = minVisibleCanvasY / scale;
-            var maxY = maxVisibleCanvasY / scale;
-            var tGridRanges = soflans.GetVisibleRanges_PreviewMode(minY, maxY, bpmList, tUnitLength);
+            var tGridRanges = soflans._GetVisibleRanges_PreviewMode(currentY, viewHeight, judgeLineOffsetY, bpmList, scale, tUnitLength);
 
             foreach (var range in tGridRanges)
             {
@@ -263,7 +261,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
                 //钦定好要画的相对于当前timeSignature的偏移Y，节拍信息，节奏速度
                 (_, var currentTGridBase, var currentMeter, var currentBpm) = currentTimeSignature;
-                var currentStartY = ConvertTGridToY_DesignMode(currentTGridBase, soflans, bpmList, scale, tUnitLength);
+                //var currentStartY = ConvertTGridToY_DesignMode(currentTGridBase, soflans, bpmList, scale, tUnitLength);
                 (_, var nextTGridBase, _, var nextBpm) = nextTimeSignature;
 
                 //计算每一拍的(grid)长度

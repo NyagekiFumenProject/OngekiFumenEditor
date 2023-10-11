@@ -58,12 +58,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             else
             {
+                var currentY = TGridCalculator.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime, target.Editor);
                 timelines = TGridCalculator.GetVisbleTimelines_PreviewMode(
                     fumen.Soflans,
                     fumen.BpmList,
                     fumen.MeterChanges,
-                    Math.Max(0, target.Rect.MinY),
-                    target.Rect.MaxY,
+                    currentY,
+                    target.Rect.Height,
                     target.Editor.Setting.JudgeLineOffsetY,
                     target.Editor.Setting.BeatSplit,
                     target.Editor.Setting.VerticalDisplayScale

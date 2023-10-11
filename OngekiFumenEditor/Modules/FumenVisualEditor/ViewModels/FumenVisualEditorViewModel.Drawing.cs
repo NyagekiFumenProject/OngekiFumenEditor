@@ -197,7 +197,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                    .Concat(fumen.ClickSEs.BinaryFindRange(min, max))
                    .Concat(fumen.LaneBlocks.GetVisibleStartObjects(min, max))
                    .Concat(fumen.Comments.BinaryFindRange(min, max))
-                   .Concat(fumen.Soflans)
+                   .Concat(fumen.Soflans.BinaryFindRange(min, max))
                    .Concat(fumen.EnemySets.BinaryFindRange(min, max))
                    //.Concat(fumen.Bullets.BinaryFindRange(min, max))
                    .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
@@ -296,7 +296,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var scale = Setting.VerticalDisplayScale;
                 var nsMinY = minY / scale;
                 var nsMaxY = maxY / scale;
-                var ranges = Fumen.Soflans.GetVisibleRanges_PreviewMode(nsMinY, nsMaxY, fumen.BpmList, 240);
+                var ranges = Fumen.Soflans._GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList, scale, Setting.TGridUnitLength); ;
                 visibleTGridRanges.AddRange(ranges.Select(x => (x.minTGrid, x.maxTGrid)));
             }
 
@@ -311,6 +311,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var renderObjects = visibleTGridRanges
                 .SelectMany(x => GetDisplayableObjects(fumen, x.minTGrid, x.maxTGrid))
+                .Distinct()
                 .OfType<OngekiTimelineObjectBase>()
                 .GroupBy(x => x.IDShortName);
 
