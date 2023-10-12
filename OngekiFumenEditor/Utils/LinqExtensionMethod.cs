@@ -272,9 +272,22 @@ namespace OngekiFumenEditor.Utils
             while (lo <= hi)
             {
                 int i = lo + ((hi - lo) >> 1);
-                int order = keySelect(insertable[i]).CompareTo(value);
+                var val = keySelect(insertable[i]);
+                int order = val.CompareTo(value);
 
-                if (order == 0) return i;
+                if (order == 0)
+                {
+                    //考虑到出现重复值
+                    for (int r = i + 1; r < insertable.Count; r++)
+                    {
+                        var v = keySelect(insertable[r]);
+                        if (v.CompareTo(val) == 0)
+                            i = r;
+                        else
+                            break;
+                    }
+                    return i;
+                }
                 if (order < 0)
                 {
                     lo = i + 1;
