@@ -31,11 +31,11 @@ namespace OngekiFumenEditor.Utils
                 await Coroutine.ExecuteAsync(new IResult[] { openDocument }.AsEnumerable().GetEnumerator());
                 return true;
             }
-            else if (filePath.EndsWith(".ogkr"))
+            else if (filePath.EndsWith(".ogkr") || filePath.EndsWith(".nyageki"))
             {
                 return await TryOpenOgkrFileAsDocument(filePath);
             }
-            
+
             return false;
         }
 
@@ -96,19 +96,16 @@ namespace OngekiFumenEditor.Utils
         {
             var result = Path.GetFileName(ogkrFilePath);
 
-            if (ogkrFilePath.EndsWith(".ogkr"))
-            {
-                var ogkrFileDir = Path.GetDirectoryName(ogkrFilePath);
-                var musicXmlFilePath = Path.Combine(ogkrFileDir, "Music.xml");
+            var ogkrFileDir = Path.GetDirectoryName(ogkrFilePath);
+            var musicXmlFilePath = Path.Combine(ogkrFileDir, "Music.xml");
 
-                //从Music.xml读取musicId
-                if (File.Exists(musicXmlFilePath))
-                {
-                    var musicXml = await XDocument.LoadAsync(File.OpenRead(musicXmlFilePath), LoadOptions.None, default);
-                    var element = musicXml.XPathSelectElement(@"//Name[1]/str[1]");
-                    if (element?.Value is string name)
-                        result = name;
-                }
+            //从Music.xml读取musicId
+            if (File.Exists(musicXmlFilePath))
+            {
+                var musicXml = await XDocument.LoadAsync(File.OpenRead(musicXmlFilePath), LoadOptions.None, default);
+                var element = musicXml.XPathSelectElement(@"//Name[1]/str[1]");
+                if (element?.Value is string name)
+                    result = name;
             }
 
             return "[快速打开] " + result;

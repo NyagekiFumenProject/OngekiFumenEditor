@@ -296,17 +296,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var scale = Setting.VerticalDisplayScale;
                 var nsMinY = minY / scale;
                 var nsMaxY = maxY / scale;
-                var ranges = Fumen.Soflans._GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList, scale, Setting.TGridUnitLength); ;
+                var ranges = Fumen.Soflans._GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList, scale, Setting.TGridUnitLength);
                 visibleTGridRanges.AddRange(ranges.Select(x => (x.minTGrid, x.maxTGrid)));
             }
 
             //todo 这里就要计算可视区域了
             Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));
-
+            
             RecalculateMagaticXGridLines();
 
             playableAreaHelper.Draw(this);
             timeSignatureHelper.DrawLines(this);
+
             xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
             var renderObjects = visibleTGridRanges

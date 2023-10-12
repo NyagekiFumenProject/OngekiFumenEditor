@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
         public override async Task Run(Command command)
         {
             var openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = FileDialogHelper.BuildExtensionFilter((".ogkr", "音击谱面"));
+            openFileDialog.Filter = FileDialogHelper.BuildExtensionFilter((".ogkr", "音击谱面"), (".nyageki", "音击谱面"));
             openFileDialog.Title = "快速打开音击谱面";
             openFileDialog.CheckFileExists = true;
 

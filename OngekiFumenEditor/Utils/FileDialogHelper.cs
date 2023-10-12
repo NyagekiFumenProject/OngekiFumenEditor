@@ -33,6 +33,7 @@ namespace OngekiFumenEditor.Utils
             dialog.Title = title;
             dialog.Filter = BuildExtensionFilterAndAll(extParams);
             dialog.Multiselect = false;
+            dialog.FilterIndex = 1;
             dialog.CheckFileExists = true;
 
             if (dialog.ShowDialog() == true)

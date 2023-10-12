@@ -329,11 +329,6 @@ namespace OngekiFumenEditor.Base.Collections
                 var cur = list[posIdx];
                 var next = list[posIdx + 1];
 
-                if (posIdx == 114)
-                {
-
-                }
-
                 var leftMergeds = Enumerable.Empty<VisibleTGridRange>();
                 var curTGrid = default(VisibleTGridRange);
                 var leftTGrid = default(TGrid);
@@ -366,7 +361,8 @@ namespace OngekiFumenEditor.Base.Collections
                     var calcLeftY = y + leftRemain;
                     left = Math.Min(calcLeftY, cur.Y);
                     newLeftRemain = Math.Max(-cur.Y + left, 0);
-                    leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - left) / absSpeed, tUnitLength));
+                    //问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
+                    leftTGrid = (cur.TGrid - cur.Bpm.LengthConvertToOffset(Math.Max(viewHeight, (cur.Y - left)) / absSpeed, tUnitLength)) ?? TGrid.Zero;
 
                     var calcRightY = y - rightRemain;
                     right = Math.Max(next.Y, calcRightY);

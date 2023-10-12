@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
 
         public override string Text
         {
-            get { return "快速打开.ogkr谱面"; }
+            get { return "快速打开谱面"; }
         }
 
         public override string ToolTip
