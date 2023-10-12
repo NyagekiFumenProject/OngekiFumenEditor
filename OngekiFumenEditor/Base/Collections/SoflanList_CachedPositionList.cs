@@ -298,6 +298,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         public IEnumerable<VisibleTGridRange> _GetVisibleRanges_PreviewMode(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale, int tUnitLength)
         {
+            var actualViewHeight = viewHeight / scale;
             var list = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
 
             IEnumerable<VisibleTGridRange> TryMerge(IEnumerable<VisibleTGridRange> sortedList)
@@ -362,7 +363,7 @@ namespace OngekiFumenEditor.Base.Collections
                     left = Math.Min(calcLeftY, cur.Y);
                     newLeftRemain = Math.Max(-cur.Y + left, 0);
                     //问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
-                    leftTGrid = (cur.TGrid - cur.Bpm.LengthConvertToOffset(Math.Max(viewHeight, (cur.Y - left)) / absSpeed, tUnitLength)) ?? TGrid.Zero;
+                    leftTGrid = (cur.TGrid - cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed, tUnitLength)) ?? TGrid.Zero;
 
                     var calcRightY = y - rightRemain;
                     right = Math.Max(next.Y, calcRightY);
@@ -405,38 +406,64 @@ namespace OngekiFumenEditor.Base.Collections
                 var minY = 0d;
                 var maxY = 0d;
 
-                for (int i = 0; i < list.Count - 1; i++)
+                if (list.Count > 1)
                 {
-                    var cur = list[i];
-                    var next = list[i + 1];
-
-                    minY = Math.Min(cur.Y, next.Y);
-                    maxY = Math.Max(cur.Y, next.Y);
-
-                    if (minY <= currentY && currentY <= maxY)
+                    for (int i = 0; i < list.Count - 1; i++)
                     {
-                        var mergeds = CalcSegment(i, currentY, preOffset, viewHeight - preOffset);
-                        foreach (var range in mergeds)
+                        var cur = list[i];
+                        var next = list[i + 1];
+
+                        minY = Math.Min(cur.Y, next.Y);
+                        maxY = Math.Max(cur.Y, next.Y);
+
+                        if (minY <= currentY && currentY <= maxY)
                         {
-                            yield return range;
+                            var mergeds = CalcSegment(i, currentY, preOffset, actualViewHeight - preOffset);
+                            foreach (var range in mergeds)
+                            {
+                                yield return range;
+                            }
                         }
                     }
+
+                    var pos = list.Last();
+                    maxY = currentY + (actualViewHeight - preOffset);
+                    minY = currentY - preOffset;
+
+                    if (pos.Y <= minY)
+                    {
+                        var gridOffset = pos.Bpm.LengthConvertToOffset(minY - pos.Y, (int)tUnitLength);
+                        var minTGrid = pos.TGrid + gridOffset;
+
+                        gridOffset = pos.Bpm.LengthConvertToOffset(maxY - pos.Y, (int)tUnitLength);
+                        var maxTGrid = pos.TGrid + gridOffset;
+
+                        var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
+                        yield return range;
+                    }
                 }
-
-                var pos = list.Last();
-                maxY = currentY + (viewHeight - preOffset);
-                minY = currentY - preOffset;
-
-                if (pos.Y <= minY)
+                else
                 {
-                    var gridOffset = pos.Bpm.LengthConvertToOffset(minY - pos.Y, (int)tUnitLength);
-                    var minTGrid = pos.TGrid + gridOffset;
+                    var cur = list[0];
+                    var absSpeed = Math.Abs(cur.Speed);
 
-                    gridOffset = pos.Bpm.LengthConvertToOffset(maxY - pos.Y, (int)tUnitLength);
-                    var maxTGrid = pos.TGrid + gridOffset;
+                    if (cur.Speed > 0)
+                    {
+                        minY = currentY - preOffset;
+                        maxY = minY + actualViewHeight;
 
-                    var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
-                    yield return range;
+                        var left = Math.Max(0, minY) / scale;
+                        var leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(left / absSpeed, tUnitLength));
+
+                        var right = left + actualViewHeight;
+                        var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(right / absSpeed, tUnitLength));
+
+                        yield return new(leftTGrid, rightTGrid);
+                    }
+                    else
+                    {
+                        //todo maybe?
+                    }
                 }
             }
 

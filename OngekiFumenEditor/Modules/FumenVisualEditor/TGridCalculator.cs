@@ -198,7 +198,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => GetVisbleTimelines_PreviewMode(editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Rect.MinY, editor.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale, tUnitLength);
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double currentY, double viewHeight, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
         {
-            var tGridRanges = soflans._GetVisibleRanges_PreviewMode(currentY, viewHeight, judgeLineOffsetY, bpmList, scale, tUnitLength);
+            var tGridRanges = soflans._GetVisibleRanges_PreviewMode(currentY, viewHeight / scale, judgeLineOffsetY, bpmList, scale, tUnitLength);
 
             foreach (var range in tGridRanges)
             {

@@ -197,7 +197,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                    .Concat(fumen.ClickSEs.BinaryFindRange(min, max))
                    .Concat(fumen.LaneBlocks.GetVisibleStartObjects(min, max))
                    .Concat(fumen.Comments.BinaryFindRange(min, max))
-                   .Concat(fumen.Soflans.BinaryFindRange(min, max))
+                   .Concat(fumen.Soflans.GetVisibleStartObjects(min, max))
                    .Concat(fumen.EnemySets.BinaryFindRange(min, max))
                    //.Concat(fumen.Bullets.BinaryFindRange(min, max))
                    .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
@@ -294,15 +294,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             else
             {
                 var scale = Setting.VerticalDisplayScale;
-                var nsMinY = minY / scale;
-                var nsMaxY = maxY / scale;
                 var ranges = Fumen.Soflans._GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList, scale, Setting.TGridUnitLength);
                 visibleTGridRanges.AddRange(ranges.Select(x => (x.minTGrid, x.maxTGrid)));
             }
 
             //todo 这里就要计算可视区域了
             Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));
-            
+
             RecalculateMagaticXGridLines();
 
             playableAreaHelper.Draw(this);

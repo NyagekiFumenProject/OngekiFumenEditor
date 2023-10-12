@@ -14,9 +14,24 @@ using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-    public partial class SoflanList : TGridSortList<Soflan>
+    public partial class SoflanList : IEnumerable<Soflan>
     {
+        private IntervalTreeWrapper<TGrid, Soflan> soflans = new(
+            x => new() { Min = x.TGrid, Max = x.EndIndicator.TGrid },
+            true,
+            nameof(Soflan.TGrid),
+            nameof(Soflan.EndTGrid)
+            );
+
         public event Action OnChangedEvent;
+
+        public IEnumerator<Soflan> GetEnumerator() => soflans.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IEnumerable<Soflan> GetVisibleStartObjects(TGrid min, TGrid max)
+        {
+            return soflans.QueryInRange(min, max);
+        }
 
         public SoflanList(IEnumerable<Soflan> initBpmChanges = default)
         {
@@ -30,9 +45,9 @@ namespace OngekiFumenEditor.Base.Collections
             cachedSoflanListCacheHash = int.MinValue;
         }
 
-        public override void Add(Soflan soflan)
+        public void Add(Soflan soflan)
         {
-            base.Add(soflan);
+            soflans.Add(soflan);
             soflan.PropertyChanged += OnSoflanPropChanged;
             OnChangedEvent?.Invoke();
         }
@@ -55,9 +70,9 @@ namespace OngekiFumenEditor.Base.Collections
             }
         }
 
-        public override void Remove(Soflan soflan)
+        public void Remove(Soflan soflan)
         {
-            base.Remove(soflan);
+            soflans.Remove(soflan);
             soflan.PropertyChanged -= OnSoflanPropChanged;
             OnChangedEvent?.Invoke();
         }
