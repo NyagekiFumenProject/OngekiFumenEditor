@@ -424,7 +424,7 @@ namespace OngekiFumenEditor.Base.Collections
 
                         if ((minY <= currentY && currentY <= maxY) || actualViewMaxY >= minY && maxY >= actualViewMinY)
                         {
-                            var mergeds = CalcSegment(i, currentY, preOffset, actualViewHeight - preOffset);
+                            var mergeds = CalcSegment(i, currentY, preOffset / scale, actualViewHeight - preOffset / scale);
                             foreach (var range in mergeds)
                             {
                                 yield return range;
@@ -433,17 +433,13 @@ namespace OngekiFumenEditor.Base.Collections
                     }
 
                     cur = list.Last();
-                    maxY = currentY + (actualViewHeight - preOffset);
-                    minY = currentY - preOffset;
-                    var absSpeed = Math.Abs(cur.Speed);
 
                     if (cur.Y <= minY)
                     {
-                        absSpeed = 1;
-                        var gridOffset = cur.Bpm.LengthConvertToOffset(minY - cur.Y, (int)tUnitLength);
+                        var gridOffset = cur.Bpm.LengthConvertToOffset(actualViewMinY - cur.Y, tUnitLength);
                         var minTGrid = cur.TGrid + gridOffset;
 
-                        gridOffset = cur.Bpm.LengthConvertToOffset(maxY - cur.Y, (int)tUnitLength);
+                        gridOffset = cur.Bpm.LengthConvertToOffset(actualViewMaxY - cur.Y, tUnitLength);
                         var maxTGrid = cur.TGrid + gridOffset;
 
                         var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
@@ -451,6 +447,8 @@ namespace OngekiFumenEditor.Base.Collections
                     }
                     else
                     {
+                        var absSpeed = Math.Abs(cur.Speed);
+
                         var leftTGrid = cur.TGrid;
 
                         var right = cur.Y + actualViewHeight;
@@ -466,10 +464,7 @@ namespace OngekiFumenEditor.Base.Collections
 
                     if (cur.Speed > 0)
                     {
-                        minY = currentY - preOffset;
-                        maxY = minY + actualViewHeight;
-
-                        var left = Math.Max(0, minY) / scale;
+                        var left = Math.Max(0, actualViewMinY);
                         var leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(left / absSpeed, tUnitLength));
 
                         var right = left + actualViewHeight;
