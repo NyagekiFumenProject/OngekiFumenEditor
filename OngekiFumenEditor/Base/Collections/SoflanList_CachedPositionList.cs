@@ -299,6 +299,9 @@ namespace OngekiFumenEditor.Base.Collections
         public IEnumerable<VisibleTGridRange> _GetVisibleRanges_PreviewMode(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale, int tUnitLength)
         {
             var actualViewHeight = viewHeight / scale;
+            var actualViewMinY = currentY - preOffset;
+            var actualViewMaxY = actualViewMinY + actualViewHeight;
+
             var list = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
 
             IEnumerable<VisibleTGridRange> TryMerge(IEnumerable<VisibleTGridRange> sortedList)
@@ -364,7 +367,7 @@ namespace OngekiFumenEditor.Base.Collections
                     newLeftRemain = Math.Max(-cur.Y + left, 0);
                     //问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
                     leftTGrid = (cur.TGrid - cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed, tUnitLength)) ?? TGrid.Zero;
-
+                    
                     var calcRightY = y - rightRemain;
                     right = Math.Max(next.Y, calcRightY);
                     newRightRemain = Math.Max(next.Y - calcRightY, 0);
@@ -405,18 +408,19 @@ namespace OngekiFumenEditor.Base.Collections
             {
                 var minY = 0d;
                 var maxY = 0d;
+                var cur = default(SoflanPoint);
 
                 if (list.Count > 1)
                 {
                     for (int i = 0; i < list.Count - 1; i++)
                     {
-                        var cur = list[i];
+                        cur = list[i];
                         var next = list[i + 1];
 
                         minY = Math.Min(cur.Y, next.Y);
                         maxY = Math.Max(cur.Y, next.Y);
 
-                        if (minY <= currentY && currentY <= maxY)
+                        if ((minY <= currentY && currentY <= maxY) || actualViewMaxY >= minY && maxY >= actualViewMinY)
                         {
                             var mergeds = CalcSegment(i, currentY, preOffset, actualViewHeight - preOffset);
                             foreach (var range in mergeds)
@@ -426,25 +430,36 @@ namespace OngekiFumenEditor.Base.Collections
                         }
                     }
 
-                    var pos = list.Last();
+                    cur = list.Last();
                     maxY = currentY + (actualViewHeight - preOffset);
                     minY = currentY - preOffset;
+                    var absSpeed = Math.Abs(cur.Speed);
 
-                    if (pos.Y <= minY)
+                    if (cur.Y <= minY)
                     {
-                        var gridOffset = pos.Bpm.LengthConvertToOffset(minY - pos.Y, (int)tUnitLength);
-                        var minTGrid = pos.TGrid + gridOffset;
+                        absSpeed = 1;
+                        var gridOffset = cur.Bpm.LengthConvertToOffset(minY - cur.Y, (int)tUnitLength);
+                        var minTGrid = cur.TGrid + gridOffset;
 
-                        gridOffset = pos.Bpm.LengthConvertToOffset(maxY - pos.Y, (int)tUnitLength);
-                        var maxTGrid = pos.TGrid + gridOffset;
+                        gridOffset = cur.Bpm.LengthConvertToOffset(maxY - cur.Y, (int)tUnitLength);
+                        var maxTGrid = cur.TGrid + gridOffset;
 
                         var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
                         yield return range;
                     }
+                    else
+                    {
+                        var leftTGrid = cur.TGrid;
+
+                        var right = cur.Y + actualViewHeight;
+                        var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
+
+                        yield return new(leftTGrid, rightTGrid);
+                    }
                 }
                 else
                 {
-                    var cur = list[0];
+                    cur = list[0];
                     var absSpeed = Math.Abs(cur.Speed);
 
                     if (cur.Speed > 0)
