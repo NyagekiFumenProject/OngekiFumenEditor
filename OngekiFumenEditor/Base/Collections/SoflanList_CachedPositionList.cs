@@ -298,8 +298,9 @@ namespace OngekiFumenEditor.Base.Collections
 
         public IEnumerable<VisibleTGridRange> _GetVisibleRanges_PreviewMode(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale, int tUnitLength)
         {
+            currentY = currentY / scale;
             var actualViewHeight = viewHeight / scale;
-            var actualViewMinY = currentY - preOffset;
+            var actualViewMinY = currentY - preOffset / scale;
             var actualViewMaxY = actualViewMinY + actualViewHeight;
 
             var list = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
@@ -353,7 +354,7 @@ namespace OngekiFumenEditor.Base.Collections
                     newLeftRemain = Math.Max(cur.Y - calcLeftY, 0);
                     leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed, tUnitLength));
 
-                    var calcRightY = (y + rightRemain) / scale;
+                    var calcRightY = y + rightRemain;
                     right = Math.Min(next.Y, calcRightY);
                     newRightRemain = Math.Max(calcRightY - next.Y, 0);
                     rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
