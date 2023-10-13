@@ -353,7 +353,7 @@ namespace OngekiFumenEditor.Base.Collections
                     newLeftRemain = Math.Max(cur.Y - calcLeftY, 0);
                     leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed, tUnitLength));
 
-                    var calcRightY = y + rightRemain;
+                    var calcRightY = (y + rightRemain) / scale;
                     right = Math.Min(next.Y, calcRightY);
                     newRightRemain = Math.Max(calcRightY - next.Y, 0);
                     rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
