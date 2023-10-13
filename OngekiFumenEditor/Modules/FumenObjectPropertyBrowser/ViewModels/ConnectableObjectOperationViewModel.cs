@@ -11,6 +11,7 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
@@ -165,7 +166,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 return;
             }
 
-            if (editor.CurrentCopiedSources.Count() > 1)
+            var copiedObjects = IoC.Get<IFumenEditorClipboard>().CurrentCopiedObjects;
+
+            if (copiedObjects.Count() > 1)
             {
                 MessageBox.Show("因为已复制的物件超过一个，无法使用刷子功能");
                 return;
@@ -177,13 +180,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 return;
             }
 
-            if (editor.CurrentCopiedSources.Count() < 1)
+            if (copiedObjects.Count() < 1)
             {
                 MessageBox.Show("需要先复制一个可以复制的物件，才能使用刷子功能");
                 return;
             }
 
-            var copiedObjectViewModel = editor.CurrentCopiedSources.FirstOrDefault() as OngekiObjectBase;
+            var copiedObjectViewModel = copiedObjects.FirstOrDefault() as OngekiObjectBase;
 
             if (copiedObjectViewModel?.CopyNew() is null)
             {

@@ -125,8 +125,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public Toast Toast => (GetView() as FumenVisualEditorView)?.mainToast;
 
-        private Dictionary<ISelectableObject, Point> currentCopiedSources = new();
-        public IEnumerable<ISelectableObject> CurrentCopiedSources => currentCopiedSources.Keys;
         public ObjectInteractiveManager InteractiveManager { get; private set; } = new();
 
         #region provide extra MenuItem by plugins
@@ -869,7 +867,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryApplyBrushObject(Point p)
         {
-            if (!(CurrentCopiedSources.IsOnlyOne(out var c) && c is OngekiObjectBase copySouceObj))
+            var copyManager = IoC.Get<IFumenEditorClipboard>();
+
+            if (!(copyManager.CurrentCopiedObjects.IsOnlyOne(out var c) && c is OngekiObjectBase copySouceObj))
                 return;
 
             var newObject = copySouceObj.CopyNew();

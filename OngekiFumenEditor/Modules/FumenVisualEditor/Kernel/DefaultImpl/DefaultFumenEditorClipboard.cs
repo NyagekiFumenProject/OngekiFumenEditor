@@ -30,6 +30,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
         public bool ContainPastableObjects => sourceEditor is not null && currentCopiedSources.Any();
 
+        public IReadOnlyCollection<OngekiObjectBase> CurrentCopiedObjects => currentCopiedSources.Keys;
+
         public async Task CopyObjects(FumenVisualEditorViewModel sourceEditor, IEnumerable<ISelectableObject> objects)
         {
             if (sourceEditor.IsLocked)
