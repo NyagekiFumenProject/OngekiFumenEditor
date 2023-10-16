@@ -204,6 +204,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        public bool IsEnableSoflan => TargetValue != Target.Player;
+
         public override string ToString() => $"{base.ToString()} StrID[{StrID}] Speed[{Speed:F3}] ShooterValue[{ShooterValue}] TargetValue[{TargetValue}] SizeValue[{SizeValue}] TypeValue[{TypeValue}]";
 
         public static string CommandName => "BPL";

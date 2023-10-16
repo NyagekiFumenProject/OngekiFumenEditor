@@ -15,6 +15,15 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
         public CommonUIViewModelBase(IObjectPropertyAccessProxy wrapper)
         {
             PropertyInfo = wrapper;
+            PropertyInfo.PropertyChanged += PropertyInfo_PropertyChanged;
+        }
+
+        protected virtual void PropertyInfo_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == propertyInfo.PropertyInfo.Name)
+            {
+                Refresh();
+            }
         }
 
         public IObjectPropertyAccessProxy PropertyInfo
@@ -47,10 +56,10 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 
         protected CommonUIViewModelBase(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
-            PropertyInfo.PropertyChanged += PropertyInfo_PropertyChanged;
+
         }
 
-        private void PropertyInfo_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        protected override void PropertyInfo_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -58,7 +67,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
                     Refresh();
                     break;
                 default:
-                    //NotifyOfPropertyChange(e.PropertyName);
+                    base.PropertyInfo_PropertyChanged(sender, e);
                     break;
             }
         }

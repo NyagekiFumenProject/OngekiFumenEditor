@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using OngekiFumenEditor.Base.Attributes;
+using System.Collections.Generic;
+using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
@@ -11,8 +13,36 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             get { return referenceBulletPallete; }
             set
             {
+                if (value is not null)
+                    value.PropertyChanged -= ReferenceBulletPallete_PropertyChanged;
                 referenceBulletPallete = value;
+                if (value is not null)
+                    value.PropertyChanged += ReferenceBulletPallete_PropertyChanged;
                 NotifyOfPropertyChange(() => ReferenceBulletPallete);
+
+                NotifyOfPropertyChange(() => Speed);
+                NotifyOfPropertyChange(() => StrID);
+                NotifyOfPropertyChange(() => PlaceOffset);
+                NotifyOfPropertyChange(() => TypeValue);
+                NotifyOfPropertyChange(() => TargetValue);
+                NotifyOfPropertyChange(() => ShooterValue);
+                NotifyOfPropertyChange(() => SizeValue);
+            }
+        }
+
+        private void ReferenceBulletPallete_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(BulletPallete.StrID):
+                case nameof(BulletPallete.PlaceOffset):
+                case nameof(BulletPallete.TypeValue):
+                case nameof(BulletPallete.TargetValue):
+                case nameof(BulletPallete.ShooterValue):
+                case nameof(BulletPallete.SizeValue):
+                case nameof(BulletPallete.Speed):
+                    NotifyOfPropertyChange(e.PropertyName);
+                    break;
             }
         }
 
@@ -21,34 +51,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Normal = 0,
             Hard = 1,
             Danger = 2
-        }
-
-        /*
-        public class BulletDamageType : FadeStringEnum
-        {
-            public BulletDamageType(string value) : base(value)
-            {
-
-            }
-
-            /// <summary>
-            /// 将使用BULLET_DAMAGE伤害
-            /// </summary>
-            public static BulletDamageType Normal { get; } = new BulletDamageType("NML");
-            /// <summary>
-            /// 将使用HARDBULLET_DAMAGE伤害
-            /// </summary>
-            public static BulletDamageType Hard { get; } = new BulletDamageType("STR");
-            /// <summary>
-            /// 将使用DANGERBULLET_DAMAGE伤害
-            /// </summary>
-            public static BulletDamageType Danger { get; } = new BulletDamageType("DNG");
-        }
-        */
-
-        public Bullet()
-        {
-
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
@@ -67,6 +69,33 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        [ObjectPropertyBrowserAlias("BPL." + nameof(Speed))]
+        [ObjectPropertyBrowserShow]
+        public float Speed => ReferenceBulletPallete?.Speed ?? default;
+
+        [ObjectPropertyBrowserAlias("BPL." + nameof(StrID))]
+        [ObjectPropertyBrowserShow]
+        public string StrID => ReferenceBulletPallete?.StrID;
+
+        [ObjectPropertyBrowserAlias("BPL." + nameof(PlaceOffset))]
+        [ObjectPropertyBrowserShow]
+        public int PlaceOffset => ReferenceBulletPallete?.PlaceOffset ?? default;
+
+        [ObjectPropertyBrowserAlias("BPL." + nameof(TypeValue))]
+        [ObjectPropertyBrowserShow]
+        public BulletType TypeValue => ReferenceBulletPallete?.TypeValue ?? default;
+
+        [ObjectPropertyBrowserAlias("BPL." + nameof(TargetValue))]
+        [ObjectPropertyBrowserShow]
+        public Target TargetValue => ReferenceBulletPallete?.TargetValue ?? default;
+
+        [ObjectPropertyBrowserAlias("BPL." + nameof(ShooterValue))]
+        [ObjectPropertyBrowserShow]
+        public Shooter ShooterValue => ReferenceBulletPallete?.ShooterValue ?? default;
+
+        [ObjectPropertyBrowserAlias("BPL." + nameof(SizeValue))]
+        [ObjectPropertyBrowserShow]
+        public BulletSize SizeValue => ReferenceBulletPallete?.SizeValue ?? default;
 
         public override string IDShortName => CommandName;
 

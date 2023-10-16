@@ -77,6 +77,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
             if (e.PropertyName == PropertyInfo.Name)
             {
                 NotifyOfPropertyChange(() => ProxyValue);
+                NotifyOfPropertyChange(e.PropertyName);
             }
         }
 
