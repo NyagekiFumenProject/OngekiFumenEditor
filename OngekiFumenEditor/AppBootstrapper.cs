@@ -200,7 +200,7 @@ namespace OngekiFumenEditor
             foreach (var preview in previewList)
                 Log.LogDebug(preview.ToString());
 
-            var r = soflanList._GetVisibleRanges_PreviewMode(2000, 800, 50, bpmList, 1, 240).ToList();
+            var r = soflanList.GetVisibleRanges_PreviewMode(2000, 800, 50, bpmList, 1, 240).ToList();
         }
 
         private async void MainWindow_Drop(object sender, DragEventArgs e)

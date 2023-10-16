@@ -77,7 +77,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
             else if (TargetValue == Target.Player)
             {
-                //写死先
+                //xUnit = xGridTotalUnit + PlaceOffset;
                 xUnit = 0;
             }
 

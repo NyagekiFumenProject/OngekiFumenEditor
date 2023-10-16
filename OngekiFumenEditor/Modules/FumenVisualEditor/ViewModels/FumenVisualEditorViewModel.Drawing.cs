@@ -324,7 +324,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             else
             {
                 var scale = Setting.VerticalDisplayScale;
-                var ranges = Fumen.Soflans._GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList, scale, Setting.TGridUnitLength);
+                var ranges = Fumen.Soflans.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList, scale, Setting.TGridUnitLength);
                 visibleTGridRanges.AddRange(ranges.Select(x => (x.minTGrid, x.maxTGrid)));
             }
 

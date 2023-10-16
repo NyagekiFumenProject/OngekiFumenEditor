@@ -144,8 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => ConvertYToTGrid_PreviewMode(pickY, editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale, editor.Setting.TGridUnitLength);
         private static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
         {
-            var nsPickY = pickY / scale;
-            var r = soflanList.GetVisibleRanges_PreviewMode(nsPickY, nsPickY, bpmList, tUnitLength);
+            var r = soflanList.GetVisibleRanges_PreviewMode(pickY, 0, 0, bpmList, scale, tUnitLength);
             var result = r.OrderBy(x => x.minTGrid).Select(x => x.minTGrid);
             return result;
         }
@@ -198,7 +197,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             => GetVisbleTimelines_PreviewMode(editor.Fumen.Soflans, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Rect.MinY, editor.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale, tUnitLength);
         public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double currentY, double viewHeight, double judgeLineOffsetY, int beatSplit, double scale, int tUnitLength = 240)
         {
-            var tGridRanges = soflans._GetVisibleRanges_PreviewMode(currentY, viewHeight, judgeLineOffsetY, bpmList, scale, tUnitLength);
+            var tGridRanges = soflans.GetVisibleRanges_PreviewMode(currentY, viewHeight, judgeLineOffsetY, bpmList, scale, tUnitLength);
 
             foreach (var range in tGridRanges)
             {

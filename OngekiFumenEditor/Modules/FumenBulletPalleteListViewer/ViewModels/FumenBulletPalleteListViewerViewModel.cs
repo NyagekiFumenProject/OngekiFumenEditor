@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
         private Point _mouseStartPosition;
         private BulletPallete _selecting;
 
-        public void OnMouseMoveAndDragNewBullet (ActionExecutionContext e)
+        public void OnMouseMoveAndDragNewBullet(ActionExecutionContext e)
         {
             if (!_draggingItem)
                 return;

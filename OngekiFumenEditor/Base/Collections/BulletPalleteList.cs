@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public IEnumerator<BulletPallete> GetEnumerator() => palletes.Select(x => x).GetEnumerator();
+        public IEnumerator<BulletPallete> GetEnumerator() => palletes.OrderBy(x => ConvertIdToInt(x.StrID)).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public void AddPallete(BulletPallete pallete)
@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Base.Collections
                 if (palletes.Count == 0)
                     cacheCurrentMaxId = "9Z";
                 else
-                    cacheCurrentMaxId = ConvertIntToId(palletes.Select(x=> ConvertIdToInt(x.StrID)).OrderBy(x => x).LastOrDefault());
+                    cacheCurrentMaxId = ConvertIntToId(palletes.Select(x => ConvertIdToInt(x.StrID)).OrderBy(x => x).LastOrDefault());
             }
 
             if (string.IsNullOrWhiteSpace(pallete.StrID))
