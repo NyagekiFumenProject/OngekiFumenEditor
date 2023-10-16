@@ -229,7 +229,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //todo 还能再次优化
                 bool check(IBulletPalleteReferencable bell)
                 {
-                    var appearOffsetTime = Math.Max(ViewHeight, ViewHeight / (bell.ReferenceBulletPallete?.Speed ?? 1));
+                    var appearOffsetTime = ViewHeight / (Math.Min(1, bell.ReferenceBulletPallete?.Speed ?? 1));
 
                     var toTime = ConvertToY(bell.TGrid.TotalUnit);
                     var fromTime = toTime - appearOffsetTime;
@@ -237,7 +237,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var minTime = Math.Min(fromTime, toTime);
                     var maxTime = Math.Max(fromTime, toTime);
 
-                    var r = MathUtils.IsInRange(minTime, maxTime, minY, minY + appearOffsetTime);
+                    var r = MathUtils.IsInRange(minTime, maxTime, minY, Math.Max(maxY, minY + appearOffsetTime));
                     return r;
                 }
                 /*
