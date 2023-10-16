@@ -452,9 +452,12 @@ namespace OngekiFumenEditor.Base.Collections
                         var leftTGrid = cur.TGrid;
 
                         var right = currentY + actualViewHeight;
-                        var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
-
-                        yield return new(leftTGrid, rightTGrid);
+                        var offset = (right - cur.Y) / absSpeed;
+                        if (offset >= 0)
+                        {
+                            var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(offset, tUnitLength));
+                            yield return new(leftTGrid, rightTGrid);
+                        }
                     }
                 }
                 else

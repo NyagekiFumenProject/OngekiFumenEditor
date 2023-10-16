@@ -178,7 +178,8 @@ namespace OngekiFumenEditor.Utils
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInRange(double start1, double end1, double start2, double end2) => (start1 <= end2 && start2 <= end1) || (start2 <= end1 && start1 <= end2);
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInRange(TimeSpan start1, TimeSpan end1, TimeSpan start2, TimeSpan end2) => (start1 <= end2 && start2 <= end1) || (start2 <= end1 && start1 <= end2);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalculateXFromBetweenObjects<T>(T from, T to, FumenVisualEditorViewModel editor, TGrid tGrid) where T : IHorizonPositionObject, ITimelineObject
             => CalculateXFromBetweenObjects(from.TGrid, from.XGrid, to.TGrid, to.XGrid, editor, tGrid);

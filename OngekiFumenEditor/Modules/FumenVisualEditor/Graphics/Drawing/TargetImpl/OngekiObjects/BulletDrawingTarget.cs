@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Base;
@@ -23,6 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public class BulletDrawingTarget : CommonBatchDrawTargetBase<Bullet>, IDisposable
     {
         public override int DefaultRenderOrder => 1500;
+
+        private SoflanList nonSoflanList = new(new[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
 
         Dictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap = new();
         Dictionary<Texture, Vector2> spritesSize = new();
@@ -92,8 +95,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             //const float fat = 3.95f;
             //var time =  32.5f * fat / (Math.Max(4.7f, 0.2f * userSpeed) * (/*obj.ReferenceBulletPallete?.Speed ??*/ 1f)) * 16.666666f;
 
-            var time = (float)target.ViewHeight / (obj.ReferenceBulletPallete?.Speed ?? 1f);
-            return time;
+            var time = target.ViewHeight / (obj.ReferenceBulletPallete?.Speed ?? 1f);
+            return (float)time;
         }
 
         private void Draw(IFumenEditorDrawingContext target, Bullet obj)
@@ -119,18 +122,48 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor);
             var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor);
 
+            double convertToYNonSoflan(TGrid tgrid)
+            {
+                return TGridCalculator.ConvertTGridToY_DesignMode(
+                    tgrid,
+                    nonSoflanList,
+                    target.Editor.Fumen.BpmList,
+                    target.Editor.Setting.VerticalDisplayScale,
+                    target.Editor.Setting.TGridUnitLength); ;
+            }
+
             //计算向量化的物件运动时间
-            var toTime = target.ConvertToY(obj.TGrid);
-            var fromTime = toTime - appearOffsetTime;
-            var currentTime = target.ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
-            var precent = (currentTime - fromTime) / appearOffsetTime;
-            //Log.LogDebug($"precent : {precent * 100:F2}");
-            if (currentTime < fromTime)
-                return;
+            var rotate = 0f;
+            var timeX = 0d;
+            var timeY = 0d;
 
-            var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
+            if (!(obj.ReferenceBulletPallete?.IsEnableSoflan ?? true))
+            {
+                var toTime = convertToYNonSoflan(obj.TGrid);
+                var fromTime = toTime - appearOffsetTime;
+                var currentTime = convertToYNonSoflan(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
+                
+                var precent = (currentTime - fromTime) / appearOffsetTime;
 
-            var timeY = target.Rect.MinY + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
+                timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
+                timeY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
+                rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
+            }
+            else
+            {
+                var toTime = target.ConvertToY(obj.TGrid);
+                var fromTime = toTime - appearOffsetTime;
+                var currentTime = target.ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
+                var precent = (currentTime - fromTime) / appearOffsetTime;
+
+                //Log.LogDebug($"precent : {precent * 100:F2}");
+                if (currentTime < fromTime)
+                    return;
+
+                timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
+                timeY = target.Rect.MinY + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
+                rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
+            }
 
             var pos = new Vector2((float)timeX, (float)timeY);
 
@@ -138,7 +171,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var size = spritesSize[texture];
             var origOffset = spritesOriginOffset[texture];
 
-            var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
             var offsetPos = pos + origOffset;
             normalDrawList[texture].Add((size, offsetPos, rotate));
             if (obj.IsSelected)

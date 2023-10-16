@@ -168,7 +168,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             var positionBpmList = soflanList.GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
 
             //获取pickY对应的bpm和bpm起始位置
-            var pos = positionBpmList.LastOrDefault(x => x.TGrid.TotalUnit <= tGridUnit);
+            var pos = positionBpmList.LastOrDefaultByBinarySearch(tGridUnit, x => x.TGrid.TotalUnit);
             if (pos.Bpm is null)
                 if (positionBpmList.FirstOrDefault().Bpm?.TGrid is TGrid first && tGridUnit < first.TotalUnit)
                     return 0;

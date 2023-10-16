@@ -185,8 +185,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public IFumenEditorDrawingTarget[] GetDrawingTarget(string name) => drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
 
-        List<IDisplayableObject> obj = new List<IDisplayableObject>();
-
         private IEnumerable<IDisplayableObject> GetDisplayableObjects(OngekiFumen fumen, TGrid min, TGrid max)
         {
             var first = Enumerable.Empty<IDisplayableObject>()
@@ -218,36 +216,68 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             /*
              * 这里考虑到有spd<1的子弹/Bell会提前出现的情况，因此得分状态分别去选择
              */
-            obj.Clear();
+
+            var objs = Enumerable.Empty<IDisplayableObject>();
             if (Editor.IsPreviewMode)
             {
+                var minY2 = ConvertToY(min.TotalUnit);
+                var maxY2 = ConvertToY(max.TotalUnit);
+                var minY = Math.Min(Math.Min(Rect.MinY, Rect.MaxY), Math.Min(minY2, maxY2));
+                var maxY = Math.Max(Math.Max(Rect.MinY, Rect.MaxY), Math.Max(minY2, maxY2));
+                var curY = ConvertToY(GetCurrentTGrid().TotalUnit);
+
                 //todo 还能再次优化
                 bool check(IBulletPalleteReferencable bell)
                 {
-                    var appearOffsetTime = ViewHeight / (bell.ReferenceBulletPallete?.Speed ?? 1f);
+                    var appearOffsetTime = Math.Max(ViewHeight, ViewHeight / (bell.ReferenceBulletPallete?.Speed ?? 1));
 
                     var toTime = ConvertToY(bell.TGrid.TotalUnit);
                     var fromTime = toTime - appearOffsetTime;
 
-                    return MathUtils.IsInRange(fromTime, toTime, Rect.MinY, Rect.MaxY);
-                }
+                    var minTime = Math.Min(fromTime, toTime);
+                    var maxTime = Math.Max(fromTime, toTime);
 
+                    var r = MathUtils.IsInRange(minTime, maxTime, minY, minY + appearOffsetTime);
+                    return r;
+                }
+                /*
+                var minAudioTime = TGridCalculator.ConvertTGridToAudioTime(min, this);
+                var maxAudioTime = TGridCalculator.ConvertTGridToAudioTime(max, this);
+                if (minAudioTime > maxAudioTime)
+                    (minAudioTime, maxAudioTime) = (maxAudioTime, minAudioTime);
+                var viewTimeSpan = (maxAudioTime - minAudioTime) / Setting.VerticalDisplayScale;
+
+                //todo 还能再次优化
+                bool check(IBulletPalleteReferencable bell)
+                {
+                    var appearOffsetTime = viewTimeSpan / (bell.ReferenceBulletPallete?.Speed ?? 1f);
+
+                    var toTime = TGridCalculator.ConvertTGridToAudioTime(bell.TGrid, this);
+                    var fromTime = toTime - appearOffsetTime;
+                    if (fromTime > toTime)
+                        (toTime, fromTime) = (fromTime, toTime);
+
+                    var r = MathUtils.IsInRange(minAudioTime, maxAudioTime, fromTime, toTime);
+                    return r;
+                }
+                
+                */
                 var r = fumen.Bells
                     .AsEnumerable<IBulletPalleteReferencable>()
                     .Concat(fumen.Bullets).AsParallel().Where(check);
 
-                obj.AddRange(r);
+                objs = objs.Concat(r);
             }
             else
             {
                 var blts = fumen.Bullets.BinaryFindRange(min, max);
                 var bels = fumen.Bells.BinaryFindRange(min, max);
 
-                obj.AddRange(bels);
-                obj.AddRange(blts);
+                objs = objs.Concat(bels);
+                objs = objs.Concat(blts);
             }
 
-            return first.Concat(obj).SelectMany(x => x.GetDisplayableObjects());
+            return first.Concat(objs).SelectMany(x => x.GetDisplayableObjects());
         }
 
         private void CleanRender()
