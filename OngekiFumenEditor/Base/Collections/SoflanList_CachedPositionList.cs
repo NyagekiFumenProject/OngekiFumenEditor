@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media.Media3D;
 
 namespace OngekiFumenEditor.Base.Collections
 {
@@ -414,6 +415,7 @@ namespace OngekiFumenEditor.Base.Collections
 
                 if (list.Count > 1)
                 {
+                    var needCalcLastPoint = true;
                     for (int i = 0; i < list.Count - 1; i++)
                     {
                         cur = list[i];
@@ -426,9 +428,8 @@ namespace OngekiFumenEditor.Base.Collections
                         {
                             var mergeds = CalcSegment(i, currentY, preOffset / scale, actualViewHeight - preOffset / scale);
                             foreach (var range in mergeds)
-                            {
                                 yield return range;
-                            }
+                            needCalcLastPoint = false;
                         }
                     }
 
@@ -445,10 +446,11 @@ namespace OngekiFumenEditor.Base.Collections
                         var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
                         yield return range;
                     }
-                    else
+                    else if(needCalcLastPoint)
                     {
                         var absSpeed = Math.Abs(cur.Speed);
 
+                        /*
                         var leftTGrid = cur.TGrid;
 
                         var right = currentY + actualViewHeight;
@@ -457,6 +459,43 @@ namespace OngekiFumenEditor.Base.Collections
                         {
                             var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(offset, tUnitLength));
                             yield return new(leftTGrid, rightTGrid);
+                        }
+                        */
+
+                        var y = currentY;
+                        var leftRemain = preOffset / scale;
+                        var rightRemain = actualViewHeight - preOffset / scale;
+
+                        if (cur.Speed > 0)
+                        {
+                            var calcLeftY = y - leftRemain;
+                            var left = Math.Max(calcLeftY, cur.Y);
+                            var newLeftRemain = Math.Max(cur.Y - calcLeftY, 0);
+                            var leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed, tUnitLength));
+
+                            var calcRightY = y + rightRemain;
+                            var right = calcRightY;
+                            var newRightRemain = calcRightY;
+                            var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
+
+                            var curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
+                            yield return curTGrid;
+                        }
+                        else
+                        {
+                            var calcLeftY = y + leftRemain;
+                            var left = Math.Min(calcLeftY, cur.Y);
+                            var newLeftRemain = Math.Max(-cur.Y + left, 0);
+                            //问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
+                            var leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed, tUnitLength))) ?? TGrid.Zero;
+
+                            var calcRightY = y - rightRemain;
+                            var right = calcRightY;
+                            var newRightRemain = calcRightY;
+                            var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed, tUnitLength));
+
+                            var curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
+                            yield return curTGrid;
                         }
                     }
                 }
