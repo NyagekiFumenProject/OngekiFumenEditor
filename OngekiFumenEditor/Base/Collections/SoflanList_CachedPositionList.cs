@@ -364,7 +364,7 @@ namespace OngekiFumenEditor.Base.Collections
             {
                 var minY = 0d;
                 var maxY = 0d;
-                var cur = default(SoflanPoint);
+                var last = default(SoflanPoint);
 
                 //判断是否有变速
                 if (list.Count > 1)
@@ -372,11 +372,11 @@ namespace OngekiFumenEditor.Base.Collections
                     //如果有变速，那么就通过各个变速区间对比和计算
                     for (int i = 0; i < list.Count - 1; i++)
                     {
-                        cur = list[i];
+                        last = list[i];
                         var next = list[i + 1];
 
-                        minY = Math.Min(cur.Y, next.Y);
-                        maxY = Math.Max(cur.Y, next.Y);
+                        minY = Math.Min(last.Y, next.Y);
+                        maxY = Math.Max(last.Y, next.Y);
 
                         //检查可视范围是否和这个变速段范围有相交
                         if ((minY <= currentY && currentY <= maxY) || actualViewMaxY >= minY && maxY >= actualViewMinY)
@@ -388,50 +388,38 @@ namespace OngekiFumenEditor.Base.Collections
                         }
                     }
 
-                    cur = list.Last();
+                    last = list.Last();
 
-                    if (cur.Y <= minY)
+                    if (last.Y <= minY)
                     {
-                        var gridOffset = cur.Bpm.LengthConvertToOffset(actualViewMinY - cur.Y, tUnitLength);
-                        var minTGrid = cur.TGrid + gridOffset;
+                        //todo 这里我忘记为啥要写了，出了bug再看
+                        var gridOffset = last.Bpm.LengthConvertToOffset(actualViewMinY - last.Y, tUnitLength);
+                        var minTGrid = last.TGrid + gridOffset;
 
-                        gridOffset = cur.Bpm.LengthConvertToOffset(actualViewMaxY - cur.Y, tUnitLength);
-                        var maxTGrid = cur.TGrid + gridOffset;
+                        gridOffset = last.Bpm.LengthConvertToOffset(actualViewMaxY - last.Y, tUnitLength);
+                        var maxTGrid = last.TGrid + gridOffset;
 
                         var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
                         yield return range;
                     }
-                    else if(currentY >= cur.Y)
+                    else if(currentY >= last.Y)
                     {
-                        var absSpeed = Math.Abs(cur.Speed);
-
-                        /*
-                        var leftTGrid = cur.TGrid;
-
-                        var right = currentY + actualViewHeight;
-                        var offset = (right - cur.Y) / absSpeed;
-                        if (offset >= 0)
-                        {
-                            var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(offset, tUnitLength));
-                            yield return new(leftTGrid, rightTGrid);
-                        }
-                        */
+                        //如果已经超过了最后一个变速点，那么这里也要计算超出的范围
+                        //为了减轻我的心智负担，这坨内容和CalcSegment()大差不多，但不需要next参数了
+                        var absSpeed = Math.Abs(last.Speed);
 
                         var y = currentY;
                         var leftRemain = preOffset / scale;
                         var rightRemain = actualViewHeight - preOffset / scale;
 
-                        if (cur.Speed > 0)
+                        if (last.Speed > 0)
                         {
                             var calcLeftY = y - leftRemain;
-                            var left = Math.Max(calcLeftY, cur.Y);
-                            var newLeftRemain = Math.Max(cur.Y - calcLeftY, 0);
-                            var leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed, tUnitLength));
+                            var left = Math.Max(calcLeftY, last.Y);
+                            var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((left - last.Y) / absSpeed, tUnitLength));
 
                             var calcRightY = y + rightRemain;
-                            var right = calcRightY;
-                            var newRightRemain = calcRightY;
-                            var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
+                            var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((calcRightY - last.Y) / absSpeed, tUnitLength));
 
                             var curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
                             yield return curTGrid;
@@ -439,15 +427,11 @@ namespace OngekiFumenEditor.Base.Collections
                         else
                         {
                             var calcLeftY = y + leftRemain;
-                            var left = Math.Min(calcLeftY, cur.Y);
-                            var newLeftRemain = Math.Max(-cur.Y + left, 0);
-                            //问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
-                            var leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed, tUnitLength))) ?? TGrid.Zero;
+                            var left = Math.Min(calcLeftY, last.Y);
+                            var leftTGrid = (last.TGrid - (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (last.Y - left)) / absSpeed, tUnitLength))) ?? TGrid.Zero;
 
                             var calcRightY = y - rightRemain;
-                            var right = calcRightY;
-                            var newRightRemain = calcRightY;
-                            var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed, tUnitLength));
+                            var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((last.Y - calcRightY) / absSpeed, tUnitLength));
 
                             var curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
                             yield return curTGrid;
@@ -457,22 +441,22 @@ namespace OngekiFumenEditor.Base.Collections
                 else
                 {
                     //如果没有变速，那么就简单计算和处理咯~
-                    cur = list[0];
-                    var absSpeed = Math.Abs(cur.Speed);
+                    last = list[0];
+                    var absSpeed = Math.Abs(last.Speed);
 
-                    if (cur.Speed > 0)
+                    if (last.Speed > 0)
                     {
                         var left = Math.Max(0, actualViewMinY);
-                        var leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(left / absSpeed, tUnitLength));
+                        var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(left / absSpeed, tUnitLength));
 
                         var right = left + actualViewHeight;
-                        var rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(right / absSpeed, tUnitLength));
+                        var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(right / absSpeed, tUnitLength));
 
                         yield return new(leftTGrid, rightTGrid);
                     }
                     else
                     {
-                        //todo maybe?
+                        //理论上不应该会走到这
                     }
                 }
             }
