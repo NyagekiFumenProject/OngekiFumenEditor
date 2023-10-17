@@ -66,51 +66,35 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             Square = 2,
         }
 
-        public double CalculateToXGrid(double xGridTotalUnit, OngekiFumen fumen)
+        public double CalculateToXGridTotalUnit(IBulletPalleteReferencable refObject, OngekiFumen fumen)
         {
-            var xUnit = 0d;
+            var xGridTotalUnit = 0d;
 
-            //暂时实现Target.FixField的
-            if (TargetValue == Target.FixField)
+            switch (TargetValue)
             {
-                xUnit = xGridTotalUnit;
-            }
-            else if (TargetValue == Target.Player)
-            {
-                //xUnit = xGridTotalUnit + PlaceOffset;
-                xUnit = 0;
+                case Target.Player:
+                    xGridTotalUnit = refObject.XGrid.TotalUnit;
+                    break;
+                case Target.FixField:
+                    xGridTotalUnit = refObject.XGrid.TotalUnit;
+                    break;
+                default:
+                    break;
             }
 
-            return xUnit;
+            return xGridTotalUnit;
         }
 
-        public XGrid CalculateToXGrid(XGrid xGrid, OngekiFumen fumen)
+        public double CalculateFromXGridTotalUnit(IBulletPalleteReferencable refObject, OngekiFumen fumen)
         {
-            xGrid = new XGrid((float)CalculateToXGrid(xGrid.TotalUnit,fumen));
-            xGrid.NormalizeSelf();
-            return xGrid;
-        }
-
-        public double CalculateFromXGrid(double xGridTotalUnit, OngekiFumen fumen)
-        {
-            var xUnit = 0d;
+            var xGridTotalUnit = 0d;
 
             //暂时实现Shooter.TargetHead && Target.FixField的
-            if (ShooterValue == Shooter.TargetHead &
-                TargetValue == Target.FixField)
-            {
-                xUnit = xGridTotalUnit;
-            }
+            if (ShooterValue == Shooter.TargetHead)
+                xGridTotalUnit = refObject.XGrid.TotalUnit;
 
-            xUnit += PlaceOffset;
-            return xUnit;
-        }
-
-        public XGrid CalculateFromXGrid(XGrid xGrid, OngekiFumen fumen)
-        {
-            xGrid = new XGrid((float)CalculateFromXGrid(xGrid.TotalUnit, fumen));
-            xGrid.NormalizeSelf();
-            return xGrid;
+            xGridTotalUnit += PlaceOffset;
+            return xGridTotalUnit;
         }
 
         private string strID = string.Empty;

@@ -119,8 +119,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             ---------------------------- fromTime = toTime - appearOffsetTime
              */
 
-            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor);
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid, target.Editor.Fumen) ?? obj.XGrid, target.Editor);
+            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
 
             double convertToYNonSoflan(TGrid tgrid)
             {
@@ -142,7 +142,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var toTime = convertToYNonSoflan(obj.TGrid);
                 var fromTime = toTime - appearOffsetTime;
                 var currentTime = convertToYNonSoflan(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
-                
+
                 var precent = (currentTime - fromTime) / appearOffsetTime;
 
                 timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
@@ -157,8 +157,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var precent = (currentTime - fromTime) / appearOffsetTime;
 
                 //Log.LogDebug($"precent : {precent * 100:F2}");
-                if (currentTime < fromTime)
-                    return;
 
                 timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
                 timeY = target.Rect.MinY + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;

@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Base;
@@ -21,6 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public class BellDrawingTarget : CommonBatchDrawTargetBase<Bell>, IDisposable
     {
         public override int DefaultRenderOrder => 1200;
+        private SoflanList nonSoflanList = new(new[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
 
         private Texture texture;
         private Vector2 size;
@@ -86,22 +88,46 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             */
             var appearOffsetTime = CalculateBulletMsecTime(target, obj);
 
-            var toTime = target.ConvertToY(obj.TGrid);
-            var fromTime = toTime - appearOffsetTime;
+            double convertToYNonSoflan(TGrid tgrid)
+            {
+                return TGridCalculator.ConvertTGridToY_DesignMode(
+                    tgrid,
+                    nonSoflanList,
+                    target.Editor.Fumen.BpmList,
+                    target.Editor.Setting.VerticalDisplayScale,
+                    target.Editor.Setting.TGridUnitLength); ;
+            }
 
-            if (target.Rect.MinY < fromTime)
-                return;
+            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
 
-            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGrid(obj.XGrid.TotalUnit, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+            //计算向量化的物件运动时间
+            var timeX = 0d;
+            var timeY = 0d;
 
-            var currentTime = target.ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
+            if (!(obj.ReferenceBulletPallete?.IsEnableSoflan ?? true))
+            {
+                var toTime = convertToYNonSoflan(obj.TGrid);
+                var fromTime = toTime - appearOffsetTime;
+                var currentTime = convertToYNonSoflan(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
 
-            var precent = (currentTime - fromTime) / appearOffsetTime;
+                var precent = (currentTime - fromTime) / appearOffsetTime;
 
-            var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
+                timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
+                timeY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
+            }
+            else
+            {
+                var toTime = target.ConvertToY(obj.TGrid);
+                var fromTime = toTime - appearOffsetTime;
+                var currentTime = target.ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
+                var precent = (currentTime - fromTime) / appearOffsetTime;
 
-            var timeY = target.Rect.MinY + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
+                //Log.LogDebug($"precent : {precent * 100:F2}");
+
+                timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
+                timeY = target.Rect.MinY + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
+            }
 
             var pos = new Vector2((float)timeX, (float)timeY);
             normalFlichList.Add((size, pos, 0f));
