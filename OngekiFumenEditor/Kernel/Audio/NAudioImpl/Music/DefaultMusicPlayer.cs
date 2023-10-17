@@ -41,7 +41,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 
         public bool IsPlaying { get => currentOut?.PlaybackState == PlaybackState.Playing; }
 
-        public float Volume { 
+        public float Volume
+        {
             get => volume;
             set
             {
@@ -109,11 +110,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
             currentOut?.Dispose();
             currentOut = default;
 
-            audioFileReader.Seek(0, SeekOrigin.Begin);
-            var provider = new VolumeSampleProvider(new OffsetSampleProvider(audioFileReader)
-            {
-                SkipOver = time
-            })
+            audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * time.TotalSeconds), SeekOrigin.Begin);
+            var provider = new VolumeSampleProvider(audioFileReader)
             {
                 Volume = Volume
             };
