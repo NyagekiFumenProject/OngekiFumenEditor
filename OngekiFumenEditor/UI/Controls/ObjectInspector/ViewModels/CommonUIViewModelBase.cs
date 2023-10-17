@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
         {
             if (e.PropertyName == propertyInfo.PropertyInfo.Name)
             {
-                Refresh();
+                NotifyOfPropertyChange(e.PropertyName);
             }
         }
 
