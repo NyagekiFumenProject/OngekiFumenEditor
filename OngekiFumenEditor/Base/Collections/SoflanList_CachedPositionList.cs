@@ -45,9 +45,9 @@ namespace OngekiFumenEditor.Base.Collections
         public record VisibleTGridRange(TGrid minTGrid, TGrid maxTGrid);
         private record VisibleRange(double minY, TGrid minTGrid, double maxY, TGrid maxTGrid);
 
-        private IIntervalTree<double, VisibleRange> cachePostionList_DesignMode;
-        private double maxEndY;
-        private IIntervalTree<double, VisibleRange> cachePostionList_PreviewMode;
+        public record SoflanSegment(int curIdx, SoflanPoint cur, SoflanPoint next);
+
+        private IIntervalTree<double, SoflanSegment> cachePostionList_PreviewMode;
 
         [Flags]
         public enum ChgEvt
@@ -167,24 +167,19 @@ namespace OngekiFumenEditor.Base.Collections
                 list.Add(new(currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
         }
 
-        private IIntervalTree<double, VisibleRange> RebuildIntervalTreePositionList(List<SoflanPoint> list)
+        private IIntervalTree<double, SoflanSegment> RebuildIntervalTreePositionList(List<SoflanPoint> list)
         {
-            var tree = new IntervalTree<double, VisibleRange>();
-            maxEndY = int.MinValue;
+            var tree = new IntervalTree<double, SoflanSegment>();
 
-            foreach (var pair in list.SequenceConsecutivelyWrap(2).Where(x => !x.IsOnlyOne()))
+            for (int i = 0; i < list.Count - 1; i++)
             {
-                var prev = pair.First();
-                var next = pair.Last();
+                var prev = list[i];
+                var next = list[i + 1];
 
                 var beginY = Math.Min(prev.Y, next.Y);
                 var endY = Math.Max(prev.Y, next.Y);
-                maxEndY = Math.Max(maxEndY, endY);
 
-                var beginTGrid = MathUtils.Min(prev.TGrid, next.TGrid);
-                var endTGrid = MathUtils.Max(prev.TGrid, next.TGrid);
-
-                tree.Add(beginY, endY, new(beginY, beginTGrid, endY, endTGrid));
+                tree.Add(beginY, endY, new(i, prev, next));
             }
 
             return tree;
@@ -217,6 +212,12 @@ namespace OngekiFumenEditor.Base.Collections
             return cachedSoflanPositionList_PreviewMode;
         }
 
+        public IIntervalTree<double, SoflanSegment> GetCachedSoflanSegment_PreviewMode(double tUnitLength, BpmList bpmList)
+        {
+            CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
+            return cachePostionList_PreviewMode;
+        }
+
         /// <summary>
         /// 通过当前坐标信息，逆推计算出获取可视TGrid范围
         /// (整个项目最恶心但最重要的实现之一)
@@ -232,10 +233,15 @@ namespace OngekiFumenEditor.Base.Collections
         {
             currentY = currentY / scale;
             var actualViewHeight = viewHeight / scale;
-            var actualViewMinY = currentY - preOffset / scale;
+            var actualPreOffset = preOffset / scale;
+            var actualViewMinY = currentY - actualPreOffset;
             var actualViewMaxY = actualViewMinY + actualViewHeight;
 
+            using var _d1 = ObjectPool<HashSet<int>>.GetWithUsingDisposable(out var fullCheckSets, out _);
+            fullCheckSets.Clear();
+
             var list = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
+            var segments = GetCachedSoflanSegment_PreviewMode(tUnitLength, bpmList);
 
             IEnumerable<VisibleTGridRange> TryMerge(IEnumerable<VisibleTGridRange> sortedList)
             {
@@ -263,6 +269,9 @@ namespace OngekiFumenEditor.Base.Collections
 
             IEnumerable<VisibleTGridRange> CalcSegment(int posIdx, double y, double leftRemain, double rightRemain)
             {
+                if (fullCheckSets.Contains(posIdx))
+                    return Enumerable.Empty<VisibleTGridRange>();
+
                 /*
                  LEFT    ------->    RIGHT
              cur(posIdx)           next(posIdx+1)
@@ -278,6 +287,7 @@ namespace OngekiFumenEditor.Base.Collections
                  */
                 var cur = list[posIdx];//当前变速信息
                 var next = list[posIdx + 1];
+                var absSpeed = Math.Abs(cur.Speed);
 
                 var leftMergeds = Enumerable.Empty<VisibleTGridRange>();
                 var curTGrid = default(VisibleTGridRange);
@@ -290,39 +300,49 @@ namespace OngekiFumenEditor.Base.Collections
                 var newLeftRemain = 0d;
                 var newRightRemain = 0d;
 
-                var absSpeed = Math.Abs(cur.Speed);
-
-                //计算在此变速段中能显示的范围leftTGrid/rightTGrid,也计算出剩余还需要显示的量newLeftRemain/newRightRemain
-                //这里为了减轻大脑心智负担，还是按正反变速分开写吧
                 if (cur.Speed > 0)
                 {
                     var calcLeftY = y - leftRemain;
                     left = Math.Max(calcLeftY, cur.Y);
-                    newLeftRemain = Math.Max(cur.Y - calcLeftY, 0);
-                    leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed, tUnitLength));
+                    //newLeftRemain = Math.Max(cur.Y - calcLeftY, 0);
+                    newLeftRemain = cur.Y - calcLeftY;
 
                     var calcRightY = y + rightRemain;
                     right = Math.Min(next.Y, calcRightY);
-                    newRightRemain = Math.Max(calcRightY - next.Y, 0);
-                    rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
-
-                    curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
+                    //newRightRemain = Math.Max(calcRightY - next.Y, 0);
+                    newRightRemain = calcRightY - next.Y;
                 }
                 else
                 {
                     var calcLeftY = y + leftRemain;
                     left = Math.Min(calcLeftY, cur.Y);
                     newLeftRemain = Math.Max(-cur.Y + left, 0);
-                    //问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
-                    leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed, tUnitLength))) ?? TGrid.Zero;
 
                     var calcRightY = y - rightRemain;
                     right = Math.Max(next.Y, calcRightY);
                     newRightRemain = Math.Max(next.Y - calcRightY, 0);
+                }
+
+                //计算在此变速段中能显示的范围leftTGrid/rightTGrid,也计算出剩余还需要显示的量newLeftRemain/newRightRemain
+                //这里为了减轻大脑心智负担，还是按正反变速分开写吧
+                if (cur.Speed > 0)
+                {
+                    leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed, tUnitLength));
+                    rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
+
+                    curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
+                }
+                else
+                {
+                    //问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
+                    leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed, tUnitLength))) ?? TGrid.Zero;
                     rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed, tUnitLength));
 
                     curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
                 }
+
+                if (newRightRemain >= 0 && newLeftRemain >= 0)
+                    fullCheckSets.Add(posIdx);
 
                 //Log.LogDebug($"{{{cur.TGrid}({cur.Y})  -->  {next.TGrid}({next.Y})}}  calc({leftRemain}|{y}|{rightRemain})  {{{leftTGrid}({left}){newLeftRemain}  -->  {rightTGrid}({right}){newRightRemain}}}");
 
@@ -369,6 +389,7 @@ namespace OngekiFumenEditor.Base.Collections
                 //判断是否有变速
                 if (list.Count > 1)
                 {
+                    /*
                     //如果有变速，那么就通过各个变速区间对比和计算
                     for (int i = 0; i < list.Count - 1; i++)
                     {
@@ -381,13 +402,65 @@ namespace OngekiFumenEditor.Base.Collections
                         //检查可视范围是否和这个变速段范围有相交
                         if ((minY <= currentY && currentY <= maxY) || actualViewMaxY >= minY && maxY >= actualViewMinY)
                         {
+                            MainCalledCount++;
                             //如果有相交，那么说明这个变速段部分内容是需要显示的，那么就计算出这部分需要显示的范围
                             var mergeds = CalcSegment(i, currentY, preOffset / scale, actualViewHeight - preOffset / scale);
                             foreach (var range in mergeds)
                                 yield return range;
                         }
                     }
+                    */
+                    /*
+                     新的优化实现：
+                      1. 获取要被扫描的变速段
+                      2. 按时间轴排序
+                      3. 先从左到右，只向右扫描一边，如果出现某个变速段能被全扫完,那就标记这个。下次再扫到这个变速段就直接返回(毕竟都已经扫完了)
+                      4. 同理，反过来再扫一遍
+                      5. 完成
+                     */
+                    using var _d2 = segments.Query(currentY, currentY)
+                        .Concat(segments.Query(actualViewMinY, actualViewMaxY))
+                        .Distinct()
+                        .OrderBy(x => x.curIdx)
+                        .ToListWithObjectPool(out var querySegments);
 
+                    var scanLeftLength = actualViewHeight - actualPreOffset;
+                    for (int i = querySegments.Count - 1; i >= 0; i--)
+                    {
+                        var mergeds = CalcSegment(querySegments[i].curIdx, currentY, 0, scanLeftLength);
+                        foreach (var range in mergeds)
+                            yield return range;
+                    }
+
+                    fullCheckSets.Clear();
+
+                    var scanRightLength = actualPreOffset;
+                    for (int i = 0; i < querySegments.Count; i++)
+                    {
+                        var mergeds = CalcSegment(querySegments[i].curIdx, currentY, scanRightLength, 0);
+                        foreach (var range in mergeds)
+                            yield return range;
+                    }
+
+                    /*
+                    foreach (var seg in querySegments)
+                    {
+                        if (prevMaxTGrid is not null && prevMaxTGrid > seg.next.TGrid)
+                            continue;
+                        prevMaxTGrid = null;
+
+                        MainCalledCount++;
+                        var i = seg.curIdx;
+                        //如果有相交，那么说明这个变速段部分内容是需要显示的，那么就计算出这部分需要显示的范围
+                        var mergeds = CalcSegment(i, currentY, actualPreOffset, actualViewHeight - actualPreOffset);
+                        foreach (var range in mergeds)
+                        {
+                            if (prevMaxTGrid is null || prevMaxTGrid < range.maxTGrid)
+                                prevMaxTGrid = range.maxTGrid;
+                            yield return range;
+                        }
+                    }
+                    */
                     last = list.Last();
 
                     if (last.Y <= minY)
@@ -402,15 +475,15 @@ namespace OngekiFumenEditor.Base.Collections
                         var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
                         yield return range;
                     }
-                    else if(currentY >= last.Y)
+                    else if (currentY >= last.Y)
                     {
                         //如果已经超过了最后一个变速点，那么这里也要计算超出的范围
                         //为了减轻我的心智负担，这坨内容和CalcSegment()大差不多，但不需要next参数了
                         var absSpeed = Math.Abs(last.Speed);
 
                         var y = currentY;
-                        var leftRemain = preOffset / scale;
-                        var rightRemain = actualViewHeight - preOffset / scale;
+                        var leftRemain = actualPreOffset;
+                        var rightRemain = actualViewHeight - actualPreOffset;
 
                         if (last.Speed > 0)
                         {
