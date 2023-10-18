@@ -312,7 +312,7 @@ namespace OngekiFumenEditor.Base.Collections
                     //newRightRemain = Math.Max(calcRightY - next.Y, 0);
                     newRightRemain = calcRightY - next.Y;
                 }
-                else
+                else if (cur.Speed < 0)
                 {
                     var calcLeftY = y + leftRemain;
                     left = Math.Min(calcLeftY, cur.Y);
@@ -321,6 +321,11 @@ namespace OngekiFumenEditor.Base.Collections
                     var calcRightY = y - rightRemain;
                     right = Math.Max(next.Y, calcRightY);
                     newRightRemain = Math.Max(next.Y - calcRightY, 0);
+                }
+                else
+                {
+                    newLeftRemain = leftRemain;
+                    newRightRemain = rightRemain;
                 }
 
                 //计算在此变速段中能显示的范围leftTGrid/rightTGrid,也计算出剩余还需要显示的量newLeftRemain/newRightRemain
@@ -332,11 +337,20 @@ namespace OngekiFumenEditor.Base.Collections
 
                     curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
                 }
-                else
+                else if (cur.Speed < 0)
                 {
                     //问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
                     leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed, tUnitLength))) ?? TGrid.Zero;
                     rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed, tUnitLength));
+
+                    curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
+                }
+                else
+                {
+                    //Speed = 0时就简单了~
+
+                    leftTGrid = cur.TGrid;
+                    rightTGrid = next.TGrid;
 
                     curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
                 }
