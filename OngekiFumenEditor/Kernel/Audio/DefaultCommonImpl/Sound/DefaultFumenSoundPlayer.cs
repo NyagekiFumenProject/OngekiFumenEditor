@@ -255,6 +255,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                         Tap { ReferenceLaneStart: { IsWallLane: true }, IsCritical: true } or Hold { ReferenceLaneStart: { IsWallLane: true }, IsCritical: true } => SoundControl.CriticalWallTap,
                         Tap { ReferenceLaneStart: { IsWallLane: false }, IsCritical: false } or Hold { ReferenceLaneStart: { IsWallLane: false }, IsCritical: false } => SoundControl.Tap,
                         Tap { ReferenceLaneStart: { IsWallLane: false }, IsCritical: true } or Hold { ReferenceLaneStart: { IsWallLane: false }, IsCritical: true } => SoundControl.CriticalTap,
+                        Tap { ReferenceLaneStart: null, IsCritical: false } or Hold { ReferenceLaneStart: null, IsCritical: false } => SoundControl.Tap,
+                        Tap { ReferenceLaneStart: null, IsCritical: true } or Hold { ReferenceLaneStart: null, IsCritical: true } => SoundControl.CriticalTap,
                         Bell => SoundControl.Bell,
                         Bullet => SoundControl.Bullet,
                         Flick { IsCritical: false } => SoundControl.Flick,
