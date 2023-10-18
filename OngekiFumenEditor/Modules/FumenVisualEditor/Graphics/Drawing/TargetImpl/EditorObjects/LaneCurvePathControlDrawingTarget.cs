@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 (float)target.ConvertToY(x.TGrid),
                 (float)XGridCalculator.ConvertXGridToX(x.XGrid, target.Editor),
                 x
-            )).ToHashSetWithObjectPool<(float y, float x, LaneCurvePathControlObject obj)>(out var list);
+            )).ToListWithObjectPool<(float y, float x, LaneCurvePathControlObject obj)>(out var list);
 
             if (list.Count == 0)
                 return;
@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     var rx = (float)XGridCalculator.ConvertXGridToX(refConnectableObject.XGrid, target.Editor);
                     yield return new LineVertex(new(rx, ry), Transparent, LineDash);
                     yield return new LineVertex(new(rx, ry), color, LineDash);
-                    foreach (var curve in item.Reverse())
+                    foreach (var curve in item.OrderBy(x => x.obj.Index).Reverse())
                         yield return new LineVertex(new(curve.x, curve.y), color, LineDash);
                     var parentConnectableObject = refConnectableObject.PrevObject;
                     var rpy = (float)target.ConvertToY(parentConnectableObject.TGrid);
