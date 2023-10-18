@@ -294,6 +294,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 var newNext = ReferenceStartObject.CreateNextObject();
 
                 newNext.Copy(this);
+                foreach (var ctrl in newNext.PathControls.ToArray())
+                    newNext.RemoveControlObject(ctrl);
 
                 newNext.TGrid = point.TGrid;
                 newNext.XGrid = point.XGrid;

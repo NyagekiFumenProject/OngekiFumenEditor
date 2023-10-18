@@ -97,6 +97,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
         public void Interpolate(ActionExecutionContext e)
         {
+            if (RefStartObject.Children.IsEmpty())
+            {
+                MessageBox.Show("无子节点,无法插值");
+                return;
+            }
+
             var genStarts = RefStartObject.InterpolateCurve(RefStartObject.CurveInterpolaterFactory).ToArray();
 
             var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
