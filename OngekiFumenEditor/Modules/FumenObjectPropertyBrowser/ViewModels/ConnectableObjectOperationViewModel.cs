@@ -201,8 +201,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             }
 
             var dialog = new BrushTGridRangeDialogViewModel();
-            dialog.BeginTGrid = RefStartObject.MinTGrid;
-            dialog.EndTGrid = RefStartObject.MaxTGrid;
+            dialog.BeginTGrid = RefStartObject.MinTGrid.CopyNew();
+            dialog.EndTGrid = RefStartObject.MaxTGrid.CopyNew();
 
             if ((await IoC.Get<IWindowManager>().ShowDialogAsync(dialog)) != true)
                 return;
