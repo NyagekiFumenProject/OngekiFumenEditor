@@ -15,7 +15,9 @@ namespace OngekiFumenEditor.Utils.Ogkr
     {
         public static IEnumerable<(ConnectableStartObject beforeStart, IEnumerable<ConnectableStartObject> genStarts)> Calculate(OngekiFumen fumen, bool xGridLimit = false)
         {
-            var curveStarts = fumen.Lanes.Where(x => x.Children.Any(x => x.PathControls.Count > 0)).ToList();
+            var curveStarts = fumen.Lanes
+                .Where(x => x.Children.Any(x => x.PathControls.Count > 0) || !x.IsPathVaild())
+                .ToList();
 
             var laneMap = curveStarts.ToDictionary(
                 x => x.RecordId,
