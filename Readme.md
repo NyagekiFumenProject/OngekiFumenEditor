@@ -33,17 +33,16 @@
 * 星咲あかり心灵控制计划
 * 重写渲染器，优化性能
 * 音频频谱显示
-* 实现Soflan变速 ([有限支持](https://github.com/MikiraSora/OngekiFumenEditor/wiki/*-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98#%E9%9F%B3%E6%95%88%E9%97%AE%E9%A2%98))
+* 实现Soflan正向变速
 * 优化性能
 * ~~美化物件美术素材~~
 * ~~实现扫描式预览方式~~
 * ~~轨道操作简单化~~
 * ~~画画专用小工具~~
 * 打包生成工具
+* 完全实现Soflan倒车变速！
 * 塞小功能&修BUG.... **<--- we are here! ---**
-....
-
-https://pastebin.com/hyNyvdwt
+....、
 
 ## 编译&下载
 [![Build Program](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml/badge.svg)](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml)
@@ -65,7 +64,7 @@ https://pastebin.com/hyNyvdwt
 * 禁止在外网公开平台讨论项目或相关内容
 * 本项目无任何利益相关，均因兴趣爱好驱动开发，属于**个人合作业余项目**，因开源精神而开源项目
 * 本项目不会提供任何相关游戏资源
-* 本项目一切相关文档以及代码均只能是为了个人学习用途
+* 本项目一切相关文档以及代码均只能是为了个人学习用途，**绝对禁止**用于任何形式商业用途
 * 因使用本项目者做坏事，所产生的相关纠纷和问题，后果自负，不关我事 ^ ^
 * **另外本项目不是Phixxos编辑器**
 
