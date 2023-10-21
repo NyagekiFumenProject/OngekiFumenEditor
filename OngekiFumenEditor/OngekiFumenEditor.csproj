@@ -76,7 +76,6 @@
     <None Remove="Resources\Images\logo.png" />
     <None Remove="Resources\Music.xml" />
     <None Remove="Resources\MusicSource.xml" />
-    <None Remove="Resources\musicTemplate.acb" />
     <None Remove="Resources\ui_jacket_0666" />
   </ItemGroup>
 
@@ -92,7 +91,6 @@
     <EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
     <EmbeddedResource Include="Resources\Music.xml" />
     <EmbeddedResource Include="Resources\MusicSource.xml" />
-    <EmbeddedResource Include="Resources\musicTemplate.acb" />
     <EmbeddedResource Include="Resources\ui_jacket_0666" />
   </ItemGroup>
 

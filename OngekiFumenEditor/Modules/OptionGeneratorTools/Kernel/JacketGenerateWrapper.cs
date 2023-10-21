@@ -38,6 +38,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
             {
                 var jacketName = $"ui_jacket_{option.MusicId.ToString().PadLeft(4, '0')}";
                 var tempFolder = TempFileHelper.GetTempFolderPath("JacketGen", jacketName);
+                Log.LogDebug($"JacketGenerateWrapper.Generate() tempFolder: {tempFolder}");
 
                 //generate normal
                 var tmpInputImageFilePath = Path.Combine(tempFolder, jacketName);

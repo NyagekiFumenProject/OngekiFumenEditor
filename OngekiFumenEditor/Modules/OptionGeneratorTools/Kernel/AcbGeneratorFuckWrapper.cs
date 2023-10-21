@@ -28,13 +28,10 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                 return new(false, "输出文件夹为空");
             try
             {
-                var musicIdStr= option.MusicId.ToString().PadLeft(4,'0');
+                var musicIdStr = option.MusicId.ToString().PadLeft(4, '0');
                 var musicSourceName = $"musicsource{musicIdStr}";
                 var tempFolder = TempFileHelper.GetTempFolderPath("AcbGen", musicSourceName);
-
-                using var fs = typeof(AcbGeneratorFuckWrapper).Assembly.GetManifestResourceStream("OngekiFumenEditor.Resources.musicTemplate.acb");
-                using var ms = new MemoryStream();
-                await fs.CopyToAsync(ms);
+                Log.LogDebug($"AcbGenerateProgram.Generate() tempFolder: {tempFolder}");
 
                 var result = await Task.Run(() => AcbGeneratorFuck.Generator.Generate(
                         option.InputAudioFilePath,
@@ -43,11 +40,8 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                         false,
                         new VGAudio.Cli.Options()
                         {
-                            Bitrate = 320 * 1024,
-                        },
-                        0,
-                        0,
-                        ms.ToArray()
+                            Bitrate = 192 * 1024,
+                        }
                         ));
 
                 var genResult = await GenerateMusicSourceXmlAsync(tempFolder, option.MusicId);

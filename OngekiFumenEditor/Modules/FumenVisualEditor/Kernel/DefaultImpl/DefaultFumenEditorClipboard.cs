@@ -113,10 +113,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     case Hold hold:
                         hold.ReferenceLaneStart = default;
                         break;
-                    //特殊处理子弹类:克隆一份子弹模板
                     case IBulletPalleteReferencable bulletPalleteObject:
                         if (bulletPalleteObject.ReferenceBulletPallete is BulletPallete bpl)
-                            bulletPalleteObject.ReferenceBulletPallete = bpl.CopyNew() as BulletPallete;
+                            bulletPalleteObject.ReferenceBulletPallete = bpl;
                         break;
                     default:
                         break;
