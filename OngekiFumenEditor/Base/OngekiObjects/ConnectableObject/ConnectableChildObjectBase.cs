@@ -71,13 +71,19 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public void AddControlObject(LaneCurvePathControlObject controlObj)
         {
+            InsertControlObject(PathControls.Count, controlObj);
+        }
+
+        public void InsertControlObject(int index, LaneCurvePathControlObject controlObj)
+        {
 #if DEBUG
             if (controlObj.RefCurveObject is not null)
                 throw new Exception("controlObj is using");
 #endif  
 
-            pathControls.Add(controlObj);
-            controlObj.Index = PathControls.Count;
+            pathControls.Insert(index, controlObj);
+            for (int i = index; i < pathControls.Count; i++)
+                pathControls[i].Index = i;
             controlObj.PropertyChanged += ControlObj_PropertyChanged;
             controlObj.RefCurveObject = this;
             NotifyRefreshPaths();

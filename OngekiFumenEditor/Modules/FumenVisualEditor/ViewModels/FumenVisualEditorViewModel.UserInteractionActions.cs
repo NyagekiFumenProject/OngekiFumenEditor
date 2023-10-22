@@ -5,6 +5,7 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
@@ -17,6 +18,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Utils;
+using SharpVectors.Renderers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -439,16 +441,50 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             //删除已选择的物件
-            var selectedObject = SelectObjects.OfType<OngekiObjectBase>().ToArray();
+            var selectedObjectGroup = SelectObjects.OfType<OngekiObjectBase>().GroupBy(x => x.GetType()).ToArray();
+
+            //特殊处理LaneCurvePathControlObject
+            var cacheCurveControlsMap = new Dictionary<LaneCurvePathControlObject, (ConnectableChildObjectBase refObj, int idx)>();
 
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("删除物件", () =>
             {
-                foreach (var obj in selectedObject)
-                    RemoveObject(obj);
+                foreach (var group in selectedObjectGroup)
+                {
+                    if (group.Key == typeof(LaneCurvePathControlObject))
+                    {
+                        foreach (var controlObject in group.OfType<LaneCurvePathControlObject>())
+                        {
+                            var refObj = controlObject.RefCurveObject;
+                            cacheCurveControlsMap[controlObject] = (refObj, refObj.PathControls.FirstIndexOf(x => x == controlObject));
+                        }
+                    }
+
+                    group.ForEach(RemoveObject);
+                }
             }, () =>
             {
-                foreach (var obj in selectedObject)
-                    Fumen.AddObject(obj);
+                foreach (var group in selectedObjectGroup)
+                {
+                    if (group.Key == typeof(LaneCurvePathControlObject))
+                    {
+                        foreach (var item in group.OfType<LaneCurvePathControlObject>().Select(x =>
+                        {
+                            if (cacheCurveControlsMap.TryGetValue(x, out var val))
+                                return (x, val.refObj, val.idx);
+                            else
+                                return default;
+                        }).Where(x => x.x is not null).GroupBy(x => x.refObj))
+                        {
+                            var refObj = item.Key;
+                            foreach ((var cp, _, var idx) in item.OrderBy(x => x.idx))
+                                refObj.InsertControlObject(idx, cp);
+                        }
+                    }
+                    else
+                    {
+                        group.ForEach(Fumen.AddObject);
+                    }
+                }
             }));
         }
 
