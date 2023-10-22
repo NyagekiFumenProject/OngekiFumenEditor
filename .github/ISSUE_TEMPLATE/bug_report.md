@@ -7,32 +7,20 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+### **请简单介绍bug表现形式**
+遇到了什么问题，画面怎么样，音效怎么样。
 
-**To Reproduce**
-Steps to reproduce the behavior:
+### **提供复现步骤(越详细越好)**
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+### **提供复现录屏链接(最好提供)**
+...
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+### **提供程序日志(在Logs文件夹里，最好最新几个日志文件压缩发来)**
+...
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
+### **截图（最好提供）**
+...
