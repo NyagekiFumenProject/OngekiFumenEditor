@@ -23,40 +23,57 @@
         </valueconverters:LoadJacketConverter>
     </mah:MetroWindow.Resources>
 
-    <Grid>
+    <Grid IsEnabled="{Binding IsBusy, Converter={StaticResource ReverseBoolConverter}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <Grid Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition />
-                <ColumnDefinition Width="auto" />
-            </Grid.ColumnDefinitions>
-            <TextBlock
-                Margin="0,0,10,0"
-                VerticalAlignment="Center"
-                Foreground="{StaticResource EnvironmentToolWindowText}"
-                Text="游戏根目录:">
-            </TextBlock>
-            <TextBlock
-                Grid.Column="1"
-                VerticalAlignment="Center"
-                Foreground="{StaticResource EnvironmentToolWindowText}"
-                Text="{Binding RootFolderPath}"
-                ToolTip="{Binding RootFolderPath}">
-            </TextBlock>
+        <StackPanel>
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource EnvironmentToolWindowText}"
+                    Text="游戏根目录:">
+                </TextBlock>
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource EnvironmentToolWindowText}"
+                    Text="{Binding RootFolderPath}"
+                    ToolTip="{Binding RootFolderPath}">
+                </TextBlock>
+                <Button
+                    Grid.Column="2"
+                    Margin="10,0,10,0"
+                    Padding="20,2,20,2"
+                    cal:Message.Attach="SelectFolder()">
+                    浏览
+                </Button>
+            </Grid>
+            <StackPanel Margin="5,5,5,10" Orientation="Horizontal">
+                <Label>关键词排序:</Label>
+                <TextBox
+                    Width="350"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding Keywords}">
+                </TextBox>
+            </StackPanel>
             <Button
-                Grid.Column="2"
-                Margin="10,0,10,0"
-                Padding="20,2,20,2"
-                cal:Message.Attach="SelectFolder()"
-                IsEnabled="{Binding IsBusy, Converter={StaticResource ReverseBoolConverter}}">
-                浏览
+                Margin="5,0,15,0"
+                Padding="20,5,20,5"
+                HorizontalAlignment="Right"
+                cal:Message.Attach="ApplyKeywords()">
+                过滤
             </Button>
-        </Grid>
-        <ItemsControl Grid.Row="1" ItemsSource="{Binding FumenSets}">
+        </StackPanel>
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding DisplayFumenSets}">
             <ItemsControl.Template>
                 <ControlTemplate TargetType="ItemsControl">
                     <Border

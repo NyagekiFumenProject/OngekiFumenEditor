@@ -10,6 +10,8 @@
         public float Level { get; set; }
         public string FilePath { get; set; }
         public int DiffIdx { get; set; }
+        public float Bpm { get; set; }
+        public string Creator { get; set; }
 
         public string DiffName => DiffIdx switch
         {

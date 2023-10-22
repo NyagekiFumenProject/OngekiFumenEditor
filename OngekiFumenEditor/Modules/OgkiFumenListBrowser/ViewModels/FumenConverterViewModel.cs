@@ -36,6 +36,7 @@ using DereTore.Exchange.Archive.ACB;
 using System.Diagnostics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Kernel.Audio;
+using System.Text.RegularExpressions;
 
 namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 {
@@ -46,6 +47,8 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
         {
             MatchCasing = MatchCasing.CaseInsensitive,
         };
+
+        private List<OngekiFumenSet> fumenSets = new();
 
         private string rootFolderPath = string.Empty;
         public string RootFolderPath
@@ -68,7 +71,17 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
             }
         }
 
-        public ObservableCollection<OngekiFumenSet> FumenSets { get; } = new ObservableCollection<OngekiFumenSet>();
+        private string keywords = string.Empty;
+        public string Keywords
+        {
+            get => keywords;
+            set
+            {
+                Set(ref keywords, value);
+            }
+        }
+
+        public ObservableCollection<OngekiFumenSet> DisplayFumenSets { get; } = new ObservableCollection<OngekiFumenSet>();
 
         public OgkiFumenListBrowserViewModel()
         {
@@ -78,7 +91,8 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
         private async void RefreshList()
         {
             IsBusy = true;
-            FumenSets.Clear();
+            fumenSets.Clear();
+            DisplayFumenSets.Clear();
             var resourceMap = new Dictionary<string, string>();
             var folder = await BuildFolder(RootFolderPath, resourceMap);
 
@@ -91,8 +105,74 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
                 s.AudioFilePath = resourceMap.TryGetValue("audio_" + s.MusicSourceId, out var a) ? a : s.AudioFilePath;
             });
 
-            FumenSets.AddRange(GetSet(folder));
+            fumenSets.AddRange(GetSet(folder).OrderBy(x => x.MusicId).DistinctContinuousBy(x => x.MusicId));
             IsBusy = false;
+
+            ApplyKeywords();
+        }
+
+        public void ApplyKeywords()
+        {
+            var keyword = Keywords?.ToLowerInvariant();
+
+            static int LevenshteinDistance(string s1, string s2)
+            {
+                if (s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase) || s2.Contains(s1, StringComparison.InvariantCultureIgnoreCase))
+                    return 0;
+
+                int[,] dp = new int[s1.Length + 1, s2.Length + 1];
+
+                for (int i = 0; i <= s1.Length; i++)
+                {
+                    dp[i, 0] = i;
+                }
+
+                for (int j = 0; j <= s2.Length; j++)
+                {
+                    dp[0, j] = j;
+                }
+
+                for (int i = 1; i <= s1.Length; i++)
+                {
+                    for (int j = 1; j <= s2.Length; j++)
+                    {
+                        int cost = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
+                        dp[i, j] = Math.Min(Math.Min(dp[i - 1, j] + 1, dp[i, j - 1] + 1), dp[i - 1, j - 1] + cost);
+                    }
+                }
+
+                return dp[s1.Length, s2.Length];
+            }
+
+            int fuzzyCalc(IEnumerable<string> strs)
+            {
+                var goodVal = int.MaxValue;
+
+                foreach (var str in strs)
+                {
+                    var modCount = LevenshteinDistance(str.ToLowerInvariant(), keyword);
+                    goodVal = Math.Min(modCount, goodVal);
+                }
+
+                return goodVal;
+            }
+
+            DisplayFumenSets.Clear();
+
+            var result = string.IsNullOrWhiteSpace(keyword) ? fumenSets : fumenSets.Select(r =>
+            {
+                var provideStrings = new[]
+                {
+                    r.Artist,
+                    r.Title,
+                }.Concat(r.Difficults.Select(x => x.Creator));
+
+                var q = fuzzyCalc(provideStrings);
+
+                return (q, r);
+            }).Where(x => x.q < 5).OrderBy(x => x.q).Select(x => x.r);
+
+            DisplayFumenSets.AddRange(result);
         }
 
         public void SelectFolder()
@@ -109,12 +189,13 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
             folder.Name = Path.GetFileName(folderPath);
 
             var subFolderPaths = Directory.GetDirectories(folderPath);
-            foreach (var subFolderPath in subFolderPaths)
+
+            await Task.WhenAll(subFolderPaths.Select(subFolderPath => Task.Run(async () =>
             {
                 var subFolder = await BuildFolder(subFolderPath, resourceMap);
                 if (!subFolder.IsEmpty)
                     folder.SubFolders.Add(subFolder);
-            }
+            })).ToArray());
 
             var folderName = Path.GetFileName(folderPath).ToLowerInvariant();
 
@@ -224,10 +305,63 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
                 fumenDiff.FilePath = fumenFilePath;
                 fumenDiff.Level = (int.TryParse(fumenConstIntegerPart, out var d1) ? d1 : 0) + ((int.TryParse(fumenConstFractionalPart, out var d2) ? d2 : 0) / 100.0f);
 
+                await ParseFumenFileInfo(fumenDiff);
+
                 set.Difficults.Add(fumenDiff);
             }
 
             return set.Difficults.Count > 0 ? set : default;
+        }
+
+        private static Regex BpmRegex = new Regex(@"BPM_DEF\s*([\d\.]+)");
+        private static Regex CreatorRegex = new Regex(@"CREATOR\s*(.+)");
+
+        private async Task ParseFumenFileInfo(OngekiFumenDiff fumenDiff)
+        {
+            try
+            {
+                using var fs = File.OpenRead(fumenDiff.FilePath);
+                using var reader = new StreamReader(fs);
+
+                var isBpmSetup = false;
+                var isCreatorSetup = false;
+
+                while (!reader.EndOfStream)
+                {
+                    var line = await reader.ReadLineAsync();
+
+                    if (!isBpmSetup)
+                    {
+                        var match = BpmRegex.Match(line);
+                        if (match.Success)
+                        {
+                            var bpm = float.Parse(match.Groups[1].Value);
+                            isBpmSetup = true;
+
+                            fumenDiff.Bpm = bpm;
+                        }
+                    }
+
+                    if (!isCreatorSetup)
+                    {
+                        var match = CreatorRegex.Match(line);
+                        if (match.Success)
+                        {
+                            var creator = match.Groups[1].Value;
+                            isCreatorSetup = true;
+
+                            fumenDiff.Creator = creator;
+                        }
+                    }
+
+                    if (isBpmSetup && isCreatorSetup)
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                //todo
+            }
         }
 
         public async void LoadFumen(OngekiFumenDiff diff)
