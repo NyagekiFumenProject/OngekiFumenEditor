@@ -208,10 +208,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             var prev = child.PrevObject;
             var next = children.FirstOrDefault(x => x.PrevObject == child);
             if (next is not null)
-            {
                 next.PrevObject = prev;
-            }
-            child.PrevObject = default;
+            else
+                child.PrevObject = default;
 
             child.ReferenceStartObject = default;
             child.PropertyChanged -= OnPropertyChanged;
