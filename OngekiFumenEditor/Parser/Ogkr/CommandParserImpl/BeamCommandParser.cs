@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
             if (dataArr.TryElementAt(6, out var xUnit))
             {
                 var xGrid = new XGrid(xUnit, 0);
+                xGrid.NormalizeSelf();
                 ob.ObliqueSourceXGrid = xGrid;
             }
         }

@@ -77,6 +77,10 @@ namespace OngekiFumenEditor.Base
             Unit += addUnit;
             Grid = (int)(Grid % GridRadix);
 
+            var diff = Unit - (int)Unit;
+            Unit = (int)Unit;
+            Grid += (int)(diff * GridRadix);
+
             if (Grid < 0)
             {
                 Grid += (int)GridRadix;

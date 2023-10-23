@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         [ObjectPropertyBrowserAllowSetNull]
         public XGrid ObliqueSourceXGrid
         {
-            get { return obliqueSourceXGrid; }
+            get { return obliqueSourceXGrid ?? ((IBeamObject)ReferenceStartObject).ObliqueSourceXGrid; }
             set
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(obliqueSourceXGrid, value);

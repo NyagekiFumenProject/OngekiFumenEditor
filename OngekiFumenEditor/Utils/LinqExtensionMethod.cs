@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Utils
 
         public static bool TryElementAt<T>(this T[] list, int idx, out T element)
         {
-            if (list.Length > (idx + 1))
+            if (list.Length >= (idx + 1))
             {
                 element = list[idx];
                 return true;
