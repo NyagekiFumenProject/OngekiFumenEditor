@@ -47,6 +47,18 @@ namespace OngekiFumenEditor.Utils
                 fun(item);
         }
 
+        public static bool TryElementAt<T>(this T[] list, int idx, out T element)
+        {
+            if (list.Length > (idx + 1))
+            {
+                element = list[idx];
+                return true;
+            }
+
+            element = default(T);
+            return false;
+        }
+
         /// <summary>
         /// 使用默认比较器，过滤掉重复的元素
         /// </summary>

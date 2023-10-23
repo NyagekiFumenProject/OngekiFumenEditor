@@ -290,7 +290,11 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
                 string SerializeOutput(ConnectableObjectBase o)
                 {
-                    return $"(Type[{o.IDShortName}], X[{o.XGrid.Unit},{o.XGrid.Grid}], T[{o.TGrid.Unit},{o.TGrid.Grid}], W[{((IBeamObject)o).WidthId}])";
+                    var b = ((IBeamObject)o);
+                    var r = $"(Type[{o.IDShortName}], X[{o.XGrid.Unit},{o.XGrid.Grid}], T[{o.TGrid.Unit},{o.TGrid.Grid}], W[{b.WidthId}]";
+                    if (b.ObliqueSourceXGrid is not null)
+                        r += $", OX[{b.ObliqueSourceXGrid.Unit},{b.ObliqueSourceXGrid.Grid}]";
+                    return r + ")";
                 }
 
                 var r = string.Join("\t->\t", laneStart.Children.AsEnumerable<ConnectableObjectBase>().Prepend(laneStart).Select(x => SerializeOutput(x)));

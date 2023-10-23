@@ -38,6 +38,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             void buildBeam(IBeamObject obj, Dictionary<string, string> map)
             {
                 obj.WidthId = int.Parse(map["W"]);
+
+                if (map.ContainsKey("OX"))
+                    obj.ObliqueSourceXGrid = map["OX"].ParseToXGrid();
             }
 
             // Start
@@ -45,7 +48,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             var startObject = new BeamStart();
             buildCommon(startObject, startData);
             startObject.RecordId = recordId;
-            buildBeam((IBeamObject)startObject, startData);
+            buildBeam(startObject, startData);
 
             // Next/End
             foreach (var childData in notes.Skip(1))

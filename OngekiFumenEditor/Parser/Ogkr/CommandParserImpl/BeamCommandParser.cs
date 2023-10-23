@@ -12,10 +12,17 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
         public void CommonParse(ConnectableObjectBase beam, CommandArgs args)
         {
             var dataArr = args.GetDataArray<float>();
+            var ob = (IBeamObject)beam;
 
             beam.TGrid = new TGrid(dataArr[2], (int)dataArr[3]);
             beam.XGrid = new XGrid(dataArr[4]);
-            ((IBeamObject)beam).WidthId = (int)dataArr[5];
+            ob.WidthId = (int)dataArr[5];
+
+            if (dataArr.TryElementAt(6, out var xUnit))
+            {
+                var xGrid = new XGrid(xUnit, 0);
+                ob.ObliqueSourceXGrid = xGrid;
+            }
         }
     }
 
@@ -29,13 +36,20 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
             var beamRecordId = args.GetData<int>(1);
             var beam = new BeamStart()
             {
-                RecordId = beamRecordId
+                RecordId = beamRecordId,
             };
 
             CommonParse(beam, args);
 
             return beam;
         }
+    }
+
+
+    [Export(typeof(ICommandParser))]
+    public class ObliqueBeamStartCommandParser : BeamStartCommandParser
+    {
+        public override string CommandLineHeader => "OBS";
     }
 
     [Export(typeof(ICommandParser))]
@@ -60,6 +74,12 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
     }
 
     [Export(typeof(ICommandParser))]
+    public class ObliqueBeamNextCommandParser : BeamNextCommandParser
+    {
+        public override string CommandLineHeader => "OBN";
+    }
+
+    [Export(typeof(ICommandParser))]
     public class BeamEndCommandParser : BeamCommandParserBase
     {
         public override string CommandLineHeader => "BME";
@@ -78,5 +98,11 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
             beamStart.AddChildObject(beam);
             return beam;
         }
+    }
+
+    [Export(typeof(ICommandParser))]
+    public class ObliqueBeamEndCommandParser : BeamEndCommandParser
+    {
+        public override string CommandLineHeader => "OBE";
     }
 }

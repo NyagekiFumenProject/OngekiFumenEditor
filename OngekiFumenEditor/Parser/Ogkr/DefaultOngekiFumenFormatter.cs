@@ -274,13 +274,20 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
                 };
 
                 sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete?.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
-
             }
         }
 
         public void ProcessBEAM(OngekiFumen fumen, StringBuilder sb)
         {
-            void SerializeOutput(ConnectableObjectBase o) => sb.AppendLine($"{o.IDShortName}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}\t{((IBeamObject)o).WidthId}");
+            void SerializeOutput(ConnectableObjectBase o)
+            {
+                var ob = (IBeamObject)o;
+                var isOblique = ob.ObliqueSourceXGrid is not null;
+                sb.AppendLine($"{(isOblique ? o.IDShortName : ("OB" + o.IDShortName.Last()))}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}\t{ob.WidthId}");
+                if (isOblique)
+                    sb.AppendLine($"\t{ob.ObliqueSourceXGrid.TotalUnit}");
+                sb.AppendLine();
+            }
 
             sb.AppendLine("[BEAM]");
             foreach (var beamStart in fumen.Beams.OrderBy(x => x.RecordId))

@@ -1,24 +1,9 @@
 ﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
-using OngekiFumenEditor.Utils;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
-using static OngekiFumenEditor.Base.OngekiObjects.EnemySet;
-using static OngekiFumenEditor.Base.OngekiObjects.Flick;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl
 {
