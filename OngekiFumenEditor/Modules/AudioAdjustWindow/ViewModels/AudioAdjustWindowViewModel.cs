@@ -51,6 +51,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
                     Set(ref isUseInputFile, value);
                 NotifyOfPropertyChange(() => IsCurrentEditorAsInputFumen);
                 NotifyOfPropertyChange(() => CurrentEditorName);
+                NotifyOfPropertyChange(() => Bpm);
             }
         }
 
@@ -71,10 +72,10 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
         {
             get
             {
-                if (bpm is double b)
-                    return b;
                 if (IsCurrentEditorAsInputFumen)
                     return IoC.Get<IEditorDocumentManager>()?.CurrentActivatedEditor?.Fumen.BpmList.FirstBpm.BPM ?? 0;
+                if (bpm is double b)
+                    return b;
                 return default;
             }
             set => Set(ref bpm, value);
@@ -183,12 +184,12 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
                 {
                     if (IsRecalculateObjects)
                     {
-                        var offset = TGridCalculator.ConvertAudioTimeToTGrid(timeOffset, currentEditor) - TGrid.Zero;
+                        var offset = currentEditor.Fumen.BpmList.FirstBpm.LengthConvertToOffset(timeOffset.TotalMilliseconds, 240);
                         var map = new Dictionary<ITimelineObject, (TGrid before, TGrid after)>();
 
                         foreach (var timelineObject in currentEditor.Fumen.GetAllDisplayableObjects().OfType<ITimelineObject>())
                         {
-                            var newTGrid = timelineObject.TGrid - offset;
+                            var newTGrid = timelineObject.TGrid + offset;
                             if (newTGrid is null)
                             {
                                 MessageBox.Show($"存在某个物件无法应用新的延迟：{timelineObject}");
@@ -207,16 +208,16 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
                             foreach (var item in map)
                                 item.Key.TGrid = item.Value.before.CopyNew();
                         }));
+
+
                     }
-
-                    var proj = currentEditor.EditorProjectData;
-                    await currentEditor.TryCloseAsync();
-
-                    await DocumentOpenHelper.TryOpenProject(proj);
                 }
 
                 offseted.SaveTo(fs);
-                MessageBox.Show($"处理完成");
+                if (IsCurrentEditorAsInputFumen)
+                    MessageBox.Show($"处理完成，但推荐您保存并重新打开当前项目，以查看最新的音频变更，或者物件位置变动。");
+                else
+                    MessageBox.Show($"处理完成");
             }
             catch (Exception e)
             {

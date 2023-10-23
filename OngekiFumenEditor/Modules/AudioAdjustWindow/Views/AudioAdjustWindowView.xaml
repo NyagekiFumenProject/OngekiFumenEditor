@@ -114,6 +114,7 @@
                         <TextBox
                             Width="75"
                             VerticalAlignment="Center"
+                            IsEnabled="{Binding IsUseInputFile}"
                             Text="{Binding Bpm}" />
                     </StackPanel>
                 </RadioButton>
