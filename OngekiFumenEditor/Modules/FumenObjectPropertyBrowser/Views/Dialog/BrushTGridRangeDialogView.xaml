@@ -10,9 +10,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="刷子时间钦定"
     Width="220"
-    Height="210"
     d:DataContext="{d:DesignInstance Type=dialog:BrushTGridRangeDialogViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
+    SaveWindowPosition="True"
+    SizeToContent="WidthAndHeight"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
     <Grid>

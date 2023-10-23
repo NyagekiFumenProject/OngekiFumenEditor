@@ -68,6 +68,28 @@ namespace OngekiFumenEditor.Utils
             return true;
         }
 
+        public static async Task<bool> TryOpenProject(EditorProjectDataModel proj)
+        {
+            var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
+            var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
+            var viewAware = (IViewAware)editor;
+            viewAware.ViewAttached += (sender, e) =>
+            {
+                var frameworkElement = (FrameworkElement)e.View;
+
+                RoutedEventHandler loadedHandler = null;
+                loadedHandler = async (sender2, e2) =>
+                {
+                    frameworkElement.Loaded -= loadedHandler;
+                    await fumenProvider.Open(editor, proj);
+                };
+                frameworkElement.Loaded += loadedHandler;
+            };
+
+            await IoC.Get<IShell>().OpenDocumentAsync(editor);
+            return true;
+        }
+
         public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(string ogkrFilePath)
         {
             (var audioFile, var audioDuration) = await GetAudioFilePath(ogkrFilePath);

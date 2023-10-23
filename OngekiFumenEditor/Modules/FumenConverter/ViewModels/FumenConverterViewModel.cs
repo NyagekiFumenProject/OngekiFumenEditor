@@ -67,16 +67,6 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (n, _) => NotifyOfPropertyChange(() => CurrentEditorName);
         }
 
-        public Task ConvertFumenFile(string fromFilePath, string toFilePath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task ConvertFumenFile(OngekiFumen fumen, string toFilePath)
-        {
-            throw new NotImplementedException();
-        }
-
         public void OnOpenSelectInputFileDialog()
         {
             var dialog = new OpenFileDialog();

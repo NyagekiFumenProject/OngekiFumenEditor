@@ -13,7 +13,6 @@
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:OgkiFumenListBrowserViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
-    ResizeMode="CanResize"
     SaveWindowPosition="True"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">

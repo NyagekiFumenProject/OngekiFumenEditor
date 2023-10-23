@@ -14,6 +14,7 @@
     d:DataContext="{d:DesignInstance Type=local2:EditorProjectSetupDialogViewModel,
                                      IsDesignTimeCreatable=True}"
     Background="{StaticResource EnvironmentWindowBackground}"
+    SizeToContent="WidthAndHeight"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
     <Grid Focusable="False">

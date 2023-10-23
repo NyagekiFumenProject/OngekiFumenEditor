@@ -9,12 +9,12 @@
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenConverter.ViewModels"
     Title="谱面转换"
     Width="500"
-    Height="235"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:FumenConverterViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
     ResizeMode="NoResize"
     SaveWindowPosition="True"
+    SizeToContent="WidthAndHeight"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
     <StackPanel>

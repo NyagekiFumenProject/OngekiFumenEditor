@@ -9,12 +9,12 @@
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels"
     Title="音频文件生成器"
     Width="475"
-    Height="270"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:AcbGeneratorWindowViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
     ResizeMode="NoResize"
     SaveWindowPosition="True"
+    SizeToContent="WidthAndHeight"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
     <StackPanel>
@@ -42,9 +42,9 @@
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Label VerticalAlignment="Center">MusicId:</Label>
                     <TextBox
-                        VerticalAlignment="Center"
                         Width="75"
                         Margin="10,0,0,0"
+                        VerticalAlignment="Center"
                         Text="{Binding GenerateOption.MusicId}">
                     </TextBox>
                 </StackPanel>

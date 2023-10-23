@@ -27,6 +27,11 @@ namespace OngekiFumenEditor.Utils
         public static string GetSupportAudioFileExtensionFilter()
             => BuildExtensionFilter(IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
 
+        public static IEnumerable<(string ext, string desc)> GetSupportFumenFileExtensionFilterList()
+            => IoC.Get<IFumenParserManager>().GetSerializerDescriptions().SelectMany(x => x.fileFormat.Select(y => (y, x.desc)));
+        public static IEnumerable<(string ext, string desc)> GetSupportAudioFileExtensionFilterList()
+            => IoC.Get<IAudioManager>().SupportAudioFileExtensionList;
+
         public static string OpenFile(string title, IEnumerable<(string ext, string desc)> extParams)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();

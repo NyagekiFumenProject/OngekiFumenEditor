@@ -9,12 +9,12 @@
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels"
     Title="封面文件生成器"
     Width="500"
-    Height="375"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:JacketGeneratorWindowViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
     ResizeMode="NoResize"
     SaveWindowPosition="True"
+    SizeToContent="WidthAndHeight"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
     <StackPanel>

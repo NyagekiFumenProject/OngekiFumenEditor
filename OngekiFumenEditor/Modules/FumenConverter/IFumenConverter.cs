@@ -11,6 +11,5 @@ namespace OngekiFumenEditor.Modules.FumenConverter
 {
     public interface IFumenConverter : IWindow
     {
-        Task ConvertFumenFile(string fromFilePath, string toFilePath);
     }
 }

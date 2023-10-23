@@ -216,6 +216,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Modules\AudioAdjustWindow\Views\AudioAdjustWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -408,6 +411,9 @@
     <Page Update="Kernel\SettingPages\Logs\Views\LogsSettingView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\AudioAdjustWindow\Views\AudioAdjustWindowView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
