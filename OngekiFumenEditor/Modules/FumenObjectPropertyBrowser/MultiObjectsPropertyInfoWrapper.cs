@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
         public IReadOnlyList<IObjectPropertyAccessProxy> Wrappers => wrappers;
 
         public string DisplayPropertyName => wrappers.First().DisplayPropertyName;
-        public string DisplayPropertyTipText => wrappers.Count > 1 ? string.Empty : wrappers.First().DisplayPropertyTipText;
+        public string DisplayPropertyTipText =>  wrappers.First().DisplayPropertyTipText;
 
         private readonly Dictionary<Type, IEqualityComparer> cacheComparerMap = new();
 
@@ -152,5 +152,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
                     wrapper.ProxyValue = value;
             }
         }
+
+        public bool IsAllowSetNull => wrappers.First().IsAllowSetNull;
     }
 }

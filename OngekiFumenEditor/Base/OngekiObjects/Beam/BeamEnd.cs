@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Utils;
@@ -20,6 +21,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         }
 
         private XGrid obliqueSourceXGrid = null;
+        [ObjectPropertyBrowserAllowSetNull]
         public XGrid ObliqueSourceXGrid
         {
             get { return obliqueSourceXGrid; }

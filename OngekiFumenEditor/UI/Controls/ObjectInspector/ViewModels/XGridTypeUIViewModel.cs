@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -92,6 +93,20 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
         public XGridTypeUIViewModel(IObjectPropertyAccessProxy wrapper) : base(wrapper)
         {
 
+        }
+
+        public void SetNull()
+        {
+            var rollback = TypedProxyValue;
+            try
+            {
+                TypedProxyValue = null;
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"Can't set null for prop {PropertyInfo.DisplayPropertyName}: {e.Message}");
+                TypedProxyValue = rollback;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
@@ -19,6 +20,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 
         private MultiObjectsPropertyInfoWrapper core;
         private FumenVisualEditorViewModel referenceEditor;
+
+        public bool IsAllowSetNull => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAllowSetNull>() is not null;
 
         public UndoableMultiObjectPropertyInfoWrapper(MultiObjectsPropertyInfoWrapper propertyWrapperCore, FumenVisualEditorViewModel referenceEditor)
         {

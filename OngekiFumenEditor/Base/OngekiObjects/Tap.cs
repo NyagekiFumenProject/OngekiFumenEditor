@@ -51,7 +51,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public override string IDShortName => IsCritical ? "CTP" : "TAP";
+        public override string IDShortName => this switch
+        {
+            { IsCritical: true } => "CTP",
+            { IsCritical: false } => "TAP",
+        };
 
         public override void Copy(OngekiObjectBase fromObj)
         {

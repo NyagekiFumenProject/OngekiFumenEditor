@@ -84,6 +84,8 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
         public string DisplayPropertyName => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAlias>()?.Alias ?? PropertyInfo.Name;
         public string DisplayPropertyTipText => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserTipText>()?.TipText ?? string.Empty;
 
+        public bool IsAllowSetNull => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAllowSetNull>() is not null;
+
         public override string ToString() => $"DisplayName:{DisplayPropertyName} PropValue:{ProxyValue}";
 
         public void Clear()

@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
         string DisplayPropertyName { get; }
         string DisplayPropertyTipText { get; }
 
+        bool IsAllowSetNull { get; }
+
         void Clear();
     }
 }
