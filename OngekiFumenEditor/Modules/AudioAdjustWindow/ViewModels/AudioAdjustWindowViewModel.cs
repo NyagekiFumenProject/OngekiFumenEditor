@@ -208,8 +208,6 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
                             foreach (var item in map)
                                 item.Key.TGrid = item.Value.before.CopyNew();
                         }));
-
-
                     }
                 }
 
