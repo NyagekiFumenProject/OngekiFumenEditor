@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
             var str = Marshal.PtrToStringAnsi(message, length);
             Log.LogDebug($"[{source}.{type}]{id}:  {str}");
-            if (str.Contains("error"))
+            if (str.Contains("error") || type == DebugType.DebugTypeError)
                 throw new Exception($"OnOpenGLDebugLog()检测到一个错误: {str}");
         }
 
