@@ -94,5 +94,17 @@ namespace OngekiFumenEditor.Properties {
                 this["OutputGraphicsLog"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool GraphicsLogSynchronous {
+            get {
+                return ((bool)(this["GraphicsLogSynchronous"]));
+            }
+            set {
+                this["GraphicsLogSynchronous"] = value;
+            }
+        }
     }
 }

@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
             Log.LogDebug($"logs setting property changed : {e.PropertyName}");
         }
 
-        public string SettingsPageName => "日志";
+        public string SettingsPageName => "程序";
 
         public string SettingsPagePath => "环境";
 

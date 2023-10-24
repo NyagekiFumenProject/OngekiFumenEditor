@@ -55,7 +55,13 @@
         <GroupBox Margin="5" Header="图形渲染">
             <StackPanel>
                 <CheckBox Margin="10,10,10,10" IsChecked="{Binding Setting.GraphicsCompatability}">兼容模式 (使用OpenGL3.3全兼容,程序显示项目或者音频画面崩溃时可尝试)</CheckBox>
-                <CheckBox Margin="10,0,10,10" IsChecked="{Binding Setting.OutputGraphicsLog}">输出OpenGL日志 (会影响性能)</CheckBox>
+                <CheckBox Margin="10,0,10,10" IsChecked="{Binding Setting.OutputGraphicsLog}">输出OpenGL日志 (会影响性能且出错会抛出异常)</CheckBox>
+                <CheckBox
+                    Margin="30,0,10,10"
+                    IsChecked="{Binding Setting.GraphicsLogSynchronous}"
+                    IsEnabled="{Binding Setting.OutputGraphicsLog}">
+                    在主线程输出OpenGL日志 (更影响性能,但抛出异常会有精准栈信息)
+                </CheckBox>
             </StackPanel>
         </GroupBox>
     </StackPanel>

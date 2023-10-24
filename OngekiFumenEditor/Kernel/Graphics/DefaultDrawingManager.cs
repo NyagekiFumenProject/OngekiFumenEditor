@@ -35,11 +35,12 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         private void OnInitOpenGL()
         {
-            var isOutputLog = Properties.ProgramSetting.Default.OutputGraphicsLog;
-            if (isOutputLog)
+            if (Properties.ProgramSetting.Default.OutputGraphicsLog)
             {
                 GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
                 GL.Enable(EnableCap.DebugOutput);
+                if (Properties.ProgramSetting.Default.GraphicsLogSynchronous)
+                    GL.Enable(EnableCap.DebugOutputSynchronous);
             }
 
             GL.ClearColor(System.Drawing.Color.Black);
@@ -59,7 +60,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
             var str = Marshal.PtrToStringAnsi(message, length);
             Log.LogDebug($"[{source}.{type}]{id}:  {str}");
             if (str.Contains("error"))
-                throw new Exception(str);
+                throw new Exception($"OnOpenGLDebugLog()检测到一个错误: {str}");
         }
 
         public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)
