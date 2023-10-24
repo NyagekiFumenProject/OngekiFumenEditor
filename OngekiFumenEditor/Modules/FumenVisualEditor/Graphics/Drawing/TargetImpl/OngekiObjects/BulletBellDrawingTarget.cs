@@ -29,6 +29,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public override int DefaultRenderOrder => 1500;
 
+        private const BulletDamageType BellDamageType = (BulletDamageType)(-1);
+        private const BulletType BellBulletType = (BulletType)(-1);
+
         private SoflanList nonSoflanList = new(new[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
 
         IDictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap;
@@ -82,7 +85,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             SetTexture(BulletDamageType.Hard, BulletType.Circle, "nt_mine_pur.png", size, origOffset);
             SetTexture(BulletDamageType.Danger, BulletType.Circle, "nt_mine_blk.png", size, origOffset);
 
-            SetTexture((BulletDamageType)(-1), (BulletType)(-1), "bell.png", size, origOffset);
+            //特殊处理
+            SetTexture(BellDamageType, BellBulletType, "bell.png", size, origOffset);
 
             size = new(30, 80);
             origOffset = new Vector2(0, 35);
@@ -107,7 +111,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             parallelOptions = new ParallelOptions()
             {
-                MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2) * 2,
+                MaxDegreeOfParallelism = /*Math.Max(2, Environment.ProcessorCount - 2)*/1,
             };
 
             Log.LogDebug($"BulletDrawingTarget.MaxDegreeOfParallelism = {parallelOptions.MaxDegreeOfParallelism}");
@@ -131,8 +135,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var pos = new Vector2((float)toX, (float)toTime);
 
             var isBell = obj is Bell;
-            var damageType = isBell ? ((BulletDamageType)(-1)) : ((Bullet)obj).BulletDamageTypeValue;
-            var bulletType = isBell ? ((BulletType)(-1)) : bulletPallateRefObj.ReferenceBulletPallete.TypeValue;
+            var damageType = isBell ? BellDamageType : ((Bullet)obj).BulletDamageTypeValue;
+            var bulletType = isBell ? BellBulletType : bulletPallateRefObj.ReferenceBulletPallete.TypeValue;
 
             var texture = spritesMap[damageType][bulletType];
             var size = spritesSize[texture];
@@ -172,7 +176,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             drawStrList.Clear();
         }
 
-        private void _Draw(IEnumerable<OngekiMovableObjectBase> objs)
+        private void DrawPreview(IEnumerable<OngekiMovableObjectBase> objs)
         {
             var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
             var baseY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Editor.Setting.JudgeLineOffsetY;
@@ -187,7 +191,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     target.Editor.Setting.TGridUnitLength);
             }
 
-            Parallel.ForEach(objs, parallelOptions, obj =>
+            /*
+             存在spd < 1或者soflan影响的子弹/bell物件。因此无法简单的使用二分法快速枚举筛选物件
+             使用并行计算，将所有bell/bullet全部判断，当然判断的结果也能直接拿来做计算
+             //todo 还能优化
+             */
+            foreach (var obj in objs)
             {
                 var bulletPallateRefObj = obj as IBulletPalleteReferencable;
                 /*
@@ -229,22 +238,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var timeY = baseY + target.Rect.Height * (1 - precent);
 
                 if (!(target.Rect.MinY <= timeY && timeY <= target.Rect.MaxY))
-                    return;
+                    continue;
 
                 var fromX = XGridCalculator.ConvertXGridToX(bulletPallateRefObj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(bulletPallateRefObj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
                 var toX = XGridCalculator.ConvertXGridToX(bulletPallateRefObj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(bulletPallateRefObj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
                 if (!(target.Rect.MinX <= timeX && timeX <= target.Rect.MaxX))
-                    return;
+                    continue;
 
                 var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
 
                 var pos = new Vector2((float)timeX, (float)timeY);
 
                 var isBell = obj is Bell;
-                var damageType = isBell ? ((BulletDamageType)(-1)) : ((Bullet)obj).BulletDamageTypeValue;
-                var bulletType = isBell ? ((BulletType)(-1)) : bulletPallateRefObj.ReferenceBulletPallete.TypeValue;
+                var damageType = isBell ? BellDamageType : ((Bullet)obj).BulletDamageTypeValue;
+                var bulletType = isBell ? BellBulletType : bulletPallateRefObj.ReferenceBulletPallete.TypeValue;
 
                 var texture = spritesMap[damageType][bulletType];
                 var size = spritesSize[texture];
@@ -254,7 +263,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 normalDrawList[texture].Add((size, offsetPos, rotate));
                 if (obj.IsSelected)
                     selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate));
-            });
+            }
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiMovableObjectBase> objs)
@@ -266,7 +275,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
             else
             {
-                _Draw(objs);
+                DrawPreview(objs);
             }
 
             foreach (var item in selectedDrawList)

@@ -331,13 +331,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             }
 
+            List<OngekiTimelineObjectBase> previewBullets = null;
             if (IsPreviewMode)
             {
+                previewBullets = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
+                previewBullets.Clear();
+
+                previewBullets.AddRange(Fumen.Bullets);
+                previewBullets.AddRange(Fumen.Bells);
+
                 //特殊处理：子弹和Bell
                 foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
-                    drawMap[drawingTarget] = Fumen.Bullets;
-                foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
-                    drawMap[drawingTarget] = Fumen.Bells;
+                    drawMap[drawingTarget] = previewBullets;
             }
 
             var prevOrder = int.MinValue;
@@ -363,6 +368,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
 
             drawMap.Clear();
+
+            if (previewBullets != null)
+            {
+                ObjectPool<List<OngekiTimelineObjectBase>>.Return(previewBullets);
+                previewBullets = default;
+            }
 
             timeSignatureHelper.DrawTimeSigntureText(this);
             xGridHelper.DrawXGridText(this, CachedMagneticXGridLines);
