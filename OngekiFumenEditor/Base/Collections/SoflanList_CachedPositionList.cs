@@ -346,9 +346,11 @@ namespace OngekiFumenEditor.Base.Collections
                 else
                 {
                     //Speed = 0时就简单了~
-
                     leftTGrid = cur.TGrid;
                     rightTGrid = next.TGrid;
+
+                    left = cur.Y;
+                    right = next.Y;
 
                     curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
                 }
