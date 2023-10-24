@@ -109,11 +109,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var x = currentX;
             var judgeOffset = (float)target.Editor.Setting.JudgeLineOffsetY;
 
-            if (obj.ObliqueSourceXGrid is not null)
+            if (obj.ObliqueSourceXGridOffset is not null)
             {
                 //It's oblique beam.
                 IBeamObject curBeamObj = obj.Children.LastOrDefault(x => curTGrid > x.TGrid) as IBeamObject ?? obj;
-                var curObliqueTopXGrid = curBeamObj.ObliqueSourceXGrid;
+                var curObliqueTopXGrid = obj.XGrid.TotalUnit + curBeamObj.ObliqueSourceXGridOffset.TotalUnit;
 
                 var currentY = target.ConvertToY(target.Editor.GetCurrentTGrid());
                 var obliqueTopX = (float)XGridCalculator.ConvertXGridToX(curObliqueTopXGrid, target.Editor);

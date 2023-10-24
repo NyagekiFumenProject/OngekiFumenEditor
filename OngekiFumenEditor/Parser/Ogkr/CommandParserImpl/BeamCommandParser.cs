@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
             {
                 var xGrid = new XGrid(xUnit, 0);
                 xGrid.NormalizeSelf();
-                ob.ObliqueSourceXGrid = xGrid;
+                ob.ObliqueSourceXGridOffset = xGrid;
             }
         }
     }

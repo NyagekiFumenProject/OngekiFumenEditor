@@ -459,7 +459,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }
                     }
 
-                    group.ForEach(RemoveObject);
+                    RemoveObjects(group);
                 }
             }, () =>
             {
@@ -488,16 +488,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
-        public void RemoveObject(OngekiObjectBase obj)
+
+        public void RemoveObjects(IEnumerable<OngekiObjectBase> objs)
         {
-            if (obj is ISelectableObject selectable)
-                selectable.IsSelected = false;
-            Fumen.RemoveObject(obj);
+            foreach (var obj in objs)
+            {
+                if (obj is ISelectableObject selectable)
+                    selectable.IsSelected = false;
+                Fumen.RemoveObject(obj);
+            }
 
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             if (IsActive)
                 propertyBrowser.RefreshSelected(this);
         }
+
+        public void RemoveObject(OngekiObjectBase obj) => RemoveObjects(obj.Repeat(1));
 
         public void KeyboardAction_SelectAllObjects()
         {

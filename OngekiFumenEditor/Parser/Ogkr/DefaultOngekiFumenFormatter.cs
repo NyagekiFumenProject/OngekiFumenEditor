@@ -282,10 +282,10 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
             void SerializeOutput(ConnectableObjectBase o)
             {
                 var ob = (IBeamObject)o;
-                var isOblique = ob.ObliqueSourceXGrid is not null;
+                var isOblique = ob.ObliqueSourceXGridOffset is not null;
                 sb.Append($"{(isOblique ? ("OB" + o.IDShortName.Last()) : o.IDShortName)}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}\t{ob.WidthId}");
                 if (isOblique)
-                    sb.Append($"\t{ob.ObliqueSourceXGrid.TotalUnit}");
+                    sb.Append($"\t{ob.ObliqueSourceXGridOffset.TotalUnit}");
                 sb.AppendLine();
             }
 

@@ -22,14 +22,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 
         private XGrid obliqueSourceXGrid = null;
         [ObjectPropertyBrowserAllowSetNull]
-        public XGrid ObliqueSourceXGrid
+        public XGrid ObliqueSourceXGridOffset
         {
-            get { return obliqueSourceXGrid ?? ((IBeamObject)ReferenceStartObject).ObliqueSourceXGrid; }
+            get { return obliqueSourceXGrid ?? (ReferenceStartObject as IBeamObject)?.ObliqueSourceXGridOffset; }
             set
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(obliqueSourceXGrid, value);
                 obliqueSourceXGrid = value;
-                NotifyOfPropertyChange(() => ObliqueSourceXGrid);
+                NotifyOfPropertyChange(() => ObliqueSourceXGridOffset);
             }
         }
     }

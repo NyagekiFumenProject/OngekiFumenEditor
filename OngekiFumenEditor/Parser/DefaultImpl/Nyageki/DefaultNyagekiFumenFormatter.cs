@@ -292,8 +292,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 {
                     var b = ((IBeamObject)o);
                     var r = $"(Type[{o.IDShortName}], X[{o.XGrid.Unit},{o.XGrid.Grid}], T[{o.TGrid.Unit},{o.TGrid.Grid}], W[{b.WidthId}]";
-                    if (b.ObliqueSourceXGrid is not null)
-                        r += $", OX[{b.ObliqueSourceXGrid.Unit},{b.ObliqueSourceXGrid.Grid}]";
+                    if (b.ObliqueSourceXGridOffset is not null)
+                        r += $", OX[{b.ObliqueSourceXGridOffset.Unit},{b.ObliqueSourceXGridOffset.Grid}]";
                     return r + ")";
                 }
 

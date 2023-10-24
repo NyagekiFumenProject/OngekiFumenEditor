@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
                 obj.WidthId = int.Parse(map["W"]);
 
                 if (map.ContainsKey("OX"))
-                    obj.ObliqueSourceXGrid = map["OX"].ParseToXGrid();
+                    obj.ObliqueSourceXGridOffset = map["OX"].ParseToXGrid();
             }
 
             // Start
