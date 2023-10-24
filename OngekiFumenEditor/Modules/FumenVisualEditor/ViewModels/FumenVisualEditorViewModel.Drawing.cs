@@ -28,6 +28,10 @@ using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using static OngekiFumenEditor.Base.Collections.SoflanList;
 using OngekiFumenEditor.Utils.ObjectPool;
 using Microsoft.CodeAnalysis.Elfie.Model.Map;
+using OngekiFumenEditor.Base.Collections;
+using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
+using static System.Windows.Forms.AxHost;
+using System.Security.Cryptography;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -35,6 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     {
         private IPerfomenceMonitor dummyPerformenceMonitor = new DummyPerformenceMonitor();
         private IPerfomenceMonitor actualPerformenceMonitor;
+        private SoflanList nonSoflanList = new(new[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
 
         private DrawTimeSignatureHelper timeSignatureHelper;
         private DrawXGridHelper xGridHelper;
@@ -222,51 +227,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             /*
              * 这里考虑到有spd<1的子弹/Bell会提前出现的情况，因此得分状态分别去选择
              */
-
             var objs = Enumerable.Empty<IDisplayableObject>();
             if (Editor.IsPreviewMode)
             {
-                using var _d = ObjectPool<List<(double min, double max)>>.GetWithUsingDisposable(out var visibleYList, out _);
-                visibleYList.Clear();
-                foreach (var item in visibleRanges)
-                {
-                    var minY2 = ConvertToY(item.min.TotalUnit);
-                    var maxY2 = ConvertToY(item.max.TotalUnit);
-                    var minY = Math.Min(Math.Min(Rect.MinY, Rect.MaxY), Math.Min(minY2, maxY2));
-                    var maxY = Math.Max(Math.Max(Rect.MinY, Rect.MaxY), Math.Max(minY2, maxY2));
-
-                    visibleYList.Add((minY, maxY));
-                }
-
-                var curY = ConvertToY(GetCurrentTGrid().TotalUnit);
-
-                //todo 还能再次优化
-                bool check(IBulletPalleteReferencable bell)
-                {
-                    var appearOffsetTime = ViewHeight / (Math.Min(1, bell.ReferenceBulletPallete?.Speed ?? 1));
-                    var toTime = ConvertToY(bell.TGrid.TotalUnit);
-                    var fromTime = toTime - appearOffsetTime;
-
-                    var minTime = Math.Min(fromTime, toTime);
-                    var maxTime = Math.Max(fromTime, toTime);
-
-                    foreach (var item in visibleYList)
-                    {
-                        (var minY, var maxY) = item;
-                        var r = MathUtils.IsInRange(minTime, maxTime, minY, Math.Max(maxY, minY + appearOffsetTime));
-
-                        if (r)
-                            return true;
-                    }
-
-                    return false;
-                }
-
+                /*
                 var r = fumen.Bells
                     .AsEnumerable<IBulletPalleteReferencable>()
-                    .Concat(fumen.Bullets).AsParallel().Where(check);
+                    .Concat(fumen.Bullets);
 
                 objs = objs.Concat(r);
+                */
             }
             else
             {
@@ -359,6 +329,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     else
                         drawMap[drawingTarget] = enums.Concat(objGroup);
                 }
+            }
+
+            if (IsPreviewMode)
+            {
+                //特殊处理：子弹和Bell
+                foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
+                    drawMap[drawingTarget] = Fumen.Bullets;
+                foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
+                    drawMap[drawingTarget] = Fumen.Bells;
             }
 
             var prevOrder = int.MinValue;

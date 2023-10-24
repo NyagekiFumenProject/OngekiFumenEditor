@@ -1,13 +1,17 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
+using NAudio.SoundFont;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Linq;
@@ -27,9 +31,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private SoflanList nonSoflanList = new(new[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
 
-        Dictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap = new();
-        Dictionary<Texture, Vector2> spritesSize = new();
-        Dictionary<Texture, Vector2> spritesOriginOffset = new();
+        IDictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap;
+        private ParallelOptions parallelOptions;
+        IDictionary<Texture, Vector2> spritesSize;
+        IDictionary<Texture, Vector2> spritesOriginOffset;
 
         Dictionary<Texture, List<(Vector2, Vector2, float)>> normalDrawList = new();
         Dictionary<Texture, List<(Vector2, Vector2, float)>> selectedDrawList = new();
@@ -50,12 +55,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 return new Texture(bitmap);
             }
 
+            var _spritesOriginOffset = new Dictionary<Texture, Vector2>();
+            var _spritesSize = new Dictionary<Texture, Vector2>();
+            var _spritesMap = new Dictionary<BulletDamageType, Dictionary<BulletType, Texture>>();
+
             void SetTexture(BulletDamageType k1, BulletType k2, string rPath, Vector2 size, Vector2 origOffset)
             {
-                if (!spritesMap.TryGetValue(k1, out var dic))
+                if (!_spritesMap.TryGetValue(k1, out var dic))
                 {
                     dic = new Dictionary<BulletType, Texture>();
-                    spritesMap[k1] = dic;
+                    _spritesMap[k1] = dic;
                 }
 
                 var tex = LoadTex(rPath);
@@ -63,8 +72,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 normalDrawList[tex] = new();
                 selectedDrawList[tex] = new();
 
-                spritesSize[tex] = size;
-                spritesOriginOffset[tex] = origOffset;
+                _spritesSize[tex] = size;
+                _spritesOriginOffset[tex] = origOffset;
             }
 
             var size = new Vector2(40, 40);
@@ -88,6 +97,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             stringDrawing = IoC.Get<IStringDrawing>();
             batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+
+            spritesOriginOffset = _spritesOriginOffset.ToImmutableDictionary();
+            spritesSize = _spritesSize.ToImmutableDictionary();
+            spritesMap = _spritesMap.ToImmutableDictionary();
+
+            parallelOptions = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2) * 2,
+            };
+
+            Log.LogDebug($"BulletDrawingTarget.MaxDegreeOfParallelism = {parallelOptions.MaxDegreeOfParallelism}");
         }
 
         public float CalculateBulletMsecTime(IFumenEditorDrawingContext target, Bullet obj, float userSpeed = 2.35f)
@@ -97,85 +117,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var time = target.ViewHeight / (obj.ReferenceBulletPallete?.Speed ?? 1f);
             return (float)time;
-        }
-
-        private void Draw(IFumenEditorDrawingContext target, Bullet obj)
-        {
-            var appearOffsetTime = CalculateBulletMsecTime(target, obj);
-            /*
-            --------------------------- toTime 
-                    \
-                     \
-                      \
-                       \
-                        \
-                         O      <- currentTime
-                          bell
-                           \
-                            \
-                             \
-                              \
-                               \
-            ---------------------------- fromTime = toTime - appearOffsetTime
-             */
-
-            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
-
-            double convertToYNonSoflan(TGrid tgrid)
-            {
-                return TGridCalculator.ConvertTGridToY_DesignMode(
-                    tgrid,
-                    nonSoflanList,
-                    target.Editor.Fumen.BpmList,
-                    target.Editor.Setting.VerticalDisplayScale,
-                    target.Editor.Setting.TGridUnitLength); ;
-            }
-
-            //计算向量化的物件运动时间
-            var rotate = 0f;
-            var timeX = 0d;
-            var timeY = 0d;
-
-            if (!(obj.ReferenceBulletPallete?.IsEnableSoflan ?? true))
-            {
-                var toTime = convertToYNonSoflan(obj.TGrid);
-                var fromTime = toTime - appearOffsetTime;
-                var currentTime = convertToYNonSoflan(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
-
-                var precent = (currentTime - fromTime) / appearOffsetTime;
-
-                timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
-                timeY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
-                rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
-            }
-            else
-            {
-                var toTime = target.ConvertToY(obj.TGrid);
-                var fromTime = toTime - appearOffsetTime;
-                var currentTime = target.ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
-                var precent = (currentTime - fromTime) / appearOffsetTime;
-
-                //Log.LogDebug($"precent : {precent * 100:F2}");
-
-                timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
-                timeY = target.Rect.MinY + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
-                rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
-            }
-
-            if (timeY > target.Rect.MaxY || timeY < target.Rect.MinY)
-                return;
-
-            var pos = new Vector2((float)timeX, (float)timeY);
-
-            var texture = spritesMap[obj.BulletDamageTypeValue][obj.ReferenceBulletPallete.TypeValue];
-            var size = spritesSize[texture];
-            var origOffset = spritesOriginOffset[texture];
-
-            var offsetPos = pos + origOffset;
-            normalDrawList[texture].Add((size, offsetPos, rotate));
-            if (obj.IsSelected)
-                selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate));
         }
 
         private void DrawEditor(IFumenEditorDrawingContext target, Bullet obj)
@@ -223,6 +164,86 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             drawStrList.Clear();
         }
 
+        private void _Draw(IEnumerable<Bullet> objs)
+        {
+            var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
+            var baseY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Editor.Setting.JudgeLineOffsetY;
+
+            double convertToYNonSoflan(TGrid tgrid)
+            {
+                return TGridCalculator.ConvertTGridToY_DesignMode(
+                    tgrid,
+                    nonSoflanList,
+                    target.Editor.Fumen.BpmList,
+                    target.Editor.Setting.VerticalDisplayScale,
+                    target.Editor.Setting.TGridUnitLength);
+            }
+
+            Parallel.ForEach(objs, parallelOptions, obj =>
+            {
+                /*
+                --------------------------- toTime 
+                        \
+                         \
+                          \
+                           \
+                            \
+                             O      <- currentTime
+                              bell
+                               \
+                                \
+                                 \
+                                  \
+                                   \
+                ---------------------------- fromTime = toTime - appearOffsetTime
+                 */
+
+                //计算向量化的物件运动时间
+                var appearOffsetTime = CalculateBulletMsecTime(target, obj);
+
+                var toTime = 0d;
+                var currentTime = 0d;
+
+                if (!(obj.ReferenceBulletPallete?.IsEnableSoflan ?? true))
+                {
+                    toTime = convertToYNonSoflan(obj.TGrid);
+                    currentTime = convertToYNonSoflan(currentTGrid);
+                }
+                else
+                {
+                    toTime = target.ConvertToY(obj.TGrid);
+                    currentTime = target.ConvertToY(currentTGrid);
+                }
+
+                var fromTime = toTime - appearOffsetTime;
+                var precent = (currentTime - fromTime) / appearOffsetTime;
+                var timeY = baseY + target.Rect.Height * (1 - precent);
+
+                if (!(target.Rect.MinY <= timeY && timeY <= target.Rect.MaxY))
+                    return;
+
+                var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+                var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+                var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
+
+                if (!(target.Rect.MinX <= timeX && timeX <= target.Rect.MaxX))
+                    return;
+
+                var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
+
+                var pos = new Vector2((float)timeX, (float)timeY);
+
+                var texture = spritesMap[obj.BulletDamageTypeValue][obj.ReferenceBulletPallete.TypeValue];
+                var size = spritesSize[texture];
+                var origOffset = spritesOriginOffset[texture];
+
+                var offsetPos = pos + origOffset;
+                normalDrawList[texture].Add((size, offsetPos, rotate));
+                if (obj.IsSelected)
+                    selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate));
+            });
+        }
+
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Bullet> objs)
         {
             if (target.Editor.IsDesignMode)
@@ -232,15 +253,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
             else
             {
-                foreach (var obj in objs)
-                    Draw(target, obj);
+                _Draw(objs);
             }
 
             foreach (var item in selectedDrawList)
-                highlightDrawing.Draw(target, item.Key, item.Value);
+                highlightDrawing.Draw(target, item.Key, item.Value.OrderBy(x => x.Item2.Y));
 
             foreach (var item in normalDrawList)
-                batchTextureDrawing.Draw(target, item.Key, item.Value);
+                batchTextureDrawing.Draw(target, item.Key, item.Value.OrderBy(x => x.Item2.Y));
 
             if (target.Editor.IsDesignMode)
                 DrawPallateStr(target);

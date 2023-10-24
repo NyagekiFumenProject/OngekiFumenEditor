@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IStringDrawing stringDrawing;
         private IBatchTextureDrawing textureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
-
+        private ParallelOptions parallelOptions;
         private List<(Vector2, Vector2, float)> selectedFlickList = new();
         private List<(Vector2, Vector2, float)> normalFlichList = new();
 
@@ -45,6 +45,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             stringDrawing = IoC.Get<IStringDrawing>();
             textureDrawing = IoC.Get<IBatchTextureDrawing>();
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+
+            parallelOptions = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2) * 2,
+            };
         }
 
         public float CalculateBulletMsecTime(IFumenEditorDrawingContext target, Bell obj, float userSpeed = 2.35f)
@@ -68,72 +73,78 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             target.RegisterSelectableObject(obj, pos, size);
         }
 
-        public void PostDraw(IFumenEditorDrawingContext target, Bell obj)
+        double convertToYNonSoflan(TGrid tgrid)
         {
-            /*
-            --------------------------- toTime 
-                    \
-                     \
-                      \
-                       \
+            return TGridCalculator.ConvertTGridToY_DesignMode(
+                tgrid,
+                nonSoflanList,
+                target.Editor.Fumen.BpmList,
+                target.Editor.Setting.VerticalDisplayScale,
+                target.Editor.Setting.TGridUnitLength);
+        }
+
+        private void _Draw(IFumenEditorDrawingContext target, IEnumerable<Bell> objs)
+        {
+            var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
+            var baseY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Editor.Setting.JudgeLineOffsetY;
+
+            Parallel.ForEach(objs, parallelOptions, obj =>
+            {
+                /*
+                --------------------------- toTime 
                         \
-                         O      <- currentTime
-                          bell
+                         \
+                          \
                            \
                             \
-                             \
-                              \
+                             O      <- currentTime
+                              bell
                                \
-            ---------------------------- fromTime = toTime - appearOffsetTime
-            */
-            var appearOffsetTime = CalculateBulletMsecTime(target, obj);
+                                \
+                                 \
+                                  \
+                                   \
+                ---------------------------- fromTime = toTime - appearOffsetTime
+                 */
 
-            double convertToYNonSoflan(TGrid tgrid)
-            {
-                return TGridCalculator.ConvertTGridToY_DesignMode(
-                    tgrid,
-                    nonSoflanList,
-                    target.Editor.Fumen.BpmList,
-                    target.Editor.Setting.VerticalDisplayScale,
-                    target.Editor.Setting.TGridUnitLength); ;
-            }
+                //计算向量化的物件运动时间
+                var appearOffsetTime = CalculateBulletMsecTime(target, obj);
 
-            var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
-            var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+                var toTime = 0d;
+                var currentTime = 0d;
 
-            //计算向量化的物件运动时间
-            var timeX = 0d;
-            var timeY = 0d;
+                if (!(obj.ReferenceBulletPallete?.IsEnableSoflan ?? true))
+                {
+                    toTime = convertToYNonSoflan(obj.TGrid);
+                    currentTime = convertToYNonSoflan(currentTGrid);
 
-            if (!(obj.ReferenceBulletPallete?.IsEnableSoflan ?? true))
-            {
-                var toTime = convertToYNonSoflan(obj.TGrid);
+                }
+                else
+                {
+                    toTime = target.ConvertToY(obj.TGrid);
+                    currentTime = target.ConvertToY(currentTGrid);
+                }
+
                 var fromTime = toTime - appearOffsetTime;
-                var currentTime = convertToYNonSoflan(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
-
                 var precent = (currentTime - fromTime) / appearOffsetTime;
+                var timeY = baseY + target.Rect.Height * (1 - precent);
 
-                timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
-                timeY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
-            }
-            else
-            {
-                var toTime = target.ConvertToY(obj.TGrid);
-                var fromTime = toTime - appearOffsetTime;
-                var currentTime = target.ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor));
-                var precent = (currentTime - fromTime) / appearOffsetTime;
+                if (!(target.Rect.MinY <= timeY && timeY <= target.Rect.MaxY))
+                    return;
 
-                //Log.LogDebug($"precent : {precent * 100:F2}");
+                var fromX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+                var toX = XGridCalculator.ConvertXGridToX(obj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(obj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+                var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
-                timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
-                timeY = target.Rect.MinY + target.Rect.Height * (1 - precent) + target.Editor.Setting.JudgeLineOffsetY;
-            }
+                if (!(target.Rect.MinX <= timeX && timeX <= target.Rect.MaxX))
+                    return;
 
-            var pos = new Vector2((float)timeX, (float)timeY);
-            normalFlichList.Add((size, pos, 0f));
-            if (obj.IsSelected)
-                selectedFlickList.Add((selectSize, pos, 0f));
-            target.RegisterSelectableObject(obj, pos, size);
+                var pos = new Vector2((float)timeX, (float)timeY);
+
+                normalFlichList.Add((size, pos, 0f));
+                if (obj.IsSelected)
+                    selectedFlickList.Add((selectSize, pos, 0f));
+            });
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Bell> objs)
@@ -145,8 +156,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
             else
             {
-                foreach (var obj in objs)
-                    PostDraw(target, obj);
+                _Draw(target, objs);
             }
 
             highlightDrawing.Draw(target, texture, selectedFlickList);
