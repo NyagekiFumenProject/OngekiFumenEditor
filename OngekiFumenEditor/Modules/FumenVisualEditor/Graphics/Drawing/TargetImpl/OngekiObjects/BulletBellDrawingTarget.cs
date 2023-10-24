@@ -28,6 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public class BulletBellDrawingTarget : CommonBatchDrawTargetBase<OngekiMovableObjectBase>, IDisposable
     {
         public override int DefaultRenderOrder => 1500;
+        public const int ParallelCountLimit = 3000;
 
         private const BulletDamageType BellDamageType = (BulletDamageType)(-1);
         private const BulletType BellBulletType = (BulletType)(-1);
@@ -111,7 +112,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             parallelOptions = new ParallelOptions()
             {
-                MaxDegreeOfParallelism = /*Math.Max(2, Environment.ProcessorCount - 2)*/1,
+                MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2),
             };
 
             Log.LogDebug($"BulletDrawingTarget.MaxDegreeOfParallelism = {parallelOptions.MaxDegreeOfParallelism}");
@@ -191,12 +192,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     target.Editor.Setting.TGridUnitLength);
             }
 
-            /*
-             存在spd < 1或者soflan影响的子弹/bell物件。因此无法简单的使用二分法快速枚举筛选物件
-             使用并行计算，将所有bell/bullet全部判断，当然判断的结果也能直接拿来做计算
-             //todo 还能优化
-             */
-            foreach (var obj in objs)
+            void _Draw(OngekiMovableObjectBase obj)
             {
                 var bulletPallateRefObj = obj as IBulletPalleteReferencable;
                 /*
@@ -238,14 +234,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var timeY = baseY + target.Rect.Height * (1 - precent);
 
                 if (!(target.Rect.MinY <= timeY && timeY <= target.Rect.MaxY))
-                    continue;
+                    return;
 
                 var fromX = XGridCalculator.ConvertXGridToX(bulletPallateRefObj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(bulletPallateRefObj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
                 var toX = XGridCalculator.ConvertXGridToX(bulletPallateRefObj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(bulletPallateRefObj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
                 if (!(target.Rect.MinX <= timeX && timeX <= target.Rect.MaxX))
-                    continue;
+                    return;
 
                 var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
 
@@ -263,6 +259,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 normalDrawList[texture].Add((size, offsetPos, rotate));
                 if (obj.IsSelected)
                     selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate));
+            }
+
+            /*
+             存在spd < 1或者soflan影响的子弹/bell物件。因此无法简单的使用二分法快速枚举筛选物件
+             使用并行计算，将所有bell/bullet全部判断，当然判断的结果也能直接拿来做计算
+             //todo 还能优化
+             */
+            if (objs.Count() < ParallelCountLimit)
+            {
+                foreach (var obj in objs)
+                    _Draw(obj);
+            }
+            else
+            {
+                //todo 使用并行会有闪烁问题，原因不明
+                Parallel.ForEach(objs, parallelOptions, _Draw);
             }
         }
 
