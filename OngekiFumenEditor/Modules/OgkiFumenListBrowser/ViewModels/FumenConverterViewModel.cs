@@ -230,7 +230,10 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
         {
             if (!int.TryParse(Path.GetFileName(file).Replace("ui_jacket_", string.Empty), out var id))
                 return;
-            resourceMap["asset_" + id] = file;
+            lock (resourceMap)
+            {
+                resourceMap["asset_" + id] = file;
+            }
         }
 
         private async Task BuildMusicSource(string musicSourceFilePath, Dictionary<string, string> resourceMap)
@@ -255,7 +258,10 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
             if (!File.Exists(acbFilePath))
                 return;
 
-            resourceMap["audio_" + id] = acbFilePath;
+            lock (resourceMap)
+            {
+                resourceMap["audio_" + id] = acbFilePath;
+            }
         }
 
         private async Task<OngekiFumenSet> BuildFumenSet(string musicXmlFilePath)
