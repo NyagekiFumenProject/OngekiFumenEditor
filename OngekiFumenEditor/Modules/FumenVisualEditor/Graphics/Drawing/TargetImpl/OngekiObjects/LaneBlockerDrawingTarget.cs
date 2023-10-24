@@ -139,7 +139,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             #endregion
 
-            var itor = lbk.GetAffactableWallLanes(fumen).OrderBy(x => x.TGrid).GetEnumerator();
+            var itor = lbk
+                .GetAffactableWallLanes(fumen)
+                .Where(x => target.CheckRangeVisible(x.MinTGrid, x.MaxTGrid))
+                .OrderBy(x => x.TGrid)
+                .GetEnumerator();
 
             var beginTGrid = lbk.TGrid;
             var endTGrid = lbk.EndIndicator.TGrid;
