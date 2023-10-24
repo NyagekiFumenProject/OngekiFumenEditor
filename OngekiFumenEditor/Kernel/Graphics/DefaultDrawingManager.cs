@@ -1,5 +1,8 @@
-﻿using OngekiFumenEditor.Utils;
+﻿//#define OGL_LOG
+using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Windowing.Common;
+using OpenTK.Wpf;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -13,6 +16,7 @@ using System.Windows.Threading;
 namespace OngekiFumenEditor.Kernel.Graphics
 {
     [Export(typeof(IDrawingManager))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultDrawingManager : IDrawingManager
     {
         TaskCompletionSource initTaskSource = new TaskCompletionSource();
@@ -31,9 +35,11 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         private void OnInitOpenGL()
         {
-            //GL.Enable(EnableCap.DebugOutput);
-            //GL.Enable(EnableCap.DebugOutputSynchronous);
+
+#if DEBUG && OGL_LOG
             GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
+            GL.Enable(EnableCap.DebugOutput);
+#endif
 
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.Blend);
@@ -44,17 +50,40 @@ namespace OngekiFumenEditor.Kernel.Graphics
             initTaskSource.SetResult();
         }
 
-        private void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
+        private static void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
         {
+            if (id == 131185)
+                return;
+
             var str = Marshal.PtrToStringAnsi(message, length);
-            Log.LogDebug($"{id}\t:\t{str}");
-            if (str.Contains("error generated"))
+            Log.LogDebug($"[{source}.{type}]{id}:  {str}");
+            if (str.Contains("error"))
                 throw new Exception(str);
         }
 
         public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)
         {
             return initTaskSource.Task;
+        }
+
+        public Task CreateContext(GLWpfControl glView, CancellationToken cancellation = default)
+        {
+            var flag = ContextFlags.Default;
+#if DEBUG && OGL_LOG
+            flag = flag | ContextFlags.Debug;
+#endif
+            var profile = ContextProfile.Core;
+
+            Log.LogDebug($"flag = {flag}, profile = {profile}");
+            glView.Start(new()
+            {
+                MajorVersion = 3,
+                MinorVersion = 3,
+                GraphicsContextFlags = flag,
+                GraphicsProfile = profile
+            });
+
+            return Task.CompletedTask;
         }
     }
 }

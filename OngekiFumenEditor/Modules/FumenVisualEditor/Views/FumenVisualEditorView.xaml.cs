@@ -10,6 +10,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels;
 using OngekiFumenEditor.Utils;
+using OpenTK.Windowing.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,12 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public FumenVisualEditorView()
         {
             InitializeComponent();
-            glView.Start(new()
-            {
-                MajorVersion = 4,
-                MinorVersion = 5,
-                GraphicsProfile = OpenTK.Windowing.Common.ContextProfile.Core
-            });
+            IoC.Get<IDrawingManager>().CreateContext(glView);
         }
 
         private void glView_Ready()

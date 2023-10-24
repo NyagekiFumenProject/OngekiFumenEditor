@@ -1,4 +1,6 @@
-﻿using OngekiFumenEditor.Kernel.Graphics;
+﻿using Caliburn.Micro;
+using OngekiFumenEditor.Kernel.Graphics;
+using OpenTK.Windowing.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,13 +25,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Views
     {
         public AudioPlayerToolViewerView()
         {
-            InitializeComponent(); 
-            glView.Start(new()
-            {
-                MajorVersion = 4,
-                MinorVersion = 5,
-                GraphicsProfile = OpenTK.Windowing.Common.ContextProfile.Core
-            });
+            InitializeComponent();
+            IoC.Get<IDrawingManager>().CreateContext(glView);
         }
 
         private void GLWpfControl_Ready()
