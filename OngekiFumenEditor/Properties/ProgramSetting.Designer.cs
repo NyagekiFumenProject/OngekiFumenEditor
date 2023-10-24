@@ -70,5 +70,29 @@ namespace OngekiFumenEditor.Properties {
                 this["UpgradeProcessPriority"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GraphicsCompatability {
+            get {
+                return ((bool)(this["GraphicsCompatability"]));
+            }
+            set {
+                this["GraphicsCompatability"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OutputGraphicsLog {
+            get {
+                return ((bool)(this["OutputGraphicsLog"]));
+            }
+            set {
+                this["OutputGraphicsLog"] = value;
+            }
+        }
     }
 }

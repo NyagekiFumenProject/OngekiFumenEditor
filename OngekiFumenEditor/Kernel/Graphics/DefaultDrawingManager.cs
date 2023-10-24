@@ -35,11 +35,12 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         private void OnInitOpenGL()
         {
-
-#if DEBUG && OGL_LOG
-            GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
-            GL.Enable(EnableCap.DebugOutput);
-#endif
+            var isOutputLog = Properties.ProgramSetting.Default.OutputGraphicsLog;
+            if (isOutputLog)
+            {
+                GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
+                GL.Enable(EnableCap.DebugOutput);
+            }
 
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.Blend);
@@ -66,22 +67,35 @@ namespace OngekiFumenEditor.Kernel.Graphics
             return initTaskSource.Task;
         }
 
-        public Task CreateContext(GLWpfControl glView, CancellationToken cancellation = default)
+        public Task CreateGraphicsContext(GLWpfControl glView, CancellationToken cancellation = default)
         {
-            var flag = ContextFlags.Default;
-#if DEBUG && OGL_LOG
-            flag = flag | ContextFlags.Debug;
-#endif
-            var profile = ContextProfile.Core;
+            var isCompatability = Properties.ProgramSetting.Default.GraphicsCompatability;
+            var isOutputLog = Properties.ProgramSetting.Default.OutputGraphicsLog;
 
-            Log.LogDebug($"flag = {flag}, profile = {profile}");
-            glView.Start(new()
+            var flag = isOutputLog ? ContextFlags.Debug : ContextFlags.Default;
+
+            var setting = isCompatability ? new GLWpfControlSettings()
             {
                 MajorVersion = 3,
                 MinorVersion = 3,
+                GraphicsContextFlags = flag | ContextFlags.ForwardCompatible,
+                GraphicsProfile = ContextProfile.Compatability
+            } : new GLWpfControlSettings()
+            {
+                MajorVersion = 4,
+                MinorVersion = 5,
                 GraphicsContextFlags = flag,
-                GraphicsProfile = profile
-            });
+                GraphicsProfile = ContextProfile.Core
+            };
+
+            Log.LogDebug($"GraphicsCompatability: {isCompatability}");
+            Log.LogDebug($"OutputGraphicsLog: {isOutputLog}");
+
+            Log.LogDebug($"GLWpfControlSettings.Version: {setting.MajorVersion}.{setting.MinorVersion}");
+            Log.LogDebug($"GLWpfControlSettings.GraphicsContextFlags: {setting.GraphicsContextFlags}");
+            Log.LogDebug($"GLWpfControlSettings.GraphicsProfile: {setting.GraphicsProfile}");
+
+            glView.Start(setting);
 
             return Task.CompletedTask;
         }

@@ -52,5 +52,11 @@
                 </Button>
             </StackPanel>
         </GroupBox>
+        <GroupBox Margin="5" Header="图形渲染">
+            <StackPanel>
+                <CheckBox Margin="10,10,10,10" IsChecked="{Binding Setting.GraphicsCompatability}">兼容模式 (使用OpenGL3.3全兼容,程序显示项目或者音频画面崩溃时可尝试)</CheckBox>
+                <CheckBox Margin="10,0,10,10" IsChecked="{Binding Setting.OutputGraphicsLog}">输出OpenGL日志 (会影响性能)</CheckBox>
+            </StackPanel>
+        </GroupBox>
     </StackPanel>
 </UserControl>

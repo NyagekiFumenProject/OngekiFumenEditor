@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Views
         public AudioPlayerToolViewerView()
         {
             InitializeComponent();
-            IoC.Get<IDrawingManager>().CreateContext(glView);
+            IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
         }
 
         private void GLWpfControl_Ready()

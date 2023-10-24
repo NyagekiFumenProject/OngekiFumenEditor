@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public FumenVisualEditorView()
         {
             InitializeComponent();
-            IoC.Get<IDrawingManager>().CreateContext(glView);
+            IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
         }
 
         private void glView_Ready()
