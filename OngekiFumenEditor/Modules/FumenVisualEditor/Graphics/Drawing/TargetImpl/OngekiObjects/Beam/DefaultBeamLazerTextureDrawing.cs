@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             GL.DeleteBuffer(textureVBO);
         }
 
-        public void Draw(IDrawingContext target, Texture texture, int width, float x, float progress, Vector4 color, float rotate)
+        public void Draw(IDrawingContext target, Texture texture, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset)
         {
             target.PerfomenceMonitor.OnBeginDrawing(this);
             {
@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     (Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1))
                     * Matrix4.CreateScale(new Vector3(width * 1.0f / texture.Width, target.ViewHeight * 2.0f / texture.Height, 1))) *
                     Matrix4.CreateRotationZ(rotate) *
-                    Matrix4.CreateTranslation(x, target.ViewHeight / 2 + target.Rect.MinY, 0);
+                    Matrix4.CreateTranslation(x, target.ViewHeight / 2 + target.Rect.MinY + judgeOffset / 2, 0);
 
                 shader.Begin();
                 {

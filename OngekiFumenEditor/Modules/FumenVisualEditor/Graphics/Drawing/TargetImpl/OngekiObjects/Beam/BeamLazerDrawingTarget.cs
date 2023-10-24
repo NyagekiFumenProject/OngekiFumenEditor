@@ -107,6 +107,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var rotate = 0f;
             var x = currentX;
+            var judgeOffset = (float)target.Editor.Setting.JudgeLineOffsetY;
 
             if (obj.ObliqueSourceXGrid is not null)
             {
@@ -116,7 +117,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 var currentY = target.ConvertToY(target.Editor.GetCurrentTGrid());
                 var obliqueTopX = (float)XGridCalculator.ConvertXGridToX(curObliqueTopXGrid, target.Editor);
-                var obliqueTopY = currentY - target.Editor.Setting.JudgeLineOffsetY + target.ViewHeight;
+                var obliqueTopY = currentY - judgeOffset + target.ViewHeight;
 
                 x = (obliqueTopX + currentX) / 2;
 
@@ -131,10 +132,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (leadInTGrid is null)
                     leadInTGrid = TGrid.Zero;
                 var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 0.25;
-                lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f), rotate);
+                lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f), rotate, judgeOffset);
             }
 
-            lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One, rotate);
+            lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One, rotate, judgeOffset);
         }
 
         public void Dispose()
