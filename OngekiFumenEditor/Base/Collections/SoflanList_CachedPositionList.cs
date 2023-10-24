@@ -148,9 +148,7 @@ namespace OngekiFumenEditor.Base.Collections
 
                 var len = MathUtils.CalculateBPMLength(prevEvent.TGrid, curEvent.TGrid, prevEvent.curBpm.BPM, tUnitLength);
 
-                //todo 什么时候能够实现倒车Soflan显示在处理吧~
                 var scaledLen = len * (isDesignMode ? Math.Abs(prevEvent.speed) : prevEvent.speed);
-                //var scaledLen = len * Math.Abs(prevEvent.speed);
 
                 var fromY = currentY;
                 var toY = currentY + scaledLen;
@@ -305,22 +303,22 @@ namespace OngekiFumenEditor.Base.Collections
                     var calcLeftY = y - leftRemain;
                     left = Math.Max(calcLeftY, cur.Y);
                     //newLeftRemain = Math.Max(cur.Y - calcLeftY, 0);
-                    newLeftRemain = cur.Y - calcLeftY;
+                    newLeftRemain = Math.Min(leftRemain, cur.Y - calcLeftY);
 
                     var calcRightY = y + rightRemain;
                     right = Math.Min(next.Y, calcRightY);
                     //newRightRemain = Math.Max(calcRightY - next.Y, 0);
-                    newRightRemain = calcRightY - next.Y;
+                    newRightRemain = Math.Min(rightRemain, calcRightY - next.Y);
                 }
                 else if (cur.Speed < 0)
                 {
                     var calcLeftY = y + leftRemain;
                     left = Math.Min(calcLeftY, cur.Y);
-                    newLeftRemain = Math.Max(-cur.Y + left, 0);
+                    newLeftRemain = Math.Min(-cur.Y + left, leftRemain);
 
                     var calcRightY = y - rightRemain;
                     right = Math.Max(next.Y, calcRightY);
-                    newRightRemain = Math.Max(next.Y - calcRightY, 0);
+                    newRightRemain = Math.Min(next.Y - calcRightY, rightRemain);
                 }
                 else
                 {
@@ -397,34 +395,9 @@ namespace OngekiFumenEditor.Base.Collections
 
             IEnumerable<VisibleTGridRange> _internal()
             {
-                var minY = 0d;
-                var maxY = 0d;
-                var last = default(SoflanPoint);
-
                 //判断是否有变速
                 if (list.Count > 1)
                 {
-                    /*
-                    //如果有变速，那么就通过各个变速区间对比和计算
-                    for (int i = 0; i < list.Count - 1; i++)
-                    {
-                        last = list[i];
-                        var next = list[i + 1];
-
-                        minY = Math.Min(last.Y, next.Y);
-                        maxY = Math.Max(last.Y, next.Y);
-
-                        //检查可视范围是否和这个变速段范围有相交
-                        if ((minY <= currentY && currentY <= maxY) || actualViewMaxY >= minY && maxY >= actualViewMinY)
-                        {
-                            MainCalledCount++;
-                            //如果有相交，那么说明这个变速段部分内容是需要显示的，那么就计算出这部分需要显示的范围
-                            var mergeds = CalcSegment(i, currentY, preOffset / scale, actualViewHeight - preOffset / scale);
-                            foreach (var range in mergeds)
-                                yield return range;
-                        }
-                    }
-                    */
                     /*
                      新的优化实现：
                       1. 获取要被扫描的变速段
@@ -457,40 +430,9 @@ namespace OngekiFumenEditor.Base.Collections
                             yield return range;
                     }
 
-                    /*
-                    foreach (var seg in querySegments)
-                    {
-                        if (prevMaxTGrid is not null && prevMaxTGrid > seg.next.TGrid)
-                            continue;
-                        prevMaxTGrid = null;
+                    var last = list.Last();
 
-                        MainCalledCount++;
-                        var i = seg.curIdx;
-                        //如果有相交，那么说明这个变速段部分内容是需要显示的，那么就计算出这部分需要显示的范围
-                        var mergeds = CalcSegment(i, currentY, actualPreOffset, actualViewHeight - actualPreOffset);
-                        foreach (var range in mergeds)
-                        {
-                            if (prevMaxTGrid is null || prevMaxTGrid < range.maxTGrid)
-                                prevMaxTGrid = range.maxTGrid;
-                            yield return range;
-                        }
-                    }
-                    */
-                    last = list.Last();
-
-                    if (last.Y <= minY)
-                    {
-                        //todo 这里我忘记为啥要写了，出了bug再看
-                        var gridOffset = last.Bpm.LengthConvertToOffset(actualViewMinY - last.Y, tUnitLength);
-                        var minTGrid = last.TGrid + gridOffset;
-
-                        gridOffset = last.Bpm.LengthConvertToOffset(actualViewMaxY - last.Y, tUnitLength);
-                        var maxTGrid = last.TGrid + gridOffset;
-
-                        var range = new VisibleTGridRange(MathUtils.Min(minTGrid, maxTGrid), MathUtils.Max(minTGrid, maxTGrid));
-                        yield return range;
-                    }
-                    else if (currentY >= last.Y)
+                    if (currentY >= last.Y)
                     {
                         //如果已经超过了最后一个变速点，那么这里也要计算超出的范围
                         //为了减轻我的心智负担，这坨内容和CalcSegment()大差不多，但不需要next参数了
@@ -529,7 +471,7 @@ namespace OngekiFumenEditor.Base.Collections
                 else
                 {
                     //如果没有变速，那么就简单计算和处理咯~
-                    last = list[0];
+                    var last = list[0];
                     var absSpeed = Math.Abs(last.Speed);
 
                     if (last.Speed > 0)

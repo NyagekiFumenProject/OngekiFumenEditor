@@ -313,6 +313,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var minY = (float)(curY - Setting.JudgeLineOffsetY);
             var maxY = (float)(minY + ViewHeight);
 
+            //计算可以显示的TGrid范围以及像素范围
             visibleTGridRanges.Clear();
             if (IsDesignMode)
             {
@@ -327,8 +328,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var ranges = Fumen.Soflans.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList, scale, Setting.TGridUnitLength);
                 visibleTGridRanges.AddRange(ranges.Select(x => (x.minTGrid, x.maxTGrid)));
             }
-
-            //todo 这里就要计算可视区域了
             Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));
 
             RecalculateMagaticXGridLines();

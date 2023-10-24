@@ -163,6 +163,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
             }
 
+            if (timeY > target.Rect.MaxY || timeY < target.Rect.MinY)
+                return;
+
             var pos = new Vector2((float)timeX, (float)timeY);
 
             var texture = spritesMap[obj.BulletDamageTypeValue][obj.ReferenceBulletPallete.TypeValue];
@@ -173,10 +176,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             normalDrawList[texture].Add((size, offsetPos, rotate));
             if (obj.IsSelected)
                 selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate));
-            drawStrList.Add((offsetPos, obj));
-            target.RegisterSelectableObject(obj, offsetPos, size);
         }
-
 
         private void DrawEditor(IFumenEditorDrawingContext target, Bullet obj)
         {

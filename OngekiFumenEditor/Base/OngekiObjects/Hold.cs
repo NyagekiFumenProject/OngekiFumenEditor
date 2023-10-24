@@ -94,7 +94,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 default:
                     break;
             }
-            //todo?
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
