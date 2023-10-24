@@ -183,18 +183,26 @@ namespace OngekiFumenEditor.Base.Collections
             return tree;
         }
 
+        private object locker = new object();
+
         private void CheckAndUpdateSoflanPositionList(double tUnitLength, BpmList bpmList)
         {
             var hash = HashCode.Combine(tUnitLength, bpmList.cachedBpmContentHash);
 
             if (cachedSoflanListCacheHash != hash)
             {
-                cachedSoflanListCacheHash = hash;
+                lock (locker)
+                {
+                    if (cachedSoflanListCacheHash != hash)
+                    {
+                        Log.LogDebug("recalculate all.");
+                        UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_DesignMode, true);
+                        UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_PreviewMode, false);
+                        cachePostionList_PreviewMode = RebuildIntervalTreePositionList(cachedSoflanPositionList_PreviewMode);
 
-                Log.LogDebug("recalculate all.");
-                UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_DesignMode, true);
-                UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_PreviewMode, false);
-                cachePostionList_PreviewMode = RebuildIntervalTreePositionList(cachedSoflanPositionList_PreviewMode);
+                        cachedSoflanListCacheHash = hash;
+                    }
+                }
             }
         }
 
