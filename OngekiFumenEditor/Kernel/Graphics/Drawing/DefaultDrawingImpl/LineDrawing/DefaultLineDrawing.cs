@@ -93,7 +93,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
                 Polyline2D.EndCapStyle.ROUND
                 );
 
-
             var arrBuffer2 = ArrayPool<float>.Shared.Rent(genVertices.Count * 6);
             var arrBufferIdx2 = 0;
 

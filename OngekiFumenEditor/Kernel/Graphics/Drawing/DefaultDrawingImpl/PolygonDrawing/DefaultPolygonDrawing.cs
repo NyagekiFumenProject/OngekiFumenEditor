@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.PolygonDr
         private int postVertexCount = 0;
         private IDrawingContext target;
 
-        public int AvailablePostableVertexCount => VertexByteSize - postVertexCount;
+        public int AvailablePostableVertexCount => VertexCount - postVertexCount;
 
         public DefaultPolygonDrawing()
         {
