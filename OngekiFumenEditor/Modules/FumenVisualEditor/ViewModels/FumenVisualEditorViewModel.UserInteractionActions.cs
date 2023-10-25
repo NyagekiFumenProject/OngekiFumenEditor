@@ -555,26 +555,54 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!IsDesignMode)
                 return;
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-            if (!(propertyBrowser.SelectedObjects.Count == 1 && propertyBrowser.SelectedObjects.FirstOrDefault() is ConnectableObjectBase connectable))
+
+            if (!propertyBrowser.SelectedObjects.All(x => x is ConnectableObjectBase))
+                return;
+            var selects = propertyBrowser.SelectedObjects.OfType<ConnectableObjectBase>().OrderBy(x => x.XGrid).ToArray();
+            if (selects.IsEmpty())
                 return;
 
-            var startObj = connectable switch
+            var minX = XGridCalculator.ConvertXGridToX(selects.Min(x => x.XGrid), this);
+            var maxX = XGridCalculator.ConvertXGridToX(selects.Max(x => x.XGrid), this);
+            var centerX = (maxX + minX) / 2;
+            var xOffsetMap = selects
+                .Select((x, i) => (XGridCalculator.ConvertXGridToX(x.XGrid, this) - centerX, i))
+                .ToDictionary(x => x.i, x => x.Item1);
+
+            var starts = selects.Select(x => x switch
             {
                 ConnectableStartObject start => start,
                 ConnectableNextObject next => next.ReferenceStartObject,
                 _ => default
-            };
+            }).Distinct().Where(x => !x.Children.OfType<ConnectableEndObject>().Any()).ToArray();
 
-            if (startObj is null || startObj.Children.OfType<ConnectableEndObject>().Any())
+            if (starts.Length != selects.Length)
                 return;
 
-            var genChild = startObj.CreateNextObject();
             var position = Mouse.GetPosition(e.View as FrameworkElement);
-
             position.Y = ViewHeight - position.Y + Rect.MinY;
 
-            var dropAction = new ConnectableObjectDropAction(startObj, genChild, () => { });
-            dropAction.Drop(this, position);
+            var genChildren = new HashSet<ConnectableNextObject>();
+
+            UndoRedoManager.BeginCombineAction();
+            foreach ((var start, var i) in starts.WithIndex())
+            {
+                var newPos = position;
+                newPos.X = position.X + xOffsetMap[i];
+
+                var genChild = start.CreateNextObject();
+                var dropAction = new ConnectableObjectDropAction(start, genChild, () => { });
+                dropAction.Drop(this, newPos);
+                genChildren.Add(genChild);
+            }
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(string.Empty, () =>
+                    {
+                        TryCancelAllObjectSelecting();
+                        genChildren.ForEach(x => x.IsSelected = true);
+                        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+                    }, () => { }));
+            var combinedAction = UndoRedoManager.EndCombineAction("快速(批量)添加轨道子节点");
+            UndoRedoManager.ExecuteAction(combinedAction);
         }
 
         public void KeyboardAction_PlayOrPause()

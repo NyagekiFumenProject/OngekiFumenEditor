@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
         public ConnectableObjectDropAction(ConnectableStartObject startObject, ConnectableChildObjectBase childObject, Action callback = default)
         {
             this.startObject = startObject;
-            this.childObject = CacheLambdaActivator.CreateInstance(childObject.GetType()) as OngekiObjectBase;
+            this.childObject = childObject/*CacheLambdaActivator.CreateInstance(childObject.GetType()) as OngekiObjectBase*/;
             this.callback = callback;
         }
 
@@ -51,12 +51,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
                 else
                     startObject.InsertChildObject(dragTGrid, childObject as ConnectableChildObjectBase);
                 editor.MoveObjectTo(childObject, dragEndPoint);
-                callback?.Invoke();
                 if (isFirst)
                 {
                     editor.NotifyObjectClicked(childObject);
                     isFirst = false;
                 }
+                callback?.Invoke();
             }, () =>
             {
                 //startObject.RemoveChildObject(childViewModel as ConnectableChildObjectBase);
