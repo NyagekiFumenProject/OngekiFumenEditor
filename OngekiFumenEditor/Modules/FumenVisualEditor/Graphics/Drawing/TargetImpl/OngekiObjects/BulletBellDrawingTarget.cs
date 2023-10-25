@@ -16,6 +16,7 @@ using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
@@ -40,8 +41,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         IDictionary<Texture, Vector2> spritesSize;
         IDictionary<Texture, Vector2> spritesOriginOffset;
 
-        Dictionary<Texture, List<(Vector2, Vector2, float)>> normalDrawList = new();
-        Dictionary<Texture, List<(Vector2, Vector2, float)>> selectedDrawList = new();
+        Dictionary<Texture, ConcurrentBag<(Vector2, Vector2, float)>> normalDrawList = new();
+        Dictionary<Texture, ConcurrentBag<(Vector2, Vector2, float)>> selectedDrawList = new();
 
         private List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
         private IStringDrawing stringDrawing;
@@ -118,6 +119,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             Log.LogDebug($"BulletDrawingTarget.MaxDegreeOfParallelism = {parallelOptions.MaxDegreeOfParallelism}");
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float CalculateBulletMsecTime(IFumenEditorDrawingContext target, IBulletPalleteReferencable obj, float userSpeed = 2.35f)
         {
             //const float fat = 3.95f;
@@ -177,19 +179,53 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             drawStrList.Clear();
         }
 
+        ConcurrentDictionary<double, double> yCacheMap = new();
+        ConcurrentDictionary<double, double> nonSoflanYCacheMap = new();
+        ConcurrentDictionary<double, double> xCacheMap = new();
+
         private void DrawPreview(IEnumerable<OngekiMovableObjectBase> objs)
         {
             var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
             var baseY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Editor.Setting.JudgeLineOffsetY;
 
+            /*
+            yCacheMap.Clear();
+            xCacheMap.Clear();
+            nonSoflanYCacheMap.Clear();
+            */
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToYNonSoflan(TGrid tgrid)
             {
+                /*var key = tgrid.TotalUnit;
+                if (nonSoflanYCacheMap.TryGetValue(key, out var r))
+                    return r;
+                return nonSoflanYCacheMap[key] = */
                 return TGridCalculator.ConvertTGridToY_DesignMode(
                     tgrid,
                     nonSoflanList,
                     target.Editor.Fumen.BpmList,
                     target.Editor.Setting.VerticalDisplayScale,
                     target.Editor.Setting.TGridUnitLength);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            double convertToX(double xgrid)
+            {
+                /*if (xCacheMap.TryGetValue(xgrid, out var r))
+                    return r;
+                return xCacheMap[xgrid] =*/
+                return XGridCalculator.ConvertXGridToX(xgrid, target.Editor);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            double convertToY(TGrid tgrid)
+            {
+                /*var key = tgrid.TotalUnit;
+                if (yCacheMap.TryGetValue(key, out var r))
+                    return r;
+                return yCacheMap[key] =*/
+                return target.ConvertToY(tgrid);
             }
 
             void _Draw(OngekiMovableObjectBase obj)
@@ -225,8 +261,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
                 else
                 {
-                    toTime = target.ConvertToY(obj.TGrid);
-                    currentTime = target.ConvertToY(currentTGrid);
+                    toTime = convertToY(obj.TGrid);
+                    currentTime = convertToY(currentTGrid);
                 }
 
                 var fromTime = toTime - appearOffsetTime;
@@ -236,8 +272,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (!(target.Rect.MinY <= timeY && timeY <= target.Rect.MaxY))
                     return;
 
-                var fromX = XGridCalculator.ConvertXGridToX(bulletPallateRefObj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(bulletPallateRefObj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
-                var toX = XGridCalculator.ConvertXGridToX(bulletPallateRefObj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(bulletPallateRefObj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit, target.Editor);
+                var fromX = convertToX(bulletPallateRefObj.ReferenceBulletPallete?.CalculateFromXGridTotalUnit(bulletPallateRefObj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit);
+                var toX = convertToX(bulletPallateRefObj.ReferenceBulletPallete?.CalculateToXGridTotalUnit(bulletPallateRefObj, target.Editor.Fumen) ?? obj.XGrid.TotalUnit);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
                 if (!(target.Rect.MinX <= timeX && timeX <= target.Rect.MaxX))

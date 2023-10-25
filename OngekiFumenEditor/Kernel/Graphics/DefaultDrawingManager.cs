@@ -47,7 +47,13 @@ namespace OngekiFumenEditor.Kernel.Graphics
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-            Log.LogInfo($"Prepare OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
+            Log.LogDebug($"Prepare OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
+
+            if (Properties.ProgramSetting.Default.GraphicsCompatability)
+            {
+                var extNames = string.Join(", ", Enumerable.Range(0, GL.GetInteger(GetPName.NumExtensions)).Select(i => GL.GetString(StringNameIndexed.Extensions, i)));
+                Log.LogDebug($"(maybe support) OpenGL extensions: {extNames}");
+            }
 
             initTaskSource.SetResult();
         }
@@ -60,7 +66,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
             var str = Marshal.PtrToStringAnsi(message, length);
             Log.LogDebug($"[{source}.{type}]{id}:  {str}");
             if (str.Contains("error") || type == DebugType.DebugTypeError)
-                throw new Exception($"OnOpenGLDebugLog()检测到一个错误: {str}");
+                throw new Exception($"OnOpenGLDebugLog() got a error: {str}");
         }
 
         public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)
