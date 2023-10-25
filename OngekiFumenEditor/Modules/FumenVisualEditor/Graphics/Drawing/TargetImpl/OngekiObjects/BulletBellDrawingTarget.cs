@@ -29,11 +29,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public class BulletBellDrawingTarget : CommonBatchDrawTargetBase<OngekiMovableObjectBase>, IDisposable
     {
         public override int DefaultRenderOrder => 1500;
-        public const int ParallelCountLimit = 3000;
 
         private const BulletDamageType BellDamageType = (BulletDamageType)(-1);
         private const BulletType BellBulletType = (BulletType)(-1);
-
+        private readonly int parallelCountLimit;
         private SoflanList nonSoflanList = new(new[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
 
         IDictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap;
@@ -117,6 +116,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             };
 
             Log.LogDebug($"BulletDrawingTarget.MaxDegreeOfParallelism = {parallelOptions.MaxDegreeOfParallelism}");
+
+            parallelCountLimit = Properties.EditorGlobalSetting.Default.ParallelCountLimit;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -302,7 +303,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
              使用并行计算，将所有bell/bullet全部判断，当然判断的结果也能直接拿来做计算
              //todo 还能优化
              */
-            if (objs.Count() < ParallelCountLimit)
+            if (objs.Count() < parallelCountLimit)
             {
                 foreach (var obj in objs)
                     _Draw(obj);

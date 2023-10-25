@@ -115,7 +115,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private bool isShowWaveform = true;
         public bool IsShowWaveform
         {
-            get => isShowWaveform;
+            get => isShowWaveform && Properties.AudioPlayerToolViewerSetting.Default.EnableWaveformDisplay;
             set => Set(ref isShowWaveform, value);
         }
 

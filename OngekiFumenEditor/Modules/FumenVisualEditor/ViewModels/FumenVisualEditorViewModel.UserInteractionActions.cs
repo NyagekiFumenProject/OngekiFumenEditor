@@ -267,7 +267,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }, () =>
                 {
                     foreach ((var timelineObject, var undoTGrid) in undoTargets)
-                        timelineObject.TGrid = undoTGrid;
+                        timelineObject.TGrid = undoTGrid.CopyNew();
                     ToastNotify($"已撤回恢复 {recoverTargets.Count} 个物件到音频时间...");
                 }
             ));
@@ -487,7 +487,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             }));
         }
-
 
         public void RemoveObjects(IEnumerable<OngekiObjectBase> objs)
         {

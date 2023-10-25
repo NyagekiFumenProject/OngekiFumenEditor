@@ -14,5 +14,8 @@
     <Setting Name="CurrentTimeXOffset" Type="System.Single" Scope="User">
       <Value Profile="(Default)">30</Value>
     </Setting>
+    <Setting Name="EnableWaveformDisplay" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

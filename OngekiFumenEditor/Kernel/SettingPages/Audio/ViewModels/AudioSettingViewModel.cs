@@ -18,6 +18,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Audio.ViewModels
     public class AudioSettingViewModel : PropertyChangedBase, ISettingsEditor
     {
         public Properties.AudioSetting Setting => Properties.AudioSetting.Default;
+        public Properties.AudioPlayerToolViewerSetting PlayerSetting => Properties.AudioPlayerToolViewerSetting.Default;
 
         public AudioSettingViewModel()
         {

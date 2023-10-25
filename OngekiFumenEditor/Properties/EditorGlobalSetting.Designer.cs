@@ -286,5 +286,17 @@ namespace OngekiFumenEditor.Properties {
                 this["AdjustPastedObjects"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000")]
+        public int ParallelCountLimit {
+            get {
+                return ((int)(this["ParallelCountLimit"]));
+            }
+            set {
+                this["ParallelCountLimit"] = value;
+            }
+        }
     }
 }

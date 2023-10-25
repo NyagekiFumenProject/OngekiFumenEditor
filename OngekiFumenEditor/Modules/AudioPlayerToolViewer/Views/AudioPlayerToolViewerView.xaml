@@ -31,7 +31,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel
+            <StackPanel 
                 Margin="10"
                 IsEnabled="{Binding IsAudioButtonEnabled}"
                 Visibility="{Binding IsShowWaveform, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static sys:Boolean.TrueString}}">

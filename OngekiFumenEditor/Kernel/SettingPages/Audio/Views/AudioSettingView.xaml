@@ -35,5 +35,12 @@
                 </Button>
             </Grid>
         </GroupBox>
+        <GroupBox Margin="5" Header="频谱">
+            <StackPanel Margin="10">
+                <CheckBox IsChecked="{Binding PlayerSetting.EnableWaveformDisplay}">
+                    允许显示频谱
+                </CheckBox>
+            </StackPanel>
+        </GroupBox>
     </StackPanel>
 </UserControl>

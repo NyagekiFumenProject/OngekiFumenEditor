@@ -46,7 +46,7 @@
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="编辑器">
+        <GroupBox Margin="5" Header="用户交互">
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center">鼠标滚轮滚动谱面速度</TextBlock>
@@ -64,6 +64,19 @@
                     IsEnabled="{Binding Setting.EnableXOffset}">
                     显示水平滚动轴
                 </CheckBox>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Margin="5" Header="渲染器">
+            <StackPanel Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center">当预览时，Bell/Bullet总数超过</TextBlock>
+                    <TextBox
+                        Width="50"
+                        Margin="5,0,5,0"
+                        Text="{Binding Setting.ParallelCountLimit}">
+                    </TextBox>
+                    <TextBlock VerticalAlignment="Center">时，会使用多线程进行并行计算</TextBlock>
+                </StackPanel>
             </StackPanel>
         </GroupBox>
     </StackPanel>

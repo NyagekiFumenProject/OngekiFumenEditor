@@ -70,5 +70,17 @@ namespace OngekiFumenEditor.Properties {
                 this["CurrentTimeXOffset"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableWaveformDisplay {
+            get {
+                return ((bool)(this["EnableWaveformDisplay"]));
+            }
+            set {
+                this["EnableWaveformDisplay"] = value;
+            }
+        }
     }
 }
