@@ -43,9 +43,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
 
             if (openFileDialog.ShowDialog() != true)
                 return;
-
             var ogkrFilePath = openFileDialog.FileName;
-            await DocumentOpenHelper.TryOpenOgkrFileAsDocument(ogkrFilePath);
+
+            try
+            {
+                await DocumentOpenHelper.TryOpenOgkrFileAsDocument(ogkrFilePath);
+            }
+            catch (Exception e)
+            {
+                var msg = $"无法快速打开谱面: {e.Message}";
+                Log.LogError(e.Message);
+                MessageBox.Show(msg);
+            }
         }
     }
 }
