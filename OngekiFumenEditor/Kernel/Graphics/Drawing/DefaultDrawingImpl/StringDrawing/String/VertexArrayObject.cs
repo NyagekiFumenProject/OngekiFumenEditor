@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using OngekiFumenEditor.Utils;
+using OpenTK.Graphics.OpenGL;
 using System;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String

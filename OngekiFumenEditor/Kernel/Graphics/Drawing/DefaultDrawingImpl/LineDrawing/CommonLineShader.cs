@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
@@ -48,9 +49,7 @@ void main(){
         {
             var shader = new CommonLineShader();
             shader.Compile();
-            var error = GL.GetError();
-            if (error != ErrorCode.NoError)
-                throw new Exception($"Create shared CommonSpriteShader object failed ,OGL Error : {error}");
+            GLUtility.CheckError("Create shared CommonSpriteShader object failed");
             return shader;
         }
     }

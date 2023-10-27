@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing;
+using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDrawing
@@ -70,9 +71,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
         {
             var shader = new BatchCircleShader();
             shader.Compile();
-            var error = GL.GetError();
-            if (error != ErrorCode.NoError)
-                throw new Exception($"Create shared BatchCircleShader object failed ,OGL Error : {error}");
+            GLUtility.CheckError("Create shared BatchCircleShader object failed");
             return shader;
         }
     }

@@ -1,29 +1,21 @@
 ﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Wpf;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
 using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
-using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 {
@@ -221,9 +213,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public void Render(TimeSpan ts)
         {
 #if DEBUG
-            var error = GL.GetError();
-            if (error != ErrorCode.NoError)
-                Log.LogDebug($"OpenGL ERROR!! : {error}");
+            GLUtility.CheckError();
 #endif
 
             GL.ClearColor(16 / 255f, 16 / 255f, 16 / 255f, 1f);

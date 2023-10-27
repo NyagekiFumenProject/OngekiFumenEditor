@@ -19,6 +19,20 @@ namespace OngekiFumenEditor.Kernel.Graphics
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultDrawingManager : IDrawingManager
     {
+        // Import the necessary Win32 functions
+        [DllImport("opengl32.dll")]
+        private static extern IntPtr wglGetCurrentDC();
+
+        [DllImport("opengl32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        private static extern IntPtr wglGetProcAddress(string lpszProc);
+
+        private static bool IsWGL_NV_DX_interopSupported()
+        {
+            var hdc = wglGetCurrentDC();
+            var functionPointer = wglGetProcAddress("wglDXSetResourceSharingNV");
+            return functionPointer != IntPtr.Zero;
+        }
+
         TaskCompletionSource initTaskSource = new TaskCompletionSource();
         bool startedInit = false;
 
@@ -49,6 +63,16 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
             Log.LogDebug($"Prepare OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
 
+            try
+            {
+                var isSupport = IsWGL_NV_DX_interopSupported();
+                Log.LogDebug($"WGL_NV_DX_interop support: {isSupport}");
+            }
+            catch
+            {
+                Log.LogDebug($"WGL_NV_DX_interop support: EXCEPTION");
+            }
+
             if (Properties.ProgramSetting.Default.GraphicsCompatability)
             {
                 var extNames = string.Join(", ", Enumerable.Range(0, GL.GetInteger(GetPName.NumExtensions)).Select(i => GL.GetString(StringNameIndexed.Extensions, i)));
@@ -65,8 +89,6 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
             var str = Marshal.PtrToStringAnsi(message, length);
             Log.LogDebug($"[{source}.{type}]{id}:  {str}");
-            if (str.Contains("error") || type == DebugType.DebugTypeError)
-                throw new Exception($"OnOpenGLDebugLog() got a error: {str}");
         }
 
         public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)

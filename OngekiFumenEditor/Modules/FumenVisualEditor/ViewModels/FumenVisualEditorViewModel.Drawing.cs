@@ -268,10 +268,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             PerfomenceMonitor.OnBeforeRender();
 
 #if DEBUG
-            var error = GL.GetError();
-            if (error != ErrorCode.NoError)
-                Log.LogDebug($"OpenGL ERROR!! : {error}");
+            GLUtility.CheckError();
 #endif
+
             CleanRender();
             GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
 
