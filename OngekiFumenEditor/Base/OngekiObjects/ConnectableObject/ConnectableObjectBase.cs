@@ -1,27 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
+﻿namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
-    public abstract class ConnectableObjectBase : OngekiMovableObjectBase
-    {
-        public abstract int RecordId { get; set; }
+	public abstract class ConnectableObjectBase : OngekiMovableObjectBase
+	{
+		public abstract int RecordId { get; set; }
 
-        public override string ToString() => $"{base.ToString()} RID[{RecordId}]";
+		public override string ToString() => $"{base.ToString()} RID[{RecordId}]";
 
-        public override void Copy(OngekiObjectBase fromObj)
-        {
-            base.Copy(fromObj);
+		public override void Copy(OngekiObjectBase fromObj)
+		{
+			base.Copy(fromObj);
 
-            if (fromObj is not ConnectableObjectBase from)
-                return;
+			if (fromObj is not ConnectableObjectBase from)
+				return;
 
-            RecordId = from.RecordId;
-        }
+			RecordId = from.RecordId;
+		}
 
-        public ConnectableChildObjectBase NextObject { get; set; }
-    }
+		public ConnectableChildObjectBase NextObject { get; set; }
+	}
 }

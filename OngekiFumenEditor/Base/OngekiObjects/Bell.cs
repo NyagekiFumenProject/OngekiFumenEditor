@@ -1,109 +1,100 @@
 using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
-using OngekiFumenEditor.Utils;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-    public class Bell : OngekiMovableObjectBase, IBulletPalleteReferencable
-    {
-        public static string CommandName => "BEL";
-        public override string IDShortName => CommandName;
+	public class Bell : OngekiMovableObjectBase, IBulletPalleteReferencable
+	{
+		public static string CommandName => "BEL";
+		public override string IDShortName => CommandName;
 
-        public Bell()
-        {
-            ReferenceBulletPallete = null;
-        }
+		public Bell()
+		{
+			ReferenceBulletPallete = null;
+		}
 
-        private BulletPallete referenceBulletPallete;
-        public BulletPallete ReferenceBulletPallete
-        {
-            get { return referenceBulletPallete; }
-            set
-            {
-                if (value is not null)
-                    value.PropertyChanged -= ReferenceBulletPallete_PropertyChanged;
-                referenceBulletPallete = value;
-                if (value is not null)
-                    value.PropertyChanged += ReferenceBulletPallete_PropertyChanged;
-                NotifyOfPropertyChange(() => ReferenceBulletPallete);
+		private BulletPallete referenceBulletPallete;
+		public BulletPallete ReferenceBulletPallete
+		{
+			get { return referenceBulletPallete; }
+			set
+			{
+				if (value is not null)
+					value.PropertyChanged -= ReferenceBulletPallete_PropertyChanged;
+				referenceBulletPallete = value;
+				if (value is not null)
+					value.PropertyChanged += ReferenceBulletPallete_PropertyChanged;
+				NotifyOfPropertyChange(() => ReferenceBulletPallete);
 
-                NotifyOfPropertyChange(() => Speed);
-                NotifyOfPropertyChange(() => StrID);
-                NotifyOfPropertyChange(() => PlaceOffset);
-                NotifyOfPropertyChange(() => TypeValue);
-                NotifyOfPropertyChange(() => TargetValue);
-                NotifyOfPropertyChange(() => ShooterValue);
-                NotifyOfPropertyChange(() => SizeValue);
-            }
-        }
+				NotifyOfPropertyChange(() => Speed);
+				NotifyOfPropertyChange(() => StrID);
+				NotifyOfPropertyChange(() => PlaceOffset);
+				NotifyOfPropertyChange(() => TypeValue);
+				NotifyOfPropertyChange(() => TargetValue);
+				NotifyOfPropertyChange(() => ShooterValue);
+				NotifyOfPropertyChange(() => SizeValue);
+			}
+		}
 
-        private void ReferenceBulletPallete_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(BulletPallete.StrID):
-                case nameof(BulletPallete.PlaceOffset):
-                case nameof(BulletPallete.TypeValue):
-                case nameof(BulletPallete.TargetValue):
-                case nameof(BulletPallete.ShooterValue):
-                case nameof(BulletPallete.SizeValue):
-                case nameof(BulletPallete.Speed):
-                    NotifyOfPropertyChange(e.PropertyName);
-                    break;
-            }
-        }
+		private void ReferenceBulletPallete_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			switch (e.PropertyName)
+			{
+				case nameof(BulletPallete.StrID):
+				case nameof(BulletPallete.PlaceOffset):
+				case nameof(BulletPallete.TypeValue):
+				case nameof(BulletPallete.TargetValue):
+				case nameof(BulletPallete.ShooterValue):
+				case nameof(BulletPallete.SizeValue):
+				case nameof(BulletPallete.Speed):
+					NotifyOfPropertyChange(e.PropertyName);
+					break;
+			}
+		}
 
 
-        [ObjectPropertyBrowserAlias("BPL." + nameof(Speed))]
-        [ObjectPropertyBrowserShow]
-        public float Speed => ReferenceBulletPallete?.Speed ?? default;
+		[ObjectPropertyBrowserAlias("BPL." + nameof(Speed))]
+		[ObjectPropertyBrowserShow]
+		public float Speed => ReferenceBulletPallete?.Speed ?? default;
 
-        [ObjectPropertyBrowserAlias("BPL." + nameof(StrID))]
-        [ObjectPropertyBrowserShow]
-        public string StrID => ReferenceBulletPallete?.StrID;
+		[ObjectPropertyBrowserAlias("BPL." + nameof(StrID))]
+		[ObjectPropertyBrowserShow]
+		public string StrID => ReferenceBulletPallete?.StrID;
 
-        [ObjectPropertyBrowserAlias("BPL." + nameof(PlaceOffset))]
-        [ObjectPropertyBrowserShow]
-        public int PlaceOffset => ReferenceBulletPallete?.PlaceOffset ?? default;
+		[ObjectPropertyBrowserAlias("BPL." + nameof(PlaceOffset))]
+		[ObjectPropertyBrowserShow]
+		public int PlaceOffset => ReferenceBulletPallete?.PlaceOffset ?? default;
 
-        [ObjectPropertyBrowserAlias("BPL." + nameof(TypeValue))]
-        [ObjectPropertyBrowserShow]
-        public BulletType TypeValue => ReferenceBulletPallete?.TypeValue ?? default;
+		[ObjectPropertyBrowserAlias("BPL." + nameof(TypeValue))]
+		[ObjectPropertyBrowserShow]
+		public BulletType TypeValue => ReferenceBulletPallete?.TypeValue ?? default;
 
-        [ObjectPropertyBrowserAlias("BPL." + nameof(TargetValue))]
-        [ObjectPropertyBrowserShow]
-        public Target TargetValue => ReferenceBulletPallete?.TargetValue ?? default;
+		[ObjectPropertyBrowserAlias("BPL." + nameof(TargetValue))]
+		[ObjectPropertyBrowserShow]
+		public Target TargetValue => ReferenceBulletPallete?.TargetValue ?? default;
 
-        [ObjectPropertyBrowserAlias("BPL." + nameof(ShooterValue))]
-        [ObjectPropertyBrowserShow]
-        public Shooter ShooterValue => ReferenceBulletPallete?.ShooterValue ?? default;
+		[ObjectPropertyBrowserAlias("BPL." + nameof(ShooterValue))]
+		[ObjectPropertyBrowserShow]
+		public Shooter ShooterValue => ReferenceBulletPallete?.ShooterValue ?? default;
 
-        [ObjectPropertyBrowserAlias("BPL." + nameof(SizeValue))]
-        [ObjectPropertyBrowserShow]
-        public BulletSize SizeValue => ReferenceBulletPallete?.SizeValue ?? default;
+		[ObjectPropertyBrowserAlias("BPL." + nameof(SizeValue))]
+		[ObjectPropertyBrowserShow]
+		public BulletSize SizeValue => ReferenceBulletPallete?.SizeValue ?? default;
 
-        public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
-        {
-            yield return this;
-        }
+		public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
+		{
+			yield return this;
+		}
 
-        public override void Copy(OngekiObjectBase fromObj)
-        {
-            base.Copy(fromObj);
+		public override void Copy(OngekiObjectBase fromObj)
+		{
+			base.Copy(fromObj);
 
-            if (fromObj is not Bell from)
-                return;
+			if (fromObj is not Bell from)
+				return;
 
-            ReferenceBulletPallete = from.ReferenceBulletPallete;
-        }
-    }
+			ReferenceBulletPallete = from.ReferenceBulletPallete;
+		}
+	}
 }

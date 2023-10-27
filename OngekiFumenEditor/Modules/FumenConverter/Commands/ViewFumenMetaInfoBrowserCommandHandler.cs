@@ -1,26 +1,24 @@
-﻿using System.ComponentModel.Composition;
-using System.Threading.Tasks;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Gemini.Framework.Commands;
-using Gemini.Framework.Services;
-using Gemini.Framework.Threading;
+using System.ComponentModel.Composition;
+using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenConverter.Commands
 {
-    [CommandHandler]
-    public class ViewFumenConverterCommandHandler : CommandHandlerBase<ViewFumenConverterCommandDefinition>
-    {
-        private readonly IWindowManager _windowManager;
+	[CommandHandler]
+	public class ViewFumenConverterCommandHandler : CommandHandlerBase<ViewFumenConverterCommandDefinition>
+	{
+		private readonly IWindowManager _windowManager;
 
-        [ImportingConstructor]
-        public ViewFumenConverterCommandHandler(IWindowManager windowManager)
-        {
-            _windowManager = windowManager;
-        }
+		[ImportingConstructor]
+		public ViewFumenConverterCommandHandler(IWindowManager windowManager)
+		{
+			_windowManager = windowManager;
+		}
 
-        public override async Task Run(Command command)
-        {
-            await _windowManager.ShowWindowAsync(IoC.Get<IFumenConverter>());
-        }
-    }
+		public override async Task Run(Command command)
+		{
+			await _windowManager.ShowWindowAsync(IoC.Get<IFumenConverter>());
+		}
+	}
 }

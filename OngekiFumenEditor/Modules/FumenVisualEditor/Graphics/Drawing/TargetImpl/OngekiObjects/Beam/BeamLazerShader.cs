@@ -1,17 +1,12 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
 {
-    internal class BeamLazerShader : Shader
-    {
-        public BeamLazerShader()
-        {
-            VertexProgram = @"
+	internal class BeamLazerShader : Shader
+	{
+		public BeamLazerShader()
+		{
+			VertexProgram = @"
                 #version 330
 out vec2 varying_texPos;
 
@@ -28,7 +23,7 @@ void main(){
 	varying_texPos=in_texPos;
 }
                 ";
-            FragmentProgram = @"
+			FragmentProgram = @"
                 #version 330
 uniform sampler2D diffuse;
 uniform vec4 color;
@@ -43,6 +38,6 @@ void main(){
 	out_color = vec4(texture(diffuse,tp).rgb,a) * color;
 }
                 ";
-        }
-    }
+		}
+	}
 }

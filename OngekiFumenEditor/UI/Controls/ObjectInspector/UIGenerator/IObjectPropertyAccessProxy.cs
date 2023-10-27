@@ -1,19 +1,18 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 {
-    public interface IObjectPropertyAccessProxy : INotifyPropertyChanged
-    {
-        PropertyInfo PropertyInfo { get; }
-        object ProxyValue { get; set; }
+	public interface IObjectPropertyAccessProxy : INotifyPropertyChanged
+	{
+		PropertyInfo PropertyInfo { get; }
+		object ProxyValue { get; set; }
 
-        string DisplayPropertyName { get; }
-        string DisplayPropertyTipText { get; }
+		string DisplayPropertyName { get; }
+		string DisplayPropertyTipText { get; }
 
-        bool IsAllowSetNull { get; }
+		bool IsAllowSetNull { get; }
 
-        void Clear();
-    }
+		void Clear();
+	}
 }

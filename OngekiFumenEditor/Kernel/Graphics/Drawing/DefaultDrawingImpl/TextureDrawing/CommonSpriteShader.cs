@@ -1,21 +1,15 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
-using OpenTK.Graphics.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
-    public class CommonSpriteShader : Shader
-    {
-        private static CommonSpriteShader _shared;
+	public class CommonSpriteShader : Shader
+	{
+		private static CommonSpriteShader _shared;
 
-        public CommonSpriteShader()
-        {
-            VertexProgram = @"
+		public CommonSpriteShader()
+		{
+			VertexProgram = @"
                 #version 330
 out vec2 varying_texPos;
 
@@ -30,7 +24,7 @@ void main(){
 	varying_texPos=in_texPos;
 }
                 ";
-            FragmentProgram = @"
+			FragmentProgram = @"
                 #version 330
 uniform sampler2D diffuse;
 in vec2 varying_texPos;
@@ -40,16 +34,16 @@ void main(){
 	out_color = texture(diffuse,varying_texPos);
 }
                 ";
-        }
+		}
 
-        public static CommonSpriteShader Shared => _shared ??= _createShared();
+		public static CommonSpriteShader Shared => _shared ??= _createShared();
 
-        private static CommonSpriteShader _createShared()
-        {
-            var shader = new CommonSpriteShader();
-            shader.Compile();
-            GLUtility.CheckError("Create shared CommonSpriteShader object failed");
-            return shader;
-        }
-    }
+		private static CommonSpriteShader _createShared()
+		{
+			var shader = new CommonSpriteShader();
+			shader.Compile();
+			GLUtility.CheckError("Create shared CommonSpriteShader object failed");
+			return shader;
+		}
+	}
 }

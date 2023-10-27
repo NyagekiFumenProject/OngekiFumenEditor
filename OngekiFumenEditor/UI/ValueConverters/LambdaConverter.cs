@@ -1,36 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Data;
 
 namespace OngekiFumenEditor.UI.ValueConverters
 {
-    public class LambdaConverter<T, X> : IValueConverter
-    {
-        private readonly Func<T, Type, object, CultureInfo, X> func;
+	public class LambdaConverter<T, X> : IValueConverter
+	{
+		private readonly Func<T, Type, object, CultureInfo, X> func;
 
-        public LambdaConverter(Func<T, X> func2)
-        {
-            func = (a, _, __, ___) => func2(a);
-        }
+		public LambdaConverter(Func<T, X> func2)
+		{
+			func = (a, _, __, ___) => func2(a);
+		}
 
-        public LambdaConverter(Func<T, Type, object, CultureInfo, X> func)
-        {
-            this.func = func;
-        }
+		public LambdaConverter(Func<T, Type, object, CultureInfo, X> func)
+		{
+			this.func = func;
+		}
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return func((T)value, targetType, parameter, culture);
-        }
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return func((T)value, targetType, parameter, culture);
+		}
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

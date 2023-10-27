@@ -1,31 +1,12 @@
-﻿using Caliburn.Micro;
-using Gemini.Modules.Toolbox;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
-using OngekiFumenEditor.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 
 namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.Views
 {
-    public partial class SvgPrefabView : OngekiObjectViewBase
-    {
-        public SvgPrefabView()
-        {
-            InitializeComponent();
-        }
-    }
+	public partial class SvgPrefabView : OngekiObjectViewBase
+	{
+		public SvgPrefabView()
+		{
+			InitializeComponent();
+		}
+	}
 }

@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OngekiFumenEditor.Kernel.Graphics.Base;
-using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing;
+﻿using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
-using OpenTK.Graphics.OpenGL;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDrawing
 {
-    internal class BatchCircleShader : Shader
-    {
-        private static BatchCircleShader _shared;
+	internal class BatchCircleShader : Shader
+	{
+		private static BatchCircleShader _shared;
 
-        public BatchCircleShader()
-        {
-            VertexProgram = @"
+		public BatchCircleShader()
+		{
+			VertexProgram = @"
                 #version 330
 
                 out vec2 pointPos;
@@ -43,7 +36,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
                 ";
 
 
-            FragmentProgram = @"
+			FragmentProgram = @"
                 #version 330
 
                 in vec2  pointPos;
@@ -63,16 +56,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
                     out_color = mix(varying_color, vec4(varying_color.rgb,0.0), step(1.0-threshold, d));
                 }
                 ";
-        }
+		}
 
-        public static BatchCircleShader Shared => _shared ??= _createShared();
+		public static BatchCircleShader Shared => _shared ??= _createShared();
 
-        private static BatchCircleShader _createShared()
-        {
-            var shader = new BatchCircleShader();
-            shader.Compile();
-            GLUtility.CheckError("Create shared BatchCircleShader object failed");
-            return shader;
-        }
-    }
+		private static BatchCircleShader _createShared()
+		{
+			var shader = new BatchCircleShader();
+			shader.Compile();
+			GLUtility.CheckError("Create shared BatchCircleShader object failed");
+			return shader;
+		}
+	}
 }

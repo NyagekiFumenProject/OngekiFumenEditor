@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OngekiFumenEditor.Kernel.Graphics.Base;
+﻿using OngekiFumenEditor.Kernel.Graphics.Base;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
-    internal class BatchShader : Shader
-    {
-        public BatchShader()
-        {
-            VertexProgram = @"
+	internal class BatchShader : Shader
+	{
+		public BatchShader()
+		{
+			VertexProgram = @"
                 #version 330
                 out vec4 varying_color;
                 out vec2 varying_texPos;
@@ -24,7 +19,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 	                varying_texPos=in_texPos;
                 }
                 ";
-            FragmentProgram = @"
+			FragmentProgram = @"
                 #version 330
                 uniform sampler2D diffuse;
                 in vec2 varying_texPos;
@@ -34,6 +29,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 	                out_color=texColor;
                 }
                 ";
-        }
-    }
+		}
+	}
 }

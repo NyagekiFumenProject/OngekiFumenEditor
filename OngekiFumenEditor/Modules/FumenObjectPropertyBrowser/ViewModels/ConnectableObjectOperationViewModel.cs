@@ -3,8 +3,6 @@ using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
@@ -12,7 +10,6 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
@@ -23,277 +20,277 @@ using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-    [MapToView(ViewType = typeof(ConnectableObjectOperationView))]
-    public abstract class ConnectableObjectOperationViewModel : PropertyChangedBase
-    {
-        public enum DragActionType
-        {
-            DropEnd,
-            DropNext,
-            DropCurvePathControl,
-            Split
-        }
+	[MapToView(ViewType = typeof(ConnectableObjectOperationView))]
+	public abstract class ConnectableObjectOperationViewModel : PropertyChangedBase
+	{
+		public enum DragActionType
+		{
+			DropEnd,
+			DropNext,
+			DropCurvePathControl,
+			Split
+		}
 
-        private bool _draggingItem;
-        private Point _mouseStartPosition;
+		private bool _draggingItem;
+		private Point _mouseStartPosition;
 
-        private ConnectableObjectBase connectableObject;
-        public ConnectableObjectBase ConnectableObject
-        {
-            get
-            {
-                return connectableObject;
-            }
-            set
-            {
-                connectableObject = value;
-                NotifyOfPropertyChange(() => ConnectableObject);
-                CheckEnable();
-            }
-        }
+		private ConnectableObjectBase connectableObject;
+		public ConnectableObjectBase ConnectableObject
+		{
+			get
+			{
+				return connectableObject;
+			}
+			set
+			{
+				connectableObject = value;
+				NotifyOfPropertyChange(() => ConnectableObject);
+				CheckEnable();
+			}
+		}
 
-        public ConnectableStartObject RefStartObject => ConnectableObject switch
-        {
-            ConnectableStartObject start => start,
-            ConnectableChildObjectBase next => next.ReferenceStartObject,
-            _ => default,
-        };
+		public ConnectableStartObject RefStartObject => ConnectableObject switch
+		{
+			ConnectableStartObject start => start,
+			ConnectableChildObjectBase next => next.ReferenceStartObject,
+			_ => default,
+		};
 
-        public bool IsEnableDragEnd => !(RefStartObject?.Children.OfType<ConnectableEndObject>().Any() ?? false);
-        public bool IsEnableDragPathControl => ConnectableObject is ConnectableChildObjectBase;
-        public bool IsStartObject => ConnectableObject is ConnectableStartObject;
+		public bool IsEnableDragEnd => !(RefStartObject?.Children.OfType<ConnectableEndObject>().Any() ?? false);
+		public bool IsEnableDragPathControl => ConnectableObject is ConnectableChildObjectBase;
+		public bool IsStartObject => ConnectableObject is ConnectableStartObject;
 
-        private void CheckEnable()
-        {
-            NotifyOfPropertyChange(() => IsEnableDragEnd);
-            NotifyOfPropertyChange(() => IsEnableDragPathControl);
-            NotifyOfPropertyChange(() => IsStartObject);
-        }
+		private void CheckEnable()
+		{
+			NotifyOfPropertyChange(() => IsEnableDragEnd);
+			NotifyOfPropertyChange(() => IsEnableDragPathControl);
+			NotifyOfPropertyChange(() => IsStartObject);
+		}
 
-        public ConnectableObjectOperationViewModel(ConnectableObjectBase obj)
-        {
-            ConnectableObject = obj;
-        }
+		public ConnectableObjectOperationViewModel(ConnectableObjectBase obj)
+		{
+			ConnectableObject = obj;
+		}
 
-        public void Border_MouseMove(ActionExecutionContext e)
-        {
-            ProcessDragStart(e, DragActionType.DropNext);
-        }
+		public void Border_MouseMove(ActionExecutionContext e)
+		{
+			ProcessDragStart(e, DragActionType.DropNext);
+		}
 
-        public void Border_MouseMove4(ActionExecutionContext e)
-        {
-            ProcessDragStart(e, DragActionType.DropCurvePathControl);
-        }
+		public void Border_MouseMove4(ActionExecutionContext e)
+		{
+			ProcessDragStart(e, DragActionType.DropCurvePathControl);
+		}
 
-        public void Border_MouseMove2(ActionExecutionContext e)
-        {
-            ProcessDragStart(e, DragActionType.DropEnd);
-        }
+		public void Border_MouseMove2(ActionExecutionContext e)
+		{
+			ProcessDragStart(e, DragActionType.DropEnd);
+		}
 
-        public void Border_MouseMove3(ActionExecutionContext e)
-        {
-            ProcessDragStart(e, DragActionType.Split);
-        }
+		public void Border_MouseMove3(ActionExecutionContext e)
+		{
+			ProcessDragStart(e, DragActionType.Split);
+		}
 
-        public void Interpolate(ActionExecutionContext e)
-        {
-            if (RefStartObject.Children.IsEmpty())
-            {
-                MessageBox.Show("无子节点,无法插值");
-                return;
-            }
+		public void Interpolate(ActionExecutionContext e)
+		{
+			if (RefStartObject.Children.IsEmpty())
+			{
+				MessageBox.Show("无子节点,无法插值");
+				return;
+			}
 
-            var genStarts = RefStartObject.InterpolateCurve(RefStartObject.CurveInterpolaterFactory).ToArray();
+			var genStarts = RefStartObject.InterpolateCurve(RefStartObject.CurveInterpolaterFactory).ToArray();
 
-            var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
-            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值曲线", () =>
-            {
-                editor.Fumen.RemoveObject(RefStartObject);
-                foreach (var start in genStarts)
-                    editor.Fumen.AddObject(start);
-            }, () =>
-            {
-                foreach (var start in genStarts)
-                    editor.Fumen.RemoveObject(start);
-                editor.Fumen.AddObject(RefStartObject);
-            }));
-        }
+			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值曲线", () =>
+			{
+				editor.Fumen.RemoveObject(RefStartObject);
+				foreach (var start in genStarts)
+					editor.Fumen.AddObject(start);
+			}, () =>
+			{
+				foreach (var start in genStarts)
+					editor.Fumen.RemoveObject(start);
+				editor.Fumen.AddObject(RefStartObject);
+			}));
+		}
 
-        public abstract ConnectableChildObjectBase GenerateChildObject(bool needNext);
+		public abstract ConnectableChildObjectBase GenerateChildObject(bool needNext);
 
-        private void ProcessDragStart(ActionExecutionContext e, DragActionType actionType)
-        {
-            if ((!_draggingItem) || RefStartObject is null)
-                return;
+		private void ProcessDragStart(ActionExecutionContext e, DragActionType actionType)
+		{
+			if ((!_draggingItem) || RefStartObject is null)
+				return;
 
-            var arg = e.EventArgs as MouseEventArgs;
+			var arg = e.EventArgs as MouseEventArgs;
 
-            Point mousePosition = arg.GetPosition(null);
-            Vector diff = _mouseStartPosition - mousePosition;
+			Point mousePosition = arg.GetPosition(null);
+			Vector diff = _mouseStartPosition - mousePosition;
 
-            if (arg.LeftButton == MouseButtonState.Pressed &&
-                (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
-                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
-            {
-                //ConnectableObjectDropAction
-                var genChildLazy = new Lazy<ConnectableChildObjectBase>(() => GenerateChildObject(actionType == DragActionType.DropNext));
-                IEditorDropHandler dropAction = actionType switch
-                {
-                    DragActionType.DropNext or DragActionType.DropEnd => new ConnectableObjectDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
-                    DragActionType.Split => new ConnectableObjectSplitDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
-                    DragActionType.DropCurvePathControl => new AddLaneCurvePathControlDropAction(ConnectableObject as ConnectableChildObjectBase),
-                    _ => default
-                };
+			if (arg.LeftButton == MouseButtonState.Pressed &&
+				(Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+				Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
+			{
+				//ConnectableObjectDropAction
+				var genChildLazy = new Lazy<ConnectableChildObjectBase>(() => GenerateChildObject(actionType == DragActionType.DropNext));
+				IEditorDropHandler dropAction = actionType switch
+				{
+					DragActionType.DropNext or DragActionType.DropEnd => new ConnectableObjectDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
+					DragActionType.Split => new ConnectableObjectSplitDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
+					DragActionType.DropCurvePathControl => new AddLaneCurvePathControlDropAction(ConnectableObject as ConnectableChildObjectBase),
+					_ => default
+				};
 
-                DragDrop.DoDragDrop(e.Source, new DataObject(ToolboxDragDrop.DataFormat, dropAction), DragDropEffects.Move);
-                _draggingItem = false;
-            }
-        }
+				DragDrop.DoDragDrop(e.Source, new DataObject(ToolboxDragDrop.DataFormat, dropAction), DragDropEffects.Move);
+				_draggingItem = false;
+			}
+		}
 
-        public void Border_MouseLeftButtonDown(ActionExecutionContext e)
-        {
-            var arg = e.EventArgs as MouseEventArgs;
+		public void Border_MouseLeftButtonDown(ActionExecutionContext e)
+		{
+			var arg = e.EventArgs as MouseEventArgs;
 
-            if (arg.LeftButton != MouseButtonState.Pressed)
-                return;
+			if (arg.LeftButton != MouseButtonState.Pressed)
+				return;
 
-            _mouseStartPosition = arg.GetPosition(null);
-            _draggingItem = true;
-        }
+			_mouseStartPosition = arg.GetPosition(null);
+			_draggingItem = true;
+		}
 
-        public async void OnBrushButtonClick()
-        {
-            var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
-            var fumen = editor.Fumen;
+		public async void OnBrushButtonClick()
+		{
+			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
+			var fumen = editor.Fumen;
 
-            if (RefStartObject?.IsPathVaild() != true)
-            {
-                MessageBox.Show("此轨道包含非法路径");
-                return;
-            }
+			if (RefStartObject?.IsPathVaild() != true)
+			{
+				MessageBox.Show("此轨道包含非法路径");
+				return;
+			}
 
-            var copiedObjects = IoC.Get<IFumenEditorClipboard>().CurrentCopiedObjects;
+			var copiedObjects = IoC.Get<IFumenEditorClipboard>().CurrentCopiedObjects;
 
-            if (copiedObjects.Count() > 1)
-            {
-                MessageBox.Show("因为已复制的物件超过一个，无法使用刷子功能");
-                return;
-            }
+			if (copiedObjects.Count() > 1)
+			{
+				MessageBox.Show("因为已复制的物件超过一个，无法使用刷子功能");
+				return;
+			}
 
-            if (!editor.IsDesignMode)
-            {
-                MessageBox.Show("请先将编辑器切换到设计模式");
-                return;
-            }
+			if (!editor.IsDesignMode)
+			{
+				MessageBox.Show("请先将编辑器切换到设计模式");
+				return;
+			}
 
-            if (copiedObjects.Count() < 1)
-            {
-                MessageBox.Show("需要先复制一个可以复制的物件，才能使用刷子功能");
-                return;
-            }
+			if (copiedObjects.Count() < 1)
+			{
+				MessageBox.Show("需要先复制一个可以复制的物件，才能使用刷子功能");
+				return;
+			}
 
-            var copiedObjectViewModel = copiedObjects.FirstOrDefault() as OngekiObjectBase;
+			var copiedObjectViewModel = copiedObjects.FirstOrDefault();
 
-            if (copiedObjectViewModel?.CopyNew() is null)
-            {
-                MessageBox.Show("此复制的物件无法使用刷子功能");
-                return;
-            }
+			if (copiedObjectViewModel?.CopyNew() is null)
+			{
+				MessageBox.Show("此复制的物件无法使用刷子功能");
+				return;
+			}
 
-            var dialog = new BrushTGridRangeDialogViewModel();
-            dialog.BeginTGrid = RefStartObject.MinTGrid.CopyNew();
-            dialog.EndTGrid = RefStartObject.MaxTGrid.CopyNew();
+			var dialog = new BrushTGridRangeDialogViewModel();
+			dialog.BeginTGrid = RefStartObject.MinTGrid.CopyNew();
+			dialog.EndTGrid = RefStartObject.MaxTGrid.CopyNew();
 
-            if ((await IoC.Get<IWindowManager>().ShowDialogAsync(dialog)) != true)
-                return;
+			if ((await IoC.Get<IWindowManager>().ShowDialogAsync(dialog)) != true)
+				return;
 
-            var beginTGrid = dialog.BeginTGrid;
-            var endTGrid = dialog.EndTGrid;
+			var beginTGrid = dialog.BeginTGrid;
+			var endTGrid = dialog.EndTGrid;
 
-            var redoAction = new System.Action(() => { });
-            var undoAction = new System.Action(() => { });
+			var redoAction = new System.Action(() => { });
+			var undoAction = new System.Action(() => { });
 
-            foreach ((var tGrid, _, _, _, _) in TGridCalculator.GetVisbleTimelines_DesignMode(
-                fumen.Soflans,
-                fumen.BpmList,
-                fumen.MeterChanges,
-                TGridCalculator.ConvertTGridToY_DesignMode(beginTGrid, editor),
-                TGridCalculator.ConvertTGridToY_DesignMode(endTGrid, editor),
-                0,
-                editor.Setting.BeatSplit,
-                editor.Setting.VerticalDisplayScale,
-                240))
-            {
-                var obj = copiedObjectViewModel.CopyNew();
-                var xGrid = RefStartObject.CalulateXGrid(tGrid);
+			foreach ((var tGrid, _, _, _, _) in TGridCalculator.GetVisbleTimelines_DesignMode(
+				fumen.Soflans,
+				fumen.BpmList,
+				fumen.MeterChanges,
+				TGridCalculator.ConvertTGridToY_DesignMode(beginTGrid, editor),
+				TGridCalculator.ConvertTGridToY_DesignMode(endTGrid, editor),
+				0,
+				editor.Setting.BeatSplit,
+				editor.Setting.VerticalDisplayScale,
+				240))
+			{
+				var obj = copiedObjectViewModel.CopyNew();
+				var xGrid = RefStartObject.CalulateXGrid(tGrid);
 
-                if (xGrid is null)
-                    continue;
+				if (xGrid is null)
+					continue;
 
-                redoAction += () =>
-                {
-                    if (obj is ITimelineObject timelineObject)
-                        timelineObject.TGrid = tGrid;
-                    if (obj is IHorizonPositionObject horizonPositionObject)
-                        horizonPositionObject.XGrid = xGrid;
+				redoAction += () =>
+				{
+					if (obj is ITimelineObject timelineObject)
+						timelineObject.TGrid = tGrid;
+					if (obj is IHorizonPositionObject horizonPositionObject)
+						horizonPositionObject.XGrid = xGrid;
 
-                    editor.Fumen.AddObject(obj);
-                };
-                undoAction += () =>
-                {
-                    editor.RemoveObject(obj);
-                };
-            }
+					editor.Fumen.AddObject(obj);
+				};
+				undoAction += () =>
+				{
+					editor.RemoveObject(obj);
+				};
+			}
 
 
-            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("批量粘贴刷子", redoAction, undoAction));
-        }
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("批量粘贴刷子", redoAction, undoAction));
+		}
 
-        public void OnPartChildCurveInterpolateClick()
-        {
-            PartChildCurveInterpolate();
-        }
+		public void OnPartChildCurveInterpolateClick()
+		{
+			PartChildCurveInterpolate();
+		}
 
-        public void PartChildCurveInterpolate()
-        {
-            var childObj = ConnectableObject as ConnectableChildObjectBase;
+		public void PartChildCurveInterpolate()
+		{
+			var childObj = ConnectableObject as ConnectableChildObjectBase;
 
-            if (!childObj.CheckCurveVaild())
-            {
-                MessageBox.Show("无法对非法的线段进行局部插值");
-                return;
-            }
+			if (!childObj.CheckCurveVaild())
+			{
+				MessageBox.Show("无法对非法的线段进行局部插值");
+				return;
+			}
 
-            var from = childObj;
-            var to = childObj.ReferenceStartObject.Children.FindNextOrDefault(childObj);
+			var from = childObj;
+			var to = childObj.ReferenceStartObject.Children.FindNextOrDefault(childObj);
 
-            var genChildren = childObj.InterpolateCurveChildren(childObj.CurveInterpolaterFactory).ToList();
+			var genChildren = childObj.InterpolateCurveChildren(childObj.CurveInterpolaterFactory).ToList();
 
-            var prev = childObj.PrevObject;
-            genChildren.RemoveAll(x => x.TGrid >= from.TGrid || x.TGrid <= prev.TGrid);
+			var prev = childObj.PrevObject;
+			genChildren.RemoveAll(x => x.TGrid >= from.TGrid || x.TGrid <= prev.TGrid);
 
-            var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
-            var storeBackupControlPoints = new List<LaneCurvePathControlObject>();
+			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
+			var storeBackupControlPoints = new List<LaneCurvePathControlObject>();
 
-            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("部分曲线插值", () =>
-            {
-                foreach (var newChild in genChildren)
-                    childObj.ReferenceStartObject.InsertChildObject(newChild.TGrid, newChild);
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("部分曲线插值", () =>
+			{
+				foreach (var newChild in genChildren)
+					childObj.ReferenceStartObject.InsertChildObject(newChild.TGrid, newChild);
 
-                storeBackupControlPoints.AddRange(childObj.PathControls);
-                foreach (var cp in storeBackupControlPoints)
-                    childObj.RemoveControlObject(cp);
+				storeBackupControlPoints.AddRange(childObj.PathControls);
+				foreach (var cp in storeBackupControlPoints)
+					childObj.RemoveControlObject(cp);
 
-            }, () =>
-            {
-                foreach (var newChild in genChildren)
-                    childObj.ReferenceStartObject.RemoveChildObject(newChild);
+			}, () =>
+			{
+				foreach (var newChild in genChildren)
+					childObj.ReferenceStartObject.RemoveChildObject(newChild);
 
-                foreach (var cp in storeBackupControlPoints)
-                    childObj.AddControlObject(cp);
-                storeBackupControlPoints.Clear();
+				foreach (var cp in storeBackupControlPoints)
+					childObj.AddControlObject(cp);
+				storeBackupControlPoints.Clear();
 
-            }));
-        }
-    }
+			}));
+		}
+	}
 }

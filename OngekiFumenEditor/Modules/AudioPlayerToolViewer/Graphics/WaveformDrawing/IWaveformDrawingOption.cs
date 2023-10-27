@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing
 {
-    public interface IWaveformDrawingOption : INotifyPropertyChanged
-    {
-    }
+	public interface IWaveformDrawingOption : INotifyPropertyChanged
+	{
+	}
 }

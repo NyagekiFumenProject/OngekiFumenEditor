@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OngekiFumenEditor.Base
+﻿namespace OngekiFumenEditor.Base
 {
-    public interface ICriticalableObject
-    {
-        bool IsCritical { get; set; }
-    }
+	public interface ICriticalableObject
+	{
+		bool IsCritical { get; set; }
+	}
 }

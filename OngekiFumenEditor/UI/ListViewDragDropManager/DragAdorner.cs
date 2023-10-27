@@ -1,13 +1,8 @@
 // Copyright (C) Josh Smith - January 2007
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Documents;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Media.Animation;
-using System.Windows.Controls;
 
 namespace WPF.JoshSmith.Adorners
 {
@@ -33,8 +28,8 @@ namespace WPF.JoshSmith.Adorners
 		/// <param name="adornedElement">The element being adorned.</param>
 		/// <param name="size">The size of the adorner.</param>
 		/// <param name="brush">A brush to with which to paint the adorner.</param>
-		public DragAdorner( UIElement adornedElement, Size size, Brush brush )
-			: base( adornedElement )
+		public DragAdorner(UIElement adornedElement, Size size, Brush brush)
+			: base(adornedElement)
 		{
 			Rectangle rect = new Rectangle();
 			rect.Fill = brush;
@@ -55,11 +50,11 @@ namespace WPF.JoshSmith.Adorners
 		/// </summary>
 		/// <param name="transform"></param>
 		/// <returns></returns>
-		public override GeneralTransform GetDesiredTransform( GeneralTransform transform )
+		public override GeneralTransform GetDesiredTransform(GeneralTransform transform)
 		{
 			GeneralTransformGroup result = new GeneralTransformGroup();
-			result.Children.Add( base.GetDesiredTransform( transform ) );
-			result.Children.Add( new TranslateTransform( this.offsetLeft, this.offsetTop ) );
+			result.Children.Add(base.GetDesiredTransform(transform));
+			result.Children.Add(new TranslateTransform(this.offsetLeft, this.offsetTop));
 			return result;
 		}
 
@@ -89,7 +84,7 @@ namespace WPF.JoshSmith.Adorners
 		/// </summary>
 		/// <param name="left"></param>
 		/// <param name="top"></param>
-		public void SetOffsets( double left, double top )
+		public void SetOffsets(double left, double top)
 		{
 			this.offsetLeft = left;
 			this.offsetTop = top;
@@ -124,9 +119,9 @@ namespace WPF.JoshSmith.Adorners
 		/// </summary>
 		/// <param name="constraint"></param>
 		/// <returns></returns>
-		protected override Size MeasureOverride( Size constraint )
+		protected override Size MeasureOverride(Size constraint)
 		{
-			this.child.Measure( constraint );
+			this.child.Measure(constraint);
 			return this.child.DesiredSize;
 		}
 
@@ -135,9 +130,9 @@ namespace WPF.JoshSmith.Adorners
 		/// </summary>
 		/// <param name="finalSize"></param>
 		/// <returns></returns>
-		protected override Size ArrangeOverride( Size finalSize )
+		protected override Size ArrangeOverride(Size finalSize)
 		{
-			this.child.Arrange( new Rect( finalSize ) );
+			this.child.Arrange(new Rect(finalSize));
 			return finalSize;
 		}
 
@@ -146,7 +141,7 @@ namespace WPF.JoshSmith.Adorners
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		protected override Visual GetVisualChild( int index )
+		protected override Visual GetVisualChild(int index)
 		{
 			return this.child;
 		}
@@ -166,8 +161,8 @@ namespace WPF.JoshSmith.Adorners
 		private void UpdateLocation()
 		{
 			AdornerLayer adornerLayer = this.Parent as AdornerLayer;
-			if( adornerLayer != null )
-				adornerLayer.Update( this.AdornedElement );
+			if (adornerLayer != null)
+				adornerLayer.Update(this.AdornedElement);
 		}
 
 		#endregion // Private Helpers

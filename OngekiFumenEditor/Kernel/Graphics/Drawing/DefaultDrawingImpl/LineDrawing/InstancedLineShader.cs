@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OngekiFumenEditor.Kernel.Graphics.Base;
+﻿using OngekiFumenEditor.Kernel.Graphics.Base;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
-    internal class InstancedLineShader : Shader
-    {
-        public InstancedLineShader()
-        {
-            VertexProgram = @"
+	internal class InstancedLineShader : Shader
+	{
+		public InstancedLineShader()
+		{
+			VertexProgram = @"
                     #version 330
                   layout(location = 0) in vec3 quad_pos;
                   layout(location = 1) in vec4 line_pos_width_a;
@@ -87,7 +82,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
                   }
 ";
 
-            FragmentProgram = @"
+			FragmentProgram = @"
                 #version 330
                 uniform vec2 u_aa_radius;
                 uniform vec2 u_viewport_size;
@@ -120,6 +115,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
                 frag_color.a *= min(av, au);
               }
 ";
-        }
-    }
+		}
+	}
 }

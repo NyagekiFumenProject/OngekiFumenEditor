@@ -1,41 +1,31 @@
-using Caliburn.Micro;
 using Gemini.Framework;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
-using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
-using OpenTK.Audio.OpenAL;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Media.Animation;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
-    public partial class FumenVisualEditorViewModel : PersistedDocument
-    {
-        private double totalDurationHeight;
-        public double TotalDurationHeight
-        {
-            get => totalDurationHeight;
-            set
-            {
-                value = Math.Max(value, ViewHeight);
-                //Log.LogDebug($"TotalDurationHeight {TotalDurationHeight} -> {value}");
-                Set(ref totalDurationHeight, value);
-            }
-        }
+	public partial class FumenVisualEditorViewModel : PersistedDocument
+	{
+		private double totalDurationHeight;
+		public double TotalDurationHeight
+		{
+			get => totalDurationHeight;
+			set
+			{
+				value = Math.Max(value, ViewHeight);
+				//Log.LogDebug($"TotalDurationHeight {TotalDurationHeight} -> {value}");
+				Set(ref totalDurationHeight, value);
+			}
+		}
 
-        private double scrollViewerVerticalOffset;
-        public double ScrollViewerVerticalOffset
-        {
-            get => scrollViewerVerticalOffset;
-            /*
+		private double scrollViewerVerticalOffset;
+		public double ScrollViewerVerticalOffset
+		{
+			get => scrollViewerVerticalOffset;
+			/*
             set
             {
                 var val = Math.Min(TotalDurationHeight, Math.Max(0, value));
@@ -47,67 +37,67 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 currentTGrid = convertToTGrid(scrollViewerVerticalOffset, this);
             }
             */
-        }
+		}
 
-        public double ReverseScrollViewerVerticalOffset
-        {
-            get => TotalDurationHeight - ScrollViewerVerticalOffset;
-            set
-            {
-                //ScrollViewerVerticalOffset = TotalDurationHeight - value;
-                var val = TotalDurationHeight - value;
-                if (IsDesignMode)
-                {
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(val, this);
-                    ScrollTo(audioTime);
-                }
-                else
-                {
-                    var curTGrid = GetCurrentTGrid();
-                    var nextTGrid = TGridCalculator.ConvertYToTGrid_PreviewMode(val, this).OrderBy(x => Math.Abs(x.TotalGrid - curTGrid.TotalGrid)).FirstOrDefault();
-                    
-                    if (nextTGrid is not null)
-                    {
-                        var audioTime = TGridCalculator.ConvertTGridToAudioTime(nextTGrid, this);
-                        ScrollTo(audioTime);
-                    }
-                }
-            }
-        }
+		public double ReverseScrollViewerVerticalOffset
+		{
+			get => TotalDurationHeight - ScrollViewerVerticalOffset;
+			set
+			{
+				//ScrollViewerVerticalOffset = TotalDurationHeight - value;
+				var val = TotalDurationHeight - value;
+				if (IsDesignMode)
+				{
+					var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(val, this);
+					ScrollTo(audioTime);
+				}
+				else
+				{
+					var curTGrid = GetCurrentTGrid();
+					var nextTGrid = TGridCalculator.ConvertYToTGrid_PreviewMode(val, this).OrderBy(x => Math.Abs(x.TotalGrid - curTGrid.TotalGrid)).FirstOrDefault();
 
-        #region ScrollTo
+					if (nextTGrid is not null)
+					{
+						var audioTime = TGridCalculator.ConvertTGridToAudioTime(nextTGrid, this);
+						ScrollTo(audioTime);
+					}
+				}
+			}
+		}
 
-        public void ScrollTo(ITimelineObject timelineObject)
-        {
-            ScrollTo(timelineObject.TGrid);
-        }
+		#region ScrollTo
 
-        public void ScrollTo(TGrid startTGrid)
-        {
-            if (startTGrid is null)
-                return;
-            var audioTime = TGridCalculator.ConvertTGridToAudioTime(startTGrid, this);
-            ScrollTo(audioTime);
-        }
+		public void ScrollTo(ITimelineObject timelineObject)
+		{
+			ScrollTo(timelineObject.TGrid);
+		}
 
-        public void ScrollTo(TimeSpan audioTime)
-        {
-            var fixedAudioTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(audioTime, EditorProjectData.AudioDuration));
-            CurrentPlayTime = fixedAudioTime;
+		public void ScrollTo(TGrid startTGrid)
+		{
+			if (startTGrid is null)
+				return;
+			var audioTime = TGridCalculator.ConvertTGridToAudioTime(startTGrid, this);
+			ScrollTo(audioTime);
+		}
 
-            var val = IsDesignMode ?
-                TGridCalculator.ConvertAudioTimeToY_DesignMode(fixedAudioTime, this) :
-                TGridCalculator.ConvertAudioTimeToY_PreviewMode(fixedAudioTime, this);
-            val = Math.Min(TotalDurationHeight, Math.Max(0, val));
+		public void ScrollTo(TimeSpan audioTime)
+		{
+			var fixedAudioTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(audioTime, EditorProjectData.AudioDuration));
+			CurrentPlayTime = fixedAudioTime;
 
-            scrollViewerVerticalOffset = val;
-            NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
-            RecalcViewProjectionMatrix();
-        }
+			var val = IsDesignMode ?
+				TGridCalculator.ConvertAudioTimeToY_DesignMode(fixedAudioTime, this) :
+				TGridCalculator.ConvertAudioTimeToY_PreviewMode(fixedAudioTime, this);
+			val = Math.Min(TotalDurationHeight, Math.Max(0, val));
 
-        #endregion
+			scrollViewerVerticalOffset = val;
+			NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
+			RecalcViewProjectionMatrix();
+		}
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
-    }
+		#endregion
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
+	}
 }

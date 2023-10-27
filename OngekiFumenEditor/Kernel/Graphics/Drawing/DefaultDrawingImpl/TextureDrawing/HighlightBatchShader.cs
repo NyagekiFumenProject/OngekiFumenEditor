@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
+﻿namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
-    internal class HighlightBatchShader : BatchShader
-    {
-        public HighlightBatchShader() : base()
-        {
-            FragmentProgram = @"
+	internal class HighlightBatchShader : BatchShader
+	{
+		public HighlightBatchShader() : base()
+		{
+			FragmentProgram = @"
 #version 330
                 uniform sampler2D diffuse;
                 uniform vec2 iResolution;
@@ -44,7 +38,7 @@ void main(){
 }
 ";
 
-            /*
+			/*
             FragmentProgram = @"
                 #version 330
                 uniform sampler2D diffuse;
@@ -57,6 +51,6 @@ void main(){
                 }
                 ";
             */
-        }
-    }
+		}
+	}
 }

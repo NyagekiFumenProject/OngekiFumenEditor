@@ -7,12 +7,12 @@ using static OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.FumenVisualE
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel
 {
-    public interface IFumenEditorClipboard
-    {
-        bool ContainPastableObjects { get; }
-        IReadOnlyCollection<OngekiObjectBase> CurrentCopiedObjects { get; }
+	public interface IFumenEditorClipboard
+	{
+		bool ContainPastableObjects { get; }
+		IReadOnlyCollection<OngekiObjectBase> CurrentCopiedObjects { get; }
 
-        Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteMirrorOption mirrorOption, Point? placePoint = default);
-        Task CopyObjects(FumenVisualEditorViewModel sourceEditor, IEnumerable<ISelectableObject> objects);
-    }
+		Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteMirrorOption mirrorOption, Point? placePoint = default);
+		Task CopyObjects(FumenVisualEditorViewModel sourceEditor, IEnumerable<ISelectableObject> objects);
+	}
 }

@@ -1,49 +1,39 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Modules.FumenVisualEditor;
-using System;
+﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane
 {
-    public abstract class NormalLaneDrawingTarget : LaneDrawingTargetBase
-    {
+	public abstract class NormalLaneDrawingTarget : LaneDrawingTargetBase
+	{
 
-    }
+	}
 
-    [Export(typeof(IFumenEditorDrawingTarget))]
-    public class LeftLaneDrawTarget : NormalLaneDrawingTarget
-    {
-        public static Vector4 LaneColor { get; } = new(1, 0, 0, 1);
+	[Export(typeof(IFumenEditorDrawingTarget))]
+	public class LeftLaneDrawTarget : NormalLaneDrawingTarget
+	{
+		public static Vector4 LaneColor { get; } = new(1, 0, 0, 1);
 
-        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
-        public override IEnumerable<string> DrawTargetID { get; } = new[] { "LLS" };
-    }
+		public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
+		public override IEnumerable<string> DrawTargetID { get; } = new[] { "LLS" };
+	}
 
-    [Export(typeof(IFumenEditorDrawingTarget))]
-    public class CenterLaneDrawTarget : NormalLaneDrawingTarget
-    {
-        public static Vector4 LaneColor { get; } = new(0, 1, 0, 1);
+	[Export(typeof(IFumenEditorDrawingTarget))]
+	public class CenterLaneDrawTarget : NormalLaneDrawingTarget
+	{
+		public static Vector4 LaneColor { get; } = new(0, 1, 0, 1);
 
-        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
-        public override IEnumerable<string> DrawTargetID { get; } = new[] { "LCS" };
-    }
+		public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
+		public override IEnumerable<string> DrawTargetID { get; } = new[] { "LCS" };
+	}
 
-    [Export(typeof(IFumenEditorDrawingTarget))]
-    public class RightLaneDrawTarget : NormalLaneDrawingTarget
-    {
-        public static Vector4 LaneColor { get; } = new(0, 0, 1, 1);
+	[Export(typeof(IFumenEditorDrawingTarget))]
+	public class RightLaneDrawTarget : NormalLaneDrawingTarget
+	{
+		public static Vector4 LaneColor { get; } = new(0, 0, 1, 1);
 
-        public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
-        public override IEnumerable<string> DrawTargetID { get; } = new[] { "LRS" };
-    }
+		public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
+		public override IEnumerable<string> DrawTargetID { get; } = new[] { "LRS" };
+	}
 }

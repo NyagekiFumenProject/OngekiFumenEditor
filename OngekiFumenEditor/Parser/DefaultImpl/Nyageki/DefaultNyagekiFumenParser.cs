@@ -7,41 +7,41 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl
 {
-    [Export(typeof(IFumenDeserializable))]
-    public class DefaultNyagekiFumenParser : IFumenDeserializable
-    {
-        public const string FormatName = "Nyageki Fumen File";
-        public string FileFormatName => FormatName;
+	[Export(typeof(IFumenDeserializable))]
+	public class DefaultNyagekiFumenParser : IFumenDeserializable
+	{
+		public const string FormatName = "Nyageki Fumen File";
+		public string FileFormatName => FormatName;
 
-        public static readonly string[] FumenFileExtensions = new[] { ".nyageki" };
-        public string[] SupportFumenFileExtensions => FumenFileExtensions;
+		public static readonly string[] FumenFileExtensions = new[] { ".nyageki" };
+		public string[] SupportFumenFileExtensions => FumenFileExtensions;
 
-        Dictionary<string, INyagekiCommandParser> commandParsers;
+		Dictionary<string, INyagekiCommandParser> commandParsers;
 
-        [ImportingConstructor]
-        public DefaultNyagekiFumenParser([ImportMany] IEnumerable<INyagekiCommandParser> commandParsers)
-        {
-            this.commandParsers = commandParsers.ToDictionary(x => x.CommandName.Trim().ToLower(), x => x);
-        }
+		[ImportingConstructor]
+		public DefaultNyagekiFumenParser([ImportMany] IEnumerable<INyagekiCommandParser> commandParsers)
+		{
+			this.commandParsers = commandParsers.ToDictionary(x => x.CommandName.Trim().ToLower(), x => x);
+		}
 
-        public async Task<OngekiFumen> DeserializeAsync(Stream stream)
-        {
-            using var reader = new StreamReader(stream);
+		public async Task<OngekiFumen> DeserializeAsync(Stream stream)
+		{
+			using var reader = new StreamReader(stream);
 
-            var fumen = new OngekiFumen();
+			var fumen = new OngekiFumen();
 
-            while (!reader.EndOfStream)
-            {
-                var line = await reader.ReadLineAsync();
-                var seg = line.Split(':', 2);
-                var commandName = seg[0].ToLower().Trim();
+			while (!reader.EndOfStream)
+			{
+				var line = await reader.ReadLineAsync();
+				var seg = line.Split(':', 2);
+				var commandName = seg[0].ToLower().Trim();
 
-                if (commandParsers.TryGetValue(commandName, out var commandParser))
-                    commandParser.ParseAndApply(fumen, seg);
-            }
+				if (commandParsers.TryGetValue(commandName, out var commandParser))
+					commandParser.ParseAndApply(fumen, seg);
+			}
 
-            fumen.Setup();
-            return fumen;
-        }
-    }
+			fumen.Setup();
+			return fumen;
+		}
+	}
 }

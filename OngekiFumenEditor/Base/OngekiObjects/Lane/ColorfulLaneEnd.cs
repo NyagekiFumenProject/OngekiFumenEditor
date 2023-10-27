@@ -1,42 +1,34 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 {
-    public class ColorfulLaneEnd : LaneEndBase, IColorfulLane
-    {
-        public override string IDShortName => "CLE";
+	public class ColorfulLaneEnd : LaneEndBase, IColorfulLane
+	{
+		public override string IDShortName => "CLE";
 
-        private ColorId colorId = ColorIdConst.Akari;
-        public ColorId ColorId
-        {
-            get => colorId;
-            set => Set(ref colorId, value);
-        }
+		private ColorId colorId = ColorIdConst.Akari;
+		public ColorId ColorId
+		{
+			get => colorId;
+			set => Set(ref colorId, value);
+		}
 
-        private int brightness = 3;
-        public int Brightness
-        {
-            get => brightness;
-            set => Set(ref brightness, value);
-        }
+		private int brightness = 3;
+		public int Brightness
+		{
+			get => brightness;
+			set => Set(ref brightness, value);
+		}
 
-        public override void Copy(OngekiObjectBase fromObj)
-        {
-            base.Copy(fromObj);
+		public override void Copy(OngekiObjectBase fromObj)
+		{
+			base.Copy(fromObj);
 
-            if (fromObj is not ColorfulLaneStart cls)
-                return;
+			if (fromObj is not ColorfulLaneStart cls)
+				return;
 
-            ColorId = cls.ColorId;
-            Brightness = cls.Brightness;
-        }
-    }
+			ColorId = cls.ColorId;
+			Brightness = cls.Brightness;
+		}
+	}
 }
