@@ -2,6 +2,7 @@
     x:Class="OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorGlobalSettingView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels"
@@ -77,6 +78,16 @@
                     </TextBox>
                     <TextBlock VerticalAlignment="Center">时，会使用多线程进行并行计算</TextBlock>
                 </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Margin="5" Header="其他">
+            <StackPanel Margin="10">
+                <Button
+                    Padding="10,5,10,5"
+                    HorizontalAlignment="Left"
+                    cal:Message.Attach="ClearRecentOpen()">
+                    清除最近打开文件历史记录
+                </Button>
             </StackPanel>
         </GroupBox>
     </StackPanel>

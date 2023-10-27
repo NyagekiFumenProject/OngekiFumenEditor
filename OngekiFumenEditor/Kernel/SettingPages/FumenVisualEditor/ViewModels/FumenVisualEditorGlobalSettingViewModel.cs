@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Settings;
+using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,11 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
         public void ApplyChanges()
         {
             Properties.EditorGlobalSetting.Default.Save();
+        }
+
+        public void ClearRecentOpen()
+        {
+            IoC.Get<IEditorRecentFilesManager>().ClearAllRecords();
         }
     }
 }

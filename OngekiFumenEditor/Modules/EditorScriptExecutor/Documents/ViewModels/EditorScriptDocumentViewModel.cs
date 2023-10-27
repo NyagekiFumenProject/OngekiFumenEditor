@@ -30,6 +30,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MessageBox = System.Windows.MessageBox;
+using OngekiFumenEditor.Kernel.RecentFiles;
 
 namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 {
@@ -164,6 +165,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
         {
             ScriptDocument.Text = await File.ReadAllTextAsync(filePath);
             Init();
+            IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
         }
 
         protected override async Task DoNew()
@@ -196,6 +198,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
                 }
                 await File.WriteAllTextAsync(filePath, ScriptDocument.Text);
                 IsDirty = false;
+                IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
             }
             catch (Exception e)
             {

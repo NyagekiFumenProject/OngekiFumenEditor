@@ -16,6 +16,7 @@ using System.Windows;
 using System.Xml.XPath;
 using Gemini.Framework.Results;
 using System.Windows.Threading;
+using OngekiFumenEditor.Kernel.RecentFiles;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -60,6 +61,7 @@ namespace OngekiFumenEditor.Utils
                     var docName = await TryFormatOpenFileName(ogkrFilePath);
 
                     editor.DisplayName = docName;
+                    IoC.Get<IEditorRecentFilesManager>().PostRecord(new(ogkrFilePath, docName, RecentOpenType.CommandOpen));
                 };
                 frameworkElement.Loaded += loadedHandler;
             };

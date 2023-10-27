@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -271,6 +272,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
                 await Load(projectData);
                 ToastNotify("谱面项目和文件加载成功");
+
+                IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
             }
             catch (Exception e)
             {
@@ -333,7 +336,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 MessageBox.Show(saveTaskResult.ErrorMessage);
             }
             else
+            {
                 ToastNotify("谱面项目和文件保存成功");
+                IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
+            }
         }
 
         #endregion

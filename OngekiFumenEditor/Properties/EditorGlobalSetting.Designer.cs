@@ -298,5 +298,17 @@ namespace OngekiFumenEditor.Properties {
                 this["ParallelCountLimit"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RecentOpenedListStr {
+            get {
+                return ((string)(this["RecentOpenedListStr"]));
+            }
+            set {
+                this["RecentOpenedListStr"] = value;
+            }
+        }
     }
 }
