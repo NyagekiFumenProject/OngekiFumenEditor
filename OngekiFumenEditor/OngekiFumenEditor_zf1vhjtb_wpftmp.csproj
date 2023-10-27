@@ -1,0 +1,745 @@
+<Project>
+  <PropertyGroup>
+    <AssemblyName>OngekiFumenEditor</AssemblyName>
+    <IntermediateOutputPath>obj\Debug\</IntermediateOutputPath>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\</MSBuildProjectExtensionsPath>
+    <_TargetAssemblyProjectName>OngekiFumenEditor</_TargetAssemblyProjectName>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>embedded</DebugType>
+    <LangVersion>preview</LangVersion>
+    <ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
+    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Dependencies\**" />
+    <Compile Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+    <Compile Remove="_bin\**" />
+    <EmbeddedResource Remove="Dependencies\**" />
+    <EmbeddedResource Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+    <EmbeddedResource Remove="_bin\**" />
+    <None Remove="Dependencies\**" />
+    <None Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+    <None Remove="_bin\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Costura64\crnlib.dll" />
+    <None Remove="Costura64\ispc_texcomp.dll" />
+    <None Remove="Costura64\PVRTexLib.dll" />
+    <None Remove="Costura64\TexToolWrap.dll" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NE.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NN.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NS.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
+    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
+    <None Remove="Resources\empty_ogkr_template.ogkr" />
+    <None Remove="Resources\Icons\close.png" />
+    <None Remove="Resources\Icons\ease.png" />
+    <None Remove="Resources\Icons\icons8-paint-brush-16.png" />
+    <None Remove="Resources\Icons\logo.ico" />
+    <None Remove="Resources\Icons\logo32.ico" />
+    <None Remove="Resources\Icons\preview.png" />
+    <None Remove="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
+    <None Remove="Resources\Images\logo.png" />
+    <None Remove="Resources\Music.xml" />
+    <None Remove="Resources\MusicSource.xml" />
+    <None Remove="Resources\ui_jacket_0666" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Costura64\crnlib.dll">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Costura64\ispc_texcomp.dll">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Costura64\PVRTexLib.dll">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Costura64\TexToolWrap.dll">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
+    <EmbeddedResource Include="Resources\Music.xml" />
+    <EmbeddedResource Include="Resources\MusicSource.xml" />
+    <EmbeddedResource Include="Resources\ui_jacket_0666" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="FodyWeavers.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AssetsTools.NET" Version="2.0.12" />
+    <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+    <PackageReference Include="Costura.Fody" Version="5.7.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FontStashSharp" Version="1.2.8" />
+    <PackageReference Include="ManagedBass" Version="3.1.1" />
+    <PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
+    <PackageReference Include="ManagedBass.Mix" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Build" Version="17.3.2" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="17.3.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.7.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.7.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+    <PackageReference Include="NAudio" Version="2.0.1" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.6.133">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="OpenTK" Version="4.3.0" />
+    <PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
+    <PackageReference Include="PixiEditor.ColorPicker" Version="3.3.1" />
+    <PackageReference Include="SharpVectors" Version="1.8.1" />
+    <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj" />
+    <ProjectReference Include="..\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Dependences\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Dependences\gemini\src\Gemini\Gemini.csproj">
+      <PrivateAssets>all</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Modules\AudioAdjustWindow\Views\AudioAdjustWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\EditorSvgObjectControlProvider\Views\ObjectProperty\Operation\SvgPrefabOperationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenConverter\Views\FumenConverterView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\MultiLanesOperationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\BossCardSelectorWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\AcbGeneratorWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Properties\OptionGeneratorToolsSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>OptionGeneratorToolsSetting.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\ProgramSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>ProgramSetting.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Properties\AudioPlayerToolViewerSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>AudioPlayerToolViewerSetting.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\AudioSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AudioSetting.settings</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\EditorGlobalSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EditorGlobalSetting.settings</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\LogSetting.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LogSetting.settings</DependentUpon>
+    </Compile>
+    <Compile Update="UI\Controls\ObjectInspector\ObjectInspectorView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\AudioPlayerToolViewerSetting.settings">
+      <LastGenOutput>AudioPlayerToolViewerSetting.Designer.cs</LastGenOutput>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\OptionGeneratorToolsSetting.settings">
+      <LastGenOutput>OptionGeneratorToolsSetting.Designer.cs</LastGenOutput>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\AudioSetting.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>AudioSetting.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Properties\EditorGlobalSetting.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>EditorGlobalSetting.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Properties\ProgramSetting.settings">
+      <LastGenOutput>ProgramSetting.Designer.cs</LastGenOutput>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\LogSetting.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>LogSetting.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="bass_fx.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\NewScriptTemplate.nyagekiScript">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\beamend.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\beamlooping.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\beamprepare.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\bell.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\bullet.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\clickse.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\exflick.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\extap.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\exwall.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\flick.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\holdend.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\holdtick.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\tap.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\sounds\wall.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProgramRootFiles Include="Resources/Binaries/ProgramRoot/**/*.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProgramRootFiles Remove="_bin\**" />
+  </ItemGroup>
+  <Target Name="CopyProgramRootFiles" AfterTargets="AfterBuild">
+    <Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="CopyProgramRootFiles" AfterTargets="Publish">
+    <Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <!--
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="echo &quot;$(OutDir)&quot; &amp; xcopy &quot;$(ProjectDir)Resources\Binaries\ProgramRoot\*.*&quot; &quot;$(OutDir)&quot; /s /y" />
+  </Target>
+  -->
+  <ItemGroup>
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\Dependencies\AcbGeneratorFuck\AcbGeneratorFuck.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\Accessibility.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\anglesharp.css\0.16.3\lib\netstandard2.0\AngleSharp.Css.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\anglesharp\0.16.1\lib\netstandard2.0\AngleSharp.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\anglesharp.xml\0.16.0\lib\netstandard2.0\AngleSharp.Xml.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\assetstools.net\2.0.12\lib\netstandard2.0\AssetsTools.NET.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\caliburn.micro.core\4.0.173\lib\netstandard2.0\Caliburn.Micro.Core.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\caliburn.micro\4.0.173\lib\net5.0-windows7.0\Caliburn.Micro.Platform.Core.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\caliburn.micro\4.0.173\lib\net5.0-windows7.0\Caliburn.Micro.Platform.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\pixieditor.colorpicker\3.3.1\lib\net6.0-windows7.0\ColorPicker.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\controlzex\4.2.0\lib\netcoreapp3.1\ControlzEx.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\costura.fody\5.7.0\lib\netstandard1.0\Costura.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\cyotek.drawing.bitmapfont\2.0.4\lib\net5.0\Cyotek.Drawing.BitmapFont.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\Dependencies\DereTore\DereTore.Common.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\Dependencies\DereTore\DereTore.Common.StarlightStage.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\Dependencies\DereTore\DereTore.Exchange.Archive.ACB.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\Dependencies\DereTore\DereTore.Exchange.Audio.HCA.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\Dependencies\DereTore\DereTore.Interop.OS.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\dotnetprojects.extended.wpf.toolkit\4.6.78\lib\netcoreapp3.0\DotNetProjects.Wpf.Extended.Toolkit.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\fontstashsharp.base\1.1.8\lib\netstandard2.0\FontStashSharp.Base.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\fontstashsharp\1.2.8\lib\netstandard2.0\FontStashSharp.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\fontstashsharp.rasterizers.stbtruetypesharp\1.1.8\lib\netstandard2.0\FontStashSharp.Rasterizers.StbTrueTypeSharp.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\Dependences\gemini\src\Gemini\bin\Debug\net6.0-windows\Gemini.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\bin\Debug\net6.0-windows\Gemini.Modules.Output.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.glwpfcontrol\4.1.0\lib\netcoreapp3.1\GLWpfControl.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\avalonedit\6.3.0.90\lib\net6.0-windows7.0\ICSharpCode.AvalonEdit.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\mahapps.metro\2.0.0-alpha0660\lib\netcoreapp3.1\MahApps.Metro.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\managedbass\3.1.1\lib\netstandard1.4\ManagedBass.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\managedbass.fx\3.1.1\lib\netstandard1.4\ManagedBass.Fx.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\managedbass.mix\3.1.1\lib\netstandard1.4\ManagedBass.Mix.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.bcl.asyncinterfaces\7.0.0\lib\netstandard2.1\Microsoft.Bcl.AsyncInterfaces.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.build\17.3.2\ref\net6.0\Microsoft.Build.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.build.framework\17.3.2\ref\net6.0\Microsoft.Build.Framework.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.analyzerutilities\3.3.0\lib\netstandard2.0\Microsoft.CodeAnalysis.AnalyzerUtilities.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.csharp\4.7.0\lib\net6.0\Microsoft.CodeAnalysis.CSharp.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.csharp.features\4.7.0\lib\net6.0\Microsoft.CodeAnalysis.CSharp.Features.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.csharp.workspaces\4.7.0\lib\net6.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.common\4.7.0\lib\net6.0\Microsoft.CodeAnalysis.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.elfie\1.0.0\lib\netstandard2.0\Microsoft.CodeAnalysis.Elfie.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.features\4.7.0\lib\net6.0\Microsoft.CodeAnalysis.Features.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.scripting.common\4.7.0\lib\net6.0\Microsoft.CodeAnalysis.Scripting.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.workspaces.common\4.7.0\lib\net6.0\Microsoft.CodeAnalysis.Workspaces.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.workspaces.msbuild\4.7.0\lib\net6.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\Microsoft.CSharp.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.diasymreader\2.0.0\lib\netstandard2.0\Microsoft.DiaSymReader.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.net.stringtools\17.3.2\ref\net6.0\Microsoft.NET.StringTools.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\Microsoft.VisualBasic.Core.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\Microsoft.VisualBasic.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\Microsoft.VisualBasic.Forms.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\Microsoft.Win32.Primitives.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\Microsoft.Win32.Registry.AccessControl.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\Microsoft.Win32.Registry.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.win32.systemevents\7.0.0\lib\net6.0\Microsoft.Win32.SystemEvents.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\microsoft.xaml.behaviors.wpf\1.1.39\lib\net5.0-windows7.0\Microsoft.Xaml.Behaviors.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\Dependences\MigratableSerializer\MigratableSerializer\bin\Debug\netstandard2.0\MigratableSerializer.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\mono.cecil\0.11.3\lib\netstandard2.0\Mono.Cecil.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\mono.cecil\0.11.3\lib\netstandard2.0\Mono.Cecil.Mdb.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\mono.cecil\0.11.3\lib\netstandard2.0\Mono.Cecil.Pdb.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\mono.cecil\0.11.3\lib\netstandard2.0\Mono.Cecil.Rocks.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\mscorlib.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\naudio.asio\2.0.0\lib\netstandard2.0\NAudio.Asio.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\naudio.core\2.0.0\lib\netstandard2.0\NAudio.Core.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\naudio\2.0.1\lib\netstandard2.0\NAudio.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\naudio.midi\2.0.1\lib\netstandard2.0\NAudio.Midi.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\naudio.wasapi\2.0.0\lib\netstandard2.0\NAudio.Wasapi.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\naudio.winforms\2.0.1\lib\netcoreapp3.1\NAudio.WinForms.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\naudio.winmm\2.0.1\lib\netstandard2.0\NAudio.WinMM.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\netstandard.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.compute\4.3.0\lib\netcoreapp3.1\OpenTK.Compute.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.core\4.3.0\lib\netstandard2.1\OpenTK.Core.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.graphics\4.3.0\lib\netstandard2.1\OpenTK.Graphics.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.input\4.3.0\lib\netstandard2.0\OpenTK.Input.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.mathematics\4.3.0\lib\netstandard2.1\OpenTK.Mathematics.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.openal\4.3.0\lib\netcoreapp3.1\OpenTK.OpenAL.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.windowing.common\4.3.0\lib\netstandard2.1\OpenTK.Windowing.Common.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.windowing.desktop\4.3.0\lib\netcoreapp3.1\OpenTK.Windowing.Desktop.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\opentk.windowing.graphicslibraryframework\4.3.0\lib\netcoreapp3.1\OpenTK.Windowing.GraphicsLibraryFramework.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\bin\Debug\netstandard2.1\Polyline2DCSharp.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationCore.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationFramework.Aero.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationFramework.Aero2.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationFramework.AeroLite.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationFramework.Classic.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationFramework.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationFramework.Luna.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationFramework.Royale.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\PresentationUI.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\ReachFramework.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sharpvectors\1.8.1\lib\net6.0-windows7.0\SharpVectors.Converters.Wpf.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sharpvectors\1.8.1\lib\net6.0-windows7.0\SharpVectors.Core.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sharpvectors\1.8.1\lib\net6.0-windows7.0\SharpVectors.Css.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sharpvectors\1.8.1\lib\net6.0-windows7.0\SharpVectors.Dom.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sharpvectors\1.8.1\lib\net6.0-windows7.0\SharpVectors.Model.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sharpvectors\1.8.1\lib\net6.0-windows7.0\SharpVectors.Rendering.Gdi.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sharpvectors\1.8.1\lib\net6.0-windows7.0\SharpVectors.Rendering.Wpf.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sharpvectors\1.8.1\lib\net6.0-windows7.0\SharpVectors.Runtime.Wpf.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\simplesvg2linesegementinterpolater\0.7.3\lib\net5.0-windows7.0\SimpleSvg2LineSegementInterpolater.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\sixlabors.imagesharp\3.0.1\lib\net6.0\SixLabors.ImageSharp.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\stbimagesharp\2.27.13\lib\netstandard2.0\StbImageSharp.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\stbtruetypesharp\1.26.11\lib\netstandard2.0\StbTrueTypeSharp.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\Dependences\SvgToXaml\SvgConverter\bin\Debug\net6.0-windows\SvgConverter.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.AppContext.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Buffers.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.CodeDom.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Collections.Concurrent.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Collections.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.collections.immutable\7.0.0\lib\net6.0\System.Collections.Immutable.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Collections.NonGeneric.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Collections.Specialized.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ComponentModel.Annotations.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.componentmodel.composition\5.0.0\ref\netstandard2.0\System.ComponentModel.Composition.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.componentmodel.composition.registration\5.0.0\ref\netstandard2.1\System.ComponentModel.Composition.Registration.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ComponentModel.DataAnnotations.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ComponentModel.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ComponentModel.EventBasedAsync.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ComponentModel.Primitives.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ComponentModel.TypeConverter.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.composition.attributedmodel\7.0.0\lib\net6.0\System.Composition.AttributedModel.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.composition.convention\7.0.0\lib\net6.0\System.Composition.Convention.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.composition.hosting\7.0.0\lib\net6.0\System.Composition.Hosting.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.composition.runtime\7.0.0\lib\net6.0\System.Composition.Runtime.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.composition.typedparts\7.0.0\lib\net6.0\System.Composition.TypedParts.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.configuration.configurationmanager\7.0.0\lib\net6.0\System.Configuration.ConfigurationManager.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Configuration.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Console.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Core.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Data.Common.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Data.DataSetExtensions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Data.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.data.odbc\5.0.0\ref\netstandard2.0\System.Data.Odbc.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.data.oledb\5.0.0\ref\netstandard2.0\System.Data.OleDb.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.data.sqlclient\4.8.1\ref\netcoreapp2.1\System.Data.SqlClient.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Design.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.Contracts.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.Debug.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.DiagnosticSource.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.EventLog.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.FileVersionInfo.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.PerformanceCounter.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.Process.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.StackTrace.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.TextWriterTraceListener.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.Tools.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.TraceSource.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Diagnostics.Tracing.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.directoryservices.accountmanagement\5.0.0\ref\netstandard2.0\System.DirectoryServices.AccountManagement.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.DirectoryServices.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.directoryservices.protocols\5.0.0\ref\netstandard2.0\System.DirectoryServices.Protocols.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.drawing.common\7.0.0\lib\net6.0\System.Drawing.Common.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Drawing.Design.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Drawing.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Drawing.Primitives.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Dynamic.Runtime.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Formats.Asn1.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Globalization.Calendars.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Globalization.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Globalization.Extensions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.Compression.Brotli.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.Compression.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.Compression.FileSystem.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.Compression.ZipFile.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.FileSystem.AccessControl.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.FileSystem.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.FileSystem.DriveInfo.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.FileSystem.Primitives.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.FileSystem.Watcher.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.IsolatedStorage.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.MemoryMappedFiles.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.IO.Packaging.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.io.pipelines\7.0.0\lib\net6.0\System.IO.Pipelines.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.Pipes.AccessControl.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.Pipes.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.io.ports\5.0.0\ref\netstandard2.0\System.IO.Ports.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.IO.UnmanagedMemoryStream.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Linq.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Linq.Expressions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Linq.Parallel.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Linq.Queryable.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.management\5.0.0\ref\netstandard2.0\System.Management.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Memory.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.Http.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.Http.Json.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.HttpListener.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.Mail.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.NameResolution.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.NetworkInformation.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.Ping.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.Primitives.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.Requests.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.Security.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.ServicePoint.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.Sockets.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.WebClient.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.WebHeaderCollection.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.WebProxy.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.WebSockets.Client.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Net.WebSockets.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Numerics.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Numerics.Vectors.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ObjectModel.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Printing.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.reflection.context\5.0.0\ref\netstandard2.0\System.Reflection.Context.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Reflection.DispatchProxy.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Reflection.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Reflection.Emit.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Reflection.Emit.ILGeneration.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Reflection.Emit.Lightweight.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Reflection.Extensions.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.reflection.metadata\7.0.0\lib\net6.0\System.Reflection.Metadata.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.reflection.metadataloadcontext\6.0.0\lib\net6.0\System.Reflection.MetadataLoadContext.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Reflection.Primitives.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Reflection.TypeExtensions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Resources.Extensions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Resources.Reader.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Resources.ResourceManager.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Resources.Writer.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.runtime.caching\5.0.0\ref\netstandard2.0\System.Runtime.Caching.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.CompilerServices.Unsafe.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.CompilerServices.VisualC.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Extensions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Handles.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.InteropServices.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.InteropServices.RuntimeInformation.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Intrinsics.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Loader.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Numerics.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Serialization.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Serialization.Formatters.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Serialization.Json.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Serialization.Primitives.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Runtime.Serialization.Xml.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.AccessControl.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Claims.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.Algorithms.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.Cng.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.Csp.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.Encoding.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.OpenSsl.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.Pkcs.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.Primitives.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.security.cryptography.protecteddata\7.0.0\lib\net6.0\System.Security.Cryptography.ProtectedData.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.X509Certificates.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Security.Cryptography.Xml.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.security.permissions\7.0.0\lib\net6.0\System.Security.Permissions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Principal.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.Principal.Windows.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Security.SecureString.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.servicemodel.primitives\4.7.0\ref\netcoreapp2.1\System.ServiceModel.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.servicemodel.duplex\4.7.0\ref\netstandard2.0\System.ServiceModel.Duplex.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.servicemodel.http\4.7.0\ref\netstandard2.0\System.ServiceModel.Http.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.servicemodel.nettcp\4.7.0\ref\netstandard2.0\System.ServiceModel.NetTcp.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.servicemodel.primitives\4.7.0\ref\netcoreapp2.1\System.ServiceModel.Primitives.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.servicemodel.security\4.7.0\ref\netstandard2.0\System.ServiceModel.Security.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.servicemodel.syndication\5.0.0\ref\netcoreapp2.1\System.ServiceModel.Syndication.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ServiceModel.Web.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ServiceProcess.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.serviceprocess.servicecontroller\5.0.0\ref\netstandard2.0\System.ServiceProcess.ServiceController.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Text.Encoding.CodePages.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Text.Encoding.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Text.Encoding.Extensions.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.text.encodings.web\7.0.0\lib\net6.0\System.Text.Encodings.Web.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.text.json\7.0.3\lib\net6.0\System.Text.Json.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Text.RegularExpressions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Threading.AccessControl.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.threading.channels\7.0.0\lib\net6.0\System.Threading.Channels.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.Overlapped.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.Tasks.Dataflow.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.Tasks.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.Tasks.Extensions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.Tasks.Parallel.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.Thread.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.ThreadPool.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Threading.Timer.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Transactions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Transactions.Local.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.ValueTuple.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Web.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Web.HttpUtility.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Windows.Controls.Ribbon.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Windows.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\system.windows.extensions\7.0.0\lib\net6.0\System.Windows.Extensions.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Windows.Forms.Design.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Windows.Forms.Design.Editors.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Windows.Forms.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Windows.Forms.Primitives.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Windows.Input.Manipulations.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Windows.Presentation.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\System.Xaml.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.Linq.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.ReaderWriter.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.Serialization.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.XDocument.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.XmlDocument.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.XmlSerializer.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.XPath.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\6.0.16\ref\net6.0\System.Xml.XPath.XDocument.dll" />
+    <ReferencePath Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\Dependencies\JacketGenerator\TexturePlugin.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\UIAutomationClient.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\UIAutomationClientSideProviders.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\UIAutomationProvider.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\UIAutomationTypes.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\WindowsBase.dll" />
+    <ReferencePath Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\ref\net6.0\WindowsFormsIntegration.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\dirkster.avalondock\3.6.2\lib\netcoreapp3.0\Xceed.Wpf.AvalonDock.dll" />
+    <ReferencePath Include="C:\Users\mikir\.nuget\packages\dirkster.avalondock.themes.vs2013\3.6.2\lib\netcoreapp3.0\Xceed.Wpf.AvalonDock.Themes.VS2013.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Kernel\SettingPages\Audio\Views\AudioSettingView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Kernel\SettingPages\FumenVisualEditor\Views\FumenVisualEditorGlobalSettingView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Kernel\SettingPages\Logs\Views\LogsSettingView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Kernel\SettingPages\Program\Views\ProgramSettingView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\AudioAdjustWindow\Views\AudioAdjustWindowView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\EditorScriptExecutor\Documents\Views\EditorScriptDocumentView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\EditorSvgObjectControlProvider\Views\ObjectProperty\Operation\SvgPrefabOperationView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\EditorSvgObjectControlProvider\Views\SvgPrefabView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenConverter\Views\FumenConverterView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenEditorRenderControlViewer\Views\FumenEditorRenderControlViewerView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenMetaInfoBrowser\Views\FumenMetaInfoBrowserView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenObjectPropertyBrowser\UI\Controls\CommonOperationButton.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenObjectPropertyBrowser\Views\BeamOperationView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenObjectPropertyBrowser\Views\Dialog\BrushTGridRangeDialogView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenObjectPropertyBrowser\Views\MultiLanesOperationView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenObjectPropertyBrowser\Views\WallOperationView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\Dialogs\EditorProjectSetupDialogView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\DisplayTextLineObjectViewBase.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\FumenVisualEditorView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\BeamEndView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\BeamNextView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\BeamStartView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\BellView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\FlickView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\LaneEndView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\LaneNextView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\LaneStartView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\TapView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\WallEndView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\WallNextView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\WallStartView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\FumenVisualEditor\Views\UI\Toast.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\OptionGeneratorTools\Views\AcbGeneratorWindowView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\OptionGeneratorTools\Views\Dialogs\BossCardSelectorWindowView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\OptionGeneratorTools\Views\MusicXmlWindowView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\ObjectInspectorView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\BaseValueTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\BoolValueTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\ColorIdEnumTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\CurveInterpolaterFactoryTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\FileInfoTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\RangeValueTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\TGridTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\ObjectInspector\Views\XGridTypeUIView.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Controls\RangeValue.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Dialogs\AboutWindow.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\UI\Dialogs\CommonColorPicker.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\App.g.cs" />
+    <Compile Include="F:\Source\Repos\OngekiFumenSupport\refHost\OngekiFumenEditor\OngekiFumenEditor\obj\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="C:\Program Files\dotnet\sdk\7.0.203\Sdks\Microsoft.NET.Sdk\targets\..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" />
+    <Analyzer Include="C:\Program Files\dotnet\sdk\7.0.203\Sdks\Microsoft.NET.Sdk\targets\..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll" />
+    <Analyzer Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.analyzers\3.3.4\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
+    <Analyzer Include="C:\Users\mikir\.nuget\packages\microsoft.codeanalysis.analyzers\3.3.4\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
+    <Analyzer Include="C:\Users\mikir\.nuget\packages\system.text.json\7.0.3\analyzers\dotnet\roslyn4.4\cs\System.Text.Json.SourceGeneration.dll" />
+    <Analyzer Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\analyzers/dotnet/System.Windows.Forms.Analyzers.dll" />
+    <Analyzer Include="C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\6.0.16\analyzers/dotnet/cs/System.Windows.Forms.Analyzers.CSharp.dll" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>
