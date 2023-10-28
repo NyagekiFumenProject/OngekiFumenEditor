@@ -785,7 +785,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				isLeftMouseDown = true;
 				isSelectRangeDragging = false;
 
-				var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToArray();
+				var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
 				if (TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this) is TGrid tGrid)
 				{
 					var lanes = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
@@ -802,8 +802,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 						return child as OngekiObjectBase;
 					}).FilterNull().OrderBy(x => x.Id);
 
-					hitResult = hitResult.Concat(lanes).Distinct().ToArray();
+					hitResult = hitResult.Concat(lanes).Distinct().ToList();
 				}
+				if (BrushMode)
+				{
+					//笔刷模式下，忽略点击线段和节点~
+					hitResult.RemoveAll(x => x is ConnectableObjectBase);
+				}
+
 				var idx = Math.Max(0, hitResult.IndexOf(mouseDownHitObject));
 				var hitOngekiObject = hitResult.ElementAtOrDefault(idx);
 
@@ -830,9 +836,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 					mouseDownHitObject = hitOngekiObject;
 					mouseDownHitObjectPosition = position;
 
-					if (hitResult.Length > 1)
+					if (hitResult.Count > 1)
 					{
-						var nextIdx = (idx + 1) % hitResult.Length;
+						var nextIdx = (idx + 1) % hitResult.Count;
 						mouseDownNextHitObject = hitResult[nextIdx];
 					}
 				}
