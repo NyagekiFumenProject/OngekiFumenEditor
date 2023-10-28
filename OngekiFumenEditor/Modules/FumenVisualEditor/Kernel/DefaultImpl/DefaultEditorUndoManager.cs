@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			this.editor = editor;
 
 			isRecoveryCurrentTime = Properties.EditorGlobalSetting.Default.RecoveryCurrentTimeAfterExecuteAction;
-			UndoCountLimit = Properties.EditorGlobalSetting.Default.IsEnableUndoActionSavingLimit ? Properties.EditorGlobalSetting.Default.UndoActionSavingLimit : null
+			UndoCountLimit = Properties.EditorGlobalSetting.Default.IsEnableUndoActionSavingLimit ? Properties.EditorGlobalSetting.Default.UndoActionSavingLimit : null;
 
 			Properties.EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
 		}

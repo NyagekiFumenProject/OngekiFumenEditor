@@ -2,12 +2,15 @@
     x:Class="OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views.FumenEditorSelectingObjectViewerView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.UI.Behaviors"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
+    cal:Message.Attach="[Key Delete]=[Action OnCancelItemSelectedObjects($dataContext)];"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:FumenEditorSelectingObjectViewerViewModel}"
@@ -24,11 +27,14 @@
             Background="Transparent"
             BorderBrush="Transparent"
             ItemsSource="{Binding Editor.SelectObjects}"
-            ScrollViewer.CanContentScroll="True"
-            SelectedValue="{Binding CurrentSelect}">
+            ScrollViewer.CanContentScroll="True">
+            <i:Interaction.Behaviors>
+                <behaviors:ListViewMultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+            </i:Interaction.Behaviors>
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem cal:Message.Attach="OnRefresh()" Header="刷新" />
+                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="取消选择列表已选的" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
@@ -46,15 +52,18 @@
                             <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding Name}"
-                        Header="物件名字" />
 
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding TGrid}"
-                        Header="物件时间" />
+                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=Name}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)">
+                            名字
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding TGrid}">
+                        <GridViewColumnHeader>
+                            物件时间
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
 
                     <GridViewColumn
                         Width="550"

@@ -6,8 +6,16 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Windows.Controls;
+using System.Windows;
+using System.Windows.Data;
+using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 {
@@ -20,23 +28,29 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 			get => editor;
 			set
 			{
+				this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropChanged);
 				Set(ref editor, value);
+				OnRefresh();
 			}
 		}
 
-		private OngekiObjectBase currentSelect;
-		public OngekiObjectBase CurrentSelect
+		private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
 		{
-			get => currentSelect;
-			set
+			switch (e.PropertyName)
 			{
-				var updateClick = currentSelect != value;
-				Set(ref currentSelect, value);
-
-				if (updateClick)
-					OnItemSingleClick(value);
+				case nameof(FumenVisualEditorViewModel.SelectObjects):
+					OnRefresh();
+					break;
+				default:
+					break;
 			}
 		}
+
+		public ObservableCollection<ISelectableObject> SelectedItems { get; set; } = new ();
+
+		private ICollectionView dataView;
+		private GridViewColumnHeader _lastHeaderClicked = null;
+		private ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
 		public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
@@ -54,16 +68,23 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
 		public void OnRefresh()
 		{
-			Editor?.NotifyOfPropertyChange(nameof(Editor.SelectObjects));
+			var list = new List<ISelectableObject>(Editor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>());
+			dataView = CollectionViewSource.GetDefaultView(list);
+			dataView.Refresh();
+		}
+
+		public void OnCancelItemSelectedObjects(ActionExecutionContext ctx)
+		{
+			foreach (var item in SelectedItems.ToArray())
+				item.IsSelected = false;
+
+			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
 		}
 
 		public void OnItemSingleClick(OngekiObjectBase item)
 		{
 			if (Editor is null)
 				return;
-
-			//Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
-			//Editor.SelectObjects.Where(x => x == item).FilterNull().ForEach(x => x.IsSelected = true);
 
 			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor, item);
 		}
@@ -78,6 +99,57 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
 			Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
 			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+		}
+
+		private void Sort(string sortBy, ListSortDirection direction)
+		{
+			dataView.SortDescriptions.Clear();
+			dataView.SortDescriptions.Add(new SortDescription(sortBy, direction));
+			dataView.Refresh();
+		}
+
+		public void SortColumn(ActionExecutionContext ctx)
+		{
+			var e = ctx.EventArgs as RoutedEventArgs;
+
+			var headerClicked = e.OriginalSource as GridViewColumnHeader;
+			ListSortDirection direction;
+
+			if (headerClicked != null)
+			{
+				if (headerClicked.Role != GridViewColumnHeaderRole.Padding)
+				{
+					if (headerClicked != _lastHeaderClicked)
+					{
+						direction = ListSortDirection.Ascending;
+					}
+					else
+					{
+						if (_lastDirection == ListSortDirection.Ascending)
+						{
+							direction = ListSortDirection.Descending;
+						}
+						else
+						{
+							direction = ListSortDirection.Ascending;
+						}
+					}
+
+					var columnBinding = headerClicked.Column.DisplayMemberBinding as Binding;
+					var sortBy = columnBinding?.Path.Path ?? headerClicked.Column.Header as string;
+
+					Sort(sortBy, direction);
+
+					// Remove arrow from previously sorted header
+					if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
+					{
+						_lastHeaderClicked.Column.HeaderTemplate = null;
+					}
+
+					_lastHeaderClicked = headerClicked;
+					_lastDirection = direction;
+				}
+			}
 		}
 	}
 }
