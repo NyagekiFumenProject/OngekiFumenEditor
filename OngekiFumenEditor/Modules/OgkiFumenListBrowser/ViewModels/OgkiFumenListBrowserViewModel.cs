@@ -68,6 +68,14 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 		public OgkiFumenListBrowserViewModel()
 		{
 			DisplayName = "音击谱面库浏览器";
+			rootFolderPath = Properties.OptionGeneratorToolsSetting.Default.LastLoadedGameFolder;
+		}
+
+		protected override void OnViewLoaded(object view)
+		{
+			base.OnViewLoaded(view);
+			if (Directory.Exists(RootFolderPath))
+				RefreshList();
 		}
 
 		private async void RefreshList()
@@ -163,6 +171,8 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 				return;
 
 			RootFolderPath = folderPath;
+			Properties.OptionGeneratorToolsSetting.Default.LastLoadedGameFolder = RootFolderPath;
+			Properties.OptionGeneratorToolsSetting.Default.Save();
 		}
 
 		public async Task<Folder> BuildFolder(string folderPath, Dictionary<string, string> resourceMap)
