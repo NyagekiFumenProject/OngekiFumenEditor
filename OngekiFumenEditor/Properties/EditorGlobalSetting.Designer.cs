@@ -310,5 +310,17 @@ namespace OngekiFumenEditor.Properties {
                 this["RecentOpenedListStr"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RecoveryCurrentTimeAfterExecuteAction {
+            get {
+                return ((bool)(this["RecoveryCurrentTimeAfterExecuteAction"]));
+            }
+            set {
+                this["RecoveryCurrentTimeAfterExecuteAction"] = value;
+            }
+        }
     }
 }

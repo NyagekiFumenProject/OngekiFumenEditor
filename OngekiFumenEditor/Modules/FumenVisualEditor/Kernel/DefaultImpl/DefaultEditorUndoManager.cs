@@ -7,6 +7,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,6 +49,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 		private Stack<List<IUndoableAction>> _combineStack = new();
 		private readonly FumenVisualEditorViewModel editor;
+		private bool isRecoveryCurrentTime;
 
 		public int RedoActionCount => ActionStack.Count - UndoActionCount;
 
@@ -65,6 +67,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 		public DefaultEditorUndoManager(FumenVisualEditorViewModel editor)
 		{
 			this.editor = editor;
+
+			isRecoveryCurrentTime = Properties.EditorGlobalSetting.Default.RecoveryCurrentTimeAfterExecuteAction;
+			UndoCountLimit = Properties.EditorGlobalSetting.Default.IsEnableUndoActionSavingLimit ? Properties.EditorGlobalSetting.Default.UndoActionSavingLimit : null
+
+			Properties.EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
+		}
+
+		private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			switch (e.PropertyName)
+			{
+				case nameof(Properties.EditorGlobalSetting.IsEnableUndoActionSavingLimit):
+				case nameof(Properties.EditorGlobalSetting.UndoActionSavingLimit):
+					UndoCountLimit = Properties.EditorGlobalSetting.Default.IsEnableUndoActionSavingLimit ? Properties.EditorGlobalSetting.Default.UndoActionSavingLimit : null;
+					break;
+				case nameof(Properties.EditorGlobalSetting.RecoveryCurrentTimeAfterExecuteAction):
+					isRecoveryCurrentTime = Properties.EditorGlobalSetting.Default.RecoveryCurrentTimeAfterExecuteAction;
+					break;
+				default:
+					break;
+			}
 		}
 
 		private void EnforceLimit()
@@ -114,19 +137,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				NotifyOfPropertyChange(() => CanRedo);
 			}
 
-			//remember currentTime and rebuild new action
-			var curTGrid = editor.GetCurrentTGrid();
-			var wrappedAction = new CompositeUndoAction(action.Name, new[]
+			if (isRecoveryCurrentTime)
 			{
-				action,
-				LambdaUndoAction.Create("记忆/恢复编辑器时间",()=> { }  ,() =>{
-					if (editor.IsDesignMode && !editor.CheckVisible(curTGrid))
-						editor.ScrollTo(curTGrid);
-				})
-			});
+				//remember currentTime and rebuild new action
+				var curTGrid = editor.GetCurrentTGrid();
+				var wrappedAction = new CompositeUndoAction(action.Name, new[]
+				{
+					action,
+					LambdaUndoAction.Create("记忆/恢复编辑器时间",()=> { }  ,() =>{
+						if (editor.IsDesignMode && !editor.CheckVisible(curTGrid))
+							editor.ScrollTo(curTGrid);
+					})
+				});
+			}
 
-			wrappedAction.Execute();
-			ActionStack.Add(wrappedAction);
+			action.Execute();
+			ActionStack.Add(action);
 			UndoActionCount++;
 
 			EnforceLimit();

@@ -107,10 +107,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		{
 			switch (e.PropertyName)
 			{
-				case nameof(Properties.EditorGlobalSetting.IsEnableUndoActionSavingLimit):
-				case nameof(Properties.EditorGlobalSetting.UndoActionSavingLimit):
-					UndoRedoManager.UndoCountLimit = Properties.EditorGlobalSetting.Default.IsEnableUndoActionSavingLimit ? Properties.EditorGlobalSetting.Default.UndoActionSavingLimit : null;
-					break;
 				case nameof(EditorSetting.VerticalDisplayScale):
 					RecalculateTotalDurationHeight();
 					var tGrid = GetCurrentTGrid();
@@ -222,9 +218,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 		public FumenVisualEditorViewModel() : base()
 		{
+			//replace owned impl
 			UndoRedoManager = new DefaultEditorUndoManager(this);
+
 			Properties.EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
-			Log.LogDebug($"UndoRedoManager.UndoCountLimit: {UndoRedoManager.UndoCountLimit}");
 		}
 
 		#region Document New/Save/Load

@@ -32,7 +32,8 @@
         </GroupBox>
         <GroupBox Margin="5" Header="撤回/重做 (需要重启生效)">
             <StackPanel Margin="10">
-                <CheckBox IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}">限制编辑器撤回操作保存数量</CheckBox>
+                <CheckBox IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}">记录操作位置，设计模式中撤回时如果不在位置内则跳转此位置</CheckBox>
+                <CheckBox Margin="0,10,0,0" IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}">限制编辑器撤回操作保存数量</CheckBox>
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableUndoActionSavingLimit}"
