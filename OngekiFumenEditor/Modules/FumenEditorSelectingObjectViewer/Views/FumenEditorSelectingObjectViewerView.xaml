@@ -26,8 +26,9 @@
             Grid.Row="1"
             Background="Transparent"
             BorderBrush="Transparent"
-            ItemsSource="{Binding Editor.SelectObjects}"
-            ScrollViewer.CanContentScroll="True">
+            ItemsSource="{Binding CollectionView}"
+            ScrollViewer.CanContentScroll="True"
+            SelectionMode="Extended">
             <i:Interaction.Behaviors>
                 <behaviors:ListViewMultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
             </i:Interaction.Behaviors>
@@ -59,8 +60,8 @@
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding TGrid}">
-                        <GridViewColumnHeader>
+                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=TGrid}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)">
                             物件时间
                         </GridViewColumnHeader>
                     </GridViewColumn>

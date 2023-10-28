@@ -46,9 +46,13 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 			}
 		}
 
-		public ObservableCollection<ISelectableObject> SelectedItems { get; set; } = new ();
+		public ObservableCollection<ISelectableObject> SelectedItems { get; } = new();
 
+		private List<ISelectableObject> editorSelectObjects = new();
+
+		public ICollectionView CollectionView => dataView;
 		private ICollectionView dataView;
+
 		private GridViewColumnHeader _lastHeaderClicked = null;
 		private ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
@@ -58,6 +62,8 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 		{
 			DisplayName = $"当前选择物件查看器";
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+
+			dataView = CollectionViewSource.GetDefaultView(editorSelectObjects);
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}
 
@@ -68,8 +74,8 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
 		public void OnRefresh()
 		{
-			var list = new List<ISelectableObject>(Editor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>());
-			dataView = CollectionViewSource.GetDefaultView(list);
+			editorSelectObjects.Clear();
+			editorSelectObjects.AddRange(Editor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>());
 			dataView.Refresh();
 		}
 
