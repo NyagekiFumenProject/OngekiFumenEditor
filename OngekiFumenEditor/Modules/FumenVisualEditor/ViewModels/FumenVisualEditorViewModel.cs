@@ -9,6 +9,7 @@ using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Parser;
@@ -221,6 +222,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 		public FumenVisualEditorViewModel() : base()
 		{
+			UndoRedoManager = new DefaultEditorUndoManager();
 			Properties.EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
 			Log.LogDebug($"UndoRedoManager.UndoCountLimit: {UndoRedoManager.UndoCountLimit}");
 		}
