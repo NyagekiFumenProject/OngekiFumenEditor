@@ -276,8 +276,13 @@ namespace OngekiFumenEditor.Base
 			} is ConnectableObjectBase lane)
 			{
 				var refStart = lane.ReferenceStartObject;
+				var prev = (lane as ConnectableChildObjectBase)?.PrevObject;
+				var next = lane.NextObject;
+
 				Lanes.Remove(lane);
-				ConnectableObjectBase.RelocateDockableAllObjects(this, refStart);
+
+				ConnectableObjectBase.RelocateDockableObjects(this, prev, refStart);
+				ConnectableObjectBase.RelocateDockableObjects(this, next, refStart);
 			}
 			else
 			{

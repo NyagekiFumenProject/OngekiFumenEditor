@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using OngekiFumenEditor.Utils;
+using System.Linq;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
@@ -37,11 +38,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 				RelocateDockableObjects(fumen, child.PrevObject, start);
 		}
 
-		private static void RelocateDockableObjects(OngekiFumen fumen, ConnectableObjectBase obj, ConnectableStartObject start)
+		public static void RelocateDockableObjects(OngekiFumen fumen, ConnectableObjectBase obj, ConnectableStartObject start)
 		{
-			if (start is null)
-				return;
-			if (obj.NextObject is null)
+			if (start is null ||
+				obj is null ||
+				obj.NextObject is null)
 				return;
 			var refLaneId = obj.RecordId;
 
