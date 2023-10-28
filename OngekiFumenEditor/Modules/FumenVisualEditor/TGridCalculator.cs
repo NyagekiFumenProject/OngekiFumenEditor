@@ -89,6 +89,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 		private static TimeSpan ConvertYToAudioTime_DesignMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale, int tUnitLength)
 		{
 			var tGrid = ConvertYToTGrid_DesignMode(pickY, soflanList, bpmList, scale, tUnitLength);
+			if (tGrid is null)
+				return default;
 			return ConvertTGridToAudioTime(tGrid, bpmList, tUnitLength);
 		}
 
