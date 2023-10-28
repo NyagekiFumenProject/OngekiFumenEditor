@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
 using SimpleSvg2LineSegementInterpolater;
@@ -23,6 +24,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
 		private List<ConnectableChildObjectBase> children = new();
 		public IEnumerable<ConnectableChildObjectBase> Children => children;
+
+		public override ConnectableStartObject ReferenceStartObject => this;
 
 		private TGrid cachedMinTGrid = default;
 		public TGrid MinTGrid
@@ -142,7 +145,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 				child.PropertyChanged += OnPropertyChanged;
 				NotifyWhenChildrenChanged();
 			}
-			child.ReferenceStartObject = this;
+			child.SetReferenceStartObject(this);
 			child.RecordId = RecordId;
 		}
 
@@ -186,7 +189,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 					NotifyWhenChildrenChanged();
 			}
 
-			child.ReferenceStartObject = this;
+			child.SetReferenceStartObject(this);
 		}
 
 		public void RemoveChildObject(ConnectableChildObjectBase child)
@@ -201,7 +204,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 			else
 				child.PrevObject = default;
 
-			child.ReferenceStartObject = default;
+			child.SetReferenceStartObject(default);
 			child.PropertyChanged -= OnPropertyChanged;
 			child.CacheRecoveryChildIndex = idx;
 

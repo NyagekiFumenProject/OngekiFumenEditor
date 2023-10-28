@@ -4,6 +4,7 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
+using Microsoft.CodeAnalysis.Differencing;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;

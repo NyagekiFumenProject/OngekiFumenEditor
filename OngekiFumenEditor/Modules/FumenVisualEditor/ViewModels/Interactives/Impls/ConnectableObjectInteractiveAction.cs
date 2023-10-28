@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 				LaneCurvePathControlObject ctrl => ctrl.RefCurveObject,
 				_ => default
 			};
-			RelocateDockableObjects(editor, obj);
+			ConnectableStartObject.RelocateDockableObjects(editor.Fumen, obj);
 		}
 
 		public override void OnDragStart(OngekiObjectBase o, Point pos, FumenVisualEditorViewModel editor)
@@ -105,7 +105,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("附着物件自动更新水平位置",
 				() =>
 				{
-					RelocateDockableObjects(editor, obj);
+					ConnectableStartObject.RelocateDockableObjects(editor.Fumen, obj);
 				}, () =>
 				{
 					foreach (var info in infoList)
@@ -117,47 +117,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 				}));
 		}
 
-		private void RelocateDockableObjects(FumenVisualEditorViewModel editor, OngekiObjectBase obj)
-		{
-			var connectable = (ConnectableObjectBase)obj;
-			var start = connectable switch
-			{
-				ConnectableChildObjectBase c => c.ReferenceStartObject,
-				ConnectableStartObject s => s,
-				_ => default
-			};
-
-			RelocateDockableObjects(editor, connectable, start);
-			if (connectable is ConnectableChildObjectBase child)
-				RelocateDockableObjects(editor, child.PrevObject, start);
-		}
-
-		private void RelocateDockableObjects(FumenVisualEditorViewModel editor, ConnectableObjectBase obj, ConnectableStartObject start)
-		{
-			if (obj.NextObject is null)
-				return;
-			var refLaneId = obj.RecordId;
-
-			var minTGrid = obj.TGrid;
-			var maxTGrid = obj.NextObject.TGrid;
-
-			using var _ = editor.Fumen.GetAllDisplayableObjects(minTGrid, maxTGrid)
-				.OfType<ILaneDockable>()
-				.Where(x => x.ReferenceLaneStrId == refLaneId)
-				.Where(x => !((ISelectableObject)x).IsSelected)
-				.ToHashSetWithObjectPool(out var dockables);
-
-			foreach (var dockable in dockables)
-			{
-				if (start.CalulateXGrid(dockable.TGrid) is XGrid xGrid)
-					dockable.XGrid = xGrid;
-
-				if (dockable is Hold hold && hold.HoldEnd is HoldEnd end)
-				{
-					if (end.RefHold?.ReferenceLaneStart?.CalulateXGrid(end.TGrid) is XGrid xGrid2)
-						end.XGrid = xGrid2;
-				}
-			}
-		}
 	}
 }

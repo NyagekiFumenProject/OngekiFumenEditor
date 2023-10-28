@@ -43,12 +43,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 			}
 		}
 
-		public ConnectableStartObject ReferenceStartObject { get; set; }
+		private ConnectableStartObject referenceStartObject;
+		public override ConnectableStartObject ReferenceStartObject => referenceStartObject;
+
 		private int recordId = int.MinValue;
 		internal int CacheRecoveryChildIndex { get; set; } = -1;
 		public override int RecordId { get => ReferenceStartObject?.RecordId ?? recordId; set => Set(ref recordId, value); }
+
 		private List<LaneCurvePathControlObject> pathControls = new();
 		public IReadOnlyList<LaneCurvePathControlObject> PathControls => pathControls;
+
 		public bool IsCurvePath => PathControls.Count > 0;
 		public bool IsVaildPath
 		{
@@ -63,6 +67,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
 		private bool cachedIsVaild = false;
 		private List<(Vector2 pos, bool isVaild)> cacheGeneratedPath = default;
+
+		public void SetReferenceStartObject(ConnectableStartObject refStart)
+		{
+			referenceStartObject = refStart;
+		}
 
 		public void AddControlObject(LaneCurvePathControlObject controlObj)
 		{
@@ -270,7 +279,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 				return;
 
 			RecordId = -Math.Abs(from.RecordId);
-			ReferenceStartObject = null;
+			SetReferenceStartObject(null);
 			PrevObject = null;
 			CurvePrecision = from.CurvePrecision;
 			CurveInterpolaterFactory = from.CurveInterpolaterFactory;

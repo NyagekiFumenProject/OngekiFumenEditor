@@ -183,6 +183,7 @@ namespace OngekiFumenEditor.Base
 			} is ConnectableObjectBase lane)
 			{
 				Lanes.Add(lane);
+				ConnectableObjectBase.RelocateDockableObjects(this, lane);
 			}
 			else
 			{
@@ -274,7 +275,9 @@ namespace OngekiFumenEditor.Base
 				_ => null
 			} is ConnectableObjectBase lane)
 			{
+				var refStart = lane.ReferenceStartObject;
 				Lanes.Remove(lane);
+				ConnectableObjectBase.RelocateDockableAllObjects(this, refStart);
 			}
 			else
 			{
