@@ -4,6 +4,7 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
+using Gemini.Modules.UndoRedo;
 using Microsoft.CodeAnalysis.Differencing;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
@@ -122,6 +123,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			get => currentCursorPosition;
 			set => Set(ref currentCursorPosition, value);
 		}
+		private Dictionary<OngekiObjectBase, Rect> hits = new();
+		private OngekiObjectBase mouseDownNextHitObject;
+		private Point mouseCanvasStartPosition;
+		private double startXOffset;
+		private double startScrollOffset;
+		private bool isCanvasDragging;
+		private bool isMiddleMouseDown;
+		private MouseButtonState prevRightButtonState;
+		private Point contextMenuPosition;
 
 		public Toast Toast => (GetView() as FumenVisualEditorView)?.mainToast;
 
@@ -334,6 +344,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			//nothing but leave it empty.
 		}
 
+		public void ExecuteActionWithRememberCurrentTime(IUndoableAction action)
+		{
+			var curTime = CurrentPlayTime;
+			var rememberAction = LambdaUndoAction.Create(action.Name, () =>
+			{
+				curTime = CurrentPlayTime;
+				action.Execute();
+			},
+			() =>
+			{
+				action.Undo();
+				ScrollTo(curTime);
+			});
+
+			UndoRedoManager.ExecuteAction(rememberAction);
+		}
+
 		#region Keyboard Actions
 
 		public void KeyboardAction_FastPlaceDockableObjectToCenter()
@@ -367,7 +394,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			var pickLane = dockableLanes.FirstOrDefault();
 
 			var beforeXGrid = dockable.XGrid;
-			var beforeHoldEndXGrid = (dockable as Hold)?.HoldEnd.XGrid;
+			var beforeHoldEndXGrid = (dockable as Hold)?.HoldEnd?.XGrid;
 			var beforeLane = dockable.ReferenceLaneStart;
 
 			//如果本身已经有轨道引用且是同一个类型的轨道，那么就判断一下位置,钦定下一条同类型轨道
@@ -419,8 +446,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 					//如果是Hold还得他整理一下尾巴呢
 					if (dockable is Hold hold)
 					{
-						if (dockable.ReferenceLaneStart.CalulateXGrid(hold.HoldEnd.TGrid) is XGrid holdXGrid)
-							hold.HoldEnd.XGrid = holdXGrid;
+						if (hold.HoldEnd is HoldEnd holdEnd && dockable.ReferenceLaneStart.CalulateXGrid(holdEnd.TGrid) is XGrid holdXGrid)
+							holdEnd.XGrid = holdXGrid;
 					}
 				}
 			}, () =>
@@ -428,8 +455,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				dockable.ReferenceLaneStart = beforeLane;
 				dockable.XGrid = beforeXGrid;
 
-				if (dockable is Hold hold)
-					hold.HoldEnd.XGrid = beforeHoldEndXGrid;
+				if (dockable is Hold hold && hold.HoldEnd is HoldEnd holdEnd && beforeHoldEndXGrid is not null)
+					holdEnd.XGrid = beforeHoldEndXGrid;
 			}));
 		}
 
@@ -1124,16 +1151,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		}
 
 		#endregion
-
-		private Dictionary<OngekiObjectBase, Rect> hits = new();
-		private OngekiObjectBase mouseDownNextHitObject;
-		private Point mouseCanvasStartPosition;
-		private double startXOffset;
-		private double startScrollOffset;
-		private bool isCanvasDragging;
-		private bool isMiddleMouseDown;
-		private MouseButtonState prevRightButtonState;
-		private Point contextMenuPosition;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size)
