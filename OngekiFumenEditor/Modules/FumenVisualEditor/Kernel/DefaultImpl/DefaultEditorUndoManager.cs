@@ -2,6 +2,9 @@
 using Gemini.Modules.UndoRedo;
 using Gemini.Modules.UndoRedo.Services;
 using Gemini.Modules.UndoRedo.UndoAction;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +21,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 		public event EventHandler BatchBegin;
 		public event EventHandler BatchEnd;
+
+		public bool IsBatching => _combineStack.Any();
 
 		private int _undoActionCount;
 
@@ -42,6 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 		private int? _undoCountLimit = null;
 
 		private Stack<List<IUndoableAction>> _combineStack = new();
+		private readonly FumenVisualEditorViewModel editor;
 
 		public int RedoActionCount => ActionStack.Count - UndoActionCount;
 
@@ -54,6 +60,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				_undoCountLimit = value;
 				EnforceLimit();
 			}
+		}
+
+		public DefaultEditorUndoManager(FumenVisualEditorViewModel editor)
+		{
+			this.editor = editor;
 		}
 
 		private void EnforceLimit()
@@ -88,6 +99,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 		{
 			if (_combineStack.TryPeek(out var combineSet))
 			{
+				//In batch mode.
 				combineSet.Add(action);
 				return;
 			}
@@ -102,8 +114,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				NotifyOfPropertyChange(() => CanRedo);
 			}
 
-			action.Execute();
-			ActionStack.Add(action);
+			//remember currentTime and rebuild new action
+			var curTGrid = editor.GetCurrentTGrid();
+			var wrappedAction = new CompositeUndoAction(action.Name, new[]
+			{
+				action,
+				LambdaUndoAction.Create("记忆/恢复编辑器时间",()=> { }  ,() =>{
+					if (editor.IsDesignMode && !editor.CheckVisible(curTGrid))
+						editor.ScrollTo(curTGrid);
+				})
+			});
+
+			wrappedAction.Execute();
+			ActionStack.Add(wrappedAction);
 			UndoActionCount++;
 
 			EnforceLimit();

@@ -222,7 +222,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 		public FumenVisualEditorViewModel() : base()
 		{
-			UndoRedoManager = new DefaultEditorUndoManager();
+			UndoRedoManager = new DefaultEditorUndoManager(this);
 			Properties.EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
 			Log.LogDebug($"UndoRedoManager.UndoCountLimit: {UndoRedoManager.UndoCountLimit}");
 		}
