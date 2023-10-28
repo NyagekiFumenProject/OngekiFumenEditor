@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Base
 {
-	public abstract class GridBase : PropertyChangedBase, IComparable<GridBase>, ISerializable
+	public abstract class GridBase : PropertyChangedBase, IComparable<GridBase>, ISerializable, IComparable
 	{
 		private int grid = 0; //grid
 		private float unit = 0; //unit
@@ -141,6 +141,11 @@ namespace OngekiFumenEditor.Base
 		public override int GetHashCode()
 		{
 			return HashCode.Combine(Unit, Grid, GridRadix);
+		}
+
+		public int CompareTo(object obj)
+		{
+			return this.CompareTo(obj as GridBase);
 		}
 
 		public static bool operator <(GridBase left, GridBase right)
