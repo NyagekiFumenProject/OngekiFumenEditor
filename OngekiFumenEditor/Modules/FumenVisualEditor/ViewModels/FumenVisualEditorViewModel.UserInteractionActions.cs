@@ -594,12 +594,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				.Select((x, i) => (XGridCalculator.ConvertXGridToX(x.XGrid, this) - centerX, i))
 				.ToDictionary(x => x.i, x => x.Item1);
 
-			var starts = selects.Select(x => x switch
-			{
-				ConnectableStartObject start => start,
-				ConnectableNextObject next => next.ReferenceStartObject,
-				_ => default
-			}).Distinct().Where(x => !x.Children.OfType<ConnectableEndObject>().Any()).ToArray();
+			var starts = selects.Select(x => x.ReferenceStartObject).Distinct().Where(x => !x.Children.OfType<ConnectableEndObject>().Any()).ToArray();
 
 			if (starts.Length != selects.Length)
 				return;
