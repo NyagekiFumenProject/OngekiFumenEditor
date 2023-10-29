@@ -155,7 +155,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			foreach ((var pos, var obj) in drawStrList)
 			{
 				if (obj.ReferenceBulletPallete is null)
-					return;
+					continue;
 				stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
 			}
 		}
@@ -176,28 +176,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			drawStrList.Clear();
 		}
 
-		ConcurrentDictionary<double, double> yCacheMap = new();
-		ConcurrentDictionary<double, double> nonSoflanYCacheMap = new();
-		ConcurrentDictionary<double, double> xCacheMap = new();
-
 		private void DrawPreview(IEnumerable<OngekiMovableObjectBase> objs)
 		{
 			var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
 			var baseY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + target.Editor.Setting.JudgeLineOffsetY;
 
-			/*
-            yCacheMap.Clear();
-            xCacheMap.Clear();
-            nonSoflanYCacheMap.Clear();
-            */
-
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			double convertToYNonSoflan(TGrid tgrid)
 			{
-				/*var key = tgrid.TotalUnit;
-                if (nonSoflanYCacheMap.TryGetValue(key, out var r))
-                    return r;
-                return nonSoflanYCacheMap[key] = */
 				return TGridCalculator.ConvertTGridToY_DesignMode(
 					tgrid,
 					nonSoflanList,
@@ -209,19 +195,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			double convertToX(double xgrid)
 			{
-				/*if (xCacheMap.TryGetValue(xgrid, out var r))
-                    return r;
-                return xCacheMap[xgrid] =*/
 				return XGridCalculator.ConvertXGridToX(xgrid, target.Editor);
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			double convertToY(TGrid tgrid)
 			{
-				/*var key = tgrid.TotalUnit;
-                if (yCacheMap.TryGetValue(key, out var r))
-                    return r;
-                return yCacheMap[key] =*/
 				return target.ConvertToY(tgrid);
 			}
 
