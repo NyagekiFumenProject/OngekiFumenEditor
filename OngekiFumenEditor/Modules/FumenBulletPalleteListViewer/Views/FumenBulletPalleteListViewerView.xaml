@@ -2,15 +2,23 @@
     x:Class="OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views.FumenBulletPalleteListViewerView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.UI.Behaviors"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:s="clr-namespace:OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ValueConverters"
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:EnumValuesGenerator x:Key="EnumValuesGenerator">
+        </valueconverters:EnumValuesGenerator>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -23,30 +31,35 @@
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
                 新增子弹类型
             </Button>
-            <Button
-                Margin="0,0,5,0"
-                cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];"
-                IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                删除已选子弹类型
+            <Button cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];" IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                删除已选的子弹类型
+            </Button>
+
+            <TextBox
+                Width="150"
+                Margin="20,0,10,0"
+                Text="{Binding Filter}" />
+
+            <Button cal:Message.Attach="[Event Click] = [Action OnRefreshFilter()];" IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                过滤
             </Button>
         </StackPanel>
         <ListView
             Grid.Row="1"
             Background="Transparent"
             BorderBrush="Transparent"
-            ItemsSource="{Binding Fumen.BulletPalleteList}"
+            ItemsSource="{Binding DataView}"
             ScrollViewer.CanContentScroll="True"
-            SelectedValue="{Binding SelectingPallete}">
+            SelectionMode="Extended"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling">
+            <i:Interaction.Behaviors>
+                <behaviors:ListViewMultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+            </i:Interaction.Behaviors>
             <ListView.Resources>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <!--<Setter Property="ContextMenu">
-                        <Setter.Value>
-                            <ContextMenu>
-                                <MenuItem Header="复制新的" cal:Message.Attach="OnCopyNewBPL($executionContext)"/>
-                            </ContextMenu>
-                        </Setter.Value>
-                    </Setter>-->
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
                 </Style>
             </ListView.Resources>
             <ListView.View>
@@ -74,11 +87,7 @@
                     <GridViewColumn Width="100" Header="发射来源">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding ShooterValue, Converter={StaticResource EnumToStringConverter}}">
-                                    <system:String>TargetHead</system:String>
-                                    <system:String>Enemy</system:String>
-                                    <system:String>Center</system:String>
-                                </ComboBox>
+                                <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -95,10 +104,7 @@
                     <GridViewColumn Width="100" Header="发射目标">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding TargetValue, Converter={StaticResource EnumToStringConverter}}">
-                                    <system:String>Player</system:String>
-                                    <system:String>FixField</system:String>
-                                </ComboBox>
+                                <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -115,10 +121,7 @@
                     <GridViewColumn Width="100" Header="子弹大小">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding SizeValue, Converter={StaticResource EnumToStringConverter}}">
-                                    <system:String>Normal</system:String>
-                                    <system:String>Large</system:String>
-                                </ComboBox>
+                                <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -126,16 +129,12 @@
                     <GridViewColumn Width="75" Header="子弹形状">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox SelectedValue="{Binding TypeValue, Converter={StaticResource EnumToStringConverter}}">
-                                    <system:String>Circle</system:String>
-                                    <system:String>Needle</system:String>
-                                    <system:String>Square</system:String>
-                                </ComboBox>
+                                <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="80" Header="辅助线颜色">
+                    <!--<GridViewColumn Width="80" Header="辅助线颜色">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnChangeEditorAxuiliaryLineColor($executionContext)];" Text="{Binding EditorAxuiliaryLineColor}">
@@ -146,7 +145,7 @@
                                 </TextBlock>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                    </GridViewColumn>-->
 
                     <GridViewColumn Width="240" Header="操作">
                         <GridViewColumn.CellTemplate>

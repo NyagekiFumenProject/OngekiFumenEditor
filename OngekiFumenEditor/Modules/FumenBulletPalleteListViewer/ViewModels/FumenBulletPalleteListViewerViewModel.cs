@@ -1,20 +1,28 @@
-﻿using Caliburn.Micro;
+﻿using AngleSharp.Common;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Data;
+using System.Linq;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
@@ -26,66 +34,83 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 		{
 			DisplayName = "子弹管理";
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
-			Fumen = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor?.Fumen;
+			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}
 
 		private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
 		{
-			Fumen = @new?.Fumen;
-			this.RegisterOrUnregisterPropertyChangeEvent(old, @new, OnEditorPropertyChanged);
+			Editor = @new;
 		}
 
 		private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
-				Fumen = (sender as FumenVisualEditorViewModel).Fumen;
+			{
+				if (Editor?.Fumen is not null)
+					DataView = CollectionViewSource.GetDefaultView(Editor.Fumen.BulletPalleteList);
+				else
+					DataView = null;
+			}
 		}
 
 		public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
-		private OngekiFumen fumen;
-		public OngekiFumen Fumen
+		private string filter;
+		public string Filter
+		{
+			get => filter;
+			set => Set(ref filter, value);
+		}
+
+		private FumenVisualEditorViewModel editor;
+		public FumenVisualEditorViewModel Editor
 		{
 			get
 			{
-				return fumen;
+				return editor;
 			}
 			set
 			{
-				fumen = value;
-				NotifyOfPropertyChange(() => Fumen);
+				this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropertyChanged);
+				Set(ref editor, value);
 				NotifyOfPropertyChange(() => IsEnable);
+
+				if (Editor?.Fumen is not null)
+					DataView = CollectionViewSource.GetDefaultView(Editor.Fumen.BulletPalleteList);
+				else
+					DataView = null;
+
+				DataView?.Refresh();
 			}
 		}
 
-		public bool IsEnable => Fumen is not null;
+		public bool IsEnable => Editor?.Fumen is not null;
 
-		private BulletPallete selectingPallete;
-		public BulletPallete SelectingPallete
+		public ObservableCollection<BulletPallete> SelectedItems { get; } = new();
+
+		private ICollectionView dataView;
+		public ICollectionView DataView
 		{
-			get
-			{
-				return selectingPallete;
-			}
+			get => dataView;
 			set
 			{
-				selectingPallete = value;
-				NotifyOfPropertyChange(() => SelectingPallete);
+				Set(ref dataView, value);
+				OnRefreshFilter();
 			}
 		}
 
 		public void OnCreateNew()
 		{
 			var plattele = new BulletPallete();
-			Fumen.AddObject(plattele);
+			Editor.Fumen.AddObject(plattele);
+			DataView?.Refresh();
 		}
 
 		public void OnDeleteSelecting(FumenBulletPalleteListViewerView e)
 		{
-			if (SelectingPallete is not null)
-			{
-				Fumen.RemoveObject(SelectingPallete);
-			}
+			foreach (var item in SelectedItems)
+				Editor.Fumen.RemoveObject(item);
+			DataView?.Refresh();
 		}
 
 		private bool _draggingItem;
@@ -96,7 +121,6 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 		{
 			if (!_draggingItem)
 				return;
-
 			var arg = e.EventArgs as MouseEventArgs;
 
 			Point mousePosition = arg.GetPosition(null);
@@ -110,7 +134,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 				{
 					var bullet = new Bullet()
 					{
-						ReferenceBulletPallete = selectingPallete
+						ReferenceBulletPallete = _selecting
 					};
 					return bullet;
 				}));
@@ -123,7 +147,6 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 		{
 			if (!_draggingItem)
 				return;
-
 			var arg = e.EventArgs as MouseEventArgs;
 
 			Point mousePosition = arg.GetPosition(null);
@@ -137,7 +160,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 				{
 					var bullet = new Bell()
 					{
-						ReferenceBulletPallete = selectingPallete
+						ReferenceBulletPallete = _selecting
 					};
 					return bullet;
 				}));
@@ -167,7 +190,8 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 			cpBPL.Copy(pallete);
 			cpBPL.StrID = null;
 
-			Fumen.AddObject(cpBPL);
+			Editor.Fumen.AddObject(cpBPL);
+			DataView?.Refresh();
 		}
 
 		public void OnChangeEditorAxuiliaryLineColor(ActionExecutionContext e)
@@ -177,6 +201,35 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 
 			var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color, $"变更 {pallete.StrID} 辅助线颜色");
 			dialog.Show();
+		}
+
+		public void OnItemDoubleClick(BulletPallete e)
+		{
+			if (e is null)
+				return;
+
+			Editor.TryCancelAllObjectSelecting();
+			Editor.Fumen.Bells
+				.OfType<IBulletPalleteReferencable>()
+				.Concat(Editor.Fumen.Bullets)
+				.Where(x => x.ReferenceBulletPallete == e)
+				.OfType<ISelectableObject>()
+				.ForEach(x => x.IsSelected = true);
+
+			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+		}
+
+		public void OnRefreshFilter()
+		{
+			if (DataView is ICollectionView view)
+			{
+				view.Filter = string.IsNullOrWhiteSpace(Filter) ? null : (r) =>
+				{
+					if (r is BulletPallete p)
+						return p.ToString().Contains(Filter, StringComparison.InvariantCultureIgnoreCase);
+					return false;
+				};
+			}
 		}
 	}
 }

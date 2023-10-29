@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using System.Collections.Generic;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 

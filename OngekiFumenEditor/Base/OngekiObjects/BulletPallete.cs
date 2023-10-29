@@ -1,65 +1,10 @@
-﻿using System.Windows.Media;
+﻿using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
 	public class BulletPallete : OngekiObjectBase
 	{
-		public enum Shooter
-		{
-			/// <summary>
-			/// 从玩家头顶位置
-			/// </summary>
-			TargetHead = 0,
-			/// <summary>
-			/// 从敌人位置
-			/// </summary>
-			Enemy = 1,
-			/// <summary>
-			/// 谱面中心(?)
-			/// </summary>
-			Center = 2,
-		}
-
-		public enum Target
-		{
-			/// <summary>
-			/// 射向玩家位置
-			/// </summary>
-			Player = 0,
-			/// <summary>
-			/// 射向对应位置，具体看使用的BLT指令的xUnit值
-			/// </summary>
-			FixField = 1
-		}
-
-		public enum BulletSize
-		{
-			/// <summary>
-			/// 普通大小
-			/// </summary>
-			Normal = 0,
-			/// <summary>
-			/// 加大版(是普通版的1.4x)
-			/// </summary>
-			Large = 1,
-		}
-
-		public enum BulletType
-		{
-			/// <summary>
-			/// 圆形子弹
-			/// </summary>
-			Circle = 0,
-			/// <summary>
-			/// 针状子弹
-			/// </summary>
-			Needle = 1,
-			/// <summary>
-			/// 圆柱形(方状)子弹
-			/// </summary>
-			Square = 2,
-		}
-
 		public double CalculateToXGridTotalUnit(IBulletPalleteReferencable refObject, OngekiFumen fumen)
 		{
 			var xGridTotalUnit = 0d;
@@ -184,7 +129,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 		public bool IsEnableSoflan => TargetValue != Target.Player;
 
-		public override string ToString() => $"{base.ToString()} StrID[{StrID}] Speed[{Speed:F3}] ShooterValue[{ShooterValue}] TargetValue[{TargetValue}] SizeValue[{SizeValue}] TypeValue[{TypeValue}]";
+		public override string ToString() => $"{base.ToString()} StrID[{StrID}] Speed[{Speed:F3}] ShooterValue[{ShooterValue}] TargetValue[{TargetValue}] SizeValue[{SizeValue}] TypeValue[{TypeValue}] EditorName[{EditorName}] PlaceOffset[{PlaceOffset}]";
 
 		public static string CommandName => "BPL";
 		public override string IDShortName => CommandName;

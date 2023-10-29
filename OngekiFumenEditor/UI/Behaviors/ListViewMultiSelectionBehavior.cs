@@ -109,6 +109,10 @@ namespace OngekiFumenEditor.UI.Behaviors
 			var selectedItems = this.SelectedItems;
 			if (selectedItems == null)
 				return;
+			
+			//这里存在一个问题，就是OriginalSource可能是其中的combobox变更
+			if (e.OriginalSource != e.Source)
+				return;
 
 			try
 			{

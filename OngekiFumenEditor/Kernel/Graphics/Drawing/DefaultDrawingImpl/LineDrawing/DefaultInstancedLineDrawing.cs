@@ -61,6 +61,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
 		private float lineWidth;
 
 #if DEBUG
+#pragma warning disable CS0649 // 从未对字段“DefaultInstancedLineDrawing.VertexData.x”赋值，字段将一直保持其默认值 0
 		private struct VertexData
 		{
 			public float x;
@@ -79,6 +80,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
 		}
 
 		private ReadOnlySpan<VertexData> vertices => MemoryMarshal.Cast<float, VertexData>(PostData.AsMemory().Slice(0, postDataFillIndex).Span);
+#pragma warning restore CS0649
 #endif
 
 		private OpenTK.Mathematics.Vector2 aa_radius_val = new OpenTK.Mathematics.Vector2(2, 2);

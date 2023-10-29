@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Utils;
@@ -179,31 +180,31 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 			{
 				var shoot = bpl.ShooterValue switch
 				{
-					BulletPallete.Shooter.TargetHead => "UPS",
-					BulletPallete.Shooter.Enemy => "ENE",
-					BulletPallete.Shooter.Center => "CEN",
+					Shooter.TargetHead => "UPS",
+					Shooter.Enemy => "ENE",
+					Shooter.Center => "CEN",
 					_ => default
 				};
 
 				var target = bpl.TargetValue switch
 				{
-					BulletPallete.Target.Player => "PLR",
-					BulletPallete.Target.FixField => "FIX",
+					Target.Player => "PLR",
+					Target.FixField => "FIX",
 					_ => default
 				};
 
 				var size = bpl.SizeValue switch
 				{
-					BulletPallete.BulletSize.Normal => "N",
-					BulletPallete.BulletSize.Large => "L",
+					BulletSize.Normal => "N",
+					BulletSize.Large => "L",
 					_ => default
 				};
 
 				var type = bpl.TypeValue switch
 				{
-					BulletPallete.BulletType.Circle => "CIR",
-					BulletPallete.BulletType.Needle => "NDL",
-					BulletPallete.BulletType.Square => "SQR",
+					BulletType.Circle => "CIR",
+					BulletType.Needle => "NDL",
+					BulletType.Square => "SQR",
 					_ => default
 				};
 

@@ -1,0 +1,19 @@
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    float angle = -0.2;
+    vec2 center = iResolution.xy / 2.0;
+
+    vec2 p = (fragCoord - center) / center;
+
+    float x = p.x * cos(angle) - p.y * sin(angle);
+    float y = p.x * sin(angle) + p.y * cos(angle);
+
+    float glow = 0.075 * sin(y * 20.0 - iTime);
+
+    vec3 stripeColor = vec3(174.0f/255.0f, 238.0f/255.0f, 238.0f/255.0f);
+    vec3 glowColor = vec3(1, 1.0, 1.0);
+
+    vec3 finalColor = mix(stripeColor, glowColor, glow);
+
+    fragColor = vec4(finalColor, 1.0);
+}
