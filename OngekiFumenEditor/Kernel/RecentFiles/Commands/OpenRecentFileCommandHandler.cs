@@ -93,8 +93,7 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 			}
 
 			var doc = pickEditorProvider.Create();
-			var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
-			var viewAware = (IViewAware)editor;
+			var viewAware = (IViewAware)doc;
 			viewAware.ViewAttached += (sender, e) =>
 			{
 				var frameworkElement = (FrameworkElement)e.View;
@@ -103,16 +102,16 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 				loadedHandler = async (sender2, e2) =>
 				{
 					frameworkElement.Loaded -= loadedHandler;
-					await pickEditorProvider.Open(editor, info.FileName);
+					await pickEditorProvider.Open(doc, info.FileName);
 					var docName = info.DisplayName;
 
-					editor.DisplayName = docName;
+					doc.DisplayName = docName;
 					IoC.Get<IEditorRecentFilesManager>().PostRecord(new(info.FileName, docName, RecentOpenType.CommandOpen));
 				};
 				frameworkElement.Loaded += loadedHandler;
 			};
 
-			await shell.OpenDocumentAsync(editor);
+			await shell.OpenDocumentAsync(doc);
 		}
 	}
 }
