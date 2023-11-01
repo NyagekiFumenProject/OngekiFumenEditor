@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
@@ -22,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 				{
 					yield return new CommonCheckResult()
 					{
-						Severity = RuleSeverity.Error,
+						Severity = RuleSeverity.Problem,
 						Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
 						LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
 						NavigateBehavior = new NavigateToObjectBehavior(missingObject),
@@ -37,8 +38,23 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 				{
 					yield return new CommonCheckResult()
 					{
-						Severity = RuleSeverity.Error,
+						Severity = RuleSeverity.Problem,
 						Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
+						LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
+						NavigateBehavior = new NavigateToObjectBehavior(missingObject),
+						RuleName = RuleName,
+					};
+				}
+			}
+
+			IEnumerable<ICheckResult> CheckHoldList(IEnumerable<Hold> objs)
+			{
+				foreach (var missingObject in objs.Where(x => x.HoldEnd is null))
+				{
+					yield return new CommonCheckResult()
+					{
+						Severity = RuleSeverity.Error,
+						Description = $"Hold(Oid:{missingObject.Id})物件缺少HoldEnd中止物件",
 						LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
 						NavigateBehavior = new NavigateToObjectBehavior(missingObject),
 						RuleName = RuleName,
@@ -55,6 +71,11 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			}
 
 			foreach (var start in CheckBeamList(fumen.Beams))
+			{
+				yield return start;
+			}
+
+			foreach (var start in CheckHoldList(fumen.Holds))
 			{
 				yield return start;
 			}

@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 				{
 					yield return new CommonCheckResult()
 					{
-						Severity = RuleSeverity.Error,
+						Severity = RuleSeverity.Problem,
 						Description = $"轨道物件路径非法",
 						LocationDescription = $"{obj.XGrid} {obj.TGrid}",
 						NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),

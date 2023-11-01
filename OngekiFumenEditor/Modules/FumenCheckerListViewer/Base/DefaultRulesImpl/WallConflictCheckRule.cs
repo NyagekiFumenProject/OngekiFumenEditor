@@ -203,7 +203,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 						yield return new CommonCheckResult()
 						{
 							RuleName = RuleName,
-							Severity = RuleSeverity.Error,
+							Severity = RuleSeverity.Problem,
 							Description = $"墙(id:{cur.Wall.RecordId})与另一个同方向的墙(id:{next.Wall.RecordId})发生时间冲突",
 							LocationDescription = cur.TGridRange.ToString(),
 							NavigateBehavior = new NavigateToTGridBehavior(cur.Wall.TGrid)
