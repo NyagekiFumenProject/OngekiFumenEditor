@@ -108,7 +108,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 
 		public void OnDeleteSelecting(FumenBulletPalleteListViewerView e)
 		{
-			foreach (var item in SelectedItems)
+			foreach (var item in SelectedItems.ToArray())
 				Editor.Fumen.RemoveObject(item);
 			DataView?.Refresh();
 		}
