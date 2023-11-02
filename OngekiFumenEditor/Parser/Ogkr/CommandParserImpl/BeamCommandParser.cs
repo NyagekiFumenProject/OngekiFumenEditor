@@ -81,24 +81,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 	}
 
 	[Export(typeof(ICommandParser))]
-	public class BeamEndCommandParser : BeamCommandParserBase
+	public class BeamEndCommandParser : BeamNextCommandParser
 	{
 		public override string CommandLineHeader => "BME";
-
-		public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
-		{
-			var beamRecordId = args.GetData<int>(1);
-			if (fumen.Beams.FirstOrDefault(x => x.RecordId == beamRecordId) is not BeamStart beamStart)
-			{
-				Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
-				return default;
-			}
-
-			var beam = new BeamEnd();
-			CommonParse(beam, args);
-			beamStart.AddChildObject(beam);
-			return beam;
-		}
 	}
 
 	[Export(typeof(ICommandParser))]

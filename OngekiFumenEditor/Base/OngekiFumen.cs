@@ -178,7 +178,7 @@ namespace OngekiFumenEditor.Base
 			}
 			else if (obj switch
 			{
-				LaneStartBase or LaneEndBase or LaneNextBase => obj,
+				LaneStartBase or LaneNextBase => obj,
 				_ => null
 			} is ConnectableObjectBase lane)
 			{
@@ -271,7 +271,7 @@ namespace OngekiFumenEditor.Base
 			}
 			else if (obj switch
 			{
-				LaneStartBase or LaneEndBase or LaneNextBase => obj,
+				LaneStartBase or LaneNextBase => obj,
 				_ => null
 			} is ConnectableObjectBase lane)
 			{

@@ -56,13 +56,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			_ => default,
 		};
 
-		public bool IsEnableDragEnd => !(RefStartObject?.Children.OfType<ConnectableEndObject>().Any() ?? false);
 		public bool IsEnableDragPathControl => ConnectableObject is ConnectableChildObjectBase;
 		public bool IsStartObject => ConnectableObject is ConnectableStartObject;
 
 		private void CheckEnable()
 		{
-			NotifyOfPropertyChange(() => IsEnableDragEnd);
 			NotifyOfPropertyChange(() => IsEnableDragPathControl);
 			NotifyOfPropertyChange(() => IsStartObject);
 		}

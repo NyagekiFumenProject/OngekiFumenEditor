@@ -594,7 +594,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				.Select((x, i) => (XGridCalculator.ConvertXGridToX(x.XGrid, this) - centerX, i))
 				.ToDictionary(x => x.i, x => x.Item1);
 
-			var starts = selects.Select(x => x.ReferenceStartObject).Distinct().Where(x => !x.Children.OfType<ConnectableEndObject>().Any()).ToArray();
+			var starts = selects.Select(x => x.ReferenceStartObject).Distinct().ToArray();
 
 			if (starts.Length != selects.Length)
 				return;
@@ -602,7 +602,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			var position = Mouse.GetPosition(e.View as FrameworkElement);
 			position.Y = ViewHeight - position.Y + Rect.MinY;
 
-			var genChildren = new HashSet<ConnectableNextObject>();
+			var genChildren = new HashSet<ConnectableChildObjectBase>();
 
 			UndoRedoManager.BeginCombineAction();
 			foreach ((var start, var i) in starts.WithIndex())
@@ -610,7 +610,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				var newPos = position;
 				newPos.X = position.X + xOffsetMap[i];
 
-				var genChild = start.CreateNextObject();
+				var genChild = start.CreateChildObject();
 				var dropAction = new ConnectableObjectDropAction(start, genChild, () => { });
 				dropAction.Drop(this, newPos);
 				genChildren.Add(genChild);
@@ -970,8 +970,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			var newObject = copySouceObj.CopyNew();
 			if (newObject is null
 				//不支持笔刷模式下新建以下玩意
-				|| newObject is ConnectableStartObject
-				|| newObject is ConnectableEndObject)
+				|| newObject is ConnectableStartObject)
 			{
 				ToastNotify($"笔刷模式下不支持{copySouceObj?.Name}");
 				return;

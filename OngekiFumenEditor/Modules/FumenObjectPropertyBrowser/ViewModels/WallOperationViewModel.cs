@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 		public override ConnectableChildObjectBase GenerateChildObject(bool needNext)
 		{
-			return needNext ? (IsLeftWall ? new WallLeftNext() : new WallRightNext()) : (IsLeftWall ? new WallLeftEnd() : new WallRightEnd());
+			return IsLeftWall ? new WallLeftNext() : new WallRightNext();
 		}
 	}
 }

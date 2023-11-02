@@ -111,8 +111,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 		private int recordId = -1;
 		public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
-		public abstract ConnectableNextObject CreateNextObject();
-		public abstract ConnectableEndObject CreateEndObject();
+		public abstract ConnectableChildObjectBase CreateChildObject();
 
 		public ConnectableStartObject()
 		{
@@ -157,12 +156,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
 		public void InsertChildObject(TGrid dragTGrid, ConnectableChildObjectBase child)
 		{
-			if (child is ConnectableEndObject)
-			{
-				AddChildObject(child);
-				return;
-			}
-
 			if (!children.Contains(child))
 			{
 				child.PrevObject = default;
@@ -329,23 +322,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 		}
 
 		public IEnumerable<ConnectableStartObject> InterpolateCurve(ICurveInterpolaterFactory factory = default)
-			=> InterpolateCurve(() => CopyNew() as ConnectableStartObject, () => CreateNextObject(), () => CreateEndObject(), factory).OfType<ConnectableStartObject>();
+			=> InterpolateCurve(() => CopyNew() as ConnectableStartObject, () => CreateChildObject(), factory).OfType<ConnectableStartObject>();
 
 		public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType, ICurveInterpolaterFactory factory = default)
 			=> InterpolateCurve(
 				() => LambdaActivator.CreateInstance(startType) as ConnectableStartObject,
-				() => LambdaActivator.CreateInstance(nextType) as ConnectableNextObject,
-				() => LambdaActivator.CreateInstance(endType) as ConnectableEndObject,
+				() => LambdaActivator.CreateInstance(nextType) as ConnectableChildObjectBase,
 				factory
 				).OfType<ConnectableStartObject>();
 
 		public IEnumerable<START> InterpolateCurve<START, NEXT, END>(ICurveInterpolaterFactory factory = default)
 			where START : ConnectableStartObject, new()
-			where END : ConnectableEndObject, new()
-			where NEXT : ConnectableNextObject, new()
-			=> InterpolateCurve(() => new START(), () => new NEXT(), () => new END(), factory).OfType<START>();
+			where NEXT : ConnectableChildObjectBase, new()
+			=> InterpolateCurve(() => new START(), () => new NEXT(), factory).OfType<START>();
 
-		public virtual IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, ICurveInterpolaterFactory factory = default)
+		public virtual IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableChildObjectBase> genNextFunc, ICurveInterpolaterFactory factory = default)
 		{
 			var traveller = (factory ?? CurveInterpolaterFactory).CreateInterpolaterForAll(this);
 
@@ -410,7 +401,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 					build(next, childPos);
 					start.AddChildObject(next);
 				}
-				var end = genEndFunc();
+				var end = genNextFunc();
 				build(end, lineSegment[lineSegment.Count - 1]);
 				start.AddChildObject(end);
 

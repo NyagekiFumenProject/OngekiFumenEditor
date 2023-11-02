@@ -26,8 +26,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 			set => Set(ref brightness, value);
 		}
 
-		public override ConnectableNextObject CreateNextObject() => new ColorfulLaneNext();
-		public override ConnectableEndObject CreateEndObject() => new ColorfulLaneEnd();
+		public override ConnectableChildObjectBase CreateChildObject() => new ColorfulLaneNext();
 
 		public override void Copy(OngekiObjectBase fromObj)
 		{
@@ -40,7 +39,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 			Brightness = cls.Brightness;
 		}
 
-		public override IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableNextObject> genNextFunc, Func<ConnectableEndObject> genEndFunc, ICurveInterpolaterFactory factory = null)
+		public override IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableChildObjectBase> genNextFunc, ICurveInterpolaterFactory factory = null)
 		{
 			void Copy(OngekiObjectBase fromObj)
 			{
@@ -61,13 +60,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 				Copy(obj);
 				return obj;
 			};
-			var overrideGenEndFunc = () =>
-			{
-				var obj = genEndFunc();
-				Copy(obj);
-				return obj;
-			};
-			return base.InterpolateCurve(overrideGenStartFunc, overrideGenNextFunc, overrideGenEndFunc, factory);
+			return base.InterpolateCurve(overrideGenStartFunc, overrideGenNextFunc, factory);
 		}
 	}
 }

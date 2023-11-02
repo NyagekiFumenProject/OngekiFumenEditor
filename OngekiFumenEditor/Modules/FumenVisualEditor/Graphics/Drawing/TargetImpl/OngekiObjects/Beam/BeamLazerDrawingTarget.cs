@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		private Texture textureBody;
 		private Texture textureWarn;
 
-		public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS" };
+		public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS", "OBS" };
 		public override DrawingVisible DefaultVisible => DrawingVisible.Preview;
 
 		public override int DefaultRenderOrder => 300;

@@ -95,13 +95,13 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 
 				foreach (var childP in points.Skip(1).SkipLast(1))
 				{
-					var nextObj = targetObject.CreateNextObject();
+					var nextObj = targetObject.CreateChildObject();
 					CommomBuildUp(childP, nextObj);
 					startObj.AddChildObject(nextObj);
 				}
 
 				var lastP = points.LastOrDefault();
-				var endObj = targetObject.CreateEndObject();
+				var endObj = targetObject.CreateChildObject();
 				CommomBuildUp(lastP, endObj);
 				startObj.AddChildObject(endObj);
 

@@ -14,6 +14,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
 		public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
-		public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS" };
+		public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS", "OBS" };
 	}
 }

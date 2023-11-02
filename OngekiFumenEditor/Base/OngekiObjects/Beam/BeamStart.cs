@@ -10,7 +10,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 		public const int LEAD_IN_BODY_DURATION = 250;
 		public const int LEAD_OUT_DURATION = 250;
 
-		public override string IDShortName => "BMS";
+		public bool IsObliqueBeam => ObliqueSourceXGridOffset is not null;
+
+		public override string IDShortName => IsObliqueBeam ? "OBS" : "BMS";
 
 		private int widthId = 2;
 		public int WidthId
@@ -32,9 +34,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 			}
 		}
 
-		public override LaneType LaneType =>  LaneType.Beam;
+		public override LaneType LaneType => LaneType.Beam;
 
-		public override ConnectableNextObject CreateNextObject() => new BeamNext();
-		public override ConnectableEndObject CreateEndObject() => new BeamEnd();
+		public override ConnectableChildObjectBase CreateChildObject() => new BeamNext();
 	}
 }

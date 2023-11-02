@@ -4,6 +4,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
 {
 	public class WallLeftNext : WallNextBase
 	{
-		public override string IDShortName => "WLN";
+		public override string IDShortName => IsEndObject ? "WLE" : "WLN";
 	}
 }

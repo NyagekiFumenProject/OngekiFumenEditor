@@ -17,35 +17,35 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 		{
 			const string RuleName = "MissingEndObject";
 
-			IEnumerable<ICheckResult> CheckBeamList(IEnumerable<BeamStart> objs)
-			{
-				foreach (var missingObject in objs.Where(x => !x.Children.OfType<ConnectableEndObject>().Any()))
-				{
-					yield return new CommonCheckResult()
-					{
-						Severity = RuleSeverity.Problem,
-						Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
-						LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
-						NavigateBehavior = new NavigateToObjectBehavior(missingObject),
-						RuleName = RuleName,
-					};
-				}
-			}
+			//IEnumerable<ICheckResult> CheckBeamList(IEnumerable<BeamStart> objs)
+			//{
+			//	foreach (var missingObject in objs.Where(x => !x.Children.OfType<ConnectableEndObject>().Any()))
+			//	{
+			//		yield return new CommonCheckResult()
+			//		{
+			//			Severity = RuleSeverity.Problem,
+			//			Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
+			//			LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
+			//			NavigateBehavior = new NavigateToObjectBehavior(missingObject),
+			//			RuleName = RuleName,
+			//		};
+			//	}
+			//}
 
-			IEnumerable<ICheckResult> CheckList(IEnumerable<ConnectableStartObject> objs)
-			{
-				foreach (var missingObject in objs.Where(x => !x.Children.OfType<ConnectableEndObject>().Any()))
-				{
-					yield return new CommonCheckResult()
-					{
-						Severity = RuleSeverity.Problem,
-						Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
-						LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
-						NavigateBehavior = new NavigateToObjectBehavior(missingObject),
-						RuleName = RuleName,
-					};
-				}
-			}
+			//IEnumerable<ICheckResult> CheckList(IEnumerable<ConnectableStartObject> objs)
+			//{
+			//	foreach (var missingObject in objs.Where(x => !x.Children.OfType<ConnectableEndObject>().Any()))
+			//	{
+			//		yield return new CommonCheckResult()
+			//		{
+			//			Severity = RuleSeverity.Problem,
+			//			Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
+			//			LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
+			//			NavigateBehavior = new NavigateToObjectBehavior(missingObject),
+			//			RuleName = RuleName,
+			//		};
+			//	}
+			//}
 
 			IEnumerable<ICheckResult> CheckHoldList(IEnumerable<Hold> objs)
 			{
@@ -65,15 +65,15 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			var starts = Enumerable.Empty<ConnectableStartObject>()
 				.Concat(fumen.Lanes);
 
-			foreach (var start in CheckList(starts))
-			{
-				yield return start;
-			}
+			//foreach (var start in CheckList(starts))
+			//{
+			//	yield return start;
+			//}
 
-			foreach (var start in CheckBeamList(fumen.Beams))
-			{
-				yield return start;
-			}
+			//foreach (var start in CheckBeamList(fumen.Beams))
+			//{
+			//	yield return start;
+			//}
 
 			foreach (var start in CheckHoldList(fumen.Holds))
 			{

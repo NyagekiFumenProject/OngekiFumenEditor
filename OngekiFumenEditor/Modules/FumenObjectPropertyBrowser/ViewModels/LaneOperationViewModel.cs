@@ -21,20 +21,20 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 				case 'W':
 					return LaneChar switch
 					{
-						'L' => needNext ? new WallLeftNext() : new WallLeftEnd(),
-						'R' => needNext ? new WallRightNext() : new WallRightEnd(),
+						'L' => new WallLeftNext(),
+						'R' => new WallRightNext(),
 						_ => default
 					};
 				case 'C':
-					return needNext ? new ColorfulLaneNext() : new ColorfulLaneEnd();
+					return new ColorfulLaneNext();
 				case 'E':
-					return needNext ? new EnemyLaneNext() : new EnemyLaneEnd();
+					return new EnemyLaneNext();
 				case 'L':
 					return LaneChar switch
 					{
-						'L' => needNext ? new LaneLeftNext() : new LaneLeftEnd(),
-						'C' => needNext ? new LaneCenterNext() : new LaneCenterEnd(),
-						'R' => needNext ? new LaneRightNext() : new LaneRightEnd(),
+						'L' => new LaneLeftNext(),
+						'C' => new LaneCenterNext(),
+						'R' => new LaneRightNext(),
 						_ => default
 					};
 				default:

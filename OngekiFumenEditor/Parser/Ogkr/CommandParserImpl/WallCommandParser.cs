@@ -36,25 +36,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 		}
 	}
 
-	public abstract class WallNextCommandParser<T> : WallCommandParserBase where T : ConnectableNextObject, new()
-	{
-		public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
-		{
-			var beamRecordId = args.GetData<int>(1);
-			if (fumen.Lanes.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
-			{
-				Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
-				return default;
-			}
-
-			var beam = new T();
-			CommonParse(beam, args, fumen);
-			beamStart.AddChildObject(beam);
-			return beam;
-		}
-	}
-
-	public abstract class WallEndCommandParser<T> : WallCommandParserBase where T : ConnectableEndObject, new()
+	public abstract class WallNextCommandParser<T> : WallCommandParserBase where T : ConnectableChildObjectBase, new()
 	{
 		public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
 		{
@@ -87,7 +69,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 	}
 
 	[Export(typeof(ICommandParser))]
-	public class WallLeftEndommandParser : WallEndCommandParser<WallLeftEnd>
+	public class WallLeftEndommandParser : WallNextCommandParser<WallLeftNext>
 	{
 		public override string CommandLineHeader => "WLE";
 	}
@@ -105,7 +87,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 	}
 
 	[Export(typeof(ICommandParser))]
-	public class WallRightEndommandParser : WallEndCommandParser<WallRightEnd>
+	public class WallRightEndommandParser : WallNextCommandParser<WallRightNext>
 	{
 		public override string CommandLineHeader => "WRE";
 	}

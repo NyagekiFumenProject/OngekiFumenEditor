@@ -2,7 +2,7 @@
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Lane.Base
 {
-	public abstract class LaneNextBase : ConnectableNextObject
+	public abstract class LaneNextBase : ConnectableChildObjectBase
 	{
 
 	}

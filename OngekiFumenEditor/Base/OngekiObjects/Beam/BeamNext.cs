@@ -4,9 +4,11 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
-	public class BeamNext : ConnectableNextObject, IBeamObject
+	public class BeamNext : ConnectableChildObjectBase, IBeamObject
 	{
-		public override string IDShortName => "BMN";
+		public override string IDShortName => (IsObliqueBeam ? "OB" : "BM") + (IsEndObject ? "E" : "N");
+
+		public bool IsObliqueBeam => ObliqueSourceXGridOffset is not null;
 
 		private int widthId = 2;
 		public int WidthId

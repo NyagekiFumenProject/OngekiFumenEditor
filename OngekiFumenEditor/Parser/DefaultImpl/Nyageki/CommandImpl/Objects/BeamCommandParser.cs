@@ -48,8 +48,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			{
 				var childObject = childData["Type"].Last() switch
 				{
-					'N' => startObject.CreateNextObject(),
-					'E' => startObject.CreateEndObject(),
+					'N' => startObject.CreateChildObject(),
+					'E' => startObject.CreateChildObject(),
 					_ => default(ConnectableChildObjectBase)
 				};
 

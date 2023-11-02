@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 		public override ConnectableChildObjectBase GenerateChildObject(bool needNext)
 		{
-			return needNext ? new BeamNext() : new BeamEnd();
+			return new BeamNext();
 		}
 	}
 }

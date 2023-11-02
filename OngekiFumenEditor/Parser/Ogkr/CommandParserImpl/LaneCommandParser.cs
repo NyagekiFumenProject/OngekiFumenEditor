@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 	}
 
 	[Export(typeof(ICommandParser))]
-	public class ColorfulLaneEndCommandParser : LaneChildObjectCommandParser<ColorfulLaneEnd>
+	public class ColorfulLaneEndCommandParser : ColorfulLaneNextCommandParser
 	{
 		public override string CommandLineHeader => "CLE";
 	}
@@ -129,25 +129,25 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 	}
 
 	[Export(typeof(ICommandParser))]
-	public class LaneLeftEndCommandParser : LaneChildObjectCommandParser<LaneLeftEnd>
+	public class LaneLeftEndCommandParser : LaneLeftNextCommandParser
 	{
 		public override string CommandLineHeader => "LLE";
 	}
 
 	[Export(typeof(ICommandParser))]
-	public class LaneCenterEndCommandParser : LaneChildObjectCommandParser<LaneCenterEnd>
+	public class LaneCenterEndCommandParser : LaneCenterNextCommandParser
 	{
 		public override string CommandLineHeader => "LCE";
 	}
 
 	[Export(typeof(ICommandParser))]
-	public class LaneRightEndCommandParser : LaneChildObjectCommandParser<LaneRightEnd>
+	public class LaneRightEndCommandParser : LaneRightNextCommandParser
 	{
 		public override string CommandLineHeader => "LRE";
 	}
 
 	[Export(typeof(ICommandParser))]
-	public class EnemyLaneEndCommandParser : LaneChildObjectCommandParser<EnemyLaneEnd>
+	public class EnemyLaneEndCommandParser : EnemyLaneNextCommandParser
 	{
 		public override string CommandLineHeader => "ENE";
 	}

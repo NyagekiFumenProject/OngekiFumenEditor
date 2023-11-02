@@ -9,7 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 
 		public override LaneType LaneType => LaneType.Center;
 
-		public override ConnectableNextObject CreateNextObject() => new LaneCenterNext();
-		public override ConnectableEndObject CreateEndObject() => new LaneCenterEnd();
+		public override ConnectableChildObjectBase CreateChildObject() => new LaneCenterNext();
 	}
 }

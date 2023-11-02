@@ -9,7 +9,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Wall
 
 		public override LaneType LaneType => LaneType.WallLeft;
 
-		public override ConnectableNextObject CreateNextObject() => new WallLeftNext();
-		public override ConnectableEndObject CreateEndObject() => new WallLeftEnd();
+		public override ConnectableChildObjectBase CreateChildObject() => new WallLeftNext();
 	}
 }

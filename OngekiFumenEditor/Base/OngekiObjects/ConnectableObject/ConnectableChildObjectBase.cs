@@ -14,6 +14,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 	{
 		public override LaneType LaneType => ReferenceStartObject?.LaneType ?? default;
 
+		public bool IsEndObject => NextObject is null;
+
 		private float curvePrecision = 0.025f;
 		public float CurvePrecision
 		{
@@ -303,7 +305,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 				if (itor.EnumerateNext() is not CurvePoint point)
 					break;
 
-				var newNext = ReferenceStartObject.CreateNextObject();
+				var newNext = ReferenceStartObject.CreateChildObject();
 
 				newNext.Copy(this);
 				foreach (var ctrl in newNext.PathControls.ToArray())

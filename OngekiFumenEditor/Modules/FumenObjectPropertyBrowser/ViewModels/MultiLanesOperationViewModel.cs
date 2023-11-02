@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 				return;
 
 			var frontStart = frontChild.ReferenceStartObject;
-			var midChild = frontStart.CreateNextObject();
+			var midChild = frontStart.CreateChildObject();
 			var endDummy = default(ConnectableChildObjectBase);
 			var frontEnd = default(ConnectableChildObjectBase);
 
@@ -47,17 +47,19 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 				midChild.XGrid = laterStart.XGrid.CopyNew();
 				midChild.TGrid = laterStart.TGrid.CopyNew();
 
+				/*
 				if (frontStart.Children.OfType<ConnectableEndObject>().FirstOrDefault() is ConnectableChildObjectBase _end)
 				{
 					frontEnd = _end;
 
-					endDummy = frontStart.CreateNextObject();
+					endDummy = frontStart.CreateChildObject();
 					endDummy.XGrid = frontEnd.XGrid.CopyNew();
 					endDummy.TGrid = frontEnd.TGrid.CopyNew();
 
 					frontStart.RemoveChildObject(frontEnd);
 					frontStart.AddChildObject(endDummy);
 				}
+				*/
 
 				frontStart.AddChildObject(midChild);
 

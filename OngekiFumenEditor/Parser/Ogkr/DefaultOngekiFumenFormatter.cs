@@ -283,7 +283,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 			{
 				var ob = (IBeamObject)o;
 				var isOblique = ob.ObliqueSourceXGridOffset is not null;
-				sb.Append($"{(isOblique ? ("OB" + o.IDShortName.Last()) : o.IDShortName)}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}\t{ob.WidthId}");
+				sb.Append($"{o.IDShortName}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}\t{ob.WidthId}");
 				if (isOblique)
 					sb.Append($"\t{ob.ObliqueSourceXGridOffset.TotalUnit}");
 				sb.AppendLine();

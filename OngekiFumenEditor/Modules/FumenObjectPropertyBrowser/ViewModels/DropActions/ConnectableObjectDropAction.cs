@@ -34,12 +34,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 			}
 
 			var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
-			var endObj = startObject.Children.OfType<ConnectableEndObject>().FirstOrDefault();
-			var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) && endObj is null;
+			var lastObj = startObject.Children.LastOrDefault();
+			var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) || (lastObj is not null && lastObj.TGrid < dragTGrid);
 			var isFirst = true;
-
-			if (endObj is not null && !isAppend && endObj.TGrid < dragTGrid)
-				return;
 
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加Next物件", () =>
 			{

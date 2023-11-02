@@ -4,7 +4,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 {
 	public class ColorfulLaneNext : LaneNextBase, IColorfulLane
 	{
-		public override string IDShortName => "CLN";
+		public override string IDShortName => IsEndObject ? "CLE" : "CLN";
 
 		private ColorId colorId = ColorIdConst.Akari;
 		public ColorId ColorId
