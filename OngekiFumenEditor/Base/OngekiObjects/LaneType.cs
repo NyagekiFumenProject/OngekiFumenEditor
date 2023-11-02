@@ -7,6 +7,7 @@
 		Right = 3,
 		Colorful = 4,
 		Enemy = 5,
+		Beam = 6,
 		WallLeft = 1,
 		WallRight = -1,
 	}

@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
 	public abstract class ConnectableChildObjectBase : ConnectableObjectBase
 	{
+		public override LaneType LaneType => ReferenceStartObject?.LaneType ?? default;
+
 		private float curvePrecision = 0.025f;
 		public float CurvePrecision
 		{

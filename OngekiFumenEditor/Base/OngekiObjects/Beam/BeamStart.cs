@@ -32,6 +32,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 			}
 		}
 
+		public override LaneType LaneType =>  LaneType.Beam;
+
 		public override ConnectableNextObject CreateNextObject() => new BeamNext();
 		public override ConnectableEndObject CreateEndObject() => new BeamEnd();
 	}
