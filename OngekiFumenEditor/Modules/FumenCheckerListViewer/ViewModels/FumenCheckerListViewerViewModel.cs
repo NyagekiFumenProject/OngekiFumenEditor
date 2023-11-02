@@ -4,8 +4,11 @@ using Gemini.Framework.Services;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Utils;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows.Controls;
@@ -63,9 +66,16 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 			get => editor;
 			set
 			{
+				this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropChanged);
 				Set(ref editor, value);
 				RefreshCurrentFumen();
 			}
+		}
+
+		private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+				RefreshCurrentFumen();
 		}
 
 		private List<IFumenCheckRule> checkRules;
