@@ -98,14 +98,22 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 		{
 			CheckResults.Clear();
 
-			if (Editor?.Fumen is not null)
+			try
 			{
-				var fumen = Editor.Fumen;
-
-				foreach (var checkRule in checkRules.SelectMany(x => x.CheckRule(fumen, Editor)))
+				if (Editor?.Fumen is not null)
 				{
-					CheckResults.Add(checkRule);
+					var fumen = Editor.Fumen;
+
+					foreach (var checkRule in checkRules.SelectMany(x => x.CheckRule(fumen, Editor)))
+					{
+						CheckResults.Add(checkRule);
+					}
 				}
+			}
+			catch (Exception e)
+			{
+				CheckResults.Clear();
+				Log.LogError($"FumenCheckerListViewer can't refresh checkers", e);
 			}
 
 			NotifyOfPropertyChange(() => ErrorCount);
@@ -129,9 +137,9 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 				case RuleSeverity.Suggest:
 					return EnableShowSuggest;
 				case RuleSeverity.Problem:
-					return enableShowProblem;
+					return EnableShowProblem;
 				case RuleSeverity.Error:
-					return enableShowError;
+					return EnableShowError;
 				default:
 					return false;
 			}

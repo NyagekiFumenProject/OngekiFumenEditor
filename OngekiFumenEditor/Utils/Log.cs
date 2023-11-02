@@ -81,5 +81,12 @@ namespace OngekiFumenEditor.Utils
 			var msg = instance.BuildLogMessage(message, "ERROR", newLine, time, prefix);
 			instance.Output(msg);
 		}
+
+		public static void LogError(string message, Exception e, bool newLine = true, bool time = true, [CallerMemberName] string prefix = "<Unknown>")
+		{
+			var instance = Instance;
+			var msg = instance.BuildLogMessage($"{message}\nContains exception:{e.Message}\n{e.StackTrace}", "ERROR", newLine, time, prefix);
+			instance.Output(msg);
+		}
 	}
 }
