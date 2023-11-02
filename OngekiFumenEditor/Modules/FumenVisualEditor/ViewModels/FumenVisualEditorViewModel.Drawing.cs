@@ -441,8 +441,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				stringBuilder.Clear();
 
 				PerfomenceMonitor?.FormatStatistics(stringBuilder);
+#if DEBUG
 				stringBuilder.AppendLine();
 				stringBuilder.AppendLine($"View: {ViewWidth}x{ViewHeight}");
+				stringBuilder.AppendLine($"VisibleYRange: [{Rect.MinY}, {Rect.MaxY}]");
+				stringBuilder.AppendLine($"VisibleTGridRanges:");
+				foreach (var tGridRange in visibleTGridRanges.ToArray())
+					stringBuilder.AppendLine($"* [{tGridRange.minTGrid}, {tGridRange.maxTGrid}]");
+#endif
 
 				DisplayFPS = stringBuilder.ToString();
 
