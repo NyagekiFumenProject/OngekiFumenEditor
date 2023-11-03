@@ -396,7 +396,6 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 					var docName = $"[快速打开] {diff.RefSet.Title}";
 
 					editor.DisplayName = docName;
-
 					IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));
 				};
 				frameworkElement.Loaded += loadedHandler;

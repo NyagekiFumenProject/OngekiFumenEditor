@@ -80,29 +80,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			}
 		}
 
-		private string specifyDefaultName;
-
-		public string SpecifyDefaultName
-		{
-			get => string.IsNullOrWhiteSpace(specifyDefaultName) ? base.DisplayName : specifyDefaultName;
-			set
-			{
-				specifyDefaultName = value;
-				NotifyOfPropertyChange(() => SpecifyDefaultName);
-				NotifyOfPropertyChange(() => DisplayName);
-			}
-		}
-
-		public override string DisplayName
-		{
-			get
-			{
-				var name = (string.IsNullOrWhiteSpace(FileName) ? SpecifyDefaultName : FileName);
-				return IsDirty ? name + "*" : name;
-			}
-			set => base.DisplayName = value;
-		}
-
 		private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			switch (e.PropertyName)
@@ -307,7 +284,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			using var _ = StatusBarHelper.BeginStatus("Fumen saving : " + filePath);
 			if (string.IsNullOrWhiteSpace(filePath))
 			{
-				await DoSaveAs(this);
+				var newProjFilePath = FileDialogHelper.SaveFile("保存新的项目文件", new[] { (FumenVisualEditorProvider.FILE_EXTENSION_NAME, "谱面项目文件") });
+				if (!string.IsNullOrWhiteSpace(newProjFilePath))
+					await Save(newProjFilePath);
 				return;
 			}
 			Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
@@ -336,6 +315,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			}
 			else
 			{
+				DisplayName = default;
 				ToastNotify("谱面项目和文件保存成功");
 				IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
 			}
