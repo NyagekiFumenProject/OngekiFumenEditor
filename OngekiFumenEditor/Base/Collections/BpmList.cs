@@ -11,14 +11,20 @@ namespace OngekiFumenEditor.Base.Collections
 {
 	public class BpmList : IBinaryFindRangeEnumable<BPMChange, TGrid>
 	{
-		private BPMChange firstBpm = new BPMChange();
+		private BPMChange firstBpm;
 		private TGridSortList<BPMChange> changedBpmList = new();
 		public BPMChange FirstBpm => firstBpm;
+
+		public int Count => 1 + changedBpmList.Count;
+
+		public BPMChange this[int index] => index == 0 ? firstBpm : changedBpmList[index - 1];
 
 		public event Action OnChangedEvent;
 
 		public BpmList(IEnumerable<BPMChange> initBpmChanges = default)
 		{
+			SetFirstBpm(new BPMChange());
+
 			OnChangedEvent += BpmList_OnChangedEvent;
 			foreach (var item in initBpmChanges ?? Enumerable.Empty<BPMChange>())
 				Add(item);
@@ -43,18 +49,24 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public void SetFirstBpm(BPMChange firstBpm)
 		{
+			if (this.firstBpm != null)
+				this.firstBpm.PropertyChanged -= OnBpmPropChanged;
 			this.firstBpm = firstBpm;
 			OnChangedEvent?.Invoke();
 			firstBpm.PropertyChanged += OnBpmPropChanged;
 		}
 
-		public void Remove(BPMChange bpm)
+		public bool Remove(BPMChange bpm)
 		{
 			if (bpm == firstBpm)
-				throw new Exception($"BpmList can't delete firstBpm : {bpm}");
-			changedBpmList.Remove(bpm);
-			bpm.PropertyChanged -= OnBpmPropChanged;
-			OnChangedEvent?.Invoke();
+				throw new Exception($"BpmList can't delete firstBpm : {bpm}, but you can use SetFirstBpm()");
+			var r = changedBpmList.Remove(bpm);
+			if (r)
+			{
+				bpm.PropertyChanged -= OnBpmPropChanged;
+				OnChangedEvent?.Invoke();
+			}
+			return r;
 		}
 
 		public IEnumerator<BPMChange> GetEnumerator()
@@ -126,5 +138,10 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public bool Contains(BPMChange obj)
 			=> ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).Contains(obj);
+
+		public void Clear()
+		{
+			changedBpmList.Clear();
+		}
 	}
 }

@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
 {
 	public class SortableCollection<T, X> : IBinaryFindRangeEnumable<T, X> where X : IComparable<X>
 	{
-		private List<T> items = new List<T>();
+		private List<T> items = new();
 		private readonly Func<T, X> sortKeySelector;
 		private ComparerWrapper<T> comparer;
 
@@ -48,9 +48,9 @@ namespace OngekiFumenEditor.Base.Collections.Base
 			}
 		}
 
-		public virtual void Remove(T obj)
+		public virtual bool Remove(T obj)
 		{
-			items.Remove(obj);
+			return items.Remove(obj);
 		}
 
 		public bool Contains(T obj)
@@ -95,14 +95,17 @@ namespace OngekiFumenEditor.Base.Collections.Base
 			return Enumerable.Range(range.minIndex, range.maxIndex - range.minIndex).Select(i => items[i]);
 		}
 
-		public bool FastContains(T obj) => Contains(obj);
-
 		public int BinaryFindLastIndexByKey(X key)
 		{
 			var minIndex = items.BinarySearchBy(key, sortKeySelector);
 			minIndex = minIndex < 0 ? ~minIndex : minIndex;
 
 			return minIndex;
+		}
+
+		public void Clear()
+		{
+			items.Clear();
 		}
 	}
 }

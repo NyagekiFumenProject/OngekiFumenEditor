@@ -32,10 +32,11 @@ namespace OngekiFumenEditor.Base.Collections.Base
 			obj.PropertyChanged += OnItemPropChanged;
 		}
 
-		public override void Remove(T obj)
+		public override bool Remove(T obj)
 		{
-			base.Remove(obj);
+			var r =base.Remove(obj);
 			obj.PropertyChanged -= OnItemPropChanged;
+			return r;
 		}
 
 		public void Clear()

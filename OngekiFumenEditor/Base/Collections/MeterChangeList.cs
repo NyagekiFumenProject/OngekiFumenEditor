@@ -11,16 +11,22 @@ namespace OngekiFumenEditor.Base.Collections
 {
 	public class MeterChangeList : IBinaryFindRangeEnumable<MeterChange, TGrid>
 	{
-		private MeterChange firstMeter = new MeterChange();
+		private MeterChange firstMeter;
 		private TGridSortList<MeterChange> changedMeterList = new();
 		public MeterChange FirstMeter => firstMeter;
 
+		public int Count => 1 + changedMeterList.Count;
+
+		public MeterChange this[int index] => index == 0 ? firstMeter : changedMeterList[index - 1];
+
 		public event Action OnChangedEvent;
 
-		public MeterChangeList(IEnumerable<MeterChange> initBpmChanges = default)
+		public MeterChangeList(IEnumerable<MeterChange> initMeterChanges = default)
 		{
+			SetFirstMeter(new MeterChange());
+
 			OnChangedEvent += OnChilidrenSubPropsChangedEvent;
-			foreach (var item in initBpmChanges ?? Enumerable.Empty<MeterChange>())
+			foreach (var item in initMeterChanges ?? Enumerable.Empty<MeterChange>())
 				Add(item);
 		}
 
@@ -29,33 +35,39 @@ namespace OngekiFumenEditor.Base.Collections
 			cachedMetListCacheHash = int.MinValue;
 		}
 
-		public void Add(MeterChange bpm)
+		public void Add(MeterChange meter)
 		{
-			changedMeterList.Add(bpm);
-			bpm.PropertyChanged += OnBpmPropChanged;
+			changedMeterList.Add(meter);
+			meter.PropertyChanged += OnMeterPropChanged;
 			OnChangedEvent?.Invoke();
 		}
 
-		private void OnBpmPropChanged(object sender, PropertyChangedEventArgs e)
+		private void OnMeterPropChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName != nameof(ISelectableObject.IsSelected))
 				OnChangedEvent?.Invoke();
 		}
 
-		public void SetFirstBpm(MeterChange firstBpm)
+		public void SetFirstMeter(MeterChange firstMet)
 		{
-			this.firstMeter = firstBpm;
+			if (firstMeter is not null)
+				firstMeter.PropertyChanged -= OnMeterPropChanged;
+			firstMeter = firstMet;
 			OnChangedEvent?.Invoke();
-			firstBpm.PropertyChanged += OnBpmPropChanged;
+			firstMet.PropertyChanged += OnMeterPropChanged;
 		}
 
-		public void Remove(MeterChange bpm)
+		public bool Remove(MeterChange meter)
 		{
-			if (bpm == firstMeter)
-				throw new Exception($"BpmList can't delete firstBpm : {bpm}");
-			changedMeterList.Remove(bpm);
-			bpm.PropertyChanged -= OnBpmPropChanged;
-			OnChangedEvent?.Invoke();
+			if (meter == firstMeter)
+				throw new Exception($"MeterList can't delete firstMet : {meter},but you can use SetFirstMeter()");
+			var r = changedMeterList.Remove(meter);
+			if (r)
+			{
+				meter.PropertyChanged -= OnMeterPropChanged;
+				OnChangedEvent?.Invoke();
+			}
+			return r;
 		}
 
 		public IEnumerator<MeterChange> GetEnumerator()
@@ -67,15 +79,15 @@ namespace OngekiFumenEditor.Base.Collections
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		public MeterChange GetMeter(TGrid time) => this.LastOrDefault(bpm => bpm.TGrid <= time);
+		public MeterChange GetMeter(TGrid time) => this.LastOrDefault(meter => meter.TGrid <= time);
 
 		public MeterChange GetPrevMeter(MeterChange time) => GetPrevMeter(time.TGrid);
 
-		public MeterChange GetPrevMeter(TGrid time) => this.LastOrDefault(bpm => bpm.TGrid < time);
+		public MeterChange GetPrevMeter(TGrid time) => this.LastOrDefault(meter => meter.TGrid < time);
 
-		public MeterChange GetNextMeter(MeterChange bpm) => GetNextMeter(bpm.TGrid);
+		public MeterChange GetNextMeter(MeterChange meter) => GetNextMeter(meter.TGrid);
 
-		public MeterChange GetNextMeter(TGrid time) => this.FirstOrDefault(bpm => time < bpm.TGrid);
+		public MeterChange GetNextMeter(TGrid time) => this.FirstOrDefault(meter => time < meter.TGrid);
 
 		private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedTimesignUniformPosition = new();
 		private double cachedMetListCacheHash = int.MinValue;
@@ -147,5 +159,10 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public bool Contains(MeterChange obj)
 			=> ((IBinaryFindRangeEnumable<MeterChange, TGrid>)changedMeterList).Contains(obj);
+
+		public void Clear()
+		{
+			changedMeterList.Clear();
+		}
 	}
 }
