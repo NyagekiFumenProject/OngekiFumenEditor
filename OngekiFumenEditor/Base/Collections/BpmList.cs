@@ -17,8 +17,6 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public int Count => 1 + changedBpmList.Count;
 
-		public BPMChange this[int index] => index == 0 ? firstBpm : changedBpmList[index - 1];
-
 		public event Action OnChangedEvent;
 
 		public BpmList(IEnumerable<BPMChange> initBpmChanges = default)
@@ -138,10 +136,5 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public bool Contains(BPMChange obj)
 			=> ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).Contains(obj);
-
-		public void Clear()
-		{
-			changedBpmList.Clear();
-		}
 	}
 }

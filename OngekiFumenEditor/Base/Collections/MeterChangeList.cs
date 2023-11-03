@@ -17,8 +17,6 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public int Count => 1 + changedMeterList.Count;
 
-		public MeterChange this[int index] => index == 0 ? firstMeter : changedMeterList[index - 1];
-
 		public event Action OnChangedEvent;
 
 		public MeterChangeList(IEnumerable<MeterChange> initMeterChanges = default)
@@ -159,10 +157,5 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public bool Contains(MeterChange obj)
 			=> ((IBinaryFindRangeEnumable<MeterChange, TGrid>)changedMeterList).Contains(obj);
-
-		public void Clear()
-		{
-			changedMeterList.Clear();
-		}
 	}
 }

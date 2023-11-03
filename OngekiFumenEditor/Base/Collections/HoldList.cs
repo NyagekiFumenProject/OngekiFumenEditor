@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-	public class HoldList : IEnumerable<Hold>
+	public class HoldList : IReadOnlyCollection<Hold>
 	{
 		private IntervalTreeWrapper<TGrid, Hold> startObjects = new(
 			x => new() { Min = x.TGrid, Max = x.EndTGrid },
@@ -13,6 +13,8 @@ namespace OngekiFumenEditor.Base.Collections
 			nameof(Hold.TGrid),
 			nameof(Hold.EndTGrid)
 			);
+
+		public int Count => startObjects.Count;
 
 		public IEnumerator<Hold> GetEnumerator() => startObjects.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

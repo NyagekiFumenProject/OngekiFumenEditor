@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Base.Collections.Base
 {
-	public class IntervalTreeWrapper<TKey, TValue> : IEnumerable<TValue> where TValue : INotifyPropertyChanged where TKey : IComparable<TKey>
+	public class IntervalTreeWrapper<TKey, TValue> : IReadOnlyCollection<TValue> where TValue : INotifyPropertyChanged where TKey : IComparable<TKey>
 	{
 		private IIntervalTree<TKey, TValue> tree;
 		private readonly Func<TValue, KeyRange> rangeKeySelector;

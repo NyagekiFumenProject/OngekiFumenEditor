@@ -21,10 +21,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
 			set => items.Capacity = value;
 		}
 
-		public T this[int i]
-		{
-			get { return items[i]; }
-		}
+		public T this[int i] => items[i];
 
 		public SortableCollection(Func<T, X> sortKeySelector)
 		{

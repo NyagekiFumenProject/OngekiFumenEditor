@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-	public class LaneBlockAreaList : IEnumerable<LaneBlockArea>
+	public class LaneBlockAreaList : IReadOnlyCollection<LaneBlockArea>
 	{
 		private IntervalTreeWrapper<TGrid, LaneBlockArea> blocks = new(
 			x => new() { Min = x.TGrid, Max = x.EndIndicator.TGrid },
@@ -13,6 +13,8 @@ namespace OngekiFumenEditor.Base.Collections
 			nameof(LaneBlockArea.TGrid),
 			nameof(LaneBlockArea.EndIndicator.TGrid)
 			);
+
+		public int Count => blocks.Count;
 
 		public IEnumerator<LaneBlockArea> GetEnumerator() => blocks.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

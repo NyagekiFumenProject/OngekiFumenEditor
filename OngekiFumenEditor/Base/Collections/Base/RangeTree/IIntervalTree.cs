@@ -10,17 +10,12 @@ namespace IntervalTree
 	/// </summary>
 	/// <typeparam name="TKey">The type of the range.</typeparam>
 	/// <typeparam name="TValue">The type of the data items.</typeparam>
-	public interface IIntervalTree<TKey, TValue> : IEnumerable<RangeValuePair<TKey, TValue>>
+	public interface IIntervalTree<TKey, TValue> : IReadOnlyCollection<RangeValuePair<TKey, TValue>>
 	{
 		/// <summary>
 		/// Returns all items contained in the tree.
 		/// </summary>
 		IEnumerable<TValue> Values { get; }
-
-		/// <summary>
-		/// Gets the number of elements contained in the tree.
-		/// </summary>
-		int Count { get; }
 
 		/// <summary>
 		/// Performs a point query with a single value. All items with overlapping ranges are returned.

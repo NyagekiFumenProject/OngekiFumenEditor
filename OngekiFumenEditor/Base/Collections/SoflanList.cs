@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-	public partial class SoflanList : IEnumerable<Soflan>
+	public partial class SoflanList : IReadOnlyCollection<Soflan>
 	{
 		private IntervalTreeWrapper<TGrid, Soflan> soflans = new(
 			x => new() { Min = x.TGrid, Max = x.EndIndicator.TGrid },
@@ -16,6 +16,8 @@ namespace OngekiFumenEditor.Base.Collections
 			nameof(Soflan.TGrid),
 			nameof(Soflan.EndTGrid)
 			);
+
+		public int Count => soflans.Count;
 
 		public event Action OnChangedEvent;
 

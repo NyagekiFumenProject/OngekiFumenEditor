@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-	public class BulletPalleteList : IEnumerable<BulletPallete>, INotifyCollectionChanged
+	public class BulletPalleteList : IReadOnlyList<BulletPallete>, INotifyCollectionChanged
 	{
 		private static readonly Dictionary<char, int> ALPHABET = Enumerable.Empty<char>()
 			.Concat(Enumerable.Range(0, 10).Select(x => x + '0').Select(x => (char)x))
@@ -35,32 +36,50 @@ namespace OngekiFumenEditor.Base.Collections
 			return str;
 		}
 
-		private HashSet<BulletPallete> palletes = new();
+		private Dictionary<string, BulletPallete> palleteMap = new();
 		private string cacheCurrentMaxId = null;
+
+		public int Count => palleteMap.Count;
+		public BulletPallete this[int index] => this[ConvertIntToId(index)];
+		public BulletPallete this[string strId] => palleteMap.TryGetValue(strId, out var r) ? r : default;
 
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		public IEnumerator<BulletPallete> GetEnumerator() => palletes.OrderBy(x => ConvertIdToInt(x.StrID)).GetEnumerator();
+		public IEnumerator<BulletPallete> GetEnumerator() => palleteMap.Values.OrderBy(x => ConvertIdToInt(x.StrID)).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public void AddPallete(BulletPallete pallete)
 		{
 			if (cacheCurrentMaxId is null)
 			{
-				if (palletes.Count == 0)
+				if (palleteMap.Count == 0)
 					cacheCurrentMaxId = "9Z";
 				else
-					cacheCurrentMaxId = ConvertIntToId(palletes.Select(x => ConvertIdToInt(x.StrID)).OrderBy(x => x).LastOrDefault());
+					cacheCurrentMaxId = ConvertIntToId(palleteMap.Keys.Select(ConvertIdToInt).OrderBy(x => x).LastOrDefault());
 			}
 
 			if (string.IsNullOrWhiteSpace(pallete.StrID))
 			{
-				//generate new id
+				//分配一个新的StrId
 				pallete.StrID = ConvertIntToId(ConvertIdToInt(cacheCurrentMaxId) + 1);
 			}
 
-			if (palletes.Add(pallete))
+			var addable = true;
+			if (palleteMap.TryGetValue(pallete.StrID, out var old))
 			{
+				if (old == pallete)
+					addable = false; //重复添加，那就忽略了
+				else
+				{
+					Log.LogWarn($"remove old ({old}) and add new ({pallete}).");
+					RemovePallete(old); //存在旧的，那就先删了旧的再添加新的
+				}
+			}
+
+			if (addable)
+			{
+				palleteMap[pallete.StrID] = pallete;
+
 				pallete.PropertyChanged += OnPalletePropChanged;
 				cacheCurrentMaxId = Comparer<string>.Default.Compare(pallete.StrID, cacheCurrentMaxId) > 0 ? pallete.StrID : cacheCurrentMaxId;
 
@@ -70,7 +89,7 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public void RemovePallete(BulletPallete pallete)
 		{
-			if (palletes.Remove(pallete))
+			if (palleteMap.Remove(pallete.StrID))
 			{
 				pallete.PropertyChanged -= OnPalletePropChanged;
 				CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));

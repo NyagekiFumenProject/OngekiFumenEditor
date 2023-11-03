@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-	public class ConnectableObjectList<START_TYPE, CHILD_TYPE> : IEnumerable<START_TYPE> where START_TYPE : ConnectableStartObject where CHILD_TYPE : ConnectableChildObjectBase
+	public class ConnectableObjectList<START_TYPE, CHILD_TYPE> : IReadOnlyCollection<START_TYPE> where START_TYPE : ConnectableStartObject where CHILD_TYPE : ConnectableChildObjectBase
 	{
 		private IntervalTreeWrapper<TGrid, START_TYPE> startObjects = new(
 			x => new() { Min = x.MinTGrid, Max = x.MaxTGrid },
@@ -16,6 +16,8 @@ namespace OngekiFumenEditor.Base.Collections
 			nameof(ConnectableStartObject.MinTGrid),
 			nameof(ConnectableStartObject.MaxTGrid)
 			);
+
+		public int Count => startObjects.Count;
 
 		public IEnumerator<START_TYPE> GetEnumerator() => startObjects.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
