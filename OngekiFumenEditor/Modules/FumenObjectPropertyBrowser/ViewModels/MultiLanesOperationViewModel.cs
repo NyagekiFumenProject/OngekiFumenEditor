@@ -15,15 +15,23 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 		private readonly ConnectableStartObject laterStart;
 
 		/**
+		 合并前:
             frontStart  frontChild
             o-----------o
-
-                        o endDummy
 
                         o midChild
                             
                         o--------o---------o
                         laterStart
+
+		合并后:
+            frontStart  frontChild
+            o-----------o
+			            |
+                        | 
+                        |   
+                o       o--------o---------o
+       laterStart       midChild 
         */
 
 		public MultiLanesOperationViewModel(ConnectableChildObjectBase frontChild, ConnectableStartObject laterStart)
@@ -39,27 +47,11 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			var frontStart = frontChild.ReferenceStartObject;
 			var midChild = frontStart.CreateChildObject();
-			var endDummy = default(ConnectableChildObjectBase);
-			var frontEnd = default(ConnectableChildObjectBase);
 
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("合并轨道", () =>
 			{
 				midChild.XGrid = laterStart.XGrid.CopyNew();
 				midChild.TGrid = laterStart.TGrid.CopyNew();
-
-				/*
-				if (frontStart.Children.OfType<ConnectableEndObject>().FirstOrDefault() is ConnectableChildObjectBase _end)
-				{
-					frontEnd = _end;
-
-					endDummy = frontStart.CreateChildObject();
-					endDummy.XGrid = frontEnd.XGrid.CopyNew();
-					endDummy.TGrid = frontEnd.TGrid.CopyNew();
-
-					frontStart.RemoveChildObject(frontEnd);
-					frontStart.AddChildObject(endDummy);
-				}
-				*/
 
 				frontStart.AddChildObject(midChild);
 
@@ -71,15 +63,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 				}
 
 				editor.Fumen.RemoveObject(laterStart);
+				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
 			}, () =>
 			{
-				if (endDummy is not null)
-				{
-					frontStart.RemoveChildObject(endDummy);
-					frontEnd.CacheRecoveryChildIndex = -1;
-					frontStart.AddChildObject(frontEnd);
-				}
-
 				var next = midChild.NextObject;
 				while (next != null)
 				{
@@ -90,6 +76,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 				}
 				frontStart.RemoveChildObject(midChild);
 				editor.Fumen.AddObject(laterStart);
+
+				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
 			}));
 		}
 	}
