@@ -149,7 +149,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 					TGrid = TGrid.Zero
 				};
 				var offset = new GridOffset(Unit, Grid);
-				var msec = MathUtils.CalculateBPMLength(bpmChange, TGrid.Zero + offset, 240);
+				var msec = MathUtils.CalculateBPMLength(bpmChange, TGrid.Zero + offset);
 				timeOffset = TimeSpan.FromMilliseconds(msec);
 			}
 			else
@@ -168,7 +168,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 				{
 					if (IsRecalculateObjects)
 					{
-						var offset = currentEditor.Fumen.BpmList.FirstBpm.LengthConvertToOffset(timeOffset.TotalMilliseconds, 240);
+						var offset = currentEditor.Fumen.BpmList.FirstBpm.LengthConvertToOffset(timeOffset.TotalMilliseconds);
 						var map = new Dictionary<ITimelineObject, (TGrid before, TGrid after)>();
 
 						foreach (var timelineObject in currentEditor.Fumen.GetAllDisplayableObjects().OfType<ITimelineObject>())

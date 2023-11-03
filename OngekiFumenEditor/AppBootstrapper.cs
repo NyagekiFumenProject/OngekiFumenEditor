@@ -190,13 +190,13 @@ namespace OngekiFumenEditor
 				new (){ TGrid = new(5,0),EndTGrid = new(6,0),Speed = -1.5f },
 			});
 
-			var designList = soflanList.GetCachedSoflanPositionList_DesignMode(240, bpmList);
-			var previewList = soflanList.GetCachedSoflanPositionList_PreviewMode(240, bpmList);
+			var designList = soflanList.GetCachedSoflanPositionList_DesignMode(bpmList);
+			var previewList = soflanList.GetCachedSoflanPositionList_PreviewMode(bpmList);
 
 			foreach (var preview in previewList)
 				Log.LogDebug(preview.ToString());
 
-			var r = soflanList.GetVisibleRanges_PreviewMode(2000, 800, 50, bpmList, 1, 240).ToList();
+			var r = soflanList.GetVisibleRanges_PreviewMode(2000, 800, 50, bpmList, 1).ToList();
 		}
 
 		private async void MainWindow_Drop(object sender, DragEventArgs e)

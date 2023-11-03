@@ -9,11 +9,11 @@ namespace OngekiFumenEditor.Base
 		private int grid = 0; //grid
 		private float unit = 0; //unit
 
-		private uint gridRadix = 2857;
+		private readonly uint gridRadix;
 		public uint GridRadix
 		{
 			get => gridRadix;
-			protected set
+			init
 			{
 				gridRadix = value;
 				RecalculateTotalValues();
@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Base
 			TotalUnit = Unit + Grid * 1.0 / GridRadix;
 		}
 
-		public GridBase(float unit = default, int grid = default)
+		public GridBase(float unit, int grid)
 		{
 			Grid = grid;
 			Unit = unit;

@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 				if (int.TryParse(value?.ToString(), out var v))
 				{
 					cacheGrid = v;
-					TryApplyValue(v, Unit, ResT);
+					TryApplyValue(v, Unit);
 					NotifyOfPropertyChange(() => Grid);
 				}
 			}
@@ -44,41 +44,17 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 				if (float.TryParse(value?.ToString(), out var v))
 				{
 					cacheUnit = v;
-					TryApplyValue(Grid, v, ResT);
+					TryApplyValue(Grid, v);
 					NotifyOfPropertyChange(() => Unit);
 				}
 			}
 		}
 
-		private object cacheResT = TGrid.DEFAULT_RES_T;
-		public object ResT
+		private void TryApplyValue(object Grid, object Unit)
 		{
-			get
+			if (Grid is int grid && Unit is float unit)
 			{
-				var val = ProxyValue;
-				if (val is TGrid tGrid)
-					return tGrid.ResT;
-				return cacheResT;
-			}
-			set
-			{
-				if (uint.TryParse(value?.ToString(), out var v))
-				{
-					cacheUnit = v;
-					TryApplyValue(Grid, Unit, v);
-					NotifyOfPropertyChange(() => ResT);
-				}
-			}
-		}
-
-		private void TryApplyValue(object Grid, object Unit, object ResT)
-		{
-			if (Grid is int grid && Unit is float unit && ResT is uint resT)
-			{
-				var oldVal = TypedProxyValue;
-				var newVal = new TGrid(unit, grid, resT);
-				var refTarget = this;
-
+				var newVal = new TGrid(unit, grid);
 				TypedProxyValue = newVal;
 			}
 		}

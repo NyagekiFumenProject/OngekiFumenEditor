@@ -90,7 +90,7 @@ namespace OngekiFumenEditor.Base.Collections
 		private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedTimesignUniformPosition = new();
 		private double cachedMetListCacheHash = int.MinValue;
 
-		private void UpdateCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
+		private void UpdateCachedAllTimeSignatureUniformPositionList(BpmList bpmList)
 		{
 			TGrid pickBiggerTGrid(ITimelineObject a, ITimelineObject b) => a.TGrid > b.TGrid ? a.TGrid : b.TGrid;
 
@@ -99,12 +99,12 @@ namespace OngekiFumenEditor.Base.Collections
 			//最初默认的
 			cachedTimesignUniformPosition.Add((TimeSpan.FromMilliseconds(0), pickBiggerTGrid(FirstMeter, bpmList.FirstBpm), FirstMeter, bpmList.FirstBpm));
 
-			var bpmUnitList = bpmList.GetCachedAllBpmUniformPositionList(tUnitLength);
+			var bpmUnitList = bpmList.GetCachedAllBpmUniformPositionList();
 
 			foreach (var meterChange in changedMeterList)
 			{
 				(var audioTime, var refBpm) = bpmUnitList.LastOrDefault(x => x.bpm.TGrid <= meterChange.TGrid);
-				var meterY = audioTime + TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(refBpm, meterChange.TGrid, tUnitLength));
+				var meterY = audioTime + TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(refBpm, meterChange.TGrid));
 				cachedTimesignUniformPosition.Add((meterY, pickBiggerTGrid(meterChange, refBpm), meterChange, refBpm));
 			}
 
@@ -136,14 +136,14 @@ namespace OngekiFumenEditor.Base.Collections
 				cachedTimesignUniformPosition.Remove(item);
 		}
 
-		public List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(double tUnitLength, BpmList bpmList)
+		public List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(BpmList bpmList)
 		{
-			var hash = HashCode.Combine(tUnitLength, bpmList.cachedBpmContentHash);
+			var hash = HashCode.Combine(bpmList.cachedBpmContentHash);
 
 			if (cachedMetListCacheHash != hash)
 			{
 				//Log.LogDebug("recalculate all time signatures.");
-				UpdateCachedAllTimeSignatureUniformPositionList(tUnitLength, bpmList);
+				UpdateCachedAllTimeSignatureUniformPositionList(bpmList);
 				cachedMetListCacheHash = hash;
 			}
 			return cachedTimesignUniformPosition;

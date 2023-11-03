@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			IEnumerable<ICheckResult> CheckList(IEnumerable<OngekiTimelineObjectBase> objs)
 			{
 				const string RuleName = "ObjectTimelineNotAligned";
-				var beats = fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(fumenHostViewModel.Setting.TGridUnitLength, fumen.BpmList);
+				var beats = fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(fumen.BpmList);
 
 				var currentIndex = 0;
 

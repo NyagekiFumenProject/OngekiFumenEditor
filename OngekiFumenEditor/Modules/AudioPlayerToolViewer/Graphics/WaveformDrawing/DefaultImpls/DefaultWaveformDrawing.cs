@@ -64,7 +64,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 			var fromTime = curTime - TimeSpan.FromMilliseconds(target.CurrentTimeXOffset * target.DurationMsPerPixel);
 			var toTime = fromTime + TimeSpan.FromMilliseconds(width * target.DurationMsPerPixel);
 			var curTimeGrid = TGridCalculator.ConvertAudioTimeToTGrid(curTime, target.EditorViewModel);
-			(_, _, var currentMeter, var currentBpm) = TGridCalculator.GetCurrentTimeSignature(curTimeGrid, target.EditorViewModel.Fumen.BpmList, target.EditorViewModel.Fumen.MeterChanges, target.EditorViewModel.Setting.TGridUnitLength);
+			(_, _, var currentMeter, var currentBpm) = TGridCalculator.GetCurrentTimeSignature(curTimeGrid, target.EditorViewModel.Fumen.BpmList, target.EditorViewModel.Fumen.MeterChanges);
 			var durationMs = (toTime - fromTime).TotalMilliseconds;
 
 			(var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
@@ -105,11 +105,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 				var curTGrid = TGridCalculator.ConvertAudioTimeToTGrid(curTime, target.EditorViewModel);
 
 				var bpmList = editor.Fumen.BpmList;
-				var tGridUnitLength = editor.Setting.TGridUnitLength;
 
-				var beginX = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, bpmList, tGridUnitLength).TotalMilliseconds;
-				var endX = TGridCalculator.ConvertTGridToAudioTime(endTGrid, bpmList, tGridUnitLength).TotalMilliseconds;
-				var curX = TGridCalculator.ConvertTGridToAudioTime(curTGrid, bpmList, tGridUnitLength).TotalMilliseconds;
+				var beginX = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, bpmList).TotalMilliseconds;
+				var endX = TGridCalculator.ConvertTGridToAudioTime(endTGrid, bpmList).TotalMilliseconds;
+				var curX = TGridCalculator.ConvertTGridToAudioTime(curTGrid, bpmList).TotalMilliseconds;
 
 				var aWidth = (endTime - beginTime).TotalMilliseconds / target.DurationMsPerPixel;
 				var prefixOffsetX = -Math.Min(0, fromTime.TotalMilliseconds) / target.DurationMsPerPixel;
@@ -137,7 +136,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
 					float calcX(TGrid tGrid)
 					{
-						var bx = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, dummySoflanList, bpmList, 1, editor.Setting.TGridUnitLength);
+						var bx = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, dummySoflanList, bpmList, 1);
 						var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
 
 						return x;
@@ -213,7 +212,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 						var prevBpm = currentBpm;
 
 						foreach ((var tGrid, var bx, var beatIdx, var meter, var bpm) in TGridCalculator.GetVisbleTimelines_DesignMode(dummySoflanList, bpmList,
-							editor.Fumen.MeterChanges, beginX, endX, curX, editor.Setting.BeatSplit, 1.0f, editor.Setting.TGridUnitLength))
+							editor.Fumen.MeterChanges, beginX, endX, curX, editor.Setting.BeatSplit, 1.0f))
 						{
 							var x = (float)(prefixOffsetX + aWidth * ((bx - beginX) / xWidth) - width / 2);
 

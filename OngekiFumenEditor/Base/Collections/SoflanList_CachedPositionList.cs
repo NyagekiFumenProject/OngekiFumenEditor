@@ -30,14 +30,12 @@ namespace OngekiFumenEditor.Base.Collections
 
 		#region SoflanPositionList
 
-		private double cachedSoflanListCacheHash = int.MinValue;
+		private int cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
 
 		private List<SoflanPoint> cachedSoflanPositionList_DesignMode = new();
 		private List<SoflanPoint> cachedSoflanPositionList_PreviewMode = new();
 
 		public record VisibleTGridRange(TGrid minTGrid, TGrid maxTGrid);
-		private record VisibleRange(double minY, TGrid minTGrid, double maxY, TGrid maxTGrid);
-
 		public record SoflanSegment(int curIdx, SoflanPoint cur, SoflanPoint next);
 
 		private IIntervalTree<double, SoflanSegment> cachePostionList_PreviewMode;
@@ -119,7 +117,7 @@ namespace OngekiFumenEditor.Base.Collections
 			return s;
 		}
 
-		private void UpdateCachedSoflanPositionList(double tUnitLength, BpmList bpmList, List<SoflanPoint> list, bool isDesignMode)
+		private void UpdateCachedSoflanPositionList(BpmList bpmList, List<SoflanPoint> list, bool isDesignMode)
 		{
 			list.Clear();
 
@@ -139,7 +137,7 @@ namespace OngekiFumenEditor.Base.Collections
                  */
 				var curEvent = itor.Current;
 
-				var len = MathUtils.CalculateBPMLength(prevEvent.TGrid, curEvent.TGrid, prevEvent.curBpm.BPM, tUnitLength);
+				var len = MathUtils.CalculateBPMLength(prevEvent.TGrid, curEvent.TGrid, prevEvent.curBpm.BPM);
 
 				var scaledLen = len * (isDesignMode ? Math.Abs(prevEvent.speed) : prevEvent.speed);
 
@@ -178,9 +176,9 @@ namespace OngekiFumenEditor.Base.Collections
 
 		private object locker = new object();
 
-		private void CheckAndUpdateSoflanPositionList(double tUnitLength, BpmList bpmList)
+		private void CheckAndUpdateSoflanPositionList(BpmList bpmList)
 		{
-			var hash = HashCode.Combine(tUnitLength, bpmList.cachedBpmContentHash);
+			var hash = bpmList.cachedBpmContentHash;
 
 			if (cachedSoflanListCacheHash != hash)
 			{
@@ -189,8 +187,8 @@ namespace OngekiFumenEditor.Base.Collections
 					if (cachedSoflanListCacheHash != hash)
 					{
 						Log.LogDebug("recalculate all.");
-						UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_DesignMode, true);
-						UpdateCachedSoflanPositionList(tUnitLength, bpmList, cachedSoflanPositionList_PreviewMode, false);
+						UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_DesignMode, true);
+						UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_PreviewMode, false);
 						cachePostionList_PreviewMode = RebuildIntervalTreePositionList(cachedSoflanPositionList_PreviewMode);
 
 						cachedSoflanListCacheHash = hash;
@@ -199,21 +197,21 @@ namespace OngekiFumenEditor.Base.Collections
 			}
 		}
 
-		public IList<SoflanPoint> GetCachedSoflanPositionList_DesignMode(double tUnitLength, BpmList bpmList)
+		public IList<SoflanPoint> GetCachedSoflanPositionList_DesignMode(BpmList bpmList)
 		{
-			CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
+			CheckAndUpdateSoflanPositionList(bpmList);
 			return cachedSoflanPositionList_DesignMode;
 		}
 
-		public IList<SoflanPoint> GetCachedSoflanPositionList_PreviewMode(double tUnitLength, BpmList bpmList)
+		public IList<SoflanPoint> GetCachedSoflanPositionList_PreviewMode(BpmList bpmList)
 		{
-			CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
+			CheckAndUpdateSoflanPositionList(bpmList);
 			return cachedSoflanPositionList_PreviewMode;
 		}
 
-		public IIntervalTree<double, SoflanSegment> GetCachedSoflanSegment_PreviewMode(double tUnitLength, BpmList bpmList)
+		public IIntervalTree<double, SoflanSegment> GetCachedSoflanSegment_PreviewMode(BpmList bpmList)
 		{
-			CheckAndUpdateSoflanPositionList(tUnitLength, bpmList);
+			CheckAndUpdateSoflanPositionList(bpmList);
 			return cachePostionList_PreviewMode;
 		}
 
@@ -228,7 +226,7 @@ namespace OngekiFumenEditor.Base.Collections
 		/// <param name="scale"></param>
 		/// <param name="tUnitLength"></param>
 		/// <returns></returns>
-		public IEnumerable<VisibleTGridRange> GetVisibleRanges_PreviewMode(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale, int tUnitLength)
+		public IEnumerable<VisibleTGridRange> GetVisibleRanges_PreviewMode(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale)
 		{
 			currentY = currentY / scale;
 			var actualViewHeight = viewHeight / scale;
@@ -236,11 +234,12 @@ namespace OngekiFumenEditor.Base.Collections
 			var actualViewMinY = currentY - actualPreOffset;
 			var actualViewMaxY = actualViewMinY + actualViewHeight;
 
+			var list = GetCachedSoflanPositionList_PreviewMode(bpmList);
+			var segments = GetCachedSoflanSegment_PreviewMode(bpmList);
+
+			//fullCheckSets用来标记哪个变速段是完全被扫完的
 			using var _d1 = ObjectPool<HashSet<int>>.GetWithUsingDisposable(out var fullCheckSets, out _);
 			fullCheckSets.Clear();
-
-			var list = GetCachedSoflanPositionList_PreviewMode(tUnitLength, bpmList);
-			var segments = GetCachedSoflanSegment_PreviewMode(tUnitLength, bpmList);
 
 			IEnumerable<VisibleTGridRange> TryMerge(IEnumerable<VisibleTGridRange> sortedList)
 			{
@@ -331,16 +330,16 @@ namespace OngekiFumenEditor.Base.Collections
 				//这里为了减轻大脑心智负担，还是按正反变速分开写吧
 				if (cur.Speed > 0)
 				{
-					leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed, tUnitLength));
-					rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed, tUnitLength));
+					leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed));
+					rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed));
 
 					curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
 				}
 				else if (cur.Speed < 0)
 				{
 					//问题是倒车时，left实际显示范围比用户指定的leftRemain还要大，因此实际上还得合并整个viewHeight
-					leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed, tUnitLength))) ?? TGrid.Zero;
-					rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed, tUnitLength));
+					leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (cur.Y - left)) / absSpeed))) ?? TGrid.Zero;
+					rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed));
 
 					curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
 				}
@@ -371,7 +370,7 @@ namespace OngekiFumenEditor.Base.Collections
 						//如果当前是第一个变速段的话，那么也能很快计算出剩余newLeftRemain对应的可视范围
 						//这里假设第一个变速点的Speed是正向的
 						//但实际上，这个理论上不应该走到这里
-						var overLeftTGrid = leftTGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newLeftRemain / absSpeed, tUnitLength));
+						var overLeftTGrid = leftTGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newLeftRemain / absSpeed));
 						overLeftTGrid = overLeftTGrid ?? TGrid.Zero;
 						leftMergeds = leftMergeds.Append(new VisibleTGridRange(overLeftTGrid, leftTGrid));
 					}
@@ -387,7 +386,7 @@ namespace OngekiFumenEditor.Base.Collections
 						var absNextSpeed = Math.Abs(next.Speed);
 						//如果当前是最后一个变速段的话，那么也能很快计算出剩余newRightRemain对应的可视范围
 						//这里假设最后一个变速点的Speed是正向的
-						var overRightTGrid = rightTGrid + (absNextSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newRightRemain / absNextSpeed, tUnitLength));
+						var overRightTGrid = rightTGrid + (absNextSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newRightRemain / absNextSpeed));
 						rightMergeds = rightMergeds.Append(new VisibleTGridRange(rightTGrid, overRightTGrid));
 					}
 				}
@@ -449,10 +448,10 @@ namespace OngekiFumenEditor.Base.Collections
 						{
 							var calcLeftY = y - leftRemain;
 							var left = Math.Max(calcLeftY, last.Y);
-							var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((left - last.Y) / absSpeed, tUnitLength));
+							var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((left - last.Y) / absSpeed));
 
 							var calcRightY = y + rightRemain;
-							var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((calcRightY - last.Y) / absSpeed, tUnitLength));
+							var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((calcRightY - last.Y) / absSpeed));
 
 							var curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
 							yield return curTGrid;
@@ -461,10 +460,10 @@ namespace OngekiFumenEditor.Base.Collections
 						{
 							var calcLeftY = y + leftRemain;
 							var left = Math.Min(calcLeftY, last.Y);
-							var leftTGrid = (last.TGrid - (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (last.Y - left)) / absSpeed, tUnitLength))) ?? TGrid.Zero;
+							var leftTGrid = (last.TGrid - (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, (last.Y - left)) / absSpeed))) ?? TGrid.Zero;
 
 							var calcRightY = y - rightRemain;
-							var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((last.Y - calcRightY) / absSpeed, tUnitLength));
+							var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((last.Y - calcRightY) / absSpeed));
 
 							var curTGrid = new VisibleTGridRange(leftTGrid, rightTGrid);
 							yield return curTGrid;
@@ -480,10 +479,10 @@ namespace OngekiFumenEditor.Base.Collections
 					if (last.Speed > 0)
 					{
 						var left = Math.Max(0, actualViewMinY);
-						var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(left / absSpeed, tUnitLength));
+						var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(left / absSpeed));
 
 						var right = left + actualViewHeight;
-						var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(right / absSpeed, tUnitLength));
+						var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(right / absSpeed));
 
 						yield return new(leftTGrid, rightTGrid);
 					}

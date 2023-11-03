@@ -145,7 +145,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 				return y;
 
 			var forceMagneticAdjust = editor.Setting.ForceMagneticDock;
-			var fin = forceMagneticAdjust ? TGridCalculator.TryPickClosestBeatTime((float)y, editor, editor.Setting.TGridUnitLength) : TGridCalculator.TryPickMagneticBeatTime((float)y, 4, editor, editor.Setting.TGridUnitLength);
+			var fin = forceMagneticAdjust ? TGridCalculator.TryPickClosestBeatTime((float)y, editor) : TGridCalculator.TryPickMagneticBeatTime((float)y, 4, editor);
 			var ry = fin.y;
 			if (fin.tGrid == null)
 				ry = y;

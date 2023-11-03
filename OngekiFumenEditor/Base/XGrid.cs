@@ -3,23 +3,16 @@ namespace OngekiFumenEditor.Base
 	public class XGrid : GridBase
 	{
 		public const uint DEFAULT_RES_X = 4096;
-		public uint ResX
-		{
-			get
-			{
-				return GridRadix;
-			}
-			set
-			{
-				GridRadix = value;
-			}
-		}
+		public uint ResX => DEFAULT_RES_X;
 
 		public static XGrid Zero { get; private set; } = new XGrid();
-		public static XGrid MaxValue { get; } = new XGrid((int.MaxValue - DEFAULT_RES_X) / DEFAULT_RES_X, (int)DEFAULT_RES_X);
+		public static XGrid MaxValue { get; } = new XGrid((int.MaxValue - DEFAULT_RES_X) / DEFAULT_RES_X);
 		public static XGrid MinValue { get; } = new XGrid(float.MinValue, int.MinValue);
 
-		public XGrid(float unit = default, int grid = default, uint resX = DEFAULT_RES_X) : base(unit, grid) => ResX = resX;
+		public XGrid(float unit = default, int grid = default) : base(unit, grid)
+		{
+			GridRadix = ResX;
+		}
 
 		public override string Serialize()
 		{
@@ -39,6 +32,6 @@ namespace OngekiFumenEditor.Base
 			return new XGrid(unit, grid);
 		}
 
-		public XGrid CopyNew() => new XGrid(Unit, Grid, ResX);
+		public XGrid CopyNew() => new XGrid(Unit, Grid);
 	}
 }

@@ -87,7 +87,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
 			var baseY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + judgeOffset;
 			var scale = target.Editor.Setting.VerticalDisplayScale;
-			var tGridUnitLength = target.Editor.Setting.TGridUnitLength;
 			var bpmList = target.Editor.Fumen.BpmList;
 			var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
 			var soflanCurrentTime = convertToY(currentTGrid);
@@ -100,8 +99,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 					tgrid,
 					nonSoflanList,
 					bpmList,
-					scale,
-					tGridUnitLength);
+					scale);
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]

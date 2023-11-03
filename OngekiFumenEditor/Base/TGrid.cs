@@ -3,23 +3,16 @@ namespace OngekiFumenEditor.Base
 	public class TGrid : GridBase
 	{
 		public const uint DEFAULT_RES_T = 1920;
-		public uint ResT
-		{
-			get
-			{
-				return GridRadix;
-			}
-			set
-			{
-				GridRadix = value;
-			}
-		}
+		public uint ResT => DEFAULT_RES_T;
 
 		public static TGrid Zero { get; } = new TGrid();
 		public static TGrid MaxValue { get; } = new TGrid((int.MaxValue - DEFAULT_RES_T) / DEFAULT_RES_T, (int)DEFAULT_RES_T);
 		public static TGrid MinValue { get; } = new TGrid(float.MinValue, int.MinValue);
 
-		public TGrid(float unit = default, int grid = default, uint resT = DEFAULT_RES_T) : base(unit, grid) => ResT = resT;
+		public TGrid(float unit = default, int grid = default) : base(unit, grid)
+		{
+			GridRadix = ResT;
+		}
 
 		public override string Serialize()
 		{
@@ -28,7 +21,7 @@ namespace OngekiFumenEditor.Base
 
 		public override string ToString() => $"T[{Unit},{Grid}]";
 
-		public TGrid CopyNew() => new(Unit, Grid, ResT);
+		public TGrid CopyNew() => new(Unit, Grid);
 
 		public static bool operator <(TGrid l, TGrid r)
 		{

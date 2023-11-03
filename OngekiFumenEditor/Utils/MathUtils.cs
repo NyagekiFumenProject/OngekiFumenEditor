@@ -38,20 +38,20 @@ namespace OngekiFumenEditor.Utils
 			return b == 0 ? a : GCD(b, a % b);
 		}
 
-		public static double CalculateLength(TGrid from, TGrid to, BpmList bpmList, double unitLen)
+		public static double CalculateLength(TGrid from, TGrid to, BpmList bpmList)
 		{
 			var fromBpm = bpmList.GetBpm(from);
 			var toBpm = bpmList.GetBpm(to);
 
 			if (fromBpm == toBpm)
 			{
-				return CalculateBPMLength(fromBpm, to, unitLen);
+				return CalculateBPMLength(fromBpm, to);
 			}
 			else
 			{
 				var nextBpm = bpmList.GetNextBpm(fromBpm);
-				var pre = CalculateBPMLength(from, nextBpm.TGrid, fromBpm.BPM, unitLen);
-				var aft = CalculateBPMLength(toBpm.TGrid, to, toBpm.BPM, unitLen);
+				var pre = CalculateBPMLength(from, nextBpm.TGrid, fromBpm.BPM);
+				var aft = CalculateBPMLength(toBpm.TGrid, to, toBpm.BPM);
 
 				var mid = 0d;
 				var cur = nextBpm;
@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Utils
 					nextBpm = bpmList.GetNextBpm(cur);
 
 					//calc len
-					mid += CalculateBPMLength(cur.TGrid, nextBpm.TGrid, cur.BPM, unitLen);
+					mid += CalculateBPMLength(cur.TGrid, nextBpm.TGrid, cur.BPM);
 
 					cur = nextBpm;
 				}
@@ -82,24 +82,24 @@ namespace OngekiFumenEditor.Utils
 			=> (to.TotalUnit - from.TotalUnit) * unitLen;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double CalculateBPMLength(BPMChange from, BPMChange to, double timeGridSize)
-			=> CalculateBPMLength(from, to.TGrid, timeGridSize);
+		public static double CalculateBPMLength(BPMChange from, BPMChange to)
+			=> CalculateBPMLength(from, to.TGrid);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double CalculateBPMLength(BPMChange from, TGrid to, double timeGridSize)
-			=> CalculateBPMLength(from.TGrid, to, from.BPM, timeGridSize);
+		public static double CalculateBPMLength(BPMChange from, TGrid to)
+			=> CalculateBPMLength(from.TGrid, to, from.BPM);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double CalculateBPMLength(TGrid from, TGrid to, double bpm, double timeGridSize)
+		public static double CalculateBPMLength(TGrid from, TGrid to, double bpm)
 		{
 			if (to is null)
 				return double.PositiveInfinity;
-			var msec = CalculateBPMLength(from.TotalUnit, to.TotalUnit, bpm, timeGridSize);
+			var msec = CalculateBPMLength(from.TotalUnit, to.TotalUnit, bpm);
 			return msec;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double CalculateBPMLength(double fromTGridUnit, double toTGridUnit, double bpm, double timeGridSize, uint resT = TGrid.DEFAULT_RES_T)
+		public static double CalculateBPMLength(double fromTGridUnit, double toTGridUnit, double bpm, uint resT = TGrid.DEFAULT_RES_T)
 		{
 			/*
             var size = bpm / 240 * timeGridSize;
@@ -184,7 +184,7 @@ namespace OngekiFumenEditor.Utils
 		public static XGrid CalculateXGridFromBetweenObjects(TGrid fromTGrid, XGrid fromXGrid, TGrid toTGrid, XGrid toXGrid, TGrid tGrid)
 		{
 			var timeX = CalculateXFromTwoPointFormFormula(tGrid.TotalGrid, fromXGrid.TotalGrid, fromTGrid.TotalGrid, toXGrid.TotalGrid, toTGrid.TotalGrid);
-			var xGrid = new XGrid((float)(timeX / fromXGrid.ResX), 0, fromXGrid.ResX);
+			var xGrid = new XGrid((float)(timeX / fromXGrid.ResX), 0);
 			xGrid.NormalizeSelf();
 
 			return xGrid;

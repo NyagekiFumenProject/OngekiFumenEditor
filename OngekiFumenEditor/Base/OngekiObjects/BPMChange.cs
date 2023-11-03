@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 		public override string ToString() => $"{base.ToString()} Bpm[{BPM}]";
 
-		public GridOffset LengthConvertToOffset(double len, int timeGridSize)
+		public GridOffset LengthConvertToOffset(double len)
 		{
 			var totalGrid = len * (TGrid.ResT * BPM) / 240000;
 

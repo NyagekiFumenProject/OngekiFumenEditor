@@ -142,22 +142,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 			}
 		}
 
-		private int tGridUnitLength = Properties.EditorGlobalSetting.Default.TGridUnitLength;
-		/// <summary>
-		/// 时间轴上单位线间距大小
-		/// </summary>
-		public int TGridUnitLength
-		{
-			get => tGridUnitLength;
-			set
-			{
-				tGridUnitLength = Properties.EditorGlobalSetting.Default.TGridUnitLength = value;
-				RequestSave();
-				NotifyOfPropertyChange(() => TGridUnitLength);
-			}
-		}
-
-
 		private int beatSplit = Properties.EditorGlobalSetting.Default.BeatSplit;
 		/// <summary>
 		/// 时间轴上单位线划分密度
@@ -290,9 +274,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 					break;
 				case nameof(Properties.EditorGlobalSetting.XGridUnitSpace):
 					xGridUnitSpace = Properties.EditorGlobalSetting.Default.XGridUnitSpace;
-					break;
-				case nameof(Properties.EditorGlobalSetting.TGridUnitLength):
-					tGridUnitLength = Properties.EditorGlobalSetting.Default.TGridUnitLength;
 					break;
 				case nameof(Properties.EditorGlobalSetting.BeatSplit):
 					beatSplit = Properties.EditorGlobalSetting.Default.BeatSplit;

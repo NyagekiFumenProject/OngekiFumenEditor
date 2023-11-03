@@ -25,14 +25,14 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <TextBlock
-                    Grid.Row="0"
+                    Grid.Row="1"
                     Margin="0,0,15,0"
                     VerticalAlignment="Center"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
                     Text="Grid">
                 </TextBlock>
                 <TextBox
-                    Grid.Row="0"
+                    Grid.Row="1"
                     Grid.Column="1"
                     HorizontalContentAlignment="Stretch"
                     VerticalContentAlignment="Center"
@@ -41,15 +41,15 @@
                     Text="{Binding Grid}">
                 </TextBox>
                 <TextBlock
-                    Grid.Row="1"
+                    Grid.Row="0"
                     Margin="0,0,15,0"
                     VerticalAlignment="Center"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
                     Text="Unit">
                 </TextBlock>
                 <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
+                    Grid.Row="0"
+                    Grid.Column="0"
                     HorizontalContentAlignment="Stretch"
                     VerticalContentAlignment="Center"
                     Background="Transparent"
@@ -61,7 +61,7 @@
             <Grid Margin="2,5,2,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Button
@@ -71,23 +71,6 @@
                     Visibility="{Binding PropertyInfo.IsAllowSetNull, Converter={StaticResource BoolToVisibilityConverter}}">
                     Set Null
                 </Button>
-                <TextBlock
-                    Name="NameBlock"
-                    Grid.Column="1"
-                    Margin="5,0,5,0"
-                    VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    Text="ResX">
-                </TextBlock>
-                <TextBox
-                    Name="Input"
-                    Grid.Column="2"
-                    HorizontalContentAlignment="Stretch"
-                    VerticalContentAlignment="Center"
-                    Background="Transparent"
-                    BorderBrush="DarkGray"
-                    Text="{Binding ResX}">
-                </TextBox>
             </Grid>
         </StackPanel>
     </GroupBox>

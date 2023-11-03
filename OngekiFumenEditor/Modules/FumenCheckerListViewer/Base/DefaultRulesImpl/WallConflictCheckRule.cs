@@ -315,9 +315,9 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 						(var leftLine, var rightLine, var point) = leftLines.SelectMany(x => rightLines.Select(y => (x, y, LineIntersection.FindIntersection(x, y, 0.000001f)))).FirstOrDefault(x => x.Item3 is not null);
 						if (point is Point p)
 						{
-							var conflictXGrid = new XGrid((float)(p.x / resX), 0, resX);
+							var conflictXGrid = new XGrid((float)(p.x / resX), 0);
 							conflictXGrid.NormalizeSelf();
-							var conflictTGrid = new TGrid((float)(p.y / resT), 0, resT);
+							var conflictTGrid = new TGrid((float)(p.y / resT), 0);
 							conflictTGrid.NormalizeSelf();
 
 							yield return new CommonCheckResult()

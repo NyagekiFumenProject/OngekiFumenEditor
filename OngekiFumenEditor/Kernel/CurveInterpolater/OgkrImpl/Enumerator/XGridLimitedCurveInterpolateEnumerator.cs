@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator
 							var newXUnit = (int)rawXGridUnit + (judge > 0 ? 1 : -1);
 							var newPoint = new CurvePoint()
 							{
-								XGrid = new XGrid(newXUnit, 0, prev.XGrid.ResX),
+								XGrid = new XGrid(newXUnit, 0),
 								TGrid = prev.TGrid.CopyNew()
 							};
 							//Log.LogDebug($"return new corner point ({newPoint})");
@@ -118,7 +118,7 @@ namespace OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator
                                   |         |
                          xunitLine1 X[1,0]   xunitLine1 X[2,0] 
                     */
-						var xGrid = new XGrid(i, 0, prev.XGrid.ResX);
+						var xGrid = new XGrid(i, 0);
 						var y = MathUtils.CalculateYFromTwoPointFormFormula(xGrid.TotalGrid, prevX, prevY, curX, curY);
 						var tunit = (float)(y / prev.TGrid.ResT);
 						var tGrid = new TGrid(tunit, 0);

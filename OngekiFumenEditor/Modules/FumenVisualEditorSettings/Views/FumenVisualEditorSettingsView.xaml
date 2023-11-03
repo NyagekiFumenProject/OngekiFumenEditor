@@ -80,20 +80,7 @@
                     SelectedIndex="4"
                     SelectedValue="{Binding Setting.XGridUnitSpace}">
                 </ComboBox>
-                <TextBlock
-                    Grid.Row="1"
-                    Margin="0,5,0,5"
-                    VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    ToolTip="The vertical base length within standard bpm 240">
-                    水平轴缩放伸缩基准 *
-                </TextBlock>
-                <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="0,5,0,5"
-                    Text="{Binding Setting.TGridUnitLength}">
-                </TextBox>
+
             </Grid>
             <StackPanel>
                 <controls:RangeValue
