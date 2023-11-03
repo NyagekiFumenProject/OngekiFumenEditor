@@ -324,18 +324,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				}
 			}
 
-			List<OngekiTimelineObjectBase> previewBullets = null;
 			if (IsPreviewMode)
 			{
-				previewBullets = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
-				previewBullets.Clear();
-
-				previewBullets.AddRange(Fumen.Bullets);
-				previewBullets.AddRange(Fumen.Bells);
-
 				//特殊处理：子弹和Bell
 				foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
-					drawMap[drawingTarget] = previewBullets;
+					drawMap[drawingTarget] = Fumen.Bullets;
+				foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
+					drawMap[drawingTarget] = Fumen.Bells;
 			}
 
 			var prevOrder = int.MinValue;
@@ -361,12 +356,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			}
 
 			drawMap.Clear();
-
-			if (previewBullets != null)
-			{
-				ObjectPool<List<OngekiTimelineObjectBase>>.Return(previewBullets);
-				previewBullets = default;
-			}
 
 			timeSignatureHelper.DrawTimeSigntureText(this);
 			xGridHelper.DrawXGridText(this, CachedMagneticXGridLines);
@@ -447,7 +436,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				stringBuilder.AppendLine($"VisibleYRange: [{Rect.MinY}, {Rect.MaxY}]");
 				stringBuilder.AppendLine($"VisibleTGridRanges:");
 				foreach (var tGridRange in visibleTGridRanges.ToArray())
-					stringBuilder.AppendLine($"* [{tGridRange.minTGrid}, {tGridRange.maxTGrid}]");
+					stringBuilder.AppendLine($"*   {tGridRange.minTGrid}  -  {tGridRange.maxTGrid}");
 #endif
 
 				DisplayFPS = stringBuilder.ToString();

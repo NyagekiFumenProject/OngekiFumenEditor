@@ -106,7 +106,7 @@ namespace OngekiFumenEditor.Base
 			var unusedMeter = MeterChanges.FirstOrDefault(x => x.Bunbo == firstMeter.Bunbo && x.BunShi == firstMeter.BunShi && x.TGrid == TGrid.Zero);
 			if (unusedMeter is not null && MeterChanges.FirstMeter != unusedMeter)
 				MeterChanges.Remove(unusedMeter);
-			MeterChanges.SetFirstBpm(firstMeter);
+			MeterChanges.SetFirstMeter(firstMeter);
 		}
 
 		public void AddObject(OngekiObjectBase obj)
