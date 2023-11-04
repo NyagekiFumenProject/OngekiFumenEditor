@@ -49,7 +49,7 @@
                 </TextBlock>
                 <TextBox
                     Grid.Row="0"
-                    Grid.Column="0"
+                    Grid.Column="1"
                     HorizontalContentAlignment="Stretch"
                     VerticalContentAlignment="Center"
                     Background="Transparent"

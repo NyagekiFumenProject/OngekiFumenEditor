@@ -172,8 +172,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			IsPreventMutualExclusionSelecting = false;
 		}
 
-
-
 		public async void MenuItemAction_CopySelectedObjects()
 		{
 			await IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);

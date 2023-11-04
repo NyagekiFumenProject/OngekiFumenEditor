@@ -33,16 +33,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 	{
 		private IPerfomenceMonitor dummyPerformenceMonitor = new DummyPerformenceMonitor();
 		private IPerfomenceMonitor actualPerformenceMonitor;
-		private SoflanList nonSoflanList = new(new[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
 
 		private DrawTimeSignatureHelper timeSignatureHelper;
 		private DrawXGridHelper xGridHelper;
 		private DrawJudgeLineHelper judgeLineHelper;
 		private DrawSelectingRangeHelper selectingRangeHelper;
 		private DrawPlayableAreaHelper playableAreaHelper;
+
 		private Func<double, FumenVisualEditorViewModel, double> convertToY = TGridCalculator.ConvertTGridUnitToY_DesignMode;
 
-		private StringBuilder stringBuilder = new StringBuilder();
+		private StringBuilder stringBuilder = new StringBuilder(2048);
 
 		private List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
 		public IEnumerable<CacheDrawXLineResult> CachedMagneticXGridLines => cachedMagneticXGridLines;
@@ -304,6 +304,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 			xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
+			//todo 可以把GroupBy()给优化掉
 			var renderObjects =
 				 GetDisplayableObjects(fumen, visibleTGridRanges)
 				.Distinct()

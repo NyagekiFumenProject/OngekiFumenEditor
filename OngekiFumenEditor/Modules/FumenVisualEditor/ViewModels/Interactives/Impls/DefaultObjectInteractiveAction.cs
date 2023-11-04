@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawXGridHelper;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls
 {
@@ -155,22 +156,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
 		public virtual double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
 		{
-			//todo 基于二分法查询最近
 			var enableMagneticAdjust = !editor.Setting.DisableXGridMagneticDock;
 			var forceMagneticAdjust = editor.Setting.ForceMagneticDock || editor.Setting.ForceXGridMagneticDock;
 			var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
 
-			var nearestUnitLine = (enableMagneticAdjust ? editor.CachedMagneticXGridLines.Select(z =>
-			(
-				Math.Abs(z.X - x),
-				z.X,
-				true
-			)).Where(z => z.Item1 < dockableTriggerDistance).OrderBy(x => x.Item1)
-			: Enumerable.Empty<(double, float, bool)>()).FirstOrDefault();
+			IEnumerable<double> calc2()
+			{
+				var xOffset = (float)editor.Setting.XOffset;
 
-			double? fin = nearestUnitLine.Item3 ? nearestUnitLine.Item2 : forceMagneticAdjust ? null : x;
-			//Log.LogInfo($"nearestUnitLine x:{x:F2} distance:{nearestUnitLine?.distance:F2} fin:{fin}");
-			return fin;
+				var unitSize = (float)XGridCalculator.CalculateXUnitSize(editor);
+				var baseX = editor.ViewWidth / 2 + xOffset;
+
+				var rX = x - baseX;
+				var sign = Math.Sign(rX);
+
+				var xpX = (int)(Math.Abs(rX) / unitSize);
+
+				yield return baseX + xpX * unitSize * sign;
+				yield return baseX + (xpX + 1) * unitSize * sign;
+			}
+
+			var nearestUnitLine2 = (enableMagneticAdjust ? calc2().Select(z => (Math.Abs(z - x), z, true))
+				.Where(z => z.Item1 < dockableTriggerDistance).OrderBy(x => x.Item1)
+			: Enumerable.Empty<(double, double, bool)>()).FirstOrDefault();
+			var fin2 = nearestUnitLine2.Item3 ? nearestUnitLine2.Item2 : forceMagneticAdjust ? default(double?) : x;
+
+			return fin2;
 		}
 	}
 }
