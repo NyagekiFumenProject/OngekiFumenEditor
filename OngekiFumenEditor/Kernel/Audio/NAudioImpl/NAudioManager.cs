@@ -38,7 +38,22 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
 		public NAudioManager()
 		{
-			audioOutputDevice = new WasapiOut(AudioClientShareMode.Shared, 0);
+			var audioOutputType = (AudioOutputType)Properties.AudioSetting.Default.AudioOutputType;
+			try
+			{
+				audioOutputDevice = audioOutputType switch
+				{
+					AudioOutputType.Asio => new AsioOut() { AutoStop = false },
+					AudioOutputType.Wasapi => new WasapiOut(AudioClientShareMode.Shared, 0),
+					AudioOutputType.WaveOut or _ => new WaveOut() { DesiredLatency = 100 },
+				};
+			}
+			catch (Exception e)
+			{
+				Log.LogError($"Can't create audio output device:{audioOutputType}", e);
+				throw;
+			}
+			Log.LogDebug($"audioOutputDevice: {audioOutputDevice}");
 
 			audioMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
 			audioMixer.ReadFully = true;
