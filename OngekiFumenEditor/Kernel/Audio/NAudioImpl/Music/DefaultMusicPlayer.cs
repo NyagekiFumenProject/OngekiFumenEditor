@@ -5,6 +5,7 @@ using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,17 +14,17 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 {
 	internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
 	{
-		private FinishedListenerProvider finishProvider = new();
+		private FinishedListenerProvider finishProvider;
 
 		private AudioFileReader audioFileReader;
 		private VolumeSampleProvider currentVolumeProvider;
-		private WaveOut currentOut;
 		private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
-		private DateTime startTime;
+		private Stopwatch sw = new();
 		private TimeSpan pauseTime;
 		private float volume = 1;
 		private bool isAvaliable;
 		private byte[] samples;
+		private MixingSampleProvider musicMixer;
 
 		public event IAudioPlayer.OnPlaybackFinishedFunc OnPlaybackFinished;
 
@@ -33,7 +34,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 
 		public float Speed { get => 1; set { } }
 
-		public bool IsPlaying { get => currentOut?.PlaybackState == PlaybackState.Playing; }
+		private bool isPlaying;
+		public bool IsPlaying
+		{
+			get => isPlaying;
+			set => Set(ref isPlaying, value);
+		}
 
 		public float Volume
 		{
@@ -59,9 +65,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 			}
 		}
 
-		public DefaultMusicPlayer()
+		public DefaultMusicPlayer(MixingSampleProvider soundMixer)
 		{
-			finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
+			this.musicMixer = soundMixer;
 		}
 
 		private void Provider_OnReturnEmptySamples()
@@ -77,15 +83,16 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 
 			try
 			{
-				currentOut = new WaveOut();
 				audioFileReader = new AudioFileReader(audio_file);
 				var ms = new MemoryStream();
 				await audioFileReader.CopyToAsync(ms);
 				audioFileReader.Seek(0, SeekOrigin.Begin);
 				samples = ms.ToArray();
-				finishProvider.Provider = audioFileReader;
+				currentVolumeProvider = new(audioFileReader);
+				finishProvider = new(currentVolumeProvider);
 				finishProvider.StartListen();
-				currentOut?.Init(finishProvider);
+				finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
+
 				NotifyOfPropertyChange(() => Duration);
 				IsAvaliable = true;
 			}
@@ -100,34 +107,21 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 		{
 			time = MathUtils.Max(TimeSpan.FromMilliseconds(0), MathUtils.Min(time, Duration));
 
-			currentOut?.Stop();
-			currentOut?.Dispose();
-			currentOut = default;
-
 			audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * time.TotalSeconds), SeekOrigin.Begin);
-			var provider = new VolumeSampleProvider(audioFileReader)
-			{
-				Volume = Volume
-			};
-
 			baseOffset = time;
-			startTime = DateTime.Now;
 
-			currentVolumeProvider = provider;
-			currentOut = new WaveOut();
-			finishProvider.Provider = provider;
 			finishProvider.StartListen();
-			currentOut.Init(finishProvider);
-			UpdatePropsManually();
 
+			UpdatePropsManually();
 			if (!pause)
 				Play();
 		}
 
 		public async void Play()
 		{
-			currentOut?.Play();
-			startTime = DateTime.Now;
+			IsPlaying = true;
+			sw.Restart();
+			musicMixer.AddMixerInput(finishProvider);
 			await IoC.Get<ISchedulerManager>().AddScheduler(this);
 		}
 
@@ -135,13 +129,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 		{
 			if (!IsPlaying)
 				return pauseTime;
-			var coreTime = DateTime.Now - startTime;
-			var actualTime = coreTime/* * currentOutPositionWeight*/ + baseOffset;
+			var offset = TimeSpan.FromTicks(sw.ElapsedTicks);
+			var actualTime = offset + baseOffset;
 			return actualTime;
 		}
 
 		public async void Stop()
 		{
+			IsPlaying = false;
+			musicMixer.RemoveMixerInput(finishProvider);
 			await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
 			Seek(TimeSpan.FromMilliseconds(0), true);
 		}
@@ -149,16 +145,15 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 		public async void Pause()
 		{
 			pauseTime = GetTime();
-			currentOut?.Pause();
+			IsPlaying = false;
+			musicMixer.RemoveMixerInput(finishProvider);
 			UpdatePropsManually();
 			await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
 		}
 
 		private void CleanCurrentOut()
 		{
-			currentOut?.Stop();
-			currentOut?.Dispose();
-			currentOut = null;
+			musicMixer.RemoveMixerInput(finishProvider);
 			UpdatePropsManually();
 		}
 
@@ -169,6 +164,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 			audioFileReader?.Dispose();
 			audioFileReader = null;
 			IsAvaliable = false;
+			IsPlaying = false;
 
 			await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
 		}

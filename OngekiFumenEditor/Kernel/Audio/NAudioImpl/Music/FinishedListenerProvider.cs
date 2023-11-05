@@ -5,13 +5,18 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 {
 	internal class FinishedListenerProvider : ISampleProvider
 	{
-		public ISampleProvider Provider { get; set; }
-
+		private ISampleProvider provider;
+		public ISampleProvider Provider => provider;
+		public WaveFormat WaveFormat => provider.WaveFormat;
 		private bool enableEventFire;
 
 		public event Action OnReturnEmptySamples;
 
-		public WaveFormat WaveFormat => Provider.WaveFormat;
+		public FinishedListenerProvider(ISampleProvider provider)
+		{
+			this.provider = provider;
+		}
+
 
 		public void StartListen()
 		{
@@ -28,6 +33,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 			var read = Provider.Read(buffer, offset, count);
 			if (read == 0 && enableEventFire)
 				OnReturnEmptySamples?.Invoke();
+			
 			return read;
 		}
 	}

@@ -18,11 +18,17 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 	{
 		private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
 
-		private readonly IWavePlayer soundOutputDevice;
+		private readonly IWavePlayer audioOutputDevice;
+
+		private readonly MixingSampleProvider audioMixer;
 		private readonly MixingSampleProvider soundMixer;
+		private readonly MixingSampleProvider musicMixer;
+
 		private readonly VolumeSampleProvider soundVolumeWrapper;
+		private readonly VolumeSampleProvider musicVolumeWrapper;
 
 		public float SoundVolume { get => soundVolumeWrapper.Volume; set => soundVolumeWrapper.Volume = value; }
+		public float MusicVolume { get => musicVolumeWrapper.Volume; set => musicVolumeWrapper.Volume = value; }
 
 		public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; } = new[] {
 			(".mp3","音频文件"),
@@ -32,12 +38,24 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
 		public NAudioManager()
 		{
-			soundOutputDevice = new WasapiOut(AudioClientShareMode.Shared, 0);
+			audioOutputDevice = new WasapiOut(AudioClientShareMode.Shared, 0);
+
+			audioMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
+			audioMixer.ReadFully = true;
+			audioOutputDevice.Init(audioMixer);
+			audioOutputDevice.Play();
+
+			//setup sound
 			soundMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
 			soundMixer.ReadFully = true;
 			soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
-			soundOutputDevice.Init(soundVolumeWrapper);
-			soundOutputDevice.Play();
+			audioMixer.AddMixerInput(soundVolumeWrapper);
+
+			//setup sound
+			musicMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
+			musicMixer.ReadFully = true;
+			musicVolumeWrapper = new VolumeSampleProvider(musicMixer);
+			audioMixer.AddMixerInput(musicVolumeWrapper);
 
 			Log.LogInfo($"Audio implement will use {GetType()}");
 		}
@@ -56,15 +74,15 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 				};
 			}
 
-			AddMixerInput(provider);
+			AddSoundMixerInput(provider);
 		}
 
-		public void AddMixerInput(ISampleProvider input)
+		public void AddSoundMixerInput(ISampleProvider input)
 		{
 			soundMixer.AddMixerInput(input);
 		}
 
-		public void RemoveMixerInput(ISampleProvider input)
+		public void RemoveSoundMixerInput(ISampleProvider input)
 		{
 			soundMixer.RemoveMixerInput(input);
 		}
@@ -81,7 +99,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 					return null;
 			}
 
-			var player = new DefaultMusicPlayer();
+			var player = new DefaultMusicPlayer(musicMixer);
 			ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
 			await player.Load(filePath);
 			return player;
@@ -96,7 +114,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 				cached = ResampleCacheSound(cached);
 			}
 
-			if (cached.WaveFormat.Channels == 1 && soundMixer.WaveFormat.Channels == 2)
+			if (cached.WaveFormat.Channels == 1 && audioMixer.WaveFormat.Channels == 2)
 			{
 				Log.LogWarn($"Extend channel from Mono to Stereo : {filePath}");
 				cached = MonoToStereoSound(cached);
@@ -180,7 +198,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 					player?.Dispose();
 			}
 			ownAudioPlayerRefs.Clear();
-			soundOutputDevice?.Dispose();
+			audioOutputDevice?.Dispose();
 		}
 
 		public ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init)
@@ -199,7 +217,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 			handle.Volume = volume;
 
 			//add to mixer
-			AddMixerInput(handle.Provider);
+			AddSoundMixerInput(handle.Provider);
 
 			//Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
 			return handle;
@@ -211,7 +229,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 				return;
 
 			//Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
-			RemoveMixerInput(handle.Provider);
+			RemoveSoundMixerInput(handle.Provider);
 		}
 	}
 }
