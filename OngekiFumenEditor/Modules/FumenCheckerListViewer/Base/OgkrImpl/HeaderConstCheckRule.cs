@@ -13,6 +13,7 @@ using System.Linq;
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
 	[Export(typeof(IFumenCheckRule))]
+	[Export(typeof(IOngekiFumenCheckRule))]
 	internal class HeaderConstCheckRule : IOngekiFumenCheckRule
 	{
 		private class NavigateMetaInfoViewBehavior : INavigateBehavior
