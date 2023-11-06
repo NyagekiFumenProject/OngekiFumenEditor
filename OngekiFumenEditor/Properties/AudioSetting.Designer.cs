@@ -46,5 +46,17 @@ namespace OngekiFumenEditor.Properties {
                 this["AudioOutputType"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("48000")]
+        public int AudioSampleRate {
+            get {
+                return ((int)(this["AudioSampleRate"]));
+            }
+            set {
+                this["AudioSampleRate"] = value;
+            }
+        }
     }
 }

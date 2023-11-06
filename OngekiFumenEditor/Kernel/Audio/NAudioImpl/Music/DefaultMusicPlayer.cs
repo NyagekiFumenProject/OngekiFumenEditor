@@ -2,6 +2,7 @@
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Utils;
 using System;
@@ -12,11 +13,10 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 {
-	internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
+    internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
 	{
 		private FinishedListenerProvider finishProvider;
 
-		private AudioFileReader audioFileReader;
 		private VolumeSampleProvider currentVolumeProvider;
 		private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
 		private Stopwatch sw = new();
@@ -24,17 +24,20 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 		private float volume = 1;
 		private bool isAvaliable;
 		private byte[] samples;
+		private BufferWaveStream audioFileReader;
 		private MixingSampleProvider musicMixer;
 
 		public event IAudioPlayer.OnPlaybackFinishedFunc OnPlaybackFinished;
 
-		public TimeSpan Duration { get => audioFileReader.TotalTime; }
+		public TimeSpan Duration => duration;
 
 		public TimeSpan CurrentTime { get => GetTime(); }
 
 		public float Speed { get => 1; set { } }
 
 		private bool isPlaying;
+		private TimeSpan duration;
+
 		public bool IsPlaying
 		{
 			get => isPlaying;
@@ -76,18 +79,22 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 			OnPlaybackFinished?.Invoke();
 		}
 
-		public async Task Load(string audio_file)
+		public async Task Load(string audio_file, int targetSampleRate)
 		{
 			//release resource before loading new one.
 			Dispose();
 
 			try
 			{
-				audioFileReader = new AudioFileReader(audio_file);
-				var ms = new MemoryStream();
-				await audioFileReader.CopyToAsync(ms);
+				Log.LogInfo($"Load audio file: {audio_file}");
+				var rawStream = new AudioFileReader(audio_file);
+				duration = rawStream.TotalTime;
+				var processedProvider = await AudioCompatibilizer.CheckCompatible(rawStream, targetSampleRate);
+
+				samples = processedProvider.ToWaveProvider().ToArray();
+
+				audioFileReader = new BufferWaveStream(samples, processedProvider.WaveFormat);
 				audioFileReader.Seek(0, SeekOrigin.Begin);
-				samples = ms.ToArray();
 				currentVolumeProvider = new(audioFileReader);
 				finishProvider = new(currentVolumeProvider);
 				finishProvider.StartListen();

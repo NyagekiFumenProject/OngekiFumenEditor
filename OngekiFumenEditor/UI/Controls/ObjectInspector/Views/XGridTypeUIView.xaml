@@ -57,8 +57,7 @@
                     Text="{Binding Unit}">
                 </TextBox>
             </Grid>
-
-            <Grid Margin="2,5,2,0">
+            <Grid Margin="2,0,2,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -68,7 +67,7 @@
                     Grid.Column="0"
                     cal:Message.Attach="SetNull()"
                     Background="LightGray"
-                    Visibility="{Binding PropertyInfo.IsAllowSetNull, Converter={StaticResource BoolToVisibilityConverter}}">
+                    Visibility="{Binding PropertyInfo.IsAllowSetNull, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
                     Set Null
                 </Button>
             </Grid>

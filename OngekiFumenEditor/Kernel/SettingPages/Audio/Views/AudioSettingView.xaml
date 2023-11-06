@@ -23,6 +23,13 @@
                         ItemsSource="{Binding AudioOutputTypeValues}"
                         SelectedIndex="{Binding Setting.AudioOutputType}" />
                 </StackPanel>
+                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                    <Label>钦定采样率：</Label>
+                    <TextBox
+                        Width="100"
+                        VerticalAlignment="Center"
+                        Text="{Binding AudioSampleRate}" />
+                </StackPanel>
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="音效">

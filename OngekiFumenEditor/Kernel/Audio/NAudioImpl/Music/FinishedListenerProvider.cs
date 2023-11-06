@@ -17,7 +17,6 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 			this.provider = provider;
 		}
 
-
 		public void StartListen()
 		{
 			enableEventFire = true;
