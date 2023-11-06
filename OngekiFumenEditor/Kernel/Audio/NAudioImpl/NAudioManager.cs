@@ -128,7 +128,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 		public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
 		{
 			using var audioFileReader = new AudioFileReader(filePath);
-			Log.LogDebug($"Load sound file: {filePath}");
+			Log.LogInfo($"Load sound file: {filePath}");
 
 			var provider = await AudioCompatibilizer.CheckCompatible(audioFileReader, targetSampleRate);
 

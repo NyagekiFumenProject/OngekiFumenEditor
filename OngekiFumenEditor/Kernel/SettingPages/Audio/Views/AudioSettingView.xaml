@@ -26,9 +26,9 @@
                 <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                     <Label>钦定采样率：</Label>
                     <TextBox
-                        Width="100"
+                        Width="75"
                         VerticalAlignment="Center"
-                        Text="{Binding AudioSampleRate}" />
+                        Text="{Binding Setting.AudioSampleRate}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
