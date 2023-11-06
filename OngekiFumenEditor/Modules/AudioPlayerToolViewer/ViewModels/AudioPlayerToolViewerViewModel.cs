@@ -242,5 +242,27 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			//Log.LogDebug($"Apply sound control:{(SoundControl)sc}");
 			NotifyOfPropertyChange(() => SoundControls);
 		}
+
+		public async void OnReloadSoundFiles()
+		{
+			if (AudioPlayer is null || FumenSoundPlayer is null)
+			{
+				MessageBox.Show("请先等待音频/音效初始化完成");
+				return;
+			}
+
+			if (AudioPlayer.IsPlaying)
+			{
+				MessageBox.Show("请先暂停音频/谱面播放");
+				return;
+			}
+
+			var result = await FumenSoundPlayer.ReloadSoundFiles();
+
+			if (result)
+			{
+				MessageBox.Show("音效重新加载成功");
+			}
+		}
 	}
 }

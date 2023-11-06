@@ -60,19 +60,21 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 			}
 			Log.LogDebug($"audioOutputDevice: {audioOutputDevice}");
 
-			audioMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(targetSampleRate, 2));
+			var format = WaveFormat.CreateIeeeFloatWaveFormat(targetSampleRate, 2);
+
+			audioMixer = new MixingSampleProvider(format);
 			audioMixer.ReadFully = true;
 			audioOutputDevice.Init(audioMixer);
 			audioOutputDevice.Play();
 
 			//setup sound
-			soundMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(targetSampleRate, 2));
+			soundMixer = new MixingSampleProvider(format);
 			soundMixer.ReadFully = true;
 			soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
 			audioMixer.AddMixerInput(soundVolumeWrapper);
 
 			//setup sound
-			musicMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(targetSampleRate, 2));
+			musicMixer = new MixingSampleProvider(format);
 			musicMixer.ReadFully = true;
 			musicVolumeWrapper = new VolumeSampleProvider(musicMixer);
 			audioMixer.AddMixerInput(musicVolumeWrapper);

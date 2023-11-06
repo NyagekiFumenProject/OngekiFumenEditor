@@ -3,6 +3,7 @@ using IntervalTree;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -50,7 +51,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 		}
 
 		private Dictionary<SoundControl, ISoundPlayer> cacheSounds = new();
-		private Task loadTask;
+		private Task<bool> loadTask;
 
 		public DefaultFumenSoundPlayer()
 		{
@@ -59,7 +60,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
 		private async void InitSounds()
 		{
-			var source = new TaskCompletionSource();
+			var source = new TaskCompletionSource<bool>();
 			loadTask = source.Task;
 			var audioManager = IoC.Get<IAudioManager>();
 
@@ -69,6 +70,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 				var msg = $"因为音效文件夹不存在,无法加载音效";
 				MessageBox.Show(msg);
 				Log.LogError(msg);
+				source.SetResult(false);
+				return;
 			}
 			else
 				Log.LogInfo($"SoundFolderPath : {soundFolderPath} , fullpath : {Path.GetFullPath(soundFolderPath)}");
@@ -90,6 +93,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 				}
 			}
 
+			cacheSounds.Clear();
 			await load(SoundControl.Tap, "tap.wav");
 			await load(SoundControl.Bell, "bell.wav");
 			await load(SoundControl.CriticalTap, "extap.wav");
@@ -106,9 +110,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			await load(SoundControl.BeamEnd, "beamend.wav");
 
 			if (!noError)
+			{
 				MessageBox.Show("部分音效并未加载成功,详情可查看日志");
+				source.SetResult(false);
+				return;
+			}
 
-			source.SetResult();
+			source.SetResult(true);
 		}
 
 		public async Task Prepare(FumenVisualEditorViewModel editor, IAudioPlayer player)
@@ -487,6 +495,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 					item.Value.Volume = volume;
 				}
 			}
+		}
+
+		public async Task<bool> ReloadSoundFiles()
+		{
+			InitSounds();
+			return await loadTask;
 		}
 	}
 }
