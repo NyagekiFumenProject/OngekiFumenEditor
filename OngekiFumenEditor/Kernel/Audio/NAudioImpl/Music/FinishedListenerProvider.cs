@@ -30,9 +30,13 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 		public int Read(float[] buffer, int offset, int count)
 		{
 			var read = Provider.Read(buffer, offset, count);
-			if (read == 0 && enableEventFire)
+			if (read < count && enableEventFire)
 				OnReturnEmptySamples?.Invoke();
-			
+
+			if (read < count)
+				Array.Clear(buffer, offset + read, count - read);
+
+			read = count;
 			return read;
 		}
 	}
