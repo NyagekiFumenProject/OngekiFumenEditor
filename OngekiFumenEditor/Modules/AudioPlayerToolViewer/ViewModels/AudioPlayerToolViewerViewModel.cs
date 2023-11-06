@@ -53,7 +53,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			{
 				Set(ref editor, value);
 				FumenSoundPlayer?.Clean();
-				scrollAnimationClearFunc?.Invoke();
 				AudioPlayer = Editor?.AudioPlayer;
 			}
 		}
@@ -126,8 +125,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			}
 		}
 
-		private System.Action scrollAnimationClearFunc = default;
-
 		public bool IsAudioButtonEnabled => AudioPlayer is not null;
 
 		public AudioPlayerToolViewerViewModel()
@@ -136,6 +133,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
+
+			CompositionTarget.Rendering += CompositionTarget_Rendering; ;
 		}
 
 		private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -159,23 +158,15 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			}
 		}
 
-		private async Task InitPreviewActions()
+		private void CompositionTarget_Rendering(object sender, EventArgs e)
 		{
-			scrollAnimationClearFunc?.Invoke();
-			await FumenSoundPlayer.Prepare(Editor, AudioPlayer);
-			EventHandler func = (e, d) =>
-			{
-				if (AudioPlayer is null)
-					return;
-				Process(AudioPlayer.CurrentTime);
-			};
-			CompositionTarget.Rendering += func;
-			scrollAnimationClearFunc = () =>
-			{
-				CompositionTarget.Rendering -= func;
-				scrollAnimationClearFunc = default;
-			};
+			if (AudioPlayer is null)
+				return;
+			if (!AudioPlayer.IsPlaying)
+				return;
+			Process(AudioPlayer.CurrentTime);
 		}
+
 
 		private void Process(TimeSpan time)
 		{
@@ -189,7 +180,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 		public void OnStopButtonClicked()
 		{
 			//Editor.UnlockAllUserInteraction();
-			scrollAnimationClearFunc?.Invoke();
 			FumenSoundPlayer?.Stop();
 			AudioPlayer?.Stop();
 		}
@@ -215,14 +205,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			}
 			if (AudioPlayer.IsPlaying)
 			{
-				scrollAnimationClearFunc?.Invoke();
-				FumenSoundPlayer.Pause();
-				AudioPlayer.Pause();
+				OnStopButtonClicked();
 			}
 			else
 			{
-				if (scrollAnimationClearFunc is null)
-					await InitPreviewActions();
+				await FumenSoundPlayer.Prepare(Editor, AudioPlayer);
 				var tgrid = Editor.GetCurrentTGrid();
 				var seekTo = TGridCalculator.ConvertTGridToAudioTime(tgrid, Editor);
 				Log.LogDebug($"seek to {tgrid}({seekTo})");
