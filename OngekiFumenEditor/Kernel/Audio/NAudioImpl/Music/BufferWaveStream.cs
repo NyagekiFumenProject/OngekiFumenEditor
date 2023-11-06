@@ -33,8 +33,10 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 			var floatBuffer = MemoryMarshal.Cast<byte, float>(waveBuffer);
 
 			var floatPosition = (int)(Position / sizeof(float));
+			var floatLength = waveBuffer.Length / sizeof(float);
+
 			var beforePosition = floatPosition;
-			for (int i = 0; i < count && floatPosition < waveBuffer.Length; i++)
+			for (int i = 0; i < count && floatPosition < floatLength; i++)
 				buffer[offset + i] = floatBuffer[floatPosition++];
 			var read = floatPosition - beforePosition;
 			Position = floatPosition * sizeof(float);
