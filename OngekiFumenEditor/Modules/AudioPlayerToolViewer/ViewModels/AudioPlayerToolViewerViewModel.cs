@@ -19,7 +19,7 @@ using System.Windows.Threading;
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 {
 	[Export(typeof(IAudioPlayerToolViewer))]
-	public partial class AudioPlayerToolViewerViewModel : Tool, IAudioPlayerToolViewer
+	public partial class AudioPlayerToolViewerViewModel : Tool, IAudioPlayerToolViewer, IDisposable
 	{
 		public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 
-			CompositionTarget.Rendering += CompositionTarget_Rendering; ;
+			CompositionTarget.Rendering += CompositionTarget_Rendering;
 		}
 
 		private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -250,6 +250,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			{
 				MessageBox.Show("音效重新加载成功");
 			}
+		}
+
+		public void Dispose()
+		{
+			CompositionTarget.Rendering -= CompositionTarget_Rendering;
 		}
 	}
 }
