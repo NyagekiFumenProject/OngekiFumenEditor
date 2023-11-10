@@ -20,7 +20,11 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public static int ConvertIdToInt(string id)
 		{
-			return id.Reverse().Select((x, i) => (int)Math.Pow(ALPHABET.Count, i) * (ALPHABET.TryGetValue(x, out var d) ? d : 0)).Sum();
+			return id
+				.ToUpperInvariant()
+				.Reverse()
+				.Select((x, i) => (int)Math.Pow(ALPHABET.Count, i) * (ALPHABET.TryGetValue(x, out var d) ? d : 0))
+				.Sum();
 		}
 
 		public static string ConvertIntToId(int val)
@@ -33,15 +37,15 @@ namespace OngekiFumenEditor.Base.Collections
 				val = val / ALPHABET_REV.Count;
 			}
 
-			return str;
+			return str.ToUpperInvariant();
 		}
 
-		private Dictionary<string, BulletPallete> palleteMap = new();
+		private Dictionary<int, BulletPallete> palleteMap = new();
 		private string cacheCurrentMaxId = null;
 
 		public int Count => palleteMap.Count;
-		public BulletPallete this[int index] => this[ConvertIntToId(index)];
-		public BulletPallete this[string strId] => palleteMap.TryGetValue(strId, out var r) ? r : default;
+		public BulletPallete this[int index] => this[index];
+		public BulletPallete this[string strId] => palleteMap.TryGetValue(ConvertIdToInt(strId), out var r) ? r : default;
 
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
@@ -55,17 +59,17 @@ namespace OngekiFumenEditor.Base.Collections
 				if (palleteMap.Count == 0)
 					cacheCurrentMaxId = "9Z";
 				else
-					cacheCurrentMaxId = ConvertIntToId(palleteMap.Keys.Select(ConvertIdToInt).OrderBy(x => x).LastOrDefault());
+					cacheCurrentMaxId = ConvertIntToId(palleteMap.Keys.OrderBy(x => x).LastOrDefault());
 			}
 
 			if (string.IsNullOrWhiteSpace(pallete.StrID))
 			{
-				//分配一个新的StrId
+				//分配一个新的StrId 
 				pallete.StrID = ConvertIntToId(ConvertIdToInt(cacheCurrentMaxId) + 1);
 			}
 
 			var addable = true;
-			if (palleteMap.TryGetValue(pallete.StrID, out var old))
+			if (palleteMap.TryGetValue(ConvertIdToInt(pallete.StrID), out var old))
 			{
 				if (old == pallete)
 					addable = false; //重复添加，那就忽略了
@@ -78,7 +82,7 @@ namespace OngekiFumenEditor.Base.Collections
 
 			if (addable)
 			{
-				palleteMap[pallete.StrID] = pallete;
+				palleteMap[ConvertIdToInt(pallete.StrID)] = pallete;
 
 				pallete.PropertyChanged += OnPalletePropChanged;
 				cacheCurrentMaxId = Comparer<string>.Default.Compare(pallete.StrID, cacheCurrentMaxId) > 0 ? pallete.StrID : cacheCurrentMaxId;
@@ -89,7 +93,7 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public void RemovePallete(BulletPallete pallete)
 		{
-			if (palleteMap.Remove(pallete.StrID))
+			if (palleteMap.Remove(ConvertIdToInt(pallete.StrID)))
 			{
 				pallete.PropertyChanged -= OnPalletePropChanged;
 				CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));

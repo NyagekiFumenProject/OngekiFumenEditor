@@ -321,6 +321,25 @@ namespace OngekiFumenEditor.Base
 							}
 						}
 						break;
+					case nameof(IBulletPalleteChangable.SetStrID):
+						if (sender is IBulletPalleteReferencable bullet)
+						{
+							var beforeStrId = bullet.ReferenceBulletPallete?.StrID;
+							var afterStrId = bullet.SetStrID;
+							if (!string.IsNullOrWhiteSpace(afterStrId))
+							{
+								if (BulletPalleteList[afterStrId] is BulletPallete newPallete)
+								{
+									bullet.ReferenceBulletPallete = newPallete;
+									Log.LogInfo($"Change IBulletPalleteReferencable object {bullet} ref pallete from {beforeStrId} to {afterStrId}.");
+								}
+								else
+								{
+									Log.LogWarn($"Change IBulletPalleteReferencable object {bullet} ref pallete failed, new ref strId={afterStrId} not found.");
+								}
+							}
+						}
+						break;
 					default:
 						break;
 				}
