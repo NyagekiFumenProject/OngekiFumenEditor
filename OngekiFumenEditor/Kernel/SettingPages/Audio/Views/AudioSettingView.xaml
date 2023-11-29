@@ -13,6 +13,25 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <StackPanel>
+        <GroupBox Margin="5" Header="输出">
+            <StackPanel Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <Label>使用输出方式：</Label>
+                    <ComboBox
+                        Width="100"
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding AudioOutputTypeValues}"
+                        SelectedIndex="{Binding Setting.AudioOutputType}" />
+                </StackPanel>
+                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                    <Label>钦定采样率：</Label>
+                    <TextBox
+                        Width="75"
+                        VerticalAlignment="Center"
+                        Text="{Binding Setting.AudioSampleRate}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
         <GroupBox Margin="5" Header="音效">
             <Grid Margin="10">
                 <Grid.ColumnDefinitions>

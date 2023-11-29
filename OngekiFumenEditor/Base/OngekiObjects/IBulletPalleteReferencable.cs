@@ -2,7 +2,7 @@
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-	public interface IBulletPalleteReferencable : IDisplayableObject, IHorizonPositionObject, ITimelineObject, INotifyPropertyChanged
+	public interface IBulletPalleteReferencable : IDisplayableObject, IHorizonPositionObject, ITimelineObject, INotifyPropertyChanged, IBulletPalleteChangable
 	{
 		BulletPallete ReferenceBulletPallete { get; set; }
 	}

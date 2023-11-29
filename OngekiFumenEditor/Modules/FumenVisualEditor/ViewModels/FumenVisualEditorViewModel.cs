@@ -199,6 +199,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			UndoRedoManager = new DefaultEditorUndoManager(this);
 
 			Properties.EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
+			DisplayName = default;
 		}
 
 		#region Document New/Save/Load

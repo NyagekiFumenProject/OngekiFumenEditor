@@ -23,7 +23,6 @@
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <TextBlock
                     Grid.Row="1"
@@ -58,7 +57,7 @@
                     Text="{Binding Unit}">
                 </TextBox>
             </Grid>
-            <Grid Margin="2,5,2,0">
+            <Grid Margin="2,0,2,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />

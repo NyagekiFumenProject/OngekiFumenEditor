@@ -76,7 +76,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 		[ObjectPropertyBrowserAlias("BPL." + nameof(StrID))]
 		[ObjectPropertyBrowserShow]
-		public string StrID => ReferenceBulletPallete?.StrID;
+		public string StrID => ReferenceBulletPallete?.StrID ?? string.Empty;
+
+		private string setStrID;
+		[ObjectPropertyBrowserShow]
+		[ObjectPropertyBrowserTipText("改变此值可以改变此物件对应的子弹模板")]
+		[ObjectPropertyBrowserAlias("SetStrID")]
+		public string SetStrID
+		{
+			get => setStrID;
+			set
+			{
+				Set(ref setStrID, value);
+				setStrID = default;
+			}
+		}
 
 		[ObjectPropertyBrowserAlias("BPL." + nameof(PlaceOffset))]
 		[ObjectPropertyBrowserShow]

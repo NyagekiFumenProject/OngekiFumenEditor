@@ -1,4 +1,6 @@
 ﻿using NAudio.Wave;
+using NWaves.Operations;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -12,26 +14,15 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 		public WaveFormat WaveFormat { get; init; }
 		public TimeSpan Duration { get; init; }
 
-		public CachedSound(string audioFileName)
+		private CachedSound()
 		{
-			using var audioFileReader = new AudioFileReader(audioFileName);
+			//no way
+		}
 
-			Duration = audioFileReader.TotalTime;
-			WaveFormat = audioFileReader.WaveFormat;
-
-			var wholeFile = new List<float>((int)(audioFileReader.Length / 4));
-
-			var readLen = audioFileReader.WaveFormat.SampleRate * audioFileReader.WaveFormat.Channels;
-			var readBuffer = ArrayPool<float>.Shared.Rent(readLen);
-
-			int samplesRead;
-			while ((samplesRead = audioFileReader.Read(readBuffer, 0, readLen)) > 0)
-			{
-				wholeFile.AddRange(readBuffer.Take(samplesRead));
-			}
-
-			AudioData = wholeFile.ToArray();
-			ArrayPool<float>.Shared.Return(readBuffer);
+		public CachedSound(ISampleProvider copySourceProvider)
+		{
+			AudioData = copySourceProvider.ToArray();
+			WaveFormat = copySourceProvider.WaveFormat;
 		}
 
 		public CachedSound(float[] newBuf, WaveFormat outFormat)
