@@ -24,5 +24,25 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 			get => outputFolderPath;
 			set => Set(ref outputFolderPath, value);
 		}
+
+		private int previewBeginTime = 60000;
+		public int PreviewBeginTime
+		{
+			get => previewBeginTime;
+			set
+			{
+				Set(ref previewBeginTime, value);
+			}
+		}
+
+		private int previewEndTime = 80000;
+		public int PreviewEndTime
+		{
+			get => previewEndTime;
+			set
+			{
+				Set(ref previewEndTime, value);
+			}
+		}
 	}
 }

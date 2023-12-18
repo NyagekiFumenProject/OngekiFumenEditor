@@ -84,6 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
 			var displayAudioTime = target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime;
 
+
 			foreach ((var t, var y, var beatIndex, _, _) in timelines)
 			{
 				var str = string.Empty;
@@ -103,8 +104,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
 				var fy = (float)y;
 
-				var maxAlpha = beatIndex == 0 && !isPreviewMode ? 1 : maxDispAlpha;
-				var minAlpha = beatIndex == 0 && !isPreviewMode ? 1 : minDispAlpha;
+				var maxAlpha = maxDispAlpha;
+				var minAlpha = minDispAlpha;
+
+				if (!isPreviewMode)
+				{
+					if(beatIndex == 0)
+						maxAlpha = minAlpha = 1;
+				}
 
 				list.Add(new(new(0, fy), new(1, 1, 1, 0), VertexDash.Solider));
 				list.Add(new(new(0, fy), new(1, 1, 1, maxAlpha), VertexDash.Solider));

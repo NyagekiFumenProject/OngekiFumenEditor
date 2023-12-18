@@ -48,6 +48,18 @@
                         Text="{Binding GenerateOption.MusicId}">
                     </TextBox>
                 </StackPanel>
+                <StackPanel Margin="5" Orientation="Horizontal">
+                    <Label Content="预览时间(毫秒):" />
+                    <TextBox
+                        Width="100"
+                        VerticalAlignment="Center"
+                        Text="{Binding GenerateOption.PreviewBeginTime}" />
+                    <Label Content="~" />
+                    <TextBox
+                        Width="100"
+                        VerticalAlignment="Center"
+                        Text="{Binding GenerateOption.PreviewEndTime}" />
+                </StackPanel>
             </StackPanel>
         </GroupBox>
         <StackPanel Margin="10" Orientation="Horizontal">

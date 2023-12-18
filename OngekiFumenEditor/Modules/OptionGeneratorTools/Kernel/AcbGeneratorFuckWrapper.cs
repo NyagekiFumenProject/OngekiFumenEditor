@@ -38,7 +38,9 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 						new VGAudio.Cli.Options()
 						{
 							Bitrate = 192 * 1024,
-						}
+						},
+						previewBeginTime: TimeSpan.FromMilliseconds(option.PreviewBeginTime),
+						previewEndTime: TimeSpan.FromMilliseconds(option.PreviewEndTime)
 						));
 
 				var genResult = await GenerateMusicSourceXmlAsync(tempFolder, option.MusicId);
