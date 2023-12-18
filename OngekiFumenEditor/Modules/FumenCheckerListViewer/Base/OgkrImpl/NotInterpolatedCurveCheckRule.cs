@@ -10,6 +10,7 @@ using System.Linq;
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
 	[Export(typeof(IFumenCheckRule))]
+	[Export(typeof(IOngekiFumenCheckRule))]
 	internal class NotInterpolatedCurveCheckRule : IOngekiFumenCheckRule
 	{
 		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)

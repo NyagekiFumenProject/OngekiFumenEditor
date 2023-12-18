@@ -31,7 +31,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel 
+            <StackPanel
                 Margin="10"
                 IsEnabled="{Binding IsAudioButtonEnabled}"
                 Visibility="{Binding IsShowWaveform, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static sys:Boolean.TrueString}}">
@@ -171,6 +171,14 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <StackPanel
+                            Margin="5"
+                            HorizontalAlignment="Left"
+                            Orientation="Horizontal">
+                            <Button Padding="5,2,5,2" cal:Message.Attach="OnReloadSoundFiles()">
+                                重新加载音效文件
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                 </GroupBox>
 

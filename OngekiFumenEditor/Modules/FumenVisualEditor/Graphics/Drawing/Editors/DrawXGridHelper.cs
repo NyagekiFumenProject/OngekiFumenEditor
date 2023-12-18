@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils.ObjectPool;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
@@ -37,7 +38,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
 			foreach (var result in drawLines)
 			{
-				var a = result.XGridTotalUnit == 0 ? 0.4f : 0.25f;
+				var a = Math.Abs(result.XGridTotalUnit) switch
+				{
+					0 => 0.4f,
+					24 => 0.6f,
+					_ => 0.25f
+				};
 
 				list.Add(new(new(result.X, target.Rect.Height), new(1, 1, 1, 0), VertexDash.Solider));
 				list.Add(new(new(result.X, 0), new(1, 1, 1, a), VertexDash.Solider));

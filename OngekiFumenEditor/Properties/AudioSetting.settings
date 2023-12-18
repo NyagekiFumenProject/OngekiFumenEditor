@@ -5,5 +5,11 @@
     <Setting Name="SoundFolderPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">.\Resources\sounds\</Value>
     </Setting>
+    <Setting Name="AudioOutputType" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="AudioSampleRate" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">48000</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

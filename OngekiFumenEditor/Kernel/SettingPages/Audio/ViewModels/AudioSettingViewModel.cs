@@ -1,8 +1,13 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Settings;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl;
 using OngekiFumenEditor.Utils;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace OngekiFumenEditor.Kernel.SettingPages.Audio.ViewModels
@@ -13,6 +18,8 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Audio.ViewModels
 	{
 		public Properties.AudioSetting Setting => Properties.AudioSetting.Default;
 		public Properties.AudioPlayerToolViewerSetting PlayerSetting => Properties.AudioPlayerToolViewerSetting.Default;
+
+		public IEnumerable<AudioOutputType> AudioOutputTypeValues => Enum.GetValues<AudioOutputType>().OrderBy(x => x);
 
 		public AudioSettingViewModel()
 		{
@@ -31,6 +38,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Audio.ViewModels
 		public void ApplyChanges()
 		{
 			Setting.Save();
+			PlayerSetting.Save();
 		}
 
 		public void OnSoundFolderPathButtonClick()

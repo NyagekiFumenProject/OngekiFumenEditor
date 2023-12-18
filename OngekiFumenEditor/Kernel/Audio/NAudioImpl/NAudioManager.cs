@@ -3,6 +3,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Audio.DefaultImp.Music;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Buffers;
@@ -17,12 +18,18 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 	public class NAudioManager : IAudioManager
 	{
 		private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
+		private int targetSampleRate;
+		private readonly IWavePlayer audioOutputDevice;
 
-		private readonly IWavePlayer soundOutputDevice;
+		private readonly MixingSampleProvider audioMixer;
 		private readonly MixingSampleProvider soundMixer;
+		private readonly MixingSampleProvider musicMixer;
+
 		private readonly VolumeSampleProvider soundVolumeWrapper;
+		private readonly VolumeSampleProvider musicVolumeWrapper;
 
 		public float SoundVolume { get => soundVolumeWrapper.Volume; set => soundVolumeWrapper.Volume = value; }
+		public float MusicVolume { get => musicVolumeWrapper.Volume; set => musicVolumeWrapper.Volume = value; }
 
 		public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; } = new[] {
 			(".mp3","音频文件"),
@@ -32,12 +39,45 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
 		public NAudioManager()
 		{
-			soundOutputDevice = new WasapiOut(AudioClientShareMode.Shared, 0);
-			soundMixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(48000, 2));
+			var audioOutputType = (AudioOutputType)Properties.AudioSetting.Default.AudioOutputType;
+			targetSampleRate = Properties.AudioSetting.Default.AudioSampleRate;
+			Log.LogDebug($"targetSampleRate: {targetSampleRate}");
+			Log.LogDebug($"audioOutputType: {audioOutputType}");
+
+			try
+			{
+				audioOutputDevice = audioOutputType switch
+				{
+					AudioOutputType.Asio => new AsioOut() { AutoStop = false },
+					AudioOutputType.Wasapi => new WasapiOut(AudioClientShareMode.Shared, 0),
+					AudioOutputType.WaveOut or _ => new WaveOut() { DesiredLatency = 100 },
+				};
+			}
+			catch (Exception e)
+			{
+				Log.LogError($"Can't create audio output device:{audioOutputType}", e);
+				throw;
+			}
+			Log.LogDebug($"audioOutputDevice: {audioOutputDevice}");
+
+			var format = WaveFormat.CreateIeeeFloatWaveFormat(targetSampleRate, 2);
+
+			audioMixer = new MixingSampleProvider(format);
+			audioMixer.ReadFully = true;
+			audioOutputDevice.Init(audioMixer);
+			audioOutputDevice.Play();
+
+			//setup sound
+			soundMixer = new MixingSampleProvider(format);
 			soundMixer.ReadFully = true;
 			soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
-			soundOutputDevice.Init(soundVolumeWrapper);
-			soundOutputDevice.Play();
+			audioMixer.AddMixerInput(soundVolumeWrapper);
+
+			//setup sound
+			musicMixer = new MixingSampleProvider(format);
+			musicMixer.ReadFully = true;
+			musicVolumeWrapper = new VolumeSampleProvider(musicMixer);
+			audioMixer.AddMixerInput(musicVolumeWrapper);
 
 			Log.LogInfo($"Audio implement will use {GetType()}");
 		}
@@ -56,15 +96,15 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 				};
 			}
 
-			AddMixerInput(provider);
+			AddSoundMixerInput(provider);
 		}
 
-		public void AddMixerInput(ISampleProvider input)
+		public void AddSoundMixerInput(ISampleProvider input)
 		{
 			soundMixer.AddMixerInput(input);
 		}
 
-		public void RemoveMixerInput(ISampleProvider input)
+		public void RemoveSoundMixerInput(ISampleProvider input)
 		{
 			soundMixer.RemoveMixerInput(input);
 		}
@@ -81,94 +121,20 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 					return null;
 			}
 
-			var player = new DefaultMusicPlayer();
+			var player = new DefaultMusicPlayer(musicMixer);
 			ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
-			await player.Load(filePath);
+			await player.Load(filePath, targetSampleRate);
 			return player;
 		}
 
-		public Task<ISoundPlayer> LoadSoundAsync(string filePath)
+		public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
 		{
-			var cached = new CachedSound(filePath);
-			if (cached.WaveFormat.SampleRate != 48000)
-			{
-				Log.LogWarn($"Resample sound audio file from {cached.WaveFormat.SampleRate} to 48000 : {filePath}");
-				cached = ResampleCacheSound(cached);
-			}
+			using var audioFileReader = new AudioFileReader(filePath);
+			Log.LogInfo($"Load sound file: {filePath}");
 
-			if (cached.WaveFormat.Channels == 1 && soundMixer.WaveFormat.Channels == 2)
-			{
-				Log.LogWarn($"Extend channel from Mono to Stereo : {filePath}");
-				cached = MonoToStereoSound(cached);
-			}
+			var provider = await AudioCompatibilizer.CheckCompatible(audioFileReader, targetSampleRate);
 
-			return Task.FromResult<ISoundPlayer>(new NAudioSoundPlayer(cached, this));
-		}
-
-		private CachedSound MonoToStereoSound(CachedSound cache)
-		{
-			var converter = new MonoToStereoSampleProvider(cache.CreateSampleProvider());
-			var buffer = ArrayPool<float>.Shared.Rent(1024_000);
-			var outFormat = converter.WaveFormat;
-			var list = new List<(float[], int)>();
-
-			while (true)
-			{
-				var read = converter.Read(buffer, 0, buffer.Length);
-				if (read == 0)
-					break;
-
-				var b = ArrayPool<float>.Shared.Rent(read);
-				buffer.AsSpan()[..read].CopyTo(b);
-				list.Add((b, read));
-			}
-
-			var totalLength = list.Select(x => x.Item2).Sum();
-			var newBuf = new float[totalLength];
-
-			var r = 0;
-			foreach ((var b, var read) in list)
-			{
-				b.AsSpan()[..read].CopyTo(newBuf.AsSpan().Slice(r, read));
-				r += read;
-				ArrayPool<float>.Shared.Return(b);
-			}
-
-			ArrayPool<float>.Shared.Return(buffer);
-			return new CachedSound(newBuf, outFormat);
-		}
-
-		private CachedSound ResampleCacheSound(CachedSound cache)
-		{
-			var resampler = new WdlResamplingSampleProvider(cache.CreateSampleProvider(), 48000);
-			var buffer = ArrayPool<float>.Shared.Rent(1024_000);
-			var outFormat = resampler.WaveFormat;
-			var list = new List<(float[], int)>();
-
-			while (true)
-			{
-				var read = resampler.Read(buffer, 0, buffer.Length);
-				if (read == 0)
-					break;
-
-				var b = ArrayPool<float>.Shared.Rent(read);
-				buffer.AsSpan()[..read].CopyTo(b);
-				list.Add((b, read));
-			}
-
-			var totalLength = list.Select(x => x.Item2).Sum();
-			var newBuf = new float[totalLength];
-
-			var r = 0;
-			foreach ((var b, var read) in list)
-			{
-				b.AsSpan()[..read].CopyTo(newBuf.AsSpan().Slice(r, read));
-				r += read;
-				ArrayPool<float>.Shared.Return(b);
-			}
-
-			ArrayPool<float>.Shared.Return(buffer);
-			return new CachedSound(newBuf, outFormat);
+			return new NAudioSoundPlayer(new CachedSound(provider), this);
 		}
 
 		public void Dispose()
@@ -180,7 +146,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 					player?.Dispose();
 			}
 			ownAudioPlayerRefs.Clear();
-			soundOutputDevice?.Dispose();
+			audioOutputDevice?.Dispose();
 		}
 
 		public ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init)
@@ -199,7 +165,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 			handle.Volume = volume;
 
 			//add to mixer
-			AddMixerInput(handle.Provider);
+			AddSoundMixerInput(handle.Provider);
 
 			//Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
 			return handle;
@@ -211,7 +177,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 				return;
 
 			//Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
-			RemoveMixerInput(handle.Provider);
+			RemoveSoundMixerInput(handle.Provider);
 		}
 	}
 }
