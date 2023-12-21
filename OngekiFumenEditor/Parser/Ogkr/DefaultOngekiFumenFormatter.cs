@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
@@ -226,7 +227,12 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 			sb.AppendLine();
 
 			foreach (var o in fumen.Soflans.OrderBy(x => x.TGrid))
-				sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.GridLength}\t{o.Speed:F6}");
+			{
+				sb.Append($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.GridLength}\t{o.Speed:F6}");
+				if (o is InterpolatableSoflan isf)
+					sb.Append($"\t{isf.Easing}\t{((InterpolatableSoflan.InterpolatableSoflanIndicator)isf.EndIndicator).Speed:F6}");
+				sb.AppendLine();
+			}
 			sb.AppendLine();
 
 			foreach (var o in fumen.ClickSEs.OrderBy(x => x.TGrid))

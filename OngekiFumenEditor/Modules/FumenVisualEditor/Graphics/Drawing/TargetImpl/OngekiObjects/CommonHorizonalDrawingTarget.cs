@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 		public override IEnumerable<string> DrawTargetID { get; } = new[]
 		{
-			"MET","SFL","BPM","EST","CLK","LBK","[LBK_End]","[SFL_End]","[CMT]"
+			"MET","SFL","BPM","EST","CLK","LBK","[LBK_End]","[SFL_End]","[CMT]","[INTP_SFL]","[INTP_SFL_End]"
 		};
 
 		private static Dictionary<string, FSColor> colors = new()
@@ -40,6 +40,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			{"MET", FSColor.LightGreen },
 			{"SFL", FSColor.LightCyan },
 			{"[CMT]", FSColor.Crimson },
+			{"[INTP_SFL]", FSColor.LightSeaGreen },
+			{"[INTP_SFL_End]", FSColor.LightSeaGreen },
 			{"BPM", FSColor.Pink },
 			{"EST", FSColor.Yellow },
 			{"CLK", FSColor.CadetBlue },
@@ -100,7 +102,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 				BPMChange o => $"BPM:{(int)o.BPM}",
 				Comment o => $"Comment:{o.Content}",
 				MeterChange o => $"MET:{o.Bunbo}/{o.BunShi}",
+				InterpolatableSoflan o => $"IntpSPD:({o.Easing}){o.Speed:F2}x",
 				Soflan o => $"SPD:{o.Speed:F2}x",
+				InterpolatableSoflan.InterpolatableSoflanIndicator o => $"{formatObj(o.RefSoflan)}_End -> {o.Speed:F2}x",
 				Soflan.SoflanEndIndicator o => $"{formatObj(o.RefSoflan)}_End",
 				LaneBlockArea o => $"LBK:{o.Direction}",
 				LaneBlockArea.LaneBlockAreaEndIndicator o => $"{formatObj(o.RefLaneBlockArea)}_End",

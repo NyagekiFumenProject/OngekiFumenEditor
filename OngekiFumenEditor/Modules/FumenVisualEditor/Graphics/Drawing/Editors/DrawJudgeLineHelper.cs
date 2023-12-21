@@ -44,8 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 			else
 				str = t.ToString();
 
-			var soflan = soflanList.LastOrDefault(x => x.TGrid <= t && t <= x.EndTGrid);
-			var speed = soflan?.Speed ?? 1;
+			var speed = soflanList.CalculateSpeed(t);
 
 			stringDrawing.Draw(
 					str,

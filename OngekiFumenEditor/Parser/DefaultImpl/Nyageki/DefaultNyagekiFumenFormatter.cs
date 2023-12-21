@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using DereTore.Common;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
@@ -234,7 +235,13 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 				sb.WriteLine($"BpmChange\t:\t{bpm.BPM}\t:\tT[{bpm.TGrid.Unit},{bpm.TGrid.Grid}]");
 			sb.WriteLine();
 			foreach (var soflan in fumen.Soflans.OrderBy(x => x.TGrid))
-				sb.WriteLine($"Soflan\t:\t{soflan.Speed}\t:\t(T[{soflan.TGrid.Unit},{soflan.TGrid.Grid}])\t->\t(T[{soflan.EndTGrid.Unit},{soflan.EndTGrid.Grid}])");
+			{
+				var name = soflan is InterpolatableSoflan ? "InterpolatableSoflan" : "Soflan";
+				sb.Write($"{name}\t:\t{soflan.Speed}\t:\t(T[{soflan.TGrid.Unit},{soflan.TGrid.Grid}])\t->\t(T[{soflan.EndTGrid.Unit},{soflan.EndTGrid.Grid}])");
+				if (soflan is InterpolatableSoflan isf)
+					sb.Write($": EndSpeed[{(isf.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed}], Easing[{isf.Easing}]");
+				sb.WriteLine();
+			}
 			sb.WriteLine();
 		}
 

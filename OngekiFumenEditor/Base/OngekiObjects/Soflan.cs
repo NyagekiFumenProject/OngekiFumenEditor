@@ -27,13 +27,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			public override string ToString() => $"{base.ToString()}";
 		}
 
-		private IDisplayableObject[] displayables;
+		protected IDisplayableObject[] displayables;
 
 		public Soflan()
 		{
 			EndIndicator = new SoflanEndIndicator() { RefSoflan = this };
 			EndIndicator.PropertyChanged += EndIndicator_PropertyChanged;
-			displayables = new IDisplayableObject[] { this, EndIndicator };
+			displayables = [this, EndIndicator];
 		}
 
 		public override TGrid TGrid
@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 		public override string IDShortName => $"SFL";
 
-		public SoflanEndIndicator EndIndicator { get; }
+		public SoflanEndIndicator EndIndicator { get; protected set; }
 
 		public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => displayables;
 
@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			return true;
 		}
 
-		public void CopyEntire(Soflan from)
+		public virtual void CopyEntire(Soflan from)
 		{
 			Copy(from);
 

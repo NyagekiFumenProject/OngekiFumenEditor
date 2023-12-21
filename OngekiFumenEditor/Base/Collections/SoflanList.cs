@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.Collections.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 using System.Collections;
@@ -57,6 +58,8 @@ namespace OngekiFumenEditor.Base.Collections
 				case nameof(TGrid.Grid):
 				case nameof(TGrid.Unit):
 				case nameof(Soflan.ApplySpeedInDesignMode):
+				case nameof(InterpolatableSoflan.Easing):
+				case nameof(InterpolatableSoflan.InterpolateCountPerResT):
 				case nameof(Soflan.EndTGrid):
 				case nameof(Soflan.GridLength):
 					OnChangedEvent?.Invoke();

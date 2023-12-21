@@ -1,7 +1,9 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
@@ -180,6 +182,18 @@ namespace OngekiFumenEditor
 				window.AllowDrop = true;
 				window.Drop += MainWindow_Drop;
 			}
+
+			var soflan = new InterpolatableSoflan()
+			{
+				Speed = 1,
+				TGrid = new TGrid(1, 0),
+				EndTGrid = new TGrid(2, 0),
+			};
+
+			(soflan.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed = 2;
+			soflan.Easing = EasingTypes.None;
+
+			var s = soflan.GetInterpolatedSoflans().ToArray();
 		}
 
 		private async void MainWindow_Drop(object sender, DragEventArgs e)

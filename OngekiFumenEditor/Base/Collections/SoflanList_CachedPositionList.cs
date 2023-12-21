@@ -1,4 +1,5 @@
 ﻿using IntervalTree;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -73,7 +74,11 @@ namespace OngekiFumenEditor.Base.Collections
 						break;
 				}
 			}
-			var r = this.AsEnumerable<ITimelineObject>().Concat(bpmList)
+			var r = this.SelectMany(x => x switch
+			{
+				InterpolatableSoflan s => s.GetInterpolatedSoflans(),
+				_ => new[] { x }
+			}).AsEnumerable<ITimelineObject>().Concat(bpmList)
 				.OrderBy(x => x.TGrid)
 				.SelectMany(GetEventTimings)
 				.GroupBy(x => x.TGrid)
@@ -495,6 +500,15 @@ namespace OngekiFumenEditor.Base.Collections
 
 			//尽量合并得到的VisibleTGridRange
 			return TryMerge(_internal());
+		}
+
+		public double CalculateSpeed(TGrid t)
+		{
+			var soflan = GetVisibleStartObjects(t, t).FirstOrDefault();
+
+			if (soflan is InterpolatableSoflan isf)
+				return isf.CalculateSpeed(t);
+			return soflan?.Speed ?? 1;
 		}
 	}
 

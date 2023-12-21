@@ -309,6 +309,43 @@ namespace OngekiFumenEditor.Utils
 			return ~lo;
 		}
 
+		private static int BinarySearchBy<T, X>(this IReadOnlyList<T> insertable, X value, Func<T, X> keySelect, int lo = 0) where X : IComparable<X>
+		{
+			//https://referencesource.microsoft.com/mscorlib/system/collections/generic/arraysorthelper.cs.html#f3d6c6df965a8a86
+
+			int hi = insertable.Count - 1;
+			while (lo <= hi)
+			{
+				int i = lo + ((hi - lo) >> 1);
+				var val = keySelect(insertable[i]);
+				int order = val.CompareTo(value);
+
+				if (order == 0)
+				{
+					//考虑到出现重复值
+					for (int r = i + 1; r < insertable.Count; r++)
+					{
+						var v = keySelect(insertable[r]);
+						if (v.CompareTo(val) == 0)
+							i = r;
+						else
+							break;
+					}
+					return i;
+				}
+				if (order < 0)
+				{
+					lo = i + 1;
+				}
+				else
+				{
+					hi = i - 1;
+				}
+			}
+
+			return ~lo;
+		}
+
 		/// <summary>
 		/// 使用二分法实现LastOrDefault()的选值(假设集合已排序)
 		/// </summary>
@@ -319,6 +356,13 @@ namespace OngekiFumenEditor.Utils
 		/// <param name="keySelect"></param>
 		/// <returns></returns>
 		public static T LastOrDefaultByBinarySearch<T, X>(this IList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
+		{
+			var idx = source.BinarySearchBy(value, keySelect);
+			var i = Math.Max(0, idx < 0 ? ((~idx) - 1) : idx);
+			return source[i];
+		}
+
+		public static T LastOrDefaultByBinarySearch<T, X>(this IReadOnlyList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
 		{
 			var idx = source.BinarySearchBy(value, keySelect);
 			var i = Math.Max(0, idx < 0 ? ((~idx) - 1) : idx);

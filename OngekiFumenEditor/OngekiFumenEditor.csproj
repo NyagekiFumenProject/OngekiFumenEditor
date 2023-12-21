@@ -237,6 +237,9 @@
     <Compile Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\InterpolatableSoflanOperationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Modules\FumenObjectPropertyBrowser\Views\MultiLanesOperationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -438,6 +441,9 @@
     <Page Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Modules\FumenObjectPropertyBrowser\Views\InterpolatableSoflanOperationView.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
     </Page>
     <Page Update="Modules\FumenObjectPropertyBrowser\Views\MultiLanesOperationView.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

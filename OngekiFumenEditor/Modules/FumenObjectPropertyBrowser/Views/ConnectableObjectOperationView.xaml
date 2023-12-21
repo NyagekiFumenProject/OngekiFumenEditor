@@ -15,8 +15,6 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
     <StackPanel Margin="21,5,0,0">
-        <ContentControl>
-        </ContentControl>
         <controls:CommonOperationButton
             Width="150"
             HorizontalAlignment="Left"
