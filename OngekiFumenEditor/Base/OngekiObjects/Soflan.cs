@@ -33,7 +33,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 		{
 			EndIndicator = new SoflanEndIndicator() { RefSoflan = this };
 			EndIndicator.PropertyChanged += EndIndicator_PropertyChanged;
-			displayables = [this, EndIndicator];
+			displayables = new IDisplayableObject[] { this, EndIndicator };
 		}
 
 		public override TGrid TGrid

@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
 		{
 			EndIndicator = new InterpolatableSoflanIndicator() { RefSoflan = this };
 			EndIndicator.PropertyChanged += EndIndicator_PropertyChanged;
-			displayables = [this, EndIndicator];
+			displayables = new IDisplayableObject[] { this, EndIndicator };
 		}
 
 		private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
