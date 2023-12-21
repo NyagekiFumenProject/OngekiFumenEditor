@@ -8,7 +8,6 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll
 {
-
 	[CommandHandler]
 	public class InterpolateAllCommandHandler : InterpolateAllCommandHandlerBase<InterpolateAllCommandDefinition>
 	{

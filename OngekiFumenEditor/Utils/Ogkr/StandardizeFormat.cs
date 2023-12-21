@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
@@ -38,9 +39,15 @@ namespace OngekiFumenEditor.Utils.Ogkr
 		{
 			var fumen = await CopyFumenObject(currentFumen);
 
+			var interpolatableSoflans = fumen.Soflans.OfType<InterpolatableSoflan>().ToArray();
+			var generatedSoflans = interpolatableSoflans.SelectMany(x => x.GetInterpolatedSoflans()).ToArray();
+
 			//directly removes objects which not belong to ongeki.
 			fumen.SvgPrefabs.Clear();
 			fumen.Comments.Clear();
+			//interpolate soflans
+			fumen.AddObjects(generatedSoflans);
+			fumen.RemoveObjects(interpolatableSoflans);
 
 			if (!CheckFumenIsSerializable(fumen, out var msg))
 				return new(false) { Message = msg };
