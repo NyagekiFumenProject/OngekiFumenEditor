@@ -378,6 +378,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 			var xOffset = (float)Setting.XOffset;
 			var width = ViewWidth;
+			if (width == 0)
+				return;
 			var xUnitSpace = (float)Setting.XGridUnitSpace;
 			var maxDisplayXUnit = Setting.XGridDisplayMaxUnit;
 
