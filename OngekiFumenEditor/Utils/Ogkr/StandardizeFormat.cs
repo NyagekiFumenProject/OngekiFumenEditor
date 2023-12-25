@@ -39,15 +39,14 @@ namespace OngekiFumenEditor.Utils.Ogkr
 		{
 			var fumen = await CopyFumenObject(currentFumen);
 
-			var interpolatableSoflans = fumen.Soflans.OfType<InterpolatableSoflan>().ToArray();
-			var generatedSoflans = interpolatableSoflans.SelectMany(x => x.GenerateKeyframeSoflans()).OfType<OngekiObjectBase>().ToArray();
+			var generatedSoflans = fumen.Soflans.GenerateDurationSoflans(fumen.BpmList).ToArray();
 
 			//directly removes objects which not belong to ongeki.
 			fumen.SvgPrefabs.Clear();
 			fumen.Comments.Clear();
 			//interpolate soflans
+			fumen.RemoveObjects(fumen.Soflans.OfType<OngekiObjectBase>().ToArray());
 			fumen.AddObjects(generatedSoflans);
-			fumen.RemoveObjects(interpolatableSoflans);
 
 			if (!CheckFumenIsSerializable(fumen, out var msg))
 				return new(false) { Message = msg };

@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace OngekiFumenEditor.Base.Collections
 
 		private void OnChilidrenSubPropsChangedEvent()
 		{
-			cachedSoflanListCacheHash = int.MinValue;
+			cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
 		}
 
 		public void Add(ISoflan soflan)

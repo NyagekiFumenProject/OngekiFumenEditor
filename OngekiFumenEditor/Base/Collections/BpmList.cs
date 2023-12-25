@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Base.Collections
 
 		private void BpmList_OnChangedEvent()
 		{
-			cachedBpmContentHash = int.MinValue;
+			cachedBpmContentHash = RandomHepler.Random(int.MinValue, int.MaxValue);
 		}
 
 		public void Add(BPMChange bpm)

@@ -509,7 +509,7 @@ namespace OngekiFumenEditor.Base.Collections
 			return soflan.Speed;
 		}
 
-		public IEnumerable<IDurationSoflan> GenerateDurationSoflans(BpmList bpmList)
+		public IEnumerable<Soflan> GenerateDurationSoflans(BpmList bpmList)
 		{
 			var list = GetCachedSoflanPositionList_PreviewMode(bpmList).Select(x => new
 			{
