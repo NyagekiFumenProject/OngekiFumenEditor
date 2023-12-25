@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using FontStashSharp;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Kernel.Graphics;
 using System.Linq;
 using System.Numerics;
@@ -44,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 			else
 				str = t.ToString();
 
-			var speed = soflanList.CalculateSpeed(t);
+			var speed = soflanList.CalculateSpeed(bpmList, t);
 
 			stringDrawing.Draw(
 					str,
@@ -63,7 +64,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
 			if (speed != 1)
 			{
-				var speedStr = $"{speed}x";
+				var speedStr = $"{speed:F2}x";
 
 				stringDrawing.Draw(
 						speedStr,

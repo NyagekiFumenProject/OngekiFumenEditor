@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			fumen.AddObject(soflan);
 		}
 
-		public void Apply(Soflan soflan, string[] seg)
+		public void Apply(ISoflan soflan, string[] seg)
 		{
 			var data = seg[1].Split(":");
 
@@ -33,7 +33,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 				.ToArray();
 
 			soflan.TGrid = tgridRange[0];
-			soflan.EndIndicator.TGrid = tgridRange[1];
+			soflan.EndTGrid = tgridRange[1];
 		}
 	}
 
@@ -52,6 +52,22 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			using var d = data[2].GetValuesMapWithDisposable(out var map);
 			soflan.Easing = Enum.Parse<EasingTypes>(map["Easing"]);
 			((InterpolatableSoflan.InterpolatableSoflanIndicator)soflan.EndIndicator).Speed = float.Parse(map["EndSpeed"]);
+
+			fumen.AddObject(soflan);
+		}
+	}
+
+
+	[Export(typeof(INyagekiCommandParser))]
+	public class KeyframeSoflanCommandParser : SoflanCommandParser
+	{
+		public override string CommandName => "KeyframeSoflan";
+
+		public override void ParseAndApply(OngekiFumen fumen, string[] seg)
+		{
+			//$"InterpolatableSoflan:{soflan.Speed}:(T[{soflan.TGrid.Unit},{soflan.TGrid.Grid}]) -> (T[{soflan.EndTGrid.Unit},{soflan.EndTGrid.Grid}])"
+			var soflan = new KeyframeSoflan();
+			Apply(soflan, seg);
 
 			fumen.AddObject(soflan);
 		}

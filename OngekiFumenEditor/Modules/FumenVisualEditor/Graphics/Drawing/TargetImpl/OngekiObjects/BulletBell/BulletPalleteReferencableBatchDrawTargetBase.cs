@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		protected Dictionary<Texture, ConcurrentBag<(Vector2, Vector2, float)>> selectedDrawList = new();
 		protected List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
 
-		private readonly SoflanList nonSoflanList = new(new[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
+		private readonly SoflanList nonSoflanList = new(new ISoflan[] { new Soflan() { TGrid = TGrid.Zero, Speed = 1 } });
 		private readonly IStringDrawing stringDrawing;
 		private readonly IHighlightBatchTextureDrawing highlightDrawing;
 		private readonly IBatchTextureDrawing batchTextureDrawing;

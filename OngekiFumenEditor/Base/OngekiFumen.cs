@@ -139,7 +139,7 @@ namespace OngekiFumenEditor.Base
 			{
 				Beams.Add(beam);
 			}
-			else if (obj is Soflan soflan)
+			else if (obj is ISoflan soflan)
 			{
 				Soflans.Add(soflan);
 			}
@@ -215,7 +215,7 @@ namespace OngekiFumenEditor.Base
 			{
 				EnemySets.Remove(est);
 			}
-			else if (obj is Soflan soflan)
+			else if (obj is ISoflan soflan)
 			{
 				Soflans.Remove(soflan);
 			}

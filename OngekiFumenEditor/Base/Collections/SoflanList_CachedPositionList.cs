@@ -54,7 +54,7 @@ namespace OngekiFumenEditor.Base.Collections
 		public IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm, ChgEvt)> GetCalculatableEvents(BpmList bpmList, bool isDesignModel)
 		{
 			var curBpm = bpmList.FirstBpm;
-			Soflan curSpeedEvent = null;
+			KeyframeSoflan curSpeedEvent = null;
 
 			IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm, ChgEvt evt)> GetEventTimings(ITimelineObject evt)
 			{
@@ -66,19 +66,20 @@ namespace OngekiFumenEditor.Base.Collections
 						var speed = (curSpeedEvent is not null && curSpeedEvent.EndTGrid > t) ? (isDesignModel ? curSpeedEvent.SpeedInEditor : curSpeedEvent.Speed) : 1.0d;
 						yield return (evt.TGrid, speed, curBpm, ChgEvt.BpmChanged);
 						break;
-					case Soflan soflanEvt:
+					case KeyframeSoflan soflanEvt:
 						curSpeedEvent = soflanEvt;
-						yield return (evt.TGrid, (isDesignModel ? soflanEvt.SpeedInEditor : soflanEvt.Speed), curBpm, ChgEvt.SoflanBegan);
-						var endTGrid = evt.TGrid + new GridOffset(0, soflanEvt.GridLength);
-						yield return (endTGrid, 1.0f, bpmList.GetBpm(endTGrid), ChgEvt.SoflanEnded);
+						yield return (evt.TGrid, (isDesignModel ? soflanEvt.SpeedInEditor : soflanEvt.Speed), curBpm, ChgEvt.SoflanChanged);
 						break;
 				}
 			}
 			var r = this.SelectMany(x => x switch
 			{
-				InterpolatableSoflan s => s.GetInterpolatedSoflans(),
-				_ => new[] { x }
-			}).AsEnumerable<ITimelineObject>().Concat(bpmList)
+				IKeyframeSoflan t => Enumerable.Repeat(x, 1),
+				IDurationSoflan t => t.GenerateKeyframeSoflans()
+			})
+				.FilterNull()
+				.AsEnumerable<ITimelineObject>()
+				.Concat(bpmList)
 				.OrderBy(x => x.TGrid)
 				.SelectMany(GetEventTimings)
 				.GroupBy(x => x.TGrid)
@@ -502,13 +503,30 @@ namespace OngekiFumenEditor.Base.Collections
 			return TryMerge(_internal());
 		}
 
-		public double CalculateSpeed(TGrid t)
+		public double CalculateSpeed(BpmList bpmList, TGrid t)
 		{
-			var soflan = GetVisibleStartObjects(t, t).FirstOrDefault();
+			var soflan = GetCachedSoflanPositionList_PreviewMode(bpmList).LastOrDefaultByBinarySearch(t, x => x.TGrid);
+			return soflan.Speed;
+		}
 
-			if (soflan is InterpolatableSoflan isf)
-				return isf.CalculateSpeed(t);
-			return soflan?.Speed ?? 1;
+		public IEnumerable<IDurationSoflan> GenerateDurationSoflans(BpmList bpmList)
+		{
+			var list = GetCachedSoflanPositionList_PreviewMode(bpmList).Select(x => new
+			{
+				x.TGrid,
+				x.Speed
+			}).OrderBy(x => x.TGrid)
+			.ToArray();
+
+			for (var i = 0; i < list.Length - 1; i++)
+			{
+				yield return new Soflan()
+				{
+					TGrid = list[i].TGrid,
+					Speed = (float)list[i].Speed,
+					EndTGrid = list[i + 1].TGrid,
+				};
+			}
 		}
 	}
 

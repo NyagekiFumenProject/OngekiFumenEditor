@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Toolbox;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -22,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 		public void Interpolate(ActionExecutionContext e)
 		{
-			var list = soflan.GetInterpolatedSoflans().ToArray();
+			var list = soflan.GenerateKeyframeSoflans().OfType<OngekiObjectBase>().ToArray();
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
 
 			if (editor == null)

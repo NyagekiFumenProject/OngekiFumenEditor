@@ -1,9 +1,10 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-	public class Soflan : OngekiTimelineObjectBase
+	public class Soflan : OngekiTimelineObjectBase, IDurationSoflan
 	{
 		public class SoflanEndIndicator : OngekiTimelineObjectBase
 		{
@@ -111,6 +112,29 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			ApplySpeedInDesignMode = from.ApplySpeedInDesignMode;
 
 			EndIndicator.Copy(from.EndIndicator);
+		}
+
+		public virtual IEnumerable<IKeyframeSoflan> GenerateKeyframeSoflans()
+		{
+			yield return new KeyframeSoflan()
+			{
+				TGrid = TGrid,
+				Speed = Speed,
+				ApplySpeedInDesignMode = ApplySpeedInDesignMode
+			};
+			yield return new KeyframeSoflan()
+			{
+				TGrid = EndTGrid,
+				Speed = 1,
+				ApplySpeedInDesignMode = ApplySpeedInDesignMode
+			};
+		}
+
+		public virtual float CalculateSpeed(TGrid tGrid)
+		{
+			if (TGrid <= tGrid && tGrid <= EndTGrid)
+				return Speed;
+			return 1;
 		}
 	}
 }

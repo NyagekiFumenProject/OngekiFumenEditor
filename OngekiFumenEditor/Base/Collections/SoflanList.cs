@@ -9,10 +9,10 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-	public partial class SoflanList : IReadOnlyCollection<Soflan>
+	public partial class SoflanList : IReadOnlyCollection<ISoflan>
 	{
-		private IntervalTreeWrapper<TGrid, Soflan> soflans = new(
-			x => new() { Min = x.TGrid, Max = x.EndIndicator.TGrid },
+		private IntervalTreeWrapper<TGrid, ISoflan> soflans = new(
+			x => new() { Min = x.TGrid, Max = x.EndTGrid },
 			true,
 			nameof(Soflan.TGrid),
 			nameof(Soflan.EndTGrid)
@@ -22,18 +22,18 @@ namespace OngekiFumenEditor.Base.Collections
 
 		public event Action OnChangedEvent;
 
-		public IEnumerator<Soflan> GetEnumerator() => soflans.GetEnumerator();
+		public IEnumerator<ISoflan> GetEnumerator() => soflans.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		public IEnumerable<Soflan> GetVisibleStartObjects(TGrid min, TGrid max)
+		public IEnumerable<ISoflan> GetVisibleStartObjects(TGrid min, TGrid max)
 		{
 			return soflans.QueryInRange(min, max);
 		}
 
-		public SoflanList(IEnumerable<Soflan> initBpmChanges = default)
+		public SoflanList(IEnumerable<ISoflan> initSoflanChanges = default)
 		{
 			OnChangedEvent += OnChilidrenSubPropsChangedEvent;
-			foreach (var item in initBpmChanges ?? Enumerable.Empty<Soflan>())
+			foreach (var item in initSoflanChanges ?? Enumerable.Empty<IKeyframeSoflan>())
 				Add(item);
 		}
 
@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Base.Collections
 			cachedSoflanListCacheHash = int.MinValue;
 		}
 
-		public void Add(Soflan soflan)
+		public void Add(ISoflan soflan)
 		{
 			soflans.Add(soflan);
 			soflan.PropertyChanged += OnSoflanPropChanged;
@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Base.Collections
 			}
 		}
 
-		public void Remove(Soflan soflan)
+		public void Remove(ISoflan soflan)
 		{
 			soflans.Remove(soflan);
 			soflan.PropertyChanged -= OnSoflanPropChanged;

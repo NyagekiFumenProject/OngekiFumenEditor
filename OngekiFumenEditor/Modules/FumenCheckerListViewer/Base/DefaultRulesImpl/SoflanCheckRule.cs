@@ -16,8 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
 		{
 			bool IsConflict(double start1, double end1, double start2, double end2) => (start1 < end2 && start2 < end1) || (start2 < end1 && start1 < end2);
-			var conflictRecMap = new HashSet<Soflan>();
-
+			var conflictRecMap = new HashSet<OngekiTimelineObjectBase>();
 
 			foreach (var cur in fumen.Soflans)
 			{
@@ -27,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 				{
 					if (IsConflict(aff.TGrid.TotalUnit, aff.EndTGrid.TotalUnit, cur.TGrid.TotalUnit, cur.EndTGrid.TotalUnit))
 					{
-						var r = new[] { aff, cur }.MaxBy(x => x.Id);
+						var r = new[] { aff, cur }.OfType<OngekiTimelineObjectBase>().MaxBy(x => x.Id);
 						if (conflictRecMap.Contains(r))
 							continue;
 						conflictRecMap.Add(r);

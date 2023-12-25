@@ -228,9 +228,21 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 
 			foreach (var o in fumen.Soflans.OrderBy(x => x.TGrid))
 			{
-				sb.Append($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.GridLength}\t{o.Speed:F6}");
-				if (o is InterpolatableSoflan isf)
-					sb.Append($"\t{isf.Easing}\t{((InterpolatableSoflan.InterpolatableSoflanIndicator)isf.EndIndicator).Speed:F6}");
+				switch (o)
+				{
+					case InterpolatableSoflan isf:
+						sb.Append($"{isf.IDShortName}\t{o.TGrid.Serialize()}\t{isf.GridLength}\t{o.Speed:F6}");
+						sb.Append($"\t{isf.Easing}\t{((InterpolatableSoflan.InterpolatableSoflanIndicator)isf.EndIndicator).Speed:F6}");
+						break;
+
+					case Soflan isf:
+						sb.Append($"{isf.IDShortName}\t{o.TGrid.Serialize()}\t{isf.GridLength}\t{o.Speed:F6}");
+						break;
+
+					case KeyframeSoflan isf:
+						sb.Append($"{isf.IDShortName}\t{o.TGrid.Serialize()}\t{o.Speed:F6}");
+						break;
+				}
 				sb.AppendLine();
 			}
 			sb.AppendLine();

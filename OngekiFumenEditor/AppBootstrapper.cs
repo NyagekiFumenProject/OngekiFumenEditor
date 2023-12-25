@@ -193,7 +193,7 @@ namespace OngekiFumenEditor
 			(soflan.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed = 2;
 			soflan.Easing = EasingTypes.None;
 
-			var s = soflan.GetInterpolatedSoflans().ToArray();
+			var s = soflan.GenerateKeyframeSoflans().ToArray();
 		}
 
 		private async void MainWindow_Drop(object sender, DragEventArgs e)

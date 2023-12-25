@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 			var fumen = await CopyFumenObject(currentFumen);
 
 			var interpolatableSoflans = fumen.Soflans.OfType<InterpolatableSoflan>().ToArray();
-			var generatedSoflans = interpolatableSoflans.SelectMany(x => x.GetInterpolatedSoflans()).ToArray();
+			var generatedSoflans = interpolatableSoflans.SelectMany(x => x.GenerateKeyframeSoflans()).OfType<OngekiObjectBase>().ToArray();
 
 			//directly removes objects which not belong to ongeki.
 			fumen.SvgPrefabs.Clear();

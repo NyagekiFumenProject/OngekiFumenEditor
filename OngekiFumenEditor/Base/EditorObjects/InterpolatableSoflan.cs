@@ -106,7 +106,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
 		}
 
 		bool cachedValid = false;
-		List<Soflan> cachedInterpolatedSoflans = new();
+		List<IKeyframeSoflan> cachedInterpolatedSoflans = new();
 
 		public void UpdateCachedInterpolatedSoflans()
 		{
@@ -120,11 +120,10 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
 			if (fromSpeed == toSpeed || fromTotalGrid == toTotalGrid)
 			{
-				cachedInterpolatedSoflans.Add(new Soflan()
+				cachedInterpolatedSoflans.Add(new KeyframeSoflan()
 				{
-					EndTGrid = new TGrid(0, toTotalGrid),
-					TGrid = new TGrid(0, fromTotalGrid),
-					Speed = fromSpeed,
+					TGrid = new TGrid(0, toTotalGrid),
+					Speed = toSpeed,
 					ApplySpeedInDesignMode = ApplySpeedInDesignMode
 				});
 			}
@@ -141,9 +140,8 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
 					var speed = fromSpeed + transformed * (toSpeed - fromSpeed);
 
-					cachedInterpolatedSoflans.Add(new Soflan()
+					cachedInterpolatedSoflans.Add(new KeyframeSoflan()
 					{
-						EndTGrid = new TGrid(0, nextGrid),
 						TGrid = new TGrid(0, curGrid),
 						Speed = speed,
 						ApplySpeedInDesignMode = ApplySpeedInDesignMode
@@ -153,18 +151,18 @@ namespace OngekiFumenEditor.Base.EditorObjects
 			cachedValid = true;
 		}
 
-		public IReadOnlyList<Soflan> GetInterpolatedSoflans()
+		public override IEnumerable<IKeyframeSoflan> GenerateKeyframeSoflans()
 		{
 			if (!cachedValid)
 				UpdateCachedInterpolatedSoflans();
 			return cachedInterpolatedSoflans;
 		}
 
-		public double CalculateSpeed(TGrid t)
+		public override float CalculateSpeed(TGrid t)
 		{
-			var list = GetInterpolatedSoflans();
-			var r = list.LastOrDefaultByBinarySearch(t, x => x.TGrid);
-			return r.Speed;
+			var list = GenerateKeyframeSoflans();
+			var r = ((IList<IKeyframeSoflan>)list).LastOrDefaultByBinarySearch(t, x => x.TGrid);
+			return r?.Speed ?? 1;
 		}
 	}
 }

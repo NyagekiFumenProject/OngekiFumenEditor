@@ -236,7 +236,12 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 			sb.WriteLine();
 			foreach (var soflan in fumen.Soflans.OrderBy(x => x.TGrid))
 			{
-				var name = soflan is InterpolatableSoflan ? "InterpolatableSoflan" : "Soflan";
+				var name = soflan switch
+				{
+					KeyframeSoflan => "KeyframeSoflan",
+					InterpolatableSoflan => "InterpolatableSoflan",
+					Soflan => "Soflan"
+				};
 				sb.Write($"{name}\t:\t{soflan.Speed}\t:\t(T[{soflan.TGrid.Unit},{soflan.TGrid.Grid}])\t->\t(T[{soflan.EndTGrid.Unit},{soflan.EndTGrid.Grid}])");
 				if (soflan is InterpolatableSoflan isf)
 					sb.Write($": EndSpeed[{(isf.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed}], Easing[{isf.Easing}]");
