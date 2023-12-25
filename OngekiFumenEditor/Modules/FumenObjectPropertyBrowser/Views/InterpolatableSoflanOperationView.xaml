@@ -15,7 +15,7 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
             DecoratorBrush="DarkSalmon"
-            Text="插值生成Soflan物件"
-            ToolTip="生成已经插值好的一堆Soflan物件" />
+            Text="插值生成KeyframeSoflan物件"
+            ToolTip="生成已经插值好的一堆KeyframeSoflan物件" />
     </StackPanel>
 </UserControl>
