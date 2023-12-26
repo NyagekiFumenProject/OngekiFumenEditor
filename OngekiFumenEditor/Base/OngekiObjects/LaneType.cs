@@ -10,5 +10,7 @@
 		Beam = 6,
 		WallLeft = 1,
 		WallRight = -1,
+		//-------------
+		AutoPlayFader = 1000,
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
@@ -50,6 +51,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 				"WLS" => new WallLeftStart(),
 				"WRS" => new WallRightStart(),
 				"ENS" => new EnemyLaneStart(),
+				"[APFS]" => new AutoplayFaderLaneStart(),
 				_ => null
 			};
 			buildCommon(startObject, startData);
@@ -60,12 +62,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			// Next/End
 			foreach (var childData in notes.Skip(1))
 			{
-				var childObject = childData["Type"].Last() switch
-				{
-					'N' => startObject.CreateChildObject(),
-					'E' => startObject.CreateChildObject(),
-					_ => default(ConnectableChildObjectBase)
-				};
+				var childObject = startObject.CreateChildObject();
 
 				buildCommon(childObject, childData);
 				if (childObject is IColorfulLane colorfulLane2)

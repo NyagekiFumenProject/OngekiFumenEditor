@@ -16,30 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 		public override ConnectableChildObjectBase GenerateChildObject(bool needNext)
 		{
-			switch (LaneTypeChar)
-			{
-				case 'W':
-					return LaneChar switch
-					{
-						'L' => new WallLeftNext(),
-						'R' => new WallRightNext(),
-						_ => default
-					};
-				case 'C':
-					return new ColorfulLaneNext();
-				case 'E':
-					return new EnemyLaneNext();
-				case 'L':
-					return LaneChar switch
-					{
-						'L' => new LaneLeftNext(),
-						'C' => new LaneCenterNext(),
-						'R' => new LaneRightNext(),
-						_ => default
-					};
-				default:
-					return default;
-			}
+			return ConnectableObject?.ReferenceStartObject?.CreateChildObject();
 		}
 	}
 }

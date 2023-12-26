@@ -44,6 +44,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 			//directly removes objects which not belong to ongeki.
 			fumen.SvgPrefabs.Clear();
 			fumen.Comments.Clear();
+			fumen.RemoveObjects(fumen.Lanes.OfType<AutoplayFaderLaneStart>().ToArray());
 			//interpolate soflans
 			fumen.RemoveObjects(fumen.Soflans.OfType<OngekiObjectBase>().ToArray());
 			fumen.AddObjects(generatedSoflans);

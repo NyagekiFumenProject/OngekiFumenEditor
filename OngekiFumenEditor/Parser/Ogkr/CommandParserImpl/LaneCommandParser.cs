@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
@@ -152,6 +153,22 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 		public override string CommandLineHeader => "ENE";
 	}
 
+	[Export(typeof(ICommandParser))]
+	public class AutoplayFaderLaneNextCommandParser : LaneChildObjectCommandParser<AutoplayFaderLaneNext>
+	{
+		public override string CommandLineHeader => "[APFN]";
+	}
 
+	[Export(typeof(ICommandParser))]
+	public class AutoplayFaderLaneEndCommandParser : AutoplayFaderLaneNextCommandParser
+	{
+		public override string CommandLineHeader => "[APFE]";
+	}
+
+	[Export(typeof(ICommandParser))]
+	public class AutoPlayFaderLaneStartCommandParser : LaneStartCommandParser<AutoplayFaderLaneStart>
+	{
+		public override string CommandLineHeader => "[APFS]";
+	}
 	#endregion
 }
