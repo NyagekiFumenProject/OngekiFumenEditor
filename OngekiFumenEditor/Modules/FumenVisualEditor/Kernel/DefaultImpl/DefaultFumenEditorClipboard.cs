@@ -25,6 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 	{
 		private Dictionary<OngekiObjectBase, Point> currentCopiedSources = new();
 		private FumenVisualEditorViewModel sourceEditor;
+		private double prevScale;
 
 		public bool ContainPastableObjects => sourceEditor is not null && currentCopiedSources.Any();
 
@@ -46,6 +47,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				sourceEditor.ToastNotify($"清空复制列表");
 				return;
 			}
+
+			prevScale = sourceEditor.Setting.VerticalDisplayScale;
 
 			//清空一下
 			currentCopiedSources.Clear();
@@ -145,6 +148,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			if (currentCopiedSources.Count is 0)
 			{
 				Log.LogWarn($"无法粘贴因为复制列表为空");
+				return;
+			}
+			var curScale = targetEditor.Setting.VerticalDisplayScale;
+			if (curScale != prevScale && currentCopiedSources.Count > 1)
+			{
+				targetEditor.ToastNotify($"原编辑器垂直缩放({prevScale:F2}x)和目标缩放({curScale:F2}x)不同，无法粘贴多个物件");
 				return;
 			}
 
