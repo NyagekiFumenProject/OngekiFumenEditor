@@ -15,32 +15,19 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 	{
 		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
 		{
-			bool IsConflict(double start1, double end1, double start2, double end2) => (start1 < end2 && start2 < end1) || (start2 < end1 && start1 < end2);
-			var conflictRecMap = new HashSet<OngekiTimelineObjectBase>();
+			var r = fumen.Soflans.CalculateSpeed(fumen.BpmList, TGrid.MaxValue);
+			var lastTGrid = fumen.Soflans.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList).LastOrDefault().TGrid;
 
-			foreach (var cur in fumen.Soflans)
+			if (r != 1)
 			{
-				var affSoflans = fumen.Soflans.GetVisibleStartObjects(cur.TGrid, cur.EndTGrid).Except(new[] { cur });
-
-				foreach (var aff in affSoflans)
+				yield return new CommonCheckResult()
 				{
-					if (IsConflict(aff.TGrid.TotalUnit, aff.EndTGrid.TotalUnit, cur.TGrid.TotalUnit, cur.EndTGrid.TotalUnit))
-					{
-						var r = new[] { aff, cur }.OfType<OngekiTimelineObjectBase>().MaxBy(x => x.Id);
-						if (conflictRecMap.Contains(r))
-							continue;
-						conflictRecMap.Add(r);
-
-						yield return new CommonCheckResult()
-						{
-							Description = $"发现Soflan作用时效冲突:{cur}和{aff}",
-							LocationDescription = $"({cur.TGrid},{cur.EndTGrid}) - ({aff.TGrid},{aff.EndTGrid})",
-							NavigateBehavior = new NavigateToObjectBehavior(r),
-							RuleName = "SoflanConflict",
-							Severity = RuleSeverity.Error
-						};
-					}
-				}
+					Description = $"最后一个Soflan变速后应该变回正常的1速,但现在是{r}速",
+					LocationDescription = lastTGrid?.ToString(),
+					NavigateBehavior = new NavigateToTGridBehavior(lastTGrid),
+					RuleName = "Soflan",
+					Severity = RuleSeverity.Problem
+				};
 			}
 		}
 	}
