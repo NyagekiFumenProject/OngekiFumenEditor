@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
@@ -269,32 +270,38 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 				var totalGrid = diff.Unit * resT + diff.Grid;
 				var i = (int)Math.Max(0, totalGrid / lengthPerBeat);
 
-				//检测是否可以绘制线
-				var isDrawable = !(double.IsInfinity(lengthPerBeat) || (beatCount == 0));
-
-				while (isDrawable)
+				//特殊处理beatCount=0的情况
+				if (beatCount == 0)
 				{
-					var tGrid = currentTGridBase + new GridOffset(0, (int)(lengthPerBeat * i));
-					//因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
-					var y = ConvertTGridToY_DesignMode(tGrid, soflans, bpmList, 1);
-					//var y = currentStartY + len;
-
-					//超过当前timeSignature范围，切换到下一个timeSignature画新的线
-					if (nextBpm is not null && tGrid >= nextTGridBase)
-						break;
-					//超过编辑器谱面范围，后面都不用画了
-					if (tGrid > endTGrid)
-						yield break;
-					//节奏线在最低可见线的后面
-					if (tGrid < currentTGridBaseOffset)
-					{
-						i++;
-						continue;
-					}
-
-					yield return (tGrid, y * scale, i % beatCount, currentMeter, currentBpm);
-					i++;
+					var y = ConvertTGridToY_DesignMode(currentTGridBase, soflans, bpmList, 1);
+					yield return (currentTGridBase, y * scale, 0, currentMeter, currentBpm);
 				}
+				else
+				{
+					while (true)
+					{
+						var tGrid = currentTGridBase + new GridOffset(0, (int)(lengthPerBeat * i));
+						//因为是不存在跨bpm长度计算，可以直接CalculateBPMLength(...)计算而不是TGridCalculator.ConvertTGridToY(...);
+						var y = ConvertTGridToY_DesignMode(tGrid, soflans, bpmList, 1);
+
+						//超过当前timeSignature范围，切换到下一个timeSignature画新的线
+						if (nextBpm is not null && tGrid >= nextTGridBase)
+							break;
+						//超过编辑器谱面范围，后面都不用画了
+						if (tGrid > endTGrid)
+							yield break;
+						//节奏线在最低可见线的后面
+						if (tGrid < currentTGridBaseOffset)
+						{
+							i++;
+							continue;
+						}
+
+						yield return (tGrid, y * scale, i % beatCount, currentMeter, currentBpm);
+						i++;
+					}
+				}
+
 				currentTGridBaseOffset = nextTGridBase;
 				currentTimeSignatureIndex = nextTimeSignatureIndex;
 				currentTimeSignature = timeSignatures.Count > currentTimeSignatureIndex ? timeSignatures[currentTimeSignatureIndex] : default;
