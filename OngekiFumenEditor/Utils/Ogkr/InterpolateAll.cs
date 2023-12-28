@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 {
 	public static class InterpolateAll
 	{
-		public static IEnumerable<(ConnectableStartObject beforeStart, IEnumerable<ConnectableStartObject> genStarts)> Calculate(OngekiFumen fumen, bool xGridLimit = false)
+		public static IEnumerable<(ConnectableStartObject beforeStart, IEnumerable<ConnectableStartObject> genStarts)> Calculate(OngekiFumen fumen, ICurveInterpolaterFactory factory)
 		{
 			var curveStarts = fumen.Lanes
 				.Where(x => x.Children.Any(x => x.PathControls.Count > 0) || !x.IsPathVaild())
@@ -17,7 +18,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 
 			var laneMap = curveStarts.ToDictionary(
 				x => x.RecordId,
-				x => x.InterpolateCurve(xGridLimit ? XGridLimitedCurveInterpolaterFactory.Default : default).ToArray());
+				x => x.InterpolateCurve(factory).ToArray());
 
 			foreach (var item in laneMap)
 			{

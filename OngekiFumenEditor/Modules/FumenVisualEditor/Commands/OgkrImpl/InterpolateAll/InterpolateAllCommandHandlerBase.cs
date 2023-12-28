@@ -1,6 +1,7 @@
 ﻿using Gemini.Framework.Commands;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -17,7 +18,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 
 			var laneMap = new Dictionary<ConnectableStartObject, List<ConnectableStartObject>>();
 
-			foreach ((var beforeLane, var genLanes) in Utils.Ogkr.InterpolateAll.Calculate(fumen, xGridLimit))
+			var curveFactory = xGridLimit ? XGridLimitedCurveInterpolaterFactory.Default : default;
+
+			foreach ((var beforeLane, var genLanes) in Utils.Ogkr.InterpolateAll.Calculate(fumen, curveFactory))
 				laneMap[beforeLane] = genLanes.ToList();
 
 			var curveStarts = laneMap.Keys.ToList();

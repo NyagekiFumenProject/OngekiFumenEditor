@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Parser.DefaultImpl.Ogkr.Rules;
@@ -52,8 +53,9 @@ namespace OngekiFumenEditor.Utils.Ogkr
 				return new(false) { Message = msg };
 
 			var laneMap = new Dictionary<ConnectableStartObject, List<ConnectableStartObject>>();
+			var curveFactory = XGridLimitedCurveInterpolaterFactory.Default;
 
-			foreach ((var beforeLane, var genLanes) in InterpolateAll.Calculate(fumen, true))
+			foreach ((var beforeLane, var genLanes) in InterpolateAll.Calculate(fumen, curveFactory))
 				laneMap[beforeLane] = genLanes.ToList();
 
 			var curveStarts = laneMap.Keys.ToList();
