@@ -34,9 +34,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			var holdEnd = hold.HoldEnd;
 			var laneType = start?.LaneType;
 
-			var shareTGrid = new TGrid();
-			var shareXGrid = new XGrid();
-
 			var color = laneType switch
 			{
 				LaneType.Left => new Vector4(1, 0, 0, 0.75f),
@@ -47,81 +44,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 				_ => new Vector4(1, 1, 1, 0.75f),
 			};
 
-			//draw line
-			using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-			list.Clear();
-
-			void Upsert<T>(T obj) where T : IHorizonPositionObject, ITimelineObject
-			{
-				var y = (float)target.ConvertToY(obj.TGrid);
-				var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-				list.Add(new(new(x, y), color, VertexDash.Solider));
-			}
-
-			void Upsert2((float, float) pos)
-			{
-				var y = (float)target.ConvertToY(pos.Item1);
-				var x = (float)XGridCalculator.ConvertXGridToX(pos.Item2, target.Editor);
-				list.Add(new(new(x, y), color, VertexDash.Solider));
-			}
-
 			if (holdEnd != null)
 			{
-				var resT = hold.TGrid.ResT;
-				var resX = hold.XGrid.ResX;
-
-				var endPos = ((float)holdEnd.TGrid.TotalUnit, (float)holdEnd.XGrid.TotalUnit);
-
-				Upsert(hold);
-				if (start != null)
+				Vector2 PostPoint2(double tGridUnit, double xGridUnit)
 				{
-					var nodes = start.Children
-						.SelectMany(x => x.GetConnectionPaths())
-						.Select(x => (x.pos.Y / resT, x.pos.X / resX))
-						.Prepend(((float)start.TGrid.TotalUnit, (float)start.XGrid.TotalUnit))
-						.DistinctContinuousBy(x => x)
-						.Where(pos => hold.TGrid.TotalUnit <= pos.Item1 && pos.Item1 <= holdEnd.TGrid.TotalUnit);
-					//var r = nodes.ToArray();
-					var itor = nodes.GetEnumerator();
+					var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
+					var y = (float)target.ConvertToY(tGridUnit);
 
-					var hasValue = itor.MoveNext();
-					var cur = itor.Current;
-					var prev = (float.MinValue, 2857f);
-
-					bool checkDiscardByHorizon((float, float) prev, (float, float) cur)
-					{
-						//判断三个点是否都在一个水平上
-						if (prev.Item1 == cur.Item1 && endPos.Item1 == cur.Item1)
-						{
-							/*
-                                       good                discard
-                            o-----------x---------o----------x----------------
-                            |           |         |          |
-                            prevX     curX_1   endPosX     curX_2
-                             */
-							var checkX = cur.Item2;
-							if (checkX < MathF.Min(prev.Item2, endPos.Item2) || checkX > MathF.Max(prev.Item2, endPos.Item2))
-								return true;
-						}
-						return false;
-					}
-
-					while (itor.MoveNext())
-					{
-						if (!checkDiscardByHorizon(prev, cur))
-							Upsert2(cur);
-						prev = cur;
-						cur = itor.Current;
-					}
-
-					if (hasValue)
-					{
-						if (!checkDiscardByHorizon(prev, cur))
-							Upsert2(cur);
-					}
+					return new(x, y);
 				}
 
-				Upsert2(endPos);
+				var holdPoint = PostPoint2(hold.TGrid.TotalUnit, hold.XGrid.TotalUnit);
+				var holdEndPoint = PostPoint2(holdEnd.TGrid.TotalUnit, holdEnd.XGrid.TotalUnit);
+
+				using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
+				list.Clear();
+				VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, VertexDash.Solider, color, list);
+				if (list.Count > 0)
+				{
+					while (holdPoint.Y > list[0].Point.Y)
+						list.RemoveAt(0);
+					list.Insert(0, new LineVertex(holdPoint, color, VertexDash.Solider));
+					while (holdEndPoint.Y < list[list.Count - 1].Point.Y)
+						list.RemoveAt(list.Count - 1);
+					list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
+				}
+
 				lineDrawing.Draw(target, list, 13);
 			}
 		}
