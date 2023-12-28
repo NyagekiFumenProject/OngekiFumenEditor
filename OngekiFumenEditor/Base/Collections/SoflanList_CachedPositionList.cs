@@ -54,7 +54,7 @@ namespace OngekiFumenEditor.Base.Collections
 		public IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm, ChgEvt)> GetCalculatableEvents(BpmList bpmList, bool isDesignModel)
 		{
 			var curBpm = bpmList.FirstBpm;
-			KeyframeSoflan curSpeedEvent = null;
+			IKeyframeSoflan curSpeedEvent = null;
 
 			IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm, ChgEvt evt)> GetEventTimings(ITimelineObject evt)
 			{
@@ -66,17 +66,34 @@ namespace OngekiFumenEditor.Base.Collections
 						var speed = (curSpeedEvent is not null && curSpeedEvent.EndTGrid > t) ? (isDesignModel ? curSpeedEvent.SpeedInEditor : curSpeedEvent.Speed) : 1.0d;
 						yield return (evt.TGrid, speed, curBpm, ChgEvt.BpmChanged);
 						break;
-					case KeyframeSoflan soflanEvt:
+					case IKeyframeSoflan soflanEvt:
 						curSpeedEvent = soflanEvt;
 						yield return (evt.TGrid, (isDesignModel ? soflanEvt.SpeedInEditor : soflanEvt.Speed), curBpm, ChgEvt.SoflanChanged);
 						break;
+					case IDurationSoflan durationEvt:
+						var itor = durationEvt.GenerateKeyframeSoflans().GetEnumerator();
+						if (itor.MoveNext())
+						{
+							curSpeedEvent = itor.Current;
+							yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), curBpm, ChgEvt.SoflanBegan);
+							if (itor.MoveNext())
+							{
+								var prev = itor.Current;
+								while (itor.MoveNext())
+								{
+									//process prev
+									yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), curBpm, ChgEvt.SoflanChanged);
+									//set prev
+									prev = itor.Current;
+								}
+								curSpeedEvent = itor.Current;
+								yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), curBpm, ChgEvt.SoflanEnded);
+							}
+						}
+						break;
 				}
 			}
-			var r = this.SelectMany(x => x switch
-			{
-				IKeyframeSoflan t => Enumerable.Repeat(x, 1),
-				IDurationSoflan t => t.GenerateKeyframeSoflans()
-			})
+			var r = this
 				.FilterNull()
 				.AsEnumerable<ITimelineObject>()
 				.Concat(bpmList)
