@@ -234,15 +234,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 				?? ConvertYToTGrid_DesignMode(minVisibleCanvasY + judgeLineOffsetY, soflans, bpmList, 1);
 
 			var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(bpmList);
-			var currentTimeSignatureIndex = 0;
 			//快速定位,尽量避免计算完全不用画的timesignature(
-			for (int i = 0; i < timeSignatures.Count; i++)
-			{
-				var cur = timeSignatures[i];
-				if (cur.startTGrid > minVisibleCanvasTGrid)
-					break;
-				currentTimeSignatureIndex = i;
-			}
+			var currentTimeSignatureIndex = timeSignatures.LastOrDefaultIndexByBinarySearch(minVisibleCanvasTGrid, x => x.startTGrid);
 
 			//钦定好要画的起始timeSignatrue
 			(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) currentTimeSignature = timeSignatures[currentTimeSignatureIndex];

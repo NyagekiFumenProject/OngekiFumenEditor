@@ -357,9 +357,15 @@ namespace OngekiFumenEditor.Utils
 		/// <returns></returns>
 		public static T LastOrDefaultByBinarySearch<T, X>(this IList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
 		{
+			var idx = source.LastOrDefaultIndexByBinarySearch(value, keySelect);
+			return source[idx];
+		}
+
+		public static int LastOrDefaultIndexByBinarySearch<T, X>(this IList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
+		{
 			var idx = source.BinarySearchBy(value, keySelect);
 			var i = Math.Max(0, idx < 0 ? ((~idx) - 1) : idx);
-			return source[i];
+			return i;
 		}
 
 		public static T LastOrDefaultByBinarySearch<T, X>(this IReadOnlyList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
