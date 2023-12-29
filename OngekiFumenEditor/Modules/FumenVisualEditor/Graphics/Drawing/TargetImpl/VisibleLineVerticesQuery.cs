@@ -11,6 +11,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 	{
 		public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
 		{
+			if (start is null)
+				return;
+
 			var resT = start.TGrid.ResT;
 			var resX = start.XGrid.ResX;
 

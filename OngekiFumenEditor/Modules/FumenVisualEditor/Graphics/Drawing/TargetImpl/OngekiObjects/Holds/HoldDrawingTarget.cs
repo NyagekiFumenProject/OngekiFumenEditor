@@ -69,6 +69,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 						list.RemoveAt(list.Count - 1);
 					list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
 				}
+				else
+				{
+					list.Add(new LineVertex(holdPoint, color, VertexDash.Solider));
+					list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
+				}
 
 				lineDrawing.Draw(target, list, 13);
 			}
