@@ -146,6 +146,11 @@
                     SelectedValue="{Binding Setting.DisplayTimeFormat, Converter={StaticResource EnumToStringConverter}}">
                 </ComboBox>
             </Grid>
+            <CheckBox
+                Margin="0,10,0,2"
+                Content="打开节拍器(仅编辑模式)"
+                IsChecked="{Binding Setting.LoopPlayTiming}">
+            </CheckBox>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

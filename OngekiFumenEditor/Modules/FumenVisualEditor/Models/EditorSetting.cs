@@ -232,6 +232,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 			}
 		}
 
+		private bool loopPlayTiming = Properties.EditorGlobalSetting.Default.LoopPlayTiming;
+		public bool LoopPlayTiming
+		{
+			get => loopPlayTiming;
+			set
+			{
+				loopPlayTiming = Properties.EditorGlobalSetting.Default.LoopPlayTiming = value;
+				RequestSave();
+				NotifyOfPropertyChange(() => loopPlayTiming);
+			}
+		}
+
 		public enum TimeFormat
 		{
 			TGrid,
@@ -307,6 +319,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 					break;
 				case nameof(Properties.EditorGlobalSetting.AdjustPastedObjects):
 					adjustPastedObjects = Properties.EditorGlobalSetting.Default.AdjustPastedObjects;
+					break;
+				case nameof(Properties.EditorGlobalSetting.LoopPlayTiming):
+					loopPlayTiming = Properties.EditorGlobalSetting.Default.LoopPlayTiming;
 					break;
 				default:
 					Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");

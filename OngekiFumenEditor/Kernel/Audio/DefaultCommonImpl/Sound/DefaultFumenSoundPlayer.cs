@@ -23,12 +23,18 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 	[Export(typeof(IFumenSoundPlayer))]
 	public partial class DefaultFumenSoundPlayer : PropertyChangedBase, IFumenSoundPlayer, IDisposable
 	{
+		private record MeterAction(TimeSpan Time, TimeSpan BeatInterval, bool isSkip);
+
 		private IntervalTree<TimeSpan, DurationSoundEvent> durationEvents = new();
 		private HashSet<DurationSoundEvent> currentPlayingDurationEvents = new();
 		private object locker = new object();
 
 		private LinkedList<SoundEvent> events = new();
 		private LinkedListNode<SoundEvent> itor;
+
+		private LinkedList<MeterAction> meterActions = new();
+		private LinkedListNode<MeterAction> meterActionsItor;
+		private int currentMeterHitCount = 0;
 
 		private AbortableThread thread;
 
@@ -296,11 +302,32 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			foreach (var durationEvent in durationList)
 				durationEvents.Add(durationEvent.Time, durationEvent.EndTime, durationEvent);
 			itor = null;
+
+			meterActions.Clear();
+			if (EditorGlobalSetting.Default.LoopPlayTiming)
+			{
+				var oneTGrid = new TGrid(1, 0);
+
+				var timeSignatureList = fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(fumen.BpmList);
+				foreach (var timeSignature in timeSignatureList)
+				{
+					var beatCount = timeSignature.meter.BunShi;
+					var isSkip = beatCount == 0;
+					var beatInterval = (isSkip ? default :
+						TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(TGrid.Zero, oneTGrid, timeSignature.bpm.BPM))
+						/ beatCount);
+
+					var action = new MeterAction(timeSignature.audioTime, beatInterval, isSkip);
+					meterActions.AddLast(action);
+				}
+			}
+			meterActionsItor = default;
+			currentMeterHitCount = 0;
 		}
 
 		private void UpdateInternal(CancellationToken token)
 		{
-			if (itor is null || player is null || token.IsCancellationRequested)
+			if ((itor is null && meterActionsItor is null) || player is null || token.IsCancellationRequested)
 				return;
 			if (!IsPlaying)
 			{
@@ -311,7 +338,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
 			var currentTime = player.CurrentTime;
 
-			//播放普通音乐
+			//播放物件音效
 			while (itor is not null)
 			{
 				var nextBeatTime = itor.Value.Time.TotalMilliseconds;
@@ -326,6 +353,47 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 					break;
 			}
 
+			//播放节拍器
+			while (meterActionsItor is not null)
+			{
+				var nextActionItor = meterActionsItor.Next;
+
+				//检查当前是否有效
+				if (meterActionsItor.Value.isSkip)
+				{
+					meterActionsItor = nextActionItor;
+					currentMeterHitCount = 0;
+					continue;
+				}
+
+				var nextBeatTime = meterActionsItor.Value.Time +
+					meterActionsItor.Value.BeatInterval * currentMeterHitCount;
+
+				//检查是否超过下一个
+				if (nextActionItor != null)
+				{
+					if (nextBeatTime > nextActionItor.Value.Time)
+					{
+						meterActionsItor = nextActionItor;
+						currentMeterHitCount = 0;
+						continue;
+					}
+				}
+
+				//没超过就检查了
+				var ct = currentTime.TotalMilliseconds - nextBeatTime.TotalMilliseconds;
+				if (ct >= 0)
+				{
+					Log.LogDebug($"currentMeterHitCount:{currentMeterHitCount}, nextBeatTime:{nextBeatTime}, diff:{ct:F2}ms, meterActionsItor:{meterActionsItor.Value}");
+					if (editor.IsDesignMode && cacheSounds.TryGetValue(SoundControl.ClickSE, out var soundPlayer))
+						soundPlayer.PlayOnce();
+					currentMeterHitCount++;
+				}
+				else
+					break;
+			}
+
+			//检查循环音效
 			lock (locker)
 			{
 				var queryDurationEvents = durationEvents.Query(currentTime);
@@ -340,7 +408,6 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 							soundPlayer.PlayLoop(durationEvent.LoopId, initPlayTime);
 
 							currentPlayingDurationEvents.Add(durationEvent);
-
 						}
 					}
 				}
@@ -402,6 +469,16 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 		{
 			Pause();
 			itor = events.Find(events.FirstOrDefault(x => msec < x.Time));
+			meterActionsItor = meterActions.Find(meterActions.LastOrDefault(x => msec >= x.Time));
+			if (meterActionsItor is null)
+				currentMeterHitCount = 0;
+			else
+			{
+				if (meterActionsItor.Value.isSkip)
+					currentMeterHitCount = 0;
+				else
+					currentMeterHitCount = (int)((msec - meterActionsItor.Value.Time) / meterActionsItor.Value.BeatInterval);
+			}
 
 			if (!pause)
 				PlayInternal();
@@ -443,6 +520,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			if (player is null)
 				return;
 			itor = itor ?? events.First;
+			meterActionsItor = meterActionsItor ?? meterActions.First;
+			currentMeterHitCount = 0;
+
 			PlayInternal();
 		}
 

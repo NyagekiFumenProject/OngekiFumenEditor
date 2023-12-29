@@ -4,6 +4,7 @@ using Gemini.Framework.Services;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
@@ -78,9 +79,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
 		private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == nameof(FumenVisualEditorViewModel.Setting))
-			{
 				Setting = Editor?.Setting;
-			}
 		}
 	}
 }
