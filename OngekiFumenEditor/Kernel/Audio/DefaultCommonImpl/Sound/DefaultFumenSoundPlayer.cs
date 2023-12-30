@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 	[Export(typeof(IFumenSoundPlayer))]
 	public partial class DefaultFumenSoundPlayer : PropertyChangedBase, IFumenSoundPlayer, IDisposable
 	{
-		private record MeterAction(TimeSpan Time, TimeSpan BeatInterval, bool isSkip);
+		private record MeterAction(TimeSpan Time, TimeSpan BeatInterval, int BeatCount, bool isSkip);
 
 		private IntervalTree<TimeSpan, DurationSoundEvent> durationEvents = new();
 		private HashSet<DurationSoundEvent> currentPlayingDurationEvents = new();
@@ -114,6 +114,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			await load(SoundControl.BeamPrepare, "beamprepare.wav");
 			await load(SoundControl.BeamLoop, "beamlooping.wav");
 			await load(SoundControl.BeamEnd, "beamend.wav");
+			await load(SoundControl.MetronomeStrongBeat, "metronomeStrongBeat.wav");
+			await load(SoundControl.MetronomeWeakBeat, "metronomeWeakBeat.wav");
 
 			if (!noError)
 			{
@@ -313,11 +315,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 				{
 					var beatCount = timeSignature.meter.BunShi;
 					var isSkip = beatCount == 0;
-					var beatInterval = (isSkip ? default :
+					var beatInterval = isSkip ? default :
 						TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(TGrid.Zero, oneTGrid, timeSignature.bpm.BPM))
-						/ beatCount);
+						/ beatCount;
 
-					var action = new MeterAction(timeSignature.audioTime, beatInterval, isSkip);
+					var action = new MeterAction(timeSignature.audioTime, beatInterval, beatCount, isSkip);
 					meterActions.AddLast(action);
 				}
 			}
@@ -346,7 +348,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 				if (ct >= 0)
 				{
 					//Debug.WriteLine($"diff:{ct:F2}ms, target:{itor.Value}, currentTime:{currentTime}");
-					ProcessSoundEvent(itor.Value);
+					PlaySoundsOnce(itor.Value.Sounds);
 					itor = itor.Next;
 				}
 				else
@@ -384,9 +386,10 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 				var ct = currentTime.TotalMilliseconds - nextBeatTime.TotalMilliseconds;
 				if (ct >= 0)
 				{
-					Log.LogDebug($"currentMeterHitCount:{currentMeterHitCount}, nextBeatTime:{nextBeatTime}, diff:{ct:F2}ms, meterActionsItor:{meterActionsItor.Value}");
-					if (editor.IsDesignMode && cacheSounds.TryGetValue(SoundControl.ClickSE, out var soundPlayer))
-						soundPlayer.PlayOnce();
+					//Log.LogDebug($"currentMeterHitCount:{currentMeterHitCount}, nextBeatTime:{nextBeatTime}, diff:{ct:F2}ms, meterActionsItor:{meterActionsItor.Value}");
+					var beatIdx = currentMeterHitCount % meterActionsItor.Value.BeatCount;
+					var sound = beatIdx == 0 ? SoundControl.MetronomeStrongBeat : SoundControl.MetronomeWeakBeat;
+					PlaySoundsOnce(sound);
 					currentMeterHitCount++;
 				}
 				else
@@ -440,10 +443,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			}
 		}
 
-		private void ProcessSoundEvent(SoundEvent evt)
+		private void PlaySoundsOnce(SoundControl sounds)
 		{
-			var sounds = evt.Sounds;
-
 			void checkPlay(SoundControl subFlag)
 			{
 				if (sounds.HasFlag(subFlag) && SoundControl.HasFlag(subFlag) && cacheSounds.TryGetValue(subFlag, out var sound))
@@ -463,6 +464,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			checkPlay(SoundControl.ClickSE);
 			checkPlay(SoundControl.BeamPrepare);
 			checkPlay(SoundControl.BeamEnd);
+			checkPlay(SoundControl.MetronomeStrongBeat);
+			checkPlay(SoundControl.MetronomeWeakBeat);
 		}
 
 		public void Seek(TimeSpan msec, bool pause)

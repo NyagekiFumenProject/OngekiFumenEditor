@@ -24,7 +24,9 @@ namespace OngekiFumenEditor.Kernel.Audio
 		BeamPrepare = HoldEnd * 2,
 		BeamLoop = BeamPrepare * 2,
 		BeamEnd = BeamLoop * 2,
+		MetronomeStrongBeat = BeamEnd * 2,
+		MetronomeWeakBeat = MetronomeStrongBeat * 2,
 
-		All = BeamPrepare | BeamLoop | BeamEnd | HoldEnd | HoldTick | ClickSE | Bell | Beam | Bullet | CriticalFlick | Flick | CriticalWallHold | WallHold | CriticalWallTap | WallTap | CriticalHold | Hold | CriticalTap | Tap
+		All = MetronomeStrongBeat | MetronomeWeakBeat | BeamPrepare | BeamLoop | BeamEnd | HoldEnd | HoldTick | ClickSE | Bell | Beam | Bullet | CriticalFlick | Flick | CriticalWallHold | WallHold | CriticalWallTap | WallTap | CriticalHold | Hold | CriticalTap | Tap
 	}
 }
