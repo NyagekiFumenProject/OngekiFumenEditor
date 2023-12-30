@@ -147,6 +147,8 @@
                             <CheckBox Content="ClickSE" IsChecked="{Binding SoundControls[13]}" />
                             <CheckBox Content="HoldTick" IsChecked="{Binding SoundControls[14]}" />
                             <CheckBox Content="HoldEnd" IsChecked="{Binding SoundControls[15]}" />
+                            <CheckBox Content="MetronomeStrongBeat" IsChecked="{Binding SoundControls[19]}" />
+                            <CheckBox Content="MetronomeWeakBeat" IsChecked="{Binding SoundControls[20]}" />
                         </WrapPanel>
                         <ItemsControl ItemsSource="{Binding SoundVolumes}">
                             <ItemsControl.ItemTemplate>
