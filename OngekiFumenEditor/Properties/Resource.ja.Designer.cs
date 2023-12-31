@@ -22,14 +22,14 @@ namespace OngekiFumenEditor.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Resource {
+    public class Resource___复制 {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resource() {
+        internal Resource___复制() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OngekiFumenEditor.Properties.Resource", typeof(Resource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OngekiFumenEditor.Properties.Resource - 复制", typeof(Resource___复制).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -214,7 +214,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 并作为刷子模式的批量生成源 的本地化字符串。
+        ///   查找类似 ,并作为刷子模式的批量生成源 的本地化字符串。
         /// </summary>
         public static string AsBrushSourceObject {
             get {

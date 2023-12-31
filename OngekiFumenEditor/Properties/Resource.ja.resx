@@ -169,7 +169,7 @@
     <value>艺术家:</value>
   </data>
   <data name="AsBrushSourceObject" xml:space="preserve">
-    <value>并作为刷子模式的批量生成源</value>
+    <value>,并作为刷子模式的批量生成源</value>
   </data>
   <data name="AudioDuration" xml:space="preserve">
     <value>音频时长:</value>

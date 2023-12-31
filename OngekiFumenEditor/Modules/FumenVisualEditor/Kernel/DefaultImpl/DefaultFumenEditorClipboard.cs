@@ -132,7 +132,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			else
 			{
 				this.sourceEditor = sourceEditor;
-				sourceEditor.ToastNotify($"{Resource.CopiedObjects.Format(currentCopiedSources.Count)} {(currentCopiedSources.Count == 1 ? Resource.AsBrushSourceObject : string.Empty)}");
+				sourceEditor.ToastNotify($"{Resource.CopiedObjects.Format(currentCopiedSources.Count)} {(currentCopiedSources.Count == 1 ? ("," + Resource.AsBrushSourceObject) : string.Empty)}");
 			}
 			return;
 		}
