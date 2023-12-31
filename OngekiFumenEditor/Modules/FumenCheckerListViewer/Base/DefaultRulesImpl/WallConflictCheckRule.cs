@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -204,7 +205,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 						{
 							RuleName = RuleName,
 							Severity = RuleSeverity.Problem,
-							Description = $"墙(id:{cur.Wall.RecordId})与另一个同方向的墙(id:{next.Wall.RecordId})发生时间冲突",
+							Description = Resource.WallConflict.Format(cur.Wall.RecordId, next.Wall.RecordId),
 							LocationDescription = cur.TGridRange.ToString(),
 							NavigateBehavior = new NavigateToTGridBehavior(cur.Wall.TGrid)
 						};
@@ -226,7 +227,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 								RuleName = RuleName,
 								Severity = RuleSeverity.Error,
 								LocationDescription = child.ToString(),
-								Description = $"墙(id:{wall.Wall.RecordId})Next/End物件的TGrid({child.TGrid})不能低于前者({maxTGrid})",
+								Description = Resource.WallConflict3.Format(wall.Wall.RecordId, child.TGrid, maxTGrid),
 								NavigateBehavior = new NavigateToObjectBehavior(child)
 							};
 							break;
@@ -325,7 +326,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 								RuleName = RuleName,
 								Severity = RuleSeverity.Error,
 								LocationDescription = $"leftLine:{leftLine} rightLine:{rightLine} conflict at {conflictXGrid} {conflictTGrid}",
-								Description = $"不同边的墙(id:{leftWall.Wall.RecordId})和(id:{rightWall.Wall.RecordId})水平交叉碰撞或重合",
+								Description = Resource.WallConflict.Format(leftWall.Wall.RecordId, rightWall.Wall.RecordId),
 								NavigateBehavior = new NavigateToTGridBehavior(conflictTGrid)
 							};
 						}

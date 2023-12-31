@@ -3,6 +3,8 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -33,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 
 						yield return new CommonCheckResult()
 						{
-							Description = $"发现Soflan作用时效冲突:{cur}和{aff}",
+							Description = Resource.SoflanConflict.Format(cur, aff),
 							LocationDescription = $"({cur.TGrid},{cur.EndTGrid}) - ({aff.TGrid},{aff.EndTGrid})",
 							NavigateBehavior = new NavigateToObjectBehavior(r),
 							RuleName = "SoflanConflict",

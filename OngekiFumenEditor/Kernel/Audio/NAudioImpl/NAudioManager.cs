@@ -32,9 +32,9 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 		public float MusicVolume { get => musicVolumeWrapper.Volume; set => musicVolumeWrapper.Volume = value; }
 
 		public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; } = new[] {
-			(".mp3","音频文件"),
-			(".wav","音频文件"),
-			(".acb","Criware音频文件"),
+			(".mp3","Audio File"),
+			(".wav","Audio File"),
+			(".acb","Criware Audio File"),
 		};
 
 		public NAudioManager()

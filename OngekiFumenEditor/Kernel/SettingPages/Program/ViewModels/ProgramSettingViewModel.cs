@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Settings;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;
@@ -24,9 +25,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 			Log.LogDebug($"logs setting property changed : {e.PropertyName}");
 		}
 
-		public string SettingsPageName => "程序";
+		public string SettingsPageName => Resource.TabProgram;
 
-		public string SettingsPagePath => "环境";
+		public string SettingsPagePath => Resource.TabEnviorment;
 
 		public void ApplyChanges()
 		{
@@ -43,7 +44,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 				var folderPath = openFolderDialog.SelectedPath;
 				if (!Directory.Exists(folderPath))
 				{
-					MessageBox.Show("选择的文件夹为空,请重新选择");
+					MessageBox.Show(Resource.ErrorFolderIsEmpty);
 					OnDumpFolderPathButtonClick();
 					return;
 				}

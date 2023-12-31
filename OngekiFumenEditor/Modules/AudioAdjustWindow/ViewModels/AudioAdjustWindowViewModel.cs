@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -93,7 +94,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 
 		public void OnOpenSelectInputFileDialog()
 		{
-			var result = FileDialogHelper.OpenFile("选择音频文件", FileDialogHelper.GetSupportAudioFileExtensionFilterList());
+			var result = FileDialogHelper.OpenFile(Resource.SelectAudioFile, FileDialogHelper.GetSupportAudioFileExtensionFilterList());
 			if (!string.IsNullOrWhiteSpace(result))
 			{
 				InputFumenFilePath = result;
@@ -103,7 +104,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 
 		public void OnOpenSelectOutputFileDialog()
 		{
-			var result = FileDialogHelper.SaveFile("保存新音频文件路径", new[] { (".wav", ".wav音频文件") });
+			var result = FileDialogHelper.SaveFile(Resource.SaveNewAudioFile, new[] { (".wav", ".wav Audio File") });
 			if (!string.IsNullOrWhiteSpace(result))
 				OutputFumenFilePath = result;
 		}
@@ -117,7 +118,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 			{
 				if (!File.Exists(InputFumenFilePath))
 				{
-					MessageBox.Show("请先选择要处理的音频文件");
+					MessageBox.Show(Resource.ErrorProcessFumenFileNotSelect);
 					return;
 				}
 
@@ -130,13 +131,13 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 
 			if (!File.Exists(audioFilePath))
 			{
-				MessageBox.Show("无音频文件输入");
+				MessageBox.Show(Resource.ErrorProcessAudioNotFound);
 				return;
 			}
 
 			if (string.IsNullOrWhiteSpace(OutputFumenFilePath))
 			{
-				MessageBox.Show("没钦定新的音频文件保存位置");
+				MessageBox.Show(Resource.ErrorSaveAudioFileNotSelect);
 				return;
 			}
 
@@ -176,14 +177,14 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 							var newTGrid = timelineObject.TGrid + offset;
 							if (newTGrid is null)
 							{
-								MessageBox.Show($"存在某个物件无法应用新的延迟：{timelineObject}");
+								MessageBox.Show($"{Resource.ErrorCantApplyNewAdjust}{timelineObject}");
 								return;
 							}
 
 							map[timelineObject] = (timelineObject.TGrid, newTGrid);
 						}
 
-						currentEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("应用音频延迟", () =>
+						currentEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.ApplyAudioAdjust, () =>
 						{
 							foreach (var item in map)
 								item.Key.TGrid = item.Value.after.CopyNew();
@@ -197,13 +198,13 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 
 				offseted.SaveTo(fs);
 				if (IsCurrentEditorAsInputFumen)
-					MessageBox.Show($"处理完成，但推荐您保存并重新打开当前项目，以查看最新的音频变更，或者物件位置变动。");
+					MessageBox.Show(Resource.ApplyAudioAdjustSuccessButSuggest);
 				else
-					MessageBox.Show($"处理完成");
+					MessageBox.Show(Resource.ApplyAudioAdjustSuccess);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show($"处理失败：{e.Message}");
+				MessageBox.Show($"{Resource.ApplyAudioAdjustFail}{e.Message}");
 			}
 		}
 	}

@@ -8,6 +8,7 @@
     xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:TGridCalculatorToolViewerViewModel,
@@ -56,23 +57,27 @@
                 </StackPanel>
             </StackPanel>
 
-            <GroupBox Header="操作">
+            <GroupBox Header="{x:Static res:Resource.Action}">
                 <StackPanel>
                     <Button
                         Margin="5,5,0,5"
                         Padding="2,5,2,5"
                         HorizontalAlignment="Left"
-                        cal:Message.Attach="[Event Click] = [Action OnRequestEditorScrollTo()];">
-                        编辑器跳转到指定的TGrid
+                        cal:Message.Attach="[Event Click] = [Action OnRequestEditorScrollTo()];"
+                        Content="{x:Static res:Resource.EditorJumpToSpecifyTGrid}">
                     </Button>
-                    <CheckBox Margin="10,0,0,0" IsChecked="{Binding IsAutoUpdateTimeIfSelectedObject}">自动显示当前物件时间</CheckBox>
+                    <CheckBox
+                        Margin="10,0,0,0"
+                        Content="{x:Static res:Resource.AutoUpdateCurrentObjectTime}"
+                        IsChecked="{Binding IsAutoUpdateTimeIfSelectedObject}">
+                    </CheckBox>
                     <Button
                         Margin="5,5,0,5"
                         Padding="2,5,2,5"
                         HorizontalAlignment="Left"
                         cal:Message.Attach="[Event Click] = [Action OnRequestApplyTGridToObject()];"
+                        Content="{x:Static res:Resource.GiveTGridToSelectedObject}"
                         Visibility="{Binding IsSelectedObject, Converter={StaticResource BoolToVisibilityConverter}}">
-                        将此TGrid赋值给当前已选物件
                     </Button>
                 </StackPanel>
             </GroupBox>

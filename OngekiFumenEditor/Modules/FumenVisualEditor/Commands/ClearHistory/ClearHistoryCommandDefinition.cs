@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ClearHistory
@@ -8,9 +9,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ClearHistory
 	{
 		public override string Name => "Toolbar.ClearHistory";
 
-		public override string Text => "清除历史记录";
+		public override string Text => Resource.ClearHistory;
 
-		public override string ToolTip => "清除历史记录";
+		public override string ToolTip => Resource.ClearHistory;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/close.png");
 

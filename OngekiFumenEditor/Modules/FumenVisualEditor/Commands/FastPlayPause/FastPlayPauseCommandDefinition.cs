@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -9,7 +10,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPlayPause
 	{
 		public override string Name => "Editor.FastPlayPause";
 
-		public override string Text => "编辑器快速播放暂停";
+		public override string Text => Resource.FastPlayPause;
 
 		public override string ToolTip => Text;
 

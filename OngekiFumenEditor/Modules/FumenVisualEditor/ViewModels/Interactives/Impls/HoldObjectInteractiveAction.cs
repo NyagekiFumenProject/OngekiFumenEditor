@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Properties;
 using System.Collections.Generic;
 using System.Windows;
 
@@ -25,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 		{
 			base.OnDragEnd(obj, point, editor);
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("更新HoldEnd位置",
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.UpdateHoldEndPosition,
 				() =>
 				{
 					//UpdateHoldEndXGrid(obj);

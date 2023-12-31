@@ -1,5 +1,6 @@
 ﻿using Gemini.Framework.Commands;
 using Microsoft.Win32;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Threading.Tasks;
@@ -13,8 +14,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
 		public override async Task Run(Command command)
 		{
 			var openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = FileDialogHelper.BuildExtensionFilter((".ogkr", "音击谱面"), (".nyageki", "音击谱面"));
-			openFileDialog.Title = "快速打开音击谱面";
+			openFileDialog.Filter = FileDialogHelper.BuildExtensionFilter((".ogkr", Resource.OngekiFumen), (".nyageki", Resource.OngekiFumen));
+			openFileDialog.Title = Resource.FastOpenOgkrFumen;
 			openFileDialog.CheckFileExists = true;
 
 			if (openFileDialog.ShowDialog() != true)
@@ -27,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
 			}
 			catch (Exception e)
 			{
-				var msg = $"无法快速打开谱面: {e.Message}";
+				var msg = $"{Resource.CantFastOpenFumen}{e.Message}";
 				Log.LogError(e.Message);
 				MessageBox.Show(msg);
 			}

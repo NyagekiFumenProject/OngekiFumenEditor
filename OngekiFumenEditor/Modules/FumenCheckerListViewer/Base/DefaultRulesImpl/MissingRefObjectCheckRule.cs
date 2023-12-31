@@ -1,6 +1,8 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -18,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = $"{dockableObj.GetType().Name}物件缺少引用Lane物件",
+					Description = Resource.MissingRefObject.Format(dockableObj.GetType().Name),
 					LocationDescription = dockableObj.ToString(),
 					NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
 					RuleName = RuleName,
@@ -30,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = $"{dockableObj.GetType().Name}物件引用的Lane物件(laneId:{dockableObj.ReferenceLaneStrId}),不存在于谱面文件内",
+					Description = Resource.MissingRefObject2.Format(dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
 					LocationDescription = dockableObj.ToString(),
 					NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
 					RuleName = RuleName,

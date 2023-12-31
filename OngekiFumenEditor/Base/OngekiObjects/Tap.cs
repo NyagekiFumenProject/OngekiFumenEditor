@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 		private int? referenceLaneStrIdManualSet = default;
 		[ObjectPropertyBrowserShow]
-		[ObjectPropertyBrowserTipText("改变此值可以改变此物件对应的轨道所属")]
+		[ObjectPropertyBrowserTipText("ObjectLaneGroupId")]
 		[ObjectPropertyBrowserAlias("SetRefLaneId")]
 		public int? ReferenceLaneStrIdManualSet
 		{

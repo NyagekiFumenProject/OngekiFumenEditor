@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Kernel.AssistHelper.Commands.AdjustDockablesHorizonPosition
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.AssistHelper.Commands.AdjustDockablesHorizonP
 
 		public override string Text
 		{
-			get { return "自动调整所有可靠物件的水平位置"; }
+			get { return Resource.CommandAdjustDockablesHorizonPosition; }
 		}
 
 		public override string ToolTip

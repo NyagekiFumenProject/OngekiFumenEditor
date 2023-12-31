@@ -7,6 +7,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
 				return TaskUtility.Completed;
 			if (!editor.IsDesignMode)
 			{
-				editor.Toast.ShowMessage("请先将编辑器切换到编辑模式");
+				editor.Toast.ShowMessage(Resource.EditorMustBeDesignMode);
 				return TaskUtility.Completed;
 			}
 

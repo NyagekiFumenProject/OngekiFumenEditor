@@ -4,6 +4,7 @@ using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels.Dialogs;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;
@@ -117,16 +118,13 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public async void Save()
 		{
-			var saveFilePath = FileDialogHelper.SaveFile("保存Music.xml文件", new[] { ("Music.xml", "Music.xml文件") });
-			if (await Generate(saveFilePath, MusicXmlOption))
-				MessageBox.Show($"生成Music.xml文件成功");
-			else
-				MessageBox.Show($"生成Music.xml文件失败");
+			var saveFilePath = FileDialogHelper.SaveFile(Resource.SaveMusicXmlFile, new[] { ("Music.xml", Resource.MusicXmlFileFormat) });
+			MessageBox.Show(Resource.GenerateMusicXmlFile + (await Generate(saveFilePath, MusicXmlOption) ? Resource.Success : Resource.Fail));
 		}
 
 		public void OnOpenSelectGamePathDialog()
 		{
-			if (!FileDialogHelper.OpenDirectory("选择游戏根目录(package目录)", out var folderPath))
+			if (!FileDialogHelper.OpenDirectory(Resource.SelectPackageFolder, out var folderPath))
 				return;
 			if (!Directory.Exists(folderPath))
 				return;
@@ -137,7 +135,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public async void ParseMusicXml()
 		{
-			var selectedXmlFile = FileDialogHelper.OpenFile("选择Music.xml文件", new[] { ("Music.xml", "Music.xml文件") });
+			var selectedXmlFile = FileDialogHelper.OpenFile(Resource.SelectMusicXmlFile, new[] { ("Music.xml", Resource.MusicXmlFileFormat) });
 			if (!File.Exists(selectedXmlFile))
 				return;
 			IsBusy = true;

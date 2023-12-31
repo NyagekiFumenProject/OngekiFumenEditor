@@ -8,6 +8,7 @@
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views.Dialog"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     Title="刷子时间钦定"
     Width="220"
     d:DataContext="{d:DesignInstance Type=dialog:BrushTGridRangeDialogViewModel}"
@@ -75,15 +76,15 @@
             <Button
                 Margin="10"
                 Padding="10,5,10,5"
-                cal:Message.Attach="[Event Click] = [Action OnComfirmButtonClicked()];">
-                确认
+                cal:Message.Attach="[Event Click] = [Action OnComfirmButtonClicked()];"
+                Content="{x:Static res:Resource.Confirm}">
             </Button>
             <Button
                 Grid.Column="1"
                 Margin="10"
                 Padding="10,5,10,5"
-                cal:Message.Attach="[Event Click] = [Action OnCancelButtonClicked()];">
-                取消
+                cal:Message.Attach="[Event Click] = [Action OnCancelButtonClicked()];"
+                Content="{x:Static res:Resource.Cancel}">
             </Button>
         </Grid>
     </Grid>

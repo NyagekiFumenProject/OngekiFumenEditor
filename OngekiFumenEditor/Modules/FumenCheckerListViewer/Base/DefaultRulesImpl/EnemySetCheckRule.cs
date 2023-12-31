@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = $"缺少Boss的EnemySet物件,建议放置一个来钦定boss出现的时机",
+					Description = Resource.MissingBossEnemySet,
 					LocationDescription = string.Empty,
 					RuleName = "MissingBossEnemySet",
 					Severity = RuleSeverity.Suggest

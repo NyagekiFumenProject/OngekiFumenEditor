@@ -6,6 +6,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -30,7 +31,11 @@
                             Foreground="GreenYellow">
                             
                         </Label>
-                        <Label VerticalAlignment="Center" VerticalContentAlignment="Center">刷新</Label>
+                        <Label
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Content="{x:Static res:Resource.Refresh}">
+                        </Label>
                     </StackPanel>
                 </Button>
                 <Button
@@ -45,13 +50,17 @@
                             Foreground="BlueViolet">
                             
                         </Label>
-                        <Label VerticalAlignment="Center" VerticalContentAlignment="Center">使用VS编辑脚本</Label>
+                        <Label
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Content="{x:Static res:Resource.EditScriptByVisualStudio}">
+                        </Label>
                     </StackPanel>
                 </Button>
                 <Label
                     Margin="10,0,0,0"
                     VerticalAlignment="Center"
-                    Content="编辑器目标" />
+                    Content="{x:Static res:Resource.EditorTarget}" />
                 <ComboBox
                     Width="150"
                     Margin="10,0,0,0"
@@ -82,7 +91,11 @@
                             Foreground="AliceBlue">
                             
                         </Label>
-                        <Label VerticalAlignment="Center" VerticalContentAlignment="Center">检查脚本</Label>
+                        <Label
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Content="{x:Static res:Resource.CheckScript}">
+                        </Label>
                     </StackPanel>
                 </Button>
                 <Button
@@ -98,7 +111,11 @@
                             Foreground="LightGreen">
                             
                         </Label>
-                        <Label VerticalAlignment="Center" VerticalContentAlignment="Center">运行脚本</Label>
+                        <Label
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Content="{x:Static res:Resource.RunScript}">
+                        </Label>
                     </StackPanel>
                 </Button>
             </StackPanel>
@@ -122,11 +139,13 @@
                 <TextBlock
                     HorizontalAlignment="Center"
                     FontSize="20"
-                    FontWeight="Bold">
-                    当前正在使用外部编辑器中....
+                    FontWeight="Bold"
+                    Text="{x:Static res:Resource.UsingExtendScriptEditor}">
                 </TextBlock>
-                <TextBlock HorizontalAlignment="Center" FontSize="15">
-                    为了避免代码混乱,您暂时无法同时操作本编辑器
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontSize="15"
+                    Text="{x:Static res:Resource.PreventUsingInternalEditor}">
                 </TextBlock>
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                     <Button
@@ -142,7 +161,11 @@
                                 Foreground="Salmon">
                                 
                             </Label>
-                            <Label VerticalAlignment="Center" VerticalContentAlignment="Center">手动同步内容</Label>
+                            <Label
+                                VerticalAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Content="{x:Static res:Resource.SyncScriptContentManually}">
+                            </Label>
                         </StackPanel>
                     </Button>
                     <Button
@@ -158,7 +181,11 @@
                                 Foreground="MediumVioletRed">
                                 
                             </Label>
-                            <Label VerticalAlignment="Center" VerticalContentAlignment="Center">中止外部编辑</Label>
+                            <Label
+                                VerticalAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Content="{x:Static res:Resource.StopUsingExtendEditor}">
+                            </Label>
                         </StackPanel>
                     </Button>
                 </StackPanel>

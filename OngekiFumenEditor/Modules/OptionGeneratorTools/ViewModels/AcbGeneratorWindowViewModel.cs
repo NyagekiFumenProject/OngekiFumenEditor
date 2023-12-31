@@ -1,6 +1,7 @@
 ﻿using Gemini.Framework;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -43,7 +44,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public void SelectAcbFilePath()
 		{
-			var imageFilePath = FileDialogHelper.OpenFile("选择音频文件", new[]
+			var imageFilePath = FileDialogHelper.OpenFile(Resource.SelectAudioFile, new[]
 			{
 				(".wav","音频文件"),
 				(".mp3","音频文件"),
@@ -56,7 +57,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public void SelectOutputFolder()
 		{
-			if (!FileDialogHelper.OpenDirectory("选择输出文件夹", out var outputFolderPath))
+			if (!FileDialogHelper.OpenDirectory(Resource.SelectOutputFolder, out var outputFolderPath))
 				return;
 
 			GenerateOption.OutputFolderPath = outputFolderPath;
@@ -76,11 +77,11 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 			if (!result.IsSuccess)
 			{
 				var msg = result.Message;
-				MessageBox.Show($"生成音频文件失败:{msg}");
+				MessageBox.Show($"{Resource.GenerateAudioFileFail}{msg}");
 			}
 			else
 			{
-				if (MessageBox.Show($"生成音频文件成功,是否打开输出文件夹?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+				if (MessageBox.Show(Resource.GenerateAudioSuccess, string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
 					ProcessUtils.OpenPath(GenerateOption.OutputFolderPath);
 			}
 			IsBusy = false;

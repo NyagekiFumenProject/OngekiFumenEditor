@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
@@ -10,9 +11,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch
 	{
 		public override string Name => "Toolbar.BrushModeSwitch";
 
-		public override string Text => "切换笔刷模式";
+		public override string Text => Resource.BrushModeSwitch;
 
-		public override string ToolTip => "如果开启笔刷模式,避免大部分物件拖拉操作";
+		public override string ToolTip => Resource.BrushModeSwitchTipText;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-paint-brush-16.png");
 

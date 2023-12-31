@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Modules.OptionGeneratorTools.Base;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.IO;
@@ -16,13 +17,13 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 		public static async Task<GenerateResult> Generate(AcbGenerateOption option)
 		{
 			if (!File.Exists(option.InputAudioFilePath))
-				return new(false, "需要转换的音频文件不存在");
+				return new(false, Resource.ConvertAudioFileNotFound);
 
-			if (option.MusicId < 0)
-				return new(false, $"MusicId({option.MusicId})不合法");
+			if (option.MusicId < 0 || option.MusicId > 9999)
+				return new(false, Resource.MusicIDInvaild.Format(option.MusicId));
 
 			if (string.IsNullOrWhiteSpace(option.OutputFolderPath))
-				return new(false, "输出文件夹为空");
+				return new(false, Resource.OutputFolderIsEmpty);
 			try
 			{
 				var musicIdStr = option.MusicId.ToString().PadLeft(4, '0');
@@ -49,7 +50,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 
 				var genFiles = Directory.GetFiles(tempFolder);
 				if (genFiles.Length < 2)
-					return new(false, "调用AcbGeneratorFuck.Generator.Generate()失败");
+					return new(false, Resource.CallAcbGeneratorFuckFail);
 
 				foreach (var genFile in genFiles)
 				{
@@ -62,7 +63,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 			catch (Exception e)
 			{
 				Log.LogError($"AcbGenerateProgram.Generate() throw exception:{e.Message}\n{e.StackTrace}");
-				return new(false, $"执行时抛出异常:{e.Message}");
+				return new(false, $"{Resource.ThrowExceptionWhenConvert}{e.Message}");
 			}
 		}
 

@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.Commands
 
 		public override string Text
 		{
-			get { return "时间计算器"; }
+			get { return Resource.TGridCalculatorToolViewer; }
 		}
 
 		public override string ToolTip

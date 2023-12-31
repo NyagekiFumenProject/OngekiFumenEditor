@@ -7,6 +7,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -39,12 +40,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				return;
 			if (!sourceEditor.IsDesignMode)
 			{
-				sourceEditor.ToastNotify($"仅在设计模式下进行复制操作");
+				sourceEditor.ToastNotify(Resource.EditorMustBeDesignMode);
 				return;
 			}
 			if (objects.IsEmpty())
 			{
-				sourceEditor.ToastNotify($"清空复制列表");
+				sourceEditor.ToastNotify(Resource.ClearCopyList);
 				return;
 			}
 
@@ -127,11 +128,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			}
 
 			if (currentCopiedSources.Count == 0)
-				sourceEditor.ToastNotify($"清空复制列表");
+				sourceEditor.ToastNotify(Resource.ClearCopyList);
 			else
 			{
 				this.sourceEditor = sourceEditor;
-				sourceEditor.ToastNotify($"钦定 {currentCopiedSources.Count} 个物件作为复制源 {(currentCopiedSources.Count == 1 ? ",并作为刷子模式的批量生成源" : string.Empty)}");
+				sourceEditor.ToastNotify($"{Resource.CopiedObjects.Format(currentCopiedSources.Count)} {(currentCopiedSources.Count == 1 ? Resource.AsBrushSourceObject : string.Empty)}");
 			}
 			return;
 		}
@@ -153,7 +154,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			var curScale = targetEditor.Setting.VerticalDisplayScale;
 			if (curScale != prevScale && currentCopiedSources.Count > 1)
 			{
-				targetEditor.ToastNotify($"原编辑器垂直缩放({prevScale:F2}x)和目标缩放({curScale:F2}x)不同，无法粘贴多个物件");
+				targetEditor.ToastNotify(Resource.CantPasteMoreObjectByScaleDifferent.Format(prevScale, curScale));
 				return;
 			}
 
@@ -435,7 +436,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					if (isAppend)
 					{
 						var newPallete = pallete.CopyNew() as BulletPallete;
-						newPallete.EditorName = $"{(string.IsNullOrWhiteSpace(newPallete.EditorName) ? newPallete.StrID : newPallete.EditorName)} - 副本";
+						newPallete.EditorName = $"{(string.IsNullOrWhiteSpace(newPallete.EditorName) ? newPallete.StrID : newPallete.EditorName)} - {Resource.Copy}";
 						pickPallete = newPallete;
 					}
 					else
@@ -544,7 +545,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			redo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
 			undo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
 
-			targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("复制粘贴", redo, undo));
+			targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.CopyAndPaste, redo, undo));
 		}
 
 		private double? CalculateYMirror(IEnumerable<OngekiObjectBase> objects, PasteMirrorOption mirrorOption)

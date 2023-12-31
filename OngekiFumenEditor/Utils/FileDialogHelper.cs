@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Properties;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Utils
 		public static string BuildExtensionFilter(params (string ext, string desc)[] extParams) => BuildExtensionFilter(extParams.AsEnumerable());
 
 		private static string BuildExtensionFilterAndAll(IEnumerable<(string ext, string desc)> extParams)
-			=> $"全支持文件 *.*|{string.Join(";", extParams.Select(x => $"*{x.ext}"))}|" + BuildExtensionFilter(extParams);
+			=> $"{Resource.AllSupportFileFormat} *.*|{string.Join(";", extParams.Select(x => $"*{x.ext}"))}|" + BuildExtensionFilter(extParams);
 
 		public static string GetSupportFumenFileExtensionFilter()
 			=> BuildExtensionFilter(IoC.Get<IFumenParserManager>().GetSerializerDescriptions().SelectMany(x => x.fileFormat.Select(y => (y, x.desc))));

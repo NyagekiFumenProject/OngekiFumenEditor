@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels"
     Title="音频文件生成器"
     Width="475"
@@ -19,7 +20,7 @@
     mc:Ignorable="d">
     <StackPanel>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <Label VerticalAlignment="Center">音频文件:</Label>
+            <Label VerticalAlignment="Center" Content="{x:Static res:Resource.AudioFile}" />
             <Label
                 Width="300"
                 Margin="10,0,0,0"
@@ -30,14 +31,14 @@
                 Margin="10,0,0,0"
                 Padding="20,5,20,5"
                 VerticalAlignment="Center"
-                cal:Message.Attach="SelectAcbFilePath()">
-                浏览
+                cal:Message.Attach="SelectAcbFilePath()"
+                Content="{x:Static res:Resource.Browser}">
             </Button>
         </StackPanel>
         <GroupBox
             Margin="10,0,10,10"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="选项">
+            Header="{x:Static res:Resource.Option}">
             <StackPanel Margin="5">
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Label VerticalAlignment="Center">MusicId:</Label>
@@ -49,7 +50,7 @@
                     </TextBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <Label Content="预览时间(毫秒):" />
+                    <Label Content="{x:Static res:Resource.PreviewTime}" />
                     <TextBox
                         Width="100"
                         VerticalAlignment="Center"
@@ -63,7 +64,8 @@
             </StackPanel>
         </GroupBox>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <Label VerticalAlignment="Center">输出目录:</Label>
+            <Label VerticalAlignment="Center" Content="{x:Static res:Resource.OutputFolder}">
+            </Label>
             <Label
                 Width="300"
                 Margin="10,0,0,0"
@@ -74,16 +76,16 @@
                 Margin="10,0,0,0"
                 Padding="20,5,20,5"
                 VerticalAlignment="Center"
-                cal:Message.Attach="SelectOutputFolder()">
-                浏览
+                cal:Message.Attach="SelectOutputFolder()"
+                Content="{x:Static res:Resource.Browser}">
             </Button>
         </StackPanel>
         <Button
             Margin="10"
             Padding="20,10,20,10"
             cal:Message.Attach="Generate()"
+            Content="{x:Static res:Resource.Generate}"
             IsEnabled="{Binding IsGeneratable}">
-            生成
         </Button>
     </StackPanel>
 </mah:MetroWindow>

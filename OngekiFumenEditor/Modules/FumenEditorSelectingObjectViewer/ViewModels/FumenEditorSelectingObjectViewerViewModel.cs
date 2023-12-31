@@ -16,6 +16,7 @@ using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 {
@@ -60,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
 		public FumenEditorSelectingObjectViewerViewModel()
 		{
-			DisplayName = $"当前选择物件查看器";
+			DisplayName = Resource.FumenEditorSelectingObjectViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 
 			dataView = CollectionViewSource.GetDefaultView(editorSelectObjects);

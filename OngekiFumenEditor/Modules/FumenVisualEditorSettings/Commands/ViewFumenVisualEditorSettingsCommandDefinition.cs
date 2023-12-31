@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.Commands
 
 		public override string Text
 		{
-			get { return "编辑器设置"; }
+			get { return Resource.FumenVisualEditorSettings; }
 		}
 
 		public override string ToolTip

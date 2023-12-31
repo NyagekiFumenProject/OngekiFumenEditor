@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Kernel.MiscMenu.Commands.About;
 using OngekiFumenEditor.Kernel.MiscMenu.Commands.CallFullGC;
 using OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Kernel.MiscMenu
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu
 			ProgramMiscOpenMenuGroup, 0);
 
 		[Export]
-		public static MenuDefinition HelpMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 99999, "帮助 (_H)");
+		public static MenuDefinition HelpMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 99999, Resource.MenuHelp);
 
 		[Export]
 		public static MenuItemGroupDefinition HelpMenuGroup = new MenuItemGroupDefinition(HelpMenu, 0);

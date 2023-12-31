@@ -5,6 +5,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 		{
 			if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
 			{
-				editor.Toast.ShowMessage("无法划分物件到音频范围之外");
+				editor.Toast.ShowMessage(Resource.DisableAddObjectBeyondAudioDuration);
 				return;
 			}
 
@@ -40,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 			var splitOutChildren = new List<ConnectableChildObjectBase>();
 			var affactedObjects = new HashSet<ILaneDockable>();
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("划分轨道", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.SplitLane, () =>
 			{
 				//计算出需要被划分出来的后边子物件集合
 				splitOutChildren.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));

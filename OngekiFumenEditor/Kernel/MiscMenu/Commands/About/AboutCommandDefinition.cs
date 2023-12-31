@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.About
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.About
 
 		public override string Text
 		{
-			get { return "关于"; }
+			get { return Resource.CommandAbout; }
 		}
 
 		public override string ToolTip

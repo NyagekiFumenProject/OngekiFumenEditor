@@ -2,6 +2,7 @@
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -71,12 +72,12 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 				var isSuccess = await DocumentOpenHelper.TryOpenAsDocument(filePath);
 				if (!isSuccess)
 				{
-					MessageBox.Show("无法打开此文件，不支持此格式");
+					MessageBox.Show(Resource.ErrorEditorNotSupport);
 				}
 			}
 			catch (Exception e)
 			{
-				var msg = $"无法打开此文件，因为抛出错误:{e.Message}";
+				var msg = $"{Resource.ErrorOpenRecentFile}{e.Message}";
 				Log.LogError(msg);
 				MessageBox.Show(msg);
 			}
@@ -88,7 +89,7 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 
 			if (pickEditorProvider is null)
 			{
-				MessageBox.Show("无合适的编辑器打开此文件");
+				MessageBox.Show(Resource.ErrorEditorNotSupport);
 				return;
 			}
 

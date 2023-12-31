@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Commands
 
 		public override string Text
 		{
-			get { return "物件属性"; }
+			get { return Resource.FumenObjectPropertyBrowser; }
 		}
 
 		public override string ToolTip

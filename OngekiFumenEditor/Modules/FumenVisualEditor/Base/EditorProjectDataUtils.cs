@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjManager;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.IO;
@@ -37,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
 			Log.LogDebug($"fumenDeserializer = {fumenDeserializer}");
 			if (fumenDeserializer is null)
-				throw new NotSupportedException($"不支持此谱面文件的解析:{projectData.FumenFilePath}");
+				throw new NotSupportedException($"{Resource.DeserializeFumenFileNotSupport}{projectData.FumenFilePath}");
 			var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
 			projectData.Fumen = fumen;
 
@@ -83,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			try
 			{
 				if (!FileHelper.IsPathWritable(projFileFullPath))
-					throw new IOException("项目文件被占用或无权限,无法写入数据");
+					throw new IOException(Resource.CantWriteProjectFileByIoError);
 
 				var tmpProjFilePath = TempFileHelper.GetTempFilePath("FumenProjFile", Path.GetFileNameWithoutExtension(projFileFullPath), Path.GetExtension(projFileFullPath));
 				StoreBulletPalleteListEditorData(editorProject);
@@ -96,7 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			}
 			catch (Exception e)
 			{
-				var msg = $"无法保存项目文件:{e.Message}{Environment.NewLine}{e.StackTrace}";
+				var msg = $"{Resource.CantSaveProjectFile}{e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 				//Log.LogError(msg);
 				//MessageBox.Show(msg);
@@ -109,12 +110,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			try
 			{
 				if (!FileHelper.IsPathWritable(fumenFileFullPath))
-					throw new IOException("谱面文件被占用或无权限,无法写入数据");
+					throw new IOException(Resource.CantWriteFumenFileByIoError);
 
 				var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFileFullPath);
 				Log.LogDebug($"serializer = {serializer}");
 				if (serializer is null)
-					throw new NotSupportedException($"不支持保存此文件格式:{Path.GetFileName(fumenFileFullPath)}");
+					throw new NotSupportedException($"{Resource.SerializeFileNotSupport}{Path.GetFileName(fumenFileFullPath)}");
 
 				var tmpFumenFilePath = TempFileHelper.GetTempFilePath("FumenFile", Path.GetFileNameWithoutExtension(fumenFileFullPath), Path.GetExtension(fumenFileFullPath));
 				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
@@ -129,7 +130,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			}
 			catch (Exception e)
 			{
-				var msg = $"无法保存谱面项目:{e.Message}{Environment.NewLine}{e.StackTrace}";
+				var msg = $"{Resource.CantSaveFumenProject}{e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 			}
 		}
@@ -173,7 +174,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			}
 			catch (Exception e)
 			{
-				var msg = $"无法完全保存项目:{e.Message}{Environment.NewLine}{e.StackTrace}";
+				var msg = $"{Resource.CantSaveProjectTotally}{e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 			}
 		}

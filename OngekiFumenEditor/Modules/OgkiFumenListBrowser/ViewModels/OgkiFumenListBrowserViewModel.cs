@@ -7,6 +7,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -67,7 +68,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
 		public OgkiFumenListBrowserViewModel()
 		{
-			DisplayName = "音击谱面库浏览器";
+			DisplayName = Resource.OgkiFumenListBrowser;
 			rootFolderPath = Properties.OptionGeneratorToolsSetting.Default.LastLoadedGameFolder;
 		}
 
@@ -167,7 +168,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
 		public void SelectFolder()
 		{
-			if (!FileDialogHelper.OpenDirectory("选择游戏根目录", out var folderPath))
+			if (!FileDialogHelper.OpenDirectory(Resource.SelectGameRootFolder, out var folderPath))
 				return;
 
 			RootFolderPath = folderPath;
@@ -376,7 +377,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 			using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath);
 			if (audio is null)
 			{
-				MessageBox.Show($"无法打开{diff.RefSet.Title},找不到音频文件");
+				MessageBox.Show(Resource.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
 				return;
 			}
 			newProj.AudioDuration = audio.Duration;
@@ -393,7 +394,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 				{
 					frameworkElement.Loaded -= loadedHandler;
 					await fumenProvider.Open(editor, newProj);
-					var docName = $"[快速打开] {diff.RefSet.Title}";
+					var docName = $"[{Resource.FastOpen}] {diff.RefSet.Title}";
 
 					editor.DisplayName = docName;
 					IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));

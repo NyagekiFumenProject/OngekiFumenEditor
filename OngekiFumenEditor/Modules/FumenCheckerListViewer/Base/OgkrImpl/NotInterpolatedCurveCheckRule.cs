@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Parser.DefaultImpl.Ogkr.Rules;
+using OngekiFumenEditor.Properties;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 					yield return new CommonCheckResult()
 					{
 						Severity = RuleSeverity.Problem,
-						Description = $"轨道物件曲线还没被插值",
+						Description = Resource.NotInterpolatedCurve,
 						LocationDescription = $"{obj.XGrid} {obj.TGrid}",
 						NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
 						RuleName = RuleName,

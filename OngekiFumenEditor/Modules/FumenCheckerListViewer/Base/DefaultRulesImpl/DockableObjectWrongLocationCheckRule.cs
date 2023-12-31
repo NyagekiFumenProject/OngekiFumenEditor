@@ -2,6 +2,8 @@
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -25,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = $"{dockableObj.GetType().Name}物件貌似没有放置在正确的轨道(id:{dockableObj.ReferenceLaneStrId})线上",
+					Description = Resource.WrongLocation.Format(dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
 					LocationDescription = dockableObj.ToString(),
 					NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
 					RuleName = RuleName,

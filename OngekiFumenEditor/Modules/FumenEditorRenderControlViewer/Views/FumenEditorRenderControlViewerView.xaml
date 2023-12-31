@@ -8,6 +8,7 @@
     xmlns:jas="clr-namespace:WPF.JoshSmith.ServiceProviders.UI"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels"
     d:DesignHeight="800"
     d:DesignWidth="300"
@@ -42,8 +43,7 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <ToolBar>
-                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]">
-                    恢复默认
+                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{x:Static res:Resource.ResetDefault}">
                 </Button>
             </ToolBar>
         </StackPanel>
@@ -66,8 +66,8 @@
                     <GridViewColumn
                         Width="30"
                         DisplayMemberBinding="{Binding RenderOrder}"
-                        Header="Idx" />
-                    <GridViewColumn Header="Design">
+                        Header="{x:Static res:Resource.RenderOrder}" />
+                    <GridViewColumn Header="{x:Static res:Resource.DesignMode}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
@@ -77,7 +77,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Preview">
+                    <GridViewColumn Header="{x:Static res:Resource.PreviewMode}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
@@ -87,7 +87,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="{x:Static res:Resource.Name}" />
                 </GridView>
             </ListView.View>
         </ListView>

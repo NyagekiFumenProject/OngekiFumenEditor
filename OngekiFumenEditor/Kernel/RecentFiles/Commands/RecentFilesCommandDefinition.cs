@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 
 		public override string Text
 		{
-			get { return "最近打开的文件..."; }
+			get { return Resource.CommandRecentFiles; }
 		}
 
 		public override string ToolTip => string.Empty;

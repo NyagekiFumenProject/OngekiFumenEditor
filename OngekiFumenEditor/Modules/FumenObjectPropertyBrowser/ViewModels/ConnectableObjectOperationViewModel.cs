@@ -10,6 +10,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
@@ -94,14 +95,14 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 		{
 			if (RefStartObject.Children.IsEmpty())
 			{
-				MessageBox.Show("无子节点,无法插值");
+				MessageBox.Show(Resource.DisableInterpolateByNoConnectableChildren);
 				return;
 			}
 
 			var genStarts = RefStartObject.InterpolateCurve(RefStartObject.CurveInterpolaterFactory).ToArray();
 
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值曲线", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.InterpolateCurve, () =>
 			{
 				editor.Fumen.RemoveObject(RefStartObject);
 				foreach (var start in genStarts)
@@ -163,7 +164,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (RefStartObject?.IsPathVaild() != true)
 			{
-				MessageBox.Show("此轨道包含非法路径");
+				MessageBox.Show(Resource.LaneContainInvalidPath);
 				return;
 			}
 
@@ -171,19 +172,19 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (copiedObjects.Count() > 1)
 			{
-				MessageBox.Show("因为已复制的物件超过一个，无法使用刷子功能");
+				MessageBox.Show(Resource.DisableUseBrushByMoreObjects);
 				return;
 			}
 
 			if (!editor.IsDesignMode)
 			{
-				MessageBox.Show("请先将编辑器切换到设计模式");
+				MessageBox.Show(Resource.EditorMustBeDesignMode);
 				return;
 			}
 
 			if (copiedObjects.Count() < 1)
 			{
-				MessageBox.Show("需要先复制一个可以复制的物件，才能使用刷子功能");
+				MessageBox.Show(Resource.CopyOneObjectOnceBeforeUsingBrush);
 				return;
 			}
 
@@ -191,7 +192,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (copiedObjectViewModel?.CopyNew() is null)
 			{
-				MessageBox.Show("此复制的物件无法使用刷子功能");
+				MessageBox.Show(Resource.ObjectNotSupportBrush);
 				return;
 			}
 
@@ -240,7 +241,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			}
 
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("批量粘贴刷子", redoAction, undoAction));
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.ObjectBatchBrush, redoAction, undoAction));
 		}
 
 		public void OnPartChildCurveInterpolateClick()
@@ -254,7 +255,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (!childObj.CheckCurveVaild())
 			{
-				MessageBox.Show("无法对非法的线段进行局部插值");
+				MessageBox.Show(Resource.DisableInterpolatePartByInvaild);
 				return;
 			}
 
@@ -269,7 +270,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
 			var storeBackupControlPoints = new List<LaneCurvePathControlObject>();
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("部分曲线插值", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.InterpolatePartCurve, () =>
 			{
 				foreach (var newChild in genChildren)
 					childObj.ReferenceStartObject.InsertChildObject(newChild.TGrid, newChild);

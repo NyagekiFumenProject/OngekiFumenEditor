@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.AudioAdjustWindow.Commands
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.Commands
 
 		public override string Text
 		{
-			get { return "音频调整"; }
+			get { return Resource.CommandAudioAdjustWindow; }
 		}
 
 		public override string ToolTip

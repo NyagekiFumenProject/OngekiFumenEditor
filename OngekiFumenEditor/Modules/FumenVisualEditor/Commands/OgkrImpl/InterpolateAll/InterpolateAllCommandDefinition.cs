@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 
 		public override string Text
 		{
-			get { return "插值所有曲线轨道"; }
+			get { return Resource.CommandInterpolateAll; }
 		}
 
 		public override string ToolTip
@@ -35,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 
 		public override string Text
 		{
-			get { return "插值所有曲线轨道(XGrid限制)"; }
+			get { return Resource.CommandInterpolateAllWithXGridLimit; }
 		}
 
 		public override string ToolTip

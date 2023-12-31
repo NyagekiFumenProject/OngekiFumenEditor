@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Commands
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Commands
 
 		public override string Text
 		{
-			get { return "Music.xml生成器"; }
+			get { return Resource.MusicXmlWindow; }
 		}
 
 		public override string ToolTip

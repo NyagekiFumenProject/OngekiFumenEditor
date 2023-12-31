@@ -7,6 +7,7 @@ using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Parser.DefaultImpl.Ogkr.Rules;
+using OngekiFumenEditor.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -107,7 +108,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 			var checkRules = IoC.GetAll<IFumenCheckRule>().OfType<IOngekiFumenCheckRule>();
 			if (checkRules.Any(x => x.CheckRule(fumen, null).Any(x => x.Severity == RuleSeverity.Error)))
 			{
-				msg = "谱面存在无法忽略的格式或内容错误,无法继续生成。请使用谱面检查工具检查谱面并修改正确。";
+				msg = Resource.FumenContainUngenerateError;
 				return false;
 			}
 

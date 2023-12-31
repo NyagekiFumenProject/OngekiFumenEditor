@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.StandardizeFormat
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Standard
 
 		public override string Text
 		{
-			get { return "生成标准音击谱面"; }
+			get { return Resource.StandardizeFormat; }
 		}
 
 		public override string ToolTip

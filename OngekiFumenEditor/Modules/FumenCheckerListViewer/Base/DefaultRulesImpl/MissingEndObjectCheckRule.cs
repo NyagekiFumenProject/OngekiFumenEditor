@@ -4,6 +4,8 @@ using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -54,7 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 					yield return new CommonCheckResult()
 					{
 						Severity = RuleSeverity.Error,
-						Description = $"Hold(Oid:{missingObject.Id})物件缺少HoldEnd中止物件",
+						Description = Resource.MissingEndObject.Format(missingObject.Id),
 						LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
 						NavigateBehavior = new NavigateToObjectBehavior(missingObject),
 						RuleName = RuleName,

@@ -1,4 +1,6 @@
 ﻿using Gemini.Modules.UndoRedo;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
@@ -10,7 +12,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 		private readonly T oldValue;
 		private readonly T newValue;
 
-		public string Name => $"物件属性({propName})变更";
+		public string Name => Resource.ObjectPropertyChanged.Format($"物件属性({propName})变更");
 
 		public PropertySetAction(string propName, Action<T> setterAction, T oldValue, T newValue)
 		{

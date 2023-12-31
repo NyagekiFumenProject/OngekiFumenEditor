@@ -4,6 +4,7 @@ using Gemini.Framework.Services;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 
 		public FumenCheckerListViewerViewModel()
 		{
-			DisplayName = "谱面检查器";
+			DisplayName = Resource.FumenCheckerListViewer;
 			checkRules = IoC.GetAll<IFumenCheckRule>().ToList();
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (n, o) => Editor = n;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;

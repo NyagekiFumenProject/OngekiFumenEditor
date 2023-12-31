@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.ObjectModel;
@@ -77,7 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
 
 		public FumenEditorRenderControlViewerViewModel()
 		{
-			DisplayName = "编辑器渲染控制";
+			DisplayName = Resource.FumenEditorRenderControlViewer;
 			RebuildItems(false);
 		}
 

@@ -1,12 +1,11 @@
-﻿using AngleSharp.Css;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using static OngekiFumenEditor.Base.OngekiObjects.EnemySet;
 
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
@@ -22,7 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = $"最后一个Soflan变速后应该变回正常的1速,但现在是{r}速",
+					Description = Resource.CheckRuleSoflanProblem.Format(r),
 					LocationDescription = lastTGrid?.ToString(),
 					NavigateBehavior = new NavigateToTGridBehavior(lastTGrid),
 					RuleName = "Soflan",

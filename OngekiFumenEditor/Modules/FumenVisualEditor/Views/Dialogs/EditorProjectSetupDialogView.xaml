@@ -8,6 +8,7 @@
     xmlns:local2="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     Title="项目新建向导"
     Width="600"
     Height="600"
@@ -28,9 +29,10 @@
                 <GroupBox
                     BorderBrush="Black"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    Header="音频设置">
+                    Header="{x:Static res:Resource.AudioOption}">
                     <StackPanel Margin="10,5,10,5">
-                        <Label>音频文件路径:</Label>
+                        <Label Content="{x:Static res:Resource.AudioFilePath}">
+                        </Label>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -41,12 +43,12 @@
                             <Button
                                 Grid.Column="1"
                                 Padding="10,5,10,5"
-                                cal:Message.Attach="[Event Click] = [Action OnSelectAudioFilePathButtonClicked()];">
-                                浏览
+                                cal:Message.Attach="[Event Click] = [Action OnSelectAudioFilePathButtonClicked()];"
+                                Content="{x:Static res:Resource.Browser}">
                             </Button>
                         </Grid>
                         <TextBlock Foreground="{DynamicResource EnvironmentToolWindowText}">
-                            <Run Text="音频长度:">
+                            <Run Text="{x:Static res:Resource.AudioDuration}">
                             </Run>
                             <Run Text="{Binding EditorProjectData.AudioDuration, StringFormat={}{0}}">
                             </Run>
@@ -57,10 +59,14 @@
                 <GroupBox
                     BorderBrush="Black"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    Header="谱面初始设置">
+                    Header="{x:Static res:Resource.FumenInitOption}">
                     <StackPanel Margin="10,5,10,5">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">初始Bpm:</TextBlock>
+                            <TextBlock
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center"
+                                Text="{x:Static res:Resource.FirstBpm}">
+                            </TextBlock>
                             <TextBox
                                 Width="150"
                                 VerticalAlignment="Center"
@@ -74,8 +80,8 @@
                                 <TextBlock
                                     Margin="0,0,10,0"
                                     VerticalAlignment="Center"
-                                    Foreground="{DynamicResource EnvironmentToolWindowText}">
-                                    谱面文件(可选):
+                                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                                    Text="{x:Static res:Resource.OptionalFumenFile}">
                                 </TextBlock>
                                 <TextBlock
                                     VerticalAlignment="Center"
@@ -86,8 +92,8 @@
                             <Button
                                 Padding="10,5,10,5"
                                 HorizontalAlignment="Right"
-                                cal:Message.Attach="[Event Click] = [Action OnSelectFumenFilePathButtonClicked()];">
-                                浏览
+                                cal:Message.Attach="[Event Click] = [Action OnSelectFumenFilePathButtonClicked()];"
+                                Content="{x:Static res:Resource.Browser}">
                             </Button>
                         </Grid>
                     </StackPanel>
@@ -99,8 +105,8 @@
         <Button
             Grid.Row="1"
             Height="50"
-            cal:Message.Attach="[Event Click] = [Action OnCreateButtonClicked()];">
-            新建
+            cal:Message.Attach="[Event Click] = [Action OnCreateButtonClicked()];"
+            Content="{x:Static res:Resource.Create}">
         </Button>
     </Grid>
 </mah:MetroWindow>

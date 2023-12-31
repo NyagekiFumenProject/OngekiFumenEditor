@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.RecentFiles;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 
@@ -22,9 +23,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
 			Log.LogDebug($"editor global setting property changed : {e.PropertyName}");
 		}
 
-		public string SettingsPageName => "可视编辑器";
+		public string SettingsPageName => Resource.TabEditor;
 
-		public string SettingsPagePath => "文档";
+		public string SettingsPagePath => Resource.TabDocument;
 
 		public void ApplyChanges()
 		{

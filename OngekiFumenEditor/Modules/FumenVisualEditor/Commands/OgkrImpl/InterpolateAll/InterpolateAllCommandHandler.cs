@@ -3,6 +3,7 @@ using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -21,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 		{
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 				return TaskUtility.Completed;
-			if (MessageBox.Show("是否插值所有包含曲线的轨道物件?\n可能将会删除并重新生成已经插值好的,不含曲线的轨道物件\n部分高度重叠的Tap/Hold物件可能会因此改变它依赖的轨道物件", "提醒", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+			if (MessageBox.Show(Resource.ComfirmInterpolateMessage, Resource.Suggest, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
 				return TaskUtility.Completed;
 			editor.LockAllUserInteraction();
 
@@ -44,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 		{
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 				return TaskUtility.Completed;
-			if (MessageBox.Show("是否插值所有包含曲线的轨道物件?\n可能将会删除并重新生成已经插值好的,不含曲线的轨道物件\n部分高度重叠的Tap/Hold物件可能会因此改变它依赖的轨道物件", "提醒", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+			if (MessageBox.Show(Resource.ComfirmInterpolateMessage, Resource.Suggest, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
 				return TaskUtility.Completed;
 			editor.LockAllUserInteraction();
 

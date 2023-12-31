@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 					yield return new CommonCheckResult()
 					{
 						Severity = RuleSeverity.Problem,
-						Description = $"轨道物件路径非法",
+						Description = Resource.InvalidConnectablePath,
 						LocationDescription = $"{obj.XGrid} {obj.TGrid}",
 						NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
 						RuleName = RuleName,

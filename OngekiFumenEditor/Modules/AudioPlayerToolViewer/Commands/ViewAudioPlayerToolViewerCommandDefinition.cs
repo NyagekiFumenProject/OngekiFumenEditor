@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Commands
 
 		public override string Text
 		{
-			get { return "音频播放"; }
+			get { return Resource.AudioPlayerToolViewer; }
 		}
 
 		public override string ToolTip

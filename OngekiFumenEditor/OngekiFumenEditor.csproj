@@ -280,6 +280,11 @@
       <DependentUpon>ProgramSetting.settings</DependentUpon>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Properties\Resource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
     <Compile Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -594,6 +599,13 @@
 
   <ItemGroup>
     <ProgramRootFiles Remove="_bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resource.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Target Name="CopyProgramRootFiles" AfterTargets="AfterBuild">

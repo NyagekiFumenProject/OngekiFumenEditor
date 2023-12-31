@@ -5,6 +5,7 @@ using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
+using OngekiFumenEditor.Properties;
 using System;
 using System.Linq;
 using System.Windows;
@@ -29,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			if (editor == null)
 				return;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值生成Soflan物件", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.InterpolateDurationSoflan, () =>
 			{
 				editor.Fumen.AddObjects(list);
 				editor.Fumen.RemoveObject(soflan);

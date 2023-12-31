@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.OgkiFumenListBrowser.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels"
     Width="500"
@@ -38,7 +39,7 @@
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
-                    Text="游戏根目录:">
+                    Text="{x:Static res:Resource.SelectGameRootFolder}">
                 </TextBlock>
                 <TextBlock
                     Grid.Column="1"
@@ -51,12 +52,12 @@
                     Grid.Column="2"
                     Margin="10,0,10,0"
                     Padding="20,2,20,2"
-                    cal:Message.Attach="SelectFolder()">
-                    浏览
+                    cal:Message.Attach="SelectFolder()"
+                    Content="{x:Static res:Resource.Browser}">
                 </Button>
             </Grid>
             <StackPanel Margin="5,5,5,10" Orientation="Horizontal">
-                <Label>关键词排序:</Label>
+                <Label Content="{x:Static res:Resource.KeywordSortFilter}" />
                 <TextBox
                     Width="350"
                     Margin="5,0,0,0"
@@ -68,8 +69,8 @@
                 Margin="5,0,15,0"
                 Padding="20,5,20,5"
                 HorizontalAlignment="Right"
-                cal:Message.Attach="ApplyKeywords()">
-                过滤
+                cal:Message.Attach="ApplyKeywords()"
+                Content="{x:Static res:Resource.Filter}">
             </Button>
         </StackPanel>
         <ItemsControl Grid.Row="1" ItemsSource="{Binding DisplayFumenSets}">
@@ -197,8 +198,8 @@
                                                             Margin="2"
                                                             Padding="10,5,10,5"
                                                             HorizontalAlignment="Left"
-                                                            cal:Message.Attach="LoadFumen($dataContext)">
-                                                            加载谱面
+                                                            cal:Message.Attach="LoadFumen($dataContext)"
+                                                            Content="{x:Static res:Resource.LoadFumen}">
                                                         </Button>
                                                     </StackPanel>
                                                 </Grid>

@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.CallFullGC
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.CallFullGC
 
 		public override string Text
 		{
-			get { return "垃圾回收"; }
+			get { return Resource.CommandCallFullGC; }
 		}
 
 		public override string ToolTip

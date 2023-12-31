@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.IO;
@@ -51,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show($"无法加载谱面 : {e.Message}");
+					MessageBox.Show($"{Resource.CantLoadFumen}{e.Message}");
 				}
 			}
 		}
@@ -60,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
 		{
 			if (string.IsNullOrWhiteSpace(EditorProjectData.AudioFilePath) || !File.Exists(EditorProjectData.AudioFilePath))
 			{
-				MessageBox.Show("音频文件未填写或者不存在");
+				MessageBox.Show(Resource.AudioFileNotFound);
 				return;
 			}
 

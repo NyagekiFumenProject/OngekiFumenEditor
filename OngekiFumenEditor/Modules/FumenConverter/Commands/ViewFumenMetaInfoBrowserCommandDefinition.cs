@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenConverter.Commands
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenConverter.Commands
 
 		public override string Text
 		{
-			get { return "谱面文件转换"; }
+			get { return Resource.FumenConverter; }
 		}
 
 		public override string ToolTip

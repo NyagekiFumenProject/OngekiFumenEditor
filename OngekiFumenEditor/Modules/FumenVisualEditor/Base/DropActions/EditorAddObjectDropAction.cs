@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
@@ -15,11 +16,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
 
 			if (mousePosition.Y > editor.TotalDurationHeight || mousePosition.Y < 0)
 			{
-				editor.Toast.ShowMessage("无法添加物件到音频范围之外");
+				editor.Toast.ShowMessage(Resource.DisableAddObjectBeyondAudioDuration);
 				return;
 			}
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加物件", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.AddObject, () =>
 			{
 				editor.MoveObjectTo(displayObject, mousePosition);
 				editor.Fumen.AddObject(displayObject);

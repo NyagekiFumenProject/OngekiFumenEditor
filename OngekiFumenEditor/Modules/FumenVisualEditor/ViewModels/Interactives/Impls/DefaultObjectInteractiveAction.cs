@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			OnDragMove(obj, point, editor);
 			var newPos = new Point(x, y);
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("物件拖动",
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.DragObjects,
 				() =>
 				{
 					OnMoveCanvas(obj, newPos, editor);

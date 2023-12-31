@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Commands
 
 		public override string Text
 		{
-			get { return "子弹管理"; }
+			get { return Resource.FumenBulletPalleteListViewer; }
 		}
 
 		public override string ToolTip

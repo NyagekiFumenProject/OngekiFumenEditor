@@ -50,9 +50,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
 
 
 				if (Editor is null)
-					DisplayName = "编辑器设置";
+					DisplayName = Resource.FumenVisualEditorSettings;
 				else
-					DisplayName = "编辑器设置 - " + Editor.FileName;
+					DisplayName = $"{Resource.FumenVisualEditorSettings} - " + Editor.FileName;
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
 
 		public FumenVisualEditorSettingsViewModel()
 		{
-			DisplayName = "编辑器设置";
+			DisplayName = Resource.FumenVisualEditorSettings;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}

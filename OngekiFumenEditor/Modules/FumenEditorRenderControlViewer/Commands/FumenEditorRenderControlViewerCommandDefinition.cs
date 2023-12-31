@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.Commands
 
 		public override string Text
 		{
-			get { return "谱面编辑器渲染控制"; }
+			get { return Resource.FumenEditorRenderControlViewer; }
 		}
 
 		public override string ToolTip

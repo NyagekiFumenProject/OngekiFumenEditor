@@ -4,6 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 		{
 			if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
 			{
-				editor.Toast.ShowMessage("无法添加物件到音频范围之外");
+				editor.Toast.ShowMessage(Resource.DisableAddObjectBeyondAudioDuration);
 				return;
 			}
 
@@ -38,7 +39,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 			var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) || (lastObj is not null && lastObj.TGrid < dragTGrid);
 			var isFirst = true;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加Next物件", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.AddConnectableNextObject, () =>
 			{
 				if (isAppend)
 					startObject.AddChildObject(childObject as ConnectableChildObjectBase);

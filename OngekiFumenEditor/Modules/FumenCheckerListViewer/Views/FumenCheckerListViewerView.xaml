@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     d:DataContext="{d:DesignInstance Type=local:FumenCheckerListViewerViewModel}"
     d:DesignHeight="300"
@@ -24,8 +25,8 @@
                 Margin="0,0,5,0"
                 Padding="20,2,20,2"
                 cal:Message.Attach="[Event Click] = [Action RefreshCurrentFumen()];"
+                Content="{x:Static res:Resource.Refresh}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                刷新
             </Button>
             <ToggleButton
                 Background="Transparent"
@@ -44,9 +45,9 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="错误">
+                        <Run Text="{x:Static res:Resource.Error}">
                         </Run>
-                        <Run Text="{Binding ErrorCount, Mode=OneWay, StringFormat={}{0} 个}" />
+                        <Run Text="{Binding ErrorCount, Mode=OneWay}" />
                         <Run>
                             <Run.Style>
                                 <Style TargetType="Run">
@@ -55,7 +56,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowError}" Value="False">
-                                            <Setter Property="Text" Value="(不显示)" />
+                                            <Setter Property="Text" Value="{x:Static res:Resource.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -82,9 +83,9 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="问题">
+                        <Run Text="{x:Static res:Resource.Problem}">
                         </Run>
-                        <Run Text="{Binding ProblemCount, Mode=OneWay, StringFormat={}{0} 个}" />
+                        <Run Text="{Binding ProblemCount, Mode=OneWay}" />
                         <Run>
                             <Run.Style>
                                 <Style TargetType="Run">
@@ -93,7 +94,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowProblem}" Value="False">
-                                            <Setter Property="Text" Value="(不显示)" />
+                                            <Setter Property="Text" Value="{x:Static res:Resource.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -120,9 +121,9 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="建议">
+                        <Run Text="{x:Static res:Resource.Advice}">
                         </Run>
-                        <Run Text="{Binding SuggestCount, Mode=OneWay, StringFormat={}{0} 个}" />
+                        <Run Text="{Binding SuggestCount, Mode=OneWay}" />
                         <Run>
                             <Run.Style>
                                 <Style TargetType="Run">
@@ -131,7 +132,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowSuggest}" Value="False">
-                                            <Setter Property="Text" Value="(不显示)" />
+                                            <Setter Property="Text" Value="{x:Static res:Resource.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -169,28 +170,28 @@
                     <GridViewColumn
                         Width="120"
                         DisplayMemberBinding="{Binding Severity}"
-                        Header="严重程度">
+                        Header="{x:Static res:Resource.Severity}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding RuleName}"
-                        Header="检查规则">
+                        Header="{x:Static res:Resource.RuleName}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="400"
                         DisplayMemberBinding="{Binding Description}"
-                        Header="描述">
+                        Header="{x:Static res:Resource.Description}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="200"
                         DisplayMemberBinding="{Binding LocationDescription}"
-                        Header="错误位置">
+                        Header="{x:Static res:Resource.WrongLocation2}">
 
                     </GridViewColumn>
                 </GridView>

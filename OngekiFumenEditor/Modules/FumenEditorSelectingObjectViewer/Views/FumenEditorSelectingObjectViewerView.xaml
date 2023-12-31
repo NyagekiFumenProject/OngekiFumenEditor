@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
     cal:Message.Attach="[Key Delete]=[Action OnCancelItemSelectedObjects($dataContext)];"
@@ -34,8 +35,8 @@
             </i:Interaction.Behaviors>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem cal:Message.Attach="OnRefresh()" Header="刷新" />
-                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="取消选择列表已选的" />
+                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{x:Static res:Resource.Refresh}" />
+                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{x:Static res:Resource.CancelSelected}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
@@ -55,21 +56,19 @@
                     </GridView.ColumnHeaderContainerStyle>
 
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=Name}">
-                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)">
-                            名字
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{x:Static res:Resource.Name}">
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=TGrid}">
-                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)">
-                            物件时间
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{x:Static res:Resource.ObjectTime}">
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="550"
                         DisplayMemberBinding="{Binding .}"
-                        Header="描述" />
+                        Header="{x:Static res:Resource.Description}" />
                 </GridView>
             </ListView.View>
         </ListView>

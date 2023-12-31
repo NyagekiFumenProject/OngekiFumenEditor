@@ -12,6 +12,7 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.Utils;
 using System;
@@ -32,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 	{
 		public FumenBulletPalleteListViewerViewModel()
 		{
-			DisplayName = "子弹管理";
+			DisplayName = Resource.FumenBulletPalleteListViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}
@@ -199,7 +200,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 			if (e.Source?.DataContext is not BulletPallete pallete)
 				return;
 
-			var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color, $"变更 {pallete.StrID} 辅助线颜色");
+			var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color, Resource.ChangeAxuiliaryLineColor.Format(pallete.StrID));
 			dialog.Show();
 		}
 

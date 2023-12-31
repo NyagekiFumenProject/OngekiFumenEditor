@@ -4,6 +4,7 @@ using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
@@ -15,7 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 	{
 		public FumenMetaInfoBrowserViewModel()
 		{
-			DisplayName = "谱面信息";
+			DisplayName = Resource.FumenMetaInfoBrowser;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Fumen = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor?.Fumen;
 		}
@@ -61,7 +62,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 				if (Fumen is null)
 				{
 					FumenProxy = null;
-					ErrorMessage = "Please load/new a fumen document first.";
+					ErrorMessage = Resource.OpenEditorBeforeUsing;
 				}
 				else
 				{

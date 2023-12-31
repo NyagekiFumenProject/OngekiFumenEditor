@@ -8,6 +8,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,25 +31,25 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 		{
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 			{
-				MessageBox.Show("请先切换到当前编辑器");
+				MessageBox.Show(Resource.MustMakeEditorActive);
 				return;
 			}
 
 			if (!editor.IsDesignMode)
 			{
-				MessageBox.Show("请先将编辑器切换到设计模式");
+				MessageBox.Show(Resource.EditorMustBeDesignMode);
 				return;
 			}
 
 			if (SvgPrefab.ProcessingDrawingGroup is not DrawingGroup drawingGroup)
 			{
-				MessageBox.Show("无效的SVG内容");
+				MessageBox.Show(Resource.SvgContentNotSupport);
 				return;
 			}
 
 			if (SvgPrefab.ShowOriginColor)
 			{
-				MessageBox.Show("请先取消勾选ShowOriginColor进行将要输出轨道的预览");
+				MessageBox.Show(Resource.UncheckShowOriginColor);
 				return;
 			}
 
@@ -126,7 +127,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 				genStarts.AddRange(subGenStarts);
 			}
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Svg原地生成轨道物件", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.SvgGenerateLane, () =>
 			{
 				editor.Fumen.AddObjects(genStarts);
 			}, () =>

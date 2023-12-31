@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,8 +76,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 				};
 			}
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("插值所有曲线轨道", redoAction, undoAction));
-			Log.LogInfo($"插值计算完成,一共对 {curveStarts.Count} 条符合条件的轨道进行插值,生成了 {laneMap.Values.Select(x => x.Count).Sum()} 条新的轨道,对应 {affactObjects.Count()} 个受到影响的Tap/Hold等物件进行重新计算。");
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.CommandInterpolateAll, redoAction, undoAction));
+			Log.LogInfo(Resource.InterpolateComplete.Format(curveStarts.Count, laneMap.Values.Select(x => x.Count).Sum(), affactObjects.Count()));
 		}
 	}
 }

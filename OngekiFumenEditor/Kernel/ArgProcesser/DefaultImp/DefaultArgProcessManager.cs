@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
 		{
 			void ErrorExit(string message)
 			{
-				MessageBox.Show(message, "错误", MessageBoxButton.OK, MessageBoxImage.Stop);
+				MessageBox.Show(message, Resource.Error, MessageBoxButton.OK, MessageBoxImage.Stop);
 				Application.Current.Shutdown(-1);
 			}
 
@@ -25,10 +26,10 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
 					Log.LogInfo($"arg.filePath: {filePath}");
 
 					if (!await DocumentOpenHelper.TryOpenAsDocument(filePath))
-						ErrorExit("提供的文件编辑器无法打开处理");
+						ErrorExit(Resource.ErrorEditorNotSupport);
 				}
 				else
-					ErrorExit("通过参数提供的文件不存在");
+					ErrorExit(Resource.ErrorFileByParamNotFound);
 			}
 		}
 	}

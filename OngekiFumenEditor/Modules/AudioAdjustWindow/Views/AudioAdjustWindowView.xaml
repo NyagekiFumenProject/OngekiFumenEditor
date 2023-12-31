@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels"
     Title="音频调整"
     Width="500"
@@ -21,7 +22,7 @@
         <GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="音频文件来源">
+            Header="{x:Static res:Resource.AudioFileSource}">
             <StackPanel>
                 <RadioButton
                     Margin="0,5,0,5"
@@ -33,7 +34,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
-                            Text="从文件加载:">
+                            Text="{x:Static res:Resource.LoadFromFile}">
                         </TextBlock>
                         <TextBlock
                             Width="280"
@@ -46,8 +47,8 @@
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
                             cal:Message.Attach="OnOpenSelectInputFileDialog()"
+                            Content="{x:Static res:Resource.Browser}"
                             Foreground="{StaticResource EnvironmentToolWindowText}">
-                            浏览
                         </Button>
                     </StackPanel>
                 </RadioButton>
@@ -66,7 +67,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
-                            Text="从当前谱面编辑器加载:">
+                            Text="{x:Static res:Resource.LoadFromCurrentEditor}">
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding CurrentEditorName}">
                         </TextBlock>
@@ -75,23 +76,25 @@
                 <CheckBox
                     Margin="20,0,10,0"
                     VerticalAlignment="Center"
+                    Content="{x:Static res:Resource.AllObjectApplyNewDelayAfterCalculated}"
                     IsChecked="{Binding IsRecalculateObjects}">
-                    对所有物件重新计算延迟后的新TGrid
                 </CheckBox>
             </StackPanel>
         </GroupBox>
 
-        <GroupBox Margin="5" Header="延迟选项">
+        <GroupBox Margin="5" Header="{x:Static res:Resource.OffsetOption}">
             <StackPanel>
                 <RadioButton VerticalContentAlignment="Center" GroupName="2857">
                     <StackPanel Orientation="Horizontal">
-                        <Label>按照秒进行调整:</Label>
+                        <Label Content="{x:Static res:Resource.ApplyOffsetBySecond}">
+                        </Label>
                         <TextBox
                             Width="100"
                             VerticalAlignment="Center"
                             Text="{Binding Seconds}">
                         </TextBox>
-                        <Label>秒</Label>
+                        <Label Content="{x:Static res:Resource.Second}">
+                        </Label>
                     </StackPanel>
                 </RadioButton>
                 <RadioButton
@@ -99,7 +102,8 @@
                     GroupName="2857"
                     IsChecked="{Binding IsUseGridOffset, Mode=OneWayToSource}">
                     <StackPanel Orientation="Horizontal">
-                        <Label>按照TGrid进行调整:</Label>
+                        <Label Content="{x:Static res:Resource.ApplyOffsetByTGrid}">
+                        </Label>
                         <Label>Unit:</Label>
                         <TextBox
                             Width="50"
@@ -124,13 +128,13 @@
         <GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="输出">
+            Header="{x:Static res:Resource.Output}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
-                    Text="保存到文件:">
+                    Text="{x:Static res:Resource.SaveToFile}">
                 </TextBlock>
                 <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding OutputFumenFilePath}">
                 </TextBlock>
@@ -138,8 +142,8 @@
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
                     cal:Message.Attach="OnOpenSelectOutputFileDialog()"
+                    Content="{x:Static res:Resource.Browser}"
                     Foreground="{StaticResource EnvironmentToolWindowText}">
-                    浏览
                 </Button>
             </StackPanel>
         </GroupBox>
@@ -148,8 +152,8 @@
             Margin="5,10,5,5"
             Padding="0,10,0,10"
             cal:Message.Attach="OnExecuteConverter()"
+            Content="{x:Static res:Resource.Process}"
             Foreground="{StaticResource EnvironmentToolWindowText}">
-            处理！
         </Button>
     </StackPanel>
 </mah:MetroWindow>

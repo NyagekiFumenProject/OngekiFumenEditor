@@ -5,6 +5,7 @@ using Gemini.Modules.UndoRedo.UndoAction;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -144,7 +145,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				var wrappedAction = new CompositeUndoAction(action.Name, new[]
 				{
 					action,
-					LambdaUndoAction.Create("记忆/恢复编辑器时间",()=> { }  ,() =>{
+					LambdaUndoAction.Create(Resource.RememberRecoveryEditorTime,()=> { }  ,() =>{
 						if (editor.IsDesignMode && !editor.CheckVisible(curTGrid))
 							editor.ScrollTo(curTGrid);
 					})

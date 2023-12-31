@@ -5,6 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     d:Background="White"
     mc:Ignorable="d">
     <UserControl.Resources>
@@ -21,7 +22,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="Drag new WallNext" />
+                Text="{x:Static res:Resource.DragToCreateWallNext}" />
         </Border>
         <Border
             Width="130"
@@ -33,7 +34,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="Drag new WallEnd" />
+                Text="{x:Static res:Resource.DragToCreateWallEnd}" />
         </Border>
     </StackPanel>
 </UserControl>

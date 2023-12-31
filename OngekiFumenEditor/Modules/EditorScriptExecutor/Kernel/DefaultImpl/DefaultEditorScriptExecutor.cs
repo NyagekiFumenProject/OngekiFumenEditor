@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using OngekiFumenEditor.Modules.EditorScriptExecutor.Scripts;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -189,11 +190,11 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel.DefaultImpl
 			var buildResult = await Build(param);
 
 			if (!buildResult.IsSuccess)
-				return new(false, "无法编译脚本:" + Environment.NewLine + string.Join(Environment.NewLine, buildResult.Errors));
+				return new(false, Resource.CompileError + Environment.NewLine + string.Join(Environment.NewLine, buildResult.Errors));
 
 			var assembly = buildResult.Assembly;
 			if (assembly is null)
-				return new(false, "failed to generate assembly : " + Environment.NewLine + string.Join(Environment.NewLine, buildResult.Errors));
+				return new(false, Resource.GenerateAssemblyFileFail + Environment.NewLine + string.Join(Environment.NewLine, buildResult.Errors));
 
 			var result = await Execute(buildResult, targetEditor);
 			return result;

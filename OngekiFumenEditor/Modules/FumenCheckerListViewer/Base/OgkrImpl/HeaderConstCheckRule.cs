@@ -6,6 +6,8 @@ using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehav
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Parser.DefaultImpl.Ogkr.Rules;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -27,15 +29,15 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
 		{
 			const string RuleName = "[Ongeki] HeaderConstMismatch";
-			const string LocationDescription = $"谱面Header信息";
+			var locationDescription = Resource.HeaderConstMismatch;
 
 			if (fumen.MetaInfo.XRESOLUTION != XGrid.DEFAULT_RES_X)
 			{
 				yield return new CommonCheckResult()
 				{
 					Severity = RuleSeverity.Error,
-					Description = $"谱面XRESOLUTION({fumen.MetaInfo.XRESOLUTION})参数和XGrid.ResX({XGrid.DEFAULT_RES_X})不匹配",
-					LocationDescription = LocationDescription,
+					Description = Resource.HeaderConstMismatch2.Format(fumen.MetaInfo.XRESOLUTION, XGrid.DEFAULT_RES_X),
+					LocationDescription = locationDescription,
 					NavigateBehavior = new NavigateMetaInfoViewBehavior(),
 					RuleName = RuleName,
 				};
@@ -46,8 +48,8 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 				yield return new CommonCheckResult()
 				{
 					Severity = RuleSeverity.Error,
-					Description = $"TRESOLUTION({fumen.MetaInfo.TRESOLUTION})TGrid.ResT({TGrid.DEFAULT_RES_T})不匹配",
-					LocationDescription = LocationDescription,
+					Description = Resource.HeaderConstMismatch3.Format(fumen.MetaInfo.TRESOLUTION, TGrid.DEFAULT_RES_T),
+					LocationDescription = locationDescription,
 					NavigateBehavior = new NavigateMetaInfoViewBehavior(),
 					RuleName = RuleName,
 				};
@@ -58,8 +60,8 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 				yield return new CommonCheckResult()
 				{
 					Severity = RuleSeverity.Error,
-					Description = $"无谱师信息",
-					LocationDescription = LocationDescription,
+					Description = Resource.HeaderConstMismatch4,
+					LocationDescription = locationDescription,
 					NavigateBehavior = new NavigateMetaInfoViewBehavior(),
 					RuleName = RuleName,
 				};

@@ -4,6 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions
@@ -23,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 		{
 			if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
 			{
-				editor.Toast.ShowMessage("无法添加物件到音频范围之外");
+				editor.Toast.ShowMessage(Resource.DisableAddObjectBeyondAudioDuration);
 				return;
 			}
 
@@ -31,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 			var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
 			var isFirst = true;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加曲线控制点", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.AddCurveControlPoint, () =>
 			{
 				cachePathControl.TGrid = dragTGrid;
 				cachePathControl.XGrid = dragXGrid;

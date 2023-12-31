@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
 
 		public override string Text
 		{
-			get { return "快速打开谱面"; }
+			get { return Resource.FastOpenFumen; }
 		}
 
 		public override string ToolTip

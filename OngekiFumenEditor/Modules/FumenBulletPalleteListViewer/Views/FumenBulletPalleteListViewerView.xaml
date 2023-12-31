@@ -9,6 +9,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:s="clr-namespace:OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ValueConverters"
@@ -28,11 +29,13 @@
             <Button
                 Margin="0,0,5,0"
                 cal:Message.Attach="[Event Click] = [Action OnCreateNew()];"
+                Content="{x:Static res:Resource.NewBulletPallete}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                新增子弹类型
             </Button>
-            <Button cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];" IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                删除已选的子弹类型
+            <Button
+                cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];"
+                Content="{x:Static res:Resource.DeleteSelectedPalletes}"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
             </Button>
 
             <TextBox
@@ -40,8 +43,10 @@
                 Margin="20,0,10,0"
                 Text="{Binding Filter}" />
 
-            <Button cal:Message.Attach="[Event Click] = [Action OnRefreshFilter()];" IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                过滤
+            <Button
+                cal:Message.Attach="[Event Click] = [Action OnRefreshFilter()];"
+                Content="{x:Static res:Resource.Filter}"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
             </Button>
         </StackPanel>
         <ListView
@@ -75,7 +80,7 @@
                         Width="60"
                         DisplayMemberBinding="{Binding StrID}"
                         Header="StrID" />
-                    <GridViewColumn Width="120" Header="名字">
+                    <GridViewColumn Width="120" Header="{x:Static res:Resource.Name}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding EditorName}">
@@ -84,7 +89,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="发射来源">
+                    <GridViewColumn Width="100" Header="{x:Static res:Resource.ShootSource}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
@@ -92,7 +97,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="80" Header="发射位置偏移">
+                    <GridViewColumn Width="80" Header="{x:Static res:Resource.ShootOffset}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding PlaceOffset}">
@@ -101,7 +106,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="发射目标">
+                    <GridViewColumn Width="100" Header="{x:Static res:Resource.ShootTarget}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
@@ -109,7 +114,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="60" Header="子弹速度">
+                    <GridViewColumn Width="60" Header="{x:Static res:Resource.BulletSpeed}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding Speed}">
@@ -118,7 +123,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="子弹大小">
+                    <GridViewColumn Width="100" Header="{x:Static res:Resource.BulletSize}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
@@ -126,7 +131,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="75" Header="子弹形状">
+                    <GridViewColumn Width="75" Header="{x:Static res:Resource.BulletType}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
@@ -147,29 +152,29 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>-->
 
-                    <GridViewColumn Width="240" Header="操作">
+                    <GridViewColumn Width="240" Header="{x:Static res:Resource.Action}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBullet($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
+                                        Text="{x:Static res:Resource.DragToCreateBullet}"
                                         TextDecorations="Baseline">
-                                        拖动生成子弹
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
+                                        Text="{x:Static res:Resource.DragToCreateBell}"
                                         TextDecorations="Baseline">
-                                        拖动生成钟(Bell)
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnCopyNewBPL($executionContext)];"
+                                        Text="{x:Static res:Resource.ClonePallete}"
                                         TextDecorations="Baseline">
-                                        克隆到新的子弹类型
                                     </TextBlock>
                                 </StackPanel>
                             </DataTemplate>

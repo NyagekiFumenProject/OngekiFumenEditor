@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenConverter.ViewModels"
     Title="谱面转换"
     Width="500"
@@ -21,7 +22,7 @@
         <GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="谱面来源">
+            Header="{x:Static res:Resource.FumenSource}">
             <StackPanel>
                 <RadioButton
                     Margin="0,5,0,5"
@@ -33,7 +34,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
-                            Text="从文件加载:">
+                            Text="{x:Static res:Resource.LoadFromFile}">
                         </TextBlock>
                         <TextBlock
                             Width="280"
@@ -46,8 +47,9 @@
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
                             cal:Message.Attach="OnOpenSelectInputFileDialog()"
+                            Content="{x:Static res:Resource.Browser}"
                             Foreground="{StaticResource EnvironmentToolWindowText}">
-                            浏览
+
                         </Button>
                     </StackPanel>
                 </RadioButton>
@@ -61,7 +63,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
-                            Text="从当前谱面编辑器加载:">
+                            Text="{x:Static res:Resource.LoadFromCurrentEditor}">
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding CurrentEditorName}">
                         </TextBlock>
@@ -73,13 +75,13 @@
         <GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="输出">
+            Header="{x:Static res:Resource.Output}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
-                    Text="保存到文件:">
+                    Text="{x:Static res:Resource.SaveToFile}">
                 </TextBlock>
                 <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding OutputFumenFilePath}">
                 </TextBlock>
@@ -87,8 +89,8 @@
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
                     cal:Message.Attach="OnOpenSelectOutputFileDialog()"
+                    Content="{x:Static res:Resource.Browser}"
                     Foreground="{StaticResource EnvironmentToolWindowText}">
-                    浏览
                 </Button>
             </StackPanel>
         </GroupBox>
@@ -97,8 +99,8 @@
             Margin="5,10,5,5"
             Padding="0,10,0,10"
             cal:Message.Attach="OnExecuteConverter()"
+            Content="{x:Static res:Resource.Execute}"
             Foreground="{StaticResource EnvironmentToolWindowText}">
-            开转！
         </Button>
     </StackPanel>
 </mah:MetroWindow>

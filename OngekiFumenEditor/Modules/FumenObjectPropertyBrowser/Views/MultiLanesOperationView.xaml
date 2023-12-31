@@ -6,6 +6,7 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:MultiLanesOperationViewModel,
@@ -22,6 +23,6 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnClick($executionContext)];"
             DecoratorBrush="DarkGray"
-            Text="合并轨道" />
+            Text="{x:Static res:Resource.CombineLanes}" />
     </StackPanel>
 </UserControl>

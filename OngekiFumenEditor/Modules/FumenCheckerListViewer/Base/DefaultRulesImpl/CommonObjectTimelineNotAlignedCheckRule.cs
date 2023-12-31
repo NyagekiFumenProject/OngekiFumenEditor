@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -59,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 						yield return new CommonCheckResult()
 						{
 							Severity = RuleSeverity.Problem,
-							Description = $"物件{obj.IDShortName}没对上节奏",
+							Description = Resource.ObjectTimelineNotAligned.Format(obj.IDShortName),
 							LocationDescription = $"{obj}",
 							NavigateBehavior = new NavigateToObjectBehavior(obj),
 							RuleName = RuleName,

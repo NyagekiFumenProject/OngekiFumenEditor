@@ -19,6 +19,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -229,7 +230,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		{
 			if (!IsDesignMode)
 			{
-				ToastNotify("请先将编辑器切换到设计模式");
+				ToastNotify(Resource.EditorMustBeDesignMode);
 				return;
 			}
 
@@ -239,17 +240,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				if (obj is ITimelineObject timelineObject)
 					cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, this);
 				else
-					ToastNotify($"无法记忆此物件，因为此物件没有实现ITimelineObject : {obj}");
+					ToastNotify(Resource.CantRememberObjectByNotSupport.Format(obj));
 			}
 
-			ToastNotify($"已记忆 {cacheObjectAudioTime.Count} 个物件的音频时间");
+			ToastNotify(Resource.RememberObjects.Format(cacheObjectAudioTime.Count));
 		}
 
 		public void MenuItemAction_RecoverySelectedObjectToAudioTime()
 		{
 			if (!IsDesignMode)
 			{
-				ToastNotify("请先将编辑器切换到设计模式");
+				ToastNotify(Resource.EditorMustBeDesignMode);
 				return;
 			}
 
@@ -262,19 +263,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 			var undoTargets = recoverTargets.Select(x => x.x).Select(x => (x, x.TGrid)).ToList();
 
-			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("恢复物件到音频时间",
+			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.RecoveryObjectToAudioTime,
 				() =>
 				{
 					Log.LogInfo($"开始恢复物件时间...");
 					foreach ((var timelineObject, var audioTime) in recoverTargets)
 						timelineObject.TGrid = TGridCalculator.ConvertYToTGrid_DesignMode(audioTime, this);
 
-					ToastNotify($"已恢复 {recoverTargets.Count} 个物件到音频时间...");
+					ToastNotify(Resource.RecoveryObjectsSuccess.Format(recoverTargets.Count));
 				}, () =>
 				{
 					foreach ((var timelineObject, var undoTGrid) in undoTargets)
 						timelineObject.TGrid = undoTGrid.CopyNew();
-					ToastNotify($"已撤回恢复 {recoverTargets.Count} 个物件到音频时间...");
+					ToastNotify(Resource.UndoRecoveryObjectsSuccess.Format(recoverTargets.Count));
 				}
 			));
 		}
@@ -285,7 +286,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		{
 			if (!IsDesignMode)
 			{
-				ToastNotify("请先将编辑器切换到设计模式");
+				ToastNotify(Resource.EditorMustBeDesignMode);
 				return;
 			}
 
@@ -376,7 +377,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		{
 			if ((!SelectObjects.AtCount(1)) || SelectObjects.FirstOrDefault() is not ILaneDockable dockable)
 			{
-				ToastNotify("需要单选一个Tap/Hold物件");
+				ToastNotify(Resource.MustSelectOneTapOrHold);
 				return;
 			}
 
@@ -429,11 +430,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 			if (pickLane is null)
 			{
-				ToastNotify($"无合适的{targetType}轨道放置物件");
+				ToastNotify(Resource.CantPlaceObjectsByNoSuiteLanes.Format(targetType));
 				return;
 			}
 
-			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create($"快速放置{dockable.GetType().Name}到{targetType}轨道", () =>
+			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.FastPlaceObjectToLane.Format(dockable.GetType().Name, targetType), () =>
 			{
 				dockable.ReferenceLaneStart = pickLane;
 				if (dockable.ReferenceLaneStart is not null)
@@ -469,7 +470,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			//特殊处理LaneCurvePathControlObject
 			var cacheCurveControlsMap = new Dictionary<LaneCurvePathControlObject, (ConnectableChildObjectBase refObj, int idx)>();
 
-			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("删除物件", () =>
+			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.DeleteObjects, () =>
 			{
 				foreach (var group in selectedObjectGroup)
 				{
@@ -556,13 +557,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 			if (map.Count == 0)
 			{
-				ToastNotify("无合适物件批量设置IsCritical属性");
+				ToastNotify(Resource.NoObjectCouldBeSetIsCritical);
 				return;
 			}
 
 			var setVal = !isAllCritical;
 
-			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("快速批量设置IsCritical", () =>
+			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.BatchSetIsCritical, () =>
 			{
 				foreach (var pair in map)
 					pair.Key.IsCritical = setVal;
@@ -619,7 +620,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 						genChildren.ForEach(x => x.IsSelected = true);
 						IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
 					}, () => { }));
-			var combinedAction = UndoRedoManager.EndCombineAction("快速(批量)添加轨道子节点");
+			var combinedAction = UndoRedoManager.EndCombineAction(Resource.FastAddObjectsToLanes);
 			UndoRedoManager.ExecuteAction(combinedAction);
 		}
 
@@ -704,7 +705,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 								var obj = x as OngekiObjectBase;
 								InteractiveManager.GetInteractive(obj).OnDragEnd(obj, cp, this);
 							});
-							var compositeAction = UndoRedoManager.EndCombineAction("物件拖动");
+							var compositeAction = UndoRedoManager.EndCombineAction(Resource.DragObjects);
 							UndoRedoManager.ExecuteAction(compositeAction);
 						}
 						else
@@ -970,7 +971,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				//不支持笔刷模式下新建以下玩意
 				|| newObject is ConnectableStartObject)
 			{
-				ToastNotify($"笔刷模式下不支持{copySouceObj?.Name}");
+				ToastNotify(Resource.NotSupportInBrushMode.Format(copySouceObj?.Name));
 				return;
 			}
 
@@ -1018,7 +1019,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				}
 			};
 
-			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("刷子物件添加", redo, undo));
+			UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.AddObjectsByBrush, redo, undo));
 		}
 
 		#region Object Click&Selection
@@ -1228,7 +1229,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			IsLocked = true;
 			SelectObjects.ToArray().ForEach(x => x.IsSelected = false);
 			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
-			ToastNotify($"编辑器已锁住");
+			ToastNotify(Resource.EditorLock);
 		}
 
 		/// <summary>
@@ -1239,7 +1240,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			if (!IsLocked)
 				return;
 			IsLocked = false;
-			ToastNotify($"编辑器已解锁");
+			ToastNotify(Resource.EditorUnlock);
 		}
 
 		#endregion

@@ -7,6 +7,7 @@ using OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.Views;
 using OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using System;
@@ -30,7 +31,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 	{
 		public class EditorItem
 		{
-			public string Name => TargetEditor?.DisplayName ?? "<无编辑器目标>";
+			public string Name => TargetEditor?.DisplayName ?? Resource.NoEditorTarget;
 			public FumenVisualEditorViewModel TargetEditor { get; set; }
 		}
 
@@ -172,7 +173,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 			}
 			catch (Exception e)
 			{
-				Log.LogDebug($"无法应用脚本模板,原因:{e.Message}");
+				Log.LogDebug($"{Resource.UseTemplateScriptFileFail}{e.Message}");
 			}
 		}
 
@@ -192,7 +193,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show($"无法保存脚本 , {e.Message}");
+				MessageBox.Show($"{Resource.CantSaveScriptFile} {e.Message}");
 			}
 		}
 
@@ -218,12 +219,12 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 
 			if (buildResult.IsSuccess)
 			{
-				MessageBox.Show("编译成功");
+				MessageBox.Show(Resource.CompileSuccess);
 				return;
 			}
 
 			var errorMsg = string.Join(Environment.NewLine, buildResult.Errors);
-			MessageBox.Show($"编译失败:\n{errorMsg}");
+			MessageBox.Show($"{Resource.CompileError}\n{errorMsg}");
 		}
 
 		public async void OnRunButtonClicked()
@@ -234,17 +235,17 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 			if (!buildResult.IsSuccess)
 			{
 				var errorMsg = string.Join(Environment.NewLine, buildResult.Errors);
-				MessageBox.Show($"编译失败:\n{errorMsg}");
+				MessageBox.Show($"{Resource.CompileError}\n{errorMsg}");
 				return;
 			}
 
-			if (MessageBox.Show("编译成功，是否执行?", default, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+			if (MessageBox.Show(Resource.ComfirmExecuteScript, default, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
 				return;
 
 			using var _2 = StatusBarHelper.BeginStatus("Script is executing ...");
 			var executeResult = await IoC.Get<IEditorScriptExecutor>().Execute(buildResult, CurrentSelectedEditor?.TargetEditor);
 
-			MessageBox.Show($"执行{(executeResult.Success ? "成功" : $"失败,原因:{executeResult.ErrorMessage}")}");
+			MessageBox.Show($"{Resource.Execute}{(executeResult.Success ? Resource.Success : $"{Resource.FailedAndReason}{executeResult.ErrorMessage}")}");
 		}
 
 		public async void OnReloadFileButtonClicked()
@@ -279,7 +280,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 
 			if (!documentContext.GenerateProjectFile(projOutputDirPath, csFilePath, out var projFilePath))
 			{
-				MessageBox.Show("生成脚本项目文件失败.");
+				MessageBox.Show(Resource.GenerateScriptProjectFileFail);
 				return;
 			}
 

@@ -10,5 +10,7 @@
 
 		public static string TrimEnd(this string str, string subStr) => str.EndsWith(subStr) ? str.Substring(0, str.Length - subStr.Length) : str;
 		public static string TrimStart(this string str, string subStr) => str.StartsWith(subStr) ? str.Substring(subStr.Length) : str;
+
+		public static string Format(this string str, params object[] args) => string.Format(str, args);
 	}
 }

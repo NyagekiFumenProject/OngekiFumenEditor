@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -102,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			else
 				return;//YOU SHOULD NOT BE HERE
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("附着物件自动更新水平位置",
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.UpdateXGridForDockedObjects,
 				() =>
 				{
 					ConnectableStartObject.RelocateDockableObjects(editor.Fumen, obj);

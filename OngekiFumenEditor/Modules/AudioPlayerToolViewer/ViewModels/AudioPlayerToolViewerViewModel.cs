@@ -6,6 +6,7 @@ using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel;
@@ -128,7 +129,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
 		public AudioPlayerToolViewerViewModel()
 		{
-			DisplayName = "音频播放";
+			DisplayName = Resource.AudioPlayerToolViewer;
 			FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
@@ -234,13 +235,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 		{
 			if (AudioPlayer is null || FumenSoundPlayer is null)
 			{
-				MessageBox.Show("请先等待音频/音效初始化完成");
+				MessageBox.Show(Resource.WaitForAudioAndFumenLoaded);
 				return;
 			}
 
 			if (AudioPlayer.IsPlaying)
 			{
-				MessageBox.Show("请先暂停音频/谱面播放");
+				MessageBox.Show(Resource.PauseAudioAndFumen);
 				return;
 			}
 
@@ -248,7 +249,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
 			if (result)
 			{
-				MessageBox.Show("音效重新加载成功");
+				MessageBox.Show(Resource.SoundLoaded);
 			}
 		}
 

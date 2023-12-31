@@ -13,6 +13,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel;
@@ -176,7 +177,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			set
 			{
 				Set(ref brushMode, value);
-				ToastNotify($"笔刷模式:{(BrushMode ? "开启" : "关闭")}");
+				ToastNotify($"{Resource.BrushMode}{(BrushMode ? Resource.Enable : Resource.Disable)}");
 			}
 		}
 
@@ -187,7 +188,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			set
 			{
 				Set(ref isShowCurveControlAlways, value);
-				ToastNotify($"IsShowCurveControlAlways = {IsShowCurveControlAlways}");
+				ToastNotify($"{Resource.ShowCurveControlAlways}{(IsShowCurveControlAlways ? Resource.Enable : Resource.Disable)}");
 			}
 		}
 
@@ -212,7 +213,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialogViewModel);
 				if (result != true)
 				{
-					Log.LogInfo($"用户无法完成新建项目向导，关闭此编辑器");
+					Log.LogInfo(Resource.CloseEditorByProjectSetupFail);
 					await TryCloseAsync(false);
 					return;
 				}
@@ -222,7 +223,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 					using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
 					var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
 					if (fumenDeserializer is null)
-						throw new NotSupportedException($"不支持此谱面文件的解析:{projectData.FumenFilePath}");
+						throw new NotSupportedException($"{Resource.DeserializeFumenFileFail}{projectData.FumenFilePath}");
 					var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
 					projectData.Fumen = fumen;
 				}
@@ -233,7 +234,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			}
 			catch (Exception e)
 			{
-				var errMsg = $"无法新建项目:{e.Message}";
+				var errMsg = $"{Resource.CantCreateProject}{e.Message}";
 				Log.LogError(errMsg);
 				MessageBox.Show(errMsg);
 				await TryCloseAsync(false);
@@ -248,13 +249,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
 				var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
 				await Load(projectData);
-				ToastNotify("谱面项目和文件加载成功");
+				ToastNotify(Resource.SaveProjectFileAndFumenFile);
 
 				IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
 			}
 			catch (Exception e)
 			{
-				var errMsg = $"无法加载项目:{e.Message}";
+				var errMsg = $"{Resource.CantLoadProject}{e.Message}";
 				Log.LogError(errMsg);
 				MessageBox.Show(errMsg);
 				await TryCloseAsync(false);
@@ -273,7 +274,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			}
 			catch (Exception e)
 			{
-				var errMsg = $"无法加载项目:{e.Message}";
+				var errMsg = $"{Resource.CantLoadProject}{e.Message}";
 				Log.LogError(errMsg);
 				MessageBox.Show(errMsg);
 				await TryCloseAsync(false);
@@ -285,7 +286,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			using var _ = StatusBarHelper.BeginStatus("Fumen saving : " + filePath);
 			if (string.IsNullOrWhiteSpace(filePath))
 			{
-				var newProjFilePath = FileDialogHelper.SaveFile("保存新的项目文件", new[] { (FumenVisualEditorProvider.FILE_EXTENSION_NAME, "谱面项目文件") });
+				var newProjFilePath = FileDialogHelper.SaveFile(Resource.SaveNewProjectFile, new[] { (FumenVisualEditorProvider.FILE_EXTENSION_NAME, Resource.FumenProjectFile) });
 				if (!string.IsNullOrWhiteSpace(newProjFilePath))
 					await Save(newProjFilePath);
 				return;
@@ -301,7 +302,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 				if (dialog.ShowDialog() != true)
 				{
-					MessageBox.Show("无法保存谱面,项目保存取消");
+					MessageBox.Show(Resource.CancelProjectSaveByFumenSaveFail);
 					return;
 				}
 
@@ -317,7 +318,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			else
 			{
 				DisplayName = default;
-				ToastNotify("谱面项目和文件保存成功");
+				ToastNotify(Resource.SaveProjectFileAndFumenFile);
 				IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
 			}
 		}

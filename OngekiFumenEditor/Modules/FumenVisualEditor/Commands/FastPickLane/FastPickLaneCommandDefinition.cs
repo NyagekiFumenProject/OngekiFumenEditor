@@ -1,6 +1,7 @@
 ﻿using Gemini.Framework.Commands;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -10,7 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
 	{
 		public override string Name => $"Editor.FastPickLane_{typeof(T).Name}";
 
-		public override string Text => $"编辑器快速选择轨道({typeof(T).Name})";
+		public override string Text => $"{Resource.FastPickLane}({typeof(T).Name})";
 
 		public override string ToolTip => Text;
 	}

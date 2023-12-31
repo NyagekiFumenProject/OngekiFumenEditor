@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
+﻿using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Utils;
 using System.IO;
 
@@ -23,7 +24,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 
 		public void OnSelectDialogOpen()
 		{
-			var filePath = FileDialogHelper.OpenFile("选择svg文件", new[] { (".svg", "Svg文件") });
+			var filePath = FileDialogHelper.OpenFile(Resource.SelectSvgFile, new[] { (".svg", "Svg文件") });
 			File = string.IsNullOrWhiteSpace(filePath) ? null : new FileInfo(filePath);
 		}
 	}

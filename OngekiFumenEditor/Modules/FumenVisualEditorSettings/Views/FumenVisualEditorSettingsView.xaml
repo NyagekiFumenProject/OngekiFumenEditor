@@ -10,6 +10,7 @@
     xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=local:FumenVisualEditorSettingsViewModel}"
     d:DesignHeight="800"
@@ -26,37 +27,37 @@
         <StackPanel Margin="10,5,10,5" Visibility="{Binding Setting, Converter={StaticResource NullToVisibilityConverter}}">
             <CheckBox
                 Margin="0,2,0,2"
-                Content="禁止时间轴自动停靠"
+                Content="{x:Static res:Resource.DisableTGridMagneticDock}"
                 IsChecked="{Binding Setting.DisableTGridMagneticDock}">
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
-                Content="强制水平位置轴自动停靠"
+                Content="{x:Static res:Resource.ForceXGridMagneticDock}"
                 IsChecked="{Binding Setting.ForceXGridMagneticDock}">
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
-                Content="禁止水平位置轴自动停靠"
+                Content="{x:Static res:Resource.DisableXGridMagneticDock}"
                 IsChecked="{Binding Setting.DisableXGridMagneticDock}">
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
-                Content="强制Tap或Hold物件停靠到轨道上"
+                Content="{x:Static res:Resource.ForceTapHoldMagneticDockToLane}"
                 IsChecked="{Binding Setting.ForceTapHoldMagneticDockToLane}">
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
-                Content="强制自动停靠"
+                Content="{x:Static res:Resource.ForceMagneticDock}"
                 IsChecked="{Binding Setting.ForceMagneticDock}">
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
-                Content="滑轮滚动判定线对齐节奏线"
+                Content="{x:Static res:Resource.JudgeLineAlignBeat}"
                 IsChecked="{Binding Setting.JudgeLineAlignBeat}">
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
-                Content="粘贴物件时自动停靠"
+                Content="{x:Static res:Resource.AdjustPastedObjects}"
                 IsChecked="{Binding Setting.AdjustPastedObjects}">
             </CheckBox>
             <Grid Margin="0,2,0,2">
@@ -71,8 +72,8 @@
                 <TextBlock
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}">
-                    水平辅助线间距
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Text="{x:Static res:Resource.XGridUnitSpace}">
                 </TextBlock>
                 <ComboBox
                     Grid.Column="1"
@@ -86,7 +87,7 @@
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.BeatSplit, Mode=TwoWay}"
-                    DisplayName="节奏线细分倍率:"
+                    DisplayName="{x:Static res:Resource.BeatSplit}"
                     MaxValue="16"
                     MinValue="0"
                     Step="1">
@@ -94,7 +95,7 @@
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.XGridDisplayMaxUnit, Mode=TwoWay}"
-                    DisplayName="水平轴最大显示范围:"
+                    DisplayName="{x:Static res:Resource.XGridDisplayMaxUnit}"
                     IsEnabled="{Binding Setting.EnableXOffset}"
                     MaxValue="200"
                     MinValue="0"
@@ -102,7 +103,7 @@
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.JudgeLineOffsetY, Mode=TwoWay}"
-                    DisplayName="判定线偏移位置:"
+                    DisplayName="{x:Static res:Resource.JudgeLineOffsetY}"
                     MaxValue="500"
                     MinValue="0"
                     Step="1">
@@ -110,14 +111,14 @@
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.XOffset, Mode=TwoWay}"
-                    DisplayName="水平轴偏移:"
+                    DisplayName="{x:Static res:Resource.XOffset}"
                     MaxValue="600"
                     MinValue="-600"
                     Step="1" />
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.VerticalDisplayScale, Mode=TwoWay}"
-                    DisplayName="水平显示缩放:"
+                    DisplayName="{x:Static res:Resource.VerticalDisplayScale}"
                     MaxValue="3"
                     MinValue="0.1"
                     Step="0.1">
@@ -136,8 +137,8 @@
                     Grid.Row="8"
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}">
-                    显示时间格式
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Text="{x:Static res:Resource.DisplayTimeFormat}">
                 </TextBlock>
                 <ComboBox
                     Grid.Row="8"
@@ -148,7 +149,7 @@
             </Grid>
             <CheckBox
                 Margin="0,10,0,2"
-                Content="打开节拍器(仅编辑模式)"
+                Content="{x:Static res:Resource.EnableLoopPlayTiming}"
                 IsChecked="{Binding Setting.LoopPlayTiming}">
             </CheckBox>
         </StackPanel>

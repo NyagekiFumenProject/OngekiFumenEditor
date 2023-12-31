@@ -6,6 +6,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -112,7 +113,7 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
 
 		public FumenTimeSignatureListViewerViewModel()
 		{
-			DisplayName = "节拍查看器";
+			DisplayName = Resource.FumenTimeSignatureListViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (n, o) => Editor = n;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}

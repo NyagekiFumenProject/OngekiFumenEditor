@@ -6,6 +6,7 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     d:Background="White"
     mc:Ignorable="d">
     <StackPanel Margin="21,5,0,0">
@@ -15,7 +16,7 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
             DecoratorBrush="DarkSalmon"
-            Text="插值生成KeyframeSoflan物件"
-            ToolTip="生成已经插值好的一堆KeyframeSoflan物件" />
+            Text="{x:Static res:Resource.InterpolateToCreateKeyframeSoflans}"
+            ToolTip="{x:Static res:Resource.InterpolateToCreateKeyframeSoflansTipText}" />
     </StackPanel>
 </UserControl>

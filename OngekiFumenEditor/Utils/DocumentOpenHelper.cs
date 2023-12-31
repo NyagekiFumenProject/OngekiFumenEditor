@@ -6,6 +6,7 @@ using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Properties;
 using System;
 using System.IO;
 using System.Linq;
@@ -96,7 +97,7 @@ namespace OngekiFumenEditor.Utils
 
 			if (!File.Exists(audioFile))
 			{
-				audioFile = FileDialogHelper.OpenFile("手动选择音频文件", IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
+				audioFile = FileDialogHelper.OpenFile(Resource.SelectAudioFileManually, IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
 				if (!File.Exists(audioFile))
 					return null;
 				audioDuration = await CalcAudioDuration(audioFile);
@@ -130,7 +131,7 @@ namespace OngekiFumenEditor.Utils
 					result = name;
 			}
 
-			return "[快速打开] " + result;
+			return $"[{Resource.FastOpen}] " + result;
 		}
 
 		private static async Task<(string, TimeSpan)> GetAudioFilePath(string ogkrFilePath)

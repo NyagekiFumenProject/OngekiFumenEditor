@@ -6,6 +6,7 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel;
@@ -89,7 +90,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
 
 		public TGridCalculatorToolViewerViewModel()
 		{
-			DisplayName = "时间计算器";
+			DisplayName = Resource.TGridCalculatorToolViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 			IoC.Get<IFumenObjectPropertyBrowser>().PropertyChanged += TGridCalculatorToolViewerViewModel_PropertyChanged;

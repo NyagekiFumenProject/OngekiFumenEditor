@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils.Attributes;
 using System.Linq;
 
@@ -48,7 +49,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			var frontStart = frontChild.ReferenceStartObject;
 			var midChild = frontStart.CreateChildObject();
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("合并轨道", () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.CombineLane, () =>
 			{
 				midChild.XGrid = laterStart.XGrid.CopyNew();
 				midChild.TGrid = laterStart.TGrid.CopyNew();

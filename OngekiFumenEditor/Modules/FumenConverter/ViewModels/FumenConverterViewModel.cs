@@ -3,6 +3,7 @@ using Gemini.Framework;
 using Microsoft.Win32;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;
@@ -77,13 +78,13 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
 			{
 				if (!File.Exists(InputFumenFilePath))
 				{
-					MessageBox.Show("请先选择输入的谱面文件路径");
+					MessageBox.Show(Resource.FumenFileNotSelect);
 					return;
 				}
 
 				if (parserManager.GetDeserializer(InputFumenFilePath) is not IFumenDeserializable deserializable)
 				{
-					MessageBox.Show("不支持解析此谱面文件");
+					MessageBox.Show(Resource.FumenFileDeserializeNotSupport);
 					return;
 				}
 
@@ -94,25 +95,25 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show($"加载谱面文件失败 : {e.Message}");
+					MessageBox.Show($"{Resource.FumenLoadFailed}{e.Message}");
 				}
 			}
 
 			if (fumen is null)
 			{
-				MessageBox.Show("无谱面输入");
+				MessageBox.Show(Resource.NoFumenInput);
 				return;
 			}
 
 			if (string.IsNullOrWhiteSpace(OutputFumenFilePath))
 			{
-				MessageBox.Show("没钦定谱面输出路径");
+				MessageBox.Show(Resource.OutputFumenFileNotSelect);
 				return;
 			}
 
 			if (parserManager.GetSerializer(OutputFumenFilePath) is not IFumenSerializable serializable)
 			{
-				MessageBox.Show("不支持谱面输出路径");
+				MessageBox.Show(Resource.OutputFumenNotSupport);
 				return;
 			}
 
@@ -120,11 +121,11 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
 			{
 				var data = await serializable.SerializeAsync(fumen);
 				await File.WriteAllBytesAsync(OutputFumenFilePath, data);
-				MessageBox.Show("转换成功");
+				MessageBox.Show(Resource.ConvertSuccess);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show($"转换失败 : {e.Message}");
+				MessageBox.Show($"{Resource.ConvertFail}{e.Message}");
 			}
 		}
 	}

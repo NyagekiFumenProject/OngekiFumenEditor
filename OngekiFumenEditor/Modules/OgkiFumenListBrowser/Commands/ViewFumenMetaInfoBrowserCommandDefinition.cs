@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.Commands
 {
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.Commands
 
 		public override string Text
 		{
-			get { return "音击谱面库浏览器"; }
+			get { return Resource.OgkiFumenListBrowser; }
 		}
 
 		public override string ToolTip

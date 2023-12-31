@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels.Dialogs"
     Title="选择..."
     Width="700"
@@ -24,7 +25,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel Margin="0,10,0,10" Orientation="Horizontal">
-            <TextBlock Margin="20,5,10,5">过滤:</TextBlock>
+            <TextBlock Margin="20,5,10,5" Text="{x:Static res:Resource.Filter}">
+            </TextBlock>
             <TextBox
                 Width="300"
                 VerticalContentAlignment="Center"
@@ -35,8 +37,8 @@
                 Margin="10,0,0,0"
                 Padding="20,5,20,5"
                 VerticalAlignment="Center"
-                cal:Message.Attach="ApplyFilter()">
-                刷新
+                cal:Message.Attach="ApplyFilter()"
+                Content="{x:Static res:Resource.Refresh}">
             </Button>
         </StackPanel>
         <ListView
@@ -77,15 +79,15 @@
             <Button
                 Margin="30,10,30,10"
                 Padding="0,5,0,5"
-                cal:Message.Attach="Comfirm()">
-                确定
+                cal:Message.Attach="Comfirm()"
+                Content="{x:Static res:Resource.Comfirm}">
             </Button>
             <Button
                 Grid.Column="1"
                 Margin="30,10,30,10"
                 Padding="0,5,0,5"
-                cal:Message.Attach="Cancel()">
-                取消
+                cal:Message.Attach="Cancel()"
+                Content="{x:Static res:Resource.Cancel}">
             </Button>
         </Grid>
     </Grid>

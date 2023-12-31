@@ -2,6 +2,7 @@
 using AssetsTools.NET.Extra;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Base;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -24,13 +25,13 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 		public static async Task<GenerateResult> Generate(JacketGenerateOption option)
 		{
 			if (!File.Exists(option.InputImageFilePath))
-				return new(false, "需要生成的图片文件不存在");
+				return new(false, Resource.InputPictureFileNotFound);
 
 			if (option.MusicId < 0)
-				return new(false, $"MusicId({option.MusicId})不合法");
+				return new(false, Resource.MusicIDInvaild);
 
 			if (string.IsNullOrWhiteSpace(option.OutputAssetbundleFolderPath))
-				return new(false, "输出文件夹为空");
+				return new(false, Resource.OutputFolderIsEmpty);
 			try
 			{
 				var jacketName = $"ui_jacket_{option.MusicId.ToString().PadLeft(4, '0')}";
@@ -46,7 +47,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 				var outputAbFilePath = Path.Combine(tmpOutputPath, jacketName);
 				var abFilePath = await GenerateJacketFileAsync(tmpInputImageFilePath, outputAbFilePath, option.MusicId, false, new(option.Width, option.Height));
 				if (!File.Exists(abFilePath))
-					return new(false, "生成ab文件失败");
+					return new(false, Resource.GenerateABFileFail);
 				Log.LogDebug($"Generate ab file to {abFilePath}");
 
 				//generate small
@@ -54,7 +55,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 				abFilePath = await GenerateJacketFileAsync(tmpInputImageFilePath, outputAbFilePath, option.MusicId, true, new(option.WidthSmall, option.HeightSmall));
 				Log.LogDebug($"Generate small ab file to {abFilePath}");
 				if (!File.Exists(abFilePath))
-					return new(false, "生成ab文件失败");
+					return new(false, Resource.GenerateABFileFail);
 
 				if (option.UpdateAssetBytesFile)
 				{
@@ -72,7 +73,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 			catch (Exception e)
 			{
 				Log.LogError($"AcbGenerateProgram.Generate() throw exception:{e.Message}\n{e.StackTrace}");
-				return new(false, $"执行时抛出异常:{e.Message}");
+				return new(false, $"{Resource.ThrowExceptionWhenConvert}{e.Message}");
 			}
 		}
 

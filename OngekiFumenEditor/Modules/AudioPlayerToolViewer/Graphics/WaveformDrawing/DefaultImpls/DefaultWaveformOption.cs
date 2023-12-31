@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 		private bool showTimingLine = true;
 		[ObjectPropertyBrowserShow]
 		[JsonInclude]
-		[ObjectPropertyBrowserAlias("显示节奏线")]
+		[ObjectPropertyBrowserAlias("ShowTimingLine")]
 		public bool ShowTimingLine
 		{
 			get => showTimingLine;
@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 		private bool showObjectPlaceLine = true;
 		[ObjectPropertyBrowserShow]
 		[JsonInclude]
-		[ObjectPropertyBrowserAlias("显示物品放置的位置")]
+		[ObjectPropertyBrowserAlias("ShowObjectPlaceLine")]
 		public bool ShowObjectPlaceLine
 		{
 			get => showObjectPlaceLine;

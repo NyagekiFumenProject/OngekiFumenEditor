@@ -5,6 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
@@ -13,82 +14,86 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <StackPanel>
-        <GroupBox Margin="5" Header="自动保存">
+        <GroupBox Margin="5" Header="{x:Static res:Resource.AutoSave}">
             <StackPanel Margin="10">
-                <CheckBox IsChecked="{Binding Setting.IsEnableAutoSave}">是否开启自动保存功能</CheckBox>
+                <CheckBox Content="{x:Static res:Resource.EnableAutoSave}" IsChecked="{Binding Setting.IsEnableAutoSave}" />
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableAutoSave}"
                     Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">自动保存频率:</TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resource.AutoSaveInterval}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.AutoSaveTimeInterval}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center">分钟/次</TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resource.TimesPerMin}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="撤回/重做 (需要重启生效)">
+        <GroupBox Margin="5" Header="{x:Static res:Resource.UndoRedo}">
             <StackPanel Margin="10">
-                <CheckBox IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}">记录操作位置，设计模式中撤回时如果不在位置内则跳转此位置</CheckBox>
-                <CheckBox Margin="0,10,0,0" IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}">限制编辑器撤回操作保存数量</CheckBox>
+                <CheckBox Content="{x:Static res:Resource.RememberUndoPlace}" IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}" />
+                <CheckBox
+                    Margin="0,10,0,0"
+                    Content="{x:Static res:Resource.LimitUndoCount}"
+                    IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}" />
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableUndoActionSavingLimit}"
                     Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">最大保存</TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resource.SaveMaxCount_Part1}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.UndoActionSavingLimit}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center">个撤回操作</TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resource.SaveMaxCount_Part2}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="用户交互">
+        <GroupBox Margin="5" Header="{x:Static res:Resource.UserInteraction}">
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">鼠标滚轮滚动谱面速度</TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resource.EditorMouseWheelSpeed}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.MouseWheelLength}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center">个单位 (值越大,滚动跨度越大)</TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resource.EditorMouseWheelSpeed_Unit}" />
                 </StackPanel>
-                <CheckBox Margin="0,10,0,0" IsChecked="{Binding Setting.EnableXOffset}">允许水平滚动</CheckBox>
                 <CheckBox
                     Margin="0,10,0,0"
+                    Content="{x:Static res:Resource.EnableHorizonScroll}"
+                    IsChecked="{Binding Setting.EnableXOffset}" />
+                <CheckBox
+                    Margin="0,10,0,0"
+                    Content="{x:Static res:Resource.EnableHorizonScrollBarDisplay}"
                     IsChecked="{Binding Setting.ShowXOffsetScrollBar}"
-                    IsEnabled="{Binding Setting.EnableXOffset}">
-                    显示水平滚动轴
-                </CheckBox>
+                    IsEnabled="{Binding Setting.EnableXOffset}" />
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="渲染器">
+        <GroupBox Margin="5" Header="{x:Static res:Resource.Render}">
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center">当预览时，Bell/Bullet总数超过</TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resource.BellBulletCountOverLimit_Part1}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.ParallelCountLimit}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center">时，会使用多线程进行并行计算</TextBlock>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resource.BellBulletCountOverLimit_Part2}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="其他">
+        <GroupBox Margin="5" Header="{x:Static res:Resource.Other}">
             <StackPanel Margin="10">
                 <Button
                     Padding="10,5,10,5"
                     HorizontalAlignment="Left"
-                    cal:Message.Attach="ClearRecentOpen()">
-                    清除最近打开文件历史记录
-                </Button>
+                    cal:Message.Attach="ClearRecentOpen()"
+                    Content="{x:Static res:Resource.CleanRecentFilesRecords}" />
             </StackPanel>
         </GroupBox>
     </StackPanel>

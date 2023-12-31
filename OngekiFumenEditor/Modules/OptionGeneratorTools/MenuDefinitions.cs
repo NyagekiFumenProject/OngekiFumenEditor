@@ -1,5 +1,6 @@
 ﻿using Gemini.Framework.Menus;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools
@@ -8,7 +9,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools
 	{
 		[Export]
 		public static MenuItemDefinition ToolsOptionsMenuGroupMenuItem = new TextMenuItemDefinition(
-			Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 0, "option生成工具");
+			Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 0, Resource.MenuOptionGenerateTool);
 
 		[Export]
 		public static MenuItemGroupDefinition OptionGeneratorToolsMenuGroup = new MenuItemGroupDefinition(ToolsOptionsMenuGroupMenuItem, 100);

@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
@@ -31,9 +32,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Audio.ViewModels
 			Log.LogDebug($"audio setting property changed : {e.PropertyName}");
 		}
 
-		public string SettingsPageName => "音频";
+		public string SettingsPageName => Resource.TabAudio;
 
-		public string SettingsPagePath => "音效";
+		public string SettingsPagePath => Resource.TabSound;
 
 		public void ApplyChanges()
 		{
@@ -51,7 +52,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Audio.ViewModels
 				var folderPath = openFolderDialog.SelectedPath;
 				if (!Directory.Exists(folderPath))
 				{
-					MessageBox.Show("选择的文件夹为空,请重新选择");
+					MessageBox.Show(Resource.ErrorSoundFolderIsEmptyFile);
 					OnSoundFolderPathButtonClick();
 					return;
 				}

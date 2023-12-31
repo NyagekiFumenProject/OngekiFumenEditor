@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
@@ -10,9 +11,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ShowCurveControlA
 	{
 		public override string Name => "Toolbar.ShowCurveControlAlways";
 
-		public override string Text => "一直显示曲线控制物件";
+		public override string Text => Resource.CommandShowCurveControlAlways;
 
-		public override string ToolTip => "如果开启，将一直显示所有曲线控制物件";
+		public override string ToolTip => Resource.CommandShowCurveControlAlwaysTipText;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/ease.png");
 

@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 		private string setStrID;
 		[ObjectPropertyBrowserShow]
-		[ObjectPropertyBrowserTipText("改变此值可以改变此物件对应的子弹模板")]
+		[ObjectPropertyBrowserTipText("ObjectPalleteStrId")]
 		[ObjectPropertyBrowserAlias("SetStrID")]
 		public string SetStrID
 		{

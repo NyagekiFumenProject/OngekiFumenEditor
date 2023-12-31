@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch
@@ -8,9 +9,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch
 	{
 		public override string Name => "Toolbar.EditorModeSwitch";
 
-		public override string Text => "编辑器预览模式";
+		public override string Text => Resource.EditorModeSwitch;
 
-		public override string ToolTip => "编辑器预览模式";
+		public override string ToolTip => Resource.EditorModeSwitch;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/preview.png");
 

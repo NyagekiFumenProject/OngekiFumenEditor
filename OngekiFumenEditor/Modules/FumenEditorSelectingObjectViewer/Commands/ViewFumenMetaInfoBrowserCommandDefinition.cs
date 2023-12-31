@@ -1,4 +1,5 @@
 ﻿using Gemini.Framework.Commands;
+using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Commands
 
 		public override string Text
 		{
-			get { return "当前选择物件查看器"; }
+			get { return Resource.FumenEditorSelectingObjectViewer; }
 		}
 
 		public override string ToolTip

@@ -1,6 +1,7 @@
 ﻿using Gemini.Framework;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -43,7 +44,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public void SelectImageFilePath()
 		{
-			var imageFilePath = FileDialogHelper.OpenFile("选择图片", new[]
+			var imageFilePath = FileDialogHelper.OpenFile(Resource.SelectImage, new[]
 			{
 				(".png","图片文件")
 			});
@@ -54,7 +55,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public void SelectOutputFolder()
 		{
-			if (!FileDialogHelper.OpenDirectory("选择输出文件夹", out var outputFolderPath))
+			if (!FileDialogHelper.OpenDirectory(Resource.SelectOutputFolder, out var outputFolderPath))
 				return;
 
 			GenerateOption.OutputAssetbundleFolderPath = outputFolderPath;
@@ -74,11 +75,11 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 			if (!result.IsSuccess)
 			{
 				var msg = result.Message;
-				MessageBox.Show($"生成封面文件失败:{msg}");
+				MessageBox.Show($"{Resource.GenerateJacketFileFail}{msg}");
 			}
 			else
 			{
-				if (MessageBox.Show($"生成封面文件成功,是否打开输出文件夹?", string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+				if (MessageBox.Show(Resource.GenerateJacketFileSuccess, string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
 					ProcessUtils.OpenPath(GenerateOption.OutputAssetbundleFolderPath);
 			}
 			IsBusy = false;

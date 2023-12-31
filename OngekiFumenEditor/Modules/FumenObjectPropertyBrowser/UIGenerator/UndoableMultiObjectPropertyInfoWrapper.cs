@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using System.ComponentModel;
 using System.Linq;
@@ -46,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 				var oldValues = core.Wrappers.Select(x => x.ProxyValue).ToArray();
 				var newValue = value;
 
-				referenceEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create($"批量赋值{core.PropertyInfo.Name}",
+				referenceEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create($"{Resource.PropertyBatchSet}{core.PropertyInfo.Name}",
 					() =>
 					{
 						core.ProxyValue = newValue;

@@ -11,6 +11,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
@@ -47,30 +48,30 @@
         </Grid.RowDefinitions>
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
-                <MenuItem Header="选取...">
-                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()" Header="选所有物件" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="反向选取所有物件" />
+                <MenuItem Header="{x:Static res:Resource.MenuSelecting}">
+                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()" Header="{x:Static res:Resource.SelectAllObjects}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="{x:Static res:Resource.ReverseSelectAllObjects}" />
                 </MenuItem>
-                <MenuItem Header="对选取物件...">
-                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()" Header="删除" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="复制 (可复制的物件)" />
-                    <MenuItem Header="操作时间...">
-                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="记忆音频时间" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="恢复到音频时间" />
+                <MenuItem Header="{x:Static res:Resource.ToSelectedObjects}">
+                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()" Header="{x:Static res:Resource.Delete}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="{x:Static res:Resource.CopyCopiable}" />
+                    <MenuItem Header="{x:Static res:Resource.ControlTimeline}">
+                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="{x:Static res:Resource.RememberAudioTime}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="{x:Static res:Resource.RecoveryAudioTime}" />
                     </MenuItem>
                 </MenuItem>
-                <MenuItem Header="对已复制物件...">
-                    <MenuItem Header="粘贴...">
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="直接粘贴" />
+                <MenuItem Header="{x:Static res:Resource.ToCopiedObjects}">
+                    <MenuItem Header="{x:Static res:Resource.ToPaste}">
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{x:Static res:Resource.PasteDirectly}" />
                         <Separator />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="按整体全体范围水平镜像粘贴" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="按整体全体范围垂直镜像粘贴" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)" Header="按X[0,0]为基准水平镜像粘贴" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="{x:Static res:Resource.PasteForHorizonMirror}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="{x:Static res:Resource.PasteForVerticalMirror}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)" Header="{x:Static res:Resource.PasteForZeroXGridMirror}" />
                     </MenuItem>
                 </MenuItem>
                 <Separator />
                 <MenuItem
-                    Header="显示FPS"
+                    Header="{x:Static res:Resource.ShowFPS}"
                     IsCheckable="True"
                     IsChecked="{Binding IsDisplayFPS}" />
             </ContextMenu>

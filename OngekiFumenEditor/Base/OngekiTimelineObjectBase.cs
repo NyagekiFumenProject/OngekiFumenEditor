@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Base
 	public abstract class OngekiTimelineObjectBase : OngekiObjectBase, ITimelineObject, IDisplayableObject, ISelectableObject
 	{
 		private TGrid tGrid = new TGrid();
-		[ObjectPropertyBrowserTipText("物件时间轴坐标")]
+		[ObjectPropertyBrowserTipText("ObjectTGrid")]
 		public virtual TGrid TGrid
 		{
 			get { return tGrid; }
