@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿  <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -602,8 +602,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Resource.en.resx">
-      <LastGenOutput>Resource.en.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Properties\Resource.zh-Hans.resx">
+      <LastGenOutput>Resource.zh-Hans.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Properties\Resource.ja.resx">
