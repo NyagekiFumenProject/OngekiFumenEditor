@@ -280,11 +280,6 @@
       <DependentUpon>ProgramSetting.settings</DependentUpon>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Properties\Resource.ja.Designer.cs">
-      <DependentUpon>Resource.ja.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Update="Properties\Resource.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -607,6 +602,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Properties\Resource.en.resx">
+      <LastGenOutput>Resource.en.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Properties\Resource.ja.resx">
       <LastGenOutput>Resource.ja.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
