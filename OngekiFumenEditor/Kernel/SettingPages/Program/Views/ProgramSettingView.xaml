@@ -70,19 +70,22 @@
             <StackPanel>
                 <CheckBox
                     Margin="10,10,10,10"
-                    Content="{x:Static res:Resources.GraphicsCompatability}"
+                    VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.GraphicsCompatability}">
+                    <TextBlock Text="{x:Static res:Resources.GraphicsCompatability}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="10,0,10,10"
-                    Content="{x:Static res:Resources.OutputGraphicsLog}"
+                    VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.OutputGraphicsLog}">
+                    <TextBlock Text="{x:Static res:Resources.OutputGraphicsLog}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="30,0,10,10"
-                    Content="{x:Static res:Resources.GraphicsLogSynchronous}"
+                    VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.GraphicsLogSynchronous}"
                     IsEnabled="{Binding Setting.OutputGraphicsLog}">
+                    <TextBlock Text="{x:Static res:Resources.GraphicsLogSynchronous}" TextWrapping="Wrap" />
                 </CheckBox>
             </StackPanel>
         </GroupBox>

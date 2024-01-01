@@ -190,7 +190,7 @@
     <value>Audio Option</value>
   </data>
   <data name="AudioPlayerToolViewer" xml:space="preserve">
-    <value>Audio Player Tool Viewer</value>
+    <value>Audio Player</value>
   </data>
   <data name="AudioTGrid" xml:space="preserve">
     <value>Audio Time(TGrid)</value>
@@ -607,7 +607,7 @@
     <value>Please select the audio file to be processed first</value>
   </data>
   <data name="ErrorProcessFumenFileNotSelect" xml:space="preserve">
-    <value>Please select the chart file to be processed first</value>
+    <value>Please select the fumen file to be processed first</value>
   </data>
   <data name="ErrorSaveAudioFileNotSelect" xml:space="preserve">
     <value>No specified location for saving the new audio file</value>
@@ -667,10 +667,10 @@
     <value>Force XGrid to snap automatically.</value>
   </data>
   <data name="FumenBulletPalleteListViewer" xml:space="preserve">
-    <value>Bullet Pallete List</value>
+    <value>Bullet Pallete</value>
   </data>
   <data name="FumenCheckerListViewer" xml:space="preserve">
-    <value>Checker List Viewer</value>
+    <value>Checker List</value>
   </data>
   <data name="FumenContainUngenerateError" xml:space="preserve">
     <value>Fumen contains format or content errors that cannot be ignored, preventing further generation. Please use the fumen checking viewer/tool to check and correct the fumen.</value>
@@ -679,13 +679,13 @@
     <value>Fumen File Format Converter</value>
   </data>
   <data name="FumenEditorRenderControlViewer" xml:space="preserve">
-    <value>Editor Render Control Viewer</value>
+    <value>Render Control</value>
   </data>
   <data name="FumenEditorSelectingObjectViewer" xml:space="preserve">
-    <value>Editor Selecting Object Viewer</value>
+    <value>Editor Selecting</value>
   </data>
   <data name="FumenFileDeserializeNotSupport" xml:space="preserve">
-    <value>This chart file cannot be parsed</value>
+    <value>This fumen file cannot be parsed</value>
   </data>
   <data name="FumenFileName" xml:space="preserve">
     <value>Fumen file name (optional):</value>
@@ -703,7 +703,7 @@
     <value>Failed to load fumen file</value>
   </data>
   <data name="FumenMetaInfoBrowser" xml:space="preserve">
-    <value>Fumen Info Browser</value>
+    <value>Fumen Info</value>
   </data>
   <data name="FumenObjectPropertyBrowser" xml:space="preserve">
     <value>Object Property</value>
@@ -715,7 +715,7 @@
     <value>Fumen Source</value>
   </data>
   <data name="FumenTimeSignatureListViewer" xml:space="preserve">
-    <value>Time Signature List Viewer</value>
+    <value>Time Signature</value>
   </data>
   <data name="FumenVisualEditorSettings" xml:space="preserve">
     <value>Editor Settings</value>
@@ -838,7 +838,7 @@
     <value>Limit the number of undo actions saved in the editor</value>
   </data>
   <data name="LoadFromCurrentEditor" xml:space="preserve">
-    <value>Load from current chart editor:</value>
+    <value>Load from current editor:</value>
   </data>
   <data name="LoadFromFile" xml:space="preserve">
     <value>Load from file:</value>
@@ -949,7 +949,7 @@
     <value>Changing this value can alter the reference bullet pallete of this object</value>
   </data>
   <data name="ObjectProperty" xml:space="preserve">
-    <value>Object property</value>
+    <value>Object Property</value>
   </data>
   <data name="ObjectPropertyChanged" xml:space="preserve">
     <value>Object property ({0}) has been changed</value>
@@ -1255,7 +1255,7 @@
     <value>Editor</value>
   </data>
   <data name="TabEnviorment" xml:space="preserve">
-    <value>Enviorment</value>
+    <value>Environment</value>
   </data>
   <data name="TabLogger" xml:space="preserve">
     <value>Logger</value>
@@ -1270,7 +1270,7 @@
     <value>Throw an error and see</value>
   </data>
   <data name="TGridCalculatorToolViewer" xml:space="preserve">
-    <value>AudioTime/TGrid Calculator</value>
+    <value>Time Calculator</value>
   </data>
   <data name="ThrowExceptionWhenConvert" xml:space="preserve">
     <value>Throw an exception during converting:</value>
@@ -1288,7 +1288,7 @@
     <value>For copied objects...</value>
   </data>
   <data name="ToPaste" xml:space="preserve">
-    <value>For paste...</value>
+    <value>To paste...</value>
   </data>
   <data name="ToSelectedObjects" xml:space="preserve">
     <value>For selected objects...</value>

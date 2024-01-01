@@ -277,7 +277,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Audio Player Tool Viewer 的本地化字符串。
+        ///   查找类似 Audio Player 的本地化字符串。
         /// </summary>
         public static string AudioPlayerToolViewer {
             get {
@@ -1528,7 +1528,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Please select the chart file to be processed first 的本地化字符串。
+        ///   查找类似 Please select the fumen file to be processed first 的本地化字符串。
         /// </summary>
         public static string ErrorProcessFumenFileNotSelect {
             get {
@@ -1708,7 +1708,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Bullet Pallete List 的本地化字符串。
+        ///   查找类似 Bullet Pallete 的本地化字符串。
         /// </summary>
         public static string FumenBulletPalleteListViewer {
             get {
@@ -1717,7 +1717,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Checker List Viewer 的本地化字符串。
+        ///   查找类似 Checker List 的本地化字符串。
         /// </summary>
         public static string FumenCheckerListViewer {
             get {
@@ -1744,7 +1744,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Editor Render Control Viewer 的本地化字符串。
+        ///   查找类似 Render Control 的本地化字符串。
         /// </summary>
         public static string FumenEditorRenderControlViewer {
             get {
@@ -1753,7 +1753,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Editor Selecting Object Viewer 的本地化字符串。
+        ///   查找类似 Editor Selecting 的本地化字符串。
         /// </summary>
         public static string FumenEditorSelectingObjectViewer {
             get {
@@ -1762,7 +1762,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 This chart file cannot be parsed 的本地化字符串。
+        ///   查找类似 This fumen file cannot be parsed 的本地化字符串。
         /// </summary>
         public static string FumenFileDeserializeNotSupport {
             get {
@@ -1816,7 +1816,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Fumen Info Browser 的本地化字符串。
+        ///   查找类似 Fumen Info 的本地化字符串。
         /// </summary>
         public static string FumenMetaInfoBrowser {
             get {
@@ -1852,7 +1852,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Time Signature List Viewer 的本地化字符串。
+        ///   查找类似 Time Signature 的本地化字符串。
         /// </summary>
         public static string FumenTimeSignatureListViewer {
             get {
@@ -2221,7 +2221,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Load from current chart editor: 的本地化字符串。
+        ///   查找类似 Load from current editor: 的本地化字符串。
         /// </summary>
         public static string LoadFromCurrentEditor {
             get {
@@ -2554,7 +2554,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Object property 的本地化字符串。
+        ///   查找类似 Object Property 的本地化字符串。
         /// </summary>
         public static string ObjectProperty {
             get {
@@ -3472,7 +3472,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Enviorment 的本地化字符串。
+        ///   查找类似 Environment 的本地化字符串。
         /// </summary>
         public static string TabEnviorment {
             get {
@@ -3517,7 +3517,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 AudioTime/TGrid Calculator 的本地化字符串。
+        ///   查找类似 Time Calculator 的本地化字符串。
         /// </summary>
         public static string TGridCalculatorToolViewer {
             get {
@@ -3571,7 +3571,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 For paste... 的本地化字符串。
+        ///   查找类似 To paste... 的本地化字符串。
         /// </summary>
         public static string ToPaste {
             get {
