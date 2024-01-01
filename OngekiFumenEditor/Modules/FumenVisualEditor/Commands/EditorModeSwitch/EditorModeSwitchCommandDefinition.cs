@@ -9,9 +9,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch
 	{
 		public override string Name => "Toolbar.EditorModeSwitch";
 
-		public override string Text => Resource.EditorModeSwitch;
+		public override string Text => Resources.EditorModeSwitch;
 
-		public override string ToolTip => Resource.EditorModeSwitch;
+		public override string ToolTip => Resources.EditorModeSwitch;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/preview.png");
 

@@ -129,7 +129,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
 		public AudioPlayerToolViewerViewModel()
 		{
-			DisplayName = Resource.AudioPlayerToolViewer;
+			DisplayName = Resources.AudioPlayerToolViewer;
 			FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
@@ -235,13 +235,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 		{
 			if (AudioPlayer is null || FumenSoundPlayer is null)
 			{
-				MessageBox.Show(Resource.WaitForAudioAndFumenLoaded);
+				MessageBox.Show(Resources.WaitForAudioAndFumenLoaded);
 				return;
 			}
 
 			if (AudioPlayer.IsPlaying)
 			{
-				MessageBox.Show(Resource.PauseAudioAndFumen);
+				MessageBox.Show(Resources.PauseAudioAndFumen);
 				return;
 			}
 
@@ -249,7 +249,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
 			if (result)
 			{
-				MessageBox.Show(Resource.SoundLoaded);
+				MessageBox.Show(Resources.SoundLoaded);
 			}
 		}
 

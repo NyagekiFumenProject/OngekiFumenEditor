@@ -23,6 +23,6 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnClick($executionContext)];"
             DecoratorBrush="DarkGray"
-            Text="{x:Static res:Resource.CombineLanes}" />
+            Text="{x:Static res:Resources.CombineLanes}" />
     </StackPanel>
 </UserControl>

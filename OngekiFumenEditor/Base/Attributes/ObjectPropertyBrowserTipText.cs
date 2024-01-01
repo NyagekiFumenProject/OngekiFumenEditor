@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Base.Attributes
 	{
 		public ObjectPropertyBrowserTipText(string tipTextResourceKey = default)
 		{
-			var tipText = Resource.ResourceManager.GetString(tipTextResourceKey);
+			var tipText = Resources.ResourceManager.GetString(tipTextResourceKey);
 			TipText = tipText ?? string.Empty;
 		}
 

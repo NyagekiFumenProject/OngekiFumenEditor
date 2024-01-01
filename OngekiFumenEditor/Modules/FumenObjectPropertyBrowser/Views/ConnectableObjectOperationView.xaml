@@ -21,7 +21,7 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             DecoratorBrush="Green"
-            Text="{x:Static res:Resource.DragToCreateNext}" />
+            Text="{x:Static res:Resources.DragToCreateNext}" />
         <!--<controls:CommonOperationButton
             Width="150"
             Margin="0,10,0,0"
@@ -41,16 +41,16 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove3($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             DecoratorBrush="DarkCyan"
-            Text="{x:Static res:Resource.DragToSplit}"
-            ToolTip="{x:Static res:Resource.DragToSplitTipText}" />
+            Text="{x:Static res:Resources.DragToSplit}"
+            ToolTip="{x:Static res:Resources.DragToSplitTipText}" />
         <controls:CommonOperationButton
             Width="150"
             Margin="0,10,0,0"
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove4($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             DecoratorBrush="DarkKhaki"
-            Text="{x:Static res:Resource.DragToCreateCurveControlPoint}"
-            ToolTip="{x:Static res:Resource.DragToCreateCurveControlPointTipText}"
+            Text="{x:Static res:Resources.DragToCreateCurveControlPoint}"
+            ToolTip="{x:Static res:Resources.DragToCreateCurveControlPointTipText}"
             Visibility="{Binding IsEnableDragPathControl, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <controls:CommonOperationButton
             Width="150"
@@ -58,8 +58,8 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
             DecoratorBrush="DarkOrchid"
-            Text="{x:Static res:Resource.InterpolateLane}"
-            ToolTip="{x:Static res:Resource.InterpolateLaneTipText}"
+            Text="{x:Static res:Resources.InterpolateLane}"
+            ToolTip="{x:Static res:Resources.InterpolateLaneTipText}"
             Visibility="{Binding IsStartObject, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <controls:CommonOperationButton
             Width="150"
@@ -67,8 +67,8 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnBrushButtonClick()];"
             DecoratorBrush="Tomato"
-            Text="{x:Static res:Resource.BrushCopied}"
-            ToolTip="{x:Static res:Resource.BrushCopiedTipText}"
+            Text="{x:Static res:Resources.BrushCopied}"
+            ToolTip="{x:Static res:Resources.BrushCopiedTipText}"
             Visibility="{Binding IsStartObject, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <controls:CommonOperationButton
             Width="150"
@@ -76,8 +76,8 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnPartChildCurveInterpolateClick()];"
             DecoratorBrush="DarkGoldenrod"
-            Text="{x:Static res:Resource.InterpolatePart}"
-            ToolTip="{x:Static res:Resource.InterpolatePartTipText}"
+            Text="{x:Static res:Resources.InterpolatePart}"
+            ToolTip="{x:Static res:Resources.InterpolatePartTipText}"
             Visibility="{Binding IsStartObject, Converter={StaticResource ReverseBoolToVisibilityConverter}}" />
     </StackPanel>
 </UserControl>

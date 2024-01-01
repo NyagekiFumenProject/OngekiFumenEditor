@@ -108,7 +108,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 			var checkRules = IoC.GetAll<IFumenCheckRule>().OfType<IOngekiFumenCheckRule>();
 			if (checkRules.Any(x => x.CheckRule(fumen, null).Any(x => x.Severity == RuleSeverity.Error)))
 			{
-				msg = Resource.FumenContainUngenerateError;
+				msg = Resources.FumenContainUngenerateError;
 				return false;
 			}
 

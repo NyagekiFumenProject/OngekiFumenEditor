@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 		private readonly T oldValue;
 		private readonly T newValue;
 
-		public string Name => Resource.ObjectPropertyChanged.Format($"物件属性({propName})变更");
+		public string Name => Resources.ObjectPropertyChanged.Format($"物件属性({propName})变更");
 
 		public PropertySetAction(string propName, Action<T> setterAction, T oldValue, T newValue)
 		{

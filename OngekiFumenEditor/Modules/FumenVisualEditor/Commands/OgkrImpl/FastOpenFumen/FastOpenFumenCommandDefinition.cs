@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
 
 		public override string Text
 		{
-			get { return Resource.FastOpenFumen; }
+			get { return Resources.FastOpenFumen; }
 		}
 
 		public override string ToolTip

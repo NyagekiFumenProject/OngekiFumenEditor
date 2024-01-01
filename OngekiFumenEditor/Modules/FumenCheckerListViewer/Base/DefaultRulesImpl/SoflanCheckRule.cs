@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = Resource.CheckRuleSoflanProblem.Format(r),
+					Description = Resources.CheckRuleSoflanProblem.Format(r),
 					LocationDescription = lastTGrid?.ToString(),
 					NavigateBehavior = new NavigateToTGridBehavior(lastTGrid),
 					RuleName = "Soflan",

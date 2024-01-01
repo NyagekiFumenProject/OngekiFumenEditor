@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl
 	public static class MenuDefinitions
 	{
 		[Export]
-		public static MenuDefinition OngekiFumenMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 6, Resource.MenuOngeki);
+		public static MenuDefinition OngekiFumenMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 6, Resources.MenuOngeki);
 
 		[Export]
 		public static MenuItemGroupDefinition OngekiFumenMenuGroup = new MenuItemGroupDefinition(OngekiFumenMenu, 0);

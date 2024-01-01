@@ -27,8 +27,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Standard
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 				return;
 			var saveFileDialog = new SaveFileDialog();
-			saveFileDialog.Filter = FileDialogHelper.BuildExtensionFilter((".ogkr", Resource.OngekiFumenStandardized));
-			saveFileDialog.Title = Resource.NewFumenFileSavePath;
+			saveFileDialog.Filter = FileDialogHelper.BuildExtensionFilter((".ogkr", Resources.OngekiFumenStandardized));
+			saveFileDialog.Title = Resources.NewFumenFileSavePath;
 
 			if (saveFileDialog.ShowDialog() != true)
 				return;
@@ -43,14 +43,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Standard
 			if (!taskResult.IsSuccess)
 			{
 				if (!string.IsNullOrWhiteSpace(taskResult.Message))
-					MessageBox.Show(taskResult.Message, Resource.StandardizeFormat, MessageBoxButton.OK);
+					MessageBox.Show(taskResult.Message, Resources.StandardizeFormat, MessageBoxButton.OK);
 				return;
 			}
 
 			var serializer = IoC.Get<IFumenParserManager>().GetSerializer(newFilePath);
 			await File.WriteAllBytesAsync(newFilePath, await serializer.SerializeAsync(taskResult.SerializedFumen));
 
-			if (MessageBox.Show(Resource.NewFumenFileSaveDone, Resource.StandardizeFormat, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+			if (MessageBox.Show(Resources.NewFumenFileSaveDone, Resources.StandardizeFormat, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
 			{
 				Process.Start(new ProcessStartInfo(Path.GetDirectoryName(newFilePath))
 				{

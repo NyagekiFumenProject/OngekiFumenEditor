@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 
 						yield return new CommonCheckResult()
 						{
-							Description = Resource.SoflanConflict.Format(cur, aff),
+							Description = Resources.SoflanConflict.Format(cur, aff),
 							LocationDescription = $"({cur.TGrid},{cur.EndTGrid}) - ({aff.TGrid},{aff.EndTGrid})",
 							NavigateBehavior = new NavigateToObjectBehavior(r),
 							RuleName = "SoflanConflict",

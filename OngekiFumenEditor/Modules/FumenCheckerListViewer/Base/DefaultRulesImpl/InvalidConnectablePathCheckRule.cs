@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 					yield return new CommonCheckResult()
 					{
 						Severity = RuleSeverity.Problem,
-						Description = Resource.InvalidConnectablePath,
+						Description = Resources.InvalidConnectablePath,
 						LocationDescription = $"{obj.XGrid} {obj.TGrid}",
 						NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
 						RuleName = RuleName,

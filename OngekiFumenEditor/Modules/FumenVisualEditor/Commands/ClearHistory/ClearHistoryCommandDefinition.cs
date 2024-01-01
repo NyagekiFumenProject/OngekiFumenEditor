@@ -9,9 +9,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ClearHistory
 	{
 		public override string Name => "Toolbar.ClearHistory";
 
-		public override string Text => Resource.ClearHistory;
+		public override string Text => Resources.ClearHistory;
 
-		public override string ToolTip => Resource.ClearHistory;
+		public override string ToolTip => Resources.ClearHistory;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/close.png");
 

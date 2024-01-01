@@ -23,9 +23,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
 			Log.LogDebug($"editor global setting property changed : {e.PropertyName}");
 		}
 
-		public string SettingsPageName => Resource.TabEditor;
+		public string SettingsPageName => Resources.TabEditor;
 
-		public string SettingsPagePath => Resource.TabDocument;
+		public string SettingsPagePath => Resources.TabDocument;
 
 		public void ApplyChanges()
 		{

@@ -118,13 +118,13 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public async void Save()
 		{
-			var saveFilePath = FileDialogHelper.SaveFile(Resource.SaveMusicXmlFile, new[] { ("Music.xml", Resource.MusicXmlFileFormat) });
-			MessageBox.Show(Resource.GenerateMusicXmlFile + (await Generate(saveFilePath, MusicXmlOption) ? Resource.Success : Resource.Fail));
+			var saveFilePath = FileDialogHelper.SaveFile(Resources.SaveMusicXmlFile, new[] { ("Music.xml", Resources.MusicXmlFileFormat) });
+			MessageBox.Show(Resources.GenerateMusicXmlFile + (await Generate(saveFilePath, MusicXmlOption) ? Resources.Success : Resources.Fail));
 		}
 
 		public void OnOpenSelectGamePathDialog()
 		{
-			if (!FileDialogHelper.OpenDirectory(Resource.SelectPackageFolder, out var folderPath))
+			if (!FileDialogHelper.OpenDirectory(Resources.SelectPackageFolder, out var folderPath))
 				return;
 			if (!Directory.Exists(folderPath))
 				return;
@@ -135,7 +135,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public async void ParseMusicXml()
 		{
-			var selectedXmlFile = FileDialogHelper.OpenFile(Resource.SelectMusicXmlFile, new[] { ("Music.xml", Resource.MusicXmlFileFormat) });
+			var selectedXmlFile = FileDialogHelper.OpenFile(Resources.SelectMusicXmlFile, new[] { ("Music.xml", Resources.MusicXmlFileFormat) });
 			if (!File.Exists(selectedXmlFile))
 				return;
 			IsBusy = true;

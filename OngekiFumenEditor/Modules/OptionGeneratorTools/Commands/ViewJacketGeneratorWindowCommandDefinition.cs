@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Commands
 
 		public override string Text
 		{
-			get { return Resource.JacketGenerator; }
+			get { return Resources.JacketGenerator; }
 		}
 
 		public override string ToolTip

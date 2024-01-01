@@ -22,7 +22,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="{x:Static res:Resource.DragToCreateWallNext}" />
+                Text="{x:Static res:Resources.DragToCreateWallNext}" />
         </Border>
         <Border
             Width="130"
@@ -34,7 +34,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="{x:Static res:Resource.DragToCreateWallEnd}" />
+                Text="{x:Static res:Resources.DragToCreateWallEnd}" />
         </Border>
     </StackPanel>
 </UserControl>

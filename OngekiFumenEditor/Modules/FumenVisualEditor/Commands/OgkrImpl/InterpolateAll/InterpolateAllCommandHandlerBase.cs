@@ -76,8 +76,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 				};
 			}
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.CommandInterpolateAll, redoAction, undoAction));
-			Log.LogInfo(Resource.InterpolateComplete.Format(curveStarts.Count, laneMap.Values.Select(x => x.Count).Sum(), affactObjects.Count()));
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CommandInterpolateAll, redoAction, undoAction));
+			Log.LogInfo(Resources.InterpolateComplete.Format(curveStarts.Count, laneMap.Values.Select(x => x.Count).Sum(), affactObjects.Count()));
 		}
 	}
 }

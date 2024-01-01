@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 					yield return new CommonCheckResult()
 					{
 						Severity = RuleSeverity.Error,
-						Description = Resource.MissingEndObject.Format(missingObject.Id),
+						Description = Resources.MissingEndObject.Format(missingObject.Id),
 						LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
 						NavigateBehavior = new NavigateToObjectBehavior(missingObject),
 						RuleName = RuleName,

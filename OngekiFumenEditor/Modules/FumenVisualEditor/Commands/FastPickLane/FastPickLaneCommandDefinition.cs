@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
 	{
 		public override string Name => $"Editor.FastPickLane_{typeof(T).Name}";
 
-		public override string Text => $"{Resource.FastPickLane}({typeof(T).Name})";
+		public override string Text => $"{Resources.FastPickLane}({typeof(T).Name})";
 
 		public override string ToolTip => Text;
 	}

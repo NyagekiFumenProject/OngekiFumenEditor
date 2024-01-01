@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 	{
 		public class EditorItem
 		{
-			public string Name => TargetEditor?.DisplayName ?? Resource.NoEditorTarget;
+			public string Name => TargetEditor?.DisplayName ?? Resources.NoEditorTarget;
 			public FumenVisualEditorViewModel TargetEditor { get; set; }
 		}
 
@@ -173,7 +173,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 			}
 			catch (Exception e)
 			{
-				Log.LogDebug($"{Resource.UseTemplateScriptFileFail}{e.Message}");
+				Log.LogDebug($"{Resources.UseTemplateScriptFileFail}{e.Message}");
 			}
 		}
 
@@ -193,7 +193,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show($"{Resource.CantSaveScriptFile} {e.Message}");
+				MessageBox.Show($"{Resources.CantSaveScriptFile} {e.Message}");
 			}
 		}
 
@@ -219,12 +219,12 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 
 			if (buildResult.IsSuccess)
 			{
-				MessageBox.Show(Resource.CompileSuccess);
+				MessageBox.Show(Resources.CompileSuccess);
 				return;
 			}
 
 			var errorMsg = string.Join(Environment.NewLine, buildResult.Errors);
-			MessageBox.Show($"{Resource.CompileError}\n{errorMsg}");
+			MessageBox.Show($"{Resources.CompileError}\n{errorMsg}");
 		}
 
 		public async void OnRunButtonClicked()
@@ -235,17 +235,17 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 			if (!buildResult.IsSuccess)
 			{
 				var errorMsg = string.Join(Environment.NewLine, buildResult.Errors);
-				MessageBox.Show($"{Resource.CompileError}\n{errorMsg}");
+				MessageBox.Show($"{Resources.CompileError}\n{errorMsg}");
 				return;
 			}
 
-			if (MessageBox.Show(Resource.ComfirmExecuteScript, default, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+			if (MessageBox.Show(Resources.ComfirmExecuteScript, default, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
 				return;
 
 			using var _2 = StatusBarHelper.BeginStatus("Script is executing ...");
 			var executeResult = await IoC.Get<IEditorScriptExecutor>().Execute(buildResult, CurrentSelectedEditor?.TargetEditor);
 
-			MessageBox.Show($"{Resource.Execute}{(executeResult.Success ? Resource.Success : $"{Resource.FailedAndReason}{executeResult.ErrorMessage}")}");
+			MessageBox.Show($"{Resources.Execute}{(executeResult.Success ? Resources.Success : $"{Resources.FailedAndReason}{executeResult.ErrorMessage}")}");
 		}
 
 		public async void OnReloadFileButtonClicked()
@@ -280,7 +280,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 
 			if (!documentContext.GenerateProjectFile(projOutputDirPath, csFilePath, out var projFilePath))
 			{
-				MessageBox.Show(Resource.GenerateScriptProjectFileFail);
+				MessageBox.Show(Resources.GenerateScriptProjectFileFail);
 				return;
 			}
 

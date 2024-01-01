@@ -32,9 +32,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Audio.ViewModels
 			Log.LogDebug($"audio setting property changed : {e.PropertyName}");
 		}
 
-		public string SettingsPageName => Resource.TabAudio;
+		public string SettingsPageName => Resources.TabAudio;
 
-		public string SettingsPagePath => Resource.TabSound;
+		public string SettingsPagePath => Resources.TabSound;
 
 		public void ApplyChanges()
 		{
@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Audio.ViewModels
 				var folderPath = openFolderDialog.SelectedPath;
 				if (!Directory.Exists(folderPath))
 				{
-					MessageBox.Show(Resource.ErrorSoundFolderIsEmptyFile);
+					MessageBox.Show(Resources.ErrorSoundFolderIsEmptyFile);
 					OnSoundFolderPathButtonClick();
 					return;
 				}

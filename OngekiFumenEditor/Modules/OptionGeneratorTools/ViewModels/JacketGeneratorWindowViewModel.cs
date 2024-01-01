@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public void SelectImageFilePath()
 		{
-			var imageFilePath = FileDialogHelper.OpenFile(Resource.SelectImage, new[]
+			var imageFilePath = FileDialogHelper.OpenFile(Resources.SelectImage, new[]
 			{
 				(".png","图片文件")
 			});
@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
 		public void SelectOutputFolder()
 		{
-			if (!FileDialogHelper.OpenDirectory(Resource.SelectOutputFolder, out var outputFolderPath))
+			if (!FileDialogHelper.OpenDirectory(Resources.SelectOutputFolder, out var outputFolderPath))
 				return;
 
 			GenerateOption.OutputAssetbundleFolderPath = outputFolderPath;
@@ -75,11 +75,11 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 			if (!result.IsSuccess)
 			{
 				var msg = result.Message;
-				MessageBox.Show($"{Resource.GenerateJacketFileFail}{msg}");
+				MessageBox.Show($"{Resources.GenerateJacketFileFail}{msg}");
 			}
 			else
 			{
-				if (MessageBox.Show(Resource.GenerateJacketFileSuccess, string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+				if (MessageBox.Show(Resources.GenerateJacketFileSuccess, string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
 					ProcessUtils.OpenPath(GenerateOption.OutputAssetbundleFolderPath);
 			}
 			IsBusy = false;

@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools
 	{
 		[Export]
 		public static MenuItemDefinition ToolsOptionsMenuGroupMenuItem = new TextMenuItemDefinition(
-			Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 0, Resource.MenuOptionGenerateTool);
+			Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 0, Resources.MenuOptionGenerateTool);
 
 		[Export]
 		public static MenuItemGroupDefinition OptionGeneratorToolsMenuGroup = new MenuItemGroupDefinition(ToolsOptionsMenuGroupMenuItem, 100);

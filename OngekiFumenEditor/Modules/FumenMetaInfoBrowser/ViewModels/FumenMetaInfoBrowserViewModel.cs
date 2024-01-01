@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 	{
 		public FumenMetaInfoBrowserViewModel()
 		{
-			DisplayName = Resource.FumenMetaInfoBrowser;
+			DisplayName = Resources.FumenMetaInfoBrowser;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Fumen = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor?.Fumen;
 		}
@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 				if (Fumen is null)
 				{
 					FumenProxy = null;
-					ErrorMessage = Resource.OpenEditorBeforeUsing;
+					ErrorMessage = Resources.OpenEditorBeforeUsing;
 				}
 				else
 				{

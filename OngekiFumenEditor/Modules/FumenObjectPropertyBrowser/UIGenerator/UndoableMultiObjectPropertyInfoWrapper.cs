@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 				var oldValues = core.Wrappers.Select(x => x.ProxyValue).ToArray();
 				var newValue = value;
 
-				referenceEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create($"{Resource.PropertyBatchSet}{core.PropertyInfo.Name}",
+				referenceEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create($"{Resources.PropertyBatchSet}{core.PropertyInfo.Name}",
 					() =>
 					{
 						core.ProxyValue = newValue;

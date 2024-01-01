@@ -97,7 +97,7 @@ namespace OngekiFumenEditor.Utils
 
 			if (!File.Exists(audioFile))
 			{
-				audioFile = FileDialogHelper.OpenFile(Resource.SelectAudioFileManually, IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
+				audioFile = FileDialogHelper.OpenFile(Resources.SelectAudioFileManually, IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
 				if (!File.Exists(audioFile))
 					return null;
 				audioDuration = await CalcAudioDuration(audioFile);
@@ -131,7 +131,7 @@ namespace OngekiFumenEditor.Utils
 					result = name;
 			}
 
-			return $"[{Resource.FastOpen}] " + result;
+			return $"[{Resources.FastOpen}] " + result;
 		}
 
 		private static async Task<(string, TimeSpan)> GetAudioFilePath(string ogkrFilePath)

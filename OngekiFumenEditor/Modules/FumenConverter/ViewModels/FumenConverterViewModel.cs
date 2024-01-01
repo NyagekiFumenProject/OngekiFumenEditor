@@ -78,13 +78,13 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
 			{
 				if (!File.Exists(InputFumenFilePath))
 				{
-					MessageBox.Show(Resource.FumenFileNotSelect);
+					MessageBox.Show(Resources.FumenFileNotSelect);
 					return;
 				}
 
 				if (parserManager.GetDeserializer(InputFumenFilePath) is not IFumenDeserializable deserializable)
 				{
-					MessageBox.Show(Resource.FumenFileDeserializeNotSupport);
+					MessageBox.Show(Resources.FumenFileDeserializeNotSupport);
 					return;
 				}
 
@@ -95,25 +95,25 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show($"{Resource.FumenLoadFailed}{e.Message}");
+					MessageBox.Show($"{Resources.FumenLoadFailed}{e.Message}");
 				}
 			}
 
 			if (fumen is null)
 			{
-				MessageBox.Show(Resource.NoFumenInput);
+				MessageBox.Show(Resources.NoFumenInput);
 				return;
 			}
 
 			if (string.IsNullOrWhiteSpace(OutputFumenFilePath))
 			{
-				MessageBox.Show(Resource.OutputFumenFileNotSelect);
+				MessageBox.Show(Resources.OutputFumenFileNotSelect);
 				return;
 			}
 
 			if (parserManager.GetSerializer(OutputFumenFilePath) is not IFumenSerializable serializable)
 			{
-				MessageBox.Show(Resource.OutputFumenNotSupport);
+				MessageBox.Show(Resources.OutputFumenNotSupport);
 				return;
 			}
 
@@ -121,11 +121,11 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
 			{
 				var data = await serializable.SerializeAsync(fumen);
 				await File.WriteAllBytesAsync(OutputFumenFilePath, data);
-				MessageBox.Show(Resource.ConvertSuccess);
+				MessageBox.Show(Resources.ConvertSuccess);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show($"{Resource.ConvertFail}{e.Message}");
+				MessageBox.Show($"{Resources.ConvertFail}{e.Message}");
 			}
 		}
 	}

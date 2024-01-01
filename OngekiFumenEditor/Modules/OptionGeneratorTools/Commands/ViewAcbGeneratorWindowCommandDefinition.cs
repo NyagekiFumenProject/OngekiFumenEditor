@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Commands
 
 		public override string Text
 		{
-			get { return Resource.AcbGenerator; }
+			get { return Resources.AcbGenerator; }
 		}
 
 		public override string ToolTip

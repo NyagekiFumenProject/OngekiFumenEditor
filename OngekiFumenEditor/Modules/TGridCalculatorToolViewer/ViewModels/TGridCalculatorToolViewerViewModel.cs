@@ -90,7 +90,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
 
 		public TGridCalculatorToolViewerViewModel()
 		{
-			DisplayName = Resource.TGridCalculatorToolViewer;
+			DisplayName = Resources.TGridCalculatorToolViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 			IoC.Get<IFumenObjectPropertyBrowser>().PropertyChanged += TGridCalculatorToolViewerViewModel_PropertyChanged;

@@ -94,7 +94,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 
 		public void OnOpenSelectInputFileDialog()
 		{
-			var result = FileDialogHelper.OpenFile(Resource.SelectAudioFile, FileDialogHelper.GetSupportAudioFileExtensionFilterList());
+			var result = FileDialogHelper.OpenFile(Resources.SelectAudioFile, FileDialogHelper.GetSupportAudioFileExtensionFilterList());
 			if (!string.IsNullOrWhiteSpace(result))
 			{
 				InputFumenFilePath = result;
@@ -104,7 +104,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 
 		public void OnOpenSelectOutputFileDialog()
 		{
-			var result = FileDialogHelper.SaveFile(Resource.SaveNewAudioFile, new[] { (".wav", ".wav Audio File") });
+			var result = FileDialogHelper.SaveFile(Resources.SaveNewAudioFile, new[] { (".wav", ".wav Audio File") });
 			if (!string.IsNullOrWhiteSpace(result))
 				OutputFumenFilePath = result;
 		}
@@ -118,7 +118,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 			{
 				if (!File.Exists(InputFumenFilePath))
 				{
-					MessageBox.Show(Resource.ErrorProcessFumenFileNotSelect);
+					MessageBox.Show(Resources.ErrorProcessFumenFileNotSelect);
 					return;
 				}
 
@@ -131,13 +131,13 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 
 			if (!File.Exists(audioFilePath))
 			{
-				MessageBox.Show(Resource.ErrorProcessAudioNotFound);
+				MessageBox.Show(Resources.ErrorProcessAudioNotFound);
 				return;
 			}
 
 			if (string.IsNullOrWhiteSpace(OutputFumenFilePath))
 			{
-				MessageBox.Show(Resource.ErrorSaveAudioFileNotSelect);
+				MessageBox.Show(Resources.ErrorSaveAudioFileNotSelect);
 				return;
 			}
 
@@ -177,14 +177,14 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 							var newTGrid = timelineObject.TGrid + offset;
 							if (newTGrid is null)
 							{
-								MessageBox.Show($"{Resource.ErrorCantApplyNewAdjust}{timelineObject}");
+								MessageBox.Show($"{Resources.ErrorCantApplyNewAdjust}{timelineObject}");
 								return;
 							}
 
 							map[timelineObject] = (timelineObject.TGrid, newTGrid);
 						}
 
-						currentEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.ApplyAudioAdjust, () =>
+						currentEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.ApplyAudioAdjust, () =>
 						{
 							foreach (var item in map)
 								item.Key.TGrid = item.Value.after.CopyNew();
@@ -198,13 +198,13 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
 
 				offseted.SaveTo(fs);
 				if (IsCurrentEditorAsInputFumen)
-					MessageBox.Show(Resource.ApplyAudioAdjustSuccessButSuggest);
+					MessageBox.Show(Resources.ApplyAudioAdjustSuccessButSuggest);
 				else
-					MessageBox.Show(Resource.ApplyAudioAdjustSuccess);
+					MessageBox.Show(Resources.ApplyAudioAdjustSuccess);
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show($"{Resource.ApplyAudioAdjustFail}{e.Message}");
+				MessageBox.Show($"{Resources.ApplyAudioAdjustFail}{e.Message}");
 			}
 		}
 	}

@@ -11,9 +11,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ShowCurveControlA
 	{
 		public override string Name => "Toolbar.ShowCurveControlAlways";
 
-		public override string Text => Resource.CommandShowCurveControlAlways;
+		public override string Text => Resources.CommandShowCurveControlAlways;
 
-		public override string ToolTip => Resource.CommandShowCurveControlAlwaysTipText;
+		public override string ToolTip => Resources.CommandShowCurveControlAlwaysTipText;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/ease.png");
 

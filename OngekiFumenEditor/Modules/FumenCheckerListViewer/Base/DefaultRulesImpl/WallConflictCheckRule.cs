@@ -205,7 +205,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 						{
 							RuleName = RuleName,
 							Severity = RuleSeverity.Problem,
-							Description = Resource.WallConflict.Format(cur.Wall.RecordId, next.Wall.RecordId),
+							Description = Resources.WallConflict.Format(cur.Wall.RecordId, next.Wall.RecordId),
 							LocationDescription = cur.TGridRange.ToString(),
 							NavigateBehavior = new NavigateToTGridBehavior(cur.Wall.TGrid)
 						};
@@ -227,7 +227,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 								RuleName = RuleName,
 								Severity = RuleSeverity.Error,
 								LocationDescription = child.ToString(),
-								Description = Resource.WallConflict3.Format(wall.Wall.RecordId, child.TGrid, maxTGrid),
+								Description = Resources.WallConflict3.Format(wall.Wall.RecordId, child.TGrid, maxTGrid),
 								NavigateBehavior = new NavigateToObjectBehavior(child)
 							};
 							break;
@@ -326,7 +326,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 								RuleName = RuleName,
 								Severity = RuleSeverity.Error,
 								LocationDescription = $"leftLine:{leftLine} rightLine:{rightLine} conflict at {conflictXGrid} {conflictTGrid}",
-								Description = Resource.WallConflict.Format(leftWall.Wall.RecordId, rightWall.Wall.RecordId),
+								Description = Resources.WallConflict.Format(leftWall.Wall.RecordId, rightWall.Wall.RecordId),
 								NavigateBehavior = new NavigateToTGridBehavior(conflictTGrid)
 							};
 						}

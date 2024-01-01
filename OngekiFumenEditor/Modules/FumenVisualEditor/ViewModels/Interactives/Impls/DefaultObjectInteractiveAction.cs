@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			OnDragMove(obj, point, editor);
 			var newPos = new Point(x, y);
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.DragObjects,
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.DragObjects,
 				() =>
 				{
 					OnMoveCanvas(obj, newPos, editor);

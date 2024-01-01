@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
 			Log.LogDebug($"fumenDeserializer = {fumenDeserializer}");
 			if (fumenDeserializer is null)
-				throw new NotSupportedException($"{Resource.DeserializeFumenFileNotSupport}{projectData.FumenFilePath}");
+				throw new NotSupportedException($"{Resources.DeserializeFumenFileNotSupport}{projectData.FumenFilePath}");
 			var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
 			projectData.Fumen = fumen;
 
@@ -84,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			try
 			{
 				if (!FileHelper.IsPathWritable(projFileFullPath))
-					throw new IOException(Resource.CantWriteProjectFileByIoError);
+					throw new IOException(Resources.CantWriteProjectFileByIoError);
 
 				var tmpProjFilePath = TempFileHelper.GetTempFilePath("FumenProjFile", Path.GetFileNameWithoutExtension(projFileFullPath), Path.GetExtension(projFileFullPath));
 				StoreBulletPalleteListEditorData(editorProject);
@@ -97,7 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			}
 			catch (Exception e)
 			{
-				var msg = $"{Resource.CantSaveProjectFile}{e.Message}{Environment.NewLine}{e.StackTrace}";
+				var msg = $"{Resources.CantSaveProjectFile}{e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 				//Log.LogError(msg);
 				//MessageBox.Show(msg);
@@ -110,12 +110,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			try
 			{
 				if (!FileHelper.IsPathWritable(fumenFileFullPath))
-					throw new IOException(Resource.CantWriteFumenFileByIoError);
+					throw new IOException(Resources.CantWriteFumenFileByIoError);
 
 				var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFileFullPath);
 				Log.LogDebug($"serializer = {serializer}");
 				if (serializer is null)
-					throw new NotSupportedException($"{Resource.SerializeFileNotSupport}{Path.GetFileName(fumenFileFullPath)}");
+					throw new NotSupportedException($"{Resources.SerializeFileNotSupport}{Path.GetFileName(fumenFileFullPath)}");
 
 				var tmpFumenFilePath = TempFileHelper.GetTempFilePath("FumenFile", Path.GetFileNameWithoutExtension(fumenFileFullPath), Path.GetExtension(fumenFileFullPath));
 				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
@@ -130,7 +130,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			}
 			catch (Exception e)
 			{
-				var msg = $"{Resource.CantSaveFumenProject}{e.Message}{Environment.NewLine}{e.StackTrace}";
+				var msg = $"{Resources.CantSaveFumenProject}{e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 			}
 		}
@@ -174,7 +174,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			}
 			catch (Exception e)
 			{
-				var msg = $"{Resource.CantSaveProjectTotally}{e.Message}{Environment.NewLine}{e.StackTrace}";
+				var msg = $"{Resources.CantSaveProjectTotally}{e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 			}
 		}

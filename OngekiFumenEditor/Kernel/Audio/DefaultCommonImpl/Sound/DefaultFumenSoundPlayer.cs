@@ -73,7 +73,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			var soundFolderPath = AudioSetting.Default.SoundFolderPath;
 			if (!Directory.Exists(soundFolderPath))
 			{
-				var msg = Resource.ErrorSoundFolderNotFound;
+				var msg = Resources.ErrorSoundFolderNotFound;
 				MessageBox.Show(msg);
 				Log.LogError(msg);
 				source.SetResult(false);
@@ -119,7 +119,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
 			if (!noError)
 			{
-				MessageBox.Show(Resource.WarnSomeSoundsNotLoad);
+				MessageBox.Show(Resources.WarnSomeSoundsNotLoad);
 				source.SetResult(false);
 				return;
 			}

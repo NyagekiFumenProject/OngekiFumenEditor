@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Standard
 
 		public override string Text
 		{
-			get { return Resource.StandardizeFormat; }
+			get { return Resources.StandardizeFormat; }
 		}
 
 		public override string ToolTip

@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Kernel.AssistHelper.Commands
 	public static class MenuDefinitions
 	{
 		[Export]
-		public static MenuDefinition AssistMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 7, Resource.MenuAssist);
+		public static MenuDefinition AssistMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 7, Resources.MenuAssist);
 		[Export]
 		public static MenuItemGroupDefinition AssistMenuGroup = new MenuItemGroupDefinition(AssistMenu, 0);
 		[Export]

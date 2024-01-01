@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory
 	{
 		public static ICurveInterpolaterFactory Default { get; } = new DefaultCurveInterpolaterFactory();
 
-		public string Name => Resource.CurveInterpolaterFactoryDefaultImpl;
+		public string Name => Resources.CurveInterpolaterFactoryDefaultImpl;
 
 		public ICurveInterpolateEnumerator CreateInterpolaterForAll(ConnectableStartObject start)
 		{

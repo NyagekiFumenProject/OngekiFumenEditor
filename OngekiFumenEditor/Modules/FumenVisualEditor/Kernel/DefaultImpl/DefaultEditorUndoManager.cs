@@ -145,7 +145,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				var wrappedAction = new CompositeUndoAction(action.Name, new[]
 				{
 					action,
-					LambdaUndoAction.Create(Resource.RememberRecoveryEditorTime,()=> { }  ,() =>{
+					LambdaUndoAction.Create(Resources.RememberRecoveryEditorTime,()=> { }  ,() =>{
 						if (editor.IsDesignMode && !editor.CheckVisible(curTGrid))
 							editor.ScrollTo(curTGrid);
 					})

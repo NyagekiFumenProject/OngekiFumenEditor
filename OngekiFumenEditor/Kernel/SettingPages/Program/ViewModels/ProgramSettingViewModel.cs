@@ -25,9 +25,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 			Log.LogDebug($"logs setting property changed : {e.PropertyName}");
 		}
 
-		public string SettingsPageName => Resource.TabProgram;
+		public string SettingsPageName => Resources.TabProgram;
 
-		public string SettingsPagePath => Resource.TabEnviorment;
+		public string SettingsPagePath => Resources.TabEnviorment;
 
 		public void ApplyChanges()
 		{
@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 				var folderPath = openFolderDialog.SelectedPath;
 				if (!Directory.Exists(folderPath))
 				{
-					MessageBox.Show(Resource.ErrorFolderIsEmpty);
+					MessageBox.Show(Resources.ErrorFolderIsEmpty);
 					OnDumpFolderPathButtonClick();
 					return;
 				}

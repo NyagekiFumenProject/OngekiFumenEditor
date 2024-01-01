@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon
 	public class UsageWikiCommandDefinition : OpenUrlCommonCommandDefinition
 	{
 		public override string NameOverride => "UsageWiki";
-		public override string Text => Resource.TutorialAndDocument;
+		public override string Text => Resources.TutorialAndDocument;
 		public override string Url => "https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki";
 	}
 
@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon
 	public class OpenProjectUrlCommandDefinition : OpenUrlCommonCommandDefinition
 	{
 		public override string NameOverride => "OpenProjectUrl";
-		public override string Text => Resource.CommandOpenProjectUrl;
+		public override string Text => Resources.CommandOpenProjectUrl;
 		public override string Url => "https://github.com/NyagekiFumenProject/OngekiFumenEditor";
 	}
 
@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon
 	public class RequestIssueHelpCommandDefinition : OpenUrlCommonCommandDefinition
 	{
 		public override string NameOverride => "RequestIssueHelp";
-		public override string Text => Resource.CommandRequestIssueHelp;
+		public override string Text => Resources.CommandRequestIssueHelp;
 		public override string Url => "https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-debugger?view=vs-2022";
 	}
 
@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon
 	public class PostSuggestCommandDefinition : OpenUrlCommonCommandDefinition
 	{
 		public override string NameOverride => "PostSuggest";
-		public override string Text => Resource.CommandPostSuggest;
+		public override string Text => Resources.CommandPostSuggest;
 		public override string Url => "https://github.com/NyagekiFumenProject/OngekiFumenEditor/pulls";
 	}
 }

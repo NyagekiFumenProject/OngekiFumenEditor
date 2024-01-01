@@ -20,7 +20,7 @@
     mc:Ignorable="d">
     <StackPanel>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <Label VerticalAlignment="Center" Content="{x:Static res:Resource.ImageFile}">
+            <Label VerticalAlignment="Center" Content="{x:Static res:Resources.ImageFile}">
             </Label>
             <Label
                 Width="300"
@@ -33,13 +33,13 @@
                 Padding="20,5,20,5"
                 VerticalAlignment="Center"
                 cal:Message.Attach="SelectImageFilePath()"
-                Content="{x:Static res:Resource.Browser}">
+                Content="{x:Static res:Resources.Browser}">
             </Button>
         </StackPanel>
         <GroupBox
             Margin="10,0,10,10"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="{x:Static res:Resource.Option}">
+            Header="{x:Static res:Resources.Option}">
             <StackPanel Margin="5">
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Label VerticalAlignment="Center">MusicId:</Label>
@@ -50,13 +50,13 @@
                     </TextBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" Content="{x:Static res:Resource.UpdateAssetBytesFile}">
+                    <Label VerticalAlignment="Center" Content="{x:Static res:Resources.UpdateAssetBytesFile}">
                     </Label>
                     <CheckBox Margin="10,0,0,0" IsChecked="{Binding GenerateOption.UpdateAssetBytesFile}">
                     </CheckBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" Content="{x:Static res:Resource.BigJacketSize}">
+                    <Label VerticalAlignment="Center" Content="{x:Static res:Resources.BigJacketSize}">
                     </Label>
                     <TextBox
                         Width="40"
@@ -69,7 +69,7 @@
                         Text="{Binding GenerateOption.Height}" />
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <Label VerticalAlignment="Center" Content="{x:Static res:Resource.SmallJacketSize}">
+                    <Label VerticalAlignment="Center" Content="{x:Static res:Resources.SmallJacketSize}">
                     </Label>
                     <TextBox
                         Width="40"
@@ -84,7 +84,7 @@
             </StackPanel>
         </GroupBox>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <Label VerticalAlignment="Center" Content="{x:Static res:Resource.OutputFolder}">
+            <Label VerticalAlignment="Center" Content="{x:Static res:Resources.OutputFolder}">
             </Label>
             <Label
                 Width="300"
@@ -97,14 +97,14 @@
                 Padding="20,5,20,5"
                 VerticalAlignment="Center"
                 cal:Message.Attach="SelectOutputFolder()"
-                Content="{x:Static res:Resource.Browser}">
+                Content="{x:Static res:Resources.Browser}">
             </Button>
         </StackPanel>
         <Button
             Margin="10"
             Padding="20,10,20,10"
             cal:Message.Attach="Generate()"
-            Content="{x:Static res:Resource.Generate}"
+            Content="{x:Static res:Resources.Generate}"
             IsEnabled="{Binding IsGeneratable}">
         </Button>
     </StackPanel>

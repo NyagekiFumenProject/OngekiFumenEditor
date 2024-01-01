@@ -23,6 +23,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -137,6 +139,14 @@ namespace OngekiFumenEditor
 				.Append(typeof(IOutput).Assembly)
 				.Append(typeof(IMainWindow).Assembly)
 				.Distinct();
+		}
+
+		protected override void PreInitialize()
+		{
+			base.PreInitialize();
+
+			Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 		}
 
 		protected void LogBaseInfos()

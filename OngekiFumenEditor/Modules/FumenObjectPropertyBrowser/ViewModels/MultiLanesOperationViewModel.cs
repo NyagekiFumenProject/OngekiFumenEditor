@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			var frontStart = frontChild.ReferenceStartObject;
 			var midChild = frontStart.CreateChildObject();
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.CombineLane, () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CombineLane, () =>
 			{
 				midChild.XGrid = laterStart.XGrid.CopyNew();
 				midChild.TGrid = laterStart.TGrid.CopyNew();

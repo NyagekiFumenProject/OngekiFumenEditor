@@ -95,7 +95,9 @@ namespace OngekiFumenEditor
 			if (assembly is not null)
 				Debug.WriteLine($"\t  resolve satellite assemblies GOOD :{assembly.FullName}");
 			else
+			{
 				Debug.WriteLine($"\t  resolve satellite assemblies BAD");
+			}
 			return assembly;
 		}
 	}

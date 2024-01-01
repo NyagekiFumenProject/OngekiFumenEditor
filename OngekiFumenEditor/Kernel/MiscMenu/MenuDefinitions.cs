@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu
 			ProgramMiscOpenMenuGroup, 0);
 
 		[Export]
-		public static MenuDefinition HelpMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 99999, Resource.MenuHelp);
+		public static MenuDefinition HelpMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 99999, Resources.MenuHelp);
 
 		[Export]
 		public static MenuItemGroupDefinition HelpMenuGroup = new MenuItemGroupDefinition(HelpMenu, 0);

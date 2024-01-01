@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Commands
 
 		public override string Text
 		{
-			get { return Resource.FumenCheckerListViewer; }
+			get { return Resources.FumenCheckerListViewer; }
 		}
 
 		public override string ToolTip

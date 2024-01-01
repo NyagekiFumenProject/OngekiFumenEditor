@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.Commands
 
 		public override string Text
 		{
-			get { return Resource.FumenVisualEditorSettings; }
+			get { return Resources.FumenVisualEditorSettings; }
 		}
 
 		public override string ToolTip

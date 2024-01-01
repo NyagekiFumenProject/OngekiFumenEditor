@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = Resource.MissingRefObject.Format(dockableObj.GetType().Name),
+					Description = Resources.MissingRefObject.Format(dockableObj.GetType().Name),
 					LocationDescription = dockableObj.ToString(),
 					NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
 					RuleName = RuleName,
@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = Resource.MissingRefObject2.Format(dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
+					Description = Resources.MissingRefObject2.Format(dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
 					LocationDescription = dockableObj.ToString(),
 					NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
 					RuleName = RuleName,

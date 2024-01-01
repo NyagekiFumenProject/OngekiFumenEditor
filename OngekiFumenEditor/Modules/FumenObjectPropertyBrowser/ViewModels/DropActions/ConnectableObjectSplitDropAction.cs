@@ -33,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 		{
 			if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
 			{
-				editor.Toast.ShowMessage(Resource.DisableAddObjectBeyondAudioDuration);
+				editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
 				return;
 			}
 
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 			var splitOutChildren = new List<ConnectableChildObjectBase>();
 			var affactedObjects = new HashSet<ILaneDockable>();
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.SplitLane, () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.SplitLane, () =>
 			{
 				//计算出需要被划分出来的后边子物件集合
 				splitOutChildren.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));

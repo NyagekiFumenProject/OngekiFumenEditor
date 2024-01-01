@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Commands
 
 		public override string Text
 		{
-			get { return Resource.FumenBulletPalleteListViewer; }
+			get { return Resources.FumenBulletPalleteListViewer; }
 		}
 
 		public override string ToolTip

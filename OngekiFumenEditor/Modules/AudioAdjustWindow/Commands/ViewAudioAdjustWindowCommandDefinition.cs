@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.Commands
 
 		public override string Text
 		{
-			get { return Resource.CommandAudioAdjustWindow; }
+			get { return Resources.CommandAudioAdjustWindow; }
 		}
 
 		public override string ToolTip

@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = Resource.MissingBossEnemySet,
+					Description = Resources.MissingBossEnemySet,
 					LocationDescription = string.Empty,
 					RuleName = "MissingBossEnemySet",
 					Severity = RuleSeverity.Suggest

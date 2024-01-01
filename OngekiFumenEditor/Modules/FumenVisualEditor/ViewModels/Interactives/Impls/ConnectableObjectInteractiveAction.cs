@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			else
 				return;//YOU SHOULD NOT BE HERE
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.UpdateXGridForDockedObjects,
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.UpdateXGridForDockedObjects,
 				() =>
 				{
 					ConnectableStartObject.RelocateDockableObjects(editor.Fumen, obj);

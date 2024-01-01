@@ -84,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 
 		public FumenCheckerListViewerViewModel()
 		{
-			DisplayName = Resource.FumenCheckerListViewer;
+			DisplayName = Resources.FumenCheckerListViewer;
 			checkRules = IoC.GetAll<IFumenCheckRule>().ToList();
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (n, o) => Editor = n;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;

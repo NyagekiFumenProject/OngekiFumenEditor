@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.About
 
 		public override string Text
 		{
-			get { return Resource.CommandAbout; }
+			get { return Resources.CommandAbout; }
 		}
 
 		public override string ToolTip

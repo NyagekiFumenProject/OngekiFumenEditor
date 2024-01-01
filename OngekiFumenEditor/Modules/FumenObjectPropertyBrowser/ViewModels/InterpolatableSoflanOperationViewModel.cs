@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			if (editor == null)
 				return;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.InterpolateDurationSoflan, () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.InterpolateDurationSoflan, () =>
 			{
 				editor.Fumen.AddObjects(list);
 				editor.Fumen.RemoveObject(soflan);

@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
 		public OgkiFumenListBrowserViewModel()
 		{
-			DisplayName = Resource.OgkiFumenListBrowser;
+			DisplayName = Resources.OgkiFumenListBrowser;
 			rootFolderPath = Properties.OptionGeneratorToolsSetting.Default.LastLoadedGameFolder;
 		}
 
@@ -168,7 +168,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
 		public void SelectFolder()
 		{
-			if (!FileDialogHelper.OpenDirectory(Resource.SelectGameRootFolder, out var folderPath))
+			if (!FileDialogHelper.OpenDirectory(Resources.SelectGameRootFolder, out var folderPath))
 				return;
 
 			RootFolderPath = folderPath;
@@ -377,7 +377,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 			using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath);
 			if (audio is null)
 			{
-				MessageBox.Show(Resource.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
+				MessageBox.Show(Resources.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
 				return;
 			}
 			newProj.AudioDuration = audio.Duration;
@@ -394,7 +394,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 				{
 					frameworkElement.Loaded -= loadedHandler;
 					await fumenProvider.Open(editor, newProj);
-					var docName = $"[{Resource.FastOpen}] {diff.RefSet.Title}";
+					var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
 
 					editor.DisplayName = docName;
 					IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));

@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 
 		public void OnSelectDialogOpen()
 		{
-			var filePath = FileDialogHelper.OpenFile(Resource.SelectSvgFile, new[] { (".svg", "Svg文件") });
+			var filePath = FileDialogHelper.OpenFile(Resources.SelectSvgFile, new[] { (".svg", "Svg文件") });
 			File = string.IsNullOrWhiteSpace(filePath) ? null : new FileInfo(filePath);
 		}
 	}

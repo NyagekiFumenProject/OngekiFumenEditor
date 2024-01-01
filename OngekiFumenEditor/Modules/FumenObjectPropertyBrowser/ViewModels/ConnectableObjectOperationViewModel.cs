@@ -95,14 +95,14 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 		{
 			if (RefStartObject.Children.IsEmpty())
 			{
-				MessageBox.Show(Resource.DisableInterpolateByNoConnectableChildren);
+				MessageBox.Show(Resources.DisableInterpolateByNoConnectableChildren);
 				return;
 			}
 
 			var genStarts = RefStartObject.InterpolateCurve(RefStartObject.CurveInterpolaterFactory).ToArray();
 
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.InterpolateCurve, () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.InterpolateCurve, () =>
 			{
 				editor.Fumen.RemoveObject(RefStartObject);
 				foreach (var start in genStarts)
@@ -164,7 +164,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (RefStartObject?.IsPathVaild() != true)
 			{
-				MessageBox.Show(Resource.LaneContainInvalidPath);
+				MessageBox.Show(Resources.LaneContainInvalidPath);
 				return;
 			}
 
@@ -172,19 +172,19 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (copiedObjects.Count() > 1)
 			{
-				MessageBox.Show(Resource.DisableUseBrushByMoreObjects);
+				MessageBox.Show(Resources.DisableUseBrushByMoreObjects);
 				return;
 			}
 
 			if (!editor.IsDesignMode)
 			{
-				MessageBox.Show(Resource.EditorMustBeDesignMode);
+				MessageBox.Show(Resources.EditorMustBeDesignMode);
 				return;
 			}
 
 			if (copiedObjects.Count() < 1)
 			{
-				MessageBox.Show(Resource.CopyOneObjectOnceBeforeUsingBrush);
+				MessageBox.Show(Resources.CopyOneObjectOnceBeforeUsingBrush);
 				return;
 			}
 
@@ -192,7 +192,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (copiedObjectViewModel?.CopyNew() is null)
 			{
-				MessageBox.Show(Resource.ObjectNotSupportBrush);
+				MessageBox.Show(Resources.ObjectNotSupportBrush);
 				return;
 			}
 
@@ -241,7 +241,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			}
 
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.ObjectBatchBrush, redoAction, undoAction));
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.ObjectBatchBrush, redoAction, undoAction));
 		}
 
 		public void OnPartChildCurveInterpolateClick()
@@ -255,7 +255,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (!childObj.CheckCurveVaild())
 			{
-				MessageBox.Show(Resource.DisableInterpolatePartByInvaild);
+				MessageBox.Show(Resources.DisableInterpolatePartByInvaild);
 				return;
 			}
 
@@ -270,7 +270,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
 			var storeBackupControlPoints = new List<LaneCurvePathControlObject>();
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.InterpolatePartCurve, () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.InterpolatePartCurve, () =>
 			{
 				foreach (var newChild in genChildren)
 					childObj.ReferenceStartObject.InsertChildObject(newChild.TGrid, newChild);

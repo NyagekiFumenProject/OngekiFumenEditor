@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
 				return TaskUtility.Completed;
 			if (!editor.IsDesignMode)
 			{
-				editor.Toast.ShowMessage(Resource.EditorMustBeDesignMode);
+				editor.Toast.ShowMessage(Resources.EditorMustBeDesignMode);
 				return TaskUtility.Completed;
 			}
 

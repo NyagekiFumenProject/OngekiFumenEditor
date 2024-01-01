@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 			{
 				yield return new CommonCheckResult()
 				{
-					Description = Resource.WrongLocation.Format(dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
+					Description = Resources.WrongLocation.Format(dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
 					LocationDescription = dockableObj.ToString(),
 					NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
 					RuleName = RuleName,

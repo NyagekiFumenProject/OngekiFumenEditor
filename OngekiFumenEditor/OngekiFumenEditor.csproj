@@ -280,10 +280,10 @@
       <DependentUpon>ProgramSetting.settings</DependentUpon>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Properties\Resource.Designer.cs">
+    <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Resource.resx</DependentUpon>
+      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml.cs">
       <SubType>Code</SubType>
@@ -602,17 +602,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Resource.zh-Hans.resx">
-      <LastGenOutput>Resource.zh-Hans.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Properties\Resources.zh-Hans.resx">
+      <LastGenOutput>Resources.zh-Hans.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Properties\Resource.ja.resx">
-      <LastGenOutput>Resource.ja.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Properties\Resources.ja.resx">
+      <LastGenOutput>Resources.ja.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Properties\Resource.resx">
+    <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

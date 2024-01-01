@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenConverter.Commands
 
 		public override string Text
 		{
-			get { return Resource.FumenConverter; }
+			get { return Resources.FumenConverter; }
 		}
 
 		public override string ToolTip

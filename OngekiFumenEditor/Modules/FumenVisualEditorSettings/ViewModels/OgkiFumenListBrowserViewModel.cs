@@ -50,9 +50,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
 
 
 				if (Editor is null)
-					DisplayName = Resource.FumenVisualEditorSettings;
+					DisplayName = Resources.FumenVisualEditorSettings;
 				else
-					DisplayName = $"{Resource.FumenVisualEditorSettings} - " + Editor.FileName;
+					DisplayName = $"{Resources.FumenVisualEditorSettings} - " + Editor.FileName;
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings.ViewModels
 
 		public FumenVisualEditorSettingsViewModel()
 		{
-			DisplayName = Resource.FumenVisualEditorSettings;
+			DisplayName = Resources.FumenVisualEditorSettings;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}

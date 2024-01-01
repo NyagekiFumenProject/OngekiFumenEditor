@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.AssistHelper.Commands.AdjustDockablesHorizonP
 
 		public override string Text
 		{
-			get { return Resource.CommandAdjustDockablesHorizonPosition; }
+			get { return Resources.CommandAdjustDockablesHorizonPosition; }
 		}
 
 		public override string ToolTip

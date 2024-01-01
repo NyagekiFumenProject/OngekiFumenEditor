@@ -11,9 +11,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch
 	{
 		public override string Name => "Toolbar.BrushModeSwitch";
 
-		public override string Text => Resource.BrushModeSwitch;
+		public override string Text => Resources.BrushModeSwitch;
 
-		public override string ToolTip => Resource.BrushModeSwitchTipText;
+		public override string ToolTip => Resources.BrushModeSwitchTipText;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-paint-brush-16.png");
 

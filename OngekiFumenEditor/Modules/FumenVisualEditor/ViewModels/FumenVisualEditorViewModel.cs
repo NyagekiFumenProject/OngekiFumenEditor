@@ -177,7 +177,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			set
 			{
 				Set(ref brushMode, value);
-				ToastNotify($"{Resource.BrushMode}{(BrushMode ? Resource.Enable : Resource.Disable)}");
+				ToastNotify($"{Resources.BrushMode}{(BrushMode ? Resources.Enable : Resources.Disable)}");
 			}
 		}
 
@@ -188,7 +188,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			set
 			{
 				Set(ref isShowCurveControlAlways, value);
-				ToastNotify($"{Resource.ShowCurveControlAlways}{(IsShowCurveControlAlways ? Resource.Enable : Resource.Disable)}");
+				ToastNotify($"{Resources.ShowCurveControlAlways}{(IsShowCurveControlAlways ? Resources.Enable : Resources.Disable)}");
 			}
 		}
 
@@ -213,7 +213,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialogViewModel);
 				if (result != true)
 				{
-					Log.LogInfo(Resource.CloseEditorByProjectSetupFail);
+					Log.LogInfo(Resources.CloseEditorByProjectSetupFail);
 					await TryCloseAsync(false);
 					return;
 				}
@@ -223,7 +223,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 					using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
 					var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
 					if (fumenDeserializer is null)
-						throw new NotSupportedException($"{Resource.DeserializeFumenFileFail}{projectData.FumenFilePath}");
+						throw new NotSupportedException($"{Resources.DeserializeFumenFileFail}{projectData.FumenFilePath}");
 					var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
 					projectData.Fumen = fumen;
 				}
@@ -234,7 +234,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			}
 			catch (Exception e)
 			{
-				var errMsg = $"{Resource.CantCreateProject}{e.Message}";
+				var errMsg = $"{Resources.CantCreateProject}{e.Message}";
 				Log.LogError(errMsg);
 				MessageBox.Show(errMsg);
 				await TryCloseAsync(false);
@@ -249,13 +249,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
 				var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
 				await Load(projectData);
-				ToastNotify(Resource.SaveProjectFileAndFumenFile);
+				ToastNotify(Resources.SaveProjectFileAndFumenFile);
 
 				IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
 			}
 			catch (Exception e)
 			{
-				var errMsg = $"{Resource.CantLoadProject}{e.Message}";
+				var errMsg = $"{Resources.CantLoadProject}{e.Message}";
 				Log.LogError(errMsg);
 				MessageBox.Show(errMsg);
 				await TryCloseAsync(false);
@@ -274,7 +274,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			}
 			catch (Exception e)
 			{
-				var errMsg = $"{Resource.CantLoadProject}{e.Message}";
+				var errMsg = $"{Resources.CantLoadProject}{e.Message}";
 				Log.LogError(errMsg);
 				MessageBox.Show(errMsg);
 				await TryCloseAsync(false);
@@ -286,7 +286,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			using var _ = StatusBarHelper.BeginStatus("Fumen saving : " + filePath);
 			if (string.IsNullOrWhiteSpace(filePath))
 			{
-				var newProjFilePath = FileDialogHelper.SaveFile(Resource.SaveNewProjectFile, new[] { (FumenVisualEditorProvider.FILE_EXTENSION_NAME, Resource.FumenProjectFile) });
+				var newProjFilePath = FileDialogHelper.SaveFile(Resources.SaveNewProjectFile, new[] { (FumenVisualEditorProvider.FILE_EXTENSION_NAME, Resources.FumenProjectFile) });
 				if (!string.IsNullOrWhiteSpace(newProjFilePath))
 					await Save(newProjFilePath);
 				return;
@@ -302,7 +302,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 				if (dialog.ShowDialog() != true)
 				{
-					MessageBox.Show(Resource.CancelProjectSaveByFumenSaveFail);
+					MessageBox.Show(Resources.CancelProjectSaveByFumenSaveFail);
 					return;
 				}
 
@@ -318,7 +318,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			else
 			{
 				DisplayName = default;
-				ToastNotify(Resource.SaveProjectFileAndFumenFile);
+				ToastNotify(Resources.SaveProjectFileAndFumenFile);
 				IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
 			}
 		}

@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Commands
 
 		public override string Text
 		{
-			get { return Resource.FumenMetaInfoBrowser; }
+			get { return Resources.FumenMetaInfoBrowser; }
 		}
 
 		public override string ToolTip

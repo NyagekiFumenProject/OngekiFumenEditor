@@ -14,8 +14,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
 		public override async Task Run(Command command)
 		{
 			var openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = FileDialogHelper.BuildExtensionFilter((".ogkr", Resource.OngekiFumen), (".nyageki", Resource.OngekiFumen));
-			openFileDialog.Title = Resource.FastOpenOgkrFumen;
+			openFileDialog.Filter = FileDialogHelper.BuildExtensionFilter((".ogkr", Resources.OngekiFumen), (".nyageki", Resources.OngekiFumen));
+			openFileDialog.Title = Resources.FastOpenOgkrFumen;
 			openFileDialog.CheckFileExists = true;
 
 			if (openFileDialog.ShowDialog() != true)
@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpen
 			}
 			catch (Exception e)
 			{
-				var msg = $"{Resource.CantFastOpenFumen}{e.Message}";
+				var msg = $"{Resources.CantFastOpenFumen}{e.Message}";
 				Log.LogError(e.Message);
 				MessageBox.Show(msg);
 			}

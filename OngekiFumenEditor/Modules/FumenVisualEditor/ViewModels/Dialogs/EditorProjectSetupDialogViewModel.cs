@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
 				}
 				catch (Exception e)
 				{
-					MessageBox.Show($"{Resource.CantLoadFumen}{e.Message}");
+					MessageBox.Show($"{Resources.CantLoadFumen}{e.Message}");
 				}
 			}
 		}
@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
 		{
 			if (string.IsNullOrWhiteSpace(EditorProjectData.AudioFilePath) || !File.Exists(EditorProjectData.AudioFilePath))
 			{
-				MessageBox.Show(Resource.AudioFileNotFound);
+				MessageBox.Show(Resources.AudioFileNotFound);
 				return;
 			}
 

@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 		{
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 				return TaskUtility.Completed;
-			if (MessageBox.Show(Resource.ComfirmInterpolateMessage, Resource.Suggest, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+			if (MessageBox.Show(Resources.ComfirmInterpolateMessage, Resources.Suggest, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
 				return TaskUtility.Completed;
 			editor.LockAllUserInteraction();
 
@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 		{
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 				return TaskUtility.Completed;
-			if (MessageBox.Show(Resource.ComfirmInterpolateMessage, Resource.Suggest, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+			if (MessageBox.Show(Resources.ComfirmInterpolateMessage, Resources.Suggest, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
 				return TaskUtility.Completed;
 			editor.LockAllUserInteraction();
 

@@ -76,7 +76,7 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 
 			Log.LogError($"call MiniDumpWriteDump() exceptionInfo = {exceptionInfo} , dumpType = {dumpType} , isSuccessful = {exceptionInfo} , getLastError = {getErrMsg()} , dumpFilePath = {filePath}");
 
-			MessageBox.Show(Resource.ProgramThrowAndDump, Resource.ProgramError, MessageBoxButton.OK, MessageBoxImage.Error);
+			MessageBox.Show(Resources.ProgramThrowAndDump, Resources.ProgramError, MessageBoxButton.OK, MessageBoxImage.Error);
 
 			FileLogOutput.WaitForWriteDone();
 			return 1;

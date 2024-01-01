@@ -17,13 +17,13 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 		public static async Task<GenerateResult> Generate(AcbGenerateOption option)
 		{
 			if (!File.Exists(option.InputAudioFilePath))
-				return new(false, Resource.ConvertAudioFileNotFound);
+				return new(false, Resources.ConvertAudioFileNotFound);
 
 			if (option.MusicId < 0 || option.MusicId > 9999)
-				return new(false, Resource.MusicIDInvaild.Format(option.MusicId));
+				return new(false, Resources.MusicIDInvaild.Format(option.MusicId));
 
 			if (string.IsNullOrWhiteSpace(option.OutputFolderPath))
-				return new(false, Resource.OutputFolderIsEmpty);
+				return new(false, Resources.OutputFolderIsEmpty);
 			try
 			{
 				var musicIdStr = option.MusicId.ToString().PadLeft(4, '0');
@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 
 				var genFiles = Directory.GetFiles(tempFolder);
 				if (genFiles.Length < 2)
-					return new(false, Resource.CallAcbGeneratorFuckFail);
+					return new(false, Resources.CallAcbGeneratorFuckFail);
 
 				foreach (var genFile in genFiles)
 				{
@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 			catch (Exception e)
 			{
 				Log.LogError($"AcbGenerateProgram.Generate() throw exception:{e.Message}\n{e.StackTrace}");
-				return new(false, $"{Resource.ThrowExceptionWhenConvert}{e.Message}");
+				return new(false, $"{Resources.ThrowExceptionWhenConvert}{e.Message}");
 			}
 		}
 

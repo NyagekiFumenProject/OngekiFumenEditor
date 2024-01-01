@@ -33,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 	{
 		public FumenBulletPalleteListViewerViewModel()
 		{
-			DisplayName = Resource.FumenBulletPalleteListViewer;
+			DisplayName = Resources.FumenBulletPalleteListViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}
@@ -200,7 +200,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
 			if (e.Source?.DataContext is not BulletPallete pallete)
 				return;
 
-			var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color, Resource.ChangeAxuiliaryLineColor.Format(pallete.StrID));
+			var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color, Resources.ChangeAxuiliaryLineColor.Format(pallete.StrID));
 			dialog.Show();
 		}
 

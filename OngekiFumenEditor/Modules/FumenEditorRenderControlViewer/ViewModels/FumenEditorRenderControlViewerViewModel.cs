@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
 
 		public FumenEditorRenderControlViewerViewModel()
 		{
-			DisplayName = Resource.FumenEditorRenderControlViewer;
+			DisplayName = Resources.FumenEditorRenderControlViewer;
 			RebuildItems(false);
 		}
 

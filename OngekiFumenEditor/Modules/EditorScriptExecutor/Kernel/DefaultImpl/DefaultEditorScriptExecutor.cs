@@ -190,11 +190,11 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel.DefaultImpl
 			var buildResult = await Build(param);
 
 			if (!buildResult.IsSuccess)
-				return new(false, Resource.CompileError + Environment.NewLine + string.Join(Environment.NewLine, buildResult.Errors));
+				return new(false, Resources.CompileError + Environment.NewLine + string.Join(Environment.NewLine, buildResult.Errors));
 
 			var assembly = buildResult.Assembly;
 			if (assembly is null)
-				return new(false, Resource.GenerateAssemblyFileFail + Environment.NewLine + string.Join(Environment.NewLine, buildResult.Errors));
+				return new(false, Resources.GenerateAssemblyFileFail + Environment.NewLine + string.Join(Environment.NewLine, buildResult.Errors));
 
 			var result = await Execute(buildResult, targetEditor);
 			return result;

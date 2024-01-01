@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
 		public FumenEditorSelectingObjectViewerViewModel()
 		{
-			DisplayName = Resource.FumenEditorSelectingObjectViewer;
+			DisplayName = Resources.FumenEditorSelectingObjectViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 
 			dataView = CollectionViewSource.GetDefaultView(editorSelectObjects);

@@ -31,25 +31,25 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 		{
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 			{
-				MessageBox.Show(Resource.MustMakeEditorActive);
+				MessageBox.Show(Resources.MustMakeEditorActive);
 				return;
 			}
 
 			if (!editor.IsDesignMode)
 			{
-				MessageBox.Show(Resource.EditorMustBeDesignMode);
+				MessageBox.Show(Resources.EditorMustBeDesignMode);
 				return;
 			}
 
 			if (SvgPrefab.ProcessingDrawingGroup is not DrawingGroup drawingGroup)
 			{
-				MessageBox.Show(Resource.SvgContentNotSupport);
+				MessageBox.Show(Resources.SvgContentNotSupport);
 				return;
 			}
 
 			if (SvgPrefab.ShowOriginColor)
 			{
-				MessageBox.Show(Resource.UncheckShowOriginColor);
+				MessageBox.Show(Resources.UncheckShowOriginColor);
 				return;
 			}
 
@@ -127,7 +127,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 				genStarts.AddRange(subGenStarts);
 			}
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.SvgGenerateLane, () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.SvgGenerateLane, () =>
 			{
 				editor.Fumen.AddObjects(genStarts);
 			}, () =>

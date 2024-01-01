@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.CallFullGC
 
 		public override string Text
 		{
-			get { return Resource.CommandCallFullGC; }
+			get { return Resources.CommandCallFullGC; }
 		}
 
 		public override string ToolTip

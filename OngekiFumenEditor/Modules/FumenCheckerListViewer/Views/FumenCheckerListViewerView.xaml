@@ -25,7 +25,7 @@
                 Margin="0,0,5,0"
                 Padding="20,2,20,2"
                 cal:Message.Attach="[Event Click] = [Action RefreshCurrentFumen()];"
-                Content="{x:Static res:Resource.Refresh}"
+                Content="{x:Static res:Resources.Refresh}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
             </Button>
             <ToggleButton
@@ -45,7 +45,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{x:Static res:Resource.Error}">
+                        <Run Text="{x:Static res:Resources.Error}">
                         </Run>
                         <Run Text="{Binding ErrorCount, Mode=OneWay}" />
                         <Run>
@@ -56,7 +56,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowError}" Value="False">
-                                            <Setter Property="Text" Value="{x:Static res:Resource.NotShow}" />
+                                            <Setter Property="Text" Value="{x:Static res:Resources.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -83,7 +83,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{x:Static res:Resource.Problem}">
+                        <Run Text="{x:Static res:Resources.Problem}">
                         </Run>
                         <Run Text="{Binding ProblemCount, Mode=OneWay}" />
                         <Run>
@@ -94,7 +94,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowProblem}" Value="False">
-                                            <Setter Property="Text" Value="{x:Static res:Resource.NotShow}" />
+                                            <Setter Property="Text" Value="{x:Static res:Resources.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -121,7 +121,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{x:Static res:Resource.Advice}">
+                        <Run Text="{x:Static res:Resources.Advice}">
                         </Run>
                         <Run Text="{Binding SuggestCount, Mode=OneWay}" />
                         <Run>
@@ -132,7 +132,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowSuggest}" Value="False">
-                                            <Setter Property="Text" Value="{x:Static res:Resource.NotShow}" />
+                                            <Setter Property="Text" Value="{x:Static res:Resources.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -170,28 +170,28 @@
                     <GridViewColumn
                         Width="120"
                         DisplayMemberBinding="{Binding Severity}"
-                        Header="{x:Static res:Resource.Severity}">
+                        Header="{x:Static res:Resources.Severity}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding RuleName}"
-                        Header="{x:Static res:Resource.RuleName}">
+                        Header="{x:Static res:Resources.RuleName}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="400"
                         DisplayMemberBinding="{Binding Description}"
-                        Header="{x:Static res:Resource.Description}">
+                        Header="{x:Static res:Resources.Description}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="200"
                         DisplayMemberBinding="{Binding LocationDescription}"
-                        Header="{x:Static res:Resource.WrongLocation2}">
+                        Header="{x:Static res:Resources.WrongLocation2}">
 
                     </GridViewColumn>
                 </GridView>

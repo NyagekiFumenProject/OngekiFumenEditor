@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 					yield return new CommonCheckResult()
 					{
 						Severity = RuleSeverity.Problem,
-						Description = Resource.NotInterpolatedCurve,
+						Description = Resources.NotInterpolatedCurve,
 						LocationDescription = $"{obj.XGrid} {obj.TGrid}",
 						NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
 						RuleName = RuleName,

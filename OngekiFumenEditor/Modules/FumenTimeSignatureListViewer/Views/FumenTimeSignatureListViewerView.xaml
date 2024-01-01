@@ -50,19 +50,19 @@
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
-                        Header="{x:Static res:Resource.AudioTime}" />
+                        Header="{x:Static res:Resources.AudioTime}" />
 
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding StartTGrid}"
-                        Header="{x:Static res:Resource.AudioTGrid}" />
+                        Header="{x:Static res:Resources.AudioTGrid}" />
 
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding BPMChange.BPM}"
                         Header="Bpm" />
 
-                    <GridViewColumn Width="100" Header="{x:Static res:Resource.TimeSignature}">
+                    <GridViewColumn Width="100" Header="{x:Static res:Resources.TimeSignature}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock>

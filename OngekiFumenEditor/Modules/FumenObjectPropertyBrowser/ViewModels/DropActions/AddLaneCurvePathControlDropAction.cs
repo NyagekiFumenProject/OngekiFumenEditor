@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 		{
 			if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
 			{
-				editor.Toast.ShowMessage(Resource.DisableAddObjectBeyondAudioDuration);
+				editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
 				return;
 			}
 
@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 			var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
 			var isFirst = true;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.AddCurveControlPoint, () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddCurveControlPoint, () =>
 			{
 				cachePathControl.TGrid = dragTGrid;
 				cachePathControl.XGrid = dragXGrid;

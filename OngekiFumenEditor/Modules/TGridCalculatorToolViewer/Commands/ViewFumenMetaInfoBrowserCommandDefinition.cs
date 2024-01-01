@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.Commands
 
 		public override string Text
 		{
-			get { return Resource.TGridCalculatorToolViewer; }
+			get { return Resources.TGridCalculatorToolViewer; }
 		}
 
 		public override string ToolTip

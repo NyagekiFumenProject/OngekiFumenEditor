@@ -16,11 +16,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
 
 			if (mousePosition.Y > editor.TotalDurationHeight || mousePosition.Y < 0)
 			{
-				editor.Toast.ShowMessage(Resource.DisableAddObjectBeyondAudioDuration);
+				editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
 				return;
 			}
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.AddObject, () =>
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddObject, () =>
 			{
 				editor.MoveObjectTo(displayObject, mousePosition);
 				editor.Fumen.AddObject(displayObject);

@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 
 		public override string Text
 		{
-			get { return Resource.CommandInterpolateAll; }
+			get { return Resources.CommandInterpolateAll; }
 		}
 
 		public override string ToolTip
@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 
 		public override string Text
 		{
-			get { return Resource.CommandInterpolateAllWithXGridLimit; }
+			get { return Resources.CommandInterpolateAllWithXGridLimit; }
 		}
 
 		public override string ToolTip

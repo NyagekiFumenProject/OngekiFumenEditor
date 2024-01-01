@@ -91,7 +91,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 		private void UpdateDisplayName()
 		{
 			var singleObj = selectedObjects.Count == 1 ? selectedObjects.First() : null;
-			DisplayName = Resource.ObjectProperty + (singleObj is null ? string.Empty : $" - {((OngekiObjectBase)singleObj).Name}");
+			DisplayName = Resources.ObjectProperty + (singleObj is null ? string.Empty : $" - {((OngekiObjectBase)singleObj).Name}");
 		}
 
 		public void RefreshSelected(IEnumerable<ISelectableObject> objects, FumenVisualEditorViewModel referenceEditor)

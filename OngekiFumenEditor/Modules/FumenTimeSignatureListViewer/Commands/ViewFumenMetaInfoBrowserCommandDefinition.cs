@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.Commands
 
 		public override string Text
 		{
-			get { return Resource.FumenTimeSignatureListViewer; }
+			get { return Resources.FumenTimeSignatureListViewer; }
 		}
 
 		public override string ToolTip

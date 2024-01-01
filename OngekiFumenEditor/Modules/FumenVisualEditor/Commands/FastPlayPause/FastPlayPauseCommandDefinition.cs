@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPlayPause
 	{
 		public override string Name => "Editor.FastPlayPause";
 
-		public override string Text => Resource.FastPlayPause;
+		public override string Text => Resources.FastPlayPause;
 
 		public override string ToolTip => Text;
 

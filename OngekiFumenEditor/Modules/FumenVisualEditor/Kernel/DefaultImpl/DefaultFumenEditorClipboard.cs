@@ -40,12 +40,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				return;
 			if (!sourceEditor.IsDesignMode)
 			{
-				sourceEditor.ToastNotify(Resource.EditorMustBeDesignMode);
+				sourceEditor.ToastNotify(Resources.EditorMustBeDesignMode);
 				return;
 			}
 			if (objects.IsEmpty())
 			{
-				sourceEditor.ToastNotify(Resource.ClearCopyList);
+				sourceEditor.ToastNotify(Resources.ClearCopyList);
 				return;
 			}
 
@@ -128,11 +128,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			}
 
 			if (currentCopiedSources.Count == 0)
-				sourceEditor.ToastNotify(Resource.ClearCopyList);
+				sourceEditor.ToastNotify(Resources.ClearCopyList);
 			else
 			{
 				this.sourceEditor = sourceEditor;
-				sourceEditor.ToastNotify($"{Resource.CopiedObjects.Format(currentCopiedSources.Count)} {(currentCopiedSources.Count == 1 ? ("," + Resource.AsBrushSourceObject) : string.Empty)}");
+				sourceEditor.ToastNotify($"{Resources.CopiedObjects.Format(currentCopiedSources.Count)} {(currentCopiedSources.Count == 1 ? ("," + Resources.AsBrushSourceObject) : string.Empty)}");
 			}
 			return;
 		}
@@ -154,7 +154,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			var curScale = targetEditor.Setting.VerticalDisplayScale;
 			if (curScale != prevScale && currentCopiedSources.Count > 1)
 			{
-				targetEditor.ToastNotify(Resource.CantPasteMoreObjectByScaleDifferent.Format(prevScale, curScale));
+				targetEditor.ToastNotify(Resources.CantPasteMoreObjectByScaleDifferent.Format(prevScale, curScale));
 				return;
 			}
 
@@ -436,7 +436,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					if (isAppend)
 					{
 						var newPallete = pallete.CopyNew() as BulletPallete;
-						newPallete.EditorName = $"{(string.IsNullOrWhiteSpace(newPallete.EditorName) ? newPallete.StrID : newPallete.EditorName)} - {Resource.Copy}";
+						newPallete.EditorName = $"{(string.IsNullOrWhiteSpace(newPallete.EditorName) ? newPallete.StrID : newPallete.EditorName)} - {Resources.Copy}";
 						pickPallete = newPallete;
 					}
 					else
@@ -545,7 +545,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			redo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
 			undo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
 
-			targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.CopyAndPaste, redo, undo));
+			targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CopyAndPaste, redo, undo));
 		}
 
 		private double? CalculateYMirror(IEnumerable<OngekiObjectBase> objects, PasteMirrorOption mirrorOption)

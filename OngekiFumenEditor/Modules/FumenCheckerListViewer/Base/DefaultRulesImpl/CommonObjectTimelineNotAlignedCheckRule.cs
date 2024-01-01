@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 						yield return new CommonCheckResult()
 						{
 							Severity = RuleSeverity.Problem,
-							Description = Resource.ObjectTimelineNotAligned.Format(obj.IDShortName),
+							Description = Resources.ObjectTimelineNotAligned.Format(obj.IDShortName),
 							LocationDescription = $"{obj}",
 							NavigateBehavior = new NavigateToObjectBehavior(obj),
 							RuleName = RuleName,

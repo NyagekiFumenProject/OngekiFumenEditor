@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 		{
 			base.OnDragEnd(obj, point, editor);
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resource.UpdateHoldEndPosition,
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.UpdateHoldEndPosition,
 				() =>
 				{
 					//UpdateHoldEndXGrid(obj);

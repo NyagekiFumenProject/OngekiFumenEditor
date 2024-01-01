@@ -35,8 +35,8 @@
             </i:Interaction.Behaviors>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{x:Static res:Resource.Refresh}" />
-                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{x:Static res:Resource.CancelSelected}" />
+                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{x:Static res:Resources.Refresh}" />
+                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{x:Static res:Resources.CancelSelected}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
@@ -56,19 +56,19 @@
                     </GridView.ColumnHeaderContainerStyle>
 
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=Name}">
-                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{x:Static res:Resource.Name}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{x:Static res:Resources.Name}">
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=TGrid}">
-                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{x:Static res:Resource.ObjectTime}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{x:Static res:Resources.ObjectTime}">
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="550"
                         DisplayMemberBinding="{Binding .}"
-                        Header="{x:Static res:Resource.Description}" />
+                        Header="{x:Static res:Resources.Description}" />
                 </GridView>
             </ListView.View>
         </ListView>

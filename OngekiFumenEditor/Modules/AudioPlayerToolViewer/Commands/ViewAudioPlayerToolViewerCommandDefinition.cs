@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Commands
 
 		public override string Text
 		{
-			get { return Resource.AudioPlayerToolViewer; }
+			get { return Resources.AudioPlayerToolViewer; }
 		}
 
 		public override string ToolTip

@@ -72,12 +72,12 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 				var isSuccess = await DocumentOpenHelper.TryOpenAsDocument(filePath);
 				if (!isSuccess)
 				{
-					MessageBox.Show(Resource.ErrorEditorNotSupport);
+					MessageBox.Show(Resources.ErrorEditorNotSupport);
 				}
 			}
 			catch (Exception e)
 			{
-				var msg = $"{Resource.ErrorOpenRecentFile}{e.Message}";
+				var msg = $"{Resources.ErrorOpenRecentFile}{e.Message}";
 				Log.LogError(msg);
 				MessageBox.Show(msg);
 			}
@@ -89,7 +89,7 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 
 			if (pickEditorProvider is null)
 			{
-				MessageBox.Show(Resource.ErrorEditorNotSupport);
+				MessageBox.Show(Resources.ErrorEditorNotSupport);
 				return;
 			}
 

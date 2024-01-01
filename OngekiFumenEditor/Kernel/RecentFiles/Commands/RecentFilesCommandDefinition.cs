@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 
 		public override string Text
 		{
-			get { return Resource.CommandRecentFiles; }
+			get { return Resources.CommandRecentFiles; }
 		}
 
 		public override string ToolTip => string.Empty;

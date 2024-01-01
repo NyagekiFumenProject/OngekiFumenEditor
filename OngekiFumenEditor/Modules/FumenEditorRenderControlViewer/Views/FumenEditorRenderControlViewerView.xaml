@@ -43,7 +43,7 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <ToolBar>
-                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{x:Static res:Resource.ResetDefault}">
+                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{x:Static res:Resources.ResetDefault}">
                 </Button>
             </ToolBar>
         </StackPanel>
@@ -66,8 +66,8 @@
                     <GridViewColumn
                         Width="30"
                         DisplayMemberBinding="{Binding RenderOrder}"
-                        Header="{x:Static res:Resource.RenderOrder}" />
-                    <GridViewColumn Header="{x:Static res:Resource.DesignMode}">
+                        Header="{x:Static res:Resources.RenderOrder}" />
+                    <GridViewColumn Header="Design">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
@@ -77,7 +77,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="{x:Static res:Resource.PreviewMode}">
+                    <GridViewColumn Header="Preview">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
@@ -87,7 +87,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="{x:Static res:Resource.Name}" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="{x:Static res:Resources.Name}" />
                 </GridView>
             </ListView.View>
         </ListView>

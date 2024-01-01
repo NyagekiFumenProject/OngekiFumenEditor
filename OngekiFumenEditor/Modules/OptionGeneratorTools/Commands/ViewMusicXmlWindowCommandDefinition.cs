@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Commands
 
 		public override string Text
 		{
-			get { return Resource.MusicXmlWindow; }
+			get { return Resources.MusicXmlWindow; }
 		}
 
 		public override string ToolTip

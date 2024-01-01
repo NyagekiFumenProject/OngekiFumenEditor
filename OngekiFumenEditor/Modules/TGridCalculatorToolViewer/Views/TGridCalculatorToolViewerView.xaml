@@ -57,27 +57,28 @@
                 </StackPanel>
             </StackPanel>
 
-            <GroupBox Header="{x:Static res:Resource.Action}">
+            <GroupBox Header="{x:Static res:Resources.Action}">
                 <StackPanel>
                     <Button
                         Margin="5,5,0,5"
                         Padding="2,5,2,5"
-                        HorizontalAlignment="Left"
-                        cal:Message.Attach="[Event Click] = [Action OnRequestEditorScrollTo()];"
-                        Content="{x:Static res:Resource.EditorJumpToSpecifyTGrid}">
+                        HorizontalAlignment="Stretch"
+                        cal:Message.Attach="[Event Click] = [Action OnRequestEditorScrollTo()];">
+                        <TextBlock Text="{x:Static res:Resources.EditorJumpToSpecifyTGrid}" TextWrapping="Wrap" />
                     </Button>
                     <CheckBox
                         Margin="10,0,0,0"
-                        Content="{x:Static res:Resource.AutoUpdateCurrentObjectTime}"
+                        VerticalContentAlignment="Center"
                         IsChecked="{Binding IsAutoUpdateTimeIfSelectedObject}">
+                        <TextBlock Text="{x:Static res:Resources.AutoUpdateCurrentObjectTime}" TextWrapping="Wrap" />
                     </CheckBox>
                     <Button
                         Margin="5,5,0,5"
                         Padding="2,5,2,5"
-                        HorizontalAlignment="Left"
+                        HorizontalAlignment="Stretch"
                         cal:Message.Attach="[Event Click] = [Action OnRequestApplyTGridToObject()];"
-                        Content="{x:Static res:Resource.GiveTGridToSelectedObject}"
                         Visibility="{Binding IsSelectedObject, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="{x:Static res:Resources.GiveTGridToSelectedObject}" TextWrapping="Wrap" />
                     </Button>
                 </StackPanel>
             </GroupBox>

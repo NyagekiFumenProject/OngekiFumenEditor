@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
 		{
 			void ErrorExit(string message)
 			{
-				MessageBox.Show(message, Resource.Error, MessageBoxButton.OK, MessageBoxImage.Stop);
+				MessageBox.Show(message, Resources.Error, MessageBoxButton.OK, MessageBoxImage.Stop);
 				Application.Current.Shutdown(-1);
 			}
 
@@ -26,10 +26,10 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
 					Log.LogInfo($"arg.filePath: {filePath}");
 
 					if (!await DocumentOpenHelper.TryOpenAsDocument(filePath))
-						ErrorExit(Resource.ErrorEditorNotSupport);
+						ErrorExit(Resources.ErrorEditorNotSupport);
 				}
 				else
-					ErrorExit(Resource.ErrorFileByParamNotFound);
+					ErrorExit(Resources.ErrorFileByParamNotFound);
 			}
 		}
 	}

@@ -113,7 +113,7 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
 
 		public FumenTimeSignatureListViewerViewModel()
 		{
-			DisplayName = Resource.FumenTimeSignatureListViewer;
+			DisplayName = Resources.FumenTimeSignatureListViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (n, o) => Editor = n;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}

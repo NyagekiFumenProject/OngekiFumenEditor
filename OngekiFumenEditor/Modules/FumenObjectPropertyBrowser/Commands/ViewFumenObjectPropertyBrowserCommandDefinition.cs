@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Commands
 
 		public override string Text
 		{
-			get { return Resource.FumenObjectPropertyBrowser; }
+			get { return Resources.FumenObjectPropertyBrowser; }
 		}
 
 		public override string ToolTip
