@@ -4,8 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
@@ -87,6 +88,36 @@
                     IsEnabled="{Binding Setting.OutputGraphicsLog}">
                     <TextBlock Text="{markup:Translate [GraphicsLogSynchronous]}" TextWrapping="Wrap" />
                 </CheckBox>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">
+            <StackPanel>
+                <StackPanel Margin="5" Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding EnableAssociateNyagekiProj}">
+                        <TextBlock Text=".nyagekiProj" TextWrapping="Wrap" />
+                    </CheckBox>
+                    <CheckBox Margin="10,0" IsChecked="{Binding EnableAssociateNyageki}">
+                        <TextBlock Text=".nyageki" TextWrapping="Wrap" />
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding EnableAssociateOgkr}">
+                        <TextBlock Text=".ogkr" TextWrapping="Wrap" />
+                    </CheckBox>
+                </StackPanel>
+                <StackPanel Margin="5" Orientation="Horizontal">
+                    <Button
+                        Padding="10,5"
+                        HorizontalAlignment="Left"
+                        cal:Message.Attach="RegisterNyagekiAssociations()"
+                        Content="{markup:Translate [FileAssociationRegister]}"
+                        IsEnabled="{Binding EnableAssociate}" />
+                    <Button
+                        Margin="10,0,0,0"
+                        Padding="10,5"
+                        HorizontalAlignment="Left"
+                        cal:Message.Attach="UnRegisterNyagekiAssociations()"
+                        Content="{markup:Translate [FileAssociationUnregister]}"
+                        IsEnabled="{Binding EnableAssociate, Converter={StaticResource ReverseBoolConverter}}" />
+                </StackPanel>
             </StackPanel>
         </GroupBox>
     </StackPanel>

@@ -663,6 +663,18 @@
   <data name="FastPlayPause" xml:space="preserve">
     <value>编辑器快速播放暂停</value>
   </data>
+  <data name="FileAssociation" xml:space="preserve">
+    <value>文件关联</value>
+  </data>
+  <data name="FileAssociationRegister" xml:space="preserve">
+    <value>关联以上格式文件到此程序</value>
+  </data>
+  <data name="FileAssociationRequestAdmin" xml:space="preserve">
+    <value>文件关联 (需要管理员权限)</value>
+  </data>
+  <data name="FileAssociationUnregister" xml:space="preserve">
+    <value>取消所有关联</value>
+  </data>
   <data name="Filter" xml:space="preserve">
     <value>过滤</value>
   </data>
@@ -1104,6 +1116,15 @@
   <data name="Refresh" xml:space="preserve">
     <value>刷新</value>
   </data>
+  <data name="RegisterFail" xml:space="preserve">
+    <value>注册失败</value>
+  </data>
+  <data name="RegisterOneFileTypeAtLeast" xml:space="preserve">
+    <value>至少注册一个文件类型</value>
+  </data>
+  <data name="RegisterSuccess" xml:space="preserve">
+    <value>注册成功</value>
+  </data>
   <data name="ReloadSoundFile" xml:space="preserve">
     <value>重新加载音效文件</value>
   </data>
@@ -1124,6 +1145,9 @@
   </data>
   <data name="RenderOrder" xml:space="preserve">
     <value>渲染顺序</value>
+  </data>
+  <data name="RequestAdminPermission" xml:space="preserve">
+    <value>权限不够,请以管理员身份运行</value>
   </data>
   <data name="RequestRestartProgram" xml:space="preserve">
     <value>* 需要重启程序</value>
@@ -1358,6 +1382,12 @@
   </data>
   <data name="UndoRedo" xml:space="preserve">
     <value>撤回/重做 (需要重启生效)</value>
+  </data>
+  <data name="UnregisterFail" xml:space="preserve">
+    <value>注销失败</value>
+  </data>
+  <data name="UnregisterSuccess" xml:space="preserve">
+    <value>注销成功</value>
   </data>
   <data name="UpdateAssetBytesFile" xml:space="preserve">
     <value>更新assets.bytes文件(如果存在的话):</value>

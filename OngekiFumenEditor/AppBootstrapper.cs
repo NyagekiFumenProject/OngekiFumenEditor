@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -154,14 +155,29 @@ namespace OngekiFumenEditor
 			Log.LogInfo($"User CurrentCulture: {CultureInfo.CurrentCulture}, CurrentUICulture: {CultureInfo.CurrentUICulture}, DefaultThreadCurrentCulture: {CultureInfo.DefaultThreadCurrentCulture}, DefaultThreadCurrentUICulture: {CultureInfo.DefaultThreadCurrentUICulture}");
 		}
 
+		private bool CheckIfAdminPermission()
+		{
+			using var identity = WindowsIdentity.GetCurrent();
+			var principal = new WindowsPrincipal(identity);
+
+			return principal.IsInRole(WindowsBuiltInRole.Administrator);
+		}
+
 		protected async override void OnStartup(object sender, StartupEventArgs e)
 		{
 			base.OnStartup(sender, e);
 			InitExceptionCatcher();
 			LogBaseInfos();
 
+			if (CheckIfAdminPermission())
+			{
+				Log.LogWarn("Program is within admin permission.");
+				IoC.Get<WindowTitleHelper>().TitleContent = "(以管理员权限运行)";
+			}
+			else
+				IoC.Get<WindowTitleHelper>().TitleContent = "";
+
 			IoC.Get<IShell>().ToolBars.Visible = true;
-			IoC.Get<WindowTitleHelper>().TitleContent = "";
 
 			BitmapImage logo = new BitmapImage();
 			logo.BeginInit();
@@ -190,10 +206,11 @@ namespace OngekiFumenEditor
 			{
 				window.AllowDrop = true;
 				window.Drop += MainWindow_Drop;
-
-				if (!ProgramSetting.Default.DisableShowSplashScreenAfterBoot)
-					IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
 			}
+
+			var showSplashWindow = IoC.Get<IShell>().Documents.IsEmpty() && !ProgramSetting.Default.DisableShowSplashScreenAfterBoot;
+			if (showSplashWindow)
+				IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
 		}
 
 		private async void MainWindow_Drop(object sender, DragEventArgs e)

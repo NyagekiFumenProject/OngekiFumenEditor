@@ -1699,6 +1699,42 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 File Association 的本地化字符串。
+        /// </summary>
+        public static string FileAssociation {
+            get {
+                return ResourceManager.GetString("FileAssociation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Associate checked file types 的本地化字符串。
+        /// </summary>
+        public static string FileAssociationRegister {
+            get {
+                return ResourceManager.GetString("FileAssociationRegister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 File Association (Requires administrator privileges) 的本地化字符串。
+        /// </summary>
+        public static string FileAssociationRequestAdmin {
+            get {
+                return ResourceManager.GetString("FileAssociationRequestAdmin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unregister all associations 的本地化字符串。
+        /// </summary>
+        public static string FileAssociationUnregister {
+            get {
+                return ResourceManager.GetString("FileAssociationUnregister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Filter 的本地化字符串。
         /// </summary>
         public static string Filter {
@@ -3022,6 +3058,33 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Register fail 的本地化字符串。
+        /// </summary>
+        public static string RegisterFail {
+            get {
+                return ResourceManager.GetString("RegisterFail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Register at least one file type 的本地化字符串。
+        /// </summary>
+        public static string RegisterOneFileTypeAtLeast {
+            get {
+                return ResourceManager.GetString("RegisterOneFileTypeAtLeast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Register success 的本地化字符串。
+        /// </summary>
+        public static string RegisterSuccess {
+            get {
+                return ResourceManager.GetString("RegisterSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Sound files reload 的本地化字符串。
         /// </summary>
         public static string ReloadSoundFile {
@@ -3081,6 +3144,15 @@ namespace OngekiFumenEditor.Properties {
         public static string RenderOrder {
             get {
                 return ResourceManager.GetString("RenderOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Insufficient permissions. Please run as administrator 的本地化字符串。
+        /// </summary>
+        public static string RequestAdminPermission {
+            get {
+                return ResourceManager.GetString("RequestAdminPermission", resourceCulture);
             }
         }
         
@@ -3774,6 +3846,24 @@ namespace OngekiFumenEditor.Properties {
         public static string UndoRedo {
             get {
                 return ResourceManager.GetString("UndoRedo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unregister fail 的本地化字符串。
+        /// </summary>
+        public static string UnregisterFail {
+            get {
+                return ResourceManager.GetString("UnregisterFail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unregister success 的本地化字符串。
+        /// </summary>
+        public static string UnregisterSuccess {
+            get {
+                return ResourceManager.GetString("UnregisterSuccess", resourceCulture);
             }
         }
         

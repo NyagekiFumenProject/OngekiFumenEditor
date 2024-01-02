@@ -663,6 +663,18 @@
   <data name="FastPlayPause" xml:space="preserve">
     <value>Editor quick play/pause.</value>
   </data>
+  <data name="FileAssociation" xml:space="preserve">
+    <value>File Association</value>
+  </data>
+  <data name="FileAssociationRegister" xml:space="preserve">
+    <value>Associate checked file types</value>
+  </data>
+  <data name="FileAssociationRequestAdmin" xml:space="preserve">
+    <value>File Association (Requires administrator privileges)</value>
+  </data>
+  <data name="FileAssociationUnregister" xml:space="preserve">
+    <value>Unregister all associations</value>
+  </data>
   <data name="Filter" xml:space="preserve">
     <value>Filter</value>
   </data>
@@ -1104,6 +1116,15 @@
   <data name="Refresh" xml:space="preserve">
     <value>Refresh</value>
   </data>
+  <data name="RegisterFail" xml:space="preserve">
+    <value>Register fail</value>
+  </data>
+  <data name="RegisterOneFileTypeAtLeast" xml:space="preserve">
+    <value>Register at least one file type</value>
+  </data>
+  <data name="RegisterSuccess" xml:space="preserve">
+    <value>Register success</value>
+  </data>
   <data name="ReloadSoundFile" xml:space="preserve">
     <value>Sound files reload</value>
   </data>
@@ -1124,6 +1145,9 @@
   </data>
   <data name="RenderOrder" xml:space="preserve">
     <value>Render Order</value>
+  </data>
+  <data name="RequestAdminPermission" xml:space="preserve">
+    <value>Insufficient permissions. Please run as administrator</value>
   </data>
   <data name="RequestRestartProgram" xml:space="preserve">
     <value>Restart the program is required</value>
@@ -1355,6 +1379,12 @@
   </data>
   <data name="UndoRedo" xml:space="preserve">
     <value>Undo/Redo (requires restart)</value>
+  </data>
+  <data name="UnregisterFail" xml:space="preserve">
+    <value>Unregister fail</value>
+  </data>
+  <data name="UnregisterSuccess" xml:space="preserve">
+    <value>Unregister success</value>
   </data>
   <data name="UpdateAssetBytesFile" xml:space="preserve">
     <value>Update the assets.bytes file (if it exists):</value>
