@@ -4,8 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
@@ -16,7 +17,7 @@
     <StackPanel>
         <GroupBox Margin="5" Header="{markup:Translate [AutoSave]}">
             <StackPanel Margin="10">
-                <CheckBox Content="{markup:Translate [EnableAutoSave}" IsChecked="{Binding Setting.IsEnableAutoSave]}" />
+                <CheckBox Content="{markup:Translate [EnableAutoSave]}" IsChecked="{Binding Setting.IsEnableAutoSave}" />
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableAutoSave}"
