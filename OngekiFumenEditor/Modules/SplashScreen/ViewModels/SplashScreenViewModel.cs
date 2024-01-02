@@ -15,6 +15,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Windows.Forms;
 using static Gemini.Modules.Shell.Commands.NewFileCommandHandler;
 
 namespace OngekiFumenEditor.Modules.SplashScreen.ViewModels
@@ -24,15 +25,20 @@ namespace OngekiFumenEditor.Modules.SplashScreen.ViewModels
 	{
 		public ObservableCollection<string> Languages { get; } = new ObservableCollection<string>();
 
+		public string initLanguage;
 		public string SelectedLanguage
 		{
 			get { return languageManager.GetCurrentLanguage(); }
 			set
 			{
 				languageManager.SetLanguage(value);
+
 				NotifyOfPropertyChange(() => SelectedLanguage);
+				NotifyOfPropertyChange(() => IsRequestRestartProgram);
 			}
 		}
+
+		public bool IsRequestRestartProgram => initLanguage != SelectedLanguage;
 
 		public bool DisableShowSplashScreenAfterBoot
 		{
@@ -62,6 +68,7 @@ namespace OngekiFumenEditor.Modules.SplashScreen.ViewModels
 		[ImportingConstructor]
 		public SplashScreenViewModel(ILanguageManager languageManager, IShell shell)
 		{
+			initLanguage = languageManager.GetCurrentLanguage();
 			Languages.Clear();
 			foreach (var lang in languageManager.GetAvaliableLanguageNames())
 				Languages.Add(lang);
