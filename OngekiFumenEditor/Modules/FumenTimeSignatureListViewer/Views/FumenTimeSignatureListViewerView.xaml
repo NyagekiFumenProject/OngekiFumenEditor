@@ -8,7 +8,7 @@
     xmlns:converters2="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels"
     d:Background="White"
@@ -50,19 +50,19 @@
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
-                        Header="{x:Static res:Resources.AudioTime}" />
+                        Header="{markup:Translate res:Resources.AudioTime}" />
 
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding StartTGrid}"
-                        Header="{x:Static res:Resources.AudioTGrid}" />
+                        Header="{markup:Translate res:Resources.AudioTGrid}" />
 
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding BPMChange.BPM}"
                         Header="Bpm" />
 
-                    <GridViewColumn Width="100" Header="{x:Static res:Resources.TimeSignature}">
+                    <GridViewColumn Width="100" Header="{markup:Translate res:Resources.TimeSignature}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock>

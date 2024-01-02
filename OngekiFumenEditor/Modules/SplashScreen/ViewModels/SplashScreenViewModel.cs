@@ -62,6 +62,7 @@ namespace OngekiFumenEditor.Modules.SplashScreen.ViewModels
 		[ImportingConstructor]
 		public SplashScreenViewModel(ILanguageManager languageManager, IShell shell)
 		{
+			Languages.Clear();
 			foreach (var lang in languageManager.GetAvaliableLanguageNames())
 				Languages.Add(lang);
 			this.languageManager = languageManager;

@@ -11,7 +11,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
@@ -48,30 +48,30 @@
         </Grid.RowDefinitions>
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
-                <MenuItem Header="{x:Static res:Resources.MenuSelecting}">
-                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()" Header="{x:Static res:Resources.SelectAllObjects}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="{x:Static res:Resources.ReverseSelectAllObjects}" />
+                <MenuItem Header="{markup:Translate res:Resources.MenuSelecting}">
+                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()" Header="{markup:Translate res:Resources.SelectAllObjects}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="{markup:Translate res:Resources.ReverseSelectAllObjects}" />
                 </MenuItem>
-                <MenuItem Header="{x:Static res:Resources.ToSelectedObjects}">
-                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()" Header="{x:Static res:Resources.Delete}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="{x:Static res:Resources.CopyCopiable}" />
-                    <MenuItem Header="{x:Static res:Resources.ControlTimeline}">
-                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="{x:Static res:Resources.RememberAudioTime}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="{x:Static res:Resources.RecoveryAudioTime}" />
+                <MenuItem Header="{markup:Translate res:Resources.ToSelectedObjects}">
+                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()" Header="{markup:Translate res:Resources.Delete}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="{markup:Translate res:Resources.CopyCopiable}" />
+                    <MenuItem Header="{markup:Translate res:Resources.ControlTimeline}">
+                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="{markup:Translate res:Resources.RememberAudioTime}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="{markup:Translate res:Resources.RecoveryAudioTime}" />
                     </MenuItem>
                 </MenuItem>
-                <MenuItem Header="{x:Static res:Resources.ToCopiedObjects}">
-                    <MenuItem Header="{x:Static res:Resources.ToPaste}">
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{x:Static res:Resources.PasteDirectly}" />
+                <MenuItem Header="{markup:Translate res:Resources.ToCopiedObjects}">
+                    <MenuItem Header="{markup:Translate res:Resources.ToPaste}">
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate res:Resources.PasteDirectly}" />
                         <Separator />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="{x:Static res:Resources.PasteForHorizonMirror}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="{x:Static res:Resources.PasteForVerticalMirror}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)" Header="{x:Static res:Resources.PasteForZeroXGridMirror}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="{markup:Translate res:Resources.PasteForHorizonMirror}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="{markup:Translate res:Resources.PasteForVerticalMirror}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)" Header="{markup:Translate res:Resources.PasteForZeroXGridMirror}" />
                     </MenuItem>
                 </MenuItem>
                 <Separator />
                 <MenuItem
-                    Header="{x:Static res:Resources.ShowFPS}"
+                    Header="{markup:Translate res:Resources.ShowFPS}"
                     IsCheckable="True"
                     IsChecked="{Binding IsDisplayFPS}" />
             </ContextMenu>

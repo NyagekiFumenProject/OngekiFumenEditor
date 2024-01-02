@@ -8,7 +8,7 @@
     xmlns:jas="clr-namespace:WPF.JoshSmith.ServiceProviders.UI"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels"
     d:DesignHeight="800"
     d:DesignWidth="300"
@@ -43,7 +43,7 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <ToolBar>
-                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{x:Static res:Resources.ResetDefault}">
+                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{markup:Translate res:Resources.ResetDefault}">
                 </Button>
             </ToolBar>
         </StackPanel>
@@ -66,7 +66,7 @@
                     <GridViewColumn
                         Width="30"
                         DisplayMemberBinding="{Binding RenderOrder}"
-                        Header="{x:Static res:Resources.RenderOrder}" />
+                        Header="{markup:Translate res:Resources.RenderOrder}" />
                     <GridViewColumn Header="Design">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -87,7 +87,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="{x:Static res:Resources.Name}" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="{markup:Translate res:Resources.Name}" />
                 </GridView>
             </ListView.View>
         </ListView>

@@ -8,7 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
     cal:Message.Attach="[Key Delete]=[Action OnCancelItemSelectedObjects($dataContext)];"
@@ -35,8 +35,8 @@
             </i:Interaction.Behaviors>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{x:Static res:Resources.Refresh}" />
-                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{x:Static res:Resources.CancelSelected}" />
+                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{markup:Translate res:Resources.Refresh}" />
+                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{markup:Translate res:Resources.CancelSelected}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
@@ -56,19 +56,19 @@
                     </GridView.ColumnHeaderContainerStyle>
 
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=Name}">
-                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{x:Static res:Resources.Name}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate res:Resources.Name}">
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=TGrid}">
-                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{x:Static res:Resources.ObjectTime}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate res:Resources.ObjectTime}">
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="550"
                         DisplayMemberBinding="{Binding .}"
-                        Header="{x:Static res:Resources.Description}" />
+                        Header="{markup:Translate res:Resources.Description}" />
                 </GridView>
             </ListView.View>
         </ListView>

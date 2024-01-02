@@ -6,7 +6,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -34,7 +34,7 @@
                         <Label
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="{x:Static res:Resources.Refresh}">
+                            Content="{markup:Translate res:Resources.Refresh}">
                         </Label>
                     </StackPanel>
                 </Button>
@@ -53,14 +53,14 @@
                         <Label
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="{x:Static res:Resources.EditScriptByVisualStudio}">
+                            Content="{markup:Translate res:Resources.EditScriptByVisualStudio}">
                         </Label>
                     </StackPanel>
                 </Button>
                 <Label
                     Margin="10,0,0,0"
                     VerticalAlignment="Center"
-                    Content="{x:Static res:Resources.EditorTarget}" />
+                    Content="{markup:Translate res:Resources.EditorTarget}" />
                 <ComboBox
                     Width="150"
                     Margin="10,0,0,0"
@@ -94,7 +94,7 @@
                         <Label
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="{x:Static res:Resources.CheckScript}">
+                            Content="{markup:Translate res:Resources.CheckScript}">
                         </Label>
                     </StackPanel>
                 </Button>
@@ -114,7 +114,7 @@
                         <Label
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="{x:Static res:Resources.RunScript}">
+                            Content="{markup:Translate res:Resources.RunScript}">
                         </Label>
                     </StackPanel>
                 </Button>
@@ -140,12 +140,12 @@
                     HorizontalAlignment="Center"
                     FontSize="20"
                     FontWeight="Bold"
-                    Text="{x:Static res:Resources.UsingExtendScriptEditor}">
+                    Text="{markup:Translate res:Resources.UsingExtendScriptEditor}">
                 </TextBlock>
                 <TextBlock
                     HorizontalAlignment="Center"
                     FontSize="15"
-                    Text="{x:Static res:Resources.PreventUsingInternalEditor}">
+                    Text="{markup:Translate res:Resources.PreventUsingInternalEditor}">
                 </TextBlock>
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                     <Button
@@ -164,7 +164,7 @@
                             <Label
                                 VerticalAlignment="Center"
                                 VerticalContentAlignment="Center"
-                                Content="{x:Static res:Resources.SyncScriptContentManually}">
+                                Content="{markup:Translate res:Resources.SyncScriptContentManually}">
                             </Label>
                         </StackPanel>
                     </Button>
@@ -184,7 +184,7 @@
                             <Label
                                 VerticalAlignment="Center"
                                 VerticalContentAlignment="Center"
-                                Content="{x:Static res:Resources.StopUsingExtendEditor}">
+                                Content="{markup:Translate res:Resources.StopUsingExtendEditor}">
                             </Label>
                         </StackPanel>
                     </Button>

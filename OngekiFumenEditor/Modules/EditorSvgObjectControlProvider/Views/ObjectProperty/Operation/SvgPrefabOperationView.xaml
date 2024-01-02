@@ -6,7 +6,7 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.ObjectProperty.Operation"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:SvgPrefabOperationViewModel,
@@ -23,6 +23,6 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnGenerateLaneToEditor()];"
             DecoratorBrush="Green"
-            Text="{x:Static res:Resources.GenerateLaneObjects}" />
+            Text="{markup:Translate res:Resources.GenerateLaneObjects}" />
     </StackPanel>
 </UserControl>

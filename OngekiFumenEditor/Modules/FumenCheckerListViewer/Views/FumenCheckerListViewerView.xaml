@@ -6,6 +6,7 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
@@ -25,7 +26,7 @@
                 Margin="0,0,5,0"
                 Padding="20,2,20,2"
                 cal:Message.Attach="[Event Click] = [Action RefreshCurrentFumen()];"
-                Content="{x:Static res:Resources.Refresh}"
+                Content="{markup:Translate res:Resources.Refresh}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
             </Button>
             <ToggleButton
@@ -45,7 +46,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{x:Static res:Resources.Error}">
+                        <Run Text="{markup:Translate res:Resources.Error}">
                         </Run>
                         <Run Text="{Binding ErrorCount, Mode=OneWay}" />
                         <Run>
@@ -56,7 +57,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowError}" Value="False">
-                                            <Setter Property="Text" Value="{x:Static res:Resources.NotShow}" />
+                                            <Setter Property="Text" Value="{markup:Translate res:Resources.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -83,7 +84,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{x:Static res:Resources.Problem}">
+                        <Run Text="{markup:Translate res:Resources.Problem}">
                         </Run>
                         <Run Text="{Binding ProblemCount, Mode=OneWay}" />
                         <Run>
@@ -94,7 +95,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowProblem}" Value="False">
-                                            <Setter Property="Text" Value="{x:Static res:Resources.NotShow}" />
+                                            <Setter Property="Text" Value="{markup:Translate res:Resources.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -121,7 +122,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{x:Static res:Resources.Advice}">
+                        <Run Text="{markup:Translate res:Resources.Advice}">
                         </Run>
                         <Run Text="{Binding SuggestCount, Mode=OneWay}" />
                         <Run>
@@ -132,7 +133,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowSuggest}" Value="False">
-                                            <Setter Property="Text" Value="{x:Static res:Resources.NotShow}" />
+                                            <Setter Property="Text" Value="{markup:Translate res:Resources.NotShow}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -170,28 +171,28 @@
                     <GridViewColumn
                         Width="120"
                         DisplayMemberBinding="{Binding Severity}"
-                        Header="{x:Static res:Resources.Severity}">
+                        Header="{markup:Translate res:Resources.Severity}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding RuleName}"
-                        Header="{x:Static res:Resources.RuleName}">
+                        Header="{markup:Translate res:Resources.RuleName}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="400"
                         DisplayMemberBinding="{Binding Description}"
-                        Header="{x:Static res:Resources.Description}">
+                        Header="{markup:Translate res:Resources.Description}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="200"
                         DisplayMemberBinding="{Binding LocationDescription}"
-                        Header="{x:Static res:Resources.WrongLocation2}">
+                        Header="{markup:Translate res:Resources.WrongLocation2}">
 
                     </GridViewColumn>
                 </GridView>

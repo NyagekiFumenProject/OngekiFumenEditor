@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels"
     Title="Music.xml生成器"
     Width="500"
@@ -20,13 +20,13 @@
     mc:Ignorable="d">
     <ScrollViewer>
         <StackPanel Margin="5">
-            <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{x:Static res:Resources.Option}">
+            <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate res:Resources.Option}">
                 <StackPanel>
                     <StackPanel Margin="5" Orientation="Horizontal">
                         <Label
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
-                            Content="{x:Static res:Resources.SelectGameRootFolder}">
+                            Content="{markup:Translate res:Resources.SelectGameRootFolder}">
                         </Label>
                         <Label
                             Width="280"
@@ -38,7 +38,7 @@
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
                             cal:Message.Attach="OnOpenSelectGamePathDialog()"
-                            Content="{x:Static res:Resources.Browser}">
+                            Content="{markup:Translate res:Resources.Browser}">
                         </Button>
                     </StackPanel>
                     <StackPanel Margin="5" Orientation="Horizontal">
@@ -46,7 +46,7 @@
                             Margin="0,0,0,0"
                             Padding="10,2,10,2"
                             cal:Message.Attach="ParseMusicXml()"
-                            Content="{x:Static res:Resources.LoadMusicXmlFile}">
+                            Content="{markup:Translate res:Resources.LoadMusicXmlFile}">
                         </Button>
                     </StackPanel>
                 </StackPanel>
@@ -86,7 +86,7 @@
                         Grid.Row="1"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.Title}">
+                        Content="{markup:Translate res:Resources.Title}">
                     </Label>
                     <TextBox
                         Grid.Row="1"
@@ -101,7 +101,7 @@
                         Grid.Row="2"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.Artist}">
+                        Content="{markup:Translate res:Resources.Artist}">
                     </Label>
                     <TextBox
                         Grid.Row="2"
@@ -116,7 +116,7 @@
                         Grid.Row="3"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.FinishBouns}">
+                        Content="{markup:Translate res:Resources.FinishBouns}">
                     </Label>
                     <TextBox
                         Grid.Row="3"
@@ -131,7 +131,7 @@
                         Grid.Row="4"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.CostToUnlock}">
+                        Content="{markup:Translate res:Resources.CostToUnlock}">
                     </Label>
                     <TextBox
                         Grid.Row="4"
@@ -146,7 +146,7 @@
                         Grid.Row="5"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.SortOrder}">
+                        Content="{markup:Translate res:Resources.SortOrder}">
                     </Label>
                     <TextBox
                         Grid.Row="5"
@@ -161,7 +161,7 @@
                         Grid.Row="6"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.Genre}">
+                        Content="{markup:Translate res:Resources.Genre}">
                     </Label>
                     <ComboBox
                         Grid.Row="6"
@@ -194,7 +194,7 @@
                             Grid.Row="0"
                             Margin="0,5,10,5"
                             HorizontalAlignment="Right"
-                            Content="{x:Static res:Resources.Card}">
+                            Content="{markup:Translate res:Resources.Card}">
                         </Label>
                         <StackPanel
                             Grid.Row="0"
@@ -211,7 +211,7 @@
                                 Padding="20,2,20,2"
                                 VerticalAlignment="Center"
                                 cal:Message.Attach="SelectCard()"
-                                Content="{x:Static res:Resources.Browser}">
+                                Content="{markup:Translate res:Resources.Browser}">
                             </Button>
                         </StackPanel>
                         <!--    -->
@@ -219,7 +219,7 @@
                             Grid.Row="1"
                             Margin="0,5,10,5"
                             HorizontalAlignment="Right"
-                            Content="{x:Static res:Resources.BossHp}">
+                            Content="{markup:Translate res:Resources.BossHp}">
                         </Label>
                         <TextBox
                             Grid.Row="1"
@@ -234,7 +234,7 @@
                             Grid.Row="2"
                             Margin="0,5,10,5"
                             HorizontalAlignment="Right"
-                            Content="{x:Static res:Resources.BossLevel}">
+                            Content="{markup:Translate res:Resources.BossLevel}">
                         </Label>
                         <TextBox
                             Grid.Row="2"
@@ -249,7 +249,7 @@
                             Grid.Row="3"
                             Margin="0,5,10,5"
                             HorizontalAlignment="Right"
-                            Content="{x:Static res:Resources.BossVoiceIdx}">
+                            Content="{markup:Translate res:Resources.BossVoiceIdx}">
                         </Label>
                         <TextBox
                             Grid.Row="3"
@@ -298,7 +298,7 @@
                         Grid.Row="0"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.Stage}">
+                        Content="{markup:Translate res:Resources.Stage}">
                     </Label>
                     <StackPanel
                         Grid.Row="0"
@@ -315,7 +315,7 @@
                             Padding="20,2,20,2"
                             VerticalAlignment="Center"
                             cal:Message.Attach="SelectStage()"
-                            Content="{x:Static res:Resources.Browser}">
+                            Content="{markup:Translate res:Resources.Browser}">
                         </Button>
                     </StackPanel>
                     <!--    -->
@@ -323,7 +323,7 @@
                         Grid.Row="1"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.CopyRight}">
+                        Content="{markup:Translate res:Resources.CopyRight}">
                     </Label>
                     <StackPanel
                         Grid.Row="1"
@@ -340,7 +340,7 @@
                             Padding="20,2,20,2"
                             VerticalAlignment="Center"
                             cal:Message.Attach="SelectRight()"
-                            Content="{x:Static res:Resources.Browser}">
+                            Content="{markup:Translate res:Resources.Browser}">
                         </Button>
                     </StackPanel>
                     <!--    -->
@@ -348,7 +348,7 @@
                         Grid.Row="2"
                         Margin="0,5,10,5"
                         HorizontalAlignment="Right"
-                        Content="{x:Static res:Resources.GameVersion}">
+                        Content="{markup:Translate res:Resources.GameVersion}">
                     </Label>
                     <StackPanel
                         Grid.Row="2"
@@ -364,10 +364,10 @@
                         </ComboBox>
                     </StackPanel>
                     <Grid Grid.Row="3" Grid.ColumnSpan="2">
-                        <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{x:Static res:Resources.FumenInfo}">
+                        <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate res:Resources.FumenInfo}">
                             <StackPanel>
                                 <StackPanel Margin="10,5,10,5" Orientation="Horizontal">
-                                    <Label VerticalAlignment="Center" Content="{x:Static res:Resources.SelectDiff}" />
+                                    <Label VerticalAlignment="Center" Content="{markup:Translate res:Resources.SelectDiff}" />
                                     <ComboBox
                                         Width="100"
                                         Margin="10,0,0,0"
@@ -382,7 +382,7 @@
                                     Background="LightGray" />
                                 <StackPanel Margin="10,5,10,5" DataContext="{Binding CurrentSelectedFumenData}">
                                     <StackPanel Margin="0,5,0,5" Orientation="Horizontal">
-                                        <Label VerticalAlignment="Center" Content="{x:Static res:Resources.Enable}">
+                                        <Label VerticalAlignment="Center" Content="{markup:Translate res:Resources.Enable}">
                                         </Label>
                                         <CheckBox
                                             Margin="10,5,0,5"
@@ -392,7 +392,7 @@
                                             IsChecked="{Binding Enable}" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
-                                        <Label VerticalAlignment="Center" Content="{x:Static res:Resources.DiffLevel}">
+                                        <Label VerticalAlignment="Center" Content="{markup:Translate res:Resources.DiffLevel}">
                                         </Label>
                                         <TextBox
                                             Width="50"
@@ -401,7 +401,7 @@
                                         </TextBox>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
-                                        <Label VerticalAlignment="Center" Content="{x:Static res:Resources.FumenFileName}" />
+                                        <Label VerticalAlignment="Center" Content="{markup:Translate res:Resources.FumenFileName}" />
                                         <TextBox
                                             Width="100"
                                             Margin="10,5,0,5"
@@ -417,7 +417,7 @@
             <Button
                 Padding="20,10,20,10"
                 cal:Message.Attach="Save()"
-                Content="{x:Static res:Resources.Generate}"
+                Content="{markup:Translate res:Resources.Generate}"
                 IsEnabled="{Binding IsEditable}">
             </Button>
         </StackPanel>

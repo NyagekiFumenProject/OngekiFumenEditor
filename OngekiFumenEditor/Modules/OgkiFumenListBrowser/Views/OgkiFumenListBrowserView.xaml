@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.OgkiFumenListBrowser.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels"
     Width="500"
@@ -39,7 +39,7 @@
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
-                    Text="{x:Static res:Resources.SelectGameRootFolder}">
+                    Text="{markup:Translate res:Resources.SelectGameRootFolder}">
                 </TextBlock>
                 <TextBlock
                     Grid.Column="1"
@@ -53,11 +53,11 @@
                     Margin="10,0,10,0"
                     Padding="20,2,20,2"
                     cal:Message.Attach="SelectFolder()"
-                    Content="{x:Static res:Resources.Browser}">
+                    Content="{markup:Translate res:Resources.Browser}">
                 </Button>
             </Grid>
             <StackPanel Margin="5,5,5,10" Orientation="Horizontal">
-                <Label Content="{x:Static res:Resources.KeywordSortFilter}" />
+                <Label Content="{markup:Translate res:Resources.KeywordSortFilter}" />
                 <TextBox
                     Width="350"
                     Margin="5,0,0,0"
@@ -70,7 +70,7 @@
                 Padding="20,5,20,5"
                 HorizontalAlignment="Right"
                 cal:Message.Attach="ApplyKeywords()"
-                Content="{x:Static res:Resources.Filter}">
+                Content="{markup:Translate res:Resources.Filter}">
             </Button>
         </StackPanel>
         <ItemsControl Grid.Row="1" ItemsSource="{Binding DisplayFumenSets}">
@@ -199,7 +199,7 @@
                                                             Padding="10,5,10,5"
                                                             HorizontalAlignment="Left"
                                                             cal:Message.Attach="LoadFumen($dataContext)"
-                                                            Content="{x:Static res:Resources.LoadFumen}">
+                                                            Content="{markup:Translate res:Resources.LoadFumen}">
                                                         </Button>
                                                     </StackPanel>
                                                 </Grid>

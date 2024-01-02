@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels"
     Title="音频调整"
     Width="500"
@@ -22,7 +22,7 @@
         <GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="{x:Static res:Resources.AudioFileSource}">
+            Header="{markup:Translate res:Resources.AudioFileSource}">
             <StackPanel>
                 <RadioButton
                     Margin="0,5,0,5"
@@ -34,7 +34,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
-                            Text="{x:Static res:Resources.LoadFromFile}">
+                            Text="{markup:Translate res:Resources.LoadFromFile}">
                         </TextBlock>
                         <TextBlock
                             Width="280"
@@ -47,7 +47,7 @@
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
                             cal:Message.Attach="OnOpenSelectInputFileDialog()"
-                            Content="{x:Static res:Resources.Browser}"
+                            Content="{markup:Translate res:Resources.Browser}"
                             Foreground="{StaticResource EnvironmentToolWindowText}">
                         </Button>
                     </StackPanel>
@@ -67,7 +67,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
-                            Text="{x:Static res:Resources.LoadFromCurrentEditor}">
+                            Text="{markup:Translate res:Resources.LoadFromCurrentEditor}">
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding CurrentEditorName}">
                         </TextBlock>
@@ -76,24 +76,24 @@
                 <CheckBox
                     Margin="20,0,10,0"
                     VerticalAlignment="Center"
-                    Content="{x:Static res:Resources.AllObjectApplyNewDelayAfterCalculated}"
+                    Content="{markup:Translate res:Resources.AllObjectApplyNewDelayAfterCalculated}"
                     IsChecked="{Binding IsRecalculateObjects}">
                 </CheckBox>
             </StackPanel>
         </GroupBox>
 
-        <GroupBox Margin="5" Header="{x:Static res:Resources.OffsetOption}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.OffsetOption}">
             <StackPanel>
                 <RadioButton VerticalContentAlignment="Center" GroupName="2857">
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="{x:Static res:Resources.ApplyOffsetBySecond}">
+                        <Label Content="{markup:Translate res:Resources.ApplyOffsetBySecond}">
                         </Label>
                         <TextBox
                             Width="100"
                             VerticalAlignment="Center"
                             Text="{Binding Seconds}">
                         </TextBox>
-                        <Label Content="{x:Static res:Resources.Second}">
+                        <Label Content="{markup:Translate res:Resources.Second}">
                         </Label>
                     </StackPanel>
                 </RadioButton>
@@ -102,7 +102,7 @@
                     GroupName="2857"
                     IsChecked="{Binding IsUseGridOffset, Mode=OneWayToSource}">
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="{x:Static res:Resources.ApplyOffsetByTGrid}">
+                        <Label Content="{markup:Translate res:Resources.ApplyOffsetByTGrid}">
                         </Label>
                         <Label>Unit:</Label>
                         <TextBox
@@ -128,13 +128,13 @@
         <GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="{x:Static res:Resources.Output}">
+            Header="{markup:Translate res:Resources.Output}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
-                    Text="{x:Static res:Resources.SaveToFile}">
+                    Text="{markup:Translate res:Resources.SaveToFile}">
                 </TextBlock>
                 <TextBlock
                     VerticalAlignment="Center"
@@ -145,7 +145,7 @@
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
                     cal:Message.Attach="OnOpenSelectOutputFileDialog()"
-                    Content="{x:Static res:Resources.Browser}"
+                    Content="{markup:Translate res:Resources.Browser}"
                     Foreground="{StaticResource EnvironmentToolWindowText}">
                 </Button>
             </StackPanel>
@@ -155,7 +155,7 @@
             Margin="5,10,5,5"
             Padding="0,10,0,10"
             cal:Message.Attach="OnExecuteConverter()"
-            Content="{x:Static res:Resources.Process}"
+            Content="{markup:Translate res:Resources.Process}"
             Foreground="{StaticResource EnvironmentToolWindowText}">
         </Button>
     </StackPanel>

@@ -5,6 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenConverter.ViewModels"
@@ -22,7 +23,7 @@
         <GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="{x:Static res:Resources.FumenSource}">
+            Header="{markup:Translate res:Resources.FumenSource}">
             <StackPanel>
                 <RadioButton
                     Margin="0,5,0,5"
@@ -34,7 +35,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
-                            Text="{x:Static res:Resources.LoadFromFile}">
+                            Text="{markup:Translate res:Resources.LoadFromFile}">
                         </TextBlock>
                         <TextBlock
                             Width="280"
@@ -47,7 +48,7 @@
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
                             cal:Message.Attach="OnOpenSelectInputFileDialog()"
-                            Content="{x:Static res:Resources.Browser}"
+                            Content="{markup:Translate res:Resources.Browser}"
                             Foreground="{StaticResource EnvironmentToolWindowText}">
 
                         </Button>
@@ -63,7 +64,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
-                            Text="{x:Static res:Resources.LoadFromCurrentEditor}">
+                            Text="{markup:Translate res:Resources.LoadFromCurrentEditor}">
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding CurrentEditorName}">
                         </TextBlock>
@@ -75,13 +76,13 @@
         <GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="{x:Static res:Resources.Output}">
+            Header="{markup:Translate res:Resources.Output}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
-                    Text="{x:Static res:Resources.SaveToFile}">
+                    Text="{markup:Translate res:Resources.SaveToFile}">
                 </TextBlock>
                 <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding OutputFumenFilePath}">
                 </TextBlock>
@@ -89,7 +90,7 @@
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
                     cal:Message.Attach="OnOpenSelectOutputFileDialog()"
-                    Content="{x:Static res:Resources.Browser}"
+                    Content="{markup:Translate res:Resources.Browser}"
                     Foreground="{StaticResource EnvironmentToolWindowText}">
                 </Button>
             </StackPanel>
@@ -99,7 +100,7 @@
             Margin="5,10,5,5"
             Padding="0,10,0,10"
             cal:Message.Attach="OnExecuteConverter()"
-            Content="{x:Static res:Resources.Execute}"
+            Content="{markup:Translate res:Resources.Execute}"
             Foreground="{StaticResource EnvironmentToolWindowText}">
         </Button>
     </StackPanel>

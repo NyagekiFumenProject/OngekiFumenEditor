@@ -8,7 +8,7 @@
     xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:TGridCalculatorToolViewerViewModel,
@@ -57,20 +57,20 @@
                 </StackPanel>
             </StackPanel>
 
-            <GroupBox Header="{x:Static res:Resources.Action}">
+            <GroupBox Header="{markup:Translate res:Resources.Action}">
                 <StackPanel>
                     <Button
                         Margin="5,5,0,5"
                         Padding="2,5,2,5"
                         HorizontalAlignment="Stretch"
                         cal:Message.Attach="[Event Click] = [Action OnRequestEditorScrollTo()];">
-                        <TextBlock Text="{x:Static res:Resources.EditorJumpToSpecifyTGrid}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate res:Resources.EditorJumpToSpecifyTGrid}" TextWrapping="Wrap" />
                     </Button>
                     <CheckBox
                         Margin="10,0,0,0"
                         VerticalContentAlignment="Center"
                         IsChecked="{Binding IsAutoUpdateTimeIfSelectedObject}">
-                        <TextBlock Text="{x:Static res:Resources.AutoUpdateCurrentObjectTime}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate res:Resources.AutoUpdateCurrentObjectTime}" TextWrapping="Wrap" />
                     </CheckBox>
                     <Button
                         Margin="5,5,0,5"
@@ -78,7 +78,7 @@
                         HorizontalAlignment="Stretch"
                         cal:Message.Attach="[Event Click] = [Action OnRequestApplyTGridToObject()];"
                         Visibility="{Binding IsSelectedObject, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <TextBlock Text="{x:Static res:Resources.GiveTGridToSelectedObject}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate res:Resources.GiveTGridToSelectedObject}" TextWrapping="Wrap" />
                     </Button>
                 </StackPanel>
             </GroupBox>

@@ -5,7 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
@@ -14,49 +14,49 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <StackPanel>
-        <GroupBox Margin="5" Header="{x:Static res:Resources.AutoSave}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.AutoSave}">
             <StackPanel Margin="10">
-                <CheckBox Content="{x:Static res:Resources.EnableAutoSave}" IsChecked="{Binding Setting.IsEnableAutoSave}" />
+                <CheckBox Content="{markup:Translate res:Resources.EnableAutoSave}" IsChecked="{Binding Setting.IsEnableAutoSave}" />
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableAutoSave}"
                     Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resources.AutoSaveInterval}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.AutoSaveInterval}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.AutoSaveTimeInterval}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resources.TimesPerMin}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.TimesPerMin}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="{x:Static res:Resources.UndoRedo}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.UndoRedo}">
             <StackPanel Margin="10">
                 <CheckBox VerticalContentAlignment="Center" IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}">
-                    <TextBlock Text="{x:Static res:Resources.RememberUndoPlace}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate res:Resources.RememberUndoPlace}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}">
-                    <TextBlock Text="{x:Static res:Resources.LimitUndoCount}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate res:Resources.LimitUndoCount}" TextWrapping="Wrap" />
                 </CheckBox>
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableUndoActionSavingLimit}"
                     Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resources.SaveMaxCount_Part1}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.SaveMaxCount_Part1}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.UndoActionSavingLimit}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resources.SaveMaxCount_Part2}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.SaveMaxCount_Part2}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="{x:Static res:Resources.UserInteraction}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.UserInteraction}">
             <StackPanel Margin="10">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -64,7 +64,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resources.EditorMouseWheelSpeed}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.EditorMouseWheelSpeed}" />
                     <TextBox
                         Grid.Column="1"
                         Width="50"
@@ -75,40 +75,40 @@
                     <TextBlock
                         Grid.Column="2"
                         VerticalAlignment="Center"
-                        Text="{x:Static res:Resources.EditorMouseWheelSpeed_Unit}"
+                        Text="{markup:Translate res:Resources.EditorMouseWheelSpeed_Unit}"
                         TextWrapping="Wrap" />
                 </Grid>
                 <CheckBox
                     Margin="0,10,0,0"
-                    Content="{x:Static res:Resources.EnableHorizonScroll}"
+                    Content="{markup:Translate res:Resources.EnableHorizonScroll}"
                     IsChecked="{Binding Setting.EnableXOffset}" />
                 <CheckBox
                     Margin="0,10,0,0"
-                    Content="{x:Static res:Resources.EnableHorizonScrollBarDisplay}"
+                    Content="{markup:Translate res:Resources.EnableHorizonScrollBarDisplay}"
                     IsChecked="{Binding Setting.ShowXOffsetScrollBar}"
                     IsEnabled="{Binding Setting.EnableXOffset}" />
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="{x:Static res:Resources.Render}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.Render}">
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resources.BellBulletCountOverLimit_Part1}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.BellBulletCountOverLimit_Part1}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.ParallelCountLimit}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resources.BellBulletCountOverLimit_Part2}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.BellBulletCountOverLimit_Part2}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="{x:Static res:Resources.Other}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.Other}">
             <StackPanel Margin="10">
                 <Button
                     Padding="10,5,10,5"
                     HorizontalAlignment="Left"
                     cal:Message.Attach="ClearRecentOpen()"
-                    Content="{x:Static res:Resources.CleanRecentFilesRecords}" />
+                    Content="{markup:Translate res:Resources.CleanRecentFilesRecords}" />
             </StackPanel>
         </GroupBox>
     </StackPanel>

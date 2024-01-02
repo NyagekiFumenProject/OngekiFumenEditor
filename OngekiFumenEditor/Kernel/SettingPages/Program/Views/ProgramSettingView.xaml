@@ -5,7 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
@@ -14,15 +14,15 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <StackPanel>
-        <GroupBox Margin="5" Header="{x:Static res:Resources.Setup}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.Setup}">
             <StackPanel>
                 <CheckBox
                     Margin="10,10,10,10"
-                    Content="{x:Static res:Resources.ProcessProriotyUpgrade}"
+                    Content="{markup:Translate res:Resources.ProcessProriotyUpgrade}"
                     IsChecked="{Binding Setting.UpgradeProcessPriority}" />
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="{x:Static res:Resources.CrashDumpFile}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.CrashDumpFile}">
             <StackPanel>
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
@@ -30,7 +30,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Resources.CrashDumpFileOutput}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.CrashDumpFileOutput}" />
                     <TextBox
                         Grid.Column="1"
                         Margin="10,0,10,0"
@@ -41,19 +41,19 @@
                         Grid.Column="2"
                         Padding="20,2,20,2"
                         cal:Message.Attach="OnDumpFolderPathButtonClick()"
-                        Content="{x:Static res:Resources.Browser}">
+                        Content="{markup:Translate res:Resources.Browser}">
 
                     </Button>
                 </Grid>
                 <CheckBox
                     Margin="10,0,10,10"
-                    Content="{x:Static res:Resources.EnableDumpFullMemory}"
+                    Content="{markup:Translate res:Resources.EnableDumpFullMemory}"
                     IsChecked="{Binding Setting.IsFullDump}">
 
                 </CheckBox>
                 <CheckBox
                     Margin="10,0,10,10"
-                    Content="{x:Static res:Resources.EnableNotifyUserByDialog}"
+                    Content="{markup:Translate res:Resources.EnableNotifyUserByDialog}"
                     IsChecked="{Binding Setting.IsNotifyUserCrash}">
                 </CheckBox>
 
@@ -62,30 +62,30 @@
                     Padding="20,2,20,2"
                     HorizontalAlignment="Left"
                     cal:Message.Attach="ThrowException()"
-                    Content="{x:Static res:Resources.TestDump}">
+                    Content="{markup:Translate res:Resources.TestDump}">
                 </Button>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="{x:Static res:Resources.GraphicsRender}">
+        <GroupBox Margin="5" Header="{markup:Translate res:Resources.GraphicsRender}">
             <StackPanel>
                 <CheckBox
                     Margin="10,10,10,10"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.GraphicsCompatability}">
-                    <TextBlock Text="{x:Static res:Resources.GraphicsCompatability}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate res:Resources.GraphicsCompatability}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="10,0,10,10"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.OutputGraphicsLog}">
-                    <TextBlock Text="{x:Static res:Resources.OutputGraphicsLog}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate res:Resources.OutputGraphicsLog}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="30,0,10,10"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.GraphicsLogSynchronous}"
                     IsEnabled="{Binding Setting.OutputGraphicsLog}">
-                    <TextBlock Text="{x:Static res:Resources.GraphicsLogSynchronous}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate res:Resources.GraphicsLogSynchronous}" TextWrapping="Wrap" />
                 </CheckBox>
             </StackPanel>
         </GroupBox>

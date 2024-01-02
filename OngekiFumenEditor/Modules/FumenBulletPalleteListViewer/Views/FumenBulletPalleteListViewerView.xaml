@@ -9,7 +9,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:s="clr-namespace:OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ValueConverters"
@@ -29,12 +29,12 @@
             <Button
                 Margin="0,0,5,0"
                 cal:Message.Attach="[Event Click] = [Action OnCreateNew()];"
-                Content="{x:Static res:Resources.NewBulletPallete}"
+                Content="{markup:Translate res:Resources.NewBulletPallete}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
             </Button>
             <Button
                 cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];"
-                Content="{x:Static res:Resources.DeleteSelectedPalletes}"
+                Content="{markup:Translate res:Resources.DeleteSelectedPalletes}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
             </Button>
 
@@ -45,7 +45,7 @@
 
             <Button
                 cal:Message.Attach="[Event Click] = [Action OnRefreshFilter()];"
-                Content="{x:Static res:Resources.Filter}"
+                Content="{markup:Translate res:Resources.Filter}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
             </Button>
         </StackPanel>
@@ -80,7 +80,7 @@
                         Width="60"
                         DisplayMemberBinding="{Binding StrID}"
                         Header="StrID" />
-                    <GridViewColumn Width="120" Header="{x:Static res:Resources.Name}">
+                    <GridViewColumn Width="120" Header="{markup:Translate res:Resources.Name}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding EditorName}">
@@ -89,7 +89,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="{x:Static res:Resources.ShootSource}">
+                    <GridViewColumn Width="100" Header="{markup:Translate res:Resources.ShootSource}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
@@ -97,7 +97,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="80" Header="{x:Static res:Resources.ShootOffset}">
+                    <GridViewColumn Width="80" Header="{markup:Translate res:Resources.ShootOffset}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding PlaceOffset}">
@@ -106,7 +106,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="{x:Static res:Resources.ShootTarget}">
+                    <GridViewColumn Width="100" Header="{markup:Translate res:Resources.ShootTarget}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
@@ -114,7 +114,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="60" Header="{x:Static res:Resources.BulletSpeed}">
+                    <GridViewColumn Width="60" Header="{markup:Translate res:Resources.BulletSpeed}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding Speed}">
@@ -123,7 +123,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="{x:Static res:Resources.BulletSize}">
+                    <GridViewColumn Width="100" Header="{markup:Translate res:Resources.BulletSize}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
@@ -131,7 +131,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="75" Header="{x:Static res:Resources.BulletType}">
+                    <GridViewColumn Width="75" Header="{markup:Translate res:Resources.BulletType}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
@@ -152,28 +152,28 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>-->
 
-                    <GridViewColumn Width="240" Header="{x:Static res:Resources.Action}">
+                    <GridViewColumn Width="240" Header="{markup:Translate res:Resources.Action}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBullet($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
-                                        Text="{x:Static res:Resources.DragToCreateBullet}"
+                                        Text="{markup:Translate res:Resources.DragToCreateBullet}"
                                         TextDecorations="Baseline">
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
-                                        Text="{x:Static res:Resources.DragToCreateBell}"
+                                        Text="{markup:Translate res:Resources.DragToCreateBell}"
                                         TextDecorations="Baseline">
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnCopyNewBPL($executionContext)];"
-                                        Text="{x:Static res:Resources.ClonePallete}"
+                                        Text="{markup:Translate res:Resources.ClonePallete}"
                                         TextDecorations="Baseline">
                                     </TextBlock>
                                 </StackPanel>

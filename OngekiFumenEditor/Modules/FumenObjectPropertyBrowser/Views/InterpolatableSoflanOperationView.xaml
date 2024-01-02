@@ -6,7 +6,7 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     d:Background="White"
     mc:Ignorable="d">
     <StackPanel Margin="21,5,0,0">
@@ -16,7 +16,7 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
             DecoratorBrush="DarkSalmon"
-            Text="{x:Static res:Resources.InterpolateToCreateKeyframeSoflans}"
-            ToolTip="{x:Static res:Resources.InterpolateToCreateKeyframeSoflansTipText}" />
+            Text="{markup:Translate res:Resources.InterpolateToCreateKeyframeSoflans}"
+            ToolTip="{markup:Translate res:Resources.InterpolateToCreateKeyframeSoflansTipText}" />
     </StackPanel>
 </UserControl>
