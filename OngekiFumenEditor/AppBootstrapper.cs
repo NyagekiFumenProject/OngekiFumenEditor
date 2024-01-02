@@ -190,10 +190,10 @@ namespace OngekiFumenEditor
 			{
 				window.AllowDrop = true;
 				window.Drop += MainWindow_Drop;
-			}
 
-			if (!ProgramSetting.Default.DisableShowSplashScreenAfterBoot)
-				IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>(), Application.MainWindow);
+				if (!ProgramSetting.Default.DisableShowSplashScreenAfterBoot)
+					IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
+			}
 		}
 
 		private async void MainWindow_Drop(object sender, DragEventArgs e)

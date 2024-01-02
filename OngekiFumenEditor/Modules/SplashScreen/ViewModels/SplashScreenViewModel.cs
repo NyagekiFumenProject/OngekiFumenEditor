@@ -15,6 +15,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Gemini.Modules.Shell.Commands.NewFileCommandHandler;
 
