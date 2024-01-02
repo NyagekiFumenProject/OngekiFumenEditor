@@ -39,7 +39,7 @@
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
-                    Text="{markup:Translate res:Resources.SelectGameRootFolder}">
+                    Text="{markup:Translate [SelectGameRootFolder]}">
                 </TextBlock>
                 <TextBlock
                     Grid.Column="1"
@@ -53,11 +53,11 @@
                     Margin="10,0,10,0"
                     Padding="20,2,20,2"
                     cal:Message.Attach="SelectFolder()"
-                    Content="{markup:Translate res:Resources.Browser}">
+                    Content="{markup:Translate [Browser]}">
                 </Button>
             </Grid>
             <StackPanel Margin="5,5,5,10" Orientation="Horizontal">
-                <Label Content="{markup:Translate res:Resources.KeywordSortFilter}" />
+                <Label Content="{markup:Translate [KeywordSortFilter]}" />
                 <TextBox
                     Width="350"
                     Margin="5,0,0,0"
@@ -70,7 +70,7 @@
                 Padding="20,5,20,5"
                 HorizontalAlignment="Right"
                 cal:Message.Attach="ApplyKeywords()"
-                Content="{markup:Translate res:Resources.Filter}">
+                Content="{markup:Translate [Filter]}">
             </Button>
         </StackPanel>
         <ItemsControl Grid.Row="1" ItemsSource="{Binding DisplayFumenSets}">
@@ -199,7 +199,7 @@
                                                             Padding="10,5,10,5"
                                                             HorizontalAlignment="Left"
                                                             cal:Message.Attach="LoadFumen($dataContext)"
-                                                            Content="{markup:Translate res:Resources.LoadFumen}">
+                                                            Content="{markup:Translate [LoadFumen]}">
                                                         </Button>
                                                     </StackPanel>
                                                 </Grid>

@@ -22,7 +22,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="{markup:Translate res:Resources.DragToCreateHoldEnd}" />
+                Text="{markup:Translate [DragToCreateHoldEnd]}" />
         </Border>
     </StackPanel>
 </UserControl>

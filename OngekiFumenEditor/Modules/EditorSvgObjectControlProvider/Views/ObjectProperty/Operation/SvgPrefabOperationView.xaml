@@ -23,6 +23,6 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnGenerateLaneToEditor()];"
             DecoratorBrush="Green"
-            Text="{markup:Translate res:Resources.GenerateLaneObjects}" />
+            Text="{markup:Translate [GenerateLaneObjects]}" />
     </StackPanel>
 </UserControl>

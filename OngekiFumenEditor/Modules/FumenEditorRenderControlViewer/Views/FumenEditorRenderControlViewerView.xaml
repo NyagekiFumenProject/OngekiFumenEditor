@@ -43,7 +43,7 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <ToolBar>
-                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{markup:Translate res:Resources.ResetDefault}">
+                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{markup:Translate [ResetDefault]}">
                 </Button>
             </ToolBar>
         </StackPanel>
@@ -66,7 +66,7 @@
                     <GridViewColumn
                         Width="30"
                         DisplayMemberBinding="{Binding RenderOrder}"
-                        Header="{markup:Translate res:Resources.RenderOrder}" />
+                        Header="{markup:Translate [RenderOrder]}" />
                     <GridViewColumn Header="Design">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -87,7 +87,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="{markup:Translate res:Resources.Name}" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="{markup:Translate [Name]}" />
                 </GridView>
             </ListView.View>
         </ListView>

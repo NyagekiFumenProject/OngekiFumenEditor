@@ -35,8 +35,8 @@
             </i:Interaction.Behaviors>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{markup:Translate res:Resources.Refresh}" />
-                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{markup:Translate res:Resources.CancelSelected}" />
+                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{markup:Translate [Refresh]}" />
+                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{markup:Translate [CancelSelected]}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>
@@ -56,19 +56,19 @@
                     </GridView.ColumnHeaderContainerStyle>
 
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=Name}">
-                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate res:Resources.Name}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate [Name]}">
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=TGrid}">
-                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate res:Resources.ObjectTime}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate [ObjectTime]}">
                         </GridViewColumnHeader>
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="550"
                         DisplayMemberBinding="{Binding .}"
-                        Header="{markup:Translate res:Resources.Description}" />
+                        Header="{markup:Translate [Description]}" />
                 </GridView>
             </ListView.View>
         </ListView>

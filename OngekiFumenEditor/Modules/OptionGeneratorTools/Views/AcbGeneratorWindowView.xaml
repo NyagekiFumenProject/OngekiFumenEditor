@@ -20,7 +20,7 @@
     mc:Ignorable="d">
     <StackPanel>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <Label VerticalAlignment="Center" Content="{markup:Translate res:Resources.AudioFile}" />
+            <Label VerticalAlignment="Center" Content="{markup:Translate [AudioFile]}" />
             <Label
                 Width="300"
                 Margin="10,0,0,0"
@@ -32,13 +32,13 @@
                 Padding="20,5,20,5"
                 VerticalAlignment="Center"
                 cal:Message.Attach="SelectAcbFilePath()"
-                Content="{markup:Translate res:Resources.Browser}">
+                Content="{markup:Translate [Browser]}">
             </Button>
         </StackPanel>
         <GroupBox
             Margin="10,0,10,10"
             Foreground="{StaticResource EnvironmentToolWindowText}"
-            Header="{markup:Translate res:Resources.Option}">
+            Header="{markup:Translate [Option]}">
             <StackPanel Margin="5">
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Label VerticalAlignment="Center">MusicId:</Label>
@@ -50,7 +50,7 @@
                     </TextBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <Label Content="{markup:Translate res:Resources.PreviewTime}" />
+                    <Label Content="{markup:Translate [PreviewTime]}" />
                     <TextBox
                         Width="100"
                         VerticalAlignment="Center"
@@ -64,7 +64,7 @@
             </StackPanel>
         </GroupBox>
         <StackPanel Margin="10" Orientation="Horizontal">
-            <Label VerticalAlignment="Center" Content="{markup:Translate res:Resources.OutputFolder}">
+            <Label VerticalAlignment="Center" Content="{markup:Translate [OutputFolder]}">
             </Label>
             <Label
                 Width="300"
@@ -77,14 +77,14 @@
                 Padding="20,5,20,5"
                 VerticalAlignment="Center"
                 cal:Message.Attach="SelectOutputFolder()"
-                Content="{markup:Translate res:Resources.Browser}">
+                Content="{markup:Translate [Browser]}">
             </Button>
         </StackPanel>
         <Button
             Margin="10"
             Padding="20,10,20,10"
             cal:Message.Attach="Generate()"
-            Content="{markup:Translate res:Resources.Generate}"
+            Content="{markup:Translate [Generate]}"
             IsEnabled="{Binding IsGeneratable}">
         </Button>
     </StackPanel>

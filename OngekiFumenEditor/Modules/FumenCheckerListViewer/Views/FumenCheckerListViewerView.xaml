@@ -26,7 +26,7 @@
                 Margin="0,0,5,0"
                 Padding="20,2,20,2"
                 cal:Message.Attach="[Event Click] = [Action RefreshCurrentFumen()];"
-                Content="{markup:Translate res:Resources.Refresh}"
+                Content="{markup:Translate [Refresh]}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
             </Button>
             <ToggleButton
@@ -46,7 +46,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{markup:Translate res:Resources.Error}">
+                        <Run Text="{markup:Translate [Error]}">
                         </Run>
                         <Run Text="{Binding ErrorCount, Mode=OneWay}" />
                         <Run>
@@ -57,7 +57,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowError}" Value="False">
-                                            <Setter Property="Text" Value="{markup:Translate res:Resources.NotShow}" />
+                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -84,7 +84,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{markup:Translate res:Resources.Problem}">
+                        <Run Text="{markup:Translate [Problem]}">
                         </Run>
                         <Run Text="{Binding ProblemCount, Mode=OneWay}" />
                         <Run>
@@ -95,7 +95,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowProblem}" Value="False">
-                                            <Setter Property="Text" Value="{markup:Translate res:Resources.NotShow}" />
+                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -122,7 +122,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{markup:Translate res:Resources.Advice}">
+                        <Run Text="{markup:Translate [Advice]}">
                         </Run>
                         <Run Text="{Binding SuggestCount, Mode=OneWay}" />
                         <Run>
@@ -133,7 +133,7 @@
                                             <Setter Property="Text" Value="" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding EnableShowSuggest}" Value="False">
-                                            <Setter Property="Text" Value="{markup:Translate res:Resources.NotShow}" />
+                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -171,28 +171,28 @@
                     <GridViewColumn
                         Width="120"
                         DisplayMemberBinding="{Binding Severity}"
-                        Header="{markup:Translate res:Resources.Severity}">
+                        Header="{markup:Translate [Severity]}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="100"
                         DisplayMemberBinding="{Binding RuleName}"
-                        Header="{markup:Translate res:Resources.RuleName}">
+                        Header="{markup:Translate [RuleName]}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="400"
                         DisplayMemberBinding="{Binding Description}"
-                        Header="{markup:Translate res:Resources.Description}">
+                        Header="{markup:Translate [Description]}">
 
                     </GridViewColumn>
 
                     <GridViewColumn
                         Width="200"
                         DisplayMemberBinding="{Binding LocationDescription}"
-                        Header="{markup:Translate res:Resources.WrongLocation2}">
+                        Header="{markup:Translate [WrongLocation2]}">
 
                     </GridViewColumn>
                 </GridView>

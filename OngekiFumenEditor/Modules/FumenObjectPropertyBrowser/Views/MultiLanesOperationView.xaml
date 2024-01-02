@@ -23,6 +23,6 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnClick($executionContext)];"
             DecoratorBrush="DarkGray"
-            Text="{markup:Translate res:Resources.CombineLanes}" />
+            Text="{markup:Translate [CombineLanes]}" />
     </StackPanel>
 </UserControl>

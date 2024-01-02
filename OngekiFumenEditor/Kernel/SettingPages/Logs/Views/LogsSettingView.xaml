@@ -14,14 +14,14 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <StackPanel>
-        <GroupBox Margin="5" Header="{markup:Translate res:Resources.Logger}">
+        <GroupBox Margin="5" Header="{markup:Translate [Logger]}">
             <Grid Margin="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.LoggerFolder}" />
+                <TextBlock VerticalAlignment="Center" Text="{markup:Translate [LoggerFolder]}" />
                 <TextBox
                     Grid.Column="1"
                     Margin="10,0,10,0"
@@ -32,7 +32,7 @@
                     Grid.Column="2"
                     Padding="20,2,20,2"
                     cal:Message.Attach="OnLogsFolderPathButtonClick()"
-                    Content="{markup:Translate res:Resources.Browser}">
+                    Content="{markup:Translate [Browser]}">
                 </Button>
             </Grid>
         </GroupBox>

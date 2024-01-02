@@ -47,7 +47,7 @@
                 </wpf:GLWpfControl>
 
                 <StackPanel Margin="0,5,0,5">
-                    <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate res:Resources.VisualizerRenderOption}">
+                    <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [VisualizerRenderOption]}">
                         <StackPanel>
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -65,7 +65,7 @@
                                     Margin="0,0,10,0"
                                     Padding="0,5,0,5"
                                     CurrentValue="{Binding CurrentTimeXOffset, Mode=TwoWay}"
-                                    DisplayName="{markup:Translate res:Resources.CurrentTimeOffset}"
+                                    DisplayName="{markup:Translate [CurrentTimeOffset]}"
                                     MaxValue="{Binding ElementName=glView, Path=ActualWidth}"
                                     MinValue="0"
                                     Step="1">
@@ -75,7 +75,7 @@
                                     Margin="10,0,0,0"
                                     Padding="0,5,0,5"
                                     CurrentValue="{Binding DurationMsPerPixel, Mode=TwoWay}"
-                                    DisplayName="{markup:Translate res:Resources.VisualizerHorizonScale}"
+                                    DisplayName="{markup:Translate [VisualizerHorizonScale]}"
                                     MaxValue="50"
                                     MinValue="2.5"
                                     Step="2.5">
@@ -86,7 +86,7 @@
                                     Margin="0,10,10,0"
                                     Padding="0,5,0,5"
                                     CurrentValue="{Binding ResampleSize, Mode=TwoWay}"
-                                    DisplayName="{markup:Translate res:Resources.Resample}"
+                                    DisplayName="{markup:Translate [Resample]}"
                                     MaxValue="30"
                                     MinValue="0"
                                     Step="1" />
@@ -96,12 +96,12 @@
                                     Margin="10,10,0,0"
                                     Padding="0,5,0,5"
                                     CurrentValue="{Binding WaveformVecticalScale, Mode=TwoWay}"
-                                    DisplayName="{markup:Translate res:Resources.VisualizerVerticalScale}"
+                                    DisplayName="{markup:Translate [VisualizerVerticalScale]}"
                                     MaxValue="1.5"
                                     MinValue="0.01"
                                     Step="0.01" />
                             </Grid>
-                            <GroupBox Header="{markup:Translate res:Resources.VisualizerSpecialOption}">
+                            <GroupBox Header="{markup:Translate [VisualizerSpecialOption]}">
                                 <objectinspector:ObjectInspectorView Margin="5,10,10,5" InspectObject="{Binding WaveformDrawing.Options}">
 
                                 </objectinspector:ObjectInspectorView>
@@ -121,7 +121,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate res:Resources.SoundSwitchControl}">
+                <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [SoundSwitchControl]}">
                     <StackPanel>
                         <WrapPanel>
                             <WrapPanel.Resources>
@@ -181,7 +181,7 @@
                             <Button
                                 Padding="5,2,5,2"
                                 cal:Message.Attach="OnReloadSoundFiles()"
-                                Content="{markup:Translate res:Resources.ReloadSoundFile}">
+                                Content="{markup:Translate [ReloadSoundFile]}">
                             </Button>
                         </StackPanel>
                     </StackPanel>
@@ -191,18 +191,18 @@
                     Grid.Column="1"
                     Margin="10"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
-                    Header="{markup:Translate res:Resources.SwitchControl}">
+                    Header="{markup:Translate [SwitchControl]}">
                     <StackPanel>
                         <CheckBox
                             Margin="5"
-                            Content="{markup:Translate res:Resources.EnableVisualizerDisplay}"
+                            Content="{markup:Translate [EnableVisualizerDisplay]}"
                             IsChecked="{Binding IsShowWaveform}">
                         </CheckBox>
                         <StackPanel
                             Margin="5"
                             HorizontalAlignment="Stretch"
                             Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.Speed}" />
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Speed]}" />
                             <Slider
                                 Width="150"
                                 Margin="5,0,0,0"
@@ -221,7 +221,7 @@
                             Margin="5"
                             HorizontalAlignment="Stretch"
                             Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.Music}">
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Music]}">
                             </TextBlock>
                             <Slider
                                 Width="150"
@@ -239,7 +239,7 @@
                             Margin="5"
                             HorizontalAlignment="Right"
                             Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate res:Resources.Sound}">
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Sound]}">
                             </TextBlock>
                             <Slider
                                 Width="150"

@@ -30,43 +30,43 @@
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding Setting.DisableTGridMagneticDock}">
-                <TextBlock Text="{markup:Translate res:Resources.DisableTGridMagneticDock}" TextWrapping="Wrap" />
+                <TextBlock Text="{markup:Translate [DisableTGridMagneticDock]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding Setting.ForceXGridMagneticDock}">
-                <TextBlock Text="{markup:Translate res:Resources.ForceXGridMagneticDock}" TextWrapping="Wrap" />
+                <TextBlock Text="{markup:Translate [ForceXGridMagneticDock]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding Setting.DisableXGridMagneticDock}">
-                <TextBlock Text="{markup:Translate res:Resources.DisableXGridMagneticDock}" TextWrapping="Wrap" />
+                <TextBlock Text="{markup:Translate [DisableXGridMagneticDock]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding Setting.ForceTapHoldMagneticDockToLane}">
-                <TextBlock Text="{markup:Translate res:Resources.ForceTapHoldMagneticDockToLane}" TextWrapping="Wrap" />
+                <TextBlock Text="{markup:Translate [ForceTapHoldMagneticDockToLane]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding Setting.ForceMagneticDock}">
-                <TextBlock Text="{markup:Translate res:Resources.ForceMagneticDock}" TextWrapping="Wrap" />
+                <TextBlock Text="{markup:Translate [ForceMagneticDock]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding Setting.JudgeLineAlignBeat}">
-                <TextBlock Text="{markup:Translate res:Resources.JudgeLineAlignBeat}" TextWrapping="Wrap" />
+                <TextBlock Text="{markup:Translate [JudgeLineAlignBeat]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding Setting.AdjustPastedObjects}">
-                <TextBlock Text="{markup:Translate res:Resources.AdjustPastedObjects}" TextWrapping="Wrap" />
+                <TextBlock Text="{markup:Translate [AdjustPastedObjects]}" TextWrapping="Wrap" />
             </CheckBox>
             <Grid Margin="0,2,0,2">
                 <Grid.ColumnDefinitions>
@@ -81,7 +81,7 @@
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    Text="{markup:Translate res:Resources.XGridUnitSpace}"
+                    Text="{markup:Translate [XGridUnitSpace]}"
                     TextWrapping="Wrap">
                 </TextBlock>
                 <ComboBox
@@ -97,7 +97,7 @@
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.BeatSplit, Mode=TwoWay}"
-                    DisplayName="{markup:Translate res:Resources.BeatSplit}"
+                    DisplayName="{markup:Translate [BeatSplit]}"
                     MaxValue="16"
                     MinValue="0"
                     Step="1">
@@ -105,7 +105,7 @@
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.XGridDisplayMaxUnit, Mode=TwoWay}"
-                    DisplayName="{markup:Translate res:Resources.XGridDisplayMaxUnit}"
+                    DisplayName="{markup:Translate [XGridDisplayMaxUnit]}"
                     IsEnabled="{Binding Setting.EnableXOffset}"
                     MaxValue="200"
                     MinValue="0"
@@ -113,7 +113,7 @@
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.JudgeLineOffsetY, Mode=TwoWay}"
-                    DisplayName="{markup:Translate res:Resources.JudgeLineOffsetY}"
+                    DisplayName="{markup:Translate [JudgeLineOffsetY]}"
                     MaxValue="500"
                     MinValue="0"
                     Step="1">
@@ -121,14 +121,14 @@
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.XOffset, Mode=TwoWay}"
-                    DisplayName="{markup:Translate res:Resources.XOffset}"
+                    DisplayName="{markup:Translate [XOffset]}"
                     MaxValue="600"
                     MinValue="-600"
                     Step="1" />
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.VerticalDisplayScale, Mode=TwoWay}"
-                    DisplayName="{markup:Translate res:Resources.VerticalDisplayScale}"
+                    DisplayName="{markup:Translate [VerticalDisplayScale]}"
                     MaxValue="3"
                     MinValue="0.1"
                     Step="0.1">
@@ -148,7 +148,7 @@
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    Text="{markup:Translate res:Resources.DisplayTimeFormat}">
+                    Text="{markup:Translate [DisplayTimeFormat]}">
                 </TextBlock>
                 <ComboBox
                     Grid.Row="8"
@@ -161,7 +161,7 @@
                 Margin="0,10,0,2"
                 VerticalContentAlignment="Center"
                 IsChecked="{Binding Setting.LoopPlayTiming}">
-                <TextBlock Text="{markup:Translate res:Resources.EnableLoopPlayTiming}" TextWrapping="Wrap" />
+                <TextBlock Text="{markup:Translate [EnableLoopPlayTiming]}" TextWrapping="Wrap" />
             </CheckBox>
         </StackPanel>
     </ScrollViewer>

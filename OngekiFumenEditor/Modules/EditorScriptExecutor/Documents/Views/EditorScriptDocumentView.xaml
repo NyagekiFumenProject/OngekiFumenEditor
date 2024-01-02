@@ -34,7 +34,7 @@
                         <Label
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="{markup:Translate res:Resources.Refresh}">
+                            Content="{markup:Translate [Refresh]}">
                         </Label>
                     </StackPanel>
                 </Button>
@@ -53,14 +53,14 @@
                         <Label
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="{markup:Translate res:Resources.EditScriptByVisualStudio}">
+                            Content="{markup:Translate [EditScriptByVisualStudio]}">
                         </Label>
                     </StackPanel>
                 </Button>
                 <Label
                     Margin="10,0,0,0"
                     VerticalAlignment="Center"
-                    Content="{markup:Translate res:Resources.EditorTarget}" />
+                    Content="{markup:Translate [EditorTarget]}" />
                 <ComboBox
                     Width="150"
                     Margin="10,0,0,0"
@@ -94,7 +94,7 @@
                         <Label
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="{markup:Translate res:Resources.CheckScript}">
+                            Content="{markup:Translate [CheckScript]}">
                         </Label>
                     </StackPanel>
                 </Button>
@@ -114,7 +114,7 @@
                         <Label
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            Content="{markup:Translate res:Resources.RunScript}">
+                            Content="{markup:Translate [RunScript]}">
                         </Label>
                     </StackPanel>
                 </Button>
@@ -140,12 +140,12 @@
                     HorizontalAlignment="Center"
                     FontSize="20"
                     FontWeight="Bold"
-                    Text="{markup:Translate res:Resources.UsingExtendScriptEditor}">
+                    Text="{markup:Translate [UsingExtendScriptEditor]}">
                 </TextBlock>
                 <TextBlock
                     HorizontalAlignment="Center"
                     FontSize="15"
-                    Text="{markup:Translate res:Resources.PreventUsingInternalEditor}">
+                    Text="{markup:Translate [PreventUsingInternalEditor]}">
                 </TextBlock>
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                     <Button
@@ -164,7 +164,7 @@
                             <Label
                                 VerticalAlignment="Center"
                                 VerticalContentAlignment="Center"
-                                Content="{markup:Translate res:Resources.SyncScriptContentManually}">
+                                Content="{markup:Translate [SyncScriptContentManually]}">
                             </Label>
                         </StackPanel>
                     </Button>
@@ -184,7 +184,7 @@
                             <Label
                                 VerticalAlignment="Center"
                                 VerticalContentAlignment="Center"
-                                Content="{markup:Translate res:Resources.StopUsingExtendEditor}">
+                                Content="{markup:Translate [StopUsingExtendEditor]}">
                             </Label>
                         </StackPanel>
                     </Button>

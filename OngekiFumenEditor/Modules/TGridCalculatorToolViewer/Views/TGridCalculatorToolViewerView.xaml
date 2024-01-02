@@ -57,20 +57,20 @@
                 </StackPanel>
             </StackPanel>
 
-            <GroupBox Header="{markup:Translate res:Resources.Action}">
+            <GroupBox Header="{markup:Translate [Action]}">
                 <StackPanel>
                     <Button
                         Margin="5,5,0,5"
                         Padding="2,5,2,5"
                         HorizontalAlignment="Stretch"
                         cal:Message.Attach="[Event Click] = [Action OnRequestEditorScrollTo()];">
-                        <TextBlock Text="{markup:Translate res:Resources.EditorJumpToSpecifyTGrid}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate [EditorJumpToSpecifyTGrid]}" TextWrapping="Wrap" />
                     </Button>
                     <CheckBox
                         Margin="10,0,0,0"
                         VerticalContentAlignment="Center"
                         IsChecked="{Binding IsAutoUpdateTimeIfSelectedObject}">
-                        <TextBlock Text="{markup:Translate res:Resources.AutoUpdateCurrentObjectTime}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate [AutoUpdateCurrentObjectTime]}" TextWrapping="Wrap" />
                     </CheckBox>
                     <Button
                         Margin="5,5,0,5"
@@ -78,7 +78,7 @@
                         HorizontalAlignment="Stretch"
                         cal:Message.Attach="[Event Click] = [Action OnRequestApplyTGridToObject()];"
                         Visibility="{Binding IsSelectedObject, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <TextBlock Text="{markup:Translate res:Resources.GiveTGridToSelectedObject}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate [GiveTGridToSelectedObject]}" TextWrapping="Wrap" />
                     </Button>
                 </StackPanel>
             </GroupBox>

@@ -16,7 +16,7 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
             DecoratorBrush="DarkSalmon"
-            Text="{markup:Translate res:Resources.InterpolateToCreateKeyframeSoflans}"
-            ToolTip="{markup:Translate res:Resources.InterpolateToCreateKeyframeSoflansTipText}" />
+            Text="{markup:Translate [InterpolateToCreateKeyframeSoflans]}"
+            ToolTip="{markup:Translate [InterpolateToCreateKeyframeSoflansTipText]}" />
     </StackPanel>
 </UserControl>
