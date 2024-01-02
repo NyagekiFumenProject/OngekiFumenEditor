@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Utils;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
@@ -55,7 +56,7 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.DefaultImp
 		public void PostRecord(RecentRecordInfo info)
 		{
 			var fileName = Path.GetFullPath(info.FileName);
-			info = info with { FileName = fileName };
+			info = info with { FileName = fileName, LastAccessTime = DateTime.Now };
 
 			if (info.FileName == recentRecordInfos.FirstOrDefault()?.FileName)
 				return;

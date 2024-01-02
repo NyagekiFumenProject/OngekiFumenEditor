@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
+using MahApps.Metro.Controls.Dialogs;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
@@ -8,6 +9,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Scheduler;
+using OngekiFumenEditor.Modules.SplashScreen;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
@@ -144,9 +146,6 @@ namespace OngekiFumenEditor
 		protected override void PreInitialize()
 		{
 			base.PreInitialize();
-
-			Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 		}
 
 		protected void LogBaseInfos()
@@ -193,17 +192,8 @@ namespace OngekiFumenEditor
 				window.Drop += MainWindow_Drop;
 			}
 
-			var soflan = new InterpolatableSoflan()
-			{
-				Speed = 1,
-				TGrid = new TGrid(1, 0),
-				EndTGrid = new TGrid(2, 0),
-			};
-
-			(soflan.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed = 2;
-			soflan.Easing = EasingTypes.None;
-
-			var s = soflan.GenerateKeyframeSoflans().ToArray();
+			if (!ProgramSetting.Default.DisableShowSplashScreenAfterBoot)
+				IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>(), Application.MainWindow);
 		}
 
 		private async void MainWindow_Drop(object sender, DragEventArgs e)

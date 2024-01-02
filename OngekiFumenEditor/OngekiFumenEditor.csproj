@@ -66,13 +66,21 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
     <None Remove="Resources\empty_ogkr_template.ogkr" />
+    <None Remove="Resources\Icons\add-folder.png" />
+    <None Remove="Resources\Icons\book.png" />
     <None Remove="Resources\Icons\close.png" />
+    <None Remove="Resources\Icons\document.png" />
     <None Remove="Resources\Icons\ease.png" />
+    <None Remove="Resources\Icons\file.png" />
+    <None Remove="Resources\Icons\folder.png" />
+    <None Remove="Resources\Icons\home.png" />
     <None Remove="Resources\Icons\icons8-paint-brush-16.png" />
     <None Remove="Resources\Icons\logo.ico" />
     <None Remove="Resources\Icons\logo32.ico" />
+    <None Remove="Resources\Icons\open-folder.png" />
     <None Remove="Resources\Icons\preview.png" />
     <None Remove="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
+    <None Remove="Resources\Icons\search.png" />
     <None Remove="Resources\Images\logo.png" />
     <None Remove="Resources\Music.xml" />
     <None Remove="Resources\MusicSource.xml" />
@@ -206,12 +214,20 @@
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
     <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
+    <Resource Include="Resources\Icons\add-folder.png" />
+    <Resource Include="Resources\Icons\book.png" />
     <Resource Include="Resources\Icons\close.png" />
+    <Resource Include="Resources\Icons\document.png" />
     <Resource Include="Resources\Icons\ease.png" />
+    <Resource Include="Resources\Icons\file.png" />
+    <Resource Include="Resources\Icons\folder.png" />
+    <Resource Include="Resources\Icons\home.png" />
     <Resource Include="Resources\Icons\icons8-paint-brush-16.png" />
     <Resource Include="Resources\Icons\logo.ico" />
     <Resource Include="Resources\Icons\logo32.ico" />
+    <Resource Include="Resources\Icons\open-folder.png" />
     <Resource Include="Resources\Icons\preview.png" />
+    <Resource Include="Resources\Icons\search.png" />
     <Resource Include="Resources\logo.png" />
   </ItemGroup>
 
