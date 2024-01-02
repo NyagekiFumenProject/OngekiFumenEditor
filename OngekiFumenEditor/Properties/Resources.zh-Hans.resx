@@ -441,6 +441,12 @@
   <data name="Create" xml:space="preserve">
     <value>新建</value>
   </data>
+  <data name="CreateProject" xml:space="preserve">
+    <value>新建项目</value>
+  </data>
+  <data name="CreateProjectTipText" xml:space="preserve">
+    <value>新建一个项目</value>
+  </data>
   <data name="CurrentTimeOffset" xml:space="preserve">
     <value>当前时间线偏移</value>
   </data>
@@ -533,6 +539,9 @@
   </data>
   <data name="DragToSplitTipText" xml:space="preserve">
     <value>按照某个时间点分割出新旧两个轨道</value>
+  </data>
+  <data name="Earlier" xml:space="preserve">
+    <value>更早</value>
   </data>
   <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
     <value>编辑器跳转到指定的TGrid</value>
@@ -632,6 +641,12 @@
   </data>
   <data name="FastOpen" xml:space="preserve">
     <value>快速打开</value>
+  </data>
+  <data name="FastOpen2" xml:space="preserve">
+    <value>快速打开</value>
+  </data>
+  <data name="FastOpen2TipText" xml:space="preserve">
+    <value>打开现有的谱面文件</value>
   </data>
   <data name="FastOpenFumen" xml:space="preserve">
     <value>快速打开谱面</value>
@@ -768,6 +783,9 @@
   <data name="GraphicsRender" xml:space="preserve">
     <value>图形渲染</value>
   </data>
+  <data name="HalfHourAgo" xml:space="preserve">
+    <value>半小时前</value>
+  </data>
   <data name="HeaderConstMismatch" xml:space="preserve">
     <value>谱面Header信息</value>
   </data>
@@ -828,11 +846,17 @@
   <data name="JudgeLineOffsetY" xml:space="preserve">
     <value>判定线偏移位置:</value>
   </data>
+  <data name="JustBefore" xml:space="preserve">
+    <value>刚刚</value>
+  </data>
   <data name="KeywordSortFilter" xml:space="preserve">
     <value>关键词排序:</value>
   </data>
   <data name="LaneContainInvalidPath" xml:space="preserve">
     <value>此轨道包含非法路径</value>
+  </data>
+  <data name="Languages" xml:space="preserve">
+    <value>语言</value>
   </data>
   <data name="LimitUndoCount" xml:space="preserve">
     <value>限制编辑器撤回操作保存数量</value>
@@ -927,6 +951,9 @@
   <data name="NotShow" xml:space="preserve">
     <value>(不显示)</value>
   </data>
+  <data name="NotShowAnymore" xml:space="preserve">
+    <value>不再显示此窗口</value>
+  </data>
   <data name="NotSupportInBrushMode" xml:space="preserve">
     <value>笔刷模式下不支持{0}</value>
   </data>
@@ -983,6 +1010,12 @@
   </data>
   <data name="OpenEditorBeforeUsing" xml:space="preserve">
     <value>请先打开编辑器</value>
+  </data>
+  <data name="OpenProject" xml:space="preserve">
+    <value>打开项目</value>
+  </data>
+  <data name="OpenProjectTipText" xml:space="preserve">
+    <value>打开现有的项目</value>
   </data>
   <data name="Option" xml:space="preserve">
     <value>选项</value>
@@ -1056,6 +1089,9 @@
   <data name="PropertyBatchSet" xml:space="preserve">
     <value>批量赋值:</value>
   </data>
+  <data name="RecentFiles" xml:space="preserve">
+    <value>打开最近的使用的文件</value>
+  </data>
   <data name="RecoveryAudioTime" xml:space="preserve">
     <value>恢复到音频时间</value>
   </data>
@@ -1088,6 +1124,9 @@
   </data>
   <data name="RenderOrder" xml:space="preserve">
     <value>渲染顺序</value>
+  </data>
+  <data name="RequestRestartProgram" xml:space="preserve">
+    <value>* 需要重启程序</value>
   </data>
   <data name="Resample" xml:space="preserve">
     <value>重采样</value>
@@ -1224,6 +1263,9 @@
   <data name="StandardizeFormat" xml:space="preserve">
     <value>生成标准音击谱面</value>
   </data>
+  <data name="Start" xml:space="preserve">
+    <value>开始使用</value>
+  </data>
   <data name="StopUsingExtendEditor" xml:space="preserve">
     <value>中止外部编辑</value>
   </data>
@@ -1290,14 +1332,23 @@
   <data name="ToCopiedObjects" xml:space="preserve">
     <value>对已复制物件...</value>
   </data>
+  <data name="Today" xml:space="preserve">
+    <value>今天</value>
+  </data>
   <data name="ToPaste" xml:space="preserve">
     <value>粘贴...</value>
   </data>
   <data name="ToSelectedObjects" xml:space="preserve">
     <value>对选取物件...</value>
   </data>
+  <data name="Tutorial" xml:space="preserve">
+    <value>入门教程</value>
+  </data>
   <data name="TutorialAndDocument" xml:space="preserve">
     <value>教程和文档</value>
+  </data>
+  <data name="TutorialTipText" xml:space="preserve">
+    <value>学习如何使用编辑器和做谱</value>
   </data>
   <data name="UncheckShowOriginColor" xml:space="preserve">
     <value>请先取消勾选ShowOriginColor进行将要输出轨道的预览</value>
@@ -1358,6 +1409,12 @@
   </data>
   <data name="WarnSomeSoundsNotLoad" xml:space="preserve">
     <value>部分音效并未加载成功,详情可查看日志</value>
+  </data>
+  <data name="WithinOneMonth" xml:space="preserve">
+    <value>一个月内</value>
+  </data>
+  <data name="WithinOneWeek" xml:space="preserve">
+    <value>一个星期内</value>
   </data>
   <data name="WrongLocation" xml:space="preserve">
     <value>{0}物件貌似没有放置在正确的轨道(id:{1})线上</value>

@@ -1033,6 +1033,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Create Project 的本地化字符串。
+        /// </summary>
+        public static string CreateProject {
+            get {
+                return ResourceManager.GetString("CreateProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Create a new project 的本地化字符串。
+        /// </summary>
+        public static string CreateProjectTipText {
+            get {
+                return ResourceManager.GetString("CreateProjectTipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Offset current time display 的本地化字符串。
         /// </summary>
         public static string CurrentTimeOffset {
@@ -1308,6 +1326,15 @@ namespace OngekiFumenEditor.Properties {
         public static string DragToSplitTipText {
             get {
                 return ResourceManager.GetString("DragToSplitTipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Earlier 的本地化字符串。
+        /// </summary>
+        public static string Earlier {
+            get {
+                return ResourceManager.GetString("Earlier", resourceCulture);
             }
         }
         
@@ -1605,6 +1632,24 @@ namespace OngekiFumenEditor.Properties {
         public static string FastOpen {
             get {
                 return ResourceManager.GetString("FastOpen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fast Open 的本地化字符串。
+        /// </summary>
+        public static string FastOpen2 {
+            get {
+                return ResourceManager.GetString("FastOpen2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Open an existing fumen file 的本地化字符串。
+        /// </summary>
+        public static string FastOpen2TipText {
+            get {
+                return ResourceManager.GetString("FastOpen2TipText", resourceCulture);
             }
         }
         
@@ -2014,6 +2059,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Half an hour ago 的本地化字符串。
+        /// </summary>
+        public static string HalfHourAgo {
+            get {
+                return ResourceManager.GetString("HalfHourAgo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Fumen Header Info 的本地化字符串。
         /// </summary>
         public static string HeaderConstMismatch {
@@ -2194,6 +2248,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Just now 的本地化字符串。
+        /// </summary>
+        public static string JustBefore {
+            get {
+                return ResourceManager.GetString("JustBefore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Keywords sorting: 的本地化字符串。
         /// </summary>
         public static string KeywordSortFilter {
@@ -2208,6 +2271,15 @@ namespace OngekiFumenEditor.Properties {
         public static string LaneContainInvalidPath {
             get {
                 return ResourceManager.GetString("LaneContainInvalidPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Languages: 的本地化字符串。
+        /// </summary>
+        public static string Languages {
+            get {
+                return ResourceManager.GetString("Languages", resourceCulture);
             }
         }
         
@@ -2491,6 +2563,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Do not show this window again 的本地化字符串。
+        /// </summary>
+        public static string NotShowAnymore {
+            get {
+                return ResourceManager.GetString("NotShowAnymore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 {0} is not supported in brush mode. 的本地化字符串。
         /// </summary>
         public static string NotSupportInBrushMode {
@@ -2658,6 +2739,24 @@ namespace OngekiFumenEditor.Properties {
         public static string OpenEditorBeforeUsing {
             get {
                 return ResourceManager.GetString("OpenEditorBeforeUsing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Open Project 的本地化字符串。
+        /// </summary>
+        public static string OpenProject {
+            get {
+                return ResourceManager.GetString("OpenProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Create an existing project 的本地化字符串。
+        /// </summary>
+        public static string OpenProjectTipText {
+            get {
+                return ResourceManager.GetString("OpenProjectTipText", resourceCulture);
             }
         }
         
@@ -2878,6 +2977,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Open the most recently used file 的本地化字符串。
+        /// </summary>
+        public static string RecentFiles {
+            get {
+                return ResourceManager.GetString("RecentFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Recovery to audio time 的本地化字符串。
         /// </summary>
         public static string RecoveryAudioTime {
@@ -2973,6 +3081,15 @@ namespace OngekiFumenEditor.Properties {
         public static string RenderOrder {
             get {
                 return ResourceManager.GetString("RenderOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restart the program is required 的本地化字符串。
+        /// </summary>
+        public static string RequestRestartProgram {
+            get {
+                return ResourceManager.GetString("RequestRestartProgram", resourceCulture);
             }
         }
         
@@ -3382,6 +3499,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Start 的本地化字符串。
+        /// </summary>
+        public static string Start {
+            get {
+                return ResourceManager.GetString("Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Abort external editor editing 的本地化字符串。
         /// </summary>
         public static string StopUsingExtendEditor {
@@ -3571,6 +3697,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Today 的本地化字符串。
+        /// </summary>
+        public static string Today {
+            get {
+                return ResourceManager.GetString("Today", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 To paste... 的本地化字符串。
         /// </summary>
         public static string ToPaste {
@@ -3589,11 +3724,29 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Getting Started Tutorial 的本地化字符串。
+        /// </summary>
+        public static string Tutorial {
+            get {
+                return ResourceManager.GetString("Tutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Tutorial and document 的本地化字符串。
         /// </summary>
         public static string TutorialAndDocument {
             get {
                 return ResourceManager.GetString("TutorialAndDocument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Learn about fumen and how to use the editor in the tutorial 的本地化字符串。
+        /// </summary>
+        public static string TutorialTipText {
+            get {
+                return ResourceManager.GetString("TutorialTipText", resourceCulture);
             }
         }
         
@@ -3774,6 +3927,24 @@ namespace OngekiFumenEditor.Properties {
         public static string WarnSomeSoundsNotLoad {
             get {
                 return ResourceManager.GetString("WarnSomeSoundsNotLoad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Within one month 的本地化字符串。
+        /// </summary>
+        public static string WithinOneMonth {
+            get {
+                return ResourceManager.GetString("WithinOneMonth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Within one week 的本地化字符串。
+        /// </summary>
+        public static string WithinOneWeek {
+            get {
+                return ResourceManager.GetString("WithinOneWeek", resourceCulture);
             }
         }
         

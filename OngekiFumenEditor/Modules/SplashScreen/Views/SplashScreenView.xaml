@@ -6,8 +6,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.SplashScreen.Views"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:rec="clr-namespace:OngekiFumenEditor.Kernel.RecentFiles"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.SplashScreen.ViewModels"
     Title="Welcome"
     Width="1000"
@@ -48,7 +50,7 @@
                 Grid.Column="1"
                 Margin="0,0,5,0"
                 HorizontalAlignment="Right"
-                Text="* 需要重启程序"
+                Text="{markup:Translate [RequestRestartProgram]}"
                 Visibility="{Binding IsRequestRestartProgram, Converter={StaticResource BoolToVisibilityConverter}}">
             </TextBlock>
             <StackPanel
@@ -57,7 +59,7 @@
                 Orientation="Horizontal">
                 <Label
                     VerticalAlignment="Center"
-                    Content="语言:"
+                    Content="{markup:Translate [Languages]}"
                     FontSize="20" />
                 <ComboBox
                     Width="250"
@@ -86,7 +88,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <StackPanel>
-                    <Label Content="打开最近的使用的文件" FontSize="20" />
+                    <Label Content="{markup:Translate [RecentFiles]}" FontSize="20" />
                     <StackPanel
                         Margin="0,5"
                         Orientation="Horizontal"
@@ -170,7 +172,7 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Label Content="开始使用" FontSize="20" />
+                <Label Content="{markup:Translate [Start]}" FontSize="20" />
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <StackPanel Width="350">
 
@@ -199,10 +201,10 @@
                                         Margin="10"
                                         VerticalAlignment="Center">
                                         <Label
-                                            Content="新建项目"
+                                            Content="{markup:Translate [CreateProject]}"
                                             FontSize="20"
                                             FontWeight="Bold" />
-                                        <Label Content="新建一个项目" FontSize="15" />
+                                        <Label Content="{markup:Translate [CreateProjectTipText]}" FontSize="15" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -232,10 +234,10 @@
                                         Margin="10"
                                         VerticalAlignment="Center">
                                         <Label
-                                            Content="打开项目"
+                                            Content="{markup:Translate [OpenProject]}"
                                             FontSize="20"
                                             FontWeight="Bold" />
-                                        <Label Content="打开现有的项目" FontSize="15" />
+                                        <Label Content="{markup:Translate [OpenProjectTipText]}" FontSize="15" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -265,10 +267,10 @@
                                         Margin="10"
                                         VerticalAlignment="Center">
                                         <Label
-                                            Content="快速打开"
+                                            Content="{markup:Translate [FastOpen2]}"
                                             FontSize="20"
                                             FontWeight="Bold" />
-                                        <Label Content="打开现有的谱面文件" FontSize="15" />
+                                        <Label Content="{markup:Translate [FastOpen2TipText]}" FontSize="15" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -302,10 +304,13 @@
                                         Margin="10"
                                         VerticalAlignment="Center">
                                         <Label
-                                            Content="入门教程"
+                                            Content="{markup:Translate [Tutorial]}"
                                             FontSize="20"
                                             FontWeight="Bold" />
-                                        <Label Content="学习如何使用编辑器和做谱" FontSize="15" />
+                                        <TextBlock
+                                            FontSize="15"
+                                            Text="{markup:Translate [TutorialTipText]}"
+                                            TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -317,7 +322,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     IsChecked="{Binding DisableShowSplashScreenAfterBoot}">
-                    <TextBlock FontSize="15" Text="不再显示此窗口" />
+                    <TextBlock FontSize="15" Text="{markup:Translate [NotShowAnymore]}" />
                 </CheckBox>
             </Grid>
         </Grid>

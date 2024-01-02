@@ -441,6 +441,12 @@
   <data name="Create" xml:space="preserve">
     <value>Create</value>
   </data>
+  <data name="CreateProject" xml:space="preserve">
+    <value>Create Project</value>
+  </data>
+  <data name="CreateProjectTipText" xml:space="preserve">
+    <value>Create a new project</value>
+  </data>
   <data name="CurrentTimeOffset" xml:space="preserve">
     <value>Offset current time display</value>
   </data>
@@ -533,6 +539,9 @@
   </data>
   <data name="DragToSplitTipText" xml:space="preserve">
     <value>Split out two lanes, old and new, at a specific time.</value>
+  </data>
+  <data name="Earlier" xml:space="preserve">
+    <value>Earlier</value>
   </data>
   <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
     <value>Editor jumps to the specified TGrid.</value>
@@ -632,6 +641,12 @@
   </data>
   <data name="FastOpen" xml:space="preserve">
     <value>FastOpen</value>
+  </data>
+  <data name="FastOpen2" xml:space="preserve">
+    <value>Fast Open</value>
+  </data>
+  <data name="FastOpen2TipText" xml:space="preserve">
+    <value>Open an existing fumen file</value>
   </data>
   <data name="FastOpenFumen" xml:space="preserve">
     <value>Quickly open fumen</value>
@@ -768,6 +783,9 @@
   <data name="GraphicsRender" xml:space="preserve">
     <value>Graphics Render</value>
   </data>
+  <data name="HalfHourAgo" xml:space="preserve">
+    <value>Half an hour ago</value>
+  </data>
   <data name="HeaderConstMismatch" xml:space="preserve">
     <value>Fumen Header Info</value>
   </data>
@@ -828,11 +846,17 @@
   <data name="JudgeLineOffsetY" xml:space="preserve">
     <value>Judgment line offset:</value>
   </data>
+  <data name="JustBefore" xml:space="preserve">
+    <value>Just now</value>
+  </data>
   <data name="KeywordSortFilter" xml:space="preserve">
     <value>Keywords sorting:</value>
   </data>
   <data name="LaneContainInvalidPath" xml:space="preserve">
     <value>This lane contains an illegal segment</value>
+  </data>
+  <data name="Languages" xml:space="preserve">
+    <value>Languages:</value>
   </data>
   <data name="LimitUndoCount" xml:space="preserve">
     <value>Limit the number of undo actions saved in the editor</value>
@@ -927,6 +951,9 @@
   <data name="NotShow" xml:space="preserve">
     <value>(Not show)</value>
   </data>
+  <data name="NotShowAnymore" xml:space="preserve">
+    <value>Do not show this window again</value>
+  </data>
   <data name="NotSupportInBrushMode" xml:space="preserve">
     <value>{0} is not supported in brush mode.</value>
   </data>
@@ -983,6 +1010,12 @@
   </data>
   <data name="OpenEditorBeforeUsing" xml:space="preserve">
     <value>Open the editor first</value>
+  </data>
+  <data name="OpenProject" xml:space="preserve">
+    <value>Open Project</value>
+  </data>
+  <data name="OpenProjectTipText" xml:space="preserve">
+    <value>Create an existing project</value>
   </data>
   <data name="Option" xml:space="preserve">
     <value>Option</value>
@@ -1056,6 +1089,9 @@
   <data name="PropertyBatchSet" xml:space="preserve">
     <value>Property batch assignment:</value>
   </data>
+  <data name="RecentFiles" xml:space="preserve">
+    <value>Open the most recently used file</value>
+  </data>
   <data name="RecoveryAudioTime" xml:space="preserve">
     <value>Recovery to audio time</value>
   </data>
@@ -1088,6 +1124,9 @@
   </data>
   <data name="RenderOrder" xml:space="preserve">
     <value>Render Order</value>
+  </data>
+  <data name="RequestRestartProgram" xml:space="preserve">
+    <value>Restart the program is required</value>
   </data>
   <data name="Resample" xml:space="preserve">
     <value>Resample</value>
@@ -1224,6 +1263,9 @@
   <data name="StandardizeFormat" xml:space="preserve">
     <value>Generate standard ongeki fumen</value>
   </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
   <data name="StopUsingExtendEditor" xml:space="preserve">
     <value>Abort external editor editing</value>
   </data>
@@ -1287,14 +1329,23 @@
   <data name="ToCopiedObjects" xml:space="preserve">
     <value>For copied objects...</value>
   </data>
+  <data name="Today" xml:space="preserve">
+    <value>Today</value>
+  </data>
   <data name="ToPaste" xml:space="preserve">
     <value>To paste...</value>
   </data>
   <data name="ToSelectedObjects" xml:space="preserve">
     <value>For selected objects...</value>
   </data>
+  <data name="Tutorial" xml:space="preserve">
+    <value>Getting Started Tutorial</value>
+  </data>
   <data name="TutorialAndDocument" xml:space="preserve">
     <value>Tutorial and document</value>
+  </data>
+  <data name="TutorialTipText" xml:space="preserve">
+    <value>Learn about fumen and how to use the editor in the tutorial</value>
   </data>
   <data name="UncheckShowOriginColor" xml:space="preserve">
     <value>Uncheck the option ShowOriginColor first before generating lanes</value>
@@ -1355,6 +1406,12 @@
   </data>
   <data name="WarnSomeSoundsNotLoad" xml:space="preserve">
     <value>Some sound file failed to load. Please check the logs for details</value>
+  </data>
+  <data name="WithinOneMonth" xml:space="preserve">
+    <value>Within one month</value>
+  </data>
+  <data name="WithinOneWeek" xml:space="preserve">
+    <value>Within one week</value>
   </data>
   <data name="WrongLocation" xml:space="preserve">
     <value>{0} object seems not to be placed on the correct lane (id:{1})</value>
