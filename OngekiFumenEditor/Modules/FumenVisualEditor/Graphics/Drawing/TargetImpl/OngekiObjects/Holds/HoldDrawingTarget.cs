@@ -62,10 +62,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 				VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, VertexDash.Solider, color, list);
 				if (list.Count > 0)
 				{
-					while (holdPoint.Y > list[0].Point.Y)
+					while (list.Count > 0 && holdPoint.Y > list[0].Point.Y)
 						list.RemoveAt(0);
 					list.Insert(0, new LineVertex(holdPoint, color, VertexDash.Solider));
-					while (holdEndPoint.Y < list[list.Count - 1].Point.Y)
+					while (list.Count > 0 && holdEndPoint.Y < list[list.Count - 1].Point.Y)
 						list.RemoveAt(list.Count - 1);
 					list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
 				}
