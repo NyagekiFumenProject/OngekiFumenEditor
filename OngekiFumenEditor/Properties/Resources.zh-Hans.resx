@@ -588,6 +588,9 @@
   <data name="EnableLoopPlayTiming" xml:space="preserve">
     <value>打开节拍器(仅编辑模式)</value>
   </data>
+  <data name="EnableMultiInstances" xml:space="preserve">
+    <value>允许同时运行多个程序实例</value>
+  </data>
   <data name="EnableNotifyUserByDialog" xml:space="preserve">
     <value>是否显示对话框通知用户</value>
   </data>

@@ -1474,6 +1474,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Allow multiple program instances to run 的本地化字符串。
+        /// </summary>
+        public static string EnableMultiInstances {
+            get {
+                return ResourceManager.GetString("EnableMultiInstances", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Enable display dialog for notifications 的本地化字符串。
         /// </summary>
         public static string EnableNotifyUserByDialog {

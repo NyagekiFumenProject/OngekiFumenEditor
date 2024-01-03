@@ -21,6 +21,10 @@
                     Margin="10,10,10,10"
                     Content="{markup:Translate [ProcessProriotyUpgrade]}"
                     IsChecked="{Binding Setting.UpgradeProcessPriority}" />
+                <CheckBox
+                    Margin="10,0,10,10"
+                    Content="{markup:Translate [EnableMultiInstances]}"
+                    IsChecked="{Binding Setting.EnableMultiInstances}" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">

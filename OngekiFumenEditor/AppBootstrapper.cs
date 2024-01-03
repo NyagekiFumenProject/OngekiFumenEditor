@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using ControlzEx.Standard;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using MahApps.Metro.Controls.Dialogs;
@@ -21,11 +22,13 @@ using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,6 +36,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace OngekiFumenEditor
 {
@@ -168,6 +172,7 @@ namespace OngekiFumenEditor
 			base.OnStartup(sender, e);
 			InitExceptionCatcher();
 			LogBaseInfos();
+			InitIPC();
 
 			if (CheckIfAdminPermission())
 			{
@@ -213,6 +218,39 @@ namespace OngekiFumenEditor
 				IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
 		}
 
+		private void InitIPC()
+		{
+			if (ProgramSetting.Default.EnableMultiInstances)
+				return;
+			ipcThread = new AbortableThread(async (cancelToken) =>
+			{
+				while (!cancelToken.IsCancellationRequested)
+				{
+					try
+					{
+						var line = IPCHelper.ReadLineAsync(cancelToken)?.Trim();
+						if (string.IsNullOrWhiteSpace(line))
+							continue;
+						Log.LogDebug($"Recv line by IPC:{line}");
+						if (line.StartsWith("CMD:"))
+						{
+							var args = JsonSerializer.Deserialize<IPCHelper.ArgsWrapper>(line[4..]).Args;
+							await Application.Current.Dispatcher.InvokeAsync(() => IoC.Get<IProgramArgProcessManager>().ProcessArgs(args));
+						}
+					}
+					catch (Exception e)
+					{
+						Log.LogWarn($"Recv line by IPC throw exception:{e.Message}");
+					}
+				}
+			})
+			{
+				Name = "OngekiFumenEditorIPCThread",
+				IsBackground = true,
+			};
+			ipcThread.Start();
+		}
+
 		private async void MainWindow_Drop(object sender, DragEventArgs e)
 		{
 			if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -232,6 +270,7 @@ namespace OngekiFumenEditor
 		}
 
 		private bool exceptionHandling = false;
+		private AbortableThread ipcThread;
 
 		private void InitExceptionCatcher()
 		{
@@ -285,6 +324,7 @@ namespace OngekiFumenEditor
 
 		protected override async void OnExit(object sender, EventArgs e)
 		{
+			ipcThread?.Abort();
 			IoC.Get<IAudioManager>().Dispose();
 			await IoC.Get<ISchedulerManager>().Term();
 			FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");

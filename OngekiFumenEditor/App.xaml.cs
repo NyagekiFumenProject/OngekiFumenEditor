@@ -1,8 +1,13 @@
-﻿using System;
+﻿using OngekiFumenEditor.Utils;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.IO.MemoryMappedFiles;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.Json;
 using System.Windows;
 
 namespace OngekiFumenEditor
@@ -12,10 +17,14 @@ namespace OngekiFumenEditor
 	/// </summary>
 	public partial class App : Application
 	{
+		static App()
+		{
+			IPCHelper.Init();
+		}
+
 		public App()
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += OnSatelliteAssemblyResolve;
-
 			// 设置工作目录为执行文件所在的目录
 			Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 		}

@@ -588,6 +588,9 @@
   <data name="EnableLoopPlayTiming" xml:space="preserve">
     <value>Enable the metronome (only in Design Mode)</value>
   </data>
+  <data name="EnableMultiInstances" xml:space="preserve">
+    <value>Allow multiple program instances to run</value>
+  </data>
   <data name="EnableNotifyUserByDialog" xml:space="preserve">
     <value>Enable display dialog for notifications</value>
   </data>

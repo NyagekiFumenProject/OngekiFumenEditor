@@ -118,5 +118,17 @@ namespace OngekiFumenEditor.Properties {
                 this["DisableShowSplashScreenAfterBoot"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableMultiInstances {
+            get {
+                return ((bool)(this["EnableMultiInstances"]));
+            }
+            set {
+                this["EnableMultiInstances"] = value;
+            }
+        }
     }
 }
