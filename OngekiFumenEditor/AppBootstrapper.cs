@@ -35,6 +35,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
@@ -43,7 +44,7 @@ namespace OngekiFumenEditor
 	public class AppBootstrapper : Gemini.AppBootstrapper
 	{
 #if !DEBUG
-        public override bool IsPublishSingleFileHandled => true;
+		public override bool IsPublishSingleFileHandled => true;
 #endif
 
 		public AppBootstrapper() : this(true)
@@ -276,11 +277,14 @@ namespace OngekiFumenEditor
 		{
 			var recHandle = new HashSet<IntPtr>();
 
-			void LogException(object sender, Exception exception)
+			async void ProcessException(object sender, Exception exception)
 			{
 				if (exceptionHandling)
 					return;
 				exceptionHandling = true;
+
+				foreach (var visual in Application.Current.Windows.OfType<Window>())
+					visual.Hide();
 
 				var sb = new StringBuilder();
 				void exceptionDump(Exception e, int level = 0)
@@ -302,24 +306,36 @@ namespace OngekiFumenEditor
 				FileLogOutput.WriteLog(sb.ToString());
 				FileLogOutput.WaitForWriteDone();
 #if !DEBUG
-                var exceptionHandle = Marshal.GetExceptionPointers();
-                if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
-                {
-                    DumpFileHelper.WriteMiniDump(exceptionHandle);
-                    recHandle.Add(exceptionHandle);
-                }
+				var exceptionHandle = Marshal.GetExceptionPointers();
+				if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
+				{
+					DumpFileHelper.WriteMiniDump(exceptionHandle);
+					recHandle.Add(exceptionHandle);
+				}
 
-                FileLogOutput.WriteLog("FumenRescue.Rescue() Begin");
-                FumenRescue.Rescue();
-                FileLogOutput.WriteLog("FumenRescue.Rescue() End");
-                FileLogOutput.WaitForWriteDone();
+				FileLogOutput.WriteLog("FumenRescue.Rescue() Begin");
+				await FumenRescue.Rescue();
+				FileLogOutput.WriteLog("FumenRescue.Rescue() End");
+				FileLogOutput.WaitForWriteDone();
 #endif
 				exceptionHandling = true;
+				Environment.Exit(-1);
 			}
 
-			AppDomain.CurrentDomain.UnhandledException += (sender, e) => LogException(sender, e.ExceptionObject as Exception);
-			Application.Current.DispatcherUnhandledException += (sender, e) => LogException(sender, e.Exception);
-			TaskScheduler.UnobservedTaskException += (sender, e) => LogException(sender, e.Exception);
+			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+			{
+				ProcessException(sender, e.ExceptionObject as Exception);
+			};
+			Application.Current.DispatcherUnhandledException += (sender, e) =>
+			{
+				ProcessException(sender, e.Exception);
+				e.Handled = true;
+			};
+			TaskScheduler.UnobservedTaskException += (sender, e) =>
+			{
+				ProcessException(sender, e.Exception);
+				e.SetObserved();
+			};
 		}
 
 		protected override async void OnExit(object sender, EventArgs e)

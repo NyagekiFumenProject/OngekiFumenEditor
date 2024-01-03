@@ -3,22 +3,22 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Utils.DeadHandler
 {
 	internal static class FumenRescue
 	{
-		public static void Rescue()
+		public static async Task Rescue()
 		{
 			try
 			{
 				var editorManager = IoC.Get<IEditorDocumentManager>();
 				foreach (var editor in editorManager.GetCurrentEditors())
 				{
-					if (Rescue(editor, out var savedFolderPath))
-					{
+					var savedFolderPath = await Rescue(editor);
+					if (Directory.Exists(savedFolderPath))
 						Log.LogInfo($"Rescue fumen/proj file successfully: {savedFolderPath}");
-					}
 				}
 			}
 			catch
@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 			}
 		}
 
-		public static bool Rescue(FumenVisualEditorViewModel editor, out string savedPath)
+		public static async Task<string> Rescue(FumenVisualEditorViewModel editor)
 		{
 			var projFilePath = editor.FilePath;
 			var docName = "NotSavedUnknown-" + RandomHepler.RandomString(10);
@@ -35,7 +35,6 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 				docName = Path.GetFileNameWithoutExtension(projFilePath);
 
 			var rescueFolderPath = TempFileHelper.GetTempFolderPath("Rescue", docName);
-			savedPath = default;
 
 			try
 			{
@@ -43,15 +42,14 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 				var extName = ".nyagekiProj";
 				if (!string.IsNullOrWhiteSpace(projFilePath))
 					extName = Path.GetExtension(projFilePath);
-
 				var tempProjFile = Path.Combine(rescueFolderPath, docName + extName);
-				var result = EditorProjectDataUtils.TrySaveProjFileAsync(tempProjFile, editor.EditorProjectData).Result;
+				var result = await EditorProjectDataUtils.TrySaveProjFileAsync(tempProjFile, editor.EditorProjectData);
 				if (!result.IsSuccess)
-					return false;
+					return string.Empty;
 			}
 			catch
 			{
-				return false;
+				return string.Empty;
 			}
 
 			try
@@ -62,18 +60,16 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 					fumenName = RandomHepler.RandomString() + ".ogkr";
 
 				var tempFumenFile = Path.Combine(rescueFolderPath, fumenName);
-				var task = EditorProjectDataUtils.TrySaveFumenFileAsync(tempFumenFile, editor.EditorProjectData);
-				var result = task.Result;
+				var result = await EditorProjectDataUtils.TrySaveFumenFileAsync(tempFumenFile, editor.EditorProjectData);
 				if (!result.IsSuccess)
-					return false;
+					return string.Empty;
 			}
 			catch
 			{
-				return false;
+				return string.Empty;
 			}
 
-			savedPath = rescueFolderPath;
-			return true;
+			return rescueFolderPath;
 		}
 	}
 }
