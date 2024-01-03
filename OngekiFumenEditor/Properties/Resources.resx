@@ -147,6 +147,9 @@
   <data name="AllSupportFileFormat" xml:space="preserve">
     <value>All File Support</value>
   </data>
+  <data name="ApplicationVersion" xml:space="preserve">
+    <value>Application version</value>
+  </data>
   <data name="ApplyAudioAdjust" xml:space="preserve">
     <value>Apply audio adjust</value>
   </data>
@@ -339,6 +342,9 @@
   <data name="CloseEditorByProjectSetupFail" xml:space="preserve">
     <value>The user cannot complete the new project wizard; close this editor.</value>
   </data>
+  <data name="CloseProgram" xml:space="preserve">
+    <value>Close Program</value>
+  </data>
   <data name="CombineLane" xml:space="preserve">
     <value>Combine lanes</value>
   </data>
@@ -347,6 +353,9 @@
   </data>
   <data name="Comfirm" xml:space="preserve">
     <value>Confirm</value>
+  </data>
+  <data name="ComfirmClose" xml:space="preserve">
+    <value>confirmed to close</value>
   </data>
   <data name="ComfirmExecuteScript" xml:space="preserve">
     <value>Compilation successful. Execute now?</value>
@@ -540,6 +549,9 @@
   <data name="DragToSplitTipText" xml:space="preserve">
     <value>Split out two lanes, old and new, at a specific time.</value>
   </data>
+  <data name="DumpFileSaveTo" xml:space="preserve">
+    <value>Current .dmp file is stored at</value>
+  </data>
   <data name="Earlier" xml:space="preserve">
     <value>Earlier</value>
   </data>
@@ -629,6 +641,9 @@
   </data>
   <data name="ErrorSoundFolderNotFound" xml:space="preserve">
     <value>Unable to load sounds because the sound folder does not exist</value>
+  </data>
+  <data name="ExceptionTermWindowTitle" xml:space="preserve">
+    <value>Arisu has eaten your editor</value>
   </data>
   <data name="Execute" xml:space="preserve">
     <value>Execute</value>
@@ -816,6 +831,9 @@
   <data name="ImageFile" xml:space="preserve">
     <value>Image file:</value>
   </data>
+  <data name="InnerExceptionMessage" xml:space="preserve">
+    <value>Inner exception message:</value>
+  </data>
   <data name="InputPictureFileNotFound" xml:space="preserve">
     <value>The image file to be generated does not exist</value>
   </data>
@@ -887,6 +905,12 @@
   </data>
   <data name="LoadMusicXmlFile" xml:space="preserve">
     <value>Load exist Music.xml file</value>
+  </data>
+  <data name="LoadProjectFileAndFumenFile" xml:space="preserve">
+    <value>Project and fumen loaded successfully</value>
+  </data>
+  <data name="LogFileSaveTo" xml:space="preserve">
+    <value>Current log files are stored at:</value>
   </data>
   <data name="Logger" xml:space="preserve">
     <value>Logger</value>
@@ -1158,6 +1182,9 @@
   <data name="Resample" xml:space="preserve">
     <value>Resample</value>
   </data>
+  <data name="RescueFolderPathSaveTo" xml:space="preserve">
+    <value>Your fumen and project files are temporarily saved at:</value>
+  </data>
   <data name="ResetDefault" xml:space="preserve">
     <value>Reset default</value>
   </data>
@@ -1189,7 +1216,7 @@
     <value>Save new project file path</value>
   </data>
   <data name="SaveProjectFileAndFumenFile" xml:space="preserve">
-    <value>Pproject and fumen saved successfully</value>
+    <value>Project and fumen saved successfully</value>
   </data>
   <data name="SaveToFile" xml:space="preserve">
     <value>Save to file:</value>

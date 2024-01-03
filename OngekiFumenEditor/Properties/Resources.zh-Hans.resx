@@ -147,6 +147,9 @@
   <data name="AllSupportFileFormat" xml:space="preserve">
     <value>全支持文件</value>
   </data>
+  <data name="ApplicationVersion" xml:space="preserve">
+    <value>应用版本:</value>
+  </data>
   <data name="ApplyAudioAdjust" xml:space="preserve">
     <value>应用音频延迟</value>
   </data>
@@ -339,6 +342,9 @@
   <data name="CloseEditorByProjectSetupFail" xml:space="preserve">
     <value>用户无法完成新建项目向导，关闭此编辑器</value>
   </data>
+  <data name="CloseProgram" xml:space="preserve">
+    <value>关闭程序</value>
+  </data>
   <data name="CombineLane" xml:space="preserve">
     <value>合并轨道</value>
   </data>
@@ -347,6 +353,9 @@
   </data>
   <data name="Comfirm" xml:space="preserve">
     <value>确认</value>
+  </data>
+  <data name="ComfirmClose" xml:space="preserve">
+    <value>我已确认,可以关闭</value>
   </data>
   <data name="ComfirmExecuteScript" xml:space="preserve">
     <value>编译成功，是否执行?</value>
@@ -540,6 +549,9 @@
   <data name="DragToSplitTipText" xml:space="preserve">
     <value>按照某个时间点分割出新旧两个轨道</value>
   </data>
+  <data name="DumpFileSaveTo" xml:space="preserve">
+    <value>当前.dmp文件存放在:</value>
+  </data>
   <data name="Earlier" xml:space="preserve">
     <value>更早</value>
   </data>
@@ -629,6 +641,9 @@
   </data>
   <data name="ErrorSoundFolderNotFound" xml:space="preserve">
     <value>因为音效文件夹不存在,无法加载音效</value>
+  </data>
+  <data name="ExceptionTermWindowTitle" xml:space="preserve">
+    <value>江江已经吃了你的制谱器</value>
   </data>
   <data name="Execute" xml:space="preserve">
     <value>执行</value>
@@ -816,6 +831,9 @@
   <data name="ImageFile" xml:space="preserve">
     <value>图片文件:</value>
   </data>
+  <data name="InnerExceptionMessage" xml:space="preserve">
+    <value>内部异常原因:</value>
+  </data>
   <data name="InputPictureFileNotFound" xml:space="preserve">
     <value>需要生成的图片文件不存在</value>
   </data>
@@ -887,6 +905,12 @@
   </data>
   <data name="LoadMusicXmlFile" xml:space="preserve">
     <value>加载已有Music.xml数据</value>
+  </data>
+  <data name="LoadProjectFileAndFumenFile" xml:space="preserve">
+    <value>谱面项目和文件加载成功</value>
+  </data>
+  <data name="LogFileSaveTo" xml:space="preserve">
+    <value>当前日志文件存档放在:</value>
   </data>
   <data name="Logger" xml:space="preserve">
     <value>日志</value>
@@ -1157,6 +1181,9 @@
   </data>
   <data name="Resample" xml:space="preserve">
     <value>重采样</value>
+  </data>
+  <data name="RescueFolderPathSaveTo" xml:space="preserve">
+    <value>你的谱面和项目文件临时放在:</value>
   </data>
   <data name="ResetDefault" xml:space="preserve">
     <value>恢复默认</value>

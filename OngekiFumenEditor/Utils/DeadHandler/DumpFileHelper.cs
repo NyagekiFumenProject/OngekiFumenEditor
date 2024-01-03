@@ -39,13 +39,13 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 		public static void Init()
 		{
 			Directory.CreateDirectory(ProgramSetting.Default.DumpFileDirPath);
-			SetUnhandledExceptionFilter(WriteMiniDump);
+			SetUnhandledExceptionFilter(OnWriteMiniDump);
 		}
 
-		public static int WriteMiniDump(IntPtr exceptionInfo)
+		public static string WriteMiniDump(IntPtr exceptionInfo)
 		{
 			Directory.CreateDirectory(ProgramSetting.Default.DumpFileDirPath);
-			var filePath = Path.Combine(ProgramSetting.Default.DumpFileDirPath, FileHelper.FilterFileName(DateTime.Now.ToString() + ".dmp"));
+			var filePath = Path.GetFullPath(Path.Combine(ProgramSetting.Default.DumpFileDirPath, FileHelper.FilterFileName(DateTime.Now.ToString() + ".dmp")));
 
 			using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 
@@ -76,9 +76,15 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 
 			Log.LogError($"call MiniDumpWriteDump() exceptionInfo = {exceptionInfo} , dumpType = {dumpType} , isSuccessful = {exceptionInfo} , getLastError = {getErrMsg()} , dumpFilePath = {filePath}");
 
-			MessageBox.Show(Resources.ProgramThrowAndDump, Resources.ProgramError, MessageBoxButton.OK, MessageBoxImage.Error);
+			//MessageBox.Show(Resources.ProgramThrowAndDump, Resources.ProgramError, MessageBoxButton.OK, MessageBoxImage.Error);
 
 			FileLogOutput.WaitForWriteDone();
+			return filePath;
+		}
+
+		private static int OnWriteMiniDump(IntPtr exceptionInfo)
+		{
+			WriteMiniDump(exceptionInfo);
 			return 1;
 		}
 	}

@@ -249,7 +249,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
 				var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
 				await Load(projectData);
-				ToastNotify(Resources.SaveProjectFileAndFumenFile);
+				ToastNotify(Resources.LoadProjectFileAndFumenFile);
 
 				IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
 			}

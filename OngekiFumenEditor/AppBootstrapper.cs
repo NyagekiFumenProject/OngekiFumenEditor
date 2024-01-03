@@ -12,6 +12,7 @@ using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.SplashScreen;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.DeadHandler;
@@ -286,12 +287,16 @@ namespace OngekiFumenEditor
 				foreach (var visual in Application.Current.Windows.OfType<Window>())
 					visual.Hide();
 
+				var innerMessage = exception.Message;
+
 				var sb = new StringBuilder();
 				void exceptionDump(Exception e, int level = 0)
 				{
 					if (e is null)
 						return;
 					var tab = string.Concat("\t".Repeat(2 * level));
+
+					innerMessage = e.Message;
 
 					sb.AppendLine();
 					sb.AppendLine(tab + $"Exception lv.{level} : {e.Message}");
@@ -305,19 +310,28 @@ namespace OngekiFumenEditor
 				sb.AppendLine($"----------------------------");
 				FileLogOutput.WriteLog(sb.ToString());
 				FileLogOutput.WaitForWriteDone();
-#if !DEBUG
+				//#if !DEBUG
 				var exceptionHandle = Marshal.GetExceptionPointers();
+				var dumpFile = string.Empty;
 				if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
 				{
-					DumpFileHelper.WriteMiniDump(exceptionHandle);
+					dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
 					recHandle.Add(exceptionHandle);
 				}
 
 				FileLogOutput.WriteLog("FumenRescue.Rescue() Begin");
-				await FumenRescue.Rescue();
+				var resuceFolders = await FumenRescue.Rescue();
 				FileLogOutput.WriteLog("FumenRescue.Rescue() End");
 				FileLogOutput.WaitForWriteDone();
-#endif
+				//#endif
+
+				var logFile = FileLogOutput.GetCurrentLogFile();
+
+				//MessageBox.Show(Resources.ProgramThrowAndDump, Resources.ProgramError, MessageBoxButton.OK, MessageBoxImage.Error);
+
+				var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
+				exceptionWindow.ShowDialog();
+
 				exceptionHandling = true;
 				Environment.Exit(-1);
 			}
@@ -344,7 +358,6 @@ namespace OngekiFumenEditor
 			IoC.Get<IAudioManager>().Dispose();
 			await IoC.Get<ISchedulerManager>().Term();
 			FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
-			FileLogOutput.Term();
 			base.OnExit(sender, e);
 		}
 	}

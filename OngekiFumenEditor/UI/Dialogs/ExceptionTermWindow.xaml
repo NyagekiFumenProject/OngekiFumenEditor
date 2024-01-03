@@ -1,0 +1,121 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.UI.Dialogs.ExceptionTermWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="{markup:Translate [ExceptionTermWindowTitle]}"
+    Width="600"
+    MaxHeight="500"
+    Background="{DynamicResource EnvironmentWindowBackground}"
+    ResizeMode="NoResize"
+    SaveWindowPosition="True"
+    ShowCloseButton="False"
+    SizeToContent="Height"
+    Style="{DynamicResource MainWindowStyle}"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="10">
+            <TextBlock
+                FontSize="15"
+                Text="{markup:Translate [ProgramThrowAndDump]}"
+                TextWrapping="Wrap" />
+
+            <Rectangle
+                Height="2"
+                Margin="20,10"
+                Fill="LightGray" />
+
+            <StackPanel>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="{markup:Translate [RescueFolderPathSaveTo]}" />
+                <ItemsControl Margin="10,0" ItemsSource="{Binding RescueFolderPaths}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Hyperlink
+                                    Click="Hyperlink_Click"
+                                    DataContext="{Binding .}"
+                                    TextDecorations="None">
+                                    <TextBlock
+                                        Margin="0,2"
+                                        Text="{Binding .}"
+                                        TextWrapping="Wrap" />
+                                </Hyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+            <StackPanel Margin="0,10,0,0">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="{markup:Translate [LogFileSaveTo]}" />
+                <TextBlock Margin="10,0" TextWrapping="Wrap">
+                    <Hyperlink
+                        Click="Hyperlink_Click"
+                        DataContext="{Binding LogFile}"
+                        TextDecorations="None">
+                        <TextBlock Text="{Binding .}" TextWrapping="Wrap" />
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Margin="0,10,0,0">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="{markup:Translate [DumpFileSaveTo]}" />
+                <TextBlock Margin="10,0" TextWrapping="Wrap">
+                    <Hyperlink
+                        Click="Hyperlink_Click"
+                        DataContext="{Binding DumpFile}"
+                        TextDecorations="None">
+                        <TextBlock Text="{Binding .}" TextWrapping="Wrap" />
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+
+            <Rectangle
+                Height="2"
+                Margin="20,10,20,0"
+                Fill="LightGray" />
+            <StackPanel Margin="0,5,0,0">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="{markup:Translate [InnerExceptionMessage]}" />
+                <TextBlock
+                    Margin="10,5,10,0"
+                    Text="{Binding ExceptionMessage}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+            <StackPanel Margin="0,10,0,0">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="{markup:Translate [ApplicationVersion]}" />
+                <TextBlock
+                    Margin="10,5,10,0"
+                    Text="{Binding ProgramVersion}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+            <CheckBox
+                Name="Comfirm"
+                Margin="0,30,10,10"
+                HorizontalAlignment="Right"
+                Content="{markup:Translate [ComfirmClose]}"
+                FontWeight="Bold" />
+            <Button
+                Padding="0,10,0,10"
+                Click="Button_Click"
+                Content="{markup:Translate [CloseProgram]}"
+                IsEnabled="{Binding ElementName=Comfirm, Path=IsChecked}" />
+        </StackPanel>
+    </ScrollViewer>
+</mah:MetroWindow>

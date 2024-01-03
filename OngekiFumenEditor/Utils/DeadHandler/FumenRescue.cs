@@ -2,15 +2,18 @@
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 
 namespace OngekiFumenEditor.Utils.DeadHandler
 {
 	internal static class FumenRescue
 	{
-		public static async Task Rescue()
+		public static async Task<string[]> Rescue()
 		{
+			var list = new List<string>();
 			try
 			{
 				var editorManager = IoC.Get<IEditorDocumentManager>();
@@ -18,13 +21,18 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 				{
 					var savedFolderPath = await Rescue(editor);
 					if (Directory.Exists(savedFolderPath))
+					{
 						Log.LogInfo($"Rescue fumen/proj file successfully: {savedFolderPath}");
+						list.Add(savedFolderPath);
+						//return savedFolderPath;
+					}
 				}
 			}
 			catch
 			{
 
 			}
+			return list.ToArray();
 		}
 
 		public static async Task<string> Rescue(FumenVisualEditorViewModel editor)

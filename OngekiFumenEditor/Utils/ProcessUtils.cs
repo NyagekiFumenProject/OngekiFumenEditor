@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -20,6 +21,24 @@ namespace OngekiFumenEditor.Utils
 			{
 				UseShellExecute = true
 			});
+		}
+
+		public static void OpenExplorerToBrowser(string path)
+		{
+			Log.LogDebug($"user request open explorer and select a file/folder: {path}");
+			var startInfo = new ProcessStartInfo("explorer.exe")
+			{
+				UseShellExecute = true
+			};
+
+			if (File.Exists(path))
+				startInfo.Arguments = $"/select,\"{path}\"";
+			else if (Directory.Exists(path))
+				startInfo.ArgumentList.Add(path);
+			else
+				return;
+
+			Process.Start(startInfo);
 		}
 	}
 }

@@ -151,6 +151,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Application version 的本地化字符串。
+        /// </summary>
+        public static string ApplicationVersion {
+            get {
+                return ResourceManager.GetString("ApplicationVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Apply audio adjust 的本地化字符串。
         /// </summary>
         public static string ApplyAudioAdjust {
@@ -727,6 +736,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Close Program 的本地化字符串。
+        /// </summary>
+        public static string CloseProgram {
+            get {
+                return ResourceManager.GetString("CloseProgram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Combine lanes 的本地化字符串。
         /// </summary>
         public static string CombineLane {
@@ -750,6 +768,15 @@ namespace OngekiFumenEditor.Properties {
         public static string Comfirm {
             get {
                 return ResourceManager.GetString("Comfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 confirmed to close 的本地化字符串。
+        /// </summary>
+        public static string ComfirmClose {
+            get {
+                return ResourceManager.GetString("ComfirmClose", resourceCulture);
             }
         }
         
@@ -1330,6 +1357,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Current .dmp file is stored at 的本地化字符串。
+        /// </summary>
+        public static string DumpFileSaveTo {
+            get {
+                return ResourceManager.GetString("DumpFileSaveTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Earlier 的本地化字符串。
         /// </summary>
         public static string Earlier {
@@ -1596,6 +1632,15 @@ namespace OngekiFumenEditor.Properties {
         public static string ErrorSoundFolderNotFound {
             get {
                 return ResourceManager.GetString("ErrorSoundFolderNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Arisu has eaten your editor 的本地化字符串。
+        /// </summary>
+        public static string ExceptionTermWindowTitle {
+            get {
+                return ResourceManager.GetString("ExceptionTermWindowTitle", resourceCulture);
             }
         }
         
@@ -2158,6 +2203,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Inner exception message: 的本地化字符串。
+        /// </summary>
+        public static string InnerExceptionMessage {
+            get {
+                return ResourceManager.GetString("InnerExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 The image file to be generated does not exist 的本地化字符串。
         /// </summary>
         public static string InputPictureFileNotFound {
@@ -2370,6 +2424,24 @@ namespace OngekiFumenEditor.Properties {
         public static string LoadMusicXmlFile {
             get {
                 return ResourceManager.GetString("LoadMusicXmlFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Project and fumen loaded successfully 的本地化字符串。
+        /// </summary>
+        public static string LoadProjectFileAndFumenFile {
+            get {
+                return ResourceManager.GetString("LoadProjectFileAndFumenFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Current log files are stored at: 的本地化字符串。
+        /// </summary>
+        public static string LogFileSaveTo {
+            get {
+                return ResourceManager.GetString("LogFileSaveTo", resourceCulture);
             }
         }
         
@@ -3184,6 +3256,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Your fumen and project files are temporarily saved at: 的本地化字符串。
+        /// </summary>
+        public static string RescueFolderPathSaveTo {
+            get {
+                return ResourceManager.GetString("RescueFolderPathSaveTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Reset default 的本地化字符串。
         /// </summary>
         public static string ResetDefault {
@@ -3274,7 +3355,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Pproject and fumen saved successfully 的本地化字符串。
+        ///   查找类似 Project and fumen saved successfully 的本地化字符串。
         /// </summary>
         public static string SaveProjectFileAndFumenFile {
             get {
