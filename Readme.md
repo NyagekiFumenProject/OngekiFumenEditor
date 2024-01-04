@@ -41,7 +41,7 @@
 * ~~画画专用小工具~~
 * 打包生成工具
 * 完全实现Soflan倒车变速！
-* 多语言支持 **<--- we are here! ---**
+* 多语言支持 (English DONE) (Janpanese IN PROGRESS)**<--- we are here! ---**
 * 塞小功能&修BUG....
 ....、
 
