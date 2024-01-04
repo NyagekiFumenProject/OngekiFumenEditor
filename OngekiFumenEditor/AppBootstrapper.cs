@@ -10,6 +10,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Scheduler;
+using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.SplashScreen;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Dialogs;
@@ -284,8 +285,16 @@ namespace OngekiFumenEditor
 					return;
 				exceptionHandling = true;
 
-				foreach (var visual in Application.Current.Windows.OfType<Window>())
-					visual.Hide();
+				try
+				{
+					foreach (var visual in Application.Current.Windows.OfType<Window>())
+						visual.Hide();
+					IoC.Get<IAudioPlayerToolViewer>()?.AudioPlayer?.Pause();
+				}
+				catch
+				{
+
+				}
 
 				var innerMessage = exception.Message;
 
@@ -308,9 +317,8 @@ namespace OngekiFumenEditor
 				sb.AppendLine($"Program notice a (unhandled) exception from object: {sender}({sender?.GetType().FullName})");
 				exceptionDump(exception);
 				sb.AppendLine($"----------------------------");
-				FileLogOutput.WriteLog(sb.ToString());
-				FileLogOutput.WaitForWriteDone();
-				//#if !DEBUG
+				await FileLogOutput.WriteLog(sb.ToString());
+
 				var exceptionHandle = Marshal.GetExceptionPointers();
 				var dumpFile = string.Empty;
 				if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
@@ -318,16 +326,11 @@ namespace OngekiFumenEditor
 					dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
 					recHandle.Add(exceptionHandle);
 				}
-
-				FileLogOutput.WriteLog("FumenRescue.Rescue() Begin");
+				await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin");
 				var resuceFolders = await FumenRescue.Rescue();
-				FileLogOutput.WriteLog("FumenRescue.Rescue() End");
-				FileLogOutput.WaitForWriteDone();
-				//#endif
+				await FileLogOutput.WriteLog("FumenRescue.Rescue() End");
 
 				var logFile = FileLogOutput.GetCurrentLogFile();
-
-				//MessageBox.Show(Resources.ProgramThrowAndDump, Resources.ProgramError, MessageBoxButton.OK, MessageBoxImage.Error);
 
 				var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
 				exceptionWindow.ShowDialog();
