@@ -47,7 +47,7 @@
 
 ## 编译&下载
 [![Build Program](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml/badge.svg)](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml)
-[wiki](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/0.%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96%E6%9C%AC%E9%A1%B9%E7%9B%AE%E5%BA%94%E7%94%A8-(and%E6%9B%B4%E6%96%B0))
+[wiki](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki)
 
 ## 教程&问题&建议
 * [如何使用?](https://github.com/MikiraSora/OngekiFumenEditor/wiki)
