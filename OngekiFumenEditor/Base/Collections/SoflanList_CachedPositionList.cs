@@ -82,12 +82,14 @@ namespace OngekiFumenEditor.Base.Collections
 								while (itor.MoveNext())
 								{
 									//process prev
-									yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), curBpm, ChgEvt.SoflanChanged);
+									var bpm = bpmList.GetBpm(itor.Current.TGrid);
+									yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), bpm, ChgEvt.SoflanChanged);
 									//set prev
 									prev = itor.Current;
 								}
 								curSpeedEvent = itor.Current;
-								yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), curBpm, ChgEvt.SoflanEnded);
+								var bpm2 = bpmList.GetBpm(itor.Current.TGrid);
+								yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), bpm2, ChgEvt.SoflanEnded);
 							}
 						}
 						break;
