@@ -1,4 +1,5 @@
 ﻿using IntervalTree;
+using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
@@ -51,95 +52,110 @@ namespace OngekiFumenEditor.Base.Collections
 			SoflanChanged = SoflanBegan | SoflanEnded
 		}
 
-		public IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm, ChgEvt)> GetCalculatableEvents(BpmList bpmList, bool isDesignModel)
+		public IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm)> GetCalculatableEvents(BpmList bpmList, bool isDesignModel)
 		{
-			var curBpm = bpmList.FirstBpm;
-			IKeyframeSoflan curSpeedEvent = null;
-
-			IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm, ChgEvt evt)> GetEventTimings(ITimelineObject evt)
+			var sortList = new SortableCollection<(ITimelineObject timeline, ChgEvt evt), TGrid>(x => x.timeline.TGrid);
+			foreach (var timelineObject in this.FilterNull().AsEnumerable<ITimelineObject>().Concat(bpmList))
 			{
-				var t = evt.TGrid;
-				switch (evt)
+				switch (timelineObject)
 				{
-					case BPMChange bpmEvt:
-						curBpm = bpmEvt;
-						var speed = (curSpeedEvent is not null && curSpeedEvent.EndTGrid > t) ? (isDesignModel ? curSpeedEvent.SpeedInEditor : curSpeedEvent.Speed) : 1.0d;
-						yield return (evt.TGrid, speed, curBpm, ChgEvt.BpmChanged);
-						break;
-					case IKeyframeSoflan soflanEvt:
-						curSpeedEvent = soflanEvt;
-						yield return (evt.TGrid, (isDesignModel ? soflanEvt.SpeedInEditor : soflanEvt.Speed), curBpm, ChgEvt.SoflanChanged);
-						break;
 					case IDurationSoflan durationEvt:
 						var itor = durationEvt.GenerateKeyframeSoflans().GetEnumerator();
 						if (itor.MoveNext())
 						{
-							curSpeedEvent = itor.Current;
-							yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), curBpm, ChgEvt.SoflanBegan);
+							var init = itor.Current;
 							if (itor.MoveNext())
 							{
+								sortList.Add((init, ChgEvt.SoflanBegan));
 								var prev = itor.Current;
 								while (itor.MoveNext())
 								{
-									//process prev
-									var bpm = bpmList.GetBpm(itor.Current.TGrid);
-									yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), bpm, ChgEvt.SoflanChanged);
-									//set prev
+									sortList.Add((prev, ChgEvt.SoflanChanged));
 									prev = itor.Current;
 								}
-								curSpeedEvent = itor.Current;
-								var bpm2 = bpmList.GetBpm(itor.Current.TGrid);
-								yield return (itor.Current.TGrid, (isDesignModel ? itor.Current.SpeedInEditor : itor.Current.Speed), bpm2, ChgEvt.SoflanEnded);
+								sortList.Add((prev, ChgEvt.SoflanEnded));
+							}
+							else
+							{
+								sortList.Add((init, ChgEvt.SoflanChanged));
 							}
 						}
 						break;
+					case IKeyframeSoflan keyframeEvt:
+						sortList.Add((keyframeEvt, ChgEvt.SoflanChanged));
+						break;
+					case BPMChange bpmEvt:
+						sortList.Add((bpmEvt, ChgEvt.BpmChanged));
+						break;
+					default:
+						throw new Exception($"Not support object for GetCalculatableEvents(): {timelineObject}");
 				}
 			}
-			var r = this
-				.FilterNull()
-				.AsEnumerable<ITimelineObject>()
-				.Concat(bpmList)
-				.OrderBy(x => x.TGrid)
-				.SelectMany(GetEventTimings)
-				.GroupBy(x => x.TGrid)
-				.OrderBy(x => x.Key);
 
-			var s = r
-				.Select(x =>
+			IEnumerable<ITimelineObject> filter(IEnumerable<(ITimelineObject timeline, ChgEvt evt)> x)
+			{
+				var soflan = default(ITimelineObject);
+
+				foreach (var item in x)
 				{
-					var itor = x.GetEnumerator();
-					if (itor.MoveNext())
+					switch (item.timeline)
 					{
-						var totalState = itor.Current;
-						while (itor.MoveNext())
-						{
-							var curState = itor.Current;
-
-							totalState.evt |= curState.evt;
-							switch (curState.evt)
-							{
-								case ChgEvt.SoflanEnded:
-									if (!totalState.evt.HasFlag(ChgEvt.SoflanBegan))
-										totalState.speed = curState.speed;
-									break;
-								case ChgEvt.SoflanBegan:
-									totalState.speed = curState.speed;
-									break;
-								case ChgEvt.BpmChanged:
-									totalState.curBpm = curState.curBpm;
-									break;
-								default:
-									break;
-							}
-						}
-
-						return totalState;
+						case BPMChange:
+							yield return item.timeline;
+							break;
+						case IKeyframeSoflan:
+							if (item.evt == ChgEvt.SoflanEnded)
+								soflan ??= item.timeline;
+							else
+								soflan = item.timeline;
+							break;
+						default:
+							break;
 					}
-					return default;
-				})
-				.Where(x => x.evt != ChgEvt.None);
+				}
 
-			return s;
+				if (soflan != null)
+					yield return soflan;
+			}
+
+			var combineEvents = sortList.GroupBy(x => x.timeline.TGrid).SelectMany(filter).OrderBy(x => x.TGrid);
+
+			IEnumerable<(TGrid TGrid, double speed, BPMChange bpm)> visit()
+			{
+				double GetSpeed(ISoflan soflan) => isDesignModel ? soflan.SpeedInEditor : soflan.Speed;
+				var firstSoflan = this.FirstOrDefault();
+
+				(TGrid TGrid, double speed, BPMChange bpm) currentState =
+					(TGrid.Zero, firstSoflan is null ? 1 : GetSpeed(firstSoflan), bpmList.GetBpm(TGrid.Zero));
+
+				foreach (var item in combineEvents)
+				{
+					var curTGrid = item.TGrid;
+
+					if (curTGrid != currentState.TGrid)
+					{
+						yield return currentState;
+						currentState.TGrid = curTGrid;
+					}
+
+					switch (item)
+					{
+						case BPMChange curBpmChange:
+							currentState.bpm = curBpmChange;
+							break;
+						case IKeyframeSoflan soflan:
+							currentState.speed = GetSpeed(soflan);
+							break;
+						default:
+							break;
+					}
+				}
+
+				yield return currentState;
+			}
+
+			var r = visit();
+			return r;
 		}
 
 		private void UpdateCachedSoflanPositionList(BpmList bpmList, List<SoflanPoint> list, bool isDesignMode)
