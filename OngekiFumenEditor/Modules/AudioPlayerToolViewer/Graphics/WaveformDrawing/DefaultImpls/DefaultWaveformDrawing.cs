@@ -229,7 +229,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
 							var str = "";
 							if (prevMeter != meter)
-								str += $"{meter.Bunbo}/{meter.BunShi}";
+								str += $"{meter.BunShi}/{meter.Bunbo}";
 							if (prevBpm != bpm)
 								str += $" BPM:{bpm.BPM}";
 							if (str.Length > 0)
@@ -276,7 +276,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 				lineDrawing.End();
 
 				stringDrawing.Draw(
-					$"{currentMeter.Bunbo}/{currentMeter.BunShi} BPM:{currentBpm.BPM}",
+					$"{currentMeter.BunShi}/{currentMeter.Bunbo} BPM:{currentBpm.BPM}",
 					new System.Numerics.Vector2(indirectorX + 4, height / 2),
 					System.Numerics.Vector2.One,
 					15,

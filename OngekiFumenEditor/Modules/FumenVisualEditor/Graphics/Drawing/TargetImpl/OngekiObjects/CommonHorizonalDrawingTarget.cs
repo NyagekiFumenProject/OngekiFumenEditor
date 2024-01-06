@@ -102,7 +102,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			{
 				BPMChange o => $"BPM:{(int)o.BPM}",
 				Comment o => $"Comment:{o.Content}",
-				MeterChange o => $"MET:{o.Bunbo}/{o.BunShi}",
+				MeterChange o => $"MET:{o.BunShi}/{o.Bunbo}",
 				InterpolatableSoflan o => $"I-SPD:({o.Easing}){o.Speed:F2}x",
 				Soflan o => $"D-SPD:{o.Speed:F2}x",
 				KeyframeSoflan o => $"K-SPD:{o.Speed:F2}x",

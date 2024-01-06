@@ -156,7 +156,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 				var met = fumen.MeterChanges.GetMeter(x.TGrid);
 				var bpm = fumen.BpmList.GetBpm(x.TGrid);
 				var resT = bpm.TGrid.ResT;
-				var beatCount = met.BunShi * 1;
+				var beatCount = met.Bunbo;
 				if (beatCount == 0)
 					return null;
 				return (int)(resT / beatCount);
@@ -184,7 +184,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			var met = fumen.MeterChanges.GetMeter(tGrid);
 			var bpm = fumen.BpmList.GetBpm(tGrid);
 			var resT = bpm.TGrid.ResT;
-			var beatCount = met.BunShi * 1;
+			var beatCount = met.Bunbo * 1;
 			if (beatCount != 0)
 			{
 				var lengthPerBeat = (int)(resT / beatCount);
@@ -241,8 +241,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			var soundObjects = fumen.GetAllDisplayableObjects().OfType<OngekiTimelineObjectBase>();
 
 			//add default clickse objects.
-			foreach (var tGrid in CalculateDefaultClickSEs(fumen))
-				AddSound(SoundControl.ClickSE, tGrid);
+			if (!fumen.ClickSEs.Any(x => x.TGrid.TotalUnit <= 1))
+			{
+				foreach (var tGrid in CalculateDefaultClickSEs(fumen))
+					AddSound(SoundControl.ClickSE, tGrid);
+			}
 
 			using var _d = ObjectPool<HashSet<Type>>.GetWithUsingDisposable(out var typeSet, out _);
 
@@ -313,7 +316,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 				var timeSignatureList = fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(fumen.BpmList);
 				foreach (var timeSignature in timeSignatureList)
 				{
-					var beatCount = timeSignature.meter.BunShi;
+					var beatCount = timeSignature.meter.Bunbo;
 					var isSkip = beatCount == 0;
 					var beatInterval = isSkip ? default :
 						TimeSpan.FromMilliseconds(MathUtils.CalculateBPMLength(TGrid.Zero, oneTGrid, timeSignature.bpm.BPM))
