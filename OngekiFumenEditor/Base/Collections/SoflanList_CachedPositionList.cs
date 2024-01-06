@@ -124,6 +124,8 @@ namespace OngekiFumenEditor.Base.Collections
 			{
 				double GetSpeed(ISoflan soflan) => isDesignModel ? soflan.SpeedInEditor : soflan.Speed;
 				var firstSoflan = this.FirstOrDefault();
+				if (firstSoflan != null && firstSoflan.TGrid > TGrid.Zero)
+					firstSoflan = default;
 
 				(TGrid TGrid, double speed, BPMChange bpm) currentState =
 					(TGrid.Zero, firstSoflan is null ? 1 : GetSpeed(firstSoflan), bpmList.GetBpm(TGrid.Zero));
