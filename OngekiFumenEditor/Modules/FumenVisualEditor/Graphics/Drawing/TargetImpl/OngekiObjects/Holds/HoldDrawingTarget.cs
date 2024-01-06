@@ -57,6 +57,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 				var holdPoint = PostPoint2(hold.TGrid.TotalUnit, hold.XGrid.TotalUnit);
 				var holdEndPoint = PostPoint2(holdEnd.TGrid.TotalUnit, holdEnd.XGrid.TotalUnit);
 
+				bool checkDiscardByHorizon(Vector2 prev, Vector2 end, Vector2 cur)
+				{
+					//判断三个点是否都在一个水平上
+					if (prev.Y == cur.Y && end.Y == cur.Y)
+					{
+						/*
+								   good                discard
+						o-----------x---------o----------x----------------
+						|           |         |          |
+						prevX     curX_1   endPosX     curX_2
+						 */
+						var checkX = cur.X;
+						if (checkX < MathF.Min(prev.X, end.X) || checkX > MathF.Max(prev.X, end.X))
+							return true;
+					}
+					return false;
+				}
+
 				using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
 				list.Clear();
 				VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, VertexDash.Solider, color, list);
@@ -64,9 +82,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 				{
 					while (list.Count > 0 && holdPoint.Y > list[0].Point.Y)
 						list.RemoveAt(0);
+					if (list.Count >= 2)
+					{
+						var outSide = list[0];
+						var inSide = list[1];
+
+						if (checkDiscardByHorizon(inSide.Point, holdPoint, outSide.Point))
+							list.RemoveAt(0);
+					}
 					list.Insert(0, new LineVertex(holdPoint, color, VertexDash.Solider));
 					while (list.Count > 0 && holdEndPoint.Y < list[list.Count - 1].Point.Y)
 						list.RemoveAt(list.Count - 1);
+					if (list.Count >= 2)
+					{
+						var outSide = list[list.Count - 1];
+						var inSide = list[list.Count - 2];
+
+						if (checkDiscardByHorizon(inSide.Point, holdEndPoint, outSide.Point))
+							list.RemoveAt(list.Count - 1);
+					}
 					list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
 				}
 				else
