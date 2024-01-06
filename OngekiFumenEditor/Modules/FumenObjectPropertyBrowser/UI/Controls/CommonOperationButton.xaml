@@ -15,6 +15,7 @@
         <TextBlock
             Margin="5"
             Foreground="{DynamicResource EnvironmentToolWindowText}"
-            Text="{Binding Text}" />
+            Text="{Binding Text}"
+            TextWrapping="Wrap" />
     </Border>
 </UserControl>
