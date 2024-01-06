@@ -23,6 +23,8 @@
             </valueconverters:EnumToStringConverter>
             <converters1:CultureInfoNameConverter x:Key="CultureInfoNameConverter">
             </converters1:CultureInfoNameConverter>
+            <valueconverters:AsyncImageLoadConverter x:Key="AsyncImageLoadConverter">
+            </valueconverters:AsyncImageLoadConverter>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <local:AppBootstrapper x:Key="bootstrapper" />

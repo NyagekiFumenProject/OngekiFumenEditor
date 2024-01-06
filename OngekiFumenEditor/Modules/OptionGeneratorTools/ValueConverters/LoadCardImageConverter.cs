@@ -26,16 +26,15 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ValueConverters
 				if (!File.Exists(imgFilePath))
 					return;
 
-				var imgData = await JacketGenerateWrapper.GetMainImageDataAsync(imgFilePath);
+				var imgData = await JacketGenerateWrapper.GetMainImageDataAsync(default, imgFilePath);
 
 				AsyncValue = await Task.Run(() =>
 				{
-					using var image = SixLabors.ImageSharp.Image.LoadPixelData<Rgba32>(imgData.Data, imgData.Width, imgData.Height);
+					using var image = Image.LoadPixelData<Rgba32>(imgData.Data, imgData.Width, imgData.Height);
 					var memoryStream = new MemoryStream();
 					image.Mutate(i => i.Flip(FlipMode.Vertical));
 					image.SaveAsPng(memoryStream);
 					memoryStream.Seek(0, SeekOrigin.Begin);
-
 
 					var bitmapImage = new BitmapImage();
 					bitmapImage.BeginInit();

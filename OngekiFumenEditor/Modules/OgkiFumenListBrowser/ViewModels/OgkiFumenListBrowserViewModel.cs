@@ -211,7 +211,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 			}
 			else if (folderName == "assets")
 			{
-				var files = Directory.GetFiles(folderPath, "ui_jacket_*");
+				var files = Directory.GetFiles(folderPath, "ui_jacket_*_s");
 				foreach (var file in files)
 					BuildAssets(file, resourceMap);
 			}
@@ -221,7 +221,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
 		private void BuildAssets(string file, Dictionary<string, string> resourceMap)
 		{
-			if (!int.TryParse(Path.GetFileName(file).Replace("ui_jacket_", string.Empty), out var id))
+			if (!int.TryParse(Path.GetFileName(file).Replace("ui_jacket_", string.Empty).Replace("_s", string.Empty), out var id))
 				return;
 			lock (resourceMap)
 			{
@@ -366,44 +366,54 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 		public async void LoadFumen(OngekiFumenDiff diff)
 		{
 			IsBusy = true;
-			using var fs = File.OpenRead(diff.FilePath);
-			var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(diff.FilePath).DeserializeAsync(fs);
-
-			var newProj = new EditorProjectDataModel();
-			newProj.FumenFilePath = diff.FilePath;
-			newProj.Fumen = fumen;
-			newProj.AudioFilePath = diff.RefSet.AudioFilePath;
-
-			using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath);
-			if (audio is null)
+			try
 			{
-				MessageBox.Show(Resources.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
-				return;
-			}
-			newProj.AudioDuration = audio.Duration;
+				using var fs = File.OpenRead(diff.FilePath);
+				var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(diff.FilePath).DeserializeAsync(fs);
 
-			var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
-			var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
-			var viewAware = (IViewAware)editor;
-			viewAware.ViewAttached += (sender, e) =>
-			{
-				var frameworkElement = (FrameworkElement)e.View;
+				var newProj = new EditorProjectDataModel();
+				newProj.FumenFilePath = diff.FilePath;
+				newProj.Fumen = fumen;
+				newProj.AudioFilePath = diff.RefSet.AudioFilePath;
 
-				RoutedEventHandler loadedHandler = null;
-				loadedHandler = async (sender2, e2) =>
+				using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath);
+				if (audio is null)
 				{
-					frameworkElement.Loaded -= loadedHandler;
-					await fumenProvider.Open(editor, newProj);
-					var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
+					MessageBox.Show(Resources.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
+					return;
+				}
+				newProj.AudioDuration = audio.Duration;
 
-					editor.DisplayName = docName;
-					IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));
+				var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
+				var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
+				var viewAware = (IViewAware)editor;
+				viewAware.ViewAttached += (sender, e) =>
+				{
+					var frameworkElement = (FrameworkElement)e.View;
+
+					RoutedEventHandler loadedHandler = null;
+					loadedHandler = async (sender2, e2) =>
+					{
+						frameworkElement.Loaded -= loadedHandler;
+						await fumenProvider.Open(editor, newProj);
+						var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
+
+						editor.DisplayName = docName;
+						IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));
+					};
+					frameworkElement.Loaded += loadedHandler;
 				};
-				frameworkElement.Loaded += loadedHandler;
-			};
 
-			await IoC.Get<IShell>().OpenDocumentAsync(editor);
-			IsBusy = false;
+				await IoC.Get<IShell>().OpenDocumentAsync(editor);
+			}
+			catch
+			{
+
+			}
+			finally
+			{
+				IsBusy = false;
+			}
 		}
 	}
 }

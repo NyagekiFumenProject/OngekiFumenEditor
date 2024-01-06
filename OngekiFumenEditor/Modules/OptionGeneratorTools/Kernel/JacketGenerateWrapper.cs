@@ -369,14 +369,17 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 			public byte[] Data { get; }
 		}
 
-		public static Task<ImageData> GetMainImageDataAsync(string inputJacketFilePath)
+		public static Task<ImageData> GetMainImageDataAsync(byte[] abFileData, string filePath)
 		{
-			return Task.Run(() =>
+			return Task.Run(async () =>
 			{
 				var assetManager = new AssetsManager();
 
-				using var fs = File.OpenRead(inputJacketFilePath);
-				var assetBundleFile = assetManager.LoadBundleFile(fs);
+				if (abFileData is null)
+					abFileData = await File.ReadAllBytesAsync(filePath);
+				using var ms = new MemoryStream(abFileData);
+
+				var assetBundleFile = assetManager.LoadBundleFile(ms, filePath);
 				var assetsFile = assetManager.LoadAssetsFileFromBundle(assetBundleFile, 0);
 				var assetsTable = assetsFile.table;
 

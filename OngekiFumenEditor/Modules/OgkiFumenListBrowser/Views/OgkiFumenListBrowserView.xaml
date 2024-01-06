@@ -5,9 +5,8 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.OgkiFumenListBrowser.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels"
     Width="500"
     Height="800"
@@ -17,11 +16,6 @@
     SaveWindowPosition="True"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
-
-    <mah:MetroWindow.Resources>
-        <valueconverters:LoadJacketConverter x:Key="LoadJacketConverter">
-        </valueconverters:LoadJacketConverter>
-    </mah:MetroWindow.Resources>
 
     <Grid IsEnabled="{Binding IsBusy, Converter={StaticResource ReverseBoolConverter}}">
         <Grid.RowDefinitions>
@@ -73,142 +67,157 @@
                 Content="{markup:Translate [Filter]}">
             </Button>
         </StackPanel>
-        <ItemsControl Grid.Row="1" ItemsSource="{Binding DisplayFumenSets}">
+        <ItemsControl
+            Grid.Row="1"
+            Margin="0,5,0,0"
+            ItemsSource="{Binding DisplayFumenSets}"
+            ScrollViewer.CanContentScroll="True"
+            VirtualizingPanel.ScrollUnit="Pixel"
+            VirtualizingPanel.VirtualizationMode="Recycling">
             <ItemsControl.Template>
                 <ControlTemplate TargetType="ItemsControl">
-                    <Border
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                        <ScrollViewer
-                            Padding="{TemplateBinding Padding}"
-                            CanContentScroll="True"
-                            Focusable="False">
-                            <ItemsPresenter />
-                        </ScrollViewer>
-                    </Border>
+                    <ScrollViewer Padding="{TemplateBinding Padding}" Focusable="False">
+                        <ItemsPresenter />
+                    </ScrollViewer>
                 </ControlTemplate>
             </ItemsControl.Template>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling" />
+                    <VirtualizingStackPanel />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border
                         Margin="5"
+                        Padding="5"
                         BorderBrush="{StaticResource EnvironmentToolWindowText}"
                         BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
-                                    <Run>MusicId:</Run>
-                                    <Run Text="{Binding MusicId}">
-                                    </Run>
-                                </TextBlock>
-                                <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
-                                    <Run>Artist:</Run>
-                                    <Run Text="{Binding Artist}">
-                                    </Run>
-                                </TextBlock>
-                                <TextBlock
-                                    Margin="0,10,0,0"
-                                    FontSize="14"
-                                    FontWeight="Bold"
-                                    Foreground="{StaticResource EnvironmentToolWindowText}">
-                                    <Run>Title:</Run>
-                                    <Run Text="{Binding Title}">
-                                    </Run>
-                                </TextBlock>
+                        <Expander>
+                            <Expander.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border
+                                        Width="50"
+                                        Height="50"
+                                        Background="AliceBlue">
+                                        <Image DataContext="{Binding JacketFilePath, Converter={StaticResource AsyncImageLoadConverter}}" Source="{Binding Bitmap}" />
+                                    </Border>
 
-                                <ItemsControl ItemsSource="{Binding Difficults}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Margin="5" BorderThickness="1">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding DiffIdx}" Value="0">
-                                                                <Setter Property="BorderBrush" Value="GreenYellow" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding DiffIdx}" Value="1">
-                                                                <Setter Property="BorderBrush" Value="Yellow" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding DiffIdx}" Value="2">
-                                                                <Setter Property="BorderBrush" Value="Red" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding DiffIdx}" Value="3">
-                                                                <Setter Property="BorderBrush" Value="DarkViolet" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding DiffIdx}" Value="4">
-                                                                <Setter Property="BorderBrush" Value="WhiteSmoke" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="auto" />
-                                                        <ColumnDefinition />
-                                                    </Grid.ColumnDefinitions>
-                                                    <Border Width="20">
-                                                        <Border.Style>
-                                                            <Style TargetType="Border">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding DiffIdx}" Value="0">
-                                                                        <Setter Property="Background" Value="GreenYellow" />
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding DiffIdx}" Value="1">
-                                                                        <Setter Property="Background" Value="Yellow" />
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding DiffIdx}" Value="2">
-                                                                        <Setter Property="Background" Value="Red" />
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding DiffIdx}" Value="3">
-                                                                        <Setter Property="Background" Value="DarkViolet" />
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding DiffIdx}" Value="4">
-                                                                        <Setter Property="Background" Value="WhiteSmoke" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
-                                                    </Border>
-                                                    <StackPanel Grid.Column="1" Margin="5,2,0,2">
-                                                        <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
-                                                            <Run>Diff:</Run>
-                                                            <Run Text="{Binding DiffName, Mode=OneTime}">
-                                                            </Run>
-                                                        </TextBlock>
-                                                        <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
-                                                            <Run>Level:</Run>
-                                                            <Run
-                                                                FontSize="14"
-                                                                FontWeight="Bold"
-                                                                Text="{Binding Level}">
-                                                            </Run>
-                                                        </TextBlock>
-                                                        <Button
-                                                            Width="100"
-                                                            Margin="2"
-                                                            Padding="10,5,10,5"
-                                                            HorizontalAlignment="Left"
-                                                            cal:Message.Attach="LoadFumen($dataContext)"
-                                                            Content="{markup:Translate [LoadFumen]}">
-                                                        </Button>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Grid>
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                        <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
+                                            <Run>MusicId:</Run>
+                                            <Run Text="{Binding MusicId}">
+                                            </Run>
+                                        </TextBlock>
+                                        <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" TextWrapping="Wrap">
+                                            <Run>Artist:</Run>
+                                            <Run Text="{Binding Artist}">
+                                            </Run>
+                                        </TextBlock>
+                                        <TextBlock
+                                            Margin="0,5,0,0"
+                                            FontSize="14"
+                                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                                            TextWrapping="Wrap">
+                                            <Run>Title:</Run>
+                                            <Run FontWeight="Bold" Text="{Binding Title}">
+                                            </Run>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </Expander.Header>
+
+                            <ItemsControl ItemsSource="{Binding Difficults}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="5" BorderThickness="1">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DiffIdx}" Value="0">
+                                                            <Setter Property="BorderBrush" Value="GreenYellow" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DiffIdx}" Value="1">
+                                                            <Setter Property="BorderBrush" Value="Yellow" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DiffIdx}" Value="2">
+                                                            <Setter Property="BorderBrush" Value="Red" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DiffIdx}" Value="3">
+                                                            <Setter Property="BorderBrush" Value="DarkViolet" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DiffIdx}" Value="4">
+                                                            <Setter Property="BorderBrush" Value="WhiteSmoke" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="auto" />
+                                                    <ColumnDefinition />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Width="20">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DiffIdx}" Value="0">
+                                                                    <Setter Property="Background" Value="GreenYellow" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding DiffIdx}" Value="1">
+                                                                    <Setter Property="Background" Value="Yellow" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding DiffIdx}" Value="2">
+                                                                    <Setter Property="Background" Value="Red" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding DiffIdx}" Value="3">
+                                                                    <Setter Property="Background" Value="DarkViolet" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding DiffIdx}" Value="4">
+                                                                    <Setter Property="Background" Value="WhiteSmoke" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Margin="5,2,0,2">
+                                                    <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
+                                                        <Run>Diff:</Run>
+                                                        <Run Text="{Binding DiffName, Mode=OneTime}">
+                                                        </Run>
+                                                    </TextBlock>
+                                                    <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
+                                                        <Run>Level:</Run>
+                                                        <Run
+                                                            FontSize="14"
+                                                            FontWeight="Bold"
+                                                            Text="{Binding Level}">
+                                                        </Run>
+                                                    </TextBlock>
+                                                    <Button
+                                                        Width="100"
+                                                        Margin="2"
+                                                        Padding="10,5,10,5"
+                                                        HorizontalAlignment="Left"
+                                                        cal:Message.Attach="LoadFumen($dataContext)"
+                                                        Content="{markup:Translate [LoadFumen]}">
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Expander>
                     </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
