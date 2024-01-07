@@ -29,7 +29,7 @@
             </Style.Triggers>
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="LightGray" />
+            <Setter Property="Background" Value="{DynamicResource Button.Static.Background}" />
         </Style>
     </mah:MetroWindow.Resources>
     <Grid Margin="20,25">
