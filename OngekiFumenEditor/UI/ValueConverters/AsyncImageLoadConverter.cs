@@ -54,7 +54,7 @@ namespace OngekiFumenEditor.UI.ValueConverters
 
 		private async void GenerateRequestImageTask(string path, Wrapper obj)
 		{
-			if (DesignerProperties.GetIsInDesignMode(Application.Current.MainWindow))
+			if (Application.Current?.MainWindow is null || DesignerProperties.GetIsInDesignMode(Application.Current.MainWindow))
 				return;
 
 			var data = await LoadImage(path);
