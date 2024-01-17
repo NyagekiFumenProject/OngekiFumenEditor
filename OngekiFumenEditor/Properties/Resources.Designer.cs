@@ -718,7 +718,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Clone new bullet pallete 的本地化字符串。
+        ///   查找类似 clone 的本地化字符串。
         /// </summary>
         public static string ClonePallete {
             get {
@@ -1267,7 +1267,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Drag to add a new Bell object 的本地化字符串。
+        ///   查找类似 new Bell 的本地化字符串。
         /// </summary>
         public static string DragToCreateBell {
             get {
@@ -1276,7 +1276,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Drag to add a new Bullet object 的本地化字符串。
+        ///   查找类似 new Bullet 的本地化字符串。
         /// </summary>
         public static string DragToCreateBullet {
             get {

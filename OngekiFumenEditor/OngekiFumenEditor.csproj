@@ -633,6 +633,10 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Modules\FumenVisualEditor\Commands\EditorTimeSaveLoad\" />
+  </ItemGroup>
+
   <Target Name="CopyProgramRootFiles" AfterTargets="AfterBuild">
     <Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>

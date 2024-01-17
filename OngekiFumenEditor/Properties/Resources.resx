@@ -337,7 +337,7 @@
     <value>Clear the history records</value>
   </data>
   <data name="ClonePallete" xml:space="preserve">
-    <value>Clone new bullet pallete</value>
+    <value>clone</value>
   </data>
   <data name="CloseEditorByProjectSetupFail" xml:space="preserve">
     <value>The user cannot complete the new project wizard; close this editor.</value>
@@ -520,10 +520,10 @@
     <value>Drag to add a new Beam object</value>
   </data>
   <data name="DragToCreateBell" xml:space="preserve">
-    <value>Drag to add a new Bell object</value>
+    <value>new Bell</value>
   </data>
   <data name="DragToCreateBullet" xml:space="preserve">
-    <value>Drag to add a new Bullet object</value>
+    <value>new Bullet</value>
   </data>
   <data name="DragToCreateCurveControlPoint" xml:space="preserve">
     <value>Drag to add a new CurveControlPoint object</value>
