@@ -429,7 +429,7 @@ namespace OngekiFumenEditor.Base.Collections
 						var absNextSpeed = Math.Abs(next.Speed);
 						//如果当前是最后一个变速段的话，那么也能很快计算出剩余newRightRemain对应的可视范围
 						//这里假设最后一个变速点的Speed是正向的
-						var overRightTGrid = rightTGrid + (absNextSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newRightRemain / absNextSpeed));
+						var overRightTGrid = rightTGrid + (absNextSpeed == 0 ? GridOffset.Zero : next.Bpm.LengthConvertToOffset(newRightRemain / absNextSpeed));
 						rightMergeds = rightMergeds.Append(new VisibleTGridRange(rightTGrid, overRightTGrid));
 					}
 				}
