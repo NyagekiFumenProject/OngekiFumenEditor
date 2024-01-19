@@ -1,7 +1,7 @@
 ## 音击谱面编辑器
 ----
 ## 简介
-![image](https://user-images.githubusercontent.com/7549173/168522091-1386d6b6-0f71-4299-be78-4fedb38e6677.png)
+![image](https://github.com/NyagekiFumenProject/OngekiFumenEditor/assets/7549173/a495c5a2-0d6b-4995-8730-e5ee4e10b56a)
 
 ## 当前进度&roadmap:
 * Tap实现 
