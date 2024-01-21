@@ -175,6 +175,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 		public async void MenuItemAction_CopySelectedObjects()
 		{
+			prevCopyMousePosition = Mouse.GetPosition(GetView() as FrameworkElement);
 			await IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);
 		}
 
@@ -192,6 +193,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
 			PasteCopiesObjects(PasteMirrorOption.None, placePos);
 		}
+
+		public void MenuItemAction_PasteCopiesObjectsDirectly(ActionExecutionContext ctx)
+		{
+			var placePos = prevCopyMousePosition;
+			placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
+			PasteCopiesObjects(PasteMirrorOption.None, placePos);
+		}
+
 		public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
 			=> PasteCopiesObjects(PasteMirrorOption.None, ctx);
 		public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror(ActionExecutionContext ctx)
@@ -225,6 +234,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		/// </summary>
 		private bool dragOutBound;
 		private int currentDraggingActionId;
+		private Point prevCopyMousePosition;
 
 		public void MenuItemAction_RememberSelectedObjectAudioTime()
 		{

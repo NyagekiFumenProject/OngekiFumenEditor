@@ -3004,6 +3004,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Paste objects to mouse location 的本地化字符串。
+        /// </summary>
+        public static string PasteToMouse {
+            get {
+                return ResourceManager.GetString("PasteToMouse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Pause the audio/editor playback first 的本地化字符串。
         /// </summary>
         public static string PauseAudioAndFumen {

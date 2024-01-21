@@ -1098,6 +1098,9 @@
   <data name="PasteForZeroXGridMirror" xml:space="preserve">
     <value>Paste with X[0,0] as the reference point for horizontal mirroring</value>
   </data>
+  <data name="PasteToMouse" xml:space="preserve">
+    <value>Paste objects to mouse location</value>
+  </data>
   <data name="PauseAudioAndFumen" xml:space="preserve">
     <value>Pause the audio/editor playback first</value>
   </data>

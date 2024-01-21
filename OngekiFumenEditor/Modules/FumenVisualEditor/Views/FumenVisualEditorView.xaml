@@ -9,9 +9,10 @@
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
@@ -62,7 +63,8 @@
                 </MenuItem>
                 <MenuItem Header="{markup:Translate [ToCopiedObjects]}">
                     <MenuItem Header="{markup:Translate [ToPaste]}">
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteDirectly]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsDirectly($executionContext)" Header="{markup:Translate [PasteDirectly]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteToMouse]}" />
                         <Separator />
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="{markup:Translate [PasteForHorizonMirror]}" />
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="{markup:Translate [PasteForVerticalMirror]}" />

@@ -1098,6 +1098,9 @@
   <data name="PasteForZeroXGridMirror" xml:space="preserve">
     <value>按X[0,0]为基准水平镜像粘贴</value>
   </data>
+  <data name="PasteToMouse" xml:space="preserve">
+    <value>复制到鼠标位置</value>
+  </data>
   <data name="PauseAudioAndFumen" xml:space="preserve">
     <value>请先暂停音频/谱面播放</value>
   </data>
