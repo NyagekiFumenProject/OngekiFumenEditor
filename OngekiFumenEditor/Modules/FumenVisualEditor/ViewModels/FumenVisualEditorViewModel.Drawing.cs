@@ -193,8 +193,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			var objects = visibleRanges.SelectMany(x =>
 			{
 				(var min, var max) = x;
-				if (max is null || min is null)
-					return Enumerable.Empty<IDisplayableObject>();
 				var r = Enumerable.Empty<IDisplayableObject>()
 				   .Concat(fumen.Flicks.BinaryFindRange(min, max))
 				   .Concat(fumen.MeterChanges.Skip(1)) //not show first meter
@@ -289,13 +287,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this) ?? TGrid.Zero;
 				var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(maxY, this);
 
+				if (maxTGrid is null || minTGrid is null)
+					return;
 				visibleTGridRanges.Add((minTGrid, maxTGrid));
 			}
 			else
 			{
 				var scale = Setting.VerticalDisplayScale;
 				var ranges = Fumen.Soflans.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList, scale);
-				visibleTGridRanges.AddRange(ranges.Select(x => (x.minTGrid, x.maxTGrid)));
+
+				foreach (var x in ranges)
+				{
+					if (x.maxTGrid is null || x.minTGrid is null)
+						return;
+					visibleTGridRanges.Add((x.minTGrid, x.maxTGrid));
+				}
 			}
 			Rect = new VisibleRect(new(ViewWidth, minY), new(0, minY + ViewHeight));
 
