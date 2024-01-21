@@ -193,6 +193,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			var objects = visibleRanges.SelectMany(x =>
 			{
 				(var min, var max) = x;
+				if (max is null || min is null)
+					return Enumerable.Empty<IDisplayableObject>();
 				var r = Enumerable.Empty<IDisplayableObject>()
 				   .Concat(fumen.Flicks.BinaryFindRange(min, max))
 				   .Concat(fumen.MeterChanges.Skip(1)) //not show first meter
