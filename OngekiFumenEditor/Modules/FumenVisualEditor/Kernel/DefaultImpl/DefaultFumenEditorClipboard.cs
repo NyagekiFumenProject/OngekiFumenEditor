@@ -137,7 +137,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			return;
 		}
 
-		public async Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteMirrorOption mirrorOption, Point? placePoint = null)
+		public async Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteOption pasteOption, Point? placePoint = null)
 		{
 			if (targetEditor.IsLocked)
 				return;
@@ -170,8 +170,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			}
 
 			//计算出镜像中心位置
-			var mirrorYOpt = CalculateYMirror(currentCopiedSources.Keys, mirrorOption);
-			var mirrorXOpt = CalculateXMirror(targetEditor, currentCopiedSources.Keys, mirrorOption);
+			var mirrorYOpt = CalculateYMirror(currentCopiedSources.Keys, pasteOption);
+			var mirrorXOpt = CalculateXMirror(targetEditor, currentCopiedSources.Keys, pasteOption);
 
 			//获取源中心点
 			var sourceCenterPos = CalculateRangeCenter(currentCopiedSources.Keys);
@@ -182,7 +182,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			//计算出偏移量
 			var offset = (Point)(targetPoint - fixedCenterPos);
 
-			if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
+			if (pasteOption == PasteOption.XGridZeroMirror)
 				offset.X = 0;
 
 			var redo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
@@ -236,8 +236,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 						undo += () => hold.ReferenceLaneStart = default;
 						break;
 					case Flick flick:
-						if (mirrorOption == PasteMirrorOption.XGridZeroMirror
-							|| mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
+						if (pasteOption == PasteOption.XGridZeroMirror
+							|| pasteOption == PasteOption.SelectedRangeCenterXGridMirror)
 						{
 							var beforeDirection = flick.Direction;
 							redo += () => flick.Direction = (FlickDirection)(-(int)beforeDirection);
@@ -255,6 +255,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 					double CalcY(double sourceEditorY)
 					{
+						if (pasteOption == PasteOption.Direct)
+							return sourceEditorY;
 						var fixedY = adjustY(sourceEditorY);
 
 						var mirrorBaseY = mirrorYOpt is double _mirrorY ? _mirrorY : fixedY;
@@ -350,6 +352,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 					double CalcX(double x)
 					{
+						if (pasteOption == PasteOption.Direct)
+							return x;
+
 						var mirrorBaseX = mirrorXOpt is double _mirrorX ? _mirrorX : x;
 						var mirroredX = mirrorBaseX + mirrorBaseX - x;
 						offsetedX = mirroredX + offset.X;
@@ -548,9 +553,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CopyAndPaste, redo, undo));
 		}
 
-		private double? CalculateYMirror(IEnumerable<OngekiObjectBase> objects, PasteMirrorOption mirrorOption)
+		private double? CalculateYMirror(IEnumerable<OngekiObjectBase> objects, PasteOption mirrorOption)
 		{
-			if (mirrorOption != PasteMirrorOption.SelectedRangeCenterTGridMirror)
+			if (mirrorOption != PasteOption.SelectedRangeCenterTGridMirror)
 				return null;
 
 			(var minY, var maxY) = objects
@@ -565,12 +570,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			return mirrorY;
 		}
 
-		private double? CalculateXMirror(FumenVisualEditorViewModel targetEditor, IEnumerable<OngekiObjectBase> objects, PasteMirrorOption mirrorOption)
+		private double? CalculateXMirror(FumenVisualEditorViewModel targetEditor, IEnumerable<OngekiObjectBase> objects, PasteOption mirrorOption)
 		{
-			if (mirrorOption == PasteMirrorOption.XGridZeroMirror)
+			if (mirrorOption == PasteOption.XGridZeroMirror)
 				return XGridCalculator.ConvertXGridToX(0, targetEditor);
 
-			if (mirrorOption == PasteMirrorOption.SelectedRangeCenterXGridMirror)
+			if (mirrorOption == PasteOption.SelectedRangeCenterXGridMirror)
 			{
 				(var minX, var maxX) = objects
 					.Where(x => x is not ConnectableObjectBase)

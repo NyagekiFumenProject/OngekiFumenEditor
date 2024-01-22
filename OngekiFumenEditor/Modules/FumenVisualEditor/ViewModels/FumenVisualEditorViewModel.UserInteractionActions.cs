@@ -175,15 +175,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 		public async void MenuItemAction_CopySelectedObjects()
 		{
-			prevCopyMousePosition = Mouse.GetPosition(GetView() as FrameworkElement);
 			await IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);
 		}
 
-		public enum PasteMirrorOption
+		public enum PasteOption
 		{
 			XGridZeroMirror,
 			SelectedRangeCenterXGridMirror,
 			SelectedRangeCenterTGridMirror,
+			Direct,
 			None
 		}
 
@@ -191,33 +191,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		{
 			var placePos = Mouse.GetPosition(GetView() as FrameworkElement);
 			placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
-			PasteCopiesObjects(PasteMirrorOption.None, placePos);
+			PasteCopiesObjects(PasteOption.None, placePos);
 		}
 
 		public void MenuItemAction_PasteCopiesObjectsDirectly(ActionExecutionContext ctx)
 		{
-			var placePos = prevCopyMousePosition;
-			placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
-			PasteCopiesObjects(PasteMirrorOption.None, placePos);
+			PasteCopiesObjects(PasteOption.Direct, default(Point));
 		}
 
 		public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
-			=> PasteCopiesObjects(PasteMirrorOption.None, ctx);
+			=> PasteCopiesObjects(PasteOption.None, ctx);
 		public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror(ActionExecutionContext ctx)
-			=> PasteCopiesObjects(PasteMirrorOption.SelectedRangeCenterXGridMirror, ctx);
+			=> PasteCopiesObjects(PasteOption.SelectedRangeCenterXGridMirror, ctx);
 		public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror(ActionExecutionContext ctx)
-			=> PasteCopiesObjects(PasteMirrorOption.SelectedRangeCenterTGridMirror, ctx);
+			=> PasteCopiesObjects(PasteOption.SelectedRangeCenterTGridMirror, ctx);
 		public void MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror(ActionExecutionContext ctx)
-			=> PasteCopiesObjects(PasteMirrorOption.XGridZeroMirror, ctx);
+			=> PasteCopiesObjects(PasteOption.XGridZeroMirror, ctx);
 
-		public void PasteCopiesObjects(PasteMirrorOption mirrorOption, ActionExecutionContext ctx)
+		public void PasteCopiesObjects(PasteOption mirrorOption, ActionExecutionContext ctx)
 		{
 			var placePos = contextMenuPosition;
 			placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
 			PasteCopiesObjects(mirrorOption, placePos);
 		}
 
-		public async void PasteCopiesObjects(PasteMirrorOption mirrorOption, Point? placePoint = default)
+		public async void PasteCopiesObjects(PasteOption mirrorOption, Point? placePoint = default)
 		{
 			if (IsLocked)
 				return;
@@ -234,7 +232,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		/// </summary>
 		private bool dragOutBound;
 		private int currentDraggingActionId;
-		private Point prevCopyMousePosition;
 
 		public void MenuItemAction_RememberSelectedObjectAudioTime()
 		{
