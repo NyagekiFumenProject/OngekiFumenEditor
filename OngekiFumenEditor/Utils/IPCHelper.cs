@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -36,6 +37,8 @@ namespace OngekiFumenEditor.Utils
 			if (enableMultiProc)
 				return;
 
+			var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
+
 			mmf = MemoryMappedFile.CreateOrOpen("OngekiFumenEditor_MMF", FileSize, MemoryMappedFileAccess.ReadWrite);
 			using var accessor = mmf.CreateViewAccessor(0, FileSize);
 
@@ -46,7 +49,7 @@ namespace OngekiFumenEditor.Utils
 				if (process is not null)
 				{
 					//send to host
-					var r = "CMD:" + JsonSerializer.Serialize(new ArgsWrapper() { Args = Environment.GetCommandLineArgs().Skip(1).ToArray() });
+					var r = "CMD:" + JsonSerializer.Serialize(new ArgsWrapper() { Args = args });
 
 					var buffer = Encoding.UTF8.GetBytes(r);
 					accessor.WriteArray(sizeof(int) * 2, buffer, 0, Math.Min(buffer.Length, FileSize - sizeof(int) * 2));

@@ -25,8 +25,8 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
 				{
 					Log.LogInfo($"arg.filePath: {filePath}");
 
-					if (!await DocumentOpenHelper.TryOpenAsDocument(filePath))
-						ErrorExit(Resources.ErrorEditorNotSupport);
+					if (await DocumentOpenHelper.TryOpenAsDocument(filePath))
+						Application.Current?.MainWindow?.Focus();
 				}
 				else
 					ErrorExit(Resources.ErrorFileByParamNotFound);
