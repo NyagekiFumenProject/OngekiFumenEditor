@@ -1240,8 +1240,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
          2: 1 2   4      8  
          5:         5        10            
          */
-        private readonly static int[] xGridUnitUpJumpTable = [0, 1, 2, 3, 4, 5, 3, 7, 0, 3, 0, 0, 0, 0, 0, 0];
-        private readonly static int[] xGridUnitDownJumpTable = [0, 0, -1, 0, -2, 0, -3, 0, -4, -3, -5, 0, -3, 0, 0, 0];
+        private readonly static int[] xGridUnitUpJumpTable = new[] { 0, 1, 2, 3, 4, 5, 3, 7, 0, 3, 0, 0, 0, 0, 0, 0 };
+        private readonly static int[] xGridUnitDownJumpTable = new[] { 0, 0, -1, 0, -2, 0, -3, 0, -4, -3, -5, 0, -3, 0, 0, 0 };
         private void OnWheelXGridUnit(MouseWheelEventArgs arg)
         {
             var jump = (arg.Delta > 0 ? xGridUnitUpJumpTable : xGridUnitDownJumpTable).ElementAtOrDefault((int)Setting.XGridUnitSpace);
@@ -1260,8 +1260,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
          5:         5        10            15
          7:            7                14
          */
-        private readonly static int[] beatSplitUpJumpTable = [0, 1, 2, 3, 4, 5, 3, 7, 0, 3, 5, 0, 0, 0, 0, 0];
-        private readonly static int[] beatSplitDownJumpTable = [0, 0, -1, 0, -2, 0, -3, 0, -4, -3, -5, 0, -3, 0, -7, -5];
+        private readonly static int[] beatSplitUpJumpTable = new[] { 0, 1, 2, 3, 4, 5, 3, 7, 0, 3, 5, 0, 0, 0, 0, 0 };
+        private readonly static int[] beatSplitDownJumpTable = new[] { 0, 0, -1, 0, -2, 0, -3, 0, -4, -3, -5, 0, -3, 0, -7, -5 };
         private void OnWheelBeatSplit(MouseWheelEventArgs arg)
         {
             var jump = (arg.Delta > 0 ? beatSplitUpJumpTable : beatSplitDownJumpTable).ElementAtOrDefault(Setting.BeatSplit);
