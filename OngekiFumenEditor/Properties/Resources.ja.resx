@@ -1494,4 +1494,7 @@
   <data name="WithinOneWeek" xml:space="preserve">
     <value>1週間以内</value>
   </data>
+  <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
+    <value>オーディオ時間（末尾の赤い線）の外側にオブジェクトを配置できるようにする</value>
+  </data>
 </root>
