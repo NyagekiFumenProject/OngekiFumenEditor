@@ -781,7 +781,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (arg.LeftButton == MouseButtonState.Pressed)
             {
-                position.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - position.Y));
+                position.Y = Math.Max(0, Rect.MaxY - position.Y);
 
                 isLeftMouseDown = true;
                 isSelectRangeDragging = false;
@@ -1167,35 +1167,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnWheelScrollViewer(MouseWheelEventArgs arg)
         {
-            if (IsDesignMode)
+            if (IsDesignMode && Setting.JudgeLineAlignBeat)
             {
-                if (Setting.JudgeLineAlignBeat)
+                var tGrid = GetCurrentTGrid();
+                var time = TGridCalculator.ConvertTGridToAudioTime(tGrid, this);
+                var y = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, this);
+
+                var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Fumen.BpmList);
+                (var prevAudioTime, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.audioTime < time);
+                if (meter is null)
+                    (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
+
+                var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale) * 2;
+                //消除精度误差~
+                var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
+
+                var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
+                var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
+                var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
+                var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
+
+                var result = arg.Delta > 0 ? nextFirst : downFirst;
+                if (result.tGrid is not null)
                 {
-                    var tGrid = GetCurrentTGrid();
-                    var time = TGridCalculator.ConvertTGridToAudioTime(tGrid, this);
-                    var y = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, this);
-
-                    var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Fumen.BpmList);
-                    (var prevAudioTime, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.audioTime < time);
-                    if (meter is null)
-                        (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
-
-                    var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale) * 2;
-                    //消除精度误差~
-                    var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
-
-                    var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
-                    var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
-                    var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
-                    var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
-
-                    var result = arg.Delta > 0 ? nextFirst : downFirst;
-                    if (result.tGrid is not null)
-                    {
-                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(result.y, this);
-                        ScrollTo(audioTime);
-                        //ScrollTo(result.y);
-                    }
+                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(result.y, this);
+                    ScrollTo(audioTime);
+                    //ScrollTo(result.y);
                 }
             }
             else

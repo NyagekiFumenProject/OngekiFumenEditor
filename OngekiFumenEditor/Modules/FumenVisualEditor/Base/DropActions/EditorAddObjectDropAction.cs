@@ -15,9 +15,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
 			var isFirst = true;
 
 			if (mousePosition.Y > editor.TotalDurationHeight || mousePosition.Y < 0)
-			{
-				editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
-				return;
+            {
+				if (!EditorGlobalSetting.Default.EnablePlaceObjectBeyondAudioDuration)
+				{
+					editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
+					return;
+				}
 			}
 
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddObject, () =>

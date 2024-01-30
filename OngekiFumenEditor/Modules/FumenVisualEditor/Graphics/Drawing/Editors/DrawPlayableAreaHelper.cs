@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 			vertices[0] = new(new(0, y), color, VertexDash.Solider);
 			vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);
 
-			lineDrawing.Draw(target, vertices, 4);
+			lineDrawing.Draw(target, vertices, 3);
 		}
 	}
 }

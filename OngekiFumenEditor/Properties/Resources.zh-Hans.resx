@@ -606,6 +606,9 @@
   <data name="EnableNotifyUserByDialog" xml:space="preserve">
     <value>是否显示对话框通知用户</value>
   </data>
+  <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
+    <value>允许在音频时长(末尾红线)外放置物件</value>
+  </data>
   <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>允许显示频谱</value>
   </data>

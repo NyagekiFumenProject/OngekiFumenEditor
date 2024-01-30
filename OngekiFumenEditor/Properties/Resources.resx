@@ -606,6 +606,9 @@
   <data name="EnableNotifyUserByDialog" xml:space="preserve">
     <value>Enable display dialog for notifications</value>
   </data>
+  <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
+    <value>Allow user places objects beyond audio duration(red line at end of editor)</value>
+  </data>
   <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>Enable display visualizer</value>
   </data>

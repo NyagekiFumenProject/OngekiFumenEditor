@@ -32,9 +32,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 		public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
 		{
 			if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
-			{
-				editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
-				return;
+            {
+				if (!EditorGlobalSetting.Default.EnablePlaceObjectBeyondAudioDuration)
+				{
+					editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
+					return;
+				}
 			}
 
 			var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);

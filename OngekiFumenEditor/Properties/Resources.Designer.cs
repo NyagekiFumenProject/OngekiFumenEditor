@@ -1528,6 +1528,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Allow user places objects beyond audio duration(red line at end of editor) 的本地化字符串。
+        /// </summary>
+        public static string EnablePlaceObjectBeyondAudioDuration {
+            get {
+                return ResourceManager.GetString("EnablePlaceObjectBeyondAudioDuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Enable display visualizer 的本地化字符串。
         /// </summary>
         public static string EnableVisualizerDisplay {

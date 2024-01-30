@@ -9,43 +9,46 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions
 {
-	public class AddLaneCurvePathControlDropAction : IEditorDropHandler
-	{
-		private ConnectableChildObjectBase curveObject;
-		private LaneCurvePathControlObject cachePathControl;
+    public class AddLaneCurvePathControlDropAction : IEditorDropHandler
+    {
+        private ConnectableChildObjectBase curveObject;
+        private LaneCurvePathControlObject cachePathControl;
 
-		public AddLaneCurvePathControlDropAction(ConnectableChildObjectBase obj)
-		{
-			curveObject = obj;
-			cachePathControl = new LaneCurvePathControlObject();
-		}
+        public AddLaneCurvePathControlDropAction(ConnectableChildObjectBase obj)
+        {
+            curveObject = obj;
+            cachePathControl = new LaneCurvePathControlObject();
+        }
 
-		public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
-		{
-			if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
-			{
-				editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
-				return;
-			}
+        public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
+        {
+            if (dragEndPoint.Y > editor.TotalDurationHeight || dragEndPoint.Y < 0)
+            {
+                if (!EditorGlobalSetting.Default.EnablePlaceObjectBeyondAudioDuration)
+                {
+                    editor.Toast.ShowMessage(Resources.DisableAddObjectBeyondAudioDuration);
+                    return;
+                }
+            }
 
-			var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
-			var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
-			var isFirst = true;
+            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
+            var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
+            var isFirst = true;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddCurveControlPoint, () =>
-			{
-				cachePathControl.TGrid = dragTGrid;
-				cachePathControl.XGrid = dragXGrid;
-				curveObject.AddControlObject(cachePathControl);
-				if (isFirst)
-				{
-					editor.NotifyObjectClicked(cachePathControl);
-					isFirst = false;
-				}
-			}, () =>
-			{
-				curveObject.RemoveControlObject(cachePathControl);
-			}));
-		}
-	}
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddCurveControlPoint, () =>
+            {
+                cachePathControl.TGrid = dragTGrid;
+                cachePathControl.XGrid = dragXGrid;
+                curveObject.AddControlObject(cachePathControl);
+                if (isFirst)
+                {
+                    editor.NotifyObjectClicked(cachePathControl);
+                    isFirst = false;
+                }
+            }, () =>
+            {
+                curveObject.RemoveControlObject(cachePathControl);
+            }));
+        }
+    }
 }
