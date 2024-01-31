@@ -1497,4 +1497,10 @@
   <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
     <value>オーディオ時間（末尾の赤い線）の外側にオブジェクトを配置できるようにする</value>
   </data>
+  <data name="RecalculateTotalHeight" xml:space="preserve">
+    <value>エディタの全長の再計算</value>
+  </data>
+  <data name="RecaculatedSuccess" xml:space="preserve">
+    <value>再計算に成功しました</value>
+  </data>
 </root>

@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 				holdEnd.XGrid.Unit = dataArr[8];
 				holdEnd.XGrid.Grid = (int)dataArr[9];
 
-				hold.SetHold(holdEnd);
+				hold.SetHoldEnd(holdEnd);
 			}
 
 			return hold;

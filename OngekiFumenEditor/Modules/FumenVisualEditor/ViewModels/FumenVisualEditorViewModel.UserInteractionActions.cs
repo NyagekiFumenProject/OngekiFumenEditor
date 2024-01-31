@@ -28,6 +28,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -553,8 +554,29 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             SelectObjects.ForEach(x => x.IsSelected = false);
         }
 
-        public void KeyboardAction_FastSetObjectIsCritical()
+        public void KeyboardAction_FastSetObjectIsCritical(ActionExecutionContext e)
         {
+            var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+
+            var position = Mouse.GetPosition(e.View as FrameworkElement);
+            position.Y = ViewHeight - position.Y + Rect.MinY;
+
+            if (propertyBrowser.SelectedObjects.IsOnlyOne())
+            {
+                var child = propertyBrowser.SelectedObjects.FirstOrDefault() switch
+                {
+                    ConnectableChildObjectBase c => c,
+                    LaneCurvePathControlObject cc => cc.RefCurveObject,
+                    _ => default
+                };
+                if (child != null)
+                {
+                    //只有一个轨道Next被选择
+                    ProcessAsAddCurve(child, position);
+                    return;
+                }
+            }
+
             var selectables = SelectObjects.ToArray();
             var map = new Dictionary<ICriticalableObject, bool>();
 
@@ -581,11 +603,62 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
+        public bool CheckAndNotifyIfPlaceBeyondDuration(Point placePoint)
+        {
+            if (placePoint.Y > TotalDurationHeight || placePoint.Y < 0)
+            {
+                if (!EditorGlobalSetting.Default.EnablePlaceObjectBeyondAudioDuration)
+                {
+                    ToastNotify(Resources.DisableAddObjectBeyondAudioDuration);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void ProcessAsAddCurve(ConnectableChildObjectBase child, Point position)
+        {
+            if (!CheckAndNotifyIfPlaceBeyondDuration(position))
+                return;
+
+            var curvePoint = new LaneCurvePathControlObject();
+            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this);
+            var dragXGrid = XGridCalculator.ConvertXToXGrid(position.X, this);
+            var isFirst = true;
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddCurveControlPoint, () =>
+            {
+                curvePoint.TGrid = dragTGrid;
+                curvePoint.XGrid = dragXGrid;
+                child.AddControlObject(curvePoint);
+                if (isFirst)
+                {
+                    NotifyObjectClicked(curvePoint);
+                    isFirst = false;
+                }
+            }, () =>
+            {
+                child.RemoveControlObject(curvePoint);
+            }));
+        }
+
         public void KeyboardAction_FastAddConnectableChild(ActionExecutionContext e)
         {
             if (!IsDesignMode)
                 return;
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
+
+
+            var position = Mouse.GetPosition(e.View as FrameworkElement);
+            position.Y = ViewHeight - position.Y + Rect.MinY;
+
+            if (propertyBrowser.SelectedObjects.IsOnlyOne() && propertyBrowser.SelectedObjects.FirstOrDefault() is Hold hold)
+            {
+                //只有一个hold被选择，按下A那么就是添加HoldEnd
+                ProcessAsHoldEnd(hold, position);
+                return;
+            }
 
             if (!propertyBrowser.SelectedObjects.All(x => x is ConnectableObjectBase))
                 return;
@@ -593,6 +666,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (selects.IsEmpty())
                 return;
 
+            ProcessAsAddNextObjects(position, selects);
+        }
+
+        private void ProcessAsAddNextObjects(Point position, ConnectableObjectBase[] selects)
+        {
             var minX = XGridCalculator.ConvertXGridToX(selects.Min(x => x.XGrid), this);
             var maxX = XGridCalculator.ConvertXGridToX(selects.Max(x => x.XGrid), this);
             var centerX = (maxX + minX) / 2;
@@ -604,9 +682,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (starts.Length != selects.Length)
                 return;
-
-            var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = ViewHeight - position.Y + Rect.MinY;
 
             var genChildren = new HashSet<ConnectableChildObjectBase>();
 
@@ -622,13 +697,35 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 genChildren.Add(genChild);
             }
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(string.Empty, () =>
-                    {
-                        TryCancelAllObjectSelecting();
-                        genChildren.ForEach(x => x.IsSelected = true);
-                        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
-                    }, () => { }));
+            {
+                TryCancelAllObjectSelecting();
+                genChildren.ForEach(x => x.IsSelected = true);
+                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+            }, () => { }));
             var combinedAction = UndoRedoManager.EndCombineAction(Resources.FastAddObjectsToLanes);
             UndoRedoManager.ExecuteAction(combinedAction);
+        }
+
+        private void ProcessAsHoldEnd(Hold hold, Point mousePosition)
+        {
+            var holdEnd = new HoldEnd();
+            hold.SetHoldEnd(holdEnd);
+
+            var isFirst = true;
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddObject, () =>
+            {
+                MoveObjectTo(holdEnd, mousePosition);
+                Fumen.AddObject(holdEnd);
+
+                if (isFirst)
+                {
+                    NotifyObjectClicked(holdEnd);
+                    isFirst = false;
+                }
+            }, () =>
+            {
+                RemoveObject(holdEnd);
+            }));
         }
 
         public void KeyboardAction_PlayOrPause()

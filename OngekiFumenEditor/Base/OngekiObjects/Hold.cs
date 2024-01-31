@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 		public override string IDShortName => IsCritical ? "CHD" : "HLD";
 
-		public void SetHold(HoldEnd end)
+		public void SetHoldEnd(HoldEnd end)
 		{
 			if (holdEnd is not null)
 				holdEnd.PropertyChanged -= HoldEnd_PropertyChanged;
@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 			if (end is not null)
 			{
-				end.RefHold?.SetHold(null);
+				end.RefHold?.SetHoldEnd(null);
 				end.RefHold = this;
 			}
 		}

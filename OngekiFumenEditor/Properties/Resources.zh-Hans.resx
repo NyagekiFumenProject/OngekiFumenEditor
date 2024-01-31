@@ -1134,6 +1134,12 @@
   <data name="PropertyBatchSet" xml:space="preserve">
     <value>批量赋值:</value>
   </data>
+  <data name="RecaculatedSuccess" xml:space="preserve">
+    <value>重新计算成功</value>
+  </data>
+  <data name="RecalculateTotalHeight" xml:space="preserve">
+    <value>重新计算编辑器画幅总长度</value>
+  </data>
   <data name="RecentFiles" xml:space="preserve">
     <value>打开最近的使用的文件</value>
   </data>

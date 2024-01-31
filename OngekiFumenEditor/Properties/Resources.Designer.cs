@@ -3112,6 +3112,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Recaculate successfully 的本地化字符串。
+        /// </summary>
+        public static string RecaculatedSuccess {
+            get {
+                return ResourceManager.GetString("RecaculatedSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Recaculate editor scroll height 的本地化字符串。
+        /// </summary>
+        public static string RecalculateTotalHeight {
+            get {
+                return ResourceManager.GetString("RecalculateTotalHeight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Open the most recently used file 的本地化字符串。
         /// </summary>
         public static string RecentFiles {

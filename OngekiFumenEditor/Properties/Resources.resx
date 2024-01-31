@@ -1134,6 +1134,12 @@
   <data name="PropertyBatchSet" xml:space="preserve">
     <value>Property batch assignment:</value>
   </data>
+  <data name="RecaculatedSuccess" xml:space="preserve">
+    <value>Recaculate successfully</value>
+  </data>
+  <data name="RecalculateTotalHeight" xml:space="preserve">
+    <value>Recaculate editor scroll height</value>
+  </data>
   <data name="RecentFiles" xml:space="preserve">
     <value>Open the most recently used file</value>
   </data>
