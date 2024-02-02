@@ -9,6 +9,7 @@
     <LangVersion>preview</LangVersion>
     <ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
     <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
+    <StartupObject>OngekiFumenEditor.Startup</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -172,6 +173,7 @@
     <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
     <PackageReference Include="Svg" Version="3.4.6" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 

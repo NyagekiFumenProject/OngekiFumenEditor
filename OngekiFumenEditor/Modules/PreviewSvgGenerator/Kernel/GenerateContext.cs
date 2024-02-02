@@ -11,9 +11,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
         public double TotalWidth => Option.ViewWidth;
         public double TotalHeight { get; init; }
 
-        public FumenVisualEditorViewModel Editor { get; init; }
-        public OngekiFumen Fumen => Editor.Fumen;
-
+        public OngekiFumen Fumen { get; init; }
         public SvgDocument Document { get; init; }
 
         public float CalculateToY(TGrid grid)

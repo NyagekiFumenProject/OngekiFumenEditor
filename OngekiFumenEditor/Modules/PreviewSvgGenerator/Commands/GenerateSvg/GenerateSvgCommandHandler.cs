@@ -4,9 +4,13 @@ using Gemini.Framework.Threading;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg;
+using OngekiFumenEditor.Utils;
+using System;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg
 {
@@ -30,7 +34,25 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg
         public override Task Run(Command command)
         {
             if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor)
-                IoC.Get<IPreviewSvgGenerator>().GenerateSvgAsync(editor, new GenerateOption());
+            {
+                try
+                {
+                    var opt = new GenerateOption()
+                    {
+                        Duration = editor.EditorProjectData.AudioDuration,
+                        OutputFilePath = Path.GetTempFileName() + ".svg"
+                    };
+                    IoC.Get<IPreviewSvgGenerator>().GenerateSvgAsync(editor.Fumen, opt);
+
+                    if (MessageBox.Show($"生成svg文件成功,是否立即打开文件?", "提示", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                        ProcessUtils.OpenPath(opt.OutputFilePath);
+
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show($"生成svg文件失败:{e.Message}");
+                }
+            }
             return TaskUtility.Completed;
         }
     }

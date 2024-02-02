@@ -32,13 +32,12 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
     [Export(typeof(IPreviewSvgGenerator))]
     public partial class DefaultPreviewSvgGenerator : IPreviewSvgGenerator
     {
-        public async Task<string> GenerateSvgAsync(FumenVisualEditorViewModel editor, GenerateOption option)
+        public async Task<string> GenerateSvgAsync(OngekiFumen fumen, GenerateOption option)
         {
-            var fumen = editor.Fumen;
             var svgDocument = new SvgDocument();
 
             var totalWidth = option.ViewWidth;
-            var totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(TGridCalculator.ConvertAudioTimeToTGrid(editor.EditorProjectData.AudioDuration, fumen.BpmList), fumen.Soflans, fumen.BpmList, option.VerticalScale);
+            var totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(TGridCalculator.ConvertAudioTimeToTGrid(option.Duration, fumen.BpmList), fumen.Soflans, fumen.BpmList, option.VerticalScale);
 
             svgDocument.Width = new SvgUnit(SvgUnitType.Pixel, (float)totalWidth);
             svgDocument.Height = new SvgUnit(SvgUnitType.Pixel, (float)totalHeight);
@@ -51,7 +50,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             await SerializeFumenToSvg(new GenerateContext()
             {
                 Document = svgDocument,
-                Editor = editor,
+                Fumen = fumen,
                 Option = option,
                 TotalHeight = totalHeight,
             });
@@ -61,9 +60,8 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             ms.Seek(0, SeekOrigin.Begin);
             var svgContent = Encoding.UTF8.GetString(ms.ToArray());
 
-            var tempFilePath = Path.GetTempFileName() + ".svg";
-            await File.WriteAllTextAsync(tempFilePath, svgContent);
-            ProcessUtils.OpenPath(tempFilePath);
+            if (!string.IsNullOrWhiteSpace(option.OutputFilePath))
+                await File.WriteAllTextAsync(option.OutputFilePath, svgContent);
 
             return svgContent;
         }
@@ -926,6 +924,11 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             group.Children.Add(laneGroup);
 
             ctx.Document.Children.Add(group);
+        }
+
+        public Task<string> GenerateSvgAsync(GenerateOption option)
+        {
+            throw new NotImplementedException();
         }
     }
 }
