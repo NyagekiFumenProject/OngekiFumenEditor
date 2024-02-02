@@ -65,6 +65,23 @@
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
     <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\bell.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\flick.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\flick1.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\green_tap.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_blk.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_pur.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_red.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\red_tap.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet0.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet1.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet2.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet0.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet1.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet2.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\walltap.png" />
+    <None Remove="Modules\PreviewSvgGenerator\Resources\walltap2.png" />
     <None Remove="Resources\empty_ogkr_template.ogkr" />
     <None Remove="Resources\Icons\add-folder.png" />
     <None Remove="Resources\Icons\book.png" />
@@ -96,6 +113,23 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Costura64\TexToolWrap.dll">
     </EmbeddedResource>
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\bell.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick1.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\green_tap.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\red_tap.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_blk.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_pur.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_red.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet0.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet1.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet2.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet0.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet1.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet2.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\walltap.png" />
+    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\walltap2.png" />
     <EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
     <EmbeddedResource Include="Resources\Music.xml" />
     <EmbeddedResource Include="Resources\MusicSource.xml" />
@@ -137,6 +171,7 @@
     <PackageReference Include="SharpVectors" Version="1.8.1" />
     <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
+    <PackageReference Include="Svg" Version="3.4.6" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 

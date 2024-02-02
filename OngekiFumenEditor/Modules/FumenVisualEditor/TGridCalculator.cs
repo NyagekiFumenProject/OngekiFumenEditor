@@ -404,5 +404,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 				return (downFirst.tGrid, downFirst.y, downFirst.beatIndex);
 			return (nextFirst.tGrid, nextFirst.y, nextFirst.beatIndex);
 		}
-	}
+
+        internal static object ConvertTGridUnitToY_DesignMode(double v, SoflanList soflans, BpmList bpmList, object verticalScale)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

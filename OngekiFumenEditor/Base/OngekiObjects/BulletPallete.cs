@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 case Target.Player:
                     var tGrid = refObject.TGrid;
                     var apfLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>().LastOrDefault();
-                    var xGrid = apfLane.CalulateXGrid(tGrid);
+                    var xGrid = apfLane?.CalulateXGrid(tGrid);
                     xGridTotalUnit = xGrid?.TotalUnit ?? 0d;
                     xGridTotalUnit += refObject.XGrid.TotalUnit;
                     break;
@@ -42,8 +42,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                     break;
                 case Shooter.Enemy:
                     var tGrid = refObject.TGrid;
-                    var apfLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<EnemyLaneStart>().LastOrDefault();
-                    var xGrid = apfLane.CalulateXGrid(tGrid);
+                    var enemyLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<EnemyLaneStart>().LastOrDefault();
+                    var xGrid = enemyLane?.CalulateXGrid(tGrid);
                     xGridTotalUnit = xGrid?.TotalUnit ?? refObject.XGrid.TotalUnit;
                     break;
                 case Shooter.Center:

@@ -318,7 +318,7 @@ namespace OngekiFumenEditor
 				exceptionDump(exception);
 				sb.AppendLine($"----------------------------");
 				await FileLogOutput.WriteLog(sb.ToString());
-
+#if !DEBUG
 				var exceptionHandle = Marshal.GetExceptionPointers();
 				var dumpFile = string.Empty;
 				if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
@@ -337,6 +337,9 @@ namespace OngekiFumenEditor
 
 				exceptionHandling = true;
 				Environment.Exit(-1);
+#else
+				throw exception;
+#endif
 			}
 
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
