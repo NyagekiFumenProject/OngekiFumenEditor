@@ -1,7 +1,5 @@
 ﻿using Advanced.Algorithms.Geometry;
-using ICSharpCode.AvalonEdit.Document;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
@@ -21,7 +19,6 @@ using System.ComponentModel.Composition;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -128,7 +125,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
         private async Task SerializeBeams(GenerateContext ctx)
         {
-            var group = new SvgGroup();
+            var group = new SvgGroup() { ID = "beam" };
             var def = new SvgDefinitionList();
             var pattern = new SvgPatternServer()
             {
@@ -198,13 +195,13 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
         private async Task SerializeTap(GenerateContext ctx)
         {
-            var tapGroup = new SvgGroup();
-            var exTapGroup = new SvgGroup();
-            var flickGroup = new SvgGroup();
-            var exFlickGroup = new SvgGroup();
+            var tapGroup = new SvgGroup() { ID = "tap" };
+            var exTapGroup = new SvgGroup() { ID = "extap" };
+            var flickGroup = new SvgGroup() { ID = "flick" };
+            var exFlickGroup = new SvgGroup() { ID = "exflick" };
             exTapGroup.Filter = new Uri("url(#criticalEffect)", UriKind.Relative);
             //exFlickGroup.Filter = new Uri("url(#criticalEffect)", UriKind.Relative);
-            var holdBodyGroup = new SvgGroup();
+            var holdBodyGroup = new SvgGroup() { ID = "holdBody" };
             var def = new SvgDefinitionList();
             var map = new Dictionary<string, (PointF anchor, SizeF size)>();
 
@@ -473,7 +470,8 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
         private async Task SerializeBell(GenerateContext ctx)
         {
-            var group = new SvgGroup();
+            var bellGroup = new SvgGroup() { ID = "bell" };
+            var bulletGroup = new SvgGroup() { ID = "bullet" };
 
             var def = new SvgDefinitionList();
 
@@ -519,7 +517,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 return null;
             }
 
-            void AppendBell(IBulletPalleteReferencable referencable)
+            void AppendBell(SvgGroup group, IBulletPalleteReferencable referencable)
             {
                 var svgBell = new SvgUse();
                 var id = GetDefId(referencable);
@@ -537,17 +535,18 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             }
 
             foreach (var bell in ctx.Fumen.Bells)
-                AppendBell(bell);
+                AppendBell(bellGroup, bell);
             foreach (var bell in ctx.Fumen.Bullets)
-                AppendBell(bell);
+                AppendBell(bulletGroup, bell);
 
             ctx.Document.Children.Add(def);
-            ctx.Document.Children.Add(group);
+            ctx.Document.Children.Add(bellGroup);
+            ctx.Document.Children.Add(bulletGroup);
         }
 
         private async Task SerializeEvents(GenerateContext ctx)
         {
-            var group = new SvgGroup();
+            var group = new SvgGroup() { ID = "event" };
             var def = new SvgDefinitionList();
             var gradient = new SvgLinearGradientServer() { ID = "timelineStroke" };
             gradient.Children.Add(new SvgGradientStop()
@@ -587,16 +586,20 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 y = (float)(ctx.TotalHeight - y);
                 var apGroup = new SvgGroup();
 
-                var svgText = new SvgText();
-                svgText.Text = text;
+                var svgText = new SvgText
+                {
+                    Text = text,
+                    Fill = new SvgColourServer(Color.WhiteSmoke)
+                };
                 svgText.Y.Add(new SvgUnit(SvgUnitType.Pixel, y - 5));
-                svgText.Fill = new SvgColourServer(Color.WhiteSmoke);
 
-                var svgLine = new SvgLine();
-                svgLine.StartX = new SvgUnit(SvgUnitType.Percentage, 0f);
-                svgLine.EndX = new SvgUnit(SvgUnitType.Percentage, 100f);
+                var svgLine = new SvgLine
+                {
+                    StartX = new SvgUnit(SvgUnitType.Percentage, 0f),
+                    EndX = new SvgUnit(SvgUnitType.Percentage, 100f),
+                    StrokeWidth = 1
+                };
                 svgLine.StartY = svgLine.EndY = new SvgUnit(SvgUnitType.Pixel, y);
-                svgLine.StrokeWidth = 1;
 
                 svgText.TextAnchor = SvgTextAnchor.End;
                 svgText.X.Add(new SvgUnit(SvgUnitType.Percentage, 100f));
@@ -730,9 +733,8 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             rightPattern.ID = "rightLBKEffect";
             def.Children.Add(rightPattern);
 
-            var group = new SvgGroup();
-            var laneGroup = new SvgGroup();
-            var lbkGroup = new SvgGroup();
+            var laneGroup = new SvgGroup() { ID = "lane" };
+            var lbkGroup = new SvgGroup() { ID = "lbk" };
             lbkGroup.Children.Add(def);
 
             void AppendLane(LaneStartBase start, int width)
@@ -908,21 +910,20 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             foreach (var lbk in ctx.Fumen.LaneBlocks)
                 AppendLBK(lbk);
 
-            group.Children.Add(lbkGroup);
-            group.Children.Add(laneGroup);
-
-            ctx.Document.Children.Add(group);
+            ctx.Document.Children.Add(lbkGroup);
+            ctx.Document.Children.Add(laneGroup);
         }
 
         private async Task SerializePlayField(GenerateContext ctx)
         {
-            var group = new SvgGroup();
+            var group = new SvgGroup() { ID = "playfield" };
 
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
 
             var backgroundPolygon = new SvgPolygon()
             {
+                ID = "playfield_background",
                 Points = new SvgPointCollection()
                 {
                     new(SvgUnitType.Pixel, 0), new(SvgUnitType.Pixel, 0),
@@ -1060,13 +1061,15 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 collection.Add(uY);
             }
 
-            var line = new SvgPolygon();
-            line.Fill = new SvgColourServer(Color.Black);
-            line.Opacity = 0.95f;
-            line.Points = collection;
+            var line = new SvgPolygon
+            {
+                ID = "playfield_foreground",
+                Fill = new SvgColourServer(Color.Black),
+                Opacity = 0.95f,
+                Points = collection
+            };
 
             group.Children.Add(line);
-
             ctx.Document.Children.Add(group);
         }
     }
