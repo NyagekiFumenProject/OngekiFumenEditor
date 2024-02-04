@@ -737,11 +737,11 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
             var def = new SvgDefinitionList();
 
-            var leftPattern = GeneratePattern(LaneColor.AllLaneColors.FirstOrDefault(x => x.LaneType == LaneType.WallLeft).Color);
+            var leftPattern = GeneratePattern(System.Windows.Media.Colors.WhiteSmoke/*LaneColor.AllLaneColors.FirstOrDefault(x => x.LaneType == LaneType.WallLeft).Color*/);
             leftPattern.ID = "leftLBKEffect";
             def.Children.Add(leftPattern);
 
-            var rightPattern = GeneratePattern(LaneColor.AllLaneColors.FirstOrDefault(x => x.LaneType == LaneType.WallRight).Color);
+            var rightPattern = GeneratePattern(System.Windows.Media.Colors.WhiteSmoke/*LaneColor.AllLaneColors.FirstOrDefault(x => x.LaneType == LaneType.WallRight).Color*/);
             rightPattern.ID = "rightLBKEffect";
             def.Children.Add(rightPattern);
 
@@ -803,11 +803,13 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 60;
                 var id = lbk.Direction == LaneBlockArea.BlockDirection.Left ? "leftLBKEffect" : "rightLBKEffect";
                 var fumen = ctx.Fumen;
+                /*
                 var laneColor = (lbk.Direction == LaneBlockArea.BlockDirection.Left ?
                     LaneColor.AllLaneColors.FirstOrDefault(x => x.LaneType == LaneType.WallLeft) :
                     LaneColor.AllLaneColors.FirstOrDefault(x => x.LaneType == LaneType.WallRight)).Color;
                 var color = Color.FromArgb(laneColor.A, laneColor.R, laneColor.G, laneColor.B);
-
+                */
+                var color = Color.WhiteSmoke;
                 #region Generate LBK lines
 
                 void BuildLBK(IEnumerable<Vector2> gridPoints)
@@ -1018,9 +1020,9 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
                 var idx = 0;
                 var sortedPoints = points.OrderBy(x => x).ToList();
-                if (sortedPoints[0] > 0)
+                if (sortedPoints.IsEmpty() || sortedPoints.FirstOrDefault() > 0)
                     sortedPoints.Insert(0, 0);
-                if (sortedPoints[sortedPoints.Count - 1] < ctx.TotalHeight)
+                if (sortedPoints.LastOrDefault() < ctx.MaxTGrid.TotalGrid)
                     sortedPoints.Add(ctx.MaxTGrid.TotalGrid);
 
                 var segments = sortedPoints.SequenceConsecutivelyWrap(2).Select(x => (x.FirstOrDefault(), x.LastOrDefault())).ToArray();
@@ -1043,7 +1045,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                         var fromTGrid = TGrid.FromTotalGrid((int)fromY);
                         appendPoint(result, pickLane.CalulateXGrid(fromTGrid), fromY);
 
-                        foreach (var pos in pickLane.GenAllPath().Select(x => x.pos).SkipWhile(x => x.Y <= fromY).TakeWhile(x => x.Y < toY))
+                        foreach (var pos in pickLane.GenAllPath().Select(x => x.pos).SkipWhile(x => x.Y < fromY).TakeWhile(x => x.Y < toY))
                             result.Add(pos);
 
                         var toTGrid = TGrid.FromTotalGrid((int)toY);
@@ -1082,6 +1084,9 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             {
                 Fill = new SvgColourServer(Color.Black),
                 Opacity = 0.95f,
+                StrokeOpacity = 1,
+                FillOpacity = 0.95f,
+                Stroke = new SvgColourServer(Color.WhiteSmoke),
                 Points = collection
             };
             line.AddCustomClass("playfieldForeground");
