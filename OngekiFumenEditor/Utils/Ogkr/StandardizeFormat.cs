@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 			public OngekiFumen SerializedFumen { get; set; }
 		}
 
-		private static async Task<OngekiFumen> CopyFumenObject(OngekiFumen fumen)
+		public static async Task<OngekiFumen> CopyFumenObject(OngekiFumen fumen)
 		{
 			var tmpFilePath = Path.GetTempFileName() + ".ogkr";
 			var serializer = IoC.Get<IFumenParserManager>().GetSerializer(tmpFilePath);

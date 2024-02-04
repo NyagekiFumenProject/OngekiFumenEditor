@@ -20,5 +20,8 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator
         public string AudioFilePath { get; set; }
 
         public TimeSpan Duration { get; set; }
+
+        [OptionBindingAttrbute<SoflanMode>("soflanMode", "变速模式,不同选项有不同的物件表现", SoflanMode.Soflan)]
+        public SoflanMode SoflanMode { get; set; } = SoflanMode.Soflan;
     }
 }

@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg
             command.Enabled = editorDocumentManager.CurrentActivatedEditor is not null;
         }
 
-        public override Task Run(Command command)
+        public override async Task Run(Command command)
         {
             if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor)
             {
@@ -42,8 +42,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg
                         Duration = editor.EditorProjectData.AudioDuration,
                         OutputFilePath = Path.GetTempFileName() + ".svg"
                     };
-                    IoC.Get<IPreviewSvgGenerator>().GenerateSvgAsync(editor.Fumen, opt);
-
+                    await IoC.Get<IPreviewSvgGenerator>().GenerateSvgAsync(editor.Fumen, opt);
                     if (MessageBox.Show($"生成svg文件成功,是否立即打开文件?", "提示", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         ProcessUtils.OpenPath(opt.OutputFilePath);
 
@@ -53,7 +52,6 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg
                     MessageBox.Show($"生成svg文件失败:{e.Message}");
                 }
             }
-            return TaskUtility.Completed;
         }
     }
 }

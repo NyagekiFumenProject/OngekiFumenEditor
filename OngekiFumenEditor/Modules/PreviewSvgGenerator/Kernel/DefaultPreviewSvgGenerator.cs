@@ -10,6 +10,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
+using OngekiFumenEditor.Utils.Ogkr;
 using OpenTK.Mathematics;
 using Svg;
 using Svg.FilterEffects;
@@ -31,13 +32,23 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
     [Export(typeof(IPreviewSvgGenerator))]
     public class DefaultPreviewSvgGenerator : IPreviewSvgGenerator
     {
-        public async Task<string> GenerateSvgAsync(OngekiFumen fumen, GenerateOption option)
+        public async Task<string> GenerateSvgAsync(OngekiFumen rawFumen, GenerateOption option)
         {
             var svgDocument = new SvgDocument();
 
+            var fumen = await StandardizeFormat.CopyFumenObject(rawFumen);
+            if (option.SoflanMode == SoflanMode.AbsSoflan)
+                foreach (var sfl in fumen.Soflans)
+                    sfl.ApplySpeedInDesignMode = true;
+
             var totalWidth = option.ViewWidth;
             var maxTGrid = TGridCalculator.ConvertAudioTimeToTGrid(option.Duration, fumen.BpmList);
-            var totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(maxTGrid, fumen.Soflans, fumen.BpmList, option.VerticalScale);
+
+            double totalHeight;
+            if (option.SoflanMode == SoflanMode.Soflan)
+                totalHeight = TGridCalculator.ConvertTGridToY_PreviewMode(maxTGrid, fumen.Soflans, fumen.BpmList, option.VerticalScale);
+            else
+                totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(maxTGrid, fumen.Soflans, fumen.BpmList, option.VerticalScale);
 
             svgDocument.Width = new SvgUnit(SvgUnitType.Pixel, (float)totalWidth);
             svgDocument.Height = new SvgUnit(SvgUnitType.Pixel, (float)totalHeight);

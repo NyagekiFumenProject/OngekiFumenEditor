@@ -1,7 +1,9 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using Svg;
+using System;
 
 namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 {
@@ -20,6 +22,8 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
         public float CalculateToY(double totalUnit)
         {
+            if (Option.SoflanMode == SoflanMode.Soflan)
+                return (float)(TotalHeight - TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, Fumen.Soflans, Fumen.BpmList, Option.VerticalScale));
             return (float)(TotalHeight - TGridCalculator.ConvertTGridUnitToY_DesignMode(totalUnit, Fumen.Soflans, Fumen.BpmList, Option.VerticalScale));
         }
 
