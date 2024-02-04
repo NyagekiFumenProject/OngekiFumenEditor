@@ -210,12 +210,10 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
             {
                 _ = await IoC.Get<IPreviewSvgGenerator>().GenerateSvgAsync(fumen, opt);
                 console.WriteLine($"生成谱面预览.svg文件成功");
-                Application.Current.Shutdown(0);
             }
             catch (Exception e)
             {
                 console.Error.WriteLine($"执行GenerateSvgAsync()出错:{e.Message}");
-                Application.Current.Shutdown(-1);
             }
         }
     }

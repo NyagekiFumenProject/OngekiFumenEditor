@@ -1,3 +1,5 @@
+using System;
+
 namespace OngekiFumenEditor.Base
 {
 	public class XGrid : GridBase
@@ -33,5 +35,22 @@ namespace OngekiFumenEditor.Base
 		}
 
 		public XGrid CopyNew() => new XGrid(Unit, Grid);
-	}
+
+
+        public static XGrid FromTotalUnit(float totalUnit)
+        {
+            var xGrid = new XGrid(totalUnit, 0);
+            xGrid.NormalizeSelf();
+
+            return xGrid;
+        }
+
+        public static XGrid FromTotalGrid(int totalGrid)
+        {
+            var xGrid = new XGrid(0, totalGrid);
+            xGrid.NormalizeSelf();
+
+            return xGrid;
+        }
+    }
 }

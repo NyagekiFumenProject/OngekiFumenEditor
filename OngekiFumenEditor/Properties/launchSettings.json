@@ -1,8 +1,7 @@
 {
   "profiles": {
     "OngekiFumenEditor": {
-      "commandName": "Project",
-      "commandLineArgs": "svg --inputFile \"C:\\Users\\mikir\\Desktop\\音寄谱\\ホシシズク\\fumen.ogkr\" --audioFile \"C:\\Users\\mikir\\Desktop\\音寄谱\\ホシシズク\\track.wav\" --outputFile \"C:\\Users\\mikir\\Desktop\\音寄谱\\ホシシズク\\output.svg\""
+      "commandName": "Project"
     }
   }
 }

@@ -143,6 +143,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Advanced.Algorithms" Version="1.0.0" />
     <PackageReference Include="AssetsTools.NET" Version="2.0.12" />
     <PackageReference Include="AssocSupport" Version="1.1.0" />
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />

@@ -1,4 +1,7 @@
-﻿using OngekiFumenEditor.Base;
+﻿using Advanced.Algorithms.Geometry;
+using ICSharpCode.AvalonEdit.Document;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
@@ -6,12 +9,10 @@ using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
+using OpenTK.Mathematics;
 using Svg;
 using Svg.FilterEffects;
 using System;
@@ -20,11 +21,12 @@ using System.ComponentModel.Composition;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Numerics;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
+using static OngekiFumenEditor.Utils.MathUtils;
 using SvgImage = Svg.SvgImage;
 
 namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
@@ -37,11 +39,12 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             var svgDocument = new SvgDocument();
 
             var totalWidth = option.ViewWidth;
-            var totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(TGridCalculator.ConvertAudioTimeToTGrid(option.Duration, fumen.BpmList), fumen.Soflans, fumen.BpmList, option.VerticalScale);
+            var maxTGrid = TGridCalculator.ConvertAudioTimeToTGrid(option.Duration, fumen.BpmList);
+            var totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(maxTGrid, fumen.Soflans, fumen.BpmList, option.VerticalScale);
 
             svgDocument.Width = new SvgUnit(SvgUnitType.Pixel, (float)totalWidth);
             svgDocument.Height = new SvgUnit(SvgUnitType.Pixel, (float)totalHeight);
-            svgDocument.AddStyle("background", "black", 0);
+            //svgDocument.AddStyle("background", "black", 0);
 
             var effect = GenerateCriticalEffect();
             effect.ID = "criticalEffect";
@@ -53,6 +56,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 Fumen = fumen,
                 Option = option,
                 TotalHeight = totalHeight,
+                MaxTGrid = maxTGrid,
             });
 
             using var ms = new MemoryStream();
@@ -114,6 +118,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
         private async Task SerializeFumenToSvg(GenerateContext ctx)
         {
+            await SerializePlayField(ctx);
             await SerializeEvents(ctx);
             await SerializeLanes(ctx);
             await SerializeTap(ctx);
@@ -694,23 +699,6 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
         {
             SvgElement GeneratePattern(System.Windows.Media.Color laneColor)
             {
-                /*
-                var pattern = new SvgPatternServer()
-                {
-                    PatternUnits = SvgCoordinateUnits.UserSpaceOnUse,
-                    Width = new SvgUnit(SvgUnitType.Pixel, 4),
-                    Height = new SvgUnit(SvgUnitType.Pixel, 4),
-                };
-                var patternRect = new SvgRectangle()
-                {
-                    Width = new SvgUnit(SvgUnitType.Pixel, 2),
-                    Height = new SvgUnit(SvgUnitType.Pixel, 2),
-                    Fill = new SvgColourServer(Color.FromArgb(laneColor.A, laneColor.R, laneColor.G, laneColor.B)),
-                    Opacity = 0.75f
-                };
-                pattern.Children.Add(patternRect);
-                */
-
                 var pattern = new SvgPatternServer()
                 {
                     Height = new SvgUnit(SvgUnitType.Pixel, 10),
@@ -727,7 +715,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     EndY = new SvgUnit(SvgUnitType.Pixel, 11),
                     Stroke = new SvgColourServer(Color.FromArgb(laneColor.A, laneColor.R, laneColor.G, laneColor.B)),
                     Opacity = 0.75f,
-                    StrokeWidth = 1
+                    StrokeWidth = 2
                 });
                 return pattern;
             }
@@ -926,9 +914,160 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             ctx.Document.Children.Add(group);
         }
 
-        public Task<string> GenerateSvgAsync(GenerateOption option)
+        private async Task SerializePlayField(GenerateContext ctx)
         {
-            throw new NotImplementedException();
+            var group = new SvgGroup();
+
+            const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
+            const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
+
+            var backgroundPolygon = new SvgPolygon()
+            {
+                Points = new SvgPointCollection()
+                {
+                    new(SvgUnitType.Pixel, 0), new(SvgUnitType.Pixel, 0),
+                    new(SvgUnitType.Pixel, (float)ctx.TotalHeight), new(SvgUnitType.Pixel, 0),
+                    new(SvgUnitType.Pixel, (float)ctx.TotalHeight), new(SvgUnitType.Pixel, (float)ctx.TotalHeight),
+                    new(SvgUnitType.Pixel, 0), new(SvgUnitType.Pixel, (float)ctx.TotalHeight),
+                },
+                Fill = new SvgColourServer(Color.DarkCyan),
+                FillOpacity = 0.85f
+            };
+            group.Children.Add(backgroundPolygon);
+
+            List<Vector2> EnumeratePoints(bool isRight)
+            {
+                var defaultX = isRight ? defaultRightX : defaultLeftX;
+                var type = isRight ? LaneType.WallRight : LaneType.WallLeft;
+                var ranges = CombinableRange<int>.CombineRanges(ctx.Fumen.Lanes
+                    .Where(x => x.LaneType == type)
+                    .Select(x => new CombinableRange<int>(x.MinTGrid.TotalGrid, x.MaxTGrid.TotalGrid)))
+                    .OrderBy(x => isRight ? x.Max : x.Min).ToArray();
+
+                var result = new List<Vector2>();
+                var points = new HashSet<float>();
+
+                void appendPoint(List<Vector2> list, XGrid xGrid, float y)
+                {
+                    if (xGrid is null)
+                        return;
+                    list.Add(new(xGrid.TotalGrid, y));
+                }
+
+                for (int i = 0; i < ranges.Length; i++)
+                {
+                    var curRange = ranges[i];
+                    var nextRange = ranges.ElementAtOrDefault(i + 1);
+
+                    var lanes = ctx.Fumen.Lanes
+                        .GetVisibleStartObjects(TGrid.FromTotalGrid(curRange.Min), TGrid.FromTotalGrid(curRange.Max))
+                        .Where(x => x.LaneType == type)
+                        .ToArray();
+
+                    var polylines = lanes.Select(x => x.GenAllPath().Select(x => x.pos).SequenceConsecutivelyWrap(2).Select(x => (x.FirstOrDefault(), x.LastOrDefault())).ToArray())
+                        .ToArray();
+
+                    for (int r = 0; r < polylines.Length; r++)
+                    {
+                        var polylineA = polylines[r];
+                        for (int t = r + 1; t < polylines.Length; t++)
+                        {
+                            var polylineB = polylines[t];
+
+                            for (int ai = 0; ai < polylineA.Length; ai++)
+                            {
+                                for (int bi = 0; bi < polylineB.Length; bi++)
+                                {
+                                    var a = polylineA[ai];
+                                    var b = polylineB[bi];
+
+                                    if (a == b)
+                                        continue;
+
+                                    var lineA = new Line(new(a.Item1.X, a.Item1.Y), new(a.Item2.X, a.Item2.Y));
+                                    var lineB = new Line(new(b.Item1.X, b.Item1.Y), new(b.Item2.X, b.Item2.Y));
+
+                                    var point = LineIntersection.Find(lineA, lineB);
+                                    if (point is not null)
+                                        points.Add((float)point.Y);
+                                }
+                            }
+                        }
+                    }
+
+                    points.AddRange(lanes.Select(x => (float)x.TGrid.TotalGrid).Concat(lanes.Select(x => x.Children.LastOrDefault()).FilterNull().Select(x => (float)x.TGrid.TotalGrid)));
+                }
+
+                var idx = 0;
+                var sortedPoints = points.OrderBy(x => x).ToList();
+                if (sortedPoints[0] > 0)
+                    sortedPoints.Insert(0, 0);
+                if (sortedPoints[sortedPoints.Count - 1] < ctx.TotalHeight)
+                    sortedPoints.Add(ctx.MaxTGrid.TotalGrid);
+
+                var segments = sortedPoints.SequenceConsecutivelyWrap(2).Select(x => (x.FirstOrDefault(), x.LastOrDefault())).ToArray();
+
+                foreach ((var fromY, var toY) in segments)
+                {
+                    var midY = ((fromY + toY) / 2);
+                    var midTGrid = TGrid.FromTotalGrid((int)midY);
+
+                    var pickables = ctx.Fumen.Lanes
+                            .GetVisibleStartObjects(midTGrid, midTGrid)
+                            .Where(x => x.LaneType == type)
+                            .Select(x => (x.CalulateXGrid(midTGrid), x))
+                            .FilterNullBy(x => x.Item1)
+                            .ToArray();
+
+                    (var midXGrid, var pickLane) = pickables.IsEmpty() ? default : (isRight ? pickables.MaxBy(x => x.Item1) : pickables.MinBy(x => x.Item1));
+                    if (pickLane is not null)
+                    {
+                        var fromTGrid = TGrid.FromTotalGrid((int)fromY);
+                        appendPoint(result, pickLane.CalulateXGrid(fromTGrid), fromY);
+
+                        foreach (var pos in pickLane.GenAllPath().Select(x => x.pos).SkipWhile(x => x.Y <= fromY).TakeWhile(x => x.Y < toY))
+                            result.Add(pos);
+
+                        var toTGrid = TGrid.FromTotalGrid((int)toY);
+                        appendPoint(result, pickLane.CalulateXGrid(toTGrid), toY);
+                    }
+                    else
+                    {
+                        //默认24咯
+                        result.Add(new(defaultX, fromY));
+                        result.Add(new(defaultX, toY));
+                    }
+                    idx++;
+                }
+
+                return result;
+            }
+
+            var leftPoints = EnumeratePoints(false);
+            var rightPoints = EnumeratePoints(true);
+
+            var leftResult = new List<(SvgUnit, SvgUnit)>();
+            var rightResult = new List<(SvgUnit, SvgUnit)>();
+
+            var collection = new SvgPointCollection();
+
+            foreach (var point in leftPoints.Concat(rightPoints.AsEnumerable().Reverse()))
+            {
+                var uX = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToX(point.X / XGrid.DEFAULT_RES_X));
+                var uY = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(point.Y / TGrid.DEFAULT_RES_T));
+
+                collection.Add(uX);
+                collection.Add(uY);
+            }
+
+            var line = new SvgPolygon();
+            line.Fill = new SvgColourServer(Color.Black);
+            line.Opacity = 0.95f;
+            line.Points = collection;
+
+            group.Children.Add(line);
+
+            ctx.Document.Children.Add(group);
         }
     }
 }
