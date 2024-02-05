@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Utils
         const int FileSize = 10240;
         private static MemoryMappedFile mmf;
         private static bool enableMultiProc;
+        private static readonly int currentPid;
 
         internal class ArgsWrapper
         {
@@ -30,6 +31,7 @@ namespace OngekiFumenEditor.Utils
         static IPCHelper()
         {
             enableMultiProc = Properties.ProgramSetting.Default.EnableMultiInstances;
+            currentPid = Process.GetCurrentProcess().Id;
         }
 
         public static void Init(string[] args)
@@ -85,13 +87,29 @@ namespace OngekiFumenEditor.Utils
             return string.Empty;
         }
 
-        public static bool IsHost()
+        public static bool IsSelfHost()
         {
             mmf = MemoryMappedFile.CreateOrOpen("OngekiFumenEditor_MMF", FileSize, MemoryMappedFileAccess.ReadWrite);
             using var accessor = mmf.CreateViewAccessor(0, FileSize);
 
             var pid = accessor.ReadInt32(0);
-            return pid == Process.GetCurrentProcess().Id;
+            return pid == currentPid;
+        }
+
+        public static bool IsHostAlive()
+        {
+            mmf = MemoryMappedFile.CreateOrOpen("OngekiFumenEditor_MMF", FileSize, MemoryMappedFileAccess.ReadWrite);
+            using var accessor = mmf.CreateViewAccessor(0, FileSize);
+
+            var pid = accessor.ReadInt32(0);
+            return Process.GetProcessById(pid) is not null;
+        }
+
+        public static void SetSelfHost()
+        {
+            mmf = MemoryMappedFile.CreateOrOpen("OngekiFumenEditor_MMF", FileSize, MemoryMappedFileAccess.ReadWrite);
+            using var accessor = mmf.CreateViewAccessor(0, FileSize);
+            accessor.Write(0, currentPid);
         }
     }
 }

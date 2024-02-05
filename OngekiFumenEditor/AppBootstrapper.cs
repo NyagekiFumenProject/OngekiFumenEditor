@@ -224,12 +224,24 @@ namespace OngekiFumenEditor
 
         private void InitIPCServer()
         {
-            if (ProgramSetting.Default.EnableMultiInstances)
-                return;
+            //if (ProgramSetting.Default.EnableMultiInstances)
+            //    return;
             ipcThread = new AbortableThread(async (cancelToken) =>
             {
                 while (!cancelToken.IsCancellationRequested)
                 {
+                    if (!IPCHelper.IsSelfHost())
+                    {
+                        //如果自己不是host那就检查另一个host死了没,来个随机sleep那样的话可以避免多个实例撞车
+                        await Task.Delay(MathUtils.Random(0, 1000));
+                        if (!IPCHelper.IsHostAlive())
+                        {
+                            //似了就继承大业
+                            IPCHelper.SetSelfHost();
+                            Log.LogDebug("Current application instance is IPC host now.");
+                        }
+                    }
+
                     try
                     {
                         var line = IPCHelper.ReadLineAsync(cancelToken)?.Trim();
