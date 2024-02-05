@@ -43,10 +43,10 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
             Application.Current.Shutdown();
         }
 
-        public Task ProcessArgs(string[] args)
+        public async Task ProcessArgs(string[] args)
         {
             if (args.Length == 0)
-                return Task.CompletedTask;
+                return;
 
             if (args.Length == 1)
             {
@@ -56,24 +56,20 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
                 {
                     Log.LogInfo($"arg.filePath: {filePath}");
 
-                    Application.Current.Dispatcher.Invoke(async () =>
+                    _ = Application.Current.Dispatcher.Invoke(async () =>
                     {
                         if (await DocumentOpenHelper.TryOpenAsDocument(filePath))
                             Application.Current?.MainWindow?.Focus();
                     });
 
-                    return Task.CompletedTask;
+                    return;
                 }
             }
 
             var rootCommand = new RootCommand("CommandLine for OngekiFumenEditor");
-
             rootCommand.AddCommand(GenerateVerbCommands<GenerateOption>("svg", "生成预览谱面.svg文件", ProcessSvgCommand));
-
             await rootCommand.InvokeAsync(args);
-
-            if (args.Any(x => x == "--help" || x == "-h" || x == "-?"))
-                Exit();
+            Exit();
         }
 
         IEnumerable<Option> GenerateOptionsByAttributes<T>()
