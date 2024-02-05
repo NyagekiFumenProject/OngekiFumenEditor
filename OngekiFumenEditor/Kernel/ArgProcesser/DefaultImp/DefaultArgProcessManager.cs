@@ -56,8 +56,11 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
                 {
                     Log.LogInfo($"arg.filePath: {filePath}");
 
-                    if (await DocumentOpenHelper.TryOpenAsDocument(filePath))
-                        Application.Current?.MainWindow?.Focus();
+                    Application.Current.Dispatcher.Invoke(async () =>
+                    {
+                        if (await DocumentOpenHelper.TryOpenAsDocument(filePath))
+                            Application.Current?.MainWindow?.Focus();
+                    });
 
                     return;
                 }
