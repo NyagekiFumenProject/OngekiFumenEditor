@@ -4,16 +4,17 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using Svg;
 using System;
+using System.Linq;
 
 namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 {
-    public record GenerateContext
+    public class GenerateContext
     {
         public GenerateOption Option { get; init; }
         public double TotalWidth => Option.ViewWidth;
         public double TotalHeight { get; init; }
         public TGrid MaxTGrid { get; init; }
-
+        public SoflanList SpecifySoflans { get; init; }
         public OngekiFumen Fumen { get; init; }
         public SvgDocument Document { get; init; }
 
@@ -22,9 +23,23 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
         public float CalculateToY(double totalUnit)
         {
-            if (Option.SoflanMode == SoflanMode.Soflan)
-                return (float)(TotalHeight - TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, Fumen.Soflans, Fumen.BpmList, Option.VerticalScale));
-            return (float)(TotalHeight - TGridCalculator.ConvertTGridUnitToY_DesignMode(totalUnit, Fumen.Soflans, Fumen.BpmList, Option.VerticalScale));
+            double y;
+            switch (Option.SoflanMode)
+            {
+                case SoflanMode.Soflan:
+                    y = TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, Fumen.Soflans, Fumen.BpmList, Option.VerticalScale);
+                    break;
+                case SoflanMode.WeightedSoflan:
+                    y = TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, SpecifySoflans, Fumen.BpmList, Option.VerticalScale);
+                    break;
+                case SoflanMode.NoSoflan:
+                case SoflanMode.AbsSoflan:
+                default:
+                    y = TGridCalculator.ConvertTGridUnitToY_DesignMode(totalUnit, Fumen.Soflans, Fumen.BpmList, Option.VerticalScale);
+                    break;
+            }
+
+            return (float)(TotalHeight - y);
         }
 
         public float CalculateToX(XGrid grid)

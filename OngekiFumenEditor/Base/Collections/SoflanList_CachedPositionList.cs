@@ -118,7 +118,8 @@ namespace OngekiFumenEditor.Base.Collections
                     yield return soflan;
             }
 
-            var combineEvents = sortList.GroupBy(x => x.timeline.TGrid).SelectMany(filter).OrderBy(x => x.TGrid);
+            var groupEvents = sortList.GroupBy(x => x.timeline.TGrid);
+            var combineEvents = groupEvents.SelectMany(filter).OrderBy(x => x.TGrid);
 
             IEnumerable<(TGrid TGrid, double speed, BPMChange bpm)> visit()
             {

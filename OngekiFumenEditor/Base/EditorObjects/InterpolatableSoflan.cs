@@ -91,19 +91,17 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
 		public override string ToString() => $"{base.ToString()} --> EndSpeed[{((InterpolatableSoflanIndicator)EndIndicator)?.Speed}x]";
 
-		public override void CopyEntire(Soflan from)
-		{
-			Copy(from);
+        public override void Copy(OngekiObjectBase fromObj)
+        {
+            base.Copy(fromObj);
 
-			Speed = from.Speed;
-			ApplySpeedInDesignMode = from.ApplySpeedInDesignMode;
-			EndIndicator.Copy(from.EndIndicator);
+            if (fromObj is not InterpolatableSoflan soflan)
+                return;
 
-			if (from is not InterpolatableSoflan s)
-				return;
-
-			Easing = s.Easing;
-		}
+            Speed = soflan.Speed;
+            ApplySpeedInDesignMode = soflan.ApplySpeedInDesignMode;
+            Easing = soflan.Easing;
+        }
 
 		bool cachedValid = false;
 		List<IKeyframeSoflan> cachedInterpolatedSoflans = new();

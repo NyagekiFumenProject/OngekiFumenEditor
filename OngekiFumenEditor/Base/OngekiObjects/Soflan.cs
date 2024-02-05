@@ -104,12 +104,20 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			return true;
 		}
 
-		public virtual void CopyEntire(Soflan from)
+        public override void Copy(OngekiObjectBase fromObj)
+        {
+            base.Copy(fromObj);
+
+			if (fromObj is not Soflan soflan)
+				return;
+
+            Speed = soflan.Speed;
+            ApplySpeedInDesignMode = soflan.ApplySpeedInDesignMode;
+        }
+
+        public virtual void CopyEntire(Soflan from)
 		{
 			Copy(from);
-
-			Speed = from.Speed;
-			ApplySpeedInDesignMode = from.ApplySpeedInDesignMode;
 
 			EndIndicator.Copy(from.EndIndicator);
 		}

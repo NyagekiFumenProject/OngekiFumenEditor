@@ -20,7 +20,14 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator
         public string AudioFilePath { get; set; }
 
         [OptionBindingAttrbute<SoflanMode>("soflanMode", "变速模式,不同选项有不同的物件表现", SoflanMode.Soflan)]
-        public SoflanMode SoflanMode { get; set; } = SoflanMode.Soflan;
+        public SoflanMode SoflanMode { get; set; } = SoflanMode.WeightedSoflan;
+
+        [OptionBindingAttrbute<float>("weightedSoflanOffset", "WeightedSoflan模式下,soflan超过(或在附近)这个值会被加权计算", 70f)]
+        public float WeightedSoflanOffset { get; set; } = 70f;
+        [OptionBindingAttrbute<float>("weightedSoflanStress", "WeightedSoflan模式下,soflan最低能压到原来的(1-stress)倍", 0.95f)]
+        public float WeightedSoflanStress { get; set; } = 0.95f;
+        [OptionBindingAttrbute<float>("weightedSoflanSlope", "WeightedSoflan模式下,加权变化速率", 0.25f)]
+        public float WeightedSoflanSlope { get; set; } = 0.25f;
 
         internal TimeSpan Duration { get; set; }
     }

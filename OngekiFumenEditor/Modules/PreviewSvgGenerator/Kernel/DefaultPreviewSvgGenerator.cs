@@ -1,5 +1,6 @@
 ﻿using Advanced.Algorithms.Geometry;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
@@ -32,21 +33,57 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
     [Export(typeof(IPreviewSvgGenerator))]
     public class DefaultPreviewSvgGenerator : IPreviewSvgGenerator
     {
+        private SoflanList GenerateWeightedSoflan(SoflanList soflans, GenerateOption opt)
+        {
+            var offset = opt.WeightedSoflanOffset;
+            var stress = opt.WeightedSoflanStress;
+            var slope = opt.WeightedSoflanSlope;
+
+            float sigmoid(float x)
+            {
+                return 1 - stress / (1 + MathF.Pow(MathF.E, -slope * (x - offset)));
+            }
+
+            var newList = new SoflanList();
+            foreach (var sfl in soflans.OfType<OngekiTimelineObjectBase>())
+            {
+                var clone = sfl.CopyNew() as ISoflan;
+                if (sfl is Soflan sf && clone is Soflan d)
+                    d.CopyEntire(sf);
+
+                var beforeSoflan = clone.Speed;
+                var weight = sigmoid(MathF.Abs(beforeSoflan));
+                if (weight > 0.999)
+                    weight = 1;
+                var afterSoflan = beforeSoflan * weight;
+
+                Log.LogDebug($" {beforeSoflan:F2} * {weight:F2} --> {afterSoflan:F2}  {sfl.TGrid} {clone.TGrid}");
+
+                clone.Speed = afterSoflan;
+                newList.Add(clone);
+            }
+
+            return newList;
+        }
+
         public async Task<string> GenerateSvgAsync(OngekiFumen rawFumen, GenerateOption option)
         {
             var svgDocument = new SvgDocument();
 
             var fumen = await StandardizeFormat.CopyFumenObject(rawFumen);
             if (option.SoflanMode == SoflanMode.AbsSoflan)
+            {
                 foreach (var sfl in fumen.Soflans)
                     sfl.ApplySpeedInDesignMode = true;
+            }
+            var specifySoflans = option.SoflanMode != SoflanMode.WeightedSoflan ? fumen.Soflans : GenerateWeightedSoflan(fumen.Soflans, option);
 
             var totalWidth = option.ViewWidth;
             var maxTGrid = TGridCalculator.ConvertAudioTimeToTGrid(option.Duration, fumen.BpmList);
 
             double totalHeight;
-            if (option.SoflanMode == SoflanMode.Soflan)
-                totalHeight = TGridCalculator.ConvertTGridToY_PreviewMode(maxTGrid, fumen.Soflans, fumen.BpmList, option.VerticalScale);
+            if (option.SoflanMode == SoflanMode.Soflan || option.SoflanMode == SoflanMode.WeightedSoflan)
+                totalHeight = TGridCalculator.ConvertTGridToY_PreviewMode(maxTGrid, specifySoflans, fumen.BpmList, option.VerticalScale);
             else
                 totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(maxTGrid, fumen.Soflans, fumen.BpmList, option.VerticalScale);
 
@@ -62,6 +99,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             {
                 Document = svgDocument,
                 Fumen = fumen,
+                SpecifySoflans = specifySoflans,
                 Option = option,
                 TotalHeight = totalHeight,
                 MaxTGrid = maxTGrid,
