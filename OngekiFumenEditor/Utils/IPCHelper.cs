@@ -32,12 +32,10 @@ namespace OngekiFumenEditor.Utils
             enableMultiProc = Properties.ProgramSetting.Default.EnableMultiInstances;
         }
 
-        public static void Init()
+        public static void Init(string[] args)
         {
             if (enableMultiProc)
                 return;
-
-            var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
 
             mmf = MemoryMappedFile.CreateOrOpen("OngekiFumenEditor_MMF", FileSize, MemoryMappedFileAccess.ReadWrite);
             using var accessor = mmf.CreateViewAccessor(0, FileSize);

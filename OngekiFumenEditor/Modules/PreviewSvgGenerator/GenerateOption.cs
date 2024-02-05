@@ -19,9 +19,9 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator
         [OptionBindingAttrbute<string>("audioFile", "音频文件,用来获取谱面总长度", default)]
         public string AudioFilePath { get; set; }
 
-        public TimeSpan Duration { get; set; }
-
         [OptionBindingAttrbute<SoflanMode>("soflanMode", "变速模式,不同选项有不同的物件表现", SoflanMode.Soflan)]
         public SoflanMode SoflanMode { get; set; } = SoflanMode.Soflan;
+
+        internal TimeSpan Duration { get; set; }
     }
 }

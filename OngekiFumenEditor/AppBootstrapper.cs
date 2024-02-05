@@ -43,281 +43,282 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor
 {
-	public class AppBootstrapper : Gemini.AppBootstrapper
-	{
+    public class AppBootstrapper : Gemini.AppBootstrapper
+    {
 #if !DEBUG
 		public override bool IsPublishSingleFileHandled => true;
 #endif
 
-		public AppBootstrapper() : this(true)
-		{
-		}
+        public AppBootstrapper() : this(true)
+        {
+        }
 
-		public AppBootstrapper(bool useApplication = true) : base(useApplication)
-		{
-		}
+        public AppBootstrapper(bool useApplication = true) : base(useApplication)
+        {
 
-		protected async Task InitKernels()
-		{
-			await IoC.Get<ISchedulerManager>().Init();
+        }
 
-			//overwrite ViewLocator
-			var locateForModel = ViewLocator.LocateForModel;
-			ViewLocator.LocateForModel = (model, hostControl, ctx) =>
-			{
-				var r = locateForModel(model, hostControl, ctx);
-				if (r is not null)
-					if (r is not TextBlock t || !t.Text.StartsWith("Cannot find"))
-						return r;
-				return ViewHelper.CreateView(model);
-			};
-		}
+        protected override void BindServices(CompositionBatch batch)
+        {
+            base.BindServices(batch);
 
-		protected override void BindServices(CompositionBatch batch)
-		{
-			base.BindServices(batch);
+            //setup Pluigins
+            var exePath = Assembly.GetExecutingAssembly().Location;
+            var exeDir = Path.GetDirectoryName(exePath);
+            var pluginsDirPath = Path.Combine(exeDir, "Plugins");
+            Directory.CreateDirectory(pluginsDirPath);
+            var pluginsDirPaths = Directory.EnumerateDirectories(pluginsDirPath);
 
-			//setup Pluigins
-			var exePath = Assembly.GetExecutingAssembly().Location;
-			var exeDir = Path.GetDirectoryName(exePath);
-			var pluginsDirPath = Path.Combine(exeDir, "Plugins");
-			Directory.CreateDirectory(pluginsDirPath);
-			var pluginsDirPaths = Directory.EnumerateDirectories(pluginsDirPath);
+            foreach (var path in pluginsDirPaths)
+            {
+                Debug.WriteLine($"----------------");
+                Debug.WriteLine($"加载插件子目录:{path}");
+                try
+                {
+                    var directoryCatalog = new DirectoryCatalog(path);
+                    foreach (var partDef in directoryCatalog.Parts)
+                    {
+                        var part = partDef.CreatePart();
+                        batch.AddPart(part);
+                        var imports = part.ToString();
+                        var exports = string.Join(", ", part.ExportDefinitions.Select(x => x.ContractName));
+                        Debug.WriteLine($"Export ({imports}) => ({exports})");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"加载插件子目录出错:{e.Message}");
+                }
+                Debug.WriteLine($"----------------");
+            }
+        }
 
-			foreach (var path in pluginsDirPaths)
-			{
-				Debug.WriteLine($"----------------");
-				Debug.WriteLine($"加载插件子目录:{path}");
-				try
-				{
-					var directoryCatalog = new DirectoryCatalog(path);
-					foreach (var partDef in directoryCatalog.Parts)
-					{
-						var part = partDef.CreatePart();
-						batch.AddPart(part);
-						var imports = part.ToString();
-						var exports = string.Join(", ", part.ExportDefinitions.Select(x => x.ContractName));
-						Debug.WriteLine($"Export ({imports}) => ({exports})");
-					}
-				}
-				catch (Exception e)
-				{
-					Debug.WriteLine($"加载插件子目录出错:{e.Message}");
-				}
-				Debug.WriteLine($"----------------");
-			}
-		}
+        protected override void Configure()
+        {
+            FileLogOutput.Init();
+            DumpFileHelper.Init();
+            base.Configure();
+            var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
 
-		protected override void Configure()
-		{
-			FileLogOutput.Init();
-			DumpFileHelper.Init();
-			base.Configure();
-			var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
+            Caliburn.Micro.Parser.CreateTrigger = (target, triggerText) =>
+            {
+                if (triggerText == null)
+                {
+                    return defaultCreateTrigger(target, null);
+                }
 
-			Caliburn.Micro.Parser.CreateTrigger = (target, triggerText) =>
-			{
-				if (triggerText == null)
-				{
-					return defaultCreateTrigger(target, null);
-				}
+                var triggerDetail = triggerText
+                    .Replace("[", string.Empty)
+                    .Replace("]", string.Empty);
 
-				var triggerDetail = triggerText
-					.Replace("[", string.Empty)
-					.Replace("]", string.Empty);
+                var splits = triggerDetail.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
 
-				var splits = triggerDetail.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
+                switch (splits[0])
+                {
+                    case "Key":
+                        var key = (Key)Enum.Parse(typeof(Key), splits[1], true);
+                        return new KeyTrigger { Key = key };
 
-				switch (splits[0])
-				{
-					case "Key":
-						var key = (Key)Enum.Parse(typeof(Key), splits[1], true);
-						return new KeyTrigger { Key = key };
+                    case "Gesture":
+                        var mkg = (MultiKeyGesture)(new MultiKeyGestureConverter()).ConvertFrom(splits[1]);
+                        return new KeyTrigger { Modifiers = mkg.KeySequences[0].Modifiers, Key = mkg.KeySequences[0].Keys[0] };
+                }
 
-					case "Gesture":
-						var mkg = (MultiKeyGesture)(new MultiKeyGestureConverter()).ConvertFrom(splits[1]);
-						return new KeyTrigger { Modifiers = mkg.KeySequences[0].Modifiers, Key = mkg.KeySequences[0].Keys[0] };
-				}
+                return defaultCreateTrigger(target, triggerText);
+            };
+        }
 
-				return defaultCreateTrigger(target, triggerText);
-			};
-		}
+        protected override IEnumerable<Assembly> SelectAssemblies()
+        {
+            return base.SelectAssemblies()
+                .Append(typeof(IOutput).Assembly)
+                .Append(typeof(IMainWindow).Assembly)
+                .Distinct();
+        }
 
-		protected override IEnumerable<Assembly> SelectAssemblies()
-		{
-			return base.SelectAssemblies()
-				.Append(typeof(IOutput).Assembly)
-				.Append(typeof(IMainWindow).Assembly)
-				.Distinct();
-		}
+        protected void LogBaseInfos()
+        {
+            Log.LogInfo($"Application verison : {GetType().Assembly.GetName().Version} , Product Version+CommitHash : {FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).ProductVersion}");
+            Log.LogInfo($"User CurrentCulture: {CultureInfo.CurrentCulture}, CurrentUICulture: {CultureInfo.CurrentUICulture}, DefaultThreadCurrentCulture: {CultureInfo.DefaultThreadCurrentCulture}, DefaultThreadCurrentUICulture: {CultureInfo.DefaultThreadCurrentUICulture}");
+        }
 
-		protected override void PreInitialize()
-		{
-			base.PreInitialize();
-		}
+        private bool CheckIfAdminPermission()
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            var principal = new WindowsPrincipal(identity);
 
-		protected void LogBaseInfos()
-		{
-			Log.LogInfo($"Application verison : {GetType().Assembly.GetName().Version} , Product Version+CommitHash : {FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).ProductVersion}");
-			Log.LogInfo($"User CurrentCulture: {CultureInfo.CurrentCulture}, CurrentUICulture: {CultureInfo.CurrentUICulture}, DefaultThreadCurrentCulture: {CultureInfo.DefaultThreadCurrentCulture}, DefaultThreadCurrentUICulture: {CultureInfo.DefaultThreadCurrentUICulture}");
-		}
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
 
-		private bool CheckIfAdminPermission()
-		{
-			using var identity = WindowsIdentity.GetCurrent();
-			var principal = new WindowsPrincipal(identity);
+        protected async override void OnStartup(object sender, StartupEventArgs e)
+        {
+            InitExceptionCatcher();
+            LogBaseInfos();
+            InitIPCServer();
 
-			return principal.IsInRole(WindowsBuiltInRole.Administrator);
-		}
+            await IoC.Get<ISchedulerManager>().Init();
+            await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
 
-		protected async override void OnStartup(object sender, StartupEventArgs e)
-		{
-			base.OnStartup(sender, e);
-			InitExceptionCatcher();
-			LogBaseInfos();
-			InitIPC();
+            if (ProgramSetting.Default.UpgradeProcessPriority)
+            {
+                var curProc = Process.GetCurrentProcess();
+                //提升
+                var before = curProc.PriorityClass;
+                var after = ProcessPriorityClass.High;
+                curProc.PriorityClass = after;
+                Log.LogDebug($"Upgrade process priority: {before} -> {after}");
 
-			if (CheckIfAdminPermission())
-			{
-				Log.LogWarn("Program is within admin permission.");
-				IoC.Get<WindowTitleHelper>().TitleContent = "(以管理员权限运行)";
-			}
-			else
-				IoC.Get<WindowTitleHelper>().TitleContent = "";
+                curProc.PriorityBoostEnabled = true;
+            }
 
-			IoC.Get<IShell>().ToolBars.Visible = true;
+            ShowStartupGUI();
+        }
 
-			BitmapImage logo = new BitmapImage();
-			logo.BeginInit();
-			logo.UriSource = new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/logo32.ico");
-			logo.EndInit();
-			IoC.Get<WindowTitleHelper>().Icon = logo;
+        private void OnStartupForGUI()
+        {
+            //overwrite ViewLocator
+            var locateForModel = ViewLocator.LocateForModel;
+            ViewLocator.LocateForModel = (model, hostControl, ctx) =>
+            {
+                var r = locateForModel(model, hostControl, ctx);
+                if (r is not null)
+                    if (r is not TextBlock t || !t.Text.StartsWith("Cannot find"))
+                        return r;
+                return ViewHelper.CreateView(model);
+            };
 
-			await InitKernels();
-			await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
+            if (CheckIfAdminPermission())
+            {
+                Log.LogWarn("Program is within admin permission.");
+                IoC.Get<WindowTitleHelper>().TitleContent = "(以管理员权限运行)";
+            }
+            else
+                IoC.Get<WindowTitleHelper>().TitleContent = "";
 
-			if (ProgramSetting.Default.UpgradeProcessPriority)
-			{
-				var curProc = Process.GetCurrentProcess();
-				//提升
-				var before = curProc.PriorityClass;
-				var after = ProcessPriorityClass.High;
-				curProc.PriorityClass = after;
-				Log.LogDebug($"Upgrade process priority: {before} -> {after}");
+            IoC.Get<IShell>().ToolBars.Visible = true;
 
-				curProc.PriorityBoostEnabled = true;
-			}
+            BitmapImage logo = new BitmapImage();
+            logo.BeginInit();
+            logo.UriSource = new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/logo32.ico");
+            logo.EndInit();
+            IoC.Get<WindowTitleHelper>().Icon = logo;
 
-			Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
+            Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
 
-			if (Application.MainWindow is Window window)
-			{
-				window.AllowDrop = true;
-				window.Drop += MainWindow_Drop;
-			}
+            if (Application.MainWindow is Window window)
+            {
+                window.AllowDrop = true;
+                window.Drop += MainWindow_Drop;
+            }
+        }
 
-			var showSplashWindow = IoC.Get<IShell>().Documents.IsEmpty() && !ProgramSetting.Default.DisableShowSplashScreenAfterBoot;
-			if (showSplashWindow)
-				IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
-		}
+        public async void ShowStartupGUI()
+        {
+            OnStartupForGUI();
 
-		private void InitIPC()
-		{
-			if (ProgramSetting.Default.EnableMultiInstances)
-				return;
-			ipcThread = new AbortableThread(async (cancelToken) =>
-			{
-				while (!cancelToken.IsCancellationRequested)
-				{
-					try
-					{
-						var line = IPCHelper.ReadLineAsync(cancelToken)?.Trim();
-						if (string.IsNullOrWhiteSpace(line))
-							continue;
-						Log.LogDebug($"Recv line by IPC:{line}");
-						if (line.StartsWith("CMD:"))
-						{
-							var args = JsonSerializer.Deserialize<IPCHelper.ArgsWrapper>(line[4..]).Args;
-							await Application.Current.Dispatcher.InvokeAsync(() => IoC.Get<IProgramArgProcessManager>().ProcessArgs(args));
-						}
-					}
-					catch (Exception e)
-					{
-						Log.LogWarn($"Recv line by IPC throw exception:{e.Message}");
-					}
-				}
-			})
-			{
-				Name = "OngekiFumenEditorIPCThread",
-				IsBackground = true,
-			};
-			ipcThread.Start();
-		}
+            await DisplayRootViewFor<IMainWindow>();
+            var showSplashWindow = IoC.Get<IShell>().Documents.IsEmpty() && !ProgramSetting.Default.DisableShowSplashScreenAfterBoot;
+            if (showSplashWindow)
+                await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
+        }
 
-		private async void MainWindow_Drop(object sender, DragEventArgs e)
-		{
-			if (e.Data.GetDataPresent(DataFormats.FileDrop))
-			{
-				string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-				if (files != null && files.Length == 1)
-				{
-					var filePath = files[0];
-					await DocumentOpenHelper.TryOpenAsDocument(filePath);
-				}
+        private void InitIPCServer()
+        {
+            if (ProgramSetting.Default.EnableMultiInstances)
+                return;
+            ipcThread = new AbortableThread(async (cancelToken) =>
+            {
+                while (!cancelToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var line = IPCHelper.ReadLineAsync(cancelToken)?.Trim();
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+                        Log.LogDebug($"Recv line by IPC:{line}");
+                        if (line.StartsWith("CMD:"))
+                        {
+                            var args = JsonSerializer.Deserialize<IPCHelper.ArgsWrapper>(line[4..]).Args;
+                            await Application.Current.Dispatcher.InvokeAsync(() => IoC.Get<IProgramArgProcessManager>().ProcessArgs(args));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogWarn($"Recv line by IPC throw exception:{e.Message}");
+                    }
+                }
+            })
+            {
+                Name = "OngekiFumenEditorIPCThread",
+                IsBackground = true,
+            };
+            ipcThread.Start();
+        }
 
-				e.Handled = true;
-				return;
-			}
+        private async void MainWindow_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files != null && files.Length == 1)
+                {
+                    var filePath = files[0];
+                    await DocumentOpenHelper.TryOpenAsDocument(filePath);
+                }
 
-			e.Handled = false;
-		}
+                e.Handled = true;
+                return;
+            }
 
-		private bool exceptionHandling = false;
-		private AbortableThread ipcThread;
+            e.Handled = false;
+        }
 
-		private void InitExceptionCatcher()
-		{
-			var recHandle = new HashSet<IntPtr>();
+        private bool exceptionHandling = false;
+        private AbortableThread ipcThread;
 
-			async void ProcessException(object sender, Exception exception)
-			{
-				if (exceptionHandling)
-					return;
-				exceptionHandling = true;
+        private void InitExceptionCatcher()
+        {
+            var recHandle = new HashSet<IntPtr>();
 
-				try
-				{
-					foreach (var visual in Application.Current.Windows.OfType<Window>())
-						visual.Hide();
-					IoC.Get<IAudioPlayerToolViewer>()?.AudioPlayer?.Pause();
-				}
-				catch
-				{
+            async void ProcessException(object sender, Exception exception)
+            {
+                if (exceptionHandling)
+                    return;
+                exceptionHandling = true;
 
-				}
+                try
+                {
+                    foreach (var visual in Application.Current.Windows.OfType<Window>())
+                        visual.Hide();
+                    IoC.Get<IAudioPlayerToolViewer>()?.AudioPlayer?.Pause();
+                }
+                catch
+                {
 
-				var innerMessage = exception.Message;
+                }
 
-				var sb = new StringBuilder();
-				void exceptionDump(Exception e, int level = 0)
-				{
-					if (e is null)
-						return;
-					var tab = string.Concat("\t".Repeat(2 * level));
+                var innerMessage = exception.Message;
 
-					innerMessage = e.Message;
+                var sb = new StringBuilder();
+                void exceptionDump(Exception e, int level = 0)
+                {
+                    if (e is null)
+                        return;
+                    var tab = string.Concat("\t".Repeat(2 * level));
 
-					sb.AppendLine();
-					sb.AppendLine(tab + $"Exception lv.{level} : {e.Message}");
-					sb.AppendLine(tab + $"Stack : {e.StackTrace}");
+                    innerMessage = e.Message;
 
-					exceptionDump(e.InnerException, level + 1);
-				}
-				sb.AppendLine($"----------Exception Catcher----------");
-				sb.AppendLine($"Program notice a (unhandled) exception from object: {sender}({sender?.GetType().FullName})");
-				exceptionDump(exception);
-				sb.AppendLine($"----------------------------");
-				await FileLogOutput.WriteLog(sb.ToString());
+                    sb.AppendLine();
+                    sb.AppendLine(tab + $"Exception lv.{level} : {e.Message}");
+                    sb.AppendLine(tab + $"Stack : {e.StackTrace}");
+
+                    exceptionDump(e.InnerException, level + 1);
+                }
+                sb.AppendLine($"----------Exception Catcher----------");
+                sb.AppendLine($"Program notice a (unhandled) exception from object: {sender}({sender?.GetType().FullName})");
+                exceptionDump(exception);
+                sb.AppendLine($"----------------------------");
+                await FileLogOutput.WriteLog(sb.ToString());
 #if !DEBUG
 				var exceptionHandle = Marshal.GetExceptionPointers();
 				var dumpFile = string.Empty;
@@ -338,33 +339,33 @@ namespace OngekiFumenEditor
 				exceptionHandling = true;
 				Environment.Exit(-1);
 #else
-				throw exception;
+                throw exception;
 #endif
-			}
+            }
 
-			AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
-			{
-				ProcessException(sender, e.ExceptionObject as Exception);
-			};
-			Application.Current.DispatcherUnhandledException += (sender, e) =>
-			{
-				ProcessException(sender, e.Exception);
-				e.Handled = true;
-			};
-			TaskScheduler.UnobservedTaskException += (sender, e) =>
-			{
-				ProcessException(sender, e.Exception);
-				e.SetObserved();
-			};
-		}
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                ProcessException(sender, e.ExceptionObject as Exception);
+            };
+            Application.Current.DispatcherUnhandledException += (sender, e) =>
+            {
+                ProcessException(sender, e.Exception);
+                e.Handled = true;
+            };
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                ProcessException(sender, e.Exception);
+                e.SetObserved();
+            };
+        }
 
-		protected override async void OnExit(object sender, EventArgs e)
-		{
-			ipcThread?.Abort();
-			IoC.Get<IAudioManager>().Dispose();
-			await IoC.Get<ISchedulerManager>().Term();
-			FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
-			base.OnExit(sender, e);
-		}
-	}
+        protected override async void OnExit(object sender, EventArgs e)
+        {
+            ipcThread?.Abort();
+            IoC.Get<IAudioManager>().Dispose();
+            await IoC.Get<ISchedulerManager>().Term();
+            FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
+            base.OnExit(sender, e);
+        }
+    }
 }

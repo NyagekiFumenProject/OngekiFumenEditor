@@ -1,18 +1,23 @@
-﻿using Gemini.Modules.Output;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Interop;
 using static OngekiFumenEditor.Utils.Logs.ILogOutput;
 
 namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
 {
     [Export(typeof(ILogOutput))]
-    public class GeminiLogOutput : ILogOutput
+    internal class VisualStudioLogOutput : ILogOutput
     {
-        [Import(typeof(IOutput))]
-        private IOutput output = default;
-
         public void WriteLog(Severity severity , string content)
         {
-            output.Append(content);
+#if DEBUG
+            Debug.Write(content);
+#endif
         }
     }
 }
