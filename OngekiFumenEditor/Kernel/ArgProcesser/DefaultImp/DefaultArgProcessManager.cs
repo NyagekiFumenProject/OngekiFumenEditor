@@ -43,10 +43,10 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
             Application.Current.Shutdown();
         }
 
-        public async Task ProcessArgs(string[] args)
+        public Task ProcessArgs(string[] args)
         {
             if (args.Length == 0)
-                return;
+                return Task.CompletedTask;
 
             if (args.Length == 1)
             {
@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
                             Application.Current?.MainWindow?.Focus();
                     });
 
-                    return;
+                    return Task.CompletedTask;
                 }
             }
 
