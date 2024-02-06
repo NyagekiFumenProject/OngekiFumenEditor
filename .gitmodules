@@ -10,3 +10,6 @@
 [submodule "MigratableSerializer"]
 	path = Dependences/MigratableSerializer
 	url = https://github.com/MikiraSora/MigratableSerializer
+[submodule "earcut.net"]
+	path = Dependences/earcut.net
+	url = https://github.com/oberbichler/earcut.net

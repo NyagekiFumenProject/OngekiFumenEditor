@@ -179,6 +179,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Dependences\earcut.net\src\Earcut.csproj" />
     <ProjectReference Include="..\Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj" />
     <ProjectReference Include="..\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj">
       <PrivateAssets>all</PrivateAssets>

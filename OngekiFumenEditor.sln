@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigratableSerializer", "Dep
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Polyline2DCSharp", "Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj", "{86C68215-16E1-44A6-96C0-A3969AB33743}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Earcut", "Dependences\earcut.net\src\Earcut.csproj", "{67B3DEC6-6088-4E16-A653-FE59EEEBEE21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{86C68215-16E1-44A6-96C0-A3969AB33743}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86C68215-16E1-44A6-96C0-A3969AB33743}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86C68215-16E1-44A6-96C0-A3969AB33743}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67B3DEC6-6088-4E16-A653-FE59EEEBEE21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67B3DEC6-6088-4E16-A653-FE59EEEBEE21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67B3DEC6-6088-4E16-A653-FE59EEEBEE21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67B3DEC6-6088-4E16-A653-FE59EEEBEE21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,6 +67,7 @@ Global
 		{D1B291FE-A21B-4C27-930D-39CC2C963E13} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
 		{7FD497E0-B0CB-4355-89F1-9C15442F5365} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
 		{86C68215-16E1-44A6-96C0-A3969AB33743} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
+		{67B3DEC6-6088-4E16-A653-FE59EEEBEE21} = {52104FAE-CB77-4569-B3DC-4819A1BE2D34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4D0A040C-DC95-444E-A788-FDA822ED2244}
