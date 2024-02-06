@@ -13,19 +13,24 @@ using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using OngekiFumenEditor.Utils.Ogkr;
 using OpenTK.Mathematics;
+using SharpVectors.Renderers;
 using Svg;
 using Svg.FilterEffects;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 using static OngekiFumenEditor.Utils.MathUtils;
+using Rectangle = System.Drawing.Rectangle;
 using SvgImage = Svg.SvgImage;
 
 namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
@@ -57,7 +62,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     weight = 1;
                 var afterSoflan = beforeSoflan * weight;
 
-                Log.LogDebug($" {beforeSoflan:F2} * {weight:F2} --> {afterSoflan:F2}  {sfl.TGrid} {clone.TGrid}");
+                //Log.LogDebug($" {beforeSoflan:F2} * {weight:F2} --> {afterSoflan:F2}  {sfl.TGrid} {clone.TGrid}");
 
                 clone.Speed = afterSoflan;
                 newList.Add(clone);
@@ -66,7 +71,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             return newList;
         }
 
-        public async Task<string> GenerateSvgAsync(OngekiFumen rawFumen, GenerateOption option)
+        public async Task<byte[]> GenerateSvgAsync(OngekiFumen rawFumen, GenerateOption option)
         {
             var svgDocument = new SvgDocument();
 
@@ -95,7 +100,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             effect.ID = "criticalEffect";
             svgDocument.Children.Add(effect);
 
-            await SerializeFumenToSvg(new GenerateContext()
+            var ctx = new GenerateContext()
             {
                 Document = svgDocument,
                 Fumen = fumen,
@@ -103,17 +108,40 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 Option = option,
                 TotalHeight = totalHeight,
                 MaxTGrid = maxTGrid,
-            });
+            };
+            await SerializeFumenToSvg(ctx);
 
-            using var ms = new MemoryStream();
-            svgDocument.Write(ms, false);
-            ms.Seek(0, SeekOrigin.Begin);
-            var svgContent = Encoding.UTF8.GetString(ms.ToArray());
+            byte[] buf = default;
+            if (option.RenderAsPng)
+            {
+                using var image = new Bitmap((int)ctx.TotalWidth, /*(int)ctx.TotalHeight*/60000, PixelFormat.Format32bppArgb);
+                using var grahics = Graphics.FromImage(image);
+                using var render = SvgRenderer.FromGraphics(grahics);
+                render.SmoothingMode = SmoothingMode.AntiAlias;
+                var matrix = render.Transform;
+                matrix.Translate(0, 30000);
+
+                svgDocument.RenderElement(render);
+
+                grahics.Dispose();
+
+                using var ms = new MemoryStream();
+                image.Save(ms, ImageFormat.Png);
+                svgDocument.Write(ms, false);
+                ms.Seek(0, SeekOrigin.Begin);
+                buf = ms.ToArray();
+            }
+            else
+            {
+                using var ms = new MemoryStream();
+                svgDocument.Write(ms, false);
+                ms.Seek(0, SeekOrigin.Begin);
+                buf = ms.ToArray();
+            }
 
             if (!string.IsNullOrWhiteSpace(option.OutputFilePath))
-                await File.WriteAllTextAsync(option.OutputFilePath, svgContent);
-
-            return svgContent;
+                await File.WriteAllBytesAsync(option.OutputFilePath, buf);
+            return buf;
         }
 
         private SvgElement GenerateCriticalEffect()
@@ -207,6 +235,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 polyline.StrokeWidth = new SvgUnit(SvgUnitType.Pixel, width);
                 polyline.CustomAttributes.Add("stroke", "url(#beamBody)");
                 polyline.StrokeLineCap = SvgStrokeLineCap.Round;
+                polyline.Fill = new SvgColourServer(Color.Transparent);
 
                 foreach (var pos in start.GenAllPath().Select(x => x.pos).Select(point =>
                 {

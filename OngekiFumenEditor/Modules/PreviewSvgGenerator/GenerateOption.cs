@@ -29,6 +29,9 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator
         [OptionBindingAttrbute<float>("weightedSoflanSlope", "WeightedSoflan模式下,加权变化速率", 0.25f)]
         public float WeightedSoflanSlope { get; set; } = 0.25f;
 
+        [OptionBindingAttrbute<bool>("png", "是否生成png图片", false)]
+        public bool RenderAsPng { get; set; } = false;
+
         internal TimeSpan Duration { get; set; }
     }
 }
