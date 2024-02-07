@@ -2,7 +2,7 @@
   "profiles": {
     "OngekiFumenEditor": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\mikir\\Desktop\\音寄谱\\magical flavor\\MagicFlavor.nyagekiProj\""
+      "commandLineArgs": ""
     }
   }
 }

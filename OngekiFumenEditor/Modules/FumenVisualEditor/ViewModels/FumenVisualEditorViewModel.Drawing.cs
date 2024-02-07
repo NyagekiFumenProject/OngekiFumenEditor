@@ -253,7 +253,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsDesignMode)
                 GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
             else
-                GL.ClearColor(205 / 255.0f, 51 / 255.0f, 51 / 255.0f, 1);
+                GL.ClearColor(38 / 255.0f, 182 / 255.0f, 199 / 255.0f, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 

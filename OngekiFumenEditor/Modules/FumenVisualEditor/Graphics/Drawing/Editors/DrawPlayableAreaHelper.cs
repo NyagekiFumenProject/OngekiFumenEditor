@@ -21,7 +21,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
     {
         private ILineDrawing lineDrawing;
         private IPolygonDrawing polygonDrawing;
-        private Vector4 color = new(1, 0, 0, 1);
 
         LineVertex[] vertices = new LineVertex[2];
 
@@ -41,6 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         {
             var y = (float)target.Editor.TotalDurationHeight;
 
+            var color = new Vector4(1, 0, 0, 1);
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
             vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);
 
@@ -52,12 +52,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (target.Editor.IsDesignMode)
                 return;
 
+            var color = new Vector4(0, 0, 0, 1);
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
 
             var fumen = target.Editor.Fumen;
-
-            var color = new Vector4(0, 1, 0, 1);
 
             void EnumeratePoints(bool isRight, List<Vector2> result)
             {
@@ -187,8 +186,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             EnumeratePoints(false, leftPoints);
             FillPoints(leftPoints);
-            rightPoints.Reverse();
             EnumeratePoints(true, rightPoints);
+            rightPoints.Reverse();
             FillPoints(rightPoints);
 
             var list = Earcut.Tessellate(points, idxList);
