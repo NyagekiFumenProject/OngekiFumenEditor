@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 case nameof(EditorGlobalSetting.XOffset):
                     RecalcViewProjectionMatrix();
                     break;
-                case nameof(EditorGlobalSetting.EditorGlobalSetting):
+                case nameof(EditorGlobalSetting.PlayFieldBackgroundColor):
                     playFieldBackgroundColor = EditorGlobalSetting.Default.PlayFieldBackgroundColor.AsARGBToColor().ToVector4();
                     break;
                 case nameof(EditorGlobalSetting.XGridUnitSpace):
