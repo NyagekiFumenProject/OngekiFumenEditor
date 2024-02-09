@@ -7,13 +7,15 @@
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels" xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ValueConverters"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:FumenVisualEditorGlobalSettingViewModel}"
-    d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:IntToSolidBrush x:Key="IntToSolidBrush"/>
+    </UserControl.Resources>
     <StackPanel>
         <GroupBox Margin="5" Header="{markup:Translate [AutoSave]}">
             <StackPanel Margin="10">
@@ -97,17 +99,32 @@
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Render]}">
-            <StackPanel Margin="10">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part1]}" />
-                    <TextBox
+            <GroupBox Header="预览模式" Margin="5">
+                <StackPanel Margin="10">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part1]}" />
+                        <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.ParallelCountLimit}">
-                    </TextBox>
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part2]}" />
+                        </TextBox>
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part2]}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,10,0,5" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="背景颜色:"/>
+                        <Border BorderThickness="1" BorderBrush="{Binding Setting.PlayFieldBackgroundColor,Converter={StaticResource IntToSolidBrush},ConverterParameter=True}" CornerRadius="7" Width="60" Height="18" Cursor="Hand" Background="{Binding Setting.PlayFieldBackgroundColor,Converter={StaticResource IntToSolidBrush}}" Margin="10,0" cal:Message.Attach="[Event MouseDown] = [Action OnSelectBackgroundColor($executionContext)]">
+                        </Border>
+                    </StackPanel>
+                    <CheckBox IsChecked="{Binding Setting.EnablePlayFieldDrawing}">
+                        <TextBlock Text="渲染可击打区域"/>
+                    </CheckBox>
+                    <StackPanel IsEnabled="{Binding Setting.EnablePlayFieldDrawing}" Margin="0,5,0,5" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="可击打区域颜色:"/>
+                        <Border BorderThickness="1" BorderBrush="{Binding Setting.PlayFieldForegroundColor,Converter={StaticResource IntToSolidBrush},ConverterParameter=True}" CornerRadius="7" Width="60" Height="18" Cursor="Hand" Background="{Binding Setting.PlayFieldForegroundColor,Converter={StaticResource IntToSolidBrush}}" Margin="10,0" cal:Message.Attach="[Event MouseDown] = [Action OnSelectForegroundColor($executionContext)]">
+                        </Border>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+            </GroupBox>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Other]}">
             <StackPanel Margin="10">

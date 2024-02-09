@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.6.0.0")]
     public sealed partial class EditorGlobalSetting : global::System.Configuration.ApplicationSettingsBase {
         
         private static EditorGlobalSetting defaultInstance = ((EditorGlobalSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new EditorGlobalSetting())));
@@ -344,6 +344,42 @@ namespace OngekiFumenEditor.Properties {
             }
             set {
                 this["EnablePlaceObjectBeyondAudioDuration"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int PlayFieldForegroundColor {
+            get {
+                return ((int)(this["PlayFieldForegroundColor"]));
+            }
+            set {
+                this["PlayFieldForegroundColor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-14240057")]
+        public int PlayFieldBackgroundColor {
+            get {
+                return ((int)(this["PlayFieldBackgroundColor"]));
+            }
+            set {
+                this["PlayFieldBackgroundColor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnablePlayFieldDrawing {
+            get {
+                return ((bool)(this["EnablePlayFieldDrawing"]));
+            }
+            set {
+                this["EnablePlayFieldDrawing"] = value;
             }
         }
     }

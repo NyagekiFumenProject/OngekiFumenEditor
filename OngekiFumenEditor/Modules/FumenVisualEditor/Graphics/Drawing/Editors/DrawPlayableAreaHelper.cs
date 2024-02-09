@@ -14,6 +14,7 @@ using OngekiFumenEditor.Utils.ObjectPool;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using EarcutNet;
+using System.Drawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -22,12 +23,37 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private ILineDrawing lineDrawing;
         private IPolygonDrawing polygonDrawing;
 
+        private Vector4 playFieldForegroundColor;
+        private bool enablePlayFieldDrawing;
+
         LineVertex[] vertices = new LineVertex[2];
 
         public DrawPlayableAreaHelper()
         {
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
             polygonDrawing = IoC.Get<IPolygonDrawing>();
+
+            UpdateProps();
+            Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
+        }
+
+        private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Properties.EditorGlobalSetting.EnablePlayFieldDrawing):
+                case nameof(Properties.EditorGlobalSetting.PlayFieldForegroundColor):
+                    UpdateProps();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void UpdateProps()
+        {
+            enablePlayFieldDrawing = Properties.EditorGlobalSetting.Default.EnablePlayFieldDrawing;
+            playFieldForegroundColor = Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldForegroundColor).ToVector4();
         }
 
         public void Draw(IFumenEditorDrawingContext target)
@@ -49,10 +75,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void DrawPlayField(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid)
         {
-            if (target.Editor.IsDesignMode)
+            if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
 
-            var color = new Vector4(0, 0, 0, 1);
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
 
@@ -189,18 +214,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             EnumeratePoints(true, rightPoints);
             rightPoints.Reverse();
             FillPoints(rightPoints);
+            /*
+            foreach (var seq in points.SequenceWrap(2))
+            {
+                var x = XGrid.FromTotalGrid((int)seq.FirstOrDefault());
+                var y = TGrid.FromTotalGrid((int)seq.LastOrDefault());
 
+
+            }
+            */
             var list = Earcut.Tessellate(points, idxList);
 
             polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
 
+            //var random = new Random(1025);
             foreach (var seq in list.SequenceWrap(3))
             {
+                //var playFieldForegroundColor = new Vector4((float)random.NextDouble(), (float)random.NextDouble(), (float)random.NextDouble(), 1);
                 foreach (var idx in seq)
                 {
                     var x = (float)points[idx * 2 + 0];
                     var y = (float)points[idx * 2 + 1];
-                    polygonDrawing.PostPoint(new(x, y), color);
+                    polygonDrawing.PostPoint(new(x, y), playFieldForegroundColor);
                 }
             }
 

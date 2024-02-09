@@ -85,21 +85,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             switch (e.PropertyName)
             {
-                case nameof(EditorSetting.VerticalDisplayScale):
+                case nameof(EditorGlobalSetting.VerticalDisplayScale):
                     RecalculateTotalDurationHeight();
                     var tGrid = GetCurrentTGrid();
                     ScrollTo(tGrid);
                     break;
-                case nameof(EditorSetting.JudgeLineOffsetY):
+                case nameof(EditorGlobalSetting.JudgeLineOffsetY):
                     RecalcViewProjectionMatrix();
                     break;
-                case nameof(EditorSetting.XOffset):
+                case nameof(EditorGlobalSetting.XOffset):
                     RecalcViewProjectionMatrix();
                     break;
-                case nameof(EditorSetting.XGridUnitSpace):
-                case nameof(EditorSetting.DisplayTimeFormat):
-                case nameof(EditorSetting.BeatSplit):
-                case nameof(EditorSetting.XGridDisplayMaxUnit):
+                case nameof(EditorGlobalSetting.EditorGlobalSetting):
+                    playFieldBackgroundColor = EditorGlobalSetting.Default.PlayFieldBackgroundColor.AsARGBToColor().ToVector4();
+                    break;
+                case nameof(EditorGlobalSetting.XGridUnitSpace):
+                case nameof(EditorGlobalSetting.DisplayTimeFormat):
+                case nameof(EditorGlobalSetting.BeatSplit):
+                case nameof(EditorGlobalSetting.XGridDisplayMaxUnit):
                 default:
                     break;
             }

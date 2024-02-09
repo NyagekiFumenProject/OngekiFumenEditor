@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private int renderViewWidth;
         private int renderViewHeight;
-
+        private System.Numerics.Vector4 playFieldBackgroundColor;
         private float viewWidth = 0;
         public float ViewWidth
         {
@@ -161,6 +161,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             renderViewWidth = (int)(openGLView.ActualWidth * dpiX);
             renderViewHeight = (int)(openGLView.ActualHeight * dpiY);
 
+            playFieldBackgroundColor = System.Drawing.Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldBackgroundColor).ToVector4();
+
             drawTargets = IoC.GetAll<IFumenEditorDrawingTarget>()
                 .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
                 .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
@@ -253,7 +255,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsDesignMode)
                 GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
             else
-                GL.ClearColor(38 / 255.0f, 182 / 255.0f, 199 / 255.0f, 1);
+                GL.ClearColor(playFieldBackgroundColor.X, playFieldBackgroundColor.Y, playFieldBackgroundColor.Z, playFieldBackgroundColor.W);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 

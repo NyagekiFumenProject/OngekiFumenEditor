@@ -83,5 +83,14 @@
     <Setting Name="EnablePlaceObjectBeyondAudioDuration" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="PlayFieldForegroundColor" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="PlayFieldBackgroundColor" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-14240057</Value>
+    </Setting>
+    <Setting Name="EnablePlayFieldDrawing" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
