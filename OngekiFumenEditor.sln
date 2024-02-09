@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigratableSerializer", "Dep
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Polyline2DCSharp", "Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj", "{86C68215-16E1-44A6-96C0-A3969AB33743}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Earcut", "Dependences\earcut.net\src\Earcut.csproj", "{67B3DEC6-6088-4E16-A653-FE59EEEBEE21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Earcut", "Dependences\earcut.net\src\Earcut.csproj", "{67B3DEC6-6088-4E16-A653-FE59EEEBEE21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

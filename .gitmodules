@@ -12,4 +12,4 @@
 	url = https://github.com/MikiraSora/MigratableSerializer
 [submodule "earcut.net"]
 	path = Dependences/earcut.net
-	url = https://github.com/oberbichler/earcut.net
+	url = https://github.com/NyagekiFumenProject/earcut.net
