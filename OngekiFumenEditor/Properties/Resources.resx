@@ -210,6 +210,9 @@
   <data name="AutoUpdateCurrentObjectTime" xml:space="preserve">
     <value>Automatic update time for current selected object </value>
   </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>Background color:</value>
+  </data>
   <data name="BatchSetIsCritical" xml:space="preserve">
     <value>Batch set property IsCritical</value>
   </data>
@@ -609,6 +612,9 @@
   <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
     <value>Allow user places objects beyond audio duration(red line at end of editor)</value>
   </data>
+  <data name="EnablePlayFieldDrawing" xml:space="preserve">
+    <value>Enable draw play field</value>
+  </data>
   <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>Enable display visualizer</value>
   </data>
@@ -800,6 +806,9 @@
   </data>
   <data name="GenerateScriptProjectFileFail" xml:space="preserve">
     <value>Generate script project file failed</value>
+  </data>
+  <data name="GenerateSvg" xml:space="preserve">
+    <value>Generate fumen preview .svg file</value>
   </data>
   <data name="Genre" xml:space="preserve">
     <value>Genre:</value>
@@ -1106,6 +1115,9 @@
   </data>
   <data name="PauseAudioAndFumen" xml:space="preserve">
     <value>Pause the audio/editor playback first</value>
+  </data>
+  <data name="PlayFieldForegroundColor" xml:space="preserve">
+    <value>Play field foreground color:</value>
   </data>
   <data name="PreventUsingInternalEditor" xml:space="preserve">
     <value>To avoid code confusion, you are temporarily unable to operate this editor simultaneously</value>

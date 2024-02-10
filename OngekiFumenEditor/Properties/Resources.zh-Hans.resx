@@ -210,6 +210,9 @@
   <data name="AutoUpdateCurrentObjectTime" xml:space="preserve">
     <value>自动显示当前物件时间</value>
   </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>背景颜色:</value>
+  </data>
   <data name="BatchSetIsCritical" xml:space="preserve">
     <value>快速批量设置IsCritical</value>
   </data>
@@ -609,6 +612,9 @@
   <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
     <value>允许在音频时长(末尾红线)外放置物件</value>
   </data>
+  <data name="EnablePlayFieldDrawing" xml:space="preserve">
+    <value>渲染可击打区域</value>
+  </data>
   <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>允许显示频谱</value>
   </data>
@@ -800,6 +806,9 @@
   </data>
   <data name="GenerateScriptProjectFileFail" xml:space="preserve">
     <value>生成脚本项目文件失败.</value>
+  </data>
+  <data name="GenerateSvg" xml:space="preserve">
+    <value>生成铺面预览.svg文件</value>
   </data>
   <data name="Genre" xml:space="preserve">
     <value>音乐分类:</value>
@@ -1106,6 +1115,9 @@
   </data>
   <data name="PauseAudioAndFumen" xml:space="preserve">
     <value>请先暂停音频/谱面播放</value>
+  </data>
+  <data name="PlayFieldForegroundColor" xml:space="preserve">
+    <value>可击打区域颜色:</value>
   </data>
   <data name="PreventUsingInternalEditor" xml:space="preserve">
     <value>为了避免代码混乱,您暂时无法同时操作本编辑器</value>

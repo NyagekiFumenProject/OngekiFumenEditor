@@ -91,8 +91,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     ScrollTo(tGrid);
                     break;
                 case nameof(EditorGlobalSetting.JudgeLineOffsetY):
-                    RecalcViewProjectionMatrix();
-                    break;
                 case nameof(EditorGlobalSetting.XOffset):
                     RecalcViewProjectionMatrix();
                     break;
@@ -115,43 +113,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnFumenObjectModifiedChanged(OngekiObjectBase sender, PropertyChangedEventArgs e)
         {
-            var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-            var selectedObjects = objBrowser.SelectedObjects;
-
             switch (e.PropertyName)
             {
                 case nameof(ISelectableObject.IsSelected):
-                    /*
-                    if (sender is ISelectableObject selectable)
-                    {
-                        if (selectable.IsSelected)
-                        {
-                            //点击
-                            CurrentSelectedObjects.Add(selectable);
-                        }
-                        else
-                        {
-                            //取消点击
-                            if (curBrowserObj == sender)
-                                objBrowser.SetCurrentOngekiObject(null, this);
-                            CurrentSelectedObjects.Remove(selectable);
-                        }
-                        NotifyOfPropertyChange(() => SelectObjects);
-                    }
-                    */
-                    //IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
-                    break;
                 case nameof(ConnectableChildObjectBase.IsAnyControlSelecting):
-                    /*
-                    foreach (var controlPoint in ((ConnectableChildObjectBase)sender).PathControls)
-                    {
-                        var contains = CurrentSelectedObjects.Contains(controlPoint);
-                        if (controlPoint.IsSelected && !contains)
-                            CurrentSelectedObjects.Add(controlPoint);
-                        else if ((!controlPoint.IsSelected) && contains)
-                            CurrentSelectedObjects.Remove(controlPoint);
-                    }
-                    */
                     break;
                 default:
                     IsDirty = true;

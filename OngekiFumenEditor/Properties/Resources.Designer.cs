@@ -340,6 +340,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Background color: 的本地化字符串。
+        /// </summary>
+        public static string BackgroundColor {
+            get {
+                return ResourceManager.GetString("BackgroundColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Batch set property IsCritical 的本地化字符串。
         /// </summary>
         public static string BatchSetIsCritical {
@@ -1537,6 +1546,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Enable draw play field 的本地化字符串。
+        /// </summary>
+        public static string EnablePlayFieldDrawing {
+            get {
+                return ResourceManager.GetString("EnablePlayFieldDrawing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Enable display visualizer 的本地化字符串。
         /// </summary>
         public static string EnableVisualizerDisplay {
@@ -2109,6 +2127,15 @@ namespace OngekiFumenEditor.Properties {
         public static string GenerateScriptProjectFileFail {
             get {
                 return ResourceManager.GetString("GenerateScriptProjectFileFail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Generate fumen preview .svg file 的本地化字符串。
+        /// </summary>
+        public static string GenerateSvg {
+            get {
+                return ResourceManager.GetString("GenerateSvg", resourceCulture);
             }
         }
         
@@ -3027,6 +3054,15 @@ namespace OngekiFumenEditor.Properties {
         public static string PauseAudioAndFumen {
             get {
                 return ResourceManager.GetString("PauseAudioAndFumen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Play field foreground color: 的本地化字符串。
+        /// </summary>
+        public static string PlayFieldForegroundColor {
+            get {
+                return ResourceManager.GetString("PlayFieldForegroundColor", resourceCulture);
             }
         }
         

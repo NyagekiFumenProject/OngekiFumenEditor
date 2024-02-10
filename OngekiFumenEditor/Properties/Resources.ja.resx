@@ -1503,4 +1503,16 @@
   <data name="RecaculatedSuccess" xml:space="preserve">
     <value>再計算に成功しました</value>
   </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>背景色:</value>
+  </data>
+  <data name="EnablePlayFieldDrawing" xml:space="preserve">
+    <value>渲染可击打区域</value>
+  </data>
+  <data name="GenerateSvg" xml:space="preserve">
+    <value>生成铺面预览.svg文件</value>
+  </data>
+  <data name="PlayFieldForegroundColor" xml:space="preserve">
+    <value>可击打区域颜色:</value>
+  </data>
 </root>

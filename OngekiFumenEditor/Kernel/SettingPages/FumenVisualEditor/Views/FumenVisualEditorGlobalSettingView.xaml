@@ -99,7 +99,7 @@
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Render]}">
-            <GroupBox Header="预览模式" Margin="5">
+            <GroupBox Header="{markup:Translate [PreviewMode]}" Margin="5">
                 <StackPanel Margin="10">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part1]}" />
@@ -111,15 +111,15 @@
                         <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part2]}" />
                     </StackPanel>
                     <StackPanel Margin="0,10,0,5" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="背景颜色:"/>
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BackgroundColor]}"/>
                         <Border BorderThickness="1" BorderBrush="{Binding Setting.PlayFieldBackgroundColor,Converter={StaticResource IntToSolidBrush},ConverterParameter=True}" CornerRadius="7" Width="60" Height="18" Cursor="Hand" Background="{Binding Setting.PlayFieldBackgroundColor,Converter={StaticResource IntToSolidBrush}}" Margin="10,0" cal:Message.Attach="[Event MouseDown] = [Action OnSelectBackgroundColor($executionContext)]">
                         </Border>
                     </StackPanel>
                     <CheckBox IsChecked="{Binding Setting.EnablePlayFieldDrawing}">
-                        <TextBlock Text="渲染可击打区域"/>
+                        <TextBlock Text="{markup:Translate [EnablePlayFieldDrawing]}"/>
                     </CheckBox>
                     <StackPanel IsEnabled="{Binding Setting.EnablePlayFieldDrawing}" Margin="0,5,0,5" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="可击打区域颜色:"/>
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate [PlayFieldForegroundColor]}"/>
                         <Border BorderThickness="1" BorderBrush="{Binding Setting.PlayFieldForegroundColor,Converter={StaticResource IntToSolidBrush},ConverterParameter=True}" CornerRadius="7" Width="60" Height="18" Cursor="Hand" Background="{Binding Setting.PlayFieldForegroundColor,Converter={StaticResource IntToSolidBrush}}" Margin="10,0" cal:Message.Attach="[Event MouseDown] = [Action OnSelectForegroundColor($executionContext)]">
                         </Border>
                     </StackPanel>
