@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
+    <!-- 
     Microsoft ResX Schema 
     
     Version 2.0
@@ -59,1466 +59,1466 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+        <xsd:element name="root" msdata:IsDataSet="true">
             <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string" />
+                            <xsd:attribute name="type" type="xsd:string" />
+                            <xsd:attribute name="mimetype" type="xsd:string" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string" />
+                            <xsd:attribute name="name" type="xsd:string" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
             </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="AcbGenerator" xml:space="preserve">
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="AcbGenerator" xml:space="preserve">
     <value>Audio File Generator</value>
   </data>
-  <data name="Action" xml:space="preserve">
+    <data name="Action" xml:space="preserve">
     <value>Actions</value>
   </data>
-  <data name="AddConnectableNextObject" xml:space="preserve">
+    <data name="AddConnectableNextObject" xml:space="preserve">
     <value>Add connectable next object</value>
   </data>
-  <data name="AddCurveControlPoint" xml:space="preserve">
+    <data name="AddCurveControlPoint" xml:space="preserve">
     <value>Add curve control point</value>
   </data>
-  <data name="AddObject" xml:space="preserve">
+    <data name="AddObject" xml:space="preserve">
     <value>Add object</value>
   </data>
-  <data name="AddObjectsByBrush" xml:space="preserve">
+    <data name="AddObjectsByBrush" xml:space="preserve">
     <value>Add objects by brush</value>
   </data>
-  <data name="AdjustPastedObjects" xml:space="preserve">
+    <data name="AdjustPastedObjects" xml:space="preserve">
     <value>Automatically docking when objects pasted</value>
   </data>
-  <data name="Advice" xml:space="preserve">
+    <data name="Advice" xml:space="preserve">
     <value>Suggest</value>
   </data>
-  <data name="AllObjectApplyNewDelayAfterCalculated" xml:space="preserve">
+    <data name="AllObjectApplyNewDelayAfterCalculated" xml:space="preserve">
     <value>Recalculate all objects after audio delay applied</value>
   </data>
-  <data name="AllSupportFileFormat" xml:space="preserve">
+    <data name="AllSupportFileFormat" xml:space="preserve">
     <value>All File Support</value>
   </data>
-  <data name="ApplicationVersion" xml:space="preserve">
+    <data name="ApplicationVersion" xml:space="preserve">
     <value>Application version</value>
   </data>
-  <data name="ApplyAudioAdjust" xml:space="preserve">
+    <data name="ApplyAudioAdjust" xml:space="preserve">
     <value>Apply audio adjust</value>
   </data>
-  <data name="ApplyAudioAdjustFail" xml:space="preserve">
+    <data name="ApplyAudioAdjustFail" xml:space="preserve">
     <value>Processing faild：</value>
   </data>
-  <data name="ApplyAudioAdjustSuccess" xml:space="preserve">
+    <data name="ApplyAudioAdjustSuccess" xml:space="preserve">
     <value>Processing successfully</value>
   </data>
-  <data name="ApplyAudioAdjustSuccessButSuggest" xml:space="preserve">
+    <data name="ApplyAudioAdjustSuccessButSuggest" xml:space="preserve">
     <value>Processing successfully. But we recommend saving and reopening the current project to review the latest audio changes or objects position adjustments.</value>
   </data>
-  <data name="ApplyOffsetBySecond" xml:space="preserve">
+    <data name="ApplyOffsetBySecond" xml:space="preserve">
     <value>Apply delay by seconds</value>
   </data>
-  <data name="ApplyOffsetByTGrid" xml:space="preserve">
+    <data name="ApplyOffsetByTGrid" xml:space="preserve">
     <value>Apply delay by TGrid</value>
   </data>
-  <data name="Artist" xml:space="preserve">
+    <data name="Artist" xml:space="preserve">
     <value>Artist:</value>
   </data>
-  <data name="AsBrushSourceObject" xml:space="preserve">
+    <data name="AsBrushSourceObject" xml:space="preserve">
     <value>and serve as source object in brush mode.</value>
   </data>
-  <data name="AudioDuration" xml:space="preserve">
+    <data name="AudioDuration" xml:space="preserve">
     <value>Audio duration:</value>
   </data>
-  <data name="AudioFile" xml:space="preserve">
+    <data name="AudioFile" xml:space="preserve">
     <value>Audio file:</value>
   </data>
-  <data name="AudioFileNotFound" xml:space="preserve">
+    <data name="AudioFileNotFound" xml:space="preserve">
     <value>The audio file is either not provided or does not exist</value>
   </data>
-  <data name="AudioFilePath" xml:space="preserve">
+    <data name="AudioFilePath" xml:space="preserve">
     <value>Audio file path:</value>
   </data>
-  <data name="AudioFileSource" xml:space="preserve">
+    <data name="AudioFileSource" xml:space="preserve">
     <value>Audio file source</value>
   </data>
-  <data name="AudioOption" xml:space="preserve">
+    <data name="AudioOption" xml:space="preserve">
     <value>Audio Option</value>
   </data>
-  <data name="AudioPlayerToolViewer" xml:space="preserve">
+    <data name="AudioPlayerToolViewer" xml:space="preserve">
     <value>Audio Player</value>
   </data>
-  <data name="AudioTGrid" xml:space="preserve">
+    <data name="AudioTGrid" xml:space="preserve">
     <value>Audio Time(TGrid)</value>
   </data>
-  <data name="AudioTime" xml:space="preserve">
+    <data name="AudioTime" xml:space="preserve">
     <value>Audio Time</value>
   </data>
-  <data name="AutoSave" xml:space="preserve">
+    <data name="AutoSave" xml:space="preserve">
     <value>Autosave</value>
   </data>
-  <data name="AutoSaveInterval" xml:space="preserve">
+    <data name="AutoSaveInterval" xml:space="preserve">
     <value>Autosave frequency:</value>
   </data>
-  <data name="AutoUpdateCurrentObjectTime" xml:space="preserve">
+    <data name="AutoUpdateCurrentObjectTime" xml:space="preserve">
     <value>Automatic update time for current selected object </value>
   </data>
-  <data name="BackgroundColor" xml:space="preserve">
+    <data name="BackgroundColor" xml:space="preserve">
     <value>Background color:</value>
   </data>
-  <data name="BatchSetIsCritical" xml:space="preserve">
+    <data name="BatchSetIsCritical" xml:space="preserve">
     <value>Batch set property IsCritical</value>
   </data>
-  <data name="BeatSplit" xml:space="preserve">
+    <data name="BeatSplit" xml:space="preserve">
     <value>Subdivision multiplier for the meter:</value>
   </data>
-  <data name="BellBulletCountOverLimit_Part1" xml:space="preserve">
+    <data name="BellBulletCountOverLimit_Part1" xml:space="preserve">
     <value>In preview mode, if the total number of Bells/Bullets exceeds</value>
   </data>
-  <data name="BellBulletCountOverLimit_Part2" xml:space="preserve">
+    <data name="BellBulletCountOverLimit_Part2" xml:space="preserve">
     <value>,parallel computation will be employed using multiple threads</value>
   </data>
-  <data name="BigJacketSize" xml:space="preserve">
+    <data name="BigJacketSize" xml:space="preserve">
     <value>Large image dimensions (default 520x520):</value>
   </data>
-  <data name="BossHp" xml:space="preserve">
+    <data name="BossHp" xml:space="preserve">
     <value>Boss HP:</value>
   </data>
-  <data name="BossLevel" xml:space="preserve">
+    <data name="BossLevel" xml:space="preserve">
     <value>Boss Level:</value>
   </data>
-  <data name="BossVoiceIdx" xml:space="preserve">
+    <data name="BossVoiceIdx" xml:space="preserve">
     <value>Boss Voice Index:</value>
   </data>
-  <data name="Browser" xml:space="preserve">
+    <data name="Browser" xml:space="preserve">
     <value>Browser</value>
   </data>
-  <data name="BrushCopied" xml:space="preserve">
+    <data name="BrushCopied" xml:space="preserve">
     <value>Brushing on the lane with copied object</value>
   </data>
-  <data name="BrushCopiedTipText" xml:space="preserve">
+    <data name="BrushCopiedTipText" xml:space="preserve">
     <value>Batch on the lane based on the multiplied meter with copied object; illegal segments cannot be used.</value>
   </data>
-  <data name="BrushMode" xml:space="preserve">
+    <data name="BrushMode" xml:space="preserve">
     <value>Brush Mode：</value>
   </data>
-  <data name="BrushModeSwitch" xml:space="preserve">
+    <data name="BrushModeSwitch" xml:space="preserve">
     <value>Switching brush modes</value>
   </data>
-  <data name="BrushModeSwitchTipText" xml:space="preserve">
+    <data name="BrushModeSwitchTipText" xml:space="preserve">
     <value>the brush mode is enabled, avoid most object dragging operations.</value>
   </data>
-  <data name="BulletSize" xml:space="preserve">
+    <data name="BulletSize" xml:space="preserve">
     <value>Bullet Size</value>
   </data>
-  <data name="BulletSpeed" xml:space="preserve">
+    <data name="BulletSpeed" xml:space="preserve">
     <value>Bullet Speed</value>
   </data>
-  <data name="BulletType" xml:space="preserve">
+    <data name="BulletType" xml:space="preserve">
     <value>Bullet Shape</value>
   </data>
-  <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
+    <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>Call AcbGeneratorFuck.Generator.Generate() failed</value>
   </data>
-  <data name="CallGenerateSvgAsyncFail" xml:space="preserve">
+    <data name="CallGenerateSvgAsyncFail" xml:space="preserve">
     <value>Call GenerateSvgAsync() failed</value>
   </data>
-  <data name="Cancel" xml:space="preserve">
+    <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="CancelProjectSaveByFumenSaveFail" xml:space="preserve">
+    <data name="CancelProjectSaveByFumenSaveFail" xml:space="preserve">
     <value>Unable to save the fumen, project saving canceled.</value>
   </data>
-  <data name="CancelSelected" xml:space="preserve">
+    <data name="CancelSelected" xml:space="preserve">
     <value>Deselect all.</value>
   </data>
-  <data name="CantCreateProject" xml:space="preserve">
+    <data name="CantCreateProject" xml:space="preserve">
     <value>Unable to create a new project.:</value>
   </data>
-  <data name="CantFastOpenFumen" xml:space="preserve">
+    <data name="CantFastOpenFumen" xml:space="preserve">
     <value>Unable to open the fumen quickly.</value>
   </data>
-  <data name="CantLoadFumen" xml:space="preserve">
+    <data name="CantLoadFumen" xml:space="preserve">
     <value>Unable to load the fumen:</value>
   </data>
-  <data name="CantLoadProject" xml:space="preserve">
+    <data name="CantLoadProject" xml:space="preserve">
     <value>Unable to load the project:</value>
   </data>
-  <data name="CantOpenByAudioFileNotFound" xml:space="preserve">
+    <data name="CantOpenByAudioFileNotFound" xml:space="preserve">
     <value>Unable to open {0}, audio file not found.</value>
   </data>
-  <data name="CantPasteMoreObjectByScaleDifferent" xml:space="preserve">
+    <data name="CantPasteMoreObjectByScaleDifferent" xml:space="preserve">
     <value>The original editor's vertical scaling ({0:F2}x) and the target editor's vertical scaling ({1:F2}x) are different. Unable to paste multiple objects.</value>
   </data>
-  <data name="CantPlaceObjectsByNoSuiteLanes" xml:space="preserve">
+    <data name="CantPlaceObjectsByNoSuiteLanes" xml:space="preserve">
     <value>Unable to place objects on any suitable {0} Lane</value>
   </data>
-  <data name="CantRememberObjectByNotSupport" xml:space="preserve">
+    <data name="CantRememberObjectByNotSupport" xml:space="preserve">
     <value>Unable to memorize the audio time of this object because it does not implement ITimelineObject: {0}.</value>
   </data>
-  <data name="CantSaveFumenProject" xml:space="preserve">
+    <data name="CantSaveFumenProject" xml:space="preserve">
     <value>Unable to save the fumen project:</value>
   </data>
-  <data name="CantSaveProjectFile" xml:space="preserve">
+    <data name="CantSaveProjectFile" xml:space="preserve">
     <value>Unable to save the project file:</value>
   </data>
-  <data name="CantSaveProjectTotally" xml:space="preserve">
+    <data name="CantSaveProjectTotally" xml:space="preserve">
     <value>Unable to save the project completely:</value>
   </data>
-  <data name="CantSaveScriptFile" xml:space="preserve">
+    <data name="CantSaveScriptFile" xml:space="preserve">
     <value>Unable to save the script:</value>
   </data>
-  <data name="CantWriteFumenFileByIoError" xml:space="preserve">
+    <data name="CantWriteFumenFileByIoError" xml:space="preserve">
     <value>Fumen file is in use or no permission; unable to write.</value>
   </data>
-  <data name="CantWriteProjectFileByIoError" xml:space="preserve">
+    <data name="CantWriteProjectFileByIoError" xml:space="preserve">
     <value>Project file is in use or no permission; unable to write.</value>
   </data>
-  <data name="Card" xml:space="preserve">
+    <data name="Card" xml:space="preserve">
     <value>Boss Card:</value>
   </data>
-  <data name="ChangeAxuiliaryLineColor" xml:space="preserve">
+    <data name="ChangeAxuiliaryLineColor" xml:space="preserve">
     <value>Change {0} axuiliary line color.</value>
   </data>
-  <data name="CheckRuleSoflanProblem" xml:space="preserve">
+    <data name="CheckRuleSoflanProblem" xml:space="preserve">
     <value>After the last Soflan speed change, the speed should return to 1x normally, but now is {0}x.</value>
   </data>
-  <data name="CheckScript" xml:space="preserve">
+    <data name="CheckScript" xml:space="preserve">
     <value>Check script</value>
   </data>
-  <data name="CleanRecentFilesRecords" xml:space="preserve">
+    <data name="CleanRecentFilesRecords" xml:space="preserve">
     <value>Clear recent open file history</value>
   </data>
-  <data name="ClearCopyList" xml:space="preserve">
+    <data name="ClearCopyList" xml:space="preserve">
     <value>Clear the copy list</value>
   </data>
-  <data name="ClearHistory" xml:space="preserve">
+    <data name="ClearHistory" xml:space="preserve">
     <value>Clear the history records</value>
   </data>
-  <data name="ClonePallete" xml:space="preserve">
+    <data name="ClonePallete" xml:space="preserve">
     <value>clone</value>
   </data>
-  <data name="CloseEditorByProjectSetupFail" xml:space="preserve">
+    <data name="CloseEditorByProjectSetupFail" xml:space="preserve">
     <value>The user cannot complete the new project wizard; close this editor.</value>
   </data>
-  <data name="CloseProgram" xml:space="preserve">
+    <data name="CloseProgram" xml:space="preserve">
     <value>Close Program</value>
   </data>
-  <data name="CombineLane" xml:space="preserve">
+    <data name="CombineLane" xml:space="preserve">
     <value>Combine lanes</value>
   </data>
-  <data name="CombineLanes" xml:space="preserve">
+    <data name="CombineLanes" xml:space="preserve">
     <value>Combine lanes</value>
   </data>
-  <data name="Comfirm" xml:space="preserve">
+    <data name="Comfirm" xml:space="preserve">
     <value>Confirm</value>
   </data>
-  <data name="ComfirmClose" xml:space="preserve">
+    <data name="ComfirmClose" xml:space="preserve">
     <value>confirmed to close</value>
   </data>
-  <data name="ComfirmExecuteScript" xml:space="preserve">
+    <data name="ComfirmExecuteScript" xml:space="preserve">
     <value>Compilation successful. Execute now?</value>
   </data>
-  <data name="ComfirmInterpolateMessage" xml:space="preserve">
+    <data name="ComfirmInterpolateMessage" xml:space="preserve">
     <value>Do you want to interpolate all lanes containing curves?\nThis may delete and regenerate already interpolated lanes without curves.\nSome partially overlapping Tap/Hold objects may change their reference lanes  as a result.</value>
   </data>
-  <data name="CommandAbout" xml:space="preserve">
+    <data name="CommandAbout" xml:space="preserve">
     <value>About</value>
   </data>
-  <data name="CommandAdjustDockablesHorizonPosition" xml:space="preserve">
+    <data name="CommandAdjustDockablesHorizonPosition" xml:space="preserve">
     <value>Automatically adjust the XGrid for all dockable objects</value>
   </data>
-  <data name="CommandAudioAdjustWindow" xml:space="preserve">
+    <data name="CommandAudioAdjustWindow" xml:space="preserve">
     <value>Audio Delay Adjustment</value>
   </data>
-  <data name="CommandCallFullGC" xml:space="preserve">
+    <data name="CommandCallFullGC" xml:space="preserve">
     <value>Garbage collection</value>
   </data>
-  <data name="CommandInterpolateAll" xml:space="preserve">
+    <data name="CommandInterpolateAll" xml:space="preserve">
     <value>Interpolate all curved lanes.</value>
   </data>
-  <data name="CommandInterpolateAllWithXGridLimit" xml:space="preserve">
+    <data name="CommandInterpolateAllWithXGridLimit" xml:space="preserve">
     <value>Interpolate all curved lanes (XGrid Limit)</value>
   </data>
-  <data name="CommandOpenProjectUrl" xml:space="preserve">
+    <data name="CommandOpenProjectUrl" xml:space="preserve">
     <value>Project URL</value>
   </data>
-  <data name="CommandPostSuggest" xml:space="preserve">
+    <data name="CommandPostSuggest" xml:space="preserve">
     <value>Submit suggestions</value>
   </data>
-  <data name="CommandRecentFiles" xml:space="preserve">
+    <data name="CommandRecentFiles" xml:space="preserve">
     <value>Recently files...</value>
   </data>
-  <data name="CommandRequestIssueHelp" xml:space="preserve">
+    <data name="CommandRequestIssueHelp" xml:space="preserve">
     <value>Got problems?</value>
   </data>
-  <data name="CommandShowCurveControlAlways" xml:space="preserve">
+    <data name="CommandShowCurveControlAlways" xml:space="preserve">
     <value>Always displaying curve control objects</value>
   </data>
-  <data name="CommandShowCurveControlAlwaysTipText" xml:space="preserve">
+    <data name="CommandShowCurveControlAlwaysTipText" xml:space="preserve">
     <value>If enabled, all curve control objects will be displayed continuously</value>
   </data>
-  <data name="CompileError" xml:space="preserve">
+    <data name="CompileError" xml:space="preserve">
     <value>Compilation failed:</value>
   </data>
-  <data name="CompileSuccess" xml:space="preserve">
+    <data name="CompileSuccess" xml:space="preserve">
     <value>Compilation successful</value>
   </data>
-  <data name="Confirm" xml:space="preserve">
+    <data name="Confirm" xml:space="preserve">
     <value>Comfirm</value>
   </data>
-  <data name="ControlTimeline" xml:space="preserve">
+    <data name="ControlTimeline" xml:space="preserve">
     <value>To control object time...</value>
   </data>
-  <data name="ConvertAudioFileNotFound" xml:space="preserve">
+    <data name="ConvertAudioFileNotFound" xml:space="preserve">
     <value>The audio file that needs to be converted does not exist</value>
   </data>
-  <data name="ConvertFail" xml:space="preserve">
+    <data name="ConvertFail" xml:space="preserve">
     <value>Conversion failed:</value>
   </data>
-  <data name="ConvertSuccess" xml:space="preserve">
+    <data name="ConvertSuccess" xml:space="preserve">
     <value>Conversion successful</value>
   </data>
-  <data name="CopiedObjects" xml:space="preserve">
+    <data name="CopiedObjects" xml:space="preserve">
     <value>Choose {0} objects as the source for copy.</value>
   </data>
-  <data name="Copy" xml:space="preserve">
+    <data name="Copy" xml:space="preserve">
     <value>Copy</value>
   </data>
-  <data name="CopyAndPaste" xml:space="preserve">
+    <data name="CopyAndPaste" xml:space="preserve">
     <value>Copy and paste</value>
   </data>
-  <data name="CopyCopiable" xml:space="preserve">
+    <data name="CopyCopiable" xml:space="preserve">
     <value>Copy (copiable objects).</value>
   </data>
-  <data name="CopyOneObjectOnceBeforeUsingBrush" xml:space="preserve">
+    <data name="CopyOneObjectOnceBeforeUsingBrush" xml:space="preserve">
     <value>Need to copy a copiable object only before using the brush.</value>
   </data>
-  <data name="CopyRight" xml:space="preserve">
+    <data name="CopyRight" xml:space="preserve">
     <value>Copy Right:</value>
   </data>
-  <data name="CostToUnlock" xml:space="preserve">
+    <data name="CostToUnlock" xml:space="preserve">
     <value>Cost To Unlock:</value>
   </data>
-  <data name="CrashDumpFile" xml:space="preserve">
+    <data name="CrashDumpFile" xml:space="preserve">
     <value>Crash dump file</value>
   </data>
-  <data name="CrashDumpFileOutput" xml:space="preserve">
+    <data name="CrashDumpFileOutput" xml:space="preserve">
     <value>Crash dump file output</value>
   </data>
-  <data name="Create" xml:space="preserve">
+    <data name="Create" xml:space="preserve">
     <value>Create</value>
   </data>
-  <data name="CreateProject" xml:space="preserve">
+    <data name="CreateProject" xml:space="preserve">
     <value>Create Project</value>
   </data>
-  <data name="CreateProjectTipText" xml:space="preserve">
+    <data name="CreateProjectTipText" xml:space="preserve">
     <value>Create a new project</value>
   </data>
-  <data name="CurrentTimeOffset" xml:space="preserve">
+    <data name="CurrentTimeOffset" xml:space="preserve">
     <value>Offset current time display</value>
   </data>
-  <data name="CurveInterpolaterFactoryDefaultImpl" xml:space="preserve">
+    <data name="CurveInterpolaterFactoryDefaultImpl" xml:space="preserve">
     <value>Default Implement</value>
   </data>
-  <data name="CurveInterpolaterFactoryXGridLimited" xml:space="preserve">
+    <data name="CurveInterpolaterFactoryXGridLimited" xml:space="preserve">
     <value>XGrid.Unit Limit (For Ongeki)</value>
   </data>
-  <data name="Delete" xml:space="preserve">
+    <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
-  <data name="DeleteObjects" xml:space="preserve">
+    <data name="DeleteObjects" xml:space="preserve">
     <value>Delete objects</value>
   </data>
-  <data name="DeleteSelectedPalletes" xml:space="preserve">
+    <data name="DeleteSelectedPalletes" xml:space="preserve">
     <value>Delete selected bullete palletes</value>
   </data>
-  <data name="Description" xml:space="preserve">
+    <data name="Description" xml:space="preserve">
     <value>Description</value>
   </data>
-  <data name="DeserializeFumenFileFail" xml:space="preserve">
+    <data name="DeserializeFumenFileFail" xml:space="preserve">
     <value>Parsing fumen file failed:</value>
   </data>
-  <data name="DeserializeFumenFileNotSupport" xml:space="preserve">
+    <data name="DeserializeFumenFileNotSupport" xml:space="preserve">
     <value>Unsupported parsing of this fumen file:</value>
   </data>
-  <data name="DesignMode" xml:space="preserve">
+    <data name="DesignMode" xml:space="preserve">
     <value>Design Mode</value>
   </data>
-  <data name="DiffLevel" xml:space="preserve">
+    <data name="DiffLevel" xml:space="preserve">
     <value>Diff Level:</value>
   </data>
-  <data name="Disable" xml:space="preserve">
+    <data name="Disable" xml:space="preserve">
     <value>Disable</value>
   </data>
-  <data name="DisableAddObjectBeyondAudioDuration" xml:space="preserve">
+    <data name="DisableAddObjectBeyondAudioDuration" xml:space="preserve">
     <value>Unable to add objects beyond the audio/editor range.</value>
   </data>
-  <data name="DisableInterpolateByNoConnectableChildren" xml:space="preserve">
+    <data name="DisableInterpolateByNoConnectableChildren" xml:space="preserve">
     <value>No child, unable to interpolate.</value>
   </data>
-  <data name="DisableInterpolatePartByInvaild" xml:space="preserve">
+    <data name="DisableInterpolatePartByInvaild" xml:space="preserve">
     <value>Unable to interpolate part path because illegal.</value>
   </data>
-  <data name="DisableTGridMagneticDock" xml:space="preserve">
+    <data name="DisableTGridMagneticDock" xml:space="preserve">
     <value>Disable snapping for the TGrid</value>
   </data>
-  <data name="DisableUseBrushByMoreObjects" xml:space="preserve">
+    <data name="DisableUseBrushByMoreObjects" xml:space="preserve">
     <value>Unable to use the brush tool because more than one object has been copied</value>
   </data>
-  <data name="DisableXGridMagneticDock" xml:space="preserve">
+    <data name="DisableXGridMagneticDock" xml:space="preserve">
     <value>Disable snapping for the XGrid</value>
   </data>
-  <data name="DisplayTimeFormat" xml:space="preserve">
+    <data name="DisplayTimeFormat" xml:space="preserve">
     <value>Display time format</value>
   </data>
-  <data name="DragObjects" xml:space="preserve">
+    <data name="DragObjects" xml:space="preserve">
     <value>Drag objects</value>
   </data>
-  <data name="DragToCreateBeamNext" xml:space="preserve">
+    <data name="DragToCreateBeamNext" xml:space="preserve">
     <value>Drag to add a new Beam object</value>
   </data>
-  <data name="DragToCreateBell" xml:space="preserve">
+    <data name="DragToCreateBell" xml:space="preserve">
     <value>new Bell</value>
   </data>
-  <data name="DragToCreateBullet" xml:space="preserve">
+    <data name="DragToCreateBullet" xml:space="preserve">
     <value>new Bullet</value>
   </data>
-  <data name="DragToCreateCurveControlPoint" xml:space="preserve">
+    <data name="DragToCreateCurveControlPoint" xml:space="preserve">
     <value>Drag to add a new CurveControlPoint object</value>
   </data>
-  <data name="DragToCreateCurveControlPointTipText" xml:space="preserve">
+    <data name="DragToCreateCurveControlPointTipText" xml:space="preserve">
     <value>Drag to add a new CurveControlPoint object</value>
   </data>
-  <data name="DragToCreateHoldEnd" xml:space="preserve">
+    <data name="DragToCreateHoldEnd" xml:space="preserve">
     <value>Drag to add a new HoldEnd object</value>
   </data>
-  <data name="DragToCreateNext" xml:space="preserve">
+    <data name="DragToCreateNext" xml:space="preserve">
     <value>Drag to add a new next object</value>
   </data>
-  <data name="DragToCreateWallEnd" xml:space="preserve">
+    <data name="DragToCreateWallEnd" xml:space="preserve">
     <value>Drag to add a new WallEnd object</value>
   </data>
-  <data name="DragToCreateWallNext" xml:space="preserve">
+    <data name="DragToCreateWallNext" xml:space="preserve">
     <value>Drag to add a new WallNext object</value>
   </data>
-  <data name="DragToSplit" xml:space="preserve">
+    <data name="DragToSplit" xml:space="preserve">
     <value>Drag to split lane</value>
   </data>
-  <data name="DragToSplitTipText" xml:space="preserve">
+    <data name="DragToSplitTipText" xml:space="preserve">
     <value>Split out two lanes, old and new, at a specific time.</value>
   </data>
-  <data name="DumpFileSaveTo" xml:space="preserve">
+    <data name="DumpFileSaveTo" xml:space="preserve">
     <value>Current .dmp file is stored at</value>
   </data>
-  <data name="Earlier" xml:space="preserve">
+    <data name="Earlier" xml:space="preserve">
     <value>Earlier</value>
   </data>
-  <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
+    <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
     <value>Editor jumps to the specified TGrid.</value>
   </data>
-  <data name="EditorLock" xml:space="preserve">
+    <data name="EditorLock" xml:space="preserve">
     <value>Editor locked</value>
   </data>
-  <data name="EditorModeSwitch" xml:space="preserve">
+    <data name="EditorModeSwitch" xml:space="preserve">
     <value>Editor Mode</value>
   </data>
-  <data name="EditorMouseWheelSpeed" xml:space="preserve">
+    <data name="EditorMouseWheelSpeed" xml:space="preserve">
     <value>Mouse wheel scroll speed</value>
   </data>
-  <data name="EditorMouseWheelSpeed_Unit" xml:space="preserve">
+    <data name="EditorMouseWheelSpeed_Unit" xml:space="preserve">
     <value>(The larger the value, the greater the scrolling span)</value>
   </data>
-  <data name="EditorMustBeDesignMode" xml:space="preserve">
+    <data name="EditorMustBeDesignMode" xml:space="preserve">
     <value>Please switch the editor to Design Mode first.</value>
   </data>
-  <data name="EditorTarget" xml:space="preserve">
+    <data name="EditorTarget" xml:space="preserve">
     <value>Editor target</value>
   </data>
-  <data name="EditorUnlock" xml:space="preserve">
+    <data name="EditorUnlock" xml:space="preserve">
     <value>Editor unlock</value>
   </data>
-  <data name="EditScriptByVisualStudio" xml:space="preserve">
+    <data name="EditScriptByVisualStudio" xml:space="preserve">
     <value>Use Visual Studio to edit the script.</value>
   </data>
-  <data name="Enable" xml:space="preserve">
+    <data name="Enable" xml:space="preserve">
     <value>Enable</value>
   </data>
-  <data name="EnableAutoSave" xml:space="preserve">
+    <data name="EnableAutoSave" xml:space="preserve">
     <value>enable autosave?</value>
   </data>
-  <data name="EnableDumpFullMemory" xml:space="preserve">
+    <data name="EnableDumpFullMemory" xml:space="preserve">
     <value>enable dump full memory?</value>
   </data>
-  <data name="EnableHorizonScroll" xml:space="preserve">
+    <data name="EnableHorizonScroll" xml:space="preserve">
     <value>Enable horizon scroll</value>
   </data>
-  <data name="EnableHorizonScrollBarDisplay" xml:space="preserve">
+    <data name="EnableHorizonScrollBarDisplay" xml:space="preserve">
     <value>Enable display horizon scroll bar</value>
   </data>
-  <data name="EnableLoopPlayTiming" xml:space="preserve">
+    <data name="EnableLoopPlayTiming" xml:space="preserve">
     <value>Enable the metronome (only in Design Mode)</value>
   </data>
-  <data name="EnableMultiInstances" xml:space="preserve">
+    <data name="EnableMultiInstances" xml:space="preserve">
     <value>Allow multiple program instances to run</value>
   </data>
-  <data name="EnableNotifyUserByDialog" xml:space="preserve">
+    <data name="EnableNotifyUserByDialog" xml:space="preserve">
     <value>Enable display dialog for notifications</value>
   </data>
-  <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
+    <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
     <value>Allow user places objects beyond audio duration(red line at end of editor)</value>
   </data>
-  <data name="EnablePlayFieldDrawing" xml:space="preserve">
+    <data name="EnablePlayFieldDrawing" xml:space="preserve">
     <value>Enable draw play field</value>
   </data>
-  <data name="EnableVisualizerDisplay" xml:space="preserve">
+    <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>Enable display visualizer</value>
   </data>
-  <data name="Error" xml:space="preserve">
+    <data name="Error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="ErrorCantApplyNewAdjust" xml:space="preserve">
+    <data name="ErrorCantApplyNewAdjust" xml:space="preserve">
     <value>There is an object that cannot apply the new delay:</value>
   </data>
-  <data name="ErrorEditorNotSupport" xml:space="preserve">
+    <data name="ErrorEditorNotSupport" xml:space="preserve">
     <value>The provided file cannot be opened or processed by the editor</value>
   </data>
-  <data name="ErrorFileByParamNotFound" xml:space="preserve">
+    <data name="ErrorFileByParamNotFound" xml:space="preserve">
     <value>The file provided through the parameters does not exist</value>
   </data>
-  <data name="ErrorFolderIsEmpty" xml:space="preserve">
+    <data name="ErrorFolderIsEmpty" xml:space="preserve">
     <value>The selected folder is empty. Please choose again</value>
   </data>
-  <data name="ErrorOpenRecentFile" xml:space="preserve">
+    <data name="ErrorOpenRecentFile" xml:space="preserve">
     <value>Cannot open this file because an error is thrown:</value>
   </data>
-  <data name="ErrorProcessAudioNotFound" xml:space="preserve">
+    <data name="ErrorProcessAudioNotFound" xml:space="preserve">
     <value>Please select the audio file to be processed first</value>
   </data>
-  <data name="ErrorProcessFumenFileNotSelect" xml:space="preserve">
+    <data name="ErrorProcessFumenFileNotSelect" xml:space="preserve">
     <value>Please select the fumen file to be processed first</value>
   </data>
-  <data name="ErrorSaveAudioFileNotSelect" xml:space="preserve">
+    <data name="ErrorSaveAudioFileNotSelect" xml:space="preserve">
     <value>No specified location for saving the new audio file</value>
   </data>
-  <data name="ErrorSoundFolderIsEmptyFile" xml:space="preserve">
+    <data name="ErrorSoundFolderIsEmptyFile" xml:space="preserve">
     <value>The selected folder is empty. Please choose again</value>
   </data>
-  <data name="ErrorSoundFolderNotFound" xml:space="preserve">
+    <data name="ErrorSoundFolderNotFound" xml:space="preserve">
     <value>Unable to load sounds because the sound folder does not exist</value>
   </data>
-  <data name="ExceptionTermWindowTitle" xml:space="preserve">
+    <data name="ExceptionTermWindowTitle" xml:space="preserve">
     <value>Arisu has eaten your editor</value>
   </data>
-  <data name="Execute" xml:space="preserve">
+    <data name="Execute" xml:space="preserve">
     <value>Execute</value>
   </data>
-  <data name="Fail" xml:space="preserve">
+    <data name="Fail" xml:space="preserve">
     <value>Fail</value>
   </data>
-  <data name="FailedAndReason" xml:space="preserve">
+    <data name="FailedAndReason" xml:space="preserve">
     <value>Failed,reason:</value>
   </data>
-  <data name="FastAddObjectsToLanes" xml:space="preserve">
+    <data name="FastAddObjectsToLanes" xml:space="preserve">
     <value>Quickly (in bulk) add lane children.</value>
   </data>
-  <data name="FastOpen" xml:space="preserve">
+    <data name="FastOpen" xml:space="preserve">
     <value>FastOpen</value>
   </data>
-  <data name="FastOpen2" xml:space="preserve">
+    <data name="FastOpen2" xml:space="preserve">
     <value>Fast Open</value>
   </data>
-  <data name="FastOpen2TipText" xml:space="preserve">
+    <data name="FastOpen2TipText" xml:space="preserve">
     <value>Open an existing fumen file</value>
   </data>
-  <data name="FastOpenFumen" xml:space="preserve">
+    <data name="FastOpenFumen" xml:space="preserve">
     <value>Quickly open fumen</value>
   </data>
-  <data name="FastOpenOgkrFumen" xml:space="preserve">
+    <data name="FastOpenOgkrFumen" xml:space="preserve">
     <value>Quickly open ongeki fumen</value>
   </data>
-  <data name="FastPickLane" xml:space="preserve">
+    <data name="FastPickLane" xml:space="preserve">
     <value>Editor quickly select a lane</value>
   </data>
-  <data name="FastPlaceObjectToLane" xml:space="preserve">
+    <data name="FastPlaceObjectToLane" xml:space="preserve">
     <value>Quickly place {0} on the lane {1}</value>
   </data>
-  <data name="FastPlayPause" xml:space="preserve">
+    <data name="FastPlayPause" xml:space="preserve">
     <value>Editor quick play/pause.</value>
   </data>
-  <data name="FileAssociation" xml:space="preserve">
+    <data name="FileAssociation" xml:space="preserve">
     <value>File Association</value>
   </data>
-  <data name="FileAssociationRegister" xml:space="preserve">
+    <data name="FileAssociationRegister" xml:space="preserve">
     <value>Associate checked file types</value>
   </data>
-  <data name="FileAssociationRequestAdmin" xml:space="preserve">
+    <data name="FileAssociationRequestAdmin" xml:space="preserve">
     <value>File Association (Requires administrator privileges)</value>
   </data>
-  <data name="FileAssociationUnregister" xml:space="preserve">
+    <data name="FileAssociationUnregister" xml:space="preserve">
     <value>Unregister all associations</value>
   </data>
-  <data name="Filter" xml:space="preserve">
+    <data name="Filter" xml:space="preserve">
     <value>Filter</value>
   </data>
-  <data name="FinishBouns" xml:space="preserve">
+    <data name="FinishBouns" xml:space="preserve">
     <value>Finish Bouns:</value>
   </data>
-  <data name="FirstBpm" xml:space="preserve">
+    <data name="FirstBpm" xml:space="preserve">
     <value>First Bpm:</value>
   </data>
-  <data name="ForceMagneticDock" xml:space="preserve">
+    <data name="ForceMagneticDock" xml:space="preserve">
     <value>Force magnetic dock</value>
   </data>
-  <data name="ForceTapHoldMagneticDockToLane" xml:space="preserve">
+    <data name="ForceTapHoldMagneticDockToLane" xml:space="preserve">
     <value>Force Tap/Hold objects to snap onto the lane</value>
   </data>
-  <data name="ForceXGridMagneticDock" xml:space="preserve">
+    <data name="ForceXGridMagneticDock" xml:space="preserve">
     <value>Force XGrid to snap automatically.</value>
   </data>
-  <data name="FumenBulletPalleteListViewer" xml:space="preserve">
+    <data name="FumenBulletPalleteListViewer" xml:space="preserve">
     <value>Bullet Pallete</value>
   </data>
-  <data name="FumenCheckerListViewer" xml:space="preserve">
+    <data name="FumenCheckerListViewer" xml:space="preserve">
     <value>Checker List</value>
   </data>
-  <data name="FumenContainUngenerateError" xml:space="preserve">
+    <data name="FumenContainUngenerateError" xml:space="preserve">
     <value>Fumen contains format or content errors that cannot be ignored, preventing further generation. Please use the fumen checking viewer/tool to check and correct the fumen.</value>
   </data>
-  <data name="FumenConverter" xml:space="preserve">
+    <data name="FumenConverter" xml:space="preserve">
     <value>Fumen File Format Converter</value>
   </data>
-  <data name="FumenEditorRenderControlViewer" xml:space="preserve">
+    <data name="FumenEditorRenderControlViewer" xml:space="preserve">
     <value>Render Control</value>
   </data>
-  <data name="FumenEditorSelectingObjectViewer" xml:space="preserve">
+    <data name="FumenEditorSelectingObjectViewer" xml:space="preserve">
     <value>Editor Selecting</value>
   </data>
-  <data name="FumenFileDeserializeNotSupport" xml:space="preserve">
+    <data name="FumenFileDeserializeNotSupport" xml:space="preserve">
     <value>This fumen file cannot be parsed</value>
   </data>
-  <data name="FumenFileName" xml:space="preserve">
+    <data name="FumenFileName" xml:space="preserve">
     <value>Fumen file name (optional):</value>
   </data>
-  <data name="FumenFileNotSelect" xml:space="preserve">
+    <data name="FumenFileNotSelect" xml:space="preserve">
     <value>Please select the input fumen file path first</value>
   </data>
-  <data name="FumenInfo" xml:space="preserve">
+    <data name="FumenInfo" xml:space="preserve">
     <value>Fumen Info</value>
   </data>
-  <data name="FumenInitOption" xml:space="preserve">
+    <data name="FumenInitOption" xml:space="preserve">
     <value>Fumen Init Option</value>
   </data>
-  <data name="FumenLoadFailed" xml:space="preserve">
+    <data name="FumenLoadFailed" xml:space="preserve">
     <value>Failed to load fumen file</value>
   </data>
-  <data name="FumenMetaInfoBrowser" xml:space="preserve">
+    <data name="FumenMetaInfoBrowser" xml:space="preserve">
     <value>Fumen Info</value>
   </data>
-  <data name="FumenObjectPropertyBrowser" xml:space="preserve">
+    <data name="FumenObjectPropertyBrowser" xml:space="preserve">
     <value>Object Property</value>
   </data>
-  <data name="FumenProjectFile" xml:space="preserve">
+    <data name="FumenProjectFile" xml:space="preserve">
     <value>Fumen Project File</value>
   </data>
-  <data name="FumenSource" xml:space="preserve">
+    <data name="FumenSource" xml:space="preserve">
     <value>Fumen Source</value>
   </data>
-  <data name="FumenTimeSignatureListViewer" xml:space="preserve">
+    <data name="FumenTimeSignatureListViewer" xml:space="preserve">
     <value>Time Signature</value>
   </data>
-  <data name="FumenVisualEditorSettings" xml:space="preserve">
+    <data name="FumenVisualEditorSettings" xml:space="preserve">
     <value>Editor Settings</value>
   </data>
-  <data name="GameVersion" xml:space="preserve">
+    <data name="GameVersion" xml:space="preserve">
     <value>Game Version:</value>
   </data>
-  <data name="Generate" xml:space="preserve">
+    <data name="Generate" xml:space="preserve">
     <value>Generate</value>
   </data>
-  <data name="GenerateABFileFail" xml:space="preserve">
+    <data name="GenerateABFileFail" xml:space="preserve">
     <value>Generate .ab file fail</value>
   </data>
-  <data name="GenerateAssemblyFileFail" xml:space="preserve">
+    <data name="GenerateAssemblyFileFail" xml:space="preserve">
     <value>Generate .dll file fail:</value>
   </data>
-  <data name="GenerateAudioFileFail" xml:space="preserve">
+    <data name="GenerateAudioFileFail" xml:space="preserve">
     <value>Generate audio file failed:</value>
   </data>
-  <data name="GenerateAudioSuccess" xml:space="preserve">
+    <data name="GenerateAudioSuccess" xml:space="preserve">
     <value>Generate audio file successfully, open output folder?</value>
   </data>
-  <data name="GenerateJacketFileFail" xml:space="preserve">
+    <data name="GenerateJacketFileFail" xml:space="preserve">
     <value>Generate jacket files fail:</value>
   </data>
-  <data name="GenerateJacketFileSuccess" xml:space="preserve">
+    <data name="GenerateJacketFileSuccess" xml:space="preserve">
     <value>Generate jacket files successfully, open output folder?</value>
   </data>
-  <data name="GenerateLaneObjects" xml:space="preserve">
+    <data name="GenerateLaneObjects" xml:space="preserve">
     <value>Generate lane objects</value>
   </data>
-  <data name="GenerateMusicXmlFile" xml:space="preserve">
+    <data name="GenerateMusicXmlFile" xml:space="preserve">
     <value>Generate Music.xml file</value>
   </data>
-  <data name="GenerateScriptProjectFileFail" xml:space="preserve">
+    <data name="GenerateScriptProjectFileFail" xml:space="preserve">
     <value>Generate script project file failed</value>
   </data>
-  <data name="GenerateSvg" xml:space="preserve">
+    <data name="GenerateSvg" xml:space="preserve">
     <value>Generate fumen preview .svg file</value>
   </data>
-  <data name="GenerateSvgSuccess" xml:space="preserve">
+    <data name="GenerateSvgSuccess" xml:space="preserve">
     <value>Fumen .svg file generated successfully</value>
   </data>
-  <data name="GenerateSvgSuccessAndAskIfOpen" xml:space="preserve">
+    <data name="GenerateSvgSuccessAndAskIfOpen" xml:space="preserve">
     <value>Successfully generated .svg file. Do you want to open the file now?</value>
   </data>
-  <data name="Genre" xml:space="preserve">
+    <data name="Genre" xml:space="preserve">
     <value>Genre:</value>
   </data>
-  <data name="GiveTGridToSelectedObject" xml:space="preserve">
+    <data name="GiveTGridToSelectedObject" xml:space="preserve">
     <value>Assign this TGrid to the currently selected object</value>
   </data>
-  <data name="GraphicsCompatability" xml:space="preserve">
+    <data name="GraphicsCompatability" xml:space="preserve">
     <value>Compatibility mode (use OpenGL 3.3 full compatibility, try this if the program displays items or crashes with visuals)</value>
   </data>
-  <data name="GraphicsLogSynchronous" xml:space="preserve">
+    <data name="GraphicsLogSynchronous" xml:space="preserve">
     <value>Output OpenGL logs in the UI thread (more impact on performance, but throwing exceptions will provide precise stack information)</value>
   </data>
-  <data name="GraphicsRender" xml:space="preserve">
+    <data name="GraphicsRender" xml:space="preserve">
     <value>Graphics Render</value>
   </data>
-  <data name="HalfHourAgo" xml:space="preserve">
+    <data name="HalfHourAgo" xml:space="preserve">
     <value>Half an hour ago</value>
   </data>
-  <data name="HeaderConstMismatch" xml:space="preserve">
+    <data name="HeaderConstMismatch" xml:space="preserve">
     <value>Fumen Header Info</value>
   </data>
-  <data name="HeaderConstMismatch2" xml:space="preserve">
+    <data name="HeaderConstMismatch2" xml:space="preserve">
     <value>XRESOLUTION({0}) parameter does not match XGrid.ResX({1})</value>
   </data>
-  <data name="HeaderConstMismatch3" xml:space="preserve">
+    <data name="HeaderConstMismatch3" xml:space="preserve">
     <value>TRESOLUTION({0}) parameter does not match TGrid.ResT({1})</value>
   </data>
-  <data name="HeaderConstMismatch4" xml:space="preserve">
+    <data name="HeaderConstMismatch4" xml:space="preserve">
     <value>Fumen creator/designer is empty</value>
   </data>
-  <data name="ImageFile" xml:space="preserve">
+    <data name="ImageFile" xml:space="preserve">
     <value>Image file:</value>
   </data>
-  <data name="InnerExceptionMessage" xml:space="preserve">
+    <data name="InnerExceptionMessage" xml:space="preserve">
     <value>Inner exception message:</value>
   </data>
-  <data name="InputPictureFileNotFound" xml:space="preserve">
+    <data name="InputPictureFileNotFound" xml:space="preserve">
     <value>The image file to be generated does not exist</value>
   </data>
-  <data name="InterpolateComplete" xml:space="preserve">
+    <data name="InterpolateComplete" xml:space="preserve">
     <value>Interpolation completed, a total of {0} lanes were interpolated, generating {1} new lanes , corresponding to the recalculation of {2} affected Tap/Hold and other objects</value>
   </data>
-  <data name="InterpolateCurve" xml:space="preserve">
+    <data name="InterpolateCurve" xml:space="preserve">
     <value>Interpolate curve</value>
   </data>
-  <data name="InterpolateDurationSoflan" xml:space="preserve">
+    <data name="InterpolateDurationSoflan" xml:space="preserve">
     <value>Interpolate new DurationSoflan objects</value>
   </data>
-  <data name="InterpolateLane" xml:space="preserve">
+    <data name="InterpolateLane" xml:space="preserve">
     <value>Interpolate the entire lane</value>
   </data>
-  <data name="InterpolateLaneTipText" xml:space="preserve">
+    <data name="InterpolateLaneTipText" xml:space="preserve">
     <value>Interpolate curve lane into straight lines, then delete the current track and generate a new one (or more)</value>
   </data>
-  <data name="InterpolatePart" xml:space="preserve">
+    <data name="InterpolatePart" xml:space="preserve">
     <value>Interpolate the part of lane</value>
   </data>
-  <data name="InterpolatePartCurve" xml:space="preserve">
+    <data name="InterpolatePartCurve" xml:space="preserve">
     <value>Interpolate the part of lane</value>
   </data>
-  <data name="InterpolatePartTipText" xml:space="preserve">
+    <data name="InterpolatePartTipText" xml:space="preserve">
     <value>Interpolate this segment of the lane; illegal segments cannot be used</value>
   </data>
-  <data name="InterpolateToCreateKeyframeSoflans" xml:space="preserve">
+    <data name="InterpolateToCreateKeyframeSoflans" xml:space="preserve">
     <value>Interpolate new KeyframeSoflan objects</value>
   </data>
-  <data name="InterpolateToCreateKeyframeSoflansTipText" xml:space="preserve">
+    <data name="InterpolateToCreateKeyframeSoflansTipText" xml:space="preserve">
     <value>Interpolate new KeyframeSoflan objects</value>
   </data>
-  <data name="InvalidConnectablePath" xml:space="preserve">
+    <data name="InvalidConnectablePath" xml:space="preserve">
     <value>Segment of lane is illegal</value>
   </data>
-  <data name="JacketGenerator" xml:space="preserve">
+    <data name="JacketGenerator" xml:space="preserve">
     <value>Fumen Jacket Generator</value>
   </data>
-  <data name="JudgeLineAlignBeat" xml:space="preserve">
+    <data name="JudgeLineAlignBeat" xml:space="preserve">
     <value>Align the scroll judgment line with the meter line by scrolling the wheel.</value>
   </data>
-  <data name="JudgeLineOffsetY" xml:space="preserve">
+    <data name="JudgeLineOffsetY" xml:space="preserve">
     <value>Judgment line offset:</value>
   </data>
-  <data name="JustBefore" xml:space="preserve">
+    <data name="JustBefore" xml:space="preserve">
     <value>Just now</value>
   </data>
-  <data name="KeywordSortFilter" xml:space="preserve">
+    <data name="KeywordSortFilter" xml:space="preserve">
     <value>Keywords sorting:</value>
   </data>
-  <data name="LaneContainInvalidPath" xml:space="preserve">
+    <data name="LaneContainInvalidPath" xml:space="preserve">
     <value>This lane contains an illegal segment</value>
   </data>
-  <data name="Languages" xml:space="preserve">
+    <data name="Languages" xml:space="preserve">
     <value>Languages:</value>
   </data>
-  <data name="LimitUndoCount" xml:space="preserve">
+    <data name="LimitUndoCount" xml:space="preserve">
     <value>Limit the number of undo actions saved in the editor</value>
   </data>
-  <data name="LoadFromCurrentEditor" xml:space="preserve">
+    <data name="LoadFromCurrentEditor" xml:space="preserve">
     <value>Load from current editor:</value>
   </data>
-  <data name="LoadFromFile" xml:space="preserve">
+    <data name="LoadFromFile" xml:space="preserve">
     <value>Load from file:</value>
   </data>
-  <data name="LoadFumen" xml:space="preserve">
+    <data name="LoadFumen" xml:space="preserve">
     <value>Load fumen</value>
   </data>
-  <data name="LoadMusicXmlFile" xml:space="preserve">
+    <data name="LoadMusicXmlFile" xml:space="preserve">
     <value>Load exist Music.xml file</value>
   </data>
-  <data name="LoadProjectFileAndFumenFile" xml:space="preserve">
+    <data name="LoadProjectFileAndFumenFile" xml:space="preserve">
     <value>Project and fumen loaded successfully</value>
   </data>
-  <data name="LogFileSaveTo" xml:space="preserve">
+    <data name="LogFileSaveTo" xml:space="preserve">
     <value>Current log files are stored at:</value>
   </data>
-  <data name="Logger" xml:space="preserve">
+    <data name="Logger" xml:space="preserve">
     <value>Logger</value>
   </data>
-  <data name="LoggerFolder" xml:space="preserve">
+    <data name="LoggerFolder" xml:space="preserve">
     <value>Log folder</value>
   </data>
-  <data name="MenuAssist" xml:space="preserve">
+    <data name="MenuAssist" xml:space="preserve">
     <value>Assist (_A)</value>
   </data>
-  <data name="MenuHelp" xml:space="preserve">
+    <data name="MenuHelp" xml:space="preserve">
     <value>Help (_H)</value>
   </data>
-  <data name="MenuOngeki" xml:space="preserve">
+    <data name="MenuOngeki" xml:space="preserve">
     <value>Ongeki (_O)</value>
   </data>
-  <data name="MenuOptionGenerateTool" xml:space="preserve">
+    <data name="MenuOptionGenerateTool" xml:space="preserve">
     <value>Option Generate Tool</value>
   </data>
-  <data name="MenuSelecting" xml:space="preserve">
+    <data name="MenuSelecting" xml:space="preserve">
     <value>Select...</value>
   </data>
-  <data name="MissingBossEnemySet" xml:space="preserve">
+    <data name="MissingBossEnemySet" xml:space="preserve">
     <value>Missing EnemySet(Boss) object. It is recommended to place one to designate the timing of the boss's appearance</value>
   </data>
-  <data name="MissingEndObject" xml:space="preserve">
+    <data name="MissingEndObject" xml:space="preserve">
     <value>Hold (Oid:{0}) object is missing the HoldEnd object</value>
   </data>
-  <data name="MissingRefObject" xml:space="preserve">
+    <data name="MissingRefObject" xml:space="preserve">
     <value>The {0} object is missing a reference to a Lane object</value>
   </data>
-  <data name="MissingRefObject2" xml:space="preserve">
+    <data name="MissingRefObject2" xml:space="preserve">
     <value>The {0} object references a Lane object (laneId:{1}), which does not exist in the fumen.</value>
   </data>
-  <data name="Music" xml:space="preserve">
+    <data name="Music" xml:space="preserve">
     <value>Music</value>
   </data>
-  <data name="MusicIDInvaild" xml:space="preserve">
+    <data name="MusicIDInvaild" xml:space="preserve">
     <value>MusicId({0}) is illegal</value>
   </data>
-  <data name="MusicXmlFileFormat" xml:space="preserve">
+    <data name="MusicXmlFileFormat" xml:space="preserve">
     <value>Music.xml file</value>
   </data>
-  <data name="MusicXmlWindow" xml:space="preserve">
+    <data name="MusicXmlWindow" xml:space="preserve">
     <value>Music.xml generator</value>
   </data>
-  <data name="MustMakeEditorActive" xml:space="preserve">
+    <data name="MustMakeEditorActive" xml:space="preserve">
     <value>Switch to the current editor first</value>
   </data>
-  <data name="MustSelectOneTapOrHold" xml:space="preserve">
+    <data name="MustSelectOneTapOrHold" xml:space="preserve">
     <value>Need to select a Tap/Hold object only</value>
   </data>
-  <data name="Name" xml:space="preserve">
+    <data name="Name" xml:space="preserve">
     <value>Name</value>
   </data>
-  <data name="NewBulletPallete" xml:space="preserve">
+    <data name="NewBulletPallete" xml:space="preserve">
     <value>Add new pallete</value>
   </data>
-  <data name="NewFumenFileSaveDone" xml:space="preserve">
+    <data name="NewFumenFileSaveDone" xml:space="preserve">
     <value>Standardization of the ongeki fumen had completed.\nDo you want to open the output folder immediately</value>
   </data>
-  <data name="NewFumenFileSavePath" xml:space="preserve">
+    <data name="NewFumenFileSavePath" xml:space="preserve">
     <value>New fumen file output save path</value>
   </data>
-  <data name="NoEditorTarget" xml:space="preserve">
+    <data name="NoEditorTarget" xml:space="preserve">
     <value>&lt;Need Not Editor&gt;</value>
   </data>
-  <data name="NoFumenInput" xml:space="preserve">
+    <data name="NoFumenInput" xml:space="preserve">
     <value>No fumen input</value>
   </data>
-  <data name="NoObjectCouldBeSetIsCritical" xml:space="preserve">
+    <data name="NoObjectCouldBeSetIsCritical" xml:space="preserve">
     <value>No suitable objects to setting property IsCritical</value>
   </data>
-  <data name="NotInterpolatedCurve" xml:space="preserve">
+    <data name="NotInterpolatedCurve" xml:space="preserve">
     <value>The curve lane has not been interpolated yet</value>
   </data>
-  <data name="NotShow" xml:space="preserve">
+    <data name="NotShow" xml:space="preserve">
     <value>(Not show)</value>
   </data>
-  <data name="NotShowAnymore" xml:space="preserve">
+    <data name="NotShowAnymore" xml:space="preserve">
     <value>Do not show this window again</value>
   </data>
-  <data name="NotSupportInBrushMode" xml:space="preserve">
+    <data name="NotSupportInBrushMode" xml:space="preserve">
     <value>{0} is not supported in brush mode.</value>
   </data>
-  <data name="ObjectBatchBrush" xml:space="preserve">
+    <data name="ObjectBatchBrush" xml:space="preserve">
     <value>Batch paste brush</value>
   </data>
-  <data name="ObjectLaneGroupId" xml:space="preserve">
+    <data name="ObjectLaneGroupId" xml:space="preserve">
     <value>Changing this value can alter the reference lane of this object</value>
   </data>
-  <data name="ObjectNotSupportBrush" xml:space="preserve">
+    <data name="ObjectNotSupportBrush" xml:space="preserve">
     <value>This copied object cannot be used within brush mode</value>
   </data>
-  <data name="ObjectOverlap" xml:space="preserve">
+    <data name="ObjectOverlap" xml:space="preserve">
     <value>Multiple ITimelineObject objects of the same type ({0}) overlap</value>
   </data>
-  <data name="ObjectOverlap2" xml:space="preserve">
+    <data name="ObjectOverlap2" xml:space="preserve">
     <value>Multiple objects of the same type ({0}) overlap</value>
   </data>
-  <data name="ObjectPalleteStrId" xml:space="preserve">
+    <data name="ObjectPalleteStrId" xml:space="preserve">
     <value>Changing this value can alter the reference bullet pallete of this object</value>
   </data>
-  <data name="ObjectProperty" xml:space="preserve">
+    <data name="ObjectProperty" xml:space="preserve">
     <value>Object Property</value>
   </data>
-  <data name="ObjectPropertyChanged" xml:space="preserve">
+    <data name="ObjectPropertyChanged" xml:space="preserve">
     <value>Object property ({0}) has been changed</value>
   </data>
-  <data name="ObjectTag" xml:space="preserve">
+    <data name="ObjectTag" xml:space="preserve">
     <value>Represents a user-defined label, typically used for script differentiation</value>
   </data>
-  <data name="ObjectTGrid" xml:space="preserve">
+    <data name="ObjectTGrid" xml:space="preserve">
     <value>Object TGrid</value>
   </data>
-  <data name="ObjectTime" xml:space="preserve">
+    <data name="ObjectTime" xml:space="preserve">
     <value>Object Time</value>
   </data>
-  <data name="ObjectTimelineNotAligned" xml:space="preserve">
+    <data name="ObjectTimelineNotAligned" xml:space="preserve">
     <value>Object {0} does not align with the meter/time lines.</value>
   </data>
-  <data name="ObjectXGrid" xml:space="preserve">
+    <data name="ObjectXGrid" xml:space="preserve">
     <value>Object XGrid</value>
   </data>
-  <data name="OffsetOption" xml:space="preserve">
+    <data name="OffsetOption" xml:space="preserve">
     <value>Offset Option</value>
   </data>
-  <data name="OgkiFumenListBrowser" xml:space="preserve">
+    <data name="OgkiFumenListBrowser" xml:space="preserve">
     <value>Ongeki Fumen List Browser</value>
   </data>
-  <data name="OngekiFumen" xml:space="preserve">
+    <data name="OngekiFumen" xml:space="preserve">
     <value>Ongek iFumen</value>
   </data>
-  <data name="OngekiFumenStandardized" xml:space="preserve">
+    <data name="OngekiFumenStandardized" xml:space="preserve">
     <value>Standardized ongeki fumen</value>
   </data>
-  <data name="OpenEditorBeforeUsing" xml:space="preserve">
+    <data name="OpenEditorBeforeUsing" xml:space="preserve">
     <value>Open the editor first</value>
   </data>
-  <data name="OpenProject" xml:space="preserve">
+    <data name="OpenProject" xml:space="preserve">
     <value>Open Project</value>
   </data>
-  <data name="OpenProjectTipText" xml:space="preserve">
+    <data name="OpenProjectTipText" xml:space="preserve">
     <value>Create an existing project</value>
   </data>
-  <data name="Option" xml:space="preserve">
+    <data name="Option" xml:space="preserve">
     <value>Option</value>
   </data>
-  <data name="OptionalFumenFile" xml:space="preserve">
+    <data name="OptionalFumenFile" xml:space="preserve">
     <value>Fumen file (Optional):</value>
   </data>
-  <data name="Other" xml:space="preserve">
+    <data name="Other" xml:space="preserve">
     <value>Other</value>
   </data>
-  <data name="Output" xml:space="preserve">
+    <data name="Output" xml:space="preserve">
     <value>Output</value>
   </data>
-  <data name="OutputFolder" xml:space="preserve">
+    <data name="OutputFolder" xml:space="preserve">
     <value>Output folder:</value>
   </data>
-  <data name="OutputFolderIsEmpty" xml:space="preserve">
+    <data name="OutputFolderIsEmpty" xml:space="preserve">
     <value>Output folder is empty</value>
   </data>
-  <data name="OutputFumenFileNotSelect" xml:space="preserve">
+    <data name="OutputFumenFileNotSelect" xml:space="preserve">
     <value>Fumen output path is not choose.</value>
   </data>
-  <data name="OutputFumenNotSupport" xml:space="preserve">
+    <data name="OutputFumenNotSupport" xml:space="preserve">
     <value>Fumen output path is not supported</value>
   </data>
-  <data name="OutputGraphicsLog" xml:space="preserve">
+    <data name="OutputGraphicsLog" xml:space="preserve">
     <value>Output OpenGL logs (may affect performance, and errors will be thrown as exceptions)</value>
   </data>
-  <data name="OutputMethod" xml:space="preserve">
+    <data name="OutputMethod" xml:space="preserve">
     <value>Output method：</value>
   </data>
-  <data name="PasteDirectly" xml:space="preserve">
+    <data name="PasteDirectly" xml:space="preserve">
     <value>Paste directly</value>
   </data>
-  <data name="PasteForHorizonMirror" xml:space="preserve">
+    <data name="PasteForHorizonMirror" xml:space="preserve">
     <value>Paste horizontally mirrored across the entire scope</value>
   </data>
-  <data name="PasteForVerticalMirror" xml:space="preserve">
+    <data name="PasteForVerticalMirror" xml:space="preserve">
     <value>Paste vertically mirrored across the entire scope</value>
   </data>
-  <data name="PasteForZeroXGridMirror" xml:space="preserve">
+    <data name="PasteForZeroXGridMirror" xml:space="preserve">
     <value>Paste with X[0,0] as the reference point for horizontal mirroring</value>
   </data>
-  <data name="PasteToMouse" xml:space="preserve">
+    <data name="PasteToMouse" xml:space="preserve">
     <value>Paste objects to mouse location</value>
   </data>
-  <data name="PauseAudioAndFumen" xml:space="preserve">
+    <data name="PauseAudioAndFumen" xml:space="preserve">
     <value>Pause the audio/editor playback first</value>
   </data>
-  <data name="PlayFieldForegroundColor" xml:space="preserve">
+    <data name="PlayFieldForegroundColor" xml:space="preserve">
     <value>Play field foreground color:</value>
   </data>
-  <data name="PreventUsingInternalEditor" xml:space="preserve">
+    <data name="PreventUsingInternalEditor" xml:space="preserve">
     <value>To avoid code confusion, you are temporarily unable to operate this editor simultaneously</value>
   </data>
-  <data name="PreviewMode" xml:space="preserve">
+    <data name="PreviewMode" xml:space="preserve">
     <value>Preview Mode</value>
   </data>
-  <data name="PreviewTime" xml:space="preserve">
+    <data name="PreviewTime" xml:space="preserve">
     <value>Preview time(msec):</value>
   </data>
-  <data name="Problem" xml:space="preserve">
+    <data name="Problem" xml:space="preserve">
     <value>Problem</value>
   </data>
-  <data name="Process" xml:space="preserve">
+    <data name="Process" xml:space="preserve">
     <value>Process</value>
   </data>
-  <data name="ProcessProriotyUpgrade" xml:space="preserve">
+    <data name="ProcessProriotyUpgrade" xml:space="preserve">
     <value>Upgrade the priority of this application process</value>
   </data>
-  <data name="ProgramError" xml:space="preserve">
+    <data name="ProgramError" xml:space="preserve">
     <value>Program error</value>
   </data>
-  <data name="ProgramThrowAndDump" xml:space="preserve">
+    <data name="ProgramThrowAndDump" xml:space="preserve">
     <value>The program has captured an unhandled exception. Logs and dump files have been stored in the corresponding folder in the program directory. You can send them to the developers for further analysis</value>
   </data>
-  <data name="PropertyBatchSet" xml:space="preserve">
+    <data name="PropertyBatchSet" xml:space="preserve">
     <value>Property batch assignment:</value>
   </data>
-  <data name="RecaculatedSuccess" xml:space="preserve">
+    <data name="RecaculatedSuccess" xml:space="preserve">
     <value>Recaculate successfully</value>
   </data>
-  <data name="RecalculateTotalHeight" xml:space="preserve">
+    <data name="RecalculateTotalHeight" xml:space="preserve">
     <value>Recaculate editor scroll height</value>
   </data>
-  <data name="RecentFiles" xml:space="preserve">
+    <data name="RecentFiles" xml:space="preserve">
     <value>Open the most recently used file</value>
   </data>
-  <data name="RecoveryAudioTime" xml:space="preserve">
+    <data name="RecoveryAudioTime" xml:space="preserve">
     <value>Recovery to audio time</value>
   </data>
-  <data name="RecoveryObjectsSuccess" xml:space="preserve">
+    <data name="RecoveryObjectsSuccess" xml:space="preserve">
     <value>Restored {0} objects to audio time</value>
   </data>
-  <data name="RecoveryObjectToAudioTime" xml:space="preserve">
+    <data name="RecoveryObjectToAudioTime" xml:space="preserve">
     <value>Recovery objects to audio time</value>
   </data>
-  <data name="Refresh" xml:space="preserve">
+    <data name="Refresh" xml:space="preserve">
     <value>Refresh</value>
   </data>
-  <data name="RegisterFail" xml:space="preserve">
+    <data name="RegisterFail" xml:space="preserve">
     <value>Register fail</value>
   </data>
-  <data name="RegisterOneFileTypeAtLeast" xml:space="preserve">
+    <data name="RegisterOneFileTypeAtLeast" xml:space="preserve">
     <value>Register at least one file type</value>
   </data>
-  <data name="RegisterSuccess" xml:space="preserve">
+    <data name="RegisterSuccess" xml:space="preserve">
     <value>Register success</value>
   </data>
-  <data name="ReloadSoundFile" xml:space="preserve">
+    <data name="ReloadSoundFile" xml:space="preserve">
     <value>Sound files reload</value>
   </data>
-  <data name="RememberAudioTime" xml:space="preserve">
+    <data name="RememberAudioTime" xml:space="preserve">
     <value>Remember audio time</value>
   </data>
-  <data name="RememberObjects" xml:space="preserve">
+    <data name="RememberObjects" xml:space="preserve">
     <value>Memorized audio time for {0} objects</value>
   </data>
-  <data name="RememberRecoveryEditorTime" xml:space="preserve">
+    <data name="RememberRecoveryEditorTime" xml:space="preserve">
     <value>Memorize/Restore editor time.</value>
   </data>
-  <data name="RememberUndoPlace" xml:space="preserve">
+    <data name="RememberUndoPlace" xml:space="preserve">
     <value>Record the operation position. In design mode, when undoing, if not within the position, jump to this location</value>
   </data>
-  <data name="Render" xml:space="preserve">
+    <data name="Render" xml:space="preserve">
     <value>Render</value>
   </data>
-  <data name="RenderOrder" xml:space="preserve">
+    <data name="RenderOrder" xml:space="preserve">
     <value>Render Order</value>
   </data>
-  <data name="RequestAdminPermission" xml:space="preserve">
+    <data name="RequestAdminPermission" xml:space="preserve">
     <value>Insufficient permissions. Please run as administrator</value>
   </data>
-  <data name="RequestRestartProgram" xml:space="preserve">
+    <data name="RequestRestartProgram" xml:space="preserve">
     <value>Restart the program is required</value>
   </data>
-  <data name="Resample" xml:space="preserve">
+    <data name="Resample" xml:space="preserve">
     <value>Resample</value>
   </data>
-  <data name="RescueFolderPathSaveTo" xml:space="preserve">
+    <data name="RescueFolderPathSaveTo" xml:space="preserve">
     <value>Your fumen and project files are temporarily saved at:</value>
   </data>
-  <data name="ResetDefault" xml:space="preserve">
+    <data name="ResetDefault" xml:space="preserve">
     <value>Reset default</value>
   </data>
-  <data name="ReverseSelectAllObjects" xml:space="preserve">
+    <data name="ReverseSelectAllObjects" xml:space="preserve">
     <value>Invert selection of all objects</value>
   </data>
-  <data name="RuleName" xml:space="preserve">
+    <data name="RuleName" xml:space="preserve">
     <value>RuleName</value>
   </data>
-  <data name="RunScript" xml:space="preserve">
+    <data name="RunScript" xml:space="preserve">
     <value>Run script</value>
   </data>
-  <data name="SampleRates" xml:space="preserve">
+    <data name="SampleRates" xml:space="preserve">
     <value>SampleRates</value>
   </data>
-  <data name="SaveMaxCount_Part1" xml:space="preserve">
+    <data name="SaveMaxCount_Part1" xml:space="preserve">
     <value>Maximum save of </value>
   </data>
-  <data name="SaveMaxCount_Part2" xml:space="preserve">
+    <data name="SaveMaxCount_Part2" xml:space="preserve">
     <value> undo operations</value>
   </data>
-  <data name="SaveMusicXmlFile" xml:space="preserve">
+    <data name="SaveMusicXmlFile" xml:space="preserve">
     <value>Save Music.xml file</value>
   </data>
-  <data name="SaveNewAudioFile" xml:space="preserve">
+    <data name="SaveNewAudioFile" xml:space="preserve">
     <value>Save new audio file path</value>
   </data>
-  <data name="SaveNewProjectFile" xml:space="preserve">
+    <data name="SaveNewProjectFile" xml:space="preserve">
     <value>Save new project file path</value>
   </data>
-  <data name="SaveProjectFileAndFumenFile" xml:space="preserve">
+    <data name="SaveProjectFileAndFumenFile" xml:space="preserve">
     <value>Project and fumen saved successfully</value>
   </data>
-  <data name="SaveToFile" xml:space="preserve">
+    <data name="SaveToFile" xml:space="preserve">
     <value>Save to file:</value>
   </data>
-  <data name="Second" xml:space="preserve">
+    <data name="Second" xml:space="preserve">
     <value>Second</value>
   </data>
-  <data name="SelectAllObjects" xml:space="preserve">
+    <data name="SelectAllObjects" xml:space="preserve">
     <value>Select all objects</value>
   </data>
-  <data name="SelectAudioFile" xml:space="preserve">
+    <data name="SelectAudioFile" xml:space="preserve">
     <value>Select audio file</value>
   </data>
-  <data name="SelectAudioFileManually" xml:space="preserve">
+    <data name="SelectAudioFileManually" xml:space="preserve">
     <value>Select audio file manually</value>
   </data>
-  <data name="SelectDiff" xml:space="preserve">
+    <data name="SelectDiff" xml:space="preserve">
     <value>Select Diff:</value>
   </data>
-  <data name="SelectGameRootFolder" xml:space="preserve">
+    <data name="SelectGameRootFolder" xml:space="preserve">
     <value>Select game root folder</value>
   </data>
-  <data name="SelectImage" xml:space="preserve">
+    <data name="SelectImage" xml:space="preserve">
     <value>Select image</value>
   </data>
-  <data name="SelectMusicXmlFile" xml:space="preserve">
+    <data name="SelectMusicXmlFile" xml:space="preserve">
     <value>Select Music.xml file</value>
   </data>
-  <data name="SelectOutputFolder" xml:space="preserve">
+    <data name="SelectOutputFolder" xml:space="preserve">
     <value>Select output folder</value>
   </data>
-  <data name="SelectPackageFolder" xml:space="preserve">
+    <data name="SelectPackageFolder" xml:space="preserve">
     <value>Select game root folder (package folder)</value>
   </data>
-  <data name="SelectSvgFile" xml:space="preserve">
+    <data name="SelectSvgFile" xml:space="preserve">
     <value>Select .svg file</value>
   </data>
-  <data name="SerializeFileNotSupport" xml:space="preserve">
+    <data name="SerializeFileNotSupport" xml:space="preserve">
     <value>Not supported to save in this file format:</value>
   </data>
-  <data name="Setup" xml:space="preserve">
+    <data name="Setup" xml:space="preserve">
     <value>Setup</value>
   </data>
-  <data name="Severity" xml:space="preserve">
+    <data name="Severity" xml:space="preserve">
     <value>Severity</value>
   </data>
-  <data name="ShootOffset" xml:space="preserve">
+    <data name="ShootOffset" xml:space="preserve">
     <value>Shoot Offset</value>
   </data>
-  <data name="ShootSource" xml:space="preserve">
+    <data name="ShootSource" xml:space="preserve">
     <value>Shoot Source</value>
   </data>
-  <data name="ShootTarget" xml:space="preserve">
+    <data name="ShootTarget" xml:space="preserve">
     <value>Shoot Target</value>
   </data>
-  <data name="ShowCurveControlAlways" xml:space="preserve">
+    <data name="ShowCurveControlAlways" xml:space="preserve">
     <value>Always display curve control points：</value>
   </data>
-  <data name="ShowFPS" xml:space="preserve">
+    <data name="ShowFPS" xml:space="preserve">
     <value>Show FPS</value>
   </data>
-  <data name="ShowObjectPlaceLine" xml:space="preserve">
+    <data name="ShowObjectPlaceLine" xml:space="preserve">
     <value>Display the placement place of objects</value>
   </data>
-  <data name="ShowTimingLine" xml:space="preserve">
+    <data name="ShowTimingLine" xml:space="preserve">
     <value>Display the meter lines</value>
   </data>
-  <data name="SmallJacketSize" xml:space="preserve">
+    <data name="SmallJacketSize" xml:space="preserve">
     <value>Thumbnail image dimensions (default 220x220):</value>
   </data>
-  <data name="SoflanConflict" xml:space="preserve">
+    <data name="SoflanConflict" xml:space="preserve">
     <value>Detected conflicting Soflan duration: {0} and {1}</value>
   </data>
-  <data name="SortOrder" xml:space="preserve">
+    <data name="SortOrder" xml:space="preserve">
     <value>Sort Order:</value>
   </data>
-  <data name="Sound" xml:space="preserve">
+    <data name="Sound" xml:space="preserve">
     <value>Sound</value>
   </data>
-  <data name="SoundFolderPath" xml:space="preserve">
+    <data name="SoundFolderPath" xml:space="preserve">
     <value>Sound folder path:</value>
   </data>
-  <data name="SoundLoaded" xml:space="preserve">
+    <data name="SoundLoaded" xml:space="preserve">
     <value>Sound effects reloaded successfully</value>
   </data>
-  <data name="SoundSwitchControl" xml:space="preserve">
+    <data name="SoundSwitchControl" xml:space="preserve">
     <value>Sound switches</value>
   </data>
-  <data name="Speed" xml:space="preserve">
+    <data name="Speed" xml:space="preserve">
     <value>Speed</value>
   </data>
-  <data name="SplitLane" xml:space="preserve">
+    <data name="SplitLane" xml:space="preserve">
     <value>Split lane</value>
   </data>
-  <data name="Stage" xml:space="preserve">
+    <data name="Stage" xml:space="preserve">
     <value>Stage:</value>
   </data>
-  <data name="StandardizeFormat" xml:space="preserve">
+    <data name="StandardizeFormat" xml:space="preserve">
     <value>Generate standard ongeki fumen</value>
   </data>
-  <data name="Start" xml:space="preserve">
+    <data name="Start" xml:space="preserve">
     <value>Start</value>
   </data>
-  <data name="StopUsingExtendEditor" xml:space="preserve">
+    <data name="StopUsingExtendEditor" xml:space="preserve">
     <value>Abort external editor editing</value>
   </data>
-  <data name="Success" xml:space="preserve">
+    <data name="Success" xml:space="preserve">
     <value>Success</value>
   </data>
-  <data name="Suggest" xml:space="preserve">
+    <data name="Suggest" xml:space="preserve">
     <value>Suggest</value>
   </data>
-  <data name="SvgContentNotSupport" xml:space="preserve">
+    <data name="SvgContentNotSupport" xml:space="preserve">
     <value>Invalid/Unsupport SVG content</value>
   </data>
-  <data name="SvgGenerateLane" xml:space="preserve">
+    <data name="SvgGenerateLane" xml:space="preserve">
     <value>Generate lanes from SVG</value>
   </data>
-  <data name="SwitchControl" xml:space="preserve">
+    <data name="SwitchControl" xml:space="preserve">
     <value>Switches</value>
   </data>
-  <data name="SyncScriptContentManually" xml:space="preserve">
+    <data name="SyncScriptContentManually" xml:space="preserve">
     <value>Manually synchronize content</value>
   </data>
-  <data name="TabAudio" xml:space="preserve">
+    <data name="TabAudio" xml:space="preserve">
     <value>Audio</value>
   </data>
-  <data name="TabDocument" xml:space="preserve">
+    <data name="TabDocument" xml:space="preserve">
     <value>Document</value>
   </data>
-  <data name="TabEditor" xml:space="preserve">
+    <data name="TabEditor" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="TabEnviorment" xml:space="preserve">
+    <data name="TabEnviorment" xml:space="preserve">
     <value>Environment</value>
   </data>
-  <data name="TabLogger" xml:space="preserve">
+    <data name="TabLogger" xml:space="preserve">
     <value>Logger</value>
   </data>
-  <data name="TabProgram" xml:space="preserve">
+    <data name="TabProgram" xml:space="preserve">
     <value>Program</value>
   </data>
-  <data name="TabSound" xml:space="preserve">
+    <data name="TabSound" xml:space="preserve">
     <value>Sound</value>
   </data>
-  <data name="TestDump" xml:space="preserve">
+    <data name="TestDump" xml:space="preserve">
     <value>Throw an error and see</value>
   </data>
-  <data name="TGridCalculatorToolViewer" xml:space="preserve">
+    <data name="TGridCalculatorToolViewer" xml:space="preserve">
     <value>Time Calculator</value>
   </data>
-  <data name="ThrowExceptionWhenConvert" xml:space="preserve">
+    <data name="ThrowExceptionWhenConvert" xml:space="preserve">
     <value>Throw an exception during converting:</value>
   </data>
-  <data name="TimeSignature" xml:space="preserve">
+    <data name="TimeSignature" xml:space="preserve">
     <value>Time Signature</value>
   </data>
-  <data name="TimesPerMin" xml:space="preserve">
+    <data name="TimesPerMin" xml:space="preserve">
     <value>min/times</value>
   </data>
-  <data name="Title" xml:space="preserve">
+    <data name="Title" xml:space="preserve">
     <value>Title:</value>
   </data>
-  <data name="ToCopiedObjects" xml:space="preserve">
+    <data name="ToCopiedObjects" xml:space="preserve">
     <value>For copied objects...</value>
   </data>
-  <data name="Today" xml:space="preserve">
+    <data name="Today" xml:space="preserve">
     <value>Today</value>
   </data>
-  <data name="ToPaste" xml:space="preserve">
+    <data name="ToPaste" xml:space="preserve">
     <value>To paste...</value>
   </data>
-  <data name="ToSelectedObjects" xml:space="preserve">
+    <data name="ToSelectedObjects" xml:space="preserve">
     <value>For selected objects...</value>
   </data>
-  <data name="Tutorial" xml:space="preserve">
+    <data name="Tutorial" xml:space="preserve">
     <value>Getting Started Tutorial</value>
   </data>
-  <data name="TutorialAndDocument" xml:space="preserve">
+    <data name="TutorialAndDocument" xml:space="preserve">
     <value>Tutorial and document</value>
   </data>
-  <data name="TutorialTipText" xml:space="preserve">
+    <data name="TutorialTipText" xml:space="preserve">
     <value>Learn about fumen and how to use the editor in the tutorial</value>
   </data>
-  <data name="UncheckShowOriginColor" xml:space="preserve">
+    <data name="UncheckShowOriginColor" xml:space="preserve">
     <value>Uncheck the option ShowOriginColor first before generating lanes</value>
   </data>
-  <data name="UndoRecoveryObjectsSuccess" xml:space="preserve">
+    <data name="UndoRecoveryObjectsSuccess" xml:space="preserve">
     <value>Restored {0} objects to audio time after undoing...</value>
   </data>
-  <data name="UndoRedo" xml:space="preserve">
+    <data name="UndoRedo" xml:space="preserve">
     <value>Undo/Redo (requires restart)</value>
   </data>
-  <data name="UnregisterFail" xml:space="preserve">
+    <data name="UnregisterFail" xml:space="preserve">
     <value>Unregister fail</value>
   </data>
-  <data name="UnregisterSuccess" xml:space="preserve">
+    <data name="UnregisterSuccess" xml:space="preserve">
     <value>Unregister success</value>
   </data>
-  <data name="UpdateAssetBytesFile" xml:space="preserve">
+    <data name="UpdateAssetBytesFile" xml:space="preserve">
     <value>Update the assets.bytes file (if it exists):</value>
   </data>
-  <data name="UpdateHoldEndPosition" xml:space="preserve">
+    <data name="UpdateHoldEndPosition" xml:space="preserve">
     <value>Update HoldEnd positions</value>
   </data>
-  <data name="UpdateXGridForDockedObjects" xml:space="preserve">
+    <data name="UpdateXGridForDockedObjects" xml:space="preserve">
     <value>Automatically update the horizontal position for docked objects</value>
   </data>
-  <data name="UserInteraction" xml:space="preserve">
+    <data name="UserInteraction" xml:space="preserve">
     <value>User Interaction</value>
   </data>
-  <data name="UseTemplateScriptFileFail" xml:space="preserve">
+    <data name="UseTemplateScriptFileFail" xml:space="preserve">
     <value>Unable to provide script template file, reason:</value>
   </data>
-  <data name="UsingExtendScriptEditor" xml:space="preserve">
+    <data name="UsingExtendScriptEditor" xml:space="preserve">
     <value>Currently using external editor...</value>
   </data>
-  <data name="VerticalDisplayScale" xml:space="preserve">
+    <data name="VerticalDisplayScale" xml:space="preserve">
     <value>Vertical scale:</value>
   </data>
-  <data name="Visualizer" xml:space="preserve">
+    <data name="Visualizer" xml:space="preserve">
     <value>Visualizer</value>
   </data>
-  <data name="VisualizerHorizonScale" xml:space="preserve">
+    <data name="VisualizerHorizonScale" xml:space="preserve">
     <value>Visualizer horizon scale</value>
   </data>
-  <data name="VisualizerRenderOption" xml:space="preserve">
+    <data name="VisualizerRenderOption" xml:space="preserve">
     <value>Visualizer Render Options</value>
   </data>
-  <data name="VisualizerSpecialOption" xml:space="preserve">
+    <data name="VisualizerSpecialOption" xml:space="preserve">
     <value>Visualizer Special Options</value>
   </data>
-  <data name="VisualizerVerticalScale" xml:space="preserve">
+    <data name="VisualizerVerticalScale" xml:space="preserve">
     <value>Visualizer vertical scale</value>
   </data>
-  <data name="WaitForAudioAndFumenLoaded" xml:space="preserve">
+    <data name="WaitForAudioAndFumenLoaded" xml:space="preserve">
     <value>Waiting for the audio/sound initialization to complete first</value>
   </data>
-  <data name="WallConflict" xml:space="preserve">
+    <data name="WallConflict" xml:space="preserve">
     <value>Walls on different sides (id:{0}) and (id:{1}) horizontally intersect, collide, or overlap</value>
   </data>
-  <data name="WallConflict2" xml:space="preserve">
+    <data name="WallConflict2" xml:space="preserve">
     <value>Wall (id:{0}) has a timing conflict with another wall (id:{1}) in the same direction</value>
   </data>
-  <data name="WallConflict3" xml:space="preserve">
+    <data name="WallConflict3" xml:space="preserve">
     <value>Wall (id:{0}) Next/End object's TGrid ({1}) should not be lower than the former ({2})</value>
   </data>
-  <data name="WarnSomeSoundsNotLoad" xml:space="preserve">
+    <data name="WarnSomeSoundsNotLoad" xml:space="preserve">
     <value>Some sound file failed to load. Please check the logs for details</value>
   </data>
-  <data name="WithinOneMonth" xml:space="preserve">
+    <data name="WithinOneMonth" xml:space="preserve">
     <value>Within one month</value>
   </data>
-  <data name="WithinOneWeek" xml:space="preserve">
+    <data name="WithinOneWeek" xml:space="preserve">
     <value>Within one week</value>
   </data>
-  <data name="WrongLocation" xml:space="preserve">
+    <data name="WrongLocation" xml:space="preserve">
     <value>{0} object seems not to be placed on the correct lane (id:{1})</value>
   </data>
-  <data name="WrongLocation2" xml:space="preserve">
+    <data name="WrongLocation2" xml:space="preserve">
     <value>Wrong position</value>
   </data>
-  <data name="XGridDisplayMaxUnit" xml:space="preserve">
+    <data name="XGridDisplayMaxUnit" xml:space="preserve">
     <value>Maximum display XGrid range:</value>
   </data>
-  <data name="XGridUnitSpace" xml:space="preserve">
+    <data name="XGridUnitSpace" xml:space="preserve">
     <value>XGrid unit spacing</value>
   </data>
-  <data name="XOffset" xml:space="preserve">
+    <data name="XOffset" xml:space="preserve">
     <value>Horizontal scroll offset:</value>
   </data>
 </root>
