@@ -1,9 +1,11 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
+using Mono.Cecil;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;
@@ -43,13 +45,13 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg
                         OutputFilePath = Path.GetTempFileName() + ".svg"
                     };
                     await IoC.Get<IPreviewSvgGenerator>().GenerateSvgAsync(editor.Fumen, opt);
-                    if (MessageBox.Show($"生成svg文件成功,是否立即打开文件?", "提示", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    if (MessageBox.Show(Resources.GenerateSvgSuccessAndAskIfOpen, string.Empty, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         ProcessUtils.OpenPath(opt.OutputFilePath);
 
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show($"生成svg文件失败:{e.Message}");
+                    MessageBox.Show(Resources.CallGenerateSvgAsyncFail + e.Message);
                 }
             }
         }

@@ -267,6 +267,9 @@
   <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>Call AcbGeneratorFuck.Generator.Generate() failed</value>
   </data>
+  <data name="CallGenerateSvgAsyncFail" xml:space="preserve">
+    <value>Call GenerateSvgAsync() failed</value>
+  </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
@@ -809,6 +812,12 @@
   </data>
   <data name="GenerateSvg" xml:space="preserve">
     <value>Generate fumen preview .svg file</value>
+  </data>
+  <data name="GenerateSvgSuccess" xml:space="preserve">
+    <value>Fumen .svg file generated successfully</value>
+  </data>
+  <data name="GenerateSvgSuccessAndAskIfOpen" xml:space="preserve">
+    <value>Successfully generated .svg file. Do you want to open the file now?</value>
   </data>
   <data name="Genre" xml:space="preserve">
     <value>Genre:</value>

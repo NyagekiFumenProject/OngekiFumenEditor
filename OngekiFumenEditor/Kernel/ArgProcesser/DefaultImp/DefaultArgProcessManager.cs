@@ -156,11 +156,11 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
                 }
 
                 _ = await IoC.Get<IPreviewSvgGenerator>().GenerateSvgAsync(fumen, opt);
-                Log.LogInfo($"生成谱面预览.svg文件成功");
+                Log.LogInfo(Resources.GenerateSvgSuccess);
             }
             catch (Exception e)
             {
-                Log.LogError($"执行GenerateSvgAsync()出错", e);
+                Log.LogError(Resources.CallGenerateSvgAsyncFail, e);
             }
 
             Exit();

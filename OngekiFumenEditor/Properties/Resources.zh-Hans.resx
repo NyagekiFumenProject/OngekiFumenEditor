@@ -267,6 +267,9 @@
   <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>调用AcbGeneratorFuck.Generator.Generate()失败</value>
   </data>
+  <data name="CallGenerateSvgAsyncFail" xml:space="preserve">
+    <value>执行GenerateSvgAsync()出错</value>
+  </data>
   <data name="Cancel" xml:space="preserve">
     <value>取消</value>
   </data>
@@ -809,6 +812,12 @@
   </data>
   <data name="GenerateSvg" xml:space="preserve">
     <value>生成铺面预览.svg文件</value>
+  </data>
+  <data name="GenerateSvgSuccess" xml:space="preserve">
+    <value>生成谱面预览.svg文件成功</value>
+  </data>
+  <data name="GenerateSvgSuccessAndAskIfOpen" xml:space="preserve">
+    <value>生成svg文件成功,是否立即打开文件?</value>
   </data>
   <data name="Genre" xml:space="preserve">
     <value>音乐分类:</value>

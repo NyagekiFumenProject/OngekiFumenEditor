@@ -511,6 +511,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Call GenerateSvgAsync() failed 的本地化字符串。
+        /// </summary>
+        public static string CallGenerateSvgAsyncFail {
+            get {
+                return ResourceManager.GetString("CallGenerateSvgAsyncFail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Cancel 的本地化字符串。
         /// </summary>
         public static string Cancel {
@@ -2136,6 +2145,24 @@ namespace OngekiFumenEditor.Properties {
         public static string GenerateSvg {
             get {
                 return ResourceManager.GetString("GenerateSvg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fumen .svg file generated successfully 的本地化字符串。
+        /// </summary>
+        public static string GenerateSvgSuccess {
+            get {
+                return ResourceManager.GetString("GenerateSvgSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Successfully generated .svg file. Do you want to open the file now? 的本地化字符串。
+        /// </summary>
+        public static string GenerateSvgSuccessAndAskIfOpen {
+            get {
+                return ResourceManager.GetString("GenerateSvgSuccessAndAskIfOpen", resourceCulture);
             }
         }
         
