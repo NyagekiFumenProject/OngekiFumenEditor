@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.6.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
     public sealed partial class EditorGlobalSetting : global::System.Configuration.ApplicationSettingsBase {
         
         private static EditorGlobalSetting defaultInstance = ((EditorGlobalSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new EditorGlobalSetting())));
@@ -349,7 +349,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-16777216")]
         public int PlayFieldForegroundColor {
             get {
                 return ((int)(this["PlayFieldForegroundColor"]));
@@ -373,7 +373,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool EnablePlayFieldDrawing {
             get {
                 return ((bool)(this["EnablePlayFieldDrawing"]));

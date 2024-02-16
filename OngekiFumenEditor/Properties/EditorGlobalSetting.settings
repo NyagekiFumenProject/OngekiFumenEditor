@@ -84,13 +84,13 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="PlayFieldForegroundColor" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">-16777216</Value>
     </Setting>
     <Setting Name="PlayFieldBackgroundColor" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-14240057</Value>
     </Setting>
     <Setting Name="EnablePlayFieldDrawing" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>
