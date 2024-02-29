@@ -616,7 +616,7 @@
     <value>允许在音频时长(末尾红线)外放置物件</value>
   </data>
     <data name="EnablePlayFieldDrawing" xml:space="preserve">
-    <value>渲染可击打区域</value>
+    <value>渲染可击打区域 (实验性功能)</value>
   </data>
     <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>允许显示频谱</value>

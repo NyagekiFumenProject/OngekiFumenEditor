@@ -616,7 +616,7 @@
     <value>Allow user places objects beyond audio duration(red line at end of editor)</value>
   </data>
     <data name="EnablePlayFieldDrawing" xml:space="preserve">
-    <value>Enable draw play field</value>
+    <value>Enable draw play field (Experimental)</value>
   </data>
     <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>Enable display visualizer</value>

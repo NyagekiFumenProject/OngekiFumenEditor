@@ -10,7 +10,7 @@
   &lt;property name="#LayoutVersion" /&gt;
   &lt;property name="#LayoutScaleFactor"&gt;@1,Width=1@1,Height=1&lt;/property&gt;
 &lt;/XtraSerializer&gt;</globalSetting>
-    <globalSetting name="projectMruItems">&lt;?xml version='1.0' encoding='utf-8'?&gt;&lt;items&gt;&lt;item type="0" checksum="451715479" /&gt;&lt;item type="2" checksum="5312450866" /&gt;&lt;item type="2" checksum="4703146096" /&gt;&lt;item type="2" checksum="2062960065" /&gt;&lt;/items&gt;</globalSetting>
+    <globalSetting name="projectMruItems">&lt;?xml version='1.0' encoding='utf-8'?&gt;&lt;items&gt;&lt;item type="0" checksum="-758947901" /&gt;&lt;/items&gt;</globalSetting>
     <globalSetting name="ReadOnlyFileOverwriteBehaviour">0</globalSetting>
     <globalSetting name="OmitEmptyItems">True</globalSetting>
     <globalSetting name="ShowCommentsColumnInGrid">False</globalSetting>
@@ -31,28 +31,30 @@
     <userSetting name="MikiraSora@DESKTOP-B8QCJ9L.FindText">
     </userSetting>
     <userSetting name="MikiraSora@DESKTOP-B8QCJ9L.RecentFiles">H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.resx;H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.ja.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.ja.resx;H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.ja.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.zh-Hans.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.zh-Hans.resx;H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.zh-Hans.resx###***###H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.ja.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.zh-Hans.resx###***###H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.ja.resx;H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.zh-Hans.resx###***###H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.resx;H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.ja.resx;H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.zh-Hans.resx</userSetting>
+    <userSetting name="mikir@MIKIRASORAHOME.FindText">field</userSetting>
+    <userSetting name="mikir@MIKIRASORAHOME.RecentFiles">F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.resx;F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.resx;F:\Source\Repos\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.resx;F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.ja.resx;F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.ja.resx;F:\Source\Repos\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.ja.resx;F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.zh-Hans.resx;F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.zh-Hans.resx;F:\Source\Repos\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.zh-Hans.resx</userSetting>
     <description>
     </description>
   </configuration>
   <fileGroups>
     <fileGroup name="" projectFolderUniqueID="00000000-0000-0000-0000-000000000000" orderPosition="0" ignoreDuringExportAndImport="False" uniqueID="99acd697-4d8c-4aef-a242-1ba16d70df63">
-      <file filePath="Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.resx" absoluteFilePath="H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.resx" uniqueID="04b36327-5777-48aa-9155-941491512f3b" />
-      <file filePath="Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.ja.resx" absoluteFilePath="H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.ja.resx" uniqueID="5f5ac2bc-51bb-49c9-948b-be49f9fbbdc2" />
-      <file filePath="Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.zh-Hans.resx" absoluteFilePath="H:\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.zh-Hans.resx" uniqueID="83eae48d-7f1f-41d4-af2e-fa605de4c086" />
+      <file filePath="Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.resx" uniqueID="04b36327-5777-48aa-9155-941491512f3b" />
+      <file filePath="Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.ja.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.ja.resx" uniqueID="5f5ac2bc-51bb-49c9-948b-be49f9fbbdc2" />
+      <file filePath="Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.zh-Hans.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini.Modules.Output\Properties\Resources.zh-Hans.resx" uniqueID="83eae48d-7f1f-41d4-af2e-fa605de4c086" />
       <remarks>
       </remarks>
     </fileGroup>
     <fileGroup name="" projectFolderUniqueID="00000000-0000-0000-0000-000000000000" orderPosition="0" ignoreDuringExportAndImport="False" uniqueID="800f0dbe-0dd5-4433-a865-c23a2eb0d195">
-      <file filePath="Dependences\gemini\src\Gemini\Properties\Resources.resx" absoluteFilePath="H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.resx" uniqueID="0ee89bb9-569d-451d-9aff-16c28695c946" />
-      <file filePath="Dependences\gemini\src\Gemini\Properties\Resources.ja.resx" absoluteFilePath="H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.ja.resx" uniqueID="43446136-a82d-4de2-a1d0-9f7b05f6ede4" />
-      <file filePath="Dependences\gemini\src\Gemini\Properties\Resources.zh-Hans.resx" absoluteFilePath="H:\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.zh-Hans.resx" uniqueID="9a4e6a4e-0eb9-4826-b832-36eb9b3b5827" />
+      <file filePath="Dependences\gemini\src\Gemini\Properties\Resources.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.resx" uniqueID="0ee89bb9-569d-451d-9aff-16c28695c946" />
+      <file filePath="Dependences\gemini\src\Gemini\Properties\Resources.ja.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.ja.resx" uniqueID="43446136-a82d-4de2-a1d0-9f7b05f6ede4" />
+      <file filePath="Dependences\gemini\src\Gemini\Properties\Resources.zh-Hans.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\Dependences\gemini\src\Gemini\Properties\Resources.zh-Hans.resx" uniqueID="9a4e6a4e-0eb9-4826-b832-36eb9b3b5827" />
       <remarks>
       </remarks>
     </fileGroup>
     <fileGroup name="" projectFolderUniqueID="00000000-0000-0000-0000-000000000000" orderPosition="0" ignoreDuringExportAndImport="False" uniqueID="f56b0f06-6dc3-4315-ac8c-b18e1b39391f">
-      <file filePath="OngekiFumenEditor\Properties\Resources.resx" absoluteFilePath="H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.resx" uniqueID="42fbfd53-b544-41ab-a9b1-e4f92316123c" />
-      <file filePath="OngekiFumenEditor\Properties\Resources.ja.resx" absoluteFilePath="H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.ja.resx" uniqueID="c070e06e-d65d-4301-825a-64b85a16a9e6" />
-      <file filePath="OngekiFumenEditor\Properties\Resources.zh-Hans.resx" absoluteFilePath="H:\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.zh-Hans.resx" uniqueID="c5bdc2b7-5e32-48a2-9fe4-29a0b1ba1ad4" />
+      <file filePath="OngekiFumenEditor\Properties\Resources.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.resx" uniqueID="42fbfd53-b544-41ab-a9b1-e4f92316123c" />
+      <file filePath="OngekiFumenEditor\Properties\Resources.ja.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.ja.resx" uniqueID="c070e06e-d65d-4301-825a-64b85a16a9e6" />
+      <file filePath="OngekiFumenEditor\Properties\Resources.zh-Hans.resx" absoluteFilePath="F:\Source\Repos\OngekiFumenEditor\OngekiFumenEditor\Properties\Resources.zh-Hans.resx" uniqueID="c5bdc2b7-5e32-48a2-9fe4-29a0b1ba1ad4" />
       <remarks>
       </remarks>
     </fileGroup>

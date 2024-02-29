@@ -1504,7 +1504,7 @@
     <value>背景色:</value>
   </data>
     <data name="EnablePlayFieldDrawing" xml:space="preserve">
-    <value>渲染可击打区域</value>
+    <value>渲染可击打区域（実験的機能）</value>
   </data>
     <data name="GenerateSvg" xml:space="preserve">
     <value>生成铺面预览.svg文件</value>
