@@ -8,8 +8,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 	{
 		public override IEnumerable<string> DrawTargetID { get; } = new[]
 		{
-			"BMS"
-		};
+			"BMS","OBS"
+        };
 
 		public BeamEditorObjectDrawingTarget() : base(
 			LoadTextrueFromDefaultResource("NS.png"),
