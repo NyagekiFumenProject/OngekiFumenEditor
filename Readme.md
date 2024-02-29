@@ -42,8 +42,8 @@
 * 打包生成工具
 * 完全实现Soflan倒车变速！
 * 多语言支持 (English/Japanese DONE) [For translators](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/For-translators)
-* 谱面预览生成 **<--- we are here! ---**
-* 塞小功能&修BUG....
+* 谱面预览生成 
+* 塞小功能&修BUG.... **<--- we are here! ---**
 ....、
 
 ## 编译&下载
