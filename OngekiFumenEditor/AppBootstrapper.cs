@@ -2,6 +2,7 @@
 using ControlzEx.Standard;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
+using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
@@ -262,7 +263,6 @@ namespace OngekiFumenEditor
             })
             {
                 Name = "OngekiFumenEditorIPCThread",
-                IsBackground = true,
             };
             ipcThread.Start();
         }
@@ -292,11 +292,15 @@ namespace OngekiFumenEditor
         {
             var recHandle = new HashSet<IntPtr>();
 
-            async void ProcessException(object sender, Exception exception)
+            async void ProcessException(object sender, Exception exception, string trigSource)
             {
                 if (exceptionHandling)
+                {
                     return;
+                }
                 exceptionHandling = true;
+
+                await FileLogOutput.WriteLog($"trigged by {trigSource}");
 
                 try
                 {
@@ -332,41 +336,54 @@ namespace OngekiFumenEditor
                 sb.AppendLine($"----------------------------");
                 await FileLogOutput.WriteLog(sb.ToString());
 #if !DEBUG
-				var exceptionHandle = Marshal.GetExceptionPointers();
-				var dumpFile = string.Empty;
-				if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
-				{
-					dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
-					recHandle.Add(exceptionHandle);
-				}
-				await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin");
-				var resuceFolders = await FumenRescue.Rescue();
-				await FileLogOutput.WriteLog("FumenRescue.Rescue() End");
+                var exceptionHandle = Marshal.GetExceptionPointers();
+                var dumpFile = string.Empty;
+                if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
+                {
+                    dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
+                    recHandle.Add(exceptionHandle);
+                }
+                await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin\n");
+                var resuceFolders = await FumenRescue.Rescue();
+                await FileLogOutput.WriteLog("FumenRescue.Rescue() End\n");
 
-				var logFile = FileLogOutput.GetCurrentLogFile();
+                var logFile = FileLogOutput.GetCurrentLogFile();
 
-				var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
-				exceptionWindow.ShowDialog();
+                var apartmentState = Thread.CurrentThread.GetApartmentState();
+                await FileLogOutput.WriteLog($"current apartmentState: {apartmentState}\n");
+                if (apartmentState == ApartmentState.STA)
+                {
+                    var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
+                    exceptionWindow.ShowDialog();
+                }
+                else
+                {
+                    var result = Application.Current.Invoke(() =>
+                    {
+                        var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
+                        return exceptionWindow.ShowDialog();
+                    });
+                }
 
-				exceptionHandling = true;
-				Environment.Exit(-1);
+                exceptionHandling = true;
+                Environment.Exit(-1);
 #else
                 throw exception;
 #endif
             }
 
-            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
             {
-                ProcessException(sender, e.ExceptionObject as Exception);
+                ProcessException(sender, e.ExceptionObject as Exception, "AppDomain.CurrentDomain.UnhandledException");
             };
             Application.Current.DispatcherUnhandledException += (sender, e) =>
             {
-                ProcessException(sender, e.Exception);
+                ProcessException(sender, e.Exception, "Application.Current.DispatcherUnhandledException");
                 e.Handled = true;
             };
             TaskScheduler.UnobservedTaskException += (sender, e) =>
             {
-                ProcessException(sender, e.Exception);
+                ProcessException(sender, e.Exception, "TaskScheduler.UnobservedTaskException");
                 e.SetObserved();
             };
         }

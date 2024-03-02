@@ -29,11 +29,7 @@ namespace OngekiFumenEditor.Utils
 
 		public ImageLoader()
 		{
-			new Thread(PrcessQueue)
-			{
-				Name = "DefaultImageLoader.PrcessQueue()",
-				IsBackground = true
-			}.Start();
+			Task.Run(PrcessQueue);
 		}
 
 		public Task<byte[]> LoadImage(string url, CancellationToken cancellationToken)
