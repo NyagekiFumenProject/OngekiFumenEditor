@@ -209,7 +209,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 					_ => default
 				};
 
-				sb.AppendLine($"{bpl.IDShortName}\t{bpl.StrID}\t{shoot}\t{bpl.PlaceOffset}\t{target}\t{bpl.Speed}\t{size}\t{type}");
+				sb.AppendLine($"{bpl.IDShortName}\t{bpl.StrID}\t{shoot}\t{bpl.PlaceOffset}\t{target}\t{bpl.Speed}\t{size}\t{type}\t{bpl.RandomOffsetRange}");
 			}
 		}
 

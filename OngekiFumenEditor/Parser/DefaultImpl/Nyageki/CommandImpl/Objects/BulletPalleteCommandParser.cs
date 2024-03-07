@@ -25,7 +25,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			bpl.SizeValue = Enum.Parse<BulletSize>(map["Size"]);
 			bpl.TypeValue = Enum.Parse<BulletType>(map["Type"]);
 			bpl.Speed = float.Parse(map["Speed"]);
-			bpl.PlaceOffset = int.Parse(map["PlaceOffset"]);
+            bpl.RandomOffsetRange = int.Parse(map["RandomOffsetRange"]);
+            bpl.PlaceOffset = int.Parse(map["PlaceOffset"]);
 
 			fumen.AddObject(bpl);
 		}

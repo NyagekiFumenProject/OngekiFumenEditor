@@ -34,7 +34,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 				NotifyOfPropertyChange(() => TypeValue);
 				NotifyOfPropertyChange(() => TargetValue);
 				NotifyOfPropertyChange(() => ShooterValue);
-				NotifyOfPropertyChange(() => SizeValue);
+                NotifyOfPropertyChange(() => RandomOffsetRange);
+                NotifyOfPropertyChange(() => SizeValue);
 			}
 		}
 
@@ -49,7 +50,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 				case nameof(BulletPallete.ShooterValue):
 				case nameof(BulletPallete.SizeValue):
 				case nameof(BulletPallete.Speed):
-					NotifyOfPropertyChange(e.PropertyName);
+                case nameof(BulletPallete.RandomOffsetRange):
+                    NotifyOfPropertyChange(e.PropertyName);
 					break;
 			}
 		}
@@ -59,7 +61,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 		[ObjectPropertyBrowserShow]
 		public float Speed => ReferenceBulletPallete?.Speed ?? default;
 
-		[ObjectPropertyBrowserAlias("BPL." + nameof(StrID))]
+        [ObjectPropertyBrowserAlias("BPL." + nameof(RandomOffsetRange))]
+        [ObjectPropertyBrowserShow]
+        public float RandomOffsetRange => ReferenceBulletPallete?.RandomOffsetRange ?? default;
+
+        [ObjectPropertyBrowserAlias("BPL." + nameof(StrID))]
 		[ObjectPropertyBrowserShow]
 		public string StrID => ReferenceBulletPallete?.StrID;
 

@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using System;
 using System.Linq;
 using System.Windows.Media;
 
@@ -8,6 +9,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class BulletPallete : OngekiObjectBase
     {
+        public static int RandomSeed { get; set; } = DateTime.Now.ToString().GetHashCode();
+
         public double CalculateToXGridTotalUnit(IBulletPalleteReferencable refObject, OngekiFumen fumen)
         {
             double xGridTotalUnit;
@@ -28,7 +31,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                     break;
             }
 
-            return xGridTotalUnit;
+            var randomOffset = 0;
+            if (RandomOffsetRange > 0)
+            {
+                //不想用Random类，直接异或计算吧
+                var seed = (60045 * Id + 123) % 2147483648 * Id ^ Id;
+                var r = RandomOffsetRange;
+                randomOffset = (-r) + (int)(seed % (r - (-r) + 1));
+            }
+
+            return xGridTotalUnit + randomOffset;
         }
 
         public double CalculateFromXGridTotalUnit(IBulletPalleteReferencable refObject, OngekiFumen fumen)
@@ -111,6 +123,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        private int randomOffsetRange = default;
+        public int RandomOffsetRange
+        {
+            get { return randomOffsetRange; }
+            set
+            {
+                randomOffsetRange = value;
+                NotifyOfPropertyChange(() => RandomOffsetRange);
+            }
+        }
+
         private Target targetValue = Target.FixField;
         public Target TargetValue
         {
@@ -149,7 +172,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public bool IsEnableSoflan => TargetValue != Target.Player;
 
-        public override string ToString() => $"{base.ToString()} StrID[{StrID}] Speed[{Speed:F3}] ShooterValue[{ShooterValue}] TargetValue[{TargetValue}] SizeValue[{SizeValue}] TypeValue[{TypeValue}] EditorName[{EditorName}] PlaceOffset[{PlaceOffset}]";
+        public override string ToString() => $"{base.ToString()} StrID[{StrID}] Speed[{Speed:F3}] ShooterValue[{ShooterValue}] TargetValue[{TargetValue}] SizeValue[{SizeValue}] TypeValue[{TypeValue}] EditorName[{EditorName}] PlaceOffset[{PlaceOffset}] RandomOffsetRange[{RandomOffsetRange}]";
 
         public static string CommandName => "BPL";
         public override string IDShortName => CommandName;
@@ -168,6 +191,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             ShooterValue = fromBpl.ShooterValue;
             Speed = fromBpl.Speed;
             TargetValue = fromBpl.TargetValue;
+            RandomOffsetRange = fromBpl.RandomOffsetRange;
         }
     }
 }

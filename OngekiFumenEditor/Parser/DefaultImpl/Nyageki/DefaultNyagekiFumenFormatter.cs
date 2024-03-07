@@ -214,7 +214,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 				sb.Write(", ");
 				sb.Write($"Speed[{bpl.Speed}]");
 				sb.Write(", ");
-				sb.Write($"PlaceOffset[{bpl.PlaceOffset}]");
+                sb.Write($"RandomOffsetRange[{bpl.RandomOffsetRange}]");
+                sb.Write(", ");
+                sb.Write($"PlaceOffset[{bpl.PlaceOffset}]");
 				sb.Write(", ");
 				sb.Write($"Shooter[{bpl.ShooterValue}]");
 				sb.WriteLine();

@@ -15,8 +15,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 
 		public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
 		{
-			var dataIntArr = args.GetDataArray<float>();
-			var dataStrArr = args.GetDataArray<string>();
+			var dataIntArr = args.GetDataArray<int>();
+            var dataFloatArr = args.GetDataArray<float>();
+            var dataStrArr = args.GetDataArray<string>();
 			var bpl = new BulletPallete();
 
 			bpl.StrID = dataStrArr.ElementAtOrDefault(1);
@@ -27,14 +28,14 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 				"CEN" => Shooter.Center,
 				_ => throw new NotImplementedException(),
 			};
-			bpl.PlaceOffset = (int)dataIntArr.ElementAtOrDefault(3);
+			bpl.PlaceOffset = dataIntArr.ElementAtOrDefault(3);
 			bpl.TargetValue = dataStrArr.ElementAtOrDefault(4)?.ToUpper() switch
 			{
 				"PLR" => Target.Player,
 				"FIX" => Target.FixField,
 				_ => throw new NotImplementedException(),
 			};
-			bpl.Speed = dataIntArr.ElementAtOrDefault(5);
+			bpl.Speed = dataFloatArr.ElementAtOrDefault(5);
 			bpl.SizeValue = dataStrArr.ElementAtOrDefault(6)?.ToUpper() switch
 			{
 				"L" => BulletSize.Large,
@@ -46,8 +47,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 				"NDL" => BulletType.Needle,
 				"CIR" or _ => BulletType.Circle,
 			};
+            bpl.RandomOffsetRange = dataIntArr.ElementAtOrDefault(8);
 
-			return bpl;
+            return bpl;
 		}
 	}
 }
