@@ -34,10 +34,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             var randomOffset = 0;
             if (RandomOffsetRange > 0)
             {
+                var id = ((OngekiObjectBase)refObject).Id;
                 //不想用Random类，直接异或计算吧
-                var seed = (60045 * Id + 123) % 2147483648 * Id ^ Id;
+                var seed = Math.Abs((RandomSeed * id + 123) * id ^ id);
                 var r = RandomOffsetRange;
-                randomOffset = (-r) + (int)(seed % (r - (-r) + 1));
+                randomOffset = (-r) + (seed % (r - (-r) + 1));
             }
 
             return xGridTotalUnit + randomOffset;

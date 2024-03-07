@@ -740,6 +740,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void SwitchMode(bool isPreviewMode)
         {
+            BulletPallete.RandomSeed = DateTime.Now.ToString().GetHashCode();
+
             var tGrid = GetCurrentTGrid();
             IsUserRequestHideEditorObject = isPreviewMode;
             convertToY = IsDesignMode ?

@@ -1555,7 +1555,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Enable draw play field 的本地化字符串。
+        ///   查找类似 Enable draw play field (Experimental) 的本地化字符串。
         /// </summary>
         public static string EnablePlayFieldDrawing {
             get {
@@ -3171,6 +3171,15 @@ namespace OngekiFumenEditor.Properties {
         public static string PropertyBatchSet {
             get {
                 return ResourceManager.GetString("PropertyBatchSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Random Offset Range 的本地化字符串。
+        /// </summary>
+        public static string RandomOffsetRange {
+            get {
+                return ResourceManager.GetString("RandomOffsetRange", resourceCulture);
             }
         }
         

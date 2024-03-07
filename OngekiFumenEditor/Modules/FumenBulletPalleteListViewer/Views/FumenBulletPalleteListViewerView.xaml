@@ -8,8 +8,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:s="clr-namespace:OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ValueConverters"
@@ -135,6 +136,14 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding RandomOffsetRange}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
