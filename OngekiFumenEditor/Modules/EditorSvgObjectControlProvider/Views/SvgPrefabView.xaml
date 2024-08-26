@@ -6,7 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     xmlns:viewModels="clr-namespace:OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels"
-    d:DataContext="{d:DesignInstance Type=viewModels:SvgPrefabViewModel}"
     mc:Ignorable="d">
     <Canvas>
         <Rectangle

@@ -1,685 +1,656 @@
-﻿  <Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>embedded</DebugType>
-    <LangVersion>preview</LangVersion>
-    <ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
-    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
-    <StartupObject>OngekiFumenEditor.Startup</StartupObject>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DebugType>embedded</DebugType>
+		<LangVersion>preview</LangVersion>
+		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
+		<DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
+		<StartupObject>OngekiFumenEditor.Startup</StartupObject>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Dependencies\**" />
-    <Compile Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
-    <Compile Remove="_bin\**" />
-    <EmbeddedResource Remove="Dependencies\**" />
-    <EmbeddedResource Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
-    <EmbeddedResource Remove="_bin\**" />
-    <None Remove="Dependencies\**" />
-    <None Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
-    <None Remove="_bin\**" />
-    <Page Remove="Dependencies\**" />
-    <Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
-    <Page Remove="_bin\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Dependencies\**" />
+		<Compile Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+		<Compile Remove="_bin\**" />
+		<EmbeddedResource Remove="Dependencies\**" />
+		<EmbeddedResource Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+		<EmbeddedResource Remove="_bin\**" />
+		<None Remove="Dependencies\**" />
+		<None Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+		<None Remove="_bin\**" />
+		<Page Remove="Dependencies\**" />
+		<Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
+		<Page Remove="_bin\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Costura64\crnlib.dll" />
-    <None Remove="Costura64\ispc_texcomp.dll" />
-    <None Remove="Costura64\PVRTexLib.dll" />
-    <None Remove="Costura64\TexToolWrap.dll" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NE.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NN.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NS.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
-    <None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\bell.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\flick.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\flick1.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\green_tap.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_blk.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_pur.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_red.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\red_tap.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet0.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet1.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet2.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet0.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet1.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet2.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\walltap.png" />
-    <None Remove="Modules\PreviewSvgGenerator\Resources\walltap2.png" />
-    <None Remove="Resources\empty_ogkr_template.ogkr" />
-    <None Remove="Resources\Icons\add-folder.png" />
-    <None Remove="Resources\Icons\book.png" />
-    <None Remove="Resources\Icons\close.png" />
-    <None Remove="Resources\Icons\document.png" />
-    <None Remove="Resources\Icons\ease.png" />
-    <None Remove="Resources\Icons\file.png" />
-    <None Remove="Resources\Icons\folder.png" />
-    <None Remove="Resources\Icons\home.png" />
-    <None Remove="Resources\Icons\icons8-paint-brush-16.png" />
-    <None Remove="Resources\Icons\logo.ico" />
-    <None Remove="Resources\Icons\logo32.ico" />
-    <None Remove="Resources\Icons\open-folder.png" />
-    <None Remove="Resources\Icons\preview.png" />
-    <None Remove="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
-    <None Remove="Resources\Icons\search.png" />
-    <None Remove="Resources\Images\logo.png" />
-    <None Remove="Resources\Music.xml" />
-    <None Remove="Resources\MusicSource.xml" />
-    <None Remove="Resources\ui_jacket_0666" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Costura64\crnlib.dll" />
+		<None Remove="Costura64\ispc_texcomp.dll" />
+		<None Remove="Costura64\PVRTexLib.dll" />
+		<None Remove="Costura64\TexToolWrap.dll" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NE.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NN.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NS.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
+		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\bell.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\flick.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\flick1.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\green_tap.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_blk.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_pur.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\nt_mine_red.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\red_tap.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet0.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet1.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\sqrt_bullet2.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet0.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet1.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\tri_bullet2.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\walltap.png" />
+		<None Remove="Modules\PreviewSvgGenerator\Resources\walltap2.png" />
+		<None Remove="Resources\empty_ogkr_template.ogkr" />
+		<None Remove="Resources\Icons\add-folder.png" />
+		<None Remove="Resources\Icons\book.png" />
+		<None Remove="Resources\Icons\close.png" />
+		<None Remove="Resources\Icons\document.png" />
+		<None Remove="Resources\Icons\ease.png" />
+		<None Remove="Resources\Icons\file.png" />
+		<None Remove="Resources\Icons\folder.png" />
+		<None Remove="Resources\Icons\home.png" />
+		<None Remove="Resources\Icons\icons8-paint-brush-16.png" />
+		<None Remove="Resources\Icons\logo.ico" />
+		<None Remove="Resources\Icons\logo32.ico" />
+		<None Remove="Resources\Icons\open-folder.png" />
+		<None Remove="Resources\Icons\preview.png" />
+		<None Remove="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
+		<None Remove="Resources\Icons\search.png" />
+		<None Remove="Resources\Images\logo.png" />
+		<None Remove="Resources\Music.xml" />
+		<None Remove="Resources\MusicSource.xml" />
+		<None Remove="Resources\ui_jacket_0666" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Costura64\crnlib.dll">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Costura64\ispc_texcomp.dll">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Costura64\PVRTexLib.dll">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Costura64\TexToolWrap.dll">
-    </EmbeddedResource>
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\bell.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick1.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\green_tap.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\red_tap.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_blk.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_pur.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_red.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet0.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet1.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet2.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet0.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet1.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet2.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\walltap.png" />
-    <EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\walltap2.png" />
-    <EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
-    <EmbeddedResource Include="Resources\Music.xml" />
-    <EmbeddedResource Include="Resources\MusicSource.xml" />
-    <EmbeddedResource Include="Resources\ui_jacket_0666" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Costura64\crnlib.dll">
+		</EmbeddedResource>
+		<EmbeddedResource Include="Costura64\ispc_texcomp.dll">
+		</EmbeddedResource>
+		<EmbeddedResource Include="Costura64\PVRTexLib.dll">
+		</EmbeddedResource>
+		<EmbeddedResource Include="Costura64\TexToolWrap.dll">
+		</EmbeddedResource>
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\bell.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick1.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\green_tap.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\red_tap.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_blk.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_pur.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\nt_mine_red.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet0.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet1.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\sqrt_bullet2.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet0.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet1.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\tri_bullet2.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\walltap.png" />
+		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\walltap2.png" />
+		<EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
+		<EmbeddedResource Include="Resources\Music.xml" />
+		<EmbeddedResource Include="Resources\MusicSource.xml" />
+		<EmbeddedResource Include="Resources\ui_jacket_0666" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
-    <None Include="FodyWeavers.xsd" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\.editorconfig" Link=".editorconfig" />
+		<None Include="FodyWeavers.xsd" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Advanced.Algorithms" Version="1.0.0" />
-    <PackageReference Include="AssetsTools.NET" Version="2.0.12" />
-    <PackageReference Include="AssocSupport" Version="1.1.0" />
-    <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
-    <PackageReference Include="Costura.Fody" Version="5.7.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="FontStashSharp" Version="1.2.8" />
-    <PackageReference Include="ManagedBass" Version="3.1.1" />
-    <PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
-    <PackageReference Include="ManagedBass.Mix" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Build" Version="17.3.2" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="17.3.2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-    <PackageReference Include="NAudio" Version="2.0.1" />
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.6.133">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="OpenTK" Version="4.3.0" />
-    <PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
-    <PackageReference Include="PixiEditor.ColorPicker" Version="3.3.1" />
-    <PackageReference Include="SharpVectors" Version="1.8.4" />
-    <PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
-    <PackageReference Include="Svg" Version="3.4.6" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Advanced.Algorithms" Version="1.0.0" />
+		<PackageReference Include="AssetsTools.NET" Version="2.0.12" />
+		<PackageReference Include="AssocSupport" Version="1.1.0" />
+		<PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+		<PackageReference Include="Costura.Fody" Version="5.7.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="FontStashSharp" Version="1.2.8" />
+		<PackageReference Include="ManagedBass" Version="3.1.1" />
+		<PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
+		<PackageReference Include="ManagedBass.Mix" Version="3.1.1" />
+		<PackageReference Include="Microsoft.Build" Version="17.3.2" />
+		<PackageReference Include="Microsoft.Build.Framework" Version="17.3.2" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.7.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.7.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.7.0" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+		<PackageReference Include="NAudio" Version="2.0.1" />
+		<PackageReference Include="Nerdbank.GitVersioning" Version="3.6.133">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="OpenTK" Version="4.3.0" />
+		<PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
+		<PackageReference Include="PixiEditor.ColorPicker" Version="3.3.1" />
+		<PackageReference Include="SharpVectors" Version="1.8.4" />
+		<PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
+		<PackageReference Include="Svg" Version="3.4.6" />
+		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Dependences\earcut.net\src\Earcut.csproj" />
-    <ProjectReference Include="..\Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj" />
-    <ProjectReference Include="..\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj">
-      <PrivateAssets>all</PrivateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj">
-      <PrivateAssets>all</PrivateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\Dependences\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj">
-      <PrivateAssets>all</PrivateAssets>
-    </ProjectReference>
-    <ProjectReference Include="..\Dependences\gemini\src\Gemini\Gemini.csproj">
-      <PrivateAssets>all</PrivateAssets>
-    </ProjectReference>
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Dependences\earcut.net\src\Earcut.csproj" >
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj" >
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\Dependences\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\Dependences\gemini\src\Gemini\Gemini.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="AcbGeneratorFuck">
-      <HintPath>Dependencies\AcbGeneratorFuck\AcbGeneratorFuck.dll</HintPath>
-    </Reference>
-    <Reference Include="DereTore.Common">
-      <HintPath>Dependencies\DereTore\DereTore.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="DereTore.Common.StarlightStage">
-      <HintPath>Dependencies\DereTore\DereTore.Common.StarlightStage.dll</HintPath>
-    </Reference>
-    <Reference Include="DereTore.Exchange.Archive.ACB">
-      <HintPath>Dependencies\DereTore\DereTore.Exchange.Archive.ACB.dll</HintPath>
-    </Reference>
-    <Reference Include="DereTore.Exchange.Audio.HCA">
-      <HintPath>Dependencies\DereTore\DereTore.Exchange.Audio.HCA.dll</HintPath>
-    </Reference>
-    <Reference Include="DereTore.Interop.OS">
-      <HintPath>Dependencies\DereTore\DereTore.Interop.OS.dll</HintPath>
-    </Reference>
-    <Reference Include="TexturePlugin">
-      <HintPath>Dependencies\JacketGenerator\TexturePlugin.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="AcbGeneratorFuck">
+			<HintPath>Dependencies\AcbGeneratorFuck\AcbGeneratorFuck.dll</HintPath>
+		</Reference>
+		<Reference Include="DereTore.Common">
+			<HintPath>Dependencies\DereTore\DereTore.Common.dll</HintPath>
+		</Reference>
+		<Reference Include="DereTore.Common.StarlightStage">
+			<HintPath>Dependencies\DereTore\DereTore.Common.StarlightStage.dll</HintPath>
+		</Reference>
+		<Reference Include="DereTore.Exchange.Archive.ACB">
+			<HintPath>Dependencies\DereTore\DereTore.Exchange.Archive.ACB.dll</HintPath>
+		</Reference>
+		<Reference Include="DereTore.Exchange.Audio.HCA">
+			<HintPath>Dependencies\DereTore\DereTore.Exchange.Audio.HCA.dll</HintPath>
+		</Reference>
+		<Reference Include="DereTore.Interop.OS">
+			<HintPath>Dependencies\DereTore\DereTore.Interop.OS.dll</HintPath>
+		</Reference>
+		<Reference Include="TexturePlugin">
+			<HintPath>Dependencies\JacketGenerator\TexturePlugin.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NE.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NN.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NS.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
-    <Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
-    <Resource Include="Resources\Icons\add-folder.png" />
-    <Resource Include="Resources\Icons\book.png" />
-    <Resource Include="Resources\Icons\close.png" />
-    <Resource Include="Resources\Icons\document.png" />
-    <Resource Include="Resources\Icons\ease.png" />
-    <Resource Include="Resources\Icons\file.png" />
-    <Resource Include="Resources\Icons\folder.png" />
-    <Resource Include="Resources\Icons\home.png" />
-    <Resource Include="Resources\Icons\icons8-paint-brush-16.png" />
-    <Resource Include="Resources\Icons\logo.ico" />
-    <Resource Include="Resources\Icons\logo32.ico" />
-    <Resource Include="Resources\Icons\open-folder.png" />
-    <Resource Include="Resources\Icons\preview.png" />
-    <Resource Include="Resources\Icons\search.png" />
-    <Resource Include="Resources\logo.png" />
-  </ItemGroup>
+	<ItemGroup>
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NE.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NN.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NS.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
+		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
+		<Resource Include="Resources\Icons\add-folder.png" />
+		<Resource Include="Resources\Icons\book.png" />
+		<Resource Include="Resources\Icons\close.png" />
+		<Resource Include="Resources\Icons\document.png" />
+		<Resource Include="Resources\Icons\ease.png" />
+		<Resource Include="Resources\Icons\file.png" />
+		<Resource Include="Resources\Icons\folder.png" />
+		<Resource Include="Resources\Icons\home.png" />
+		<Resource Include="Resources\Icons\icons8-paint-brush-16.png" />
+		<Resource Include="Resources\Icons\logo.ico" />
+		<Resource Include="Resources\Icons\logo32.ico" />
+		<Resource Include="Resources\Icons\open-folder.png" />
+		<Resource Include="Resources\Icons\preview.png" />
+		<Resource Include="Resources\Icons\search.png" />
+		<Resource Include="Resources\logo.png" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Modules\AudioAdjustWindow\Views\AudioAdjustWindowView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\EditorSvgObjectControlProvider\Views\ObjectProperty\Operation\SvgPrefabOperationView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenConverter\Views\FumenConverterView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\InterpolatableSoflanOperationView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\MultiLanesOperationView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\BossCardSelectorWindowView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\OptionGeneratorTools\Views\AcbGeneratorWindowView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Properties\OptionGeneratorToolsSetting.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>OptionGeneratorToolsSetting.settings</DependentUpon>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Properties\ProgramSetting.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>ProgramSetting.settings</DependentUpon>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Properties\AudioPlayerToolViewerSetting.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>AudioPlayerToolViewerSetting.settings</DependentUpon>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Properties\AudioSetting.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>AudioSetting.settings</DependentUpon>
-    </Compile>
-    <Compile Update="Properties\EditorGlobalSetting.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>EditorGlobalSetting.settings</DependentUpon>
-    </Compile>
-    <Compile Update="Properties\LogSetting.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>LogSetting.settings</DependentUpon>
-    </Compile>
-    <Compile Update="UI\Controls\ObjectInspector\ObjectInspectorView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Modules\AudioAdjustWindow\Views\AudioAdjustWindowView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\EditorSvgObjectControlProvider\Views\ObjectProperty\Operation\SvgPrefabOperationView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenConverter\Views\FumenConverterView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenObjectPropertyBrowser\Views\InterpolatableSoflanOperationView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenObjectPropertyBrowser\Views\MultiLanesOperationView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\BossCardSelectorWindowView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\OptionGeneratorTools\Views\AcbGeneratorWindowView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Properties\OptionGeneratorToolsSetting.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<DependentUpon>OptionGeneratorToolsSetting.settings</DependentUpon>
+			<AutoGen>True</AutoGen>
+		</Compile>
+		<Compile Update="Properties\ProgramSetting.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<DependentUpon>ProgramSetting.settings</DependentUpon>
+			<AutoGen>True</AutoGen>
+		</Compile>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+		<Compile Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Properties\AudioPlayerToolViewerSetting.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<DependentUpon>AudioPlayerToolViewerSetting.settings</DependentUpon>
+			<AutoGen>True</AutoGen>
+		</Compile>
+		<Compile Update="Properties\AudioSetting.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>AudioSetting.settings</DependentUpon>
+		</Compile>
+		<Compile Update="Properties\EditorGlobalSetting.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>EditorGlobalSetting.settings</DependentUpon>
+		</Compile>
+		<Compile Update="Properties\LogSetting.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>LogSetting.settings</DependentUpon>
+		</Compile>
+		<Compile Update="UI\Controls\ObjectInspector\ObjectInspectorView.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Update="Properties\AudioPlayerToolViewerSetting.settings">
-      <LastGenOutput>AudioPlayerToolViewerSetting.Designer.cs</LastGenOutput>
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-    </None>
-    <None Update="Properties\OptionGeneratorToolsSetting.settings">
-      <LastGenOutput>OptionGeneratorToolsSetting.Designer.cs</LastGenOutput>
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-    </None>
-    <None Update="Properties\AudioSetting.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-      <LastGenOutput>AudioSetting.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="Properties\EditorGlobalSetting.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-      <LastGenOutput>EditorGlobalSetting.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="Properties\ProgramSetting.settings">
-      <LastGenOutput>ProgramSetting.Designer.cs</LastGenOutput>
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-    </None>
-    <None Update="Properties\LogSetting.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-      <LastGenOutput>LogSetting.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="bass_fx.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\NewScriptTemplate.nyagekiScript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\beamend.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\beamlooping.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\beamprepare.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\bell.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\bullet.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\clickse.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\exflick.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\extap.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\exwall.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\flick.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\holdend.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\holdtick.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\metronomeStrongBeat.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\tap.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\wall.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\sounds\metronomeWeakBeat.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="Properties\AudioPlayerToolViewerSetting.settings">
+			<LastGenOutput>AudioPlayerToolViewerSetting.Designer.cs</LastGenOutput>
+			<Generator>PublicSettingsSingleFileGenerator</Generator>
+		</None>
+		<None Update="Properties\OptionGeneratorToolsSetting.settings">
+			<LastGenOutput>OptionGeneratorToolsSetting.Designer.cs</LastGenOutput>
+			<Generator>PublicSettingsSingleFileGenerator</Generator>
+		</None>
+		<None Update="Properties\AudioSetting.settings">
+			<Generator>PublicSettingsSingleFileGenerator</Generator>
+			<LastGenOutput>AudioSetting.Designer.cs</LastGenOutput>
+		</None>
+		<None Update="Properties\EditorGlobalSetting.settings">
+			<Generator>PublicSettingsSingleFileGenerator</Generator>
+			<LastGenOutput>EditorGlobalSetting.Designer.cs</LastGenOutput>
+		</None>
+		<None Update="Properties\ProgramSetting.settings">
+			<LastGenOutput>ProgramSetting.Designer.cs</LastGenOutput>
+			<Generator>PublicSettingsSingleFileGenerator</Generator>
+		</None>
+		<None Update="Properties\LogSetting.settings">
+			<Generator>PublicSettingsSingleFileGenerator</Generator>
+			<LastGenOutput>LogSetting.Designer.cs</LastGenOutput>
+		</None>
+		<None Update="bass_fx.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\NewScriptTemplate.nyagekiScript">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\beamend.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\beamlooping.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\beamprepare.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\bell.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\bullet.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\clickse.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\exflick.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\extap.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\exwall.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\flick.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\holdend.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\holdtick.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\metronomeStrongBeat.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\tap.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\wall.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\sounds\metronomeWeakBeat.wav">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Page Update="Kernel\SettingPages\Audio\Views\AudioSettingView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Kernel\SettingPages\Program\Views\ProgramSettingView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Kernel\SettingPages\Logs\Views\LogsSettingView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\AudioAdjustWindow\Views\AudioAdjustWindowView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\EditorSvgObjectControlProvider\Views\ObjectProperty\Operation\SvgPrefabOperationView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenConverter\Views\FumenConverterView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\InterpolatableSoflanOperationView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\MultiLanesOperationView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\OptionGeneratorTools\Views\Dialogs\BossCardSelectorWindowView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\OptionGeneratorTools\Views\AcbGeneratorWindowView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\CurveInterpolaterFactoryTypeUIView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\ColorIdEnumTypeUIView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\FileInfoTypeUIView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\ObjectInspectorView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\RangeValueTypeUIView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\BoolValueTypeUIView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\TGridTypeUIView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UI\Controls\ObjectInspector\Views\XGridTypeUIView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\EditorSvgObjectControlProvider\Views\SvgPrefabView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamNextView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamEndView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\LaneEndView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallEndView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\LaneNextView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallNextView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\LaneStartView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallStartView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BeamStartView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\FlickView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
+	<ItemGroup>
+		<Page Update="Kernel\SettingPages\Audio\Views\AudioSettingView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Kernel\SettingPages\Program\Views\ProgramSettingView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Kernel\SettingPages\Logs\Views\LogsSettingView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\AudioAdjustWindow\Views\AudioAdjustWindowView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\AudioPlayerToolViewer\Views\AudioPlayerToolViewerView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\EditorSvgObjectControlProvider\Views\ObjectProperty\Operation\SvgPrefabOperationView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenBulletPalleteListViewer\Views\FumenBulletPalleteListViewerView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenCheckerListViewer\Views\FumenCheckerListViewerView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenConverter\Views\FumenConverterView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenEditorSelectingObjectViewer\Views\FumenEditorSelectingObjectViewerView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenObjectPropertyBrowser\Views\InterpolatableSoflanOperationView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\FumenObjectPropertyBrowser\Views\MultiLanesOperationView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\OgkiFumenListBrowser\Views\OgkiFumenListBrowserView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\OptionGeneratorTools\Views\Dialogs\BossCardSelectorWindowView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\OptionGeneratorTools\Views\Dialogs\EnumStructsSelectorWindowView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\OptionGeneratorTools\Views\AcbGeneratorWindowView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\OptionGeneratorTools\Views\JacketGeneratorWindowView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\OptionGeneratorTools\Views\MusicXmlWindowView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\Views\CurveInterpolaterFactoryTypeUIView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenObjectPropertyBrowser\Views\ConnectableObjectOperationView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\Views\ColorIdEnumTypeUIView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenObjectPropertyBrowser\Views\HoldOperationView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\Views\FileInfoTypeUIView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\ObjectInspectorView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\Views\RangeValueTypeUIView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenObjectPropertyBrowser\Views\WallOperationView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\Views\BoolValueTypeUIView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenTimeSignatureListViewer\Views\FumenTimeSignatureListViewerView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenVisualEditorSettings\Views\FumenVisualEditorSettingsView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\Views\TGridTypeUIView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="UI\Controls\ObjectInspector\Views\XGridTypeUIView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\EditorSvgObjectControlProvider\Views\SvgPrefabView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\FlickView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		</Page>
+		<Page Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProgramRootFiles Include="Resources/Binaries/ProgramRoot/**/*.*" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProgramRootFiles Include="Resources/Binaries/ProgramRoot/**/*.*" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProgramRootFiles Remove="_bin\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProgramRootFiles Remove="_bin\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.zh-Hans.resx">
-      <LastGenOutput>Resources.zh-Hans.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Properties\Resources.ja.resx">
-      <LastGenOutput>Resources.ja.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.zh-Hans.resx">
+			<LastGenOutput>Resources.zh-Hans.Designer.cs</LastGenOutput>
+			<Generator>PublicResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Properties\Resources.ja.resx">
+			<LastGenOutput>Resources.ja.Designer.cs</LastGenOutput>
+			<Generator>PublicResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>PublicResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
 
-  <Target Name="CopyProgramRootFiles" AfterTargets="AfterBuild">
-    <Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-  </Target>
-  <Target Name="CopyProgramRootFiles" AfterTargets="Publish">
-    <Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
-  </Target>
-  
-  <!--
+	<Target Name="CopyProgramRootFiles" AfterTargets="AfterBuild">
+		<Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+	</Target>
+	<Target Name="CopyProgramRootFiles" AfterTargets="Publish">
+		<Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+	</Target>
+<!--
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="echo &quot;$(OutDir)&quot; &amp; xcopy &quot;$(ProjectDir)Resources\Binaries\ProgramRoot\*.*&quot; &quot;$(OutDir)&quot; /s /y" />
   </Target>

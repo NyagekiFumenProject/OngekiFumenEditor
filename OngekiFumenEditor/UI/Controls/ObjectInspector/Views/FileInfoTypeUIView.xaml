@@ -7,9 +7,9 @@
     xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels"
+    xmlns:viewModels="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels"
     d:Background="White"
-    d:DataContext="{d:DesignInstance Type=vm:FileInfoTypeUIViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewModels:FileInfoTypeUIViewModel}"
     mc:Ignorable="d">
     <GroupBox
         Margin="5,0,5,0"

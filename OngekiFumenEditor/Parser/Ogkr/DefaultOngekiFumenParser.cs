@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 
 		public static readonly string[] FumenFileExtensions = new[] { ".ogkr" };
 
-		public const string FormatName = "OngekiFumenFile";
+		public const string FormatName = "Ongeki Fumen File";
 
 		public string[] SupportFumenFileExtensions => FumenFileExtensions;
 
