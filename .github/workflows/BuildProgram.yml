@@ -40,10 +40,10 @@ jobs:
         fetch-depth: 0
         ref: ${{ env.Branch }}
         submodules: recursive
-    - name: Setup .NET5
-      uses: actions/setup-dotnet@v1
+    - name: Setup .NET7
+      uses: actions/setup-dotnet@v4.0.1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
     - name: get-version-action
       id: project-version
       uses: euberdeveloper/ga-project-version@main
