@@ -217,7 +217,7 @@ namespace OngekiFumenEditor
         {
             OnStartupForGUI();
 
-            await DisplayRootViewFor<IMainWindow>();
+            await DisplayRootViewForAsync<IMainWindow>();
             var showSplashWindow = IoC.Get<IShell>().Documents.IsEmpty() && !ProgramSetting.Default.DisableShowSplashScreenAfterBoot;
             if (showSplashWindow)
                 await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
