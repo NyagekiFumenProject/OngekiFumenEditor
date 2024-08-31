@@ -79,11 +79,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			bool prepareWarn = false;
 
 			if (curTGrid < beginTGrid)
-			{
+            {
 				//progress = [-1,0]
-				var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_BODY_DURATION), target.Editor);
-				progress = MathUtils.Normalize(leadBodyInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 1;
-				xGrid = obj.XGrid;
+                var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_BODY_DURATION), target.Editor);
+                progress = MathUtils.Normalize(leadBodyInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 1;
+                xGrid = obj.XGrid;
 
 				prepareWarn = true;
 			}
@@ -127,14 +127,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			if (prepareWarn)
 			{
 				var audioTime = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor);
-				var leadAudioTime = audioTime - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION);
+				var leadAudioTime = audioTime - TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME);
 				var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(leadAudioTime, target.Editor);
 				if (leadInTGrid is null)
 					leadInTGrid = TGrid.Zero;
-				var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 0.25;
+				var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
+				if(warnProgress < 0) warnProgress = -1;
 				lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f), rotate, judgeOffset);
 			}
-
+			
 			lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One, rotate, judgeOffset);
 		}
 

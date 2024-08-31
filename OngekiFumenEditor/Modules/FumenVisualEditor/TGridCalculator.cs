@@ -1,4 +1,6 @@
-﻿using OngekiFumenEditor.Base;
+﻿using Microsoft.CodeAnalysis.Differencing;
+
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -12,10 +14,20 @@ using System.Windows.Controls;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
 	public static class TGridCalculator
-	{
-		#region AudioTime -> TGrid
+    {
+        #region Frame -> AudioTime
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public const float FRAME_DURATION = 16.666666f;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static TimeSpan ConvertFrameToAudioTime(float frame)
+		   => TimeSpan.FromMilliseconds(FRAME_DURATION * frame);
+
+        #endregion
+
+        #region AudioTime -> TGrid
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor)
 		   => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList);
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

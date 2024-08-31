@@ -294,7 +294,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 						//generate stop
 						AddSound(SoundControl.BeamEnd, beam.MaxTGrid);
 						AddDurationSound(SoundControl.BeamLoop, beam.TGrid, beam.MaxTGrid, loopId);
-						var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beam.TGrid, editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION), editor);
+						var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beam.TGrid, editor) - TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME), editor);
 						if (leadBodyInTGrid is null)
 							leadBodyInTGrid = TGrid.Zero;
 						AddSound(SoundControl.BeamPrepare, leadBodyInTGrid);

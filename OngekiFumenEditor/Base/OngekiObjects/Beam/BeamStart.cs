@@ -6,7 +6,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
 	public class BeamStart : ConnectableStartObject, IBeamObject
 	{
-		public const int LEAD_IN_DURATION = 1000;
+		public const float LEAD_IN_DURATION_FRAME = 50f;
 		public const int LEAD_IN_BODY_DURATION = 250;
 		public const int LEAD_OUT_DURATION = 250;
 
