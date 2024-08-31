@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             switch (TargetValue)
             {
                 case Target.Player:
-                    var frameOffset = (40f - 7.5f) / (0.47f * refObject.ReferenceBulletPallete.Speed);
+                    var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(refObject.ReferenceBulletPallete.Speed, 1));
                     var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(refObject.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
                     if(targetAudioTime < TimeSpan.Zero) targetAudioTime = TimeSpan.Zero;
                     var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(targetAudioTime, fumen.BpmList);
