@@ -12,23 +12,25 @@
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.SplashScreen.ViewModels"
     Title="Welcome"
+    WindowTitleBrush="Transparent"
     Width="1000"
     Height="700"
+    BorderThickness="0"
+    GlowBrush="Black"
     d:DataContext="{d:DesignInstance Type=vm:SplashScreenViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
-    ResizeMode="NoResize"
+
     SaveWindowPosition="True"
     mc:Ignorable="d">
     <mah:MetroWindow.Resources>
-        <Style TargetType="Border">
+        <Style x:Key="BorderStyle" TargetType="Border">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True">
                     <Setter Property="BorderBrush" Value="LightBlue" />
-                    <Setter Property="BorderThickness" Value="2" />
                 </DataTrigger>
             </Style.Triggers>
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderThickness" Value="2" />
             <Setter Property="Background" Value="{DynamicResource Button.Static.Background}" />
         </Style>
     </mah:MetroWindow.Resources>
@@ -182,7 +184,7 @@
                             HorizontalContentAlignment="Stretch"
                             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action CreateNewProject()]"
                             Cursor="Hand">
-                            <Border>
+                            <Border Style="{StaticResource BorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -215,7 +217,7 @@
                             HorizontalContentAlignment="Stretch"
                             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OpenProject()]"
                             Cursor="Hand">
-                            <Border>
+                            <Border Style="{StaticResource BorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -248,7 +250,7 @@
                             HorizontalContentAlignment="Stretch"
                             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action FastOpen()]"
                             Cursor="Hand">
-                            <Border>
+                            <Border Style="{StaticResource BorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -285,7 +287,7 @@
                             HorizontalContentAlignment="Stretch"
                             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OpenTutorial()]"
                             Cursor="Hand">
-                            <Border>
+                            <Border Style="{StaticResource BorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
