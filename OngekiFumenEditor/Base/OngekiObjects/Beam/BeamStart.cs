@@ -37,5 +37,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 		public override LaneType LaneType => LaneType.Beam;
 
 		public override ConnectableChildObjectBase CreateChildObject() => new BeamNext();
+
+        public override void Dispose()
+        {
+            base.Dispose();
+			ObliqueSourceXGridOffset = default;
+        }
 	}
 }

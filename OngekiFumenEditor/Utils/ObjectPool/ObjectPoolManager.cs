@@ -26,8 +26,8 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 			lock (this)
 			{
 				object_pools.Add(pool);
-			}
-			Log.LogDebug($"Register new object pool :{pool.GetType().GetTypeName()}");
+                Log.LogDebug($"Register new object pool :{pool.GetType().GetTypeName()}");
+            }
 		}
 
 		public void OnSchedulerTerm()

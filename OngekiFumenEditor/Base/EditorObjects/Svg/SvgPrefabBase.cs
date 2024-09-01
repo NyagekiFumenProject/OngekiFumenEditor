@@ -403,5 +403,18 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 		}
 
 		public override string ToString() => $"{base.ToString()} R[∠{Rotation}°] O[{Opacity.ValuePercent * 100:F2}%] S[{Rotation:F2}x]";
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+			ColorfulLaneBrightness = default;
+			Rotation = default;
+			OffsetX = default; 
+			OffsetY = default;
+			Opacity = default;
+			Tolerance = default;
+			ColorSimilar = default;
+        }
 	}
 }

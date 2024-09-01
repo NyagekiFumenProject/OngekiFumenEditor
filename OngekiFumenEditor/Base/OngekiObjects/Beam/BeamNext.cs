@@ -29,5 +29,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 				NotifyOfPropertyChange(() => ObliqueSourceXGridOffset);
 			}
 		}
-	}
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            ObliqueSourceXGridOffset = default;
+        }
+    }
 }

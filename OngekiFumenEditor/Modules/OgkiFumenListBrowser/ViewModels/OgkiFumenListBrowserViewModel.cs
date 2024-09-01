@@ -84,19 +84,10 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 			IsBusy = true;
 			fumenSets.Clear();
 			DisplayFumenSets.Clear();
-			var resourceMap = new Dictionary<string, string>();
-			var folder = await BuildFolder(RootFolderPath, resourceMap);
+			
+			var folder = await SearchFumenSet(RootFolderPath);
 
-			IEnumerable<OngekiFumenSet> GetSet(Folder folder) =>
-				folder.FumenSets.Concat(folder.SubFolders.SelectMany(x => GetSet(x)));
-
-			Parallel.ForEach(GetSet(folder), s =>
-			{
-				s.JacketFilePath = resourceMap.TryGetValue("asset_" + s.MusicId, out var j) ? j : s.JacketFilePath;
-				s.AudioFilePath = resourceMap.TryGetValue("audio_" + s.MusicSourceId, out var a) ? a : s.AudioFilePath;
-			});
-
-			fumenSets.AddRange(GetSet(folder).OrderBy(x => x.MusicId).DistinctContinuousBy(x => x.MusicId));
+			fumenSets.AddRange(folder);
 			IsBusy = false;
 
 			ApplyKeywords();
@@ -414,6 +405,26 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 			{
 				IsBusy = false;
 			}
+		}
+
+		public async Task<IEnumerable<OngekiFumenSet>> SearchFumenSet(string searchFolder)
+		{
+			var resourceMap = new Dictionary<string, string>();
+			var sets = new List<OngekiFumenSet>();
+			var folder = await BuildFolder(searchFolder, resourceMap);
+
+			IEnumerable<OngekiFumenSet> GetSet(Folder folder) =>
+				folder.FumenSets.Concat(folder.SubFolders.SelectMany(x => GetSet(x)));
+
+			Parallel.ForEach(GetSet(folder), s =>
+			{
+				s.JacketFilePath = resourceMap.TryGetValue("asset_" + s.MusicId, out var j) ? j : s.JacketFilePath;
+				s.AudioFilePath = resourceMap.TryGetValue("audio_" + s.MusicSourceId, out var a) ? a : s.AudioFilePath;
+			});
+
+			sets.AddRange(GetSet(folder).OrderBy(x => x.MusicId).DistinctContinuousBy(x => x.MusicId));
+
+			return sets;
 		}
 	}
 }
