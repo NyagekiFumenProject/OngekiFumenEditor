@@ -14,20 +14,20 @@ using System.Windows.Controls;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
 	public static class TGridCalculator
-    {
-        #region Frame -> AudioTime
+	{
+		#region Frame -> AudioTime
 
-        public const float FRAME_DURATION = 16.666666f;
+		public const float FRAME_DURATION = 16.666666f;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static TimeSpan ConvertFrameToAudioTime(float frame)
 		   => TimeSpan.FromMilliseconds(FRAME_DURATION * frame);
 
-        #endregion
+		#endregion
 
-        #region AudioTime -> TGrid
+		#region AudioTime -> TGrid
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static TGrid ConvertAudioTimeToTGrid(TimeSpan audioTime, FumenVisualEditorViewModel editor)
 		   => ConvertAudioTimeToTGrid(audioTime, editor.Fumen.BpmList);
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
