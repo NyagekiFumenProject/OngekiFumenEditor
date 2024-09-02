@@ -27,6 +27,12 @@ using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.DeadHandler;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
+#if !DEBUG
+using System.Runtime.InteropServices;
+using System.Threading;
+using MahApps.Metro.Controls;
+using OngekiFumenEditor.UI.Dialogs;
+#endif
 
 namespace OngekiFumenEditor;
 
