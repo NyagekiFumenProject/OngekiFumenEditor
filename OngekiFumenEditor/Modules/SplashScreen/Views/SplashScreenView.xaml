@@ -19,7 +19,7 @@
     GlowBrush="Black"
     d:DataContext="{d:DesignInstance Type=vm:SplashScreenViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
-
+    ResizeMode="NoResize"
     SaveWindowPosition="True"
     mc:Ignorable="d">
     <mah:MetroWindow.Resources>
