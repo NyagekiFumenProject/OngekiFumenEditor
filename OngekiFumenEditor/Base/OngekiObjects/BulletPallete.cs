@@ -1,6 +1,8 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
+
 using System;
 using System.Linq;
 using System.Windows.Media;
@@ -17,7 +19,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             switch (TargetValue)
             {
                 case Target.Player:
-                    var tGrid = refObject.TGrid;
+                    var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(refObject.ReferenceBulletPallete.Speed, 1));
+                    var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(refObject.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
+                    if(targetAudioTime < TimeSpan.Zero) targetAudioTime = TimeSpan.Zero;
+                    var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(targetAudioTime, fumen.BpmList);
                     var apfLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>().LastOrDefault();
                     var xGrid = apfLane?.CalulateXGrid(tGrid);
                     xGridTotalUnit = xGrid?.TotalUnit ?? 0d;

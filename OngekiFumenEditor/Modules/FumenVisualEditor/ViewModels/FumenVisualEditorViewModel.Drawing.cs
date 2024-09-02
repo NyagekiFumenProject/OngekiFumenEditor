@@ -213,7 +213,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 if (containBeams)
                 {
-                    var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(min, this) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_DURATION), this);
+                    var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(min, this) - TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME), this);
                     var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(max, this) + TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), this);
 
                     r = r.Concat(fumen.Beams.GetVisibleStartObjects(leadInTGrid, leadOutTGrid));
