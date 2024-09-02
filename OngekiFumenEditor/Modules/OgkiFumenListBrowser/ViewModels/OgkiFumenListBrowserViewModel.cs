@@ -272,86 +272,9 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 				return 0;
 			}
 
-			var set = new OngekiFumenSet();
-			set.Title = GetString("Name");
-			set.Artist = GetString("ArtistName");
-			set.Genre = GetString("Genre");
-			set.MusicId = GetId("Name");
-			set.MusicSourceId = GetId("MusicSourceName");
-
-			var folderPath = Path.GetDirectoryName(musicXmlFilePath);
-
-			foreach ((var fumenDataElement, var idx) in musicXml.XPathSelectElements("/MusicData/FumenData/FumenData").WithIndex())
-			{
-				string fumenConstIntegerPart = fumenDataElement.Element("FumenConstIntegerPart").Value;
-				string fumenConstFractionalPart = fumenDataElement.Element("FumenConstFractionalPart").Value;
-				string fumenFileName = fumenDataElement.Element("FumenFile").Element("path")?.Value;
-
-				var fumenFilePath = Path.Combine(folderPath, fumenFileName);
-				if (!File.Exists(fumenFilePath))
-					continue;
-				var fumenDiff = new OngekiFumenDiff(set);
-				fumenDiff.DiffIdx = idx;
-				fumenDiff.FilePath = fumenFilePath;
-				fumenDiff.Level = (int.TryParse(fumenConstIntegerPart, out var d1) ? d1 : 0) + ((int.TryParse(fumenConstFractionalPart, out var d2) ? d2 : 0) / 100.0f);
-
-				await ParseFumenFileInfo(fumenDiff);
-
-				set.Difficults.Add(fumenDiff);
-			}
+			var set = new OngekiFumenSet(musicXmlFilePath, musicXml);
 
 			return set.Difficults.Count > 0 ? set : default;
-		}
-
-		private static Regex BpmRegex = new Regex(@"BPM_DEF\s*([\d\.]+)");
-		private static Regex CreatorRegex = new Regex(@"CREATOR\s*(.+)");
-
-		private async Task ParseFumenFileInfo(OngekiFumenDiff fumenDiff)
-		{
-			try
-			{
-				using var fs = File.OpenRead(fumenDiff.FilePath);
-				using var reader = new StreamReader(fs);
-
-				var isBpmSetup = false;
-				var isCreatorSetup = false;
-
-				while (!reader.EndOfStream)
-				{
-					var line = await reader.ReadLineAsync();
-
-					if (!isBpmSetup)
-					{
-						var match = BpmRegex.Match(line);
-						if (match.Success)
-						{
-							var bpm = float.Parse(match.Groups[1].Value);
-							isBpmSetup = true;
-
-							fumenDiff.Bpm = bpm;
-						}
-					}
-
-					if (!isCreatorSetup)
-					{
-						var match = CreatorRegex.Match(line);
-						if (match.Success)
-						{
-							var creator = match.Groups[1].Value;
-							isCreatorSetup = true;
-
-							fumenDiff.Creator = creator;
-						}
-					}
-
-					if (isBpmSetup && isCreatorSetup)
-						break;
-				}
-			}
-			catch (Exception e)
-			{
-				//todo
-			}
 		}
 
 		public async void LoadFumen(OngekiFumenDiff diff)
