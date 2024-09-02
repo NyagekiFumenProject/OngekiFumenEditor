@@ -79,11 +79,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			bool prepareWarn = false;
 
 			if (curTGrid < beginTGrid)
-            {
+			{
 				//progress = [-1,0]
-                var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_BODY_DURATION), target.Editor);
-                progress = MathUtils.Normalize(leadBodyInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 1;
-                xGrid = obj.XGrid;
+				var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_BODY_DURATION), target.Editor);
+				progress = MathUtils.Normalize(leadBodyInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 1;
+				xGrid = obj.XGrid;
 
 				prepareWarn = true;
 			}
