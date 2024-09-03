@@ -1524,4 +1524,7 @@
   <data name="XOffset" xml:space="preserve">
     <value>Horizontal scroll offset:</value>
   </data>
+  <data name="EnableShowPlayerLocation" xml:space="preserve">
+    <value>Display the player's current position (if there is no AutoPlayFaderLane, it defaults to the center)</value>
+  </data>
 </root>

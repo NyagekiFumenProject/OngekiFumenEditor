@@ -31,7 +31,7 @@
                 </ResourceDictionary>
                 <ResourceDictionary Source="UI\Themes\TextBlock.xaml">
                 </ResourceDictionary>
-                <!-- Theme setting -->
+                <!--  Theme setting  -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

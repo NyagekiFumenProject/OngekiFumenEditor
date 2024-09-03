@@ -1564,6 +1564,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Display the player&apos;s current position (if there is no AutoPlayFaderLane, it defaults to the center) 的本地化字符串。
+        /// </summary>
+        public static string EnableShowPlayerLocation {
+            get {
+                return ResourceManager.GetString("EnableShowPlayerLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Enable display visualizer 的本地化字符串。
         /// </summary>
         public static string EnableVisualizerDisplay {

@@ -1524,4 +1524,7 @@
   <data name="XOffset" xml:space="preserve">
     <value>水平轴偏移:</value>
   </data>
+  <data name="EnableShowPlayerLocation" xml:space="preserve">
+    <value>显示玩家当前位置 (若没AutoPlayFaderLane轨道则默认在中心)</value>
+  </data>
 </root>

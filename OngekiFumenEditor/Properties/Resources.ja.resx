@@ -147,6 +147,9 @@
   <data name="AllSupportFileFormat" xml:space="preserve">
     <value>サポートされている全ファイル形式</value>
   </data>
+  <data name="ApplicationVersion" xml:space="preserve">
+    <value>アプリケーションバージョン</value>
+  </data>
   <data name="ApplyAudioAdjust" xml:space="preserve">
     <value>音源位置を補正する</value>
   </data>
@@ -207,6 +210,9 @@
   <data name="AutoUpdateCurrentObjectTime" xml:space="preserve">
     <value>現在オブジェクトの時刻を自動更新</value>
   </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>背景色:</value>
+  </data>
   <data name="BatchSetIsCritical" xml:space="preserve">
     <value>一括でクリティカル設定</value>
   </data>
@@ -261,6 +267,9 @@
   <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>AcbGeneratorFuck.Generator.Generate() の呼び出しに失敗しました</value>
   </data>
+  <data name="CallGenerateSvgAsyncFail" xml:space="preserve">
+    <value>GenerateSvgAsync() の呼び出しに失敗しました</value>
+  </data>
   <data name="Cancel" xml:space="preserve">
     <value>キャンセル</value>
   </data>
@@ -269,6 +278,9 @@
   </data>
   <data name="CancelSelected" xml:space="preserve">
     <value>選択解除</value>
+  </data>
+  <data name="CantCreateProject" xml:space="preserve">
+    <value>新しいプロジェクトを作成できません：</value>
   </data>
   <data name="CantFastOpenFumen" xml:space="preserve">
     <value>譜面をクイックオープンできませんでした：</value>
@@ -336,6 +348,9 @@
   <data name="CloseEditorByProjectSetupFail" xml:space="preserve">
     <value>ユーザは新規プロジェクトウィザードを完了できません。このエディタを閉じてください。</value>
   </data>
+  <data name="CloseProgram" xml:space="preserve">
+    <value>プログラムを終了</value>
+  </data>
   <data name="CombineLane" xml:space="preserve">
     <value>レーンを結合</value>
   </data>
@@ -344,6 +359,9 @@
   </data>
   <data name="Comfirm" xml:space="preserve">
     <value>確認</value>
+  </data>
+  <data name="ComfirmClose" xml:space="preserve">
+    <value>確認したため閉じることができます</value>
   </data>
   <data name="ComfirmExecuteScript" xml:space="preserve">
     <value>コンパイルに成功しました。実行しますか？</value>
@@ -438,6 +456,12 @@
   <data name="Create" xml:space="preserve">
     <value>作成</value>
   </data>
+  <data name="CreateProject" xml:space="preserve">
+    <value>プロジェクトを作成</value>
+  </data>
+  <data name="CreateProjectTipText" xml:space="preserve">
+    <value>新しくプロジェクトを作成します</value>
+  </data>
   <data name="CurrentTimeOffset" xml:space="preserve">
     <value>タイムラインのオフセット</value>
   </data>
@@ -531,6 +555,12 @@
   <data name="DragToSplitTipText" xml:space="preserve">
     <value>レーンの途中でレーンを2つに分岐します</value>
   </data>
+  <data name="DumpFileSaveTo" xml:space="preserve">
+    <value>.dmpファイル：</value>
+  </data>
+  <data name="Earlier" xml:space="preserve">
+    <value>以前</value>
+  </data>
   <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
     <value>エディタは指定されたTGridに移動します</value>
   </data>
@@ -576,8 +606,17 @@
   <data name="EnableLoopPlayTiming" xml:space="preserve">
     <value>メトロノームを有効化（デザインモードのみ）</value>
   </data>
+  <data name="EnableMultiInstances" xml:space="preserve">
+    <value>複数起動を許可</value>
+  </data>
   <data name="EnableNotifyUserByDialog" xml:space="preserve">
     <value>通知ダイアログを表示</value>
+  </data>
+  <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
+    <value>オーディオ時間（末尾の赤い線）の外側にオブジェクトを配置できるようにする</value>
+  </data>
+  <data name="EnablePlayFieldDrawing" xml:space="preserve">
+    <value>渲染可击打区域（実験的機能）</value>
   </data>
   <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>スペクトル表示</value>
@@ -615,6 +654,9 @@
   <data name="ErrorSoundFolderNotFound" xml:space="preserve">
     <value>音源フォルダが存在しません</value>
   </data>
+  <data name="ExceptionTermWindowTitle" xml:space="preserve">
+    <value>有栖がエディタを食べてしまいました</value>
+  </data>
   <data name="Execute" xml:space="preserve">
     <value>実行</value>
   </data>
@@ -630,6 +672,12 @@
   <data name="FastOpen" xml:space="preserve">
     <value>クイックオープン</value>
   </data>
+  <data name="FastOpen2" xml:space="preserve">
+    <value>クイックオープン</value>
+  </data>
+  <data name="FastOpen2TipText" xml:space="preserve">
+    <value>既存の譜面ファイルを開く</value>
+  </data>
   <data name="FastOpenFumen" xml:space="preserve">
     <value>譜面をクイックオープン</value>
   </data>
@@ -644,6 +692,18 @@
   </data>
   <data name="FastPlayPause" xml:space="preserve">
     <value>クイック再生/一時停止</value>
+  </data>
+  <data name="FileAssociation" xml:space="preserve">
+    <value>ファイルの関連付け</value>
+  </data>
+  <data name="FileAssociationRegister" xml:space="preserve">
+    <value>選択したファイル形式を関連付ける</value>
+  </data>
+  <data name="FileAssociationRequestAdmin" xml:space="preserve">
+    <value>ファイルの関連付け（要管理者権限）</value>
+  </data>
+  <data name="FileAssociationUnregister" xml:space="preserve">
+    <value>すべての関連付けを解除</value>
   </data>
   <data name="Filter" xml:space="preserve">
     <value>フィルタ</value>
@@ -750,6 +810,9 @@
   <data name="GenerateScriptProjectFileFail" xml:space="preserve">
     <value>スクリプトプロジェクトファイルの生成に失敗しました</value>
   </data>
+  <data name="GenerateSvg" xml:space="preserve">
+    <value>生成铺面预览.svg文件</value>
+  </data>
   <data name="Genre" xml:space="preserve">
     <value>ジャンル：</value>
   </data>
@@ -765,6 +828,9 @@
   <data name="GraphicsRender" xml:space="preserve">
     <value>画面描画</value>
   </data>
+  <data name="HalfHourAgo" xml:space="preserve">
+    <value>30分前</value>
+  </data>
   <data name="HeaderConstMismatch" xml:space="preserve">
     <value>譜面ヘッダー情報</value>
   </data>
@@ -779,6 +845,9 @@
   </data>
   <data name="ImageFile" xml:space="preserve">
     <value>画像ファイル：</value>
+  </data>
+  <data name="InnerExceptionMessage" xml:space="preserve">
+    <value>内部例外メッセージ：</value>
   </data>
   <data name="InputPictureFileNotFound" xml:space="preserve">
     <value>生成する画像ファイルが存在しません</value>
@@ -825,11 +894,17 @@
   <data name="JudgeLineOffsetY" xml:space="preserve">
     <value>判定ラインオフセット：</value>
   </data>
+  <data name="JustBefore" xml:space="preserve">
+    <value>今</value>
+  </data>
   <data name="KeywordSortFilter" xml:space="preserve">
     <value>キーワード並び替え</value>
   </data>
   <data name="LaneContainInvalidPath" xml:space="preserve">
     <value>このレーンは不正なセグメントを含んでいます</value>
+  </data>
+  <data name="Languages" xml:space="preserve">
+    <value>言語</value>
   </data>
   <data name="LimitUndoCount" xml:space="preserve">
     <value>元に戻せる回数を制限する</value>
@@ -845,6 +920,12 @@
   </data>
   <data name="LoadMusicXmlFile" xml:space="preserve">
     <value>既存のMusic.xmlを読み込む</value>
+  </data>
+  <data name="LoadProjectFileAndFumenFile" xml:space="preserve">
+    <value>プロジェクトと譜面は正常に読み込まれました</value>
+  </data>
+  <data name="LogFileSaveTo" xml:space="preserve">
+    <value>現在のログファイルの保存先：</value>
   </data>
   <data name="Logger" xml:space="preserve">
     <value>ロガー</value>
@@ -924,6 +1005,9 @@
   <data name="NotShow" xml:space="preserve">
     <value>（非表示）</value>
   </data>
+  <data name="NotShowAnymore" xml:space="preserve">
+    <value>再度表示しない</value>
+  </data>
   <data name="NotSupportInBrushMode" xml:space="preserve">
     <value>{0} はブラシモードでサポートされていません</value>
   </data>
@@ -981,6 +1065,12 @@
   <data name="OpenEditorBeforeUsing" xml:space="preserve">
     <value>エディタを開いてください</value>
   </data>
+  <data name="OpenProject" xml:space="preserve">
+    <value>プロジェクトを開く</value>
+  </data>
+  <data name="OpenProjectTipText" xml:space="preserve">
+    <value>既存のプロジェクトを開く</value>
+  </data>
   <data name="Option" xml:space="preserve">
     <value>オプション</value>
   </data>
@@ -1023,8 +1113,14 @@
   <data name="PasteForZeroXGridMirror" xml:space="preserve">
     <value>X[0, 0]を基準として水平方向にミラーリングして貼り付け</value>
   </data>
+  <data name="PasteToMouse" xml:space="preserve">
+    <value>マウスポインタ位置に貼り付け</value>
+  </data>
   <data name="PauseAudioAndFumen" xml:space="preserve">
     <value>音声/譜面を一時停止してください</value>
+  </data>
+  <data name="PlayFieldForegroundColor" xml:space="preserve">
+    <value>可击打区域颜色:</value>
   </data>
   <data name="PreventUsingInternalEditor" xml:space="preserve">
     <value>編集の競合を避けるため，一時的にこのエディタを使用できなくなります</value>
@@ -1053,6 +1149,18 @@
   <data name="PropertyBatchSet" xml:space="preserve">
     <value>プロパティのバッチ割り当て：</value>
   </data>
+  <data name="RandomOffsetRange" xml:space="preserve">
+    <value>ランダムオフセット範囲</value>
+  </data>
+  <data name="RecaculatedSuccess" xml:space="preserve">
+    <value>再計算に成功しました</value>
+  </data>
+  <data name="RecalculateTotalHeight" xml:space="preserve">
+    <value>エディタの全長の再計算</value>
+  </data>
+  <data name="RecentFiles" xml:space="preserve">
+    <value>最近使用したファイル</value>
+  </data>
   <data name="RecoveryAudioTime" xml:space="preserve">
     <value>音源時刻に復元</value>
   </data>
@@ -1064,6 +1172,15 @@
   </data>
   <data name="Refresh" xml:space="preserve">
     <value>更新</value>
+  </data>
+  <data name="RegisterFail" xml:space="preserve">
+    <value>登録に失敗しました</value>
+  </data>
+  <data name="RegisterOneFileTypeAtLeast" xml:space="preserve">
+    <value>一つ以上のファイル種別について登録に失敗しました</value>
+  </data>
+  <data name="RegisterSuccess" xml:space="preserve">
+    <value>登録に成功しました</value>
   </data>
   <data name="ReloadSoundFile" xml:space="preserve">
     <value>音源ファイルを再読込</value>
@@ -1086,8 +1203,20 @@
   <data name="RenderOrder" xml:space="preserve">
     <value>描画順</value>
   </data>
+  <data name="RequestAdminPermission" xml:space="preserve">
+    <value>権限がありません。管理者として実行してください。</value>
+  </data>
+  <data name="RequestRestartProgram" xml:space="preserve">
+    <value>プログラムの再起動が必要です</value>
+  </data>
   <data name="Resample" xml:space="preserve">
     <value>リサンプリング</value>
+  </data>
+  <data name="RescueFolderPathSaveTo" xml:space="preserve">
+    <value>譜面・プロジェクトファイルは一時的に以下の場所に保存されています：</value>
+  </data>
+  <data name="ResetDefault" xml:space="preserve">
+    <value>リセット</value>
   </data>
   <data name="ReverseSelectAllObjects" xml:space="preserve">
     <value>オブジェクトの選択を反転</value>
@@ -1218,6 +1347,9 @@
   <data name="StandardizeFormat" xml:space="preserve">
     <value>標準オンゲキ譜面を生成</value>
   </data>
+  <data name="Start" xml:space="preserve">
+    <value>開始</value>
+  </data>
   <data name="StopUsingExtendEditor" xml:space="preserve">
     <value>外部エディタの使用を停止</value>
   </data>
@@ -1281,14 +1413,23 @@
   <data name="ToCopiedObjects" xml:space="preserve">
     <value>コピーされたオブジェクト…</value>
   </data>
+  <data name="Today" xml:space="preserve">
+    <value>今日</value>
+  </data>
   <data name="ToPaste" xml:space="preserve">
     <value>貼り付け…</value>
   </data>
   <data name="ToSelectedObjects" xml:space="preserve">
     <value>選択されたオブジェクト…</value>
   </data>
+  <data name="Tutorial" xml:space="preserve">
+    <value>チュートリアル</value>
+  </data>
   <data name="TutorialAndDocument" xml:space="preserve">
     <value>チュートリアル・文書</value>
+  </data>
+  <data name="TutorialTipText" xml:space="preserve">
+    <value>譜面とエディタの使用方法についてチュートリアルで学習する</value>
   </data>
   <data name="UncheckShowOriginColor" xml:space="preserve">
     <value>出力トラックをプレビューするにはShowOriginColorのチェックを外してください</value>
@@ -1298,6 +1439,12 @@
   </data>
   <data name="UndoRedo" xml:space="preserve">
     <value>元に戻す/やり直し（要再起動）</value>
+  </data>
+  <data name="UnregisterFail" xml:space="preserve">
+    <value>登録解除に失敗しました</value>
+  </data>
+  <data name="UnregisterSuccess" xml:space="preserve">
+    <value>登録解除に成功しました</value>
   </data>
   <data name="UpdateAssetBytesFile" xml:space="preserve">
     <value>assets.bytesを更新（存在する場合）：</value>
@@ -1345,10 +1492,16 @@
     <value>同じ方向のWALLノーツ（id:{0}，id:{1}）が同じ時間に存在しています</value>
   </data>
   <data name="WallConflict3" xml:space="preserve">
-    <value>WALLノーツ（id:{0}）の中間点/終点オブジェクトのTGrid（{1}）が始点（{1}）よりも小さくなっています</value>
+    <value>WALLノーツ（id:{0}）の中間点/終点オブジェクトのTGrid（{1}）が始点（{2}）よりも小さくなっています</value>
   </data>
   <data name="WarnSomeSoundsNotLoad" xml:space="preserve">
     <value>いくつかの効果音の読み込みに失敗しました。詳細についてはログを確認してください。</value>
+  </data>
+  <data name="WithinOneMonth" xml:space="preserve">
+    <value>1ヶ月以内</value>
+  </data>
+  <data name="WithinOneWeek" xml:space="preserve">
+    <value>1週間以内</value>
   </data>
   <data name="WrongLocation" xml:space="preserve">
     <value>{0}オブジェクトが正しいレーン（id:{1}）上に配置されていません</value>
@@ -1364,155 +1517,5 @@
   </data>
   <data name="XOffset" xml:space="preserve">
     <value>水平スクロールオフセット</value>
-  </data>
-  <data name="ApplicationVersion" xml:space="preserve">
-    <value>アプリケーションバージョン</value>
-  </data>
-  <data name="CantCreateProject" xml:space="preserve">
-    <value>新しいプロジェクトを作成できません：</value>
-  </data>
-  <data name="CloseProgram" xml:space="preserve">
-    <value>プログラムを終了</value>
-  </data>
-  <data name="ComfirmClose" xml:space="preserve">
-    <value>確認したため閉じることができます</value>
-  </data>
-  <data name="CreateProject" xml:space="preserve">
-    <value>プロジェクトを作成</value>
-  </data>
-  <data name="CreateProjectTipText" xml:space="preserve">
-    <value>新しくプロジェクトを作成します</value>
-  </data>
-  <data name="DumpFileSaveTo" xml:space="preserve">
-    <value>.dmpファイル：</value>
-  </data>
-  <data name="Earlier" xml:space="preserve">
-    <value>以前</value>
-  </data>
-  <data name="EnableMultiInstances" xml:space="preserve">
-    <value>複数起動を許可</value>
-  </data>
-  <data name="ExceptionTermWindowTitle" xml:space="preserve">
-    <value>有栖がエディタを食べてしまいました</value>
-  </data>
-  <data name="FastOpen2" xml:space="preserve">
-    <value>クイックオープン</value>
-  </data>
-  <data name="FastOpen2TipText" xml:space="preserve">
-    <value>既存の譜面ファイルを開く</value>
-  </data>
-  <data name="FileAssociation" xml:space="preserve">
-    <value>ファイルの関連付け</value>
-  </data>
-  <data name="FileAssociationRegister" xml:space="preserve">
-    <value>選択したファイル形式を関連付ける</value>
-  </data>
-  <data name="FileAssociationRequestAdmin" xml:space="preserve">
-    <value>ファイルの関連付け（要管理者権限）</value>
-  </data>
-  <data name="FileAssociationUnregister" xml:space="preserve">
-    <value>すべての関連付けを解除</value>
-  </data>
-  <data name="HalfHourAgo" xml:space="preserve">
-    <value>30分前</value>
-  </data>
-  <data name="InnerExceptionMessage" xml:space="preserve">
-    <value>内部例外メッセージ：</value>
-  </data>
-  <data name="JustBefore" xml:space="preserve">
-    <value>今</value>
-  </data>
-  <data name="Languages" xml:space="preserve">
-    <value>言語</value>
-  </data>
-  <data name="LoadProjectFileAndFumenFile" xml:space="preserve">
-    <value>プロジェクトと譜面は正常に読み込まれました</value>
-  </data>
-  <data name="LogFileSaveTo" xml:space="preserve">
-    <value>現在のログファイルの保存先：</value>
-  </data>
-  <data name="NotShowAnymore" xml:space="preserve">
-    <value>再度表示しない</value>
-  </data>
-  <data name="OpenProject" xml:space="preserve">
-    <value>プロジェクトを開く</value>
-  </data>
-  <data name="OpenProjectTipText" xml:space="preserve">
-    <value>既存のプロジェクトを開く</value>
-  </data>
-  <data name="PasteToMouse" xml:space="preserve">
-    <value>マウスポインタ位置に貼り付け</value>
-  </data>
-  <data name="RecentFiles" xml:space="preserve">
-    <value>最近使用したファイル</value>
-  </data>
-  <data name="RegisterFail" xml:space="preserve">
-    <value>登録に失敗しました</value>
-  </data>
-  <data name="RegisterOneFileTypeAtLeast" xml:space="preserve">
-    <value>一つ以上のファイル種別について登録に失敗しました</value>
-  </data>
-  <data name="RegisterSuccess" xml:space="preserve">
-    <value>登録に成功しました</value>
-  </data>
-  <data name="RequestAdminPermission" xml:space="preserve">
-    <value>権限がありません。管理者として実行してください。</value>
-  </data>
-  <data name="RequestRestartProgram" xml:space="preserve">
-    <value>プログラムの再起動が必要です</value>
-  </data>
-  <data name="RescueFolderPathSaveTo" xml:space="preserve">
-    <value>譜面・プロジェクトファイルは一時的に以下の場所に保存されています：</value>
-  </data>
-  <data name="ResetDefault" xml:space="preserve">
-    <value>リセット</value>
-  </data>
-  <data name="Start" xml:space="preserve">
-    <value>開始</value>
-  </data>
-  <data name="Today" xml:space="preserve">
-    <value>今日</value>
-  </data>
-  <data name="Tutorial" xml:space="preserve">
-    <value>チュートリアル</value>
-  </data>
-  <data name="TutorialTipText" xml:space="preserve">
-    <value>譜面とエディタの使用方法についてチュートリアルで学習する</value>
-  </data>
-  <data name="UnregisterFail" xml:space="preserve">
-    <value>登録解除に失敗しました</value>
-  </data>
-  <data name="UnregisterSuccess" xml:space="preserve">
-    <value>登録解除に成功しました</value>
-  </data>
-  <data name="WithinOneMonth" xml:space="preserve">
-    <value>1ヶ月以内</value>
-  </data>
-  <data name="WithinOneWeek" xml:space="preserve">
-    <value>1週間以内</value>
-  </data>
-  <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
-    <value>オーディオ時間（末尾の赤い線）の外側にオブジェクトを配置できるようにする</value>
-  </data>
-  <data name="RecalculateTotalHeight" xml:space="preserve">
-    <value>エディタの全長の再計算</value>
-  </data>
-  <data name="RecaculatedSuccess" xml:space="preserve">
-    <value>再計算に成功しました</value>
-  </data>
-  <data name="BackgroundColor" xml:space="preserve">
-    <value>背景色:</value>
-  </data>
-  <data name="EnablePlayFieldDrawing" xml:space="preserve">
-    <value>渲染可击打区域（実験的機能）</value>
-  </data>
-  <data name="GenerateSvg" xml:space="preserve">
-    <value>生成铺面预览.svg文件</value>
-  </data>
-  <data name="PlayFieldForegroundColor" xml:space="preserve">
-    <value>可击打区域颜色:</value>
-  </data>
-  <data name="RandomOffsetRange" xml:space="preserve">
-    <value>ランダムオフセット範囲</value>
   </data>
 </root>
