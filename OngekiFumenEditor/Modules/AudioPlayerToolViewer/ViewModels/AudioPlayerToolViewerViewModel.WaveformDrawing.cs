@@ -137,7 +137,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			RecalcViewProjectionMatrix();
 		}
 
-		public async void PrepareRender(GLWpfControl glView)
+		public async void PrepareEditorLoop(GLWpfControl glView)
 		{
 			Log.LogDebug($"ready.");
 			await IoC.Get<IDrawingManager>().CheckOrInitGraphics();

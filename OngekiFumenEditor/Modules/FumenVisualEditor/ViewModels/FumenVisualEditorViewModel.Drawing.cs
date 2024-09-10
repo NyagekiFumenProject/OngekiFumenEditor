@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +16,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Scheduler;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
@@ -66,6 +69,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private readonly List<(TGrid minTGrid, TGrid maxTGrid)> visibleTGridRanges = new();
     private DrawXGridHelper xGridHelper;
     public IEnumerable<CacheDrawXLineResult> CachedMagneticXGridLines => cachedMagneticXGridLines;
+
+    public PlayerLocationRecorder PlayerLocationRecorder { get; } = new();
 
     public bool IsDisplayFPS
     {
@@ -126,13 +131,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
         var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
 
-        ViewWidth = (float) sizeArg.NewSize.Width;
-        ViewHeight = (float) sizeArg.NewSize.Height;
-        renderViewWidth = (int) (sizeArg.NewSize.Width * dpiX);
-        renderViewHeight = (int) (sizeArg.NewSize.Height * dpiY);
+        ViewWidth = (float)sizeArg.NewSize.Width;
+        ViewHeight = (float)sizeArg.NewSize.Height;
+        renderViewWidth = (int)(sizeArg.NewSize.Width * dpiX);
+        renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
     }
 
-    public async void PrepareRender(GLWpfControl openGLView)
+    public async void PrepareEditorLoop(GLWpfControl openGLView)
     {
         Log.LogDebug("ready.");
         await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
@@ -140,11 +145,11 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
         var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
 
-        ViewWidth = (float) openGLView.ActualWidth;
-        ViewHeight = (float) openGLView.ActualHeight;
+        ViewWidth = (float)openGLView.ActualWidth;
+        ViewHeight = (float)openGLView.ActualHeight;
 
-        renderViewWidth = (int) (openGLView.ActualWidth * dpiX);
-        renderViewHeight = (int) (openGLView.ActualHeight * dpiY);
+        renderViewWidth = (int)(openGLView.ActualWidth * dpiX);
+        renderViewHeight = (int)(openGLView.ActualHeight * dpiY);
 
         playFieldBackgroundColor = Color.FromArgb(EditorGlobalSetting.Default.PlayFieldBackgroundColor).ToVector4();
         enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
@@ -165,10 +170,20 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         actualPerformenceMonitor = IoC.Get<IPerfomenceMonitor>();
         IsDisplayFPS = IsDisplayFPS;
 
-        openGLView.Render += Render;
+        openGLView.Render += OnEditorLoop;
     }
 
+    private void OnEditorLoop(TimeSpan ts)
+    {
+        OnEditorUpdate(ts);
+        OnEditorRender(ts);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Render(TimeSpan ts)
+        => OnEditorRender(ts);
+
+    private void OnEditorRender(TimeSpan ts)
     {
         PerfomenceMonitor.PostUIRenderTime(ts);
         PerfomenceMonitor.OnBeforeRender();
@@ -189,7 +204,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var tGrid = GetCurrentTGrid();
 
         var curY = ConvertToY(tGrid.TotalUnit);
-        var minY = (float) (curY - Setting.JudgeLineOffsetY);
+        var minY = (float)(curY - Setting.JudgeLineOffsetY);
         var maxY = minY + ViewHeight;
 
         //计算可以显示的TGrid范围以及像素范围
@@ -366,13 +381,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     {
         var xOffset = 0;
 
-        var y = (float) convertToY(GetCurrentTGrid().TotalUnit, this);
+        var y = (float)convertToY(GetCurrentTGrid().TotalUnit, this);
 
         ProjectionMatrix =
             Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
         ViewMatrix =
             Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2 + xOffset,
-                -y - ViewHeight / 2 + (float) Setting.JudgeLineOffsetY, 0));
+                -y - ViewHeight / 2 + (float)Setting.JudgeLineOffsetY, 0));
 
         ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
     }
@@ -473,14 +488,14 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         //todo 可以优化
         cachedMagneticXGridLines.Clear();
 
-        var xOffset = (float) Setting.XOffset;
+        var xOffset = (float)Setting.XOffset;
         var width = ViewWidth;
         if (width == 0)
             return;
-        var xUnitSpace = (float) Setting.XGridUnitSpace;
+        var xUnitSpace = (float)Setting.XGridUnitSpace;
         var maxDisplayXUnit = Setting.XGridDisplayMaxUnit;
 
-        var unitSize = (float) XGridCalculator.CalculateXUnitSize(maxDisplayXUnit, width, xUnitSpace);
+        var unitSize = (float)XGridCalculator.CalculateXUnitSize(maxDisplayXUnit, width, xUnitSpace);
         var totalUnitValue = 0f;
 
         var baseX = width / 2 + xOffset;

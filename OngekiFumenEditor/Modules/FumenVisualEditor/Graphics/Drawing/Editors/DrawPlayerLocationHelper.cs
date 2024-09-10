@@ -21,7 +21,6 @@ public class DrawPlayerLocationHelper
     public DrawPlayerLocationHelper()
     {
         textureDrawing = IoC.Get<ITextureDrawing>();
-        arr[0].size = new Vector2(48, 48);
         arr[0].rotation = 0f;
 
         texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\playerLoc.png");
@@ -54,15 +53,14 @@ public class DrawPlayerLocationHelper
         if (!enableShowPlayerLocation)
             return;
 
+        var xGrid = target.Editor.PlayerLocationRecorder.GetLocationXGrid(target.CurrentPlayTime);
         var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
-        var apfLane = target.Editor.Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>()
-            .LastOrDefault();
-        var xGrid = apfLane?.CalulateXGrid(tGrid) ?? XGrid.Zero;
 
         var x = XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
         var y = target.ConvertToY(tGrid);
 
         arr[0].position = new Vector2((float)x, (float)y);
+        arr[0].size = new Vector2(48, 48);
 
         textureDrawing.Draw(target, texture, arr);
     }

@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 			{
 				if (DataContext is IDrawingContext fumenPreviewer)
 				{
-					fumenPreviewer.PrepareRender(glView);
+					fumenPreviewer.PrepareEditorLoop(glView);
 				}
 			});
 		}

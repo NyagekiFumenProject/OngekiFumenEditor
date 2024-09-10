@@ -7,8 +7,10 @@ using Gemini.Modules.Toolbox.Models;
 using Gemini.Modules.UndoRedo;
 using Microsoft.CodeAnalysis.Differencing;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -863,6 +865,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     isMiddleMouseDown = false;
                 }
             }
+            else
+            {
+                if (isDraggingPlayerLocation)
+                {
+                    Log.LogDebug("release playerLocation dragging");
+                    isDraggingPlayerLocation = false;
+                }
+            }
         }
 
         public void OnMouseDown(ActionExecutionContext e)
@@ -871,89 +881,112 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             prevRightButtonState = arg.RightButton;
 
-            if (IsLocked || IsPreviewMode)
-                return;
-
             var view = e.View as FrameworkElement;
-
             var position = arg.GetPosition(e.Source);
 
-            if (arg.LeftButton == MouseButtonState.Pressed)
+            if (IsDesignMode)
             {
-                position.Y = Math.Max(0, Rect.MaxY - position.Y);
+                if (IsLocked)
+                    return;
 
-                isLeftMouseDown = true;
-                isSelectRangeDragging = false;
-
-                var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
-                if (TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this) is TGrid tGrid)
+                if (arg.LeftButton == MouseButtonState.Pressed)
                 {
-                    var lanes = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
+                    position.Y = Math.Max(0, Rect.MaxY - position.Y);
+
+                    isLeftMouseDown = true;
+                    isSelectRangeDragging = false;
+
+                    var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
+                    if (TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this) is TGrid tGrid)
                     {
-                        var child = start.GetChildObjectFromTGrid(tGrid);
-                        if (child?.CalulateXGrid(tGrid) is not XGrid xGrid)
-                            return default;
+                        var lanes = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
+                        {
+                            var child = start.GetChildObjectFromTGrid(tGrid);
+                            if (child?.CalulateXGrid(tGrid) is not XGrid xGrid)
+                                return default;
 
-                        var laneX = XGridCalculator.ConvertXGridToX(xGrid, this);
-                        var diff = Math.Abs(laneX - position.X);
-                        if (diff > 8)
-                            return default;
+                            var laneX = XGridCalculator.ConvertXGridToX(xGrid, this);
+                            var diff = Math.Abs(laneX - position.X);
+                            if (diff > 8)
+                                return default;
 
-                        return child as OngekiObjectBase;
-                    }).FilterNull().OrderBy(x => x.Id);
+                            return child as OngekiObjectBase;
+                        }).FilterNull().OrderBy(x => x.Id);
 
-                    hitResult = hitResult.Concat(lanes).Distinct().ToList();
-                }
-                if (BrushMode)
-                {
-                    //笔刷模式下，忽略点击线段和节点~
-                    hitResult.RemoveAll(x => x is ConnectableObjectBase);
-                }
-
-                var idx = Math.Max(0, hitResult.IndexOf(mouseDownHitObject));
-                var hitOngekiObject = hitResult.ElementAtOrDefault(idx);
-
-                mouseDownHitObject = null;
-                mouseDownNextHitObject = null;
-                mouseDownHitObjectPosition = default;
-                mouseSelectRangeStartPosition = position;
-                dragOutBound = false;
-
-                if (hitOngekiObject is null)
-                {
-                    TryCancelAllObjectSelecting();
-
-                    //enable show selection
-
-                    SelectionStartPosition = new Vector2((float)position.X, (float)position.Y);
-                    SelectionCurrentCursorPosition = SelectionStartPosition;
-                    SelectionVisibility = Visibility.Visible;
-                }
-                else
-                {
-                    //这里如果已经有物件选择了就判断是否还有其他物件可以选择
-                    SelectionVisibility = Visibility.Collapsed;
-                    mouseDownHitObject = hitOngekiObject;
-                    mouseDownHitObjectPosition = position;
-
-                    if (hitResult.Count > 1)
+                        hitResult = hitResult.Concat(lanes).Distinct().ToList();
+                    }
+                    if (BrushMode)
                     {
-                        var nextIdx = (idx + 1) % hitResult.Count;
-                        mouseDownNextHitObject = hitResult[nextIdx];
+                        //笔刷模式下，忽略点击线段和节点~
+                        hitResult.RemoveAll(x => x is ConnectableObjectBase);
+                    }
+
+                    var idx = Math.Max(0, hitResult.IndexOf(mouseDownHitObject));
+                    var hitOngekiObject = hitResult.ElementAtOrDefault(idx);
+
+                    mouseDownHitObject = null;
+                    mouseDownNextHitObject = null;
+                    mouseDownHitObjectPosition = default;
+                    mouseSelectRangeStartPosition = position;
+                    dragOutBound = false;
+
+                    if (hitOngekiObject is null)
+                    {
+                        TryCancelAllObjectSelecting();
+
+                        //enable show selection
+
+                        SelectionStartPosition = new Vector2((float)position.X, (float)position.Y);
+                        SelectionCurrentCursorPosition = SelectionStartPosition;
+                        SelectionVisibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        //这里如果已经有物件选择了就判断是否还有其他物件可以选择
+                        SelectionVisibility = Visibility.Collapsed;
+                        mouseDownHitObject = hitOngekiObject;
+                        mouseDownHitObjectPosition = position;
+
+                        if (hitResult.Count > 1)
+                        {
+                            var nextIdx = (idx + 1) % hitResult.Count;
+                            mouseDownNextHitObject = hitResult[nextIdx];
+                        }
+                    }
+
+                    Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject}");
+                }
+
+                if (arg.MiddleButton == MouseButtonState.Pressed)
+                {
+                    mouseCanvasStartPosition = position;
+                    startXOffset = Setting.XOffset;
+                    startScrollOffset = ScrollViewerVerticalOffset;
+
+                    isCanvasDragging = false;
+                    isMiddleMouseDown = true;
+                }
+            }
+            else
+            {
+                if (arg.LeftButton == MouseButtonState.Pressed)
+                {
+                    //check if is dragging playerlocation
+
+                    var y = TGridCalculator.ConvertAudioTimeToY_PreviewMode(CurrentPlayTime, this);
+                    var x = XGridCalculator.ConvertXGridToX(PlayerLocationRecorder.GetLocationXGrid(CurrentPlayTime), this);
+
+                    var mouseX = position.X;
+                    var mouseY = -position.Y + Rect.MaxY;
+
+                    Log.LogDebug($"playerLoc:({x:F2},{y:F2})  mouse:({mouseX:F2},{mouseY:F2})");
+                    if (Math.Abs(mouseY - y) <= 48 && Math.Abs(mouseX - x) <= 48)
+                    {
+                        //click player location
+                        isDraggingPlayerLocation = true;
+                        draggingPlayerLocationCurrentX = XGridCalculator.ConvertXToXGrid(mouseX, this);
                     }
                 }
-
-                Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject}");
-            }
-
-            if (arg.MiddleButton == MouseButtonState.Pressed)
-            {
-                mouseCanvasStartPosition = position;
-                startXOffset = Setting.XOffset;
-                startScrollOffset = ScrollViewerVerticalOffset;
-
-                isCanvasDragging = false;
-                isMiddleMouseDown = true;
             }
 
             (e.View as FrameworkElement)?.Focus();
@@ -1370,6 +1403,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var newVal = jump + Setting.BeatSplit;
             if (newVal != 0 && newVal <= 16)
                 Setting.BeatSplit = newVal;
+        }
+
+        private bool isDraggingPlayerLocation = false;
+        private XGrid draggingPlayerLocationCurrentX = XGrid.Zero;
+
+        private void OnEditorUpdate(TimeSpan ts)
+        {
+            if (IsPreviewMode)
+            {
+                //record player location
+                if (!isDraggingPlayerLocation)
+                {
+                    var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
+                    var apfLane = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>()
+                        .LastOrDefault();
+                    var xGrid = apfLane?.CalulateXGrid(tGrid) ?? PlayerLocationRecorder.GetLocationXGrid(CurrentPlayTime);
+
+                    PlayerLocationRecorder.Commit(CurrentPlayTime, xGrid);
+                }
+                else
+                {
+                    //user is dragging
+                    var xGrid = draggingPlayerLocationCurrentX;
+                    PlayerLocationRecorder.Commit(CurrentPlayTime, xGrid);
+                }
+            }
         }
 
         #region Lock/Unlock User Interaction

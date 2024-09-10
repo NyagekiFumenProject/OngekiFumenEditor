@@ -21,6 +21,7 @@ using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.SplashScreen;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.KeyBinding.Input;
@@ -89,7 +90,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                     .Where(x => x.GetName().Name == pluginsName).FirstOrDefault();
                 if (pluginDllAssembly != null)
                 {
-                    AssemblySource.AddRange(new[] {pluginDllAssembly});
+                    AssemblySource.AddRange(new[] { pluginDllAssembly });
                     Debug.WriteLine($"Add plugin assembly {pluginDllAssembly.GetName().Name}.dll into AssemblySource");
                 }
             }
@@ -114,18 +115,18 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                 .Replace("[", string.Empty)
                 .Replace("]", string.Empty);
 
-            var splits = triggerDetail.Split((char[]) null, StringSplitOptions.RemoveEmptyEntries);
+            var splits = triggerDetail.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
 
             switch (splits[0])
             {
                 case "Key":
-                    var key = (Key) Enum.Parse(typeof(Key), splits[1], true);
-                    return new KeyTrigger {Key = key};
+                    var key = (Key)Enum.Parse(typeof(Key), splits[1], true);
+                    return new KeyTrigger { Key = key };
 
                 case "Gesture":
-                    var mkg = (MultiKeyGesture) new MultiKeyGestureConverter().ConvertFrom(splits[1]);
+                    var mkg = (MultiKeyGesture)new MultiKeyGestureConverter().ConvertFrom(splits[1]);
                     return new KeyTrigger
-                        {Modifiers = mkg.KeySequences[0].Modifiers, Key = mkg.KeySequences[0].Keys[0]};
+                    { Modifiers = mkg.KeySequences[0].Modifiers, Key = mkg.KeySequences[0].Keys[0] };
             }
 
             return defaultCreateTrigger(target, triggerText);
@@ -280,7 +281,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
-            var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files != null && files.Length == 1)
             {
                 var filePath = files[0];
