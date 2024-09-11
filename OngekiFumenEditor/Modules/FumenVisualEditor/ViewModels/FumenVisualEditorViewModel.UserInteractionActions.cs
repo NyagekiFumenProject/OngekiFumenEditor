@@ -1008,92 +1008,101 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            if (!IsDesignMode)
-                return;
-
-            if (isMiddleMouseDown)
+            if (IsDesignMode)
             {
-                isCanvasDragging = true;
-
-                var diffX = pos.X - mouseCanvasStartPosition.X;
-                Setting.XOffset = startXOffset + diffX;
-
-                var curY = pos.Y;
-                var diffY = curY - mouseCanvasStartPosition.Y;
-
-                var canvasY = startScrollOffset + diffY;
-                var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(canvasY, this);
-                //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
-                ScrollTo(audioTime);
-
-                //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
-            }
-
-            if (isLeftMouseDown)
-            {
-                var r = isSelectRangeDragging;
-                isSelectRangeDragging = true;
-                var dragCall = new Action<OngekiObjectBase, Point>((vm, pos) =>
+                if (isMiddleMouseDown)
                 {
-                    var action = InteractiveManager.GetInteractive(vm);
-                    if (r)
-                        action.OnDragMove(vm, pos, this);
-                    else
-                        action.OnDragStart(vm, pos, this);
-                });
+                    isCanvasDragging = true;
 
-                var rp = 1 - pos.Y / ViewHeight;
-                var srp = 1 - mouseSelectRangeStartPosition.Y / ViewHeight;
-                var offsetY = 0d;
+                    var diffX = pos.X - mouseCanvasStartPosition.X;
+                    Setting.XOffset = startXOffset + diffX;
 
-                //const double dragDist = 0.7;
-                const double trigPrecent = 0.15;
-                const double autoScrollSpeed = 7;
+                    var curY = pos.Y;
+                    var diffY = curY - mouseCanvasStartPosition.Y;
 
-                var offsetYAcc = 0d;
-                if (rp >= (1 - trigPrecent) && dragOutBound)
-                    offsetYAcc = (rp - (1 - trigPrecent)) / trigPrecent;
-                else if (rp <= trigPrecent && dragOutBound)
-                    offsetYAcc = rp / trigPrecent - 1;
-                else if (rp < 1 - trigPrecent && rp > trigPrecent)
-                    dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
-                offsetY = offsetYAcc * autoScrollSpeed;
-
-                var prev = CurrentPlayTime;
-                var y = Rect.MinY + Setting.JudgeLineOffsetY + offsetY;
-
-                //Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
-
-                if (offsetY != 0)
-                {
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                    var canvasY = startScrollOffset + diffY;
+                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(canvasY, this);
+                    //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
                     ScrollTo(audioTime);
+
+                    //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
                 }
 
-                //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
-                if (IsRangeSelecting)
+                if (isLeftMouseDown)
                 {
-                    //拉框
-                    var p = pos;
-                    p.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - p.Y + offsetY));
-                    SelectionCurrentCursorPosition = new Vector2((float)p.X, (float)p.Y);
-                }
-                else
-                {
-                    //拖动已选物件
-                    var cp = pos;
-                    cp.Y = ViewHeight - cp.Y + Rect.MinY;
-                    //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
-                    SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
-                }
+                    var r = isSelectRangeDragging;
+                    isSelectRangeDragging = true;
+                    var dragCall = new Action<OngekiObjectBase, Point>((vm, pos) =>
+                    {
+                        var action = InteractiveManager.GetInteractive(vm);
+                        if (r)
+                            action.OnDragMove(vm, pos, this);
+                        else
+                            action.OnDragStart(vm, pos, this);
+                    });
 
-                //持续性的
-                if (offsetY != 0)
+                    var rp = 1 - pos.Y / ViewHeight;
+                    var srp = 1 - mouseSelectRangeStartPosition.Y / ViewHeight;
+                    var offsetY = 0d;
+
+                    //const double dragDist = 0.7;
+                    const double trigPrecent = 0.15;
+                    const double autoScrollSpeed = 7;
+
+                    var offsetYAcc = 0d;
+                    if (rp >= (1 - trigPrecent) && dragOutBound)
+                        offsetYAcc = (rp - (1 - trigPrecent)) / trigPrecent;
+                    else if (rp <= trigPrecent && dragOutBound)
+                        offsetYAcc = rp / trigPrecent - 1;
+                    else if (rp < 1 - trigPrecent && rp > trigPrecent)
+                        dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
+                    offsetY = offsetYAcc * autoScrollSpeed;
+
+                    var prev = CurrentPlayTime;
+                    var y = Rect.MinY + Setting.JudgeLineOffsetY + offsetY;
+
+                    //Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
+
+                    if (offsetY != 0)
+                    {
+                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                        ScrollTo(audioTime);
+                    }
+
+                    //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
+                    if (IsRangeSelecting)
+                    {
+                        //拉框
+                        var p = pos;
+                        p.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - p.Y + offsetY));
+                        SelectionCurrentCursorPosition = new Vector2((float)p.X, (float)p.Y);
+                    }
+                    else
+                    {
+                        //拖动已选物件
+                        var cp = pos;
+                        cp.Y = ViewHeight - cp.Y + Rect.MinY;
+                        //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
+                        SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
+                    }
+
+                    //持续性的
+                    if (offsetY != 0)
+                    {
+                        var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
+                        await Task.Delay(1000 / 60);
+                        if (currentDraggingActionId == currentid)
+                            OnMouseMove(pos);
+                    }
+                }
+            }
+            else
+            {
+                //preview mode
+                if (isDraggingPlayerLocation)
                 {
-                    var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
-                    await Task.Delay(1000 / 60);
-                    if (currentDraggingActionId == currentid)
-                        OnMouseMove(pos);
+                    //update current dragging player location
+                    draggingPlayerLocationCurrentX = XGridCalculator.ConvertXToXGrid(pos.X, this);
                 }
             }
         }
