@@ -53,7 +53,7 @@ public class DrawPlayerLocationHelper
         if (!enableShowPlayerLocation)
             return;
 
-        var xGrid = target.Editor.PlayerLocationRecorder.GetLocationXGrid(target.CurrentPlayTime);
+        var xGrid = target.Editor.PlayerLocationRecorder.GetLocationXUnit(target.CurrentPlayTime);
         var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
 
         var x = XGridCalculator.ConvertXGridToX(xGrid, target.Editor);

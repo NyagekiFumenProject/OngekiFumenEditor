@@ -13,14 +13,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
     {
         private readonly Record defaultRecord = new Record()
         {
-            XGrid = XGrid.Zero,
+            XTotalUnit = 0,
             Time = TimeSpan.Zero
         };
         private readonly SortableCollection<Record, TimeSpan> list;
 
         public class Record
         {
-            public XGrid XGrid { get; set; }
+            public double XTotalUnit { get; set; }
             public TimeSpan Time { get; set; }
         }
 
@@ -42,17 +42,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             }
         }
 
-        public void Commit(TimeSpan time, XGrid xGrid)
+        public void Commit(TimeSpan time, double xGrid)
         {
             Trim(time);
 
             var record = ObjectPool<Record>.Get();
             record.Time = time;
-            record.XGrid = xGrid;
+            record.XTotalUnit = xGrid;
             list.Add(record);
 
             //check and remove duplicate records
-            while (list.Count >= 3 && list[^1].XGrid == list[^2].XGrid && list[^2].XGrid == list[^3].XGrid)
+            while (list.Count >= 3 && list[^1].XTotalUnit == list[^2].XTotalUnit && list[^2].XTotalUnit == list[^3].XTotalUnit)
             {
                 var remove = list.RemoveAt(list.Count - 2);
                 ObjectPool<Record>.Return(remove);
@@ -80,22 +80,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             }
 
             if (next == null)
-                return cur.XGrid.TotalUnit;
+                return cur.XTotalUnit;
 
             //limit
             var t = Math.Min(time.TotalMilliseconds, next.Time.TotalMilliseconds);
             t = Math.Max(t, cur.Time.TotalMilliseconds);
 
-            var calXUnit = MathUtils.CalculateXFromTwoPointFormFormula(t, cur.XGrid.TotalUnit, cur.Time.TotalMilliseconds, next.XGrid.TotalUnit, next.Time.TotalMilliseconds);
+            var calXUnit = MathUtils.CalculateXFromTwoPointFormFormula(t, cur.XTotalUnit, cur.Time.TotalMilliseconds, next.XTotalUnit, next.Time.TotalMilliseconds);
             return calXUnit;
         }
 
-        public XGrid GetLocationXGrid(TimeSpan time)
+        internal void Clear()
         {
-            var xGrid = new XGrid((float)GetLocationXUnit(time), 0);
-            xGrid.NormalizeSelf();
-
-            return xGrid;
+            list.Clear();
+            Log.LogDebug($"recorder list has clear.");
         }
     }
 }

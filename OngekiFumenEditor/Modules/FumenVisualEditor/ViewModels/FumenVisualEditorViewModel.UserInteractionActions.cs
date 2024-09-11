@@ -969,12 +969,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             else
             {
-                if (arg.LeftButton == MouseButtonState.Pressed)
+                if (arg.LeftButton == MouseButtonState.Pressed && EditorGlobalSetting.Default.EnableShowPlayerLocation)
                 {
                     //check if is dragging playerlocation
 
                     var y = TGridCalculator.ConvertAudioTimeToY_PreviewMode(CurrentPlayTime, this);
-                    var x = XGridCalculator.ConvertXGridToX(PlayerLocationRecorder.GetLocationXGrid(CurrentPlayTime), this);
+                    var x = XGridCalculator.ConvertXGridToX(PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime), this);
 
                     var mouseX = position.X;
                     var mouseY = -position.Y + Rect.MaxY;
@@ -984,7 +984,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     {
                         //click player location
                         isDraggingPlayerLocation = true;
-                        draggingPlayerLocationCurrentX = XGridCalculator.ConvertXToXGrid(mouseX, this);
+                        draggingPlayerLocationCurrentX = XGridCalculator.ConvertXToXGridTotalUnit(mouseX, this);
                     }
                 }
             }
@@ -1102,7 +1102,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (isDraggingPlayerLocation)
                 {
                     //update current dragging player location
-                    draggingPlayerLocationCurrentX = XGridCalculator.ConvertXToXGrid(pos.X, this);
+                    draggingPlayerLocationCurrentX = XGridCalculator.ConvertXToXGridTotalUnit(pos.X, this);
                 }
             }
         }
@@ -1415,7 +1415,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private bool isDraggingPlayerLocation = false;
-        private XGrid draggingPlayerLocationCurrentX = XGrid.Zero;
+        private double draggingPlayerLocationCurrentX = 0;
 
         private void OnEditorUpdate(TimeSpan ts)
         {
@@ -1427,7 +1427,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
                     var apfLane = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>()
                         .LastOrDefault();
-                    var xGrid = apfLane?.CalulateXGrid(tGrid) ?? PlayerLocationRecorder.GetLocationXGrid(CurrentPlayTime);
+                    var xGrid = apfLane?.CalulateXGrid(tGrid)?.TotalUnit ?? PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime);
 
                     PlayerLocationRecorder.Commit(CurrentPlayTime, xGrid);
                 }

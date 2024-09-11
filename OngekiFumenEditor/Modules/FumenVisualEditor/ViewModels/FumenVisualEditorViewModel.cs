@@ -100,6 +100,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 case nameof(EditorGlobalSetting.EnablePlayFieldDrawing):
                     enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
                     break;
+                case nameof(EditorGlobalSetting.EnableShowPlayerLocation):
+                    enableShowPlayerLocation = EditorGlobalSetting.Default.EnableShowPlayerLocation;
+                    PlayerLocationRecorder.Clear();
+                    break;
                 case nameof(EditorGlobalSetting.XGridUnitSpace):
                 case nameof(EditorGlobalSetting.DisplayTimeFormat):
                 case nameof(EditorGlobalSetting.BeatSplit):
@@ -153,6 +157,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         private bool isShowCurveControlAlways = false;
+        private bool enableShowPlayerLocation;
+
         public bool IsShowCurveControlAlways
         {
             get => isShowCurveControlAlways;
