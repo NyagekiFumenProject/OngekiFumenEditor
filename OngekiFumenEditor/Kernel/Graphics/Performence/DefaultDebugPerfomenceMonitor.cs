@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 	[PartCreationPolicy(CreationPolicy.NonShared)]
 	public class DefaultDebugPerfomenceMonitor : IPerfomenceMonitor
 	{
-		const int RECORD_LENGTH = 10;
+		const int RECORD_LENGTH = 165;
 
 		private class DrawingPerformenceData
 		{
@@ -130,7 +130,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 				return default;
 
 			var ave = dataList.Select(x => x.DrawingSpendTicks.Average()).Average();
-			var most = dataList.SelectMany(x => x.DrawingSpendTicks).GroupBy(x => (int)x).OrderByDescending(x => x.Key).SelectMany(x => x).Average();
+			var most = dataList.SelectMany(x => x.DrawingSpendTicks).GroupBy(x => (int)x).OrderByDescending(x => x.Count()).SelectMany(x => x).Average();
 
 			var list = dataList
 				.Select(x => new { TotalCost = x.DrawingSpendTicks.Sum(), Obj = x })
@@ -162,8 +162,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 			{
 				AveSpendTicks = RenderSpendTicks.Average(),
 				AveUIRenderSpendTicks = UIRenderSpendTicks.Average(),
-				MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Key).FirstOrDefault().Key,
-				MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Key).FirstOrDefault().Key,
+				MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
+				MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
 				AveDrawCall = (int)TotalDrawCall.Average()
 			};
 		}

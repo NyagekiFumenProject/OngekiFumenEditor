@@ -50,8 +50,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 			{
 				AveSpendTicks = RenderSpendTicks.Average(),
 				AveUIRenderSpendTicks = UIRenderSpendTicks.Average(),
-				MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Key).FirstOrDefault().Key,
-				MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Key).FirstOrDefault().Key,
+				MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
+				MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
 				AveDrawCall = (int)TotalDrawCall.Average()
 			};
 		}

@@ -23,6 +23,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Wpf;
@@ -247,20 +248,30 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         //todo 可以把GroupBy()给优化掉
         var renderObjects =
             GetDisplayableObjects(fumen, visibleTGridRanges)
-                .Distinct()
+                //.Distinct()
                 .OfType<OngekiTimelineObjectBase>()
                 .GroupBy(x => x.IDShortName);
+
+        var containList = ObjectPool<List<List<OngekiTimelineObjectBase>>>.Get();
+        containList.Clear();
 
         foreach (var objGroup in renderObjects)
         {
             if (GetDrawingTarget(objGroup.Key) is not IFumenEditorDrawingTarget[] drawingTargets)
                 continue;
 
+            var contain = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
+            contain.Clear();
+
+            contain.AddRange(objGroup);
+            //contain.SortBy(x => x.TGrid);
+
             foreach (var drawingTarget in drawingTargets)
                 if (!drawMap.TryGetValue(drawingTarget, out var enums))
-                    drawMap[drawingTarget] = objGroup;
+                    drawMap[drawingTarget] = contain;
                 else
-                    drawMap[drawingTarget] = enums.Concat(objGroup);
+                    drawMap[drawingTarget] = enums.Concat(contain);
+            containList.Add(contain);
         }
 
         if (IsPreviewMode)
@@ -289,13 +300,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
             {
                 drawingTarget.Begin(this);
-                foreach (var obj in drawingObjs.OrderBy(x => x.TGrid))
+                //all object collection has been sorted within GetDisplayableObjects()
+                foreach (var obj in drawingObjs/*.OrderBy(x => x.TGrid)*/)
                     drawingTarget.Post(obj);
                 drawingTarget.End();
             }
         }
-
-        drawMap.Clear();
 
         timeSignatureHelper.DrawTimeSigntureText(this);
         xGridHelper.DrawXGridText(this, CachedMagneticXGridLines);
@@ -303,6 +313,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         playerLocationHelper.Draw(this);
         selectingRangeHelper.Draw(this);
 
+
+        //clean up
+        drawMap.Clear();
+        foreach (var contains in containList)
+            ObjectPool<List<OngekiTimelineObjectBase>>.Return(contains);
+        ObjectPool<List<List<OngekiTimelineObjectBase>>>.Return(containList);
 
         PerfomenceMonitor.OnAfterRender();
     }
