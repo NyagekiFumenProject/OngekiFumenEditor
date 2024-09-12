@@ -7,9 +7,17 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DebugType>embedded</DebugType>
 		<LangVersion>preview</LangVersion>
-		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
 		<DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
 		<StartupObject>OngekiFumenEditor.Startup</StartupObject>
+		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DebugType>full</DebugType>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <DebugType>full</DebugType>
 	</PropertyGroup>
 
 	<ItemGroup>

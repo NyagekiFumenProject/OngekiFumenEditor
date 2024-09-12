@@ -375,7 +375,7 @@ namespace OngekiFumenEditor.Utils
 			return source[i];
 		}
 
-		public static int InsertBySortBy<T, X>(this IList<T> insertable, T needInsert, Func<T, X> keySelect)
+        public static int InsertBySortBy<T, X>(this IList<T> insertable, T needInsert, Func<T, X> keySelect)
 		{
 			var comparer = Comparer<X>.Default;
 			var needInsertKey = keySelect(needInsert);

@@ -94,11 +94,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 var points = new HashSet<float>();
 
+                var prevPos = new Vector2((float)MathUtils.Random(), (float)MathUtils.Random());
+                void appendPoint2(List<Vector2> list, float x, float y)
+                {
+                    var p = new Vector2(x, y);
+                    if (prevPos == p)
+                        return;
+                    list.Add(p);
+                    prevPos = p;
+                }
                 void appendPoint(List<Vector2> list, XGrid xGrid, float y)
                 {
                     if (xGrid is null)
                         return;
-                    list.Add(new(xGrid.TotalGrid, y));
+                    appendPoint2(list, xGrid.TotalGrid, y);
                 }
 
                 for (int i = 0; i < ranges.Length; i++)
@@ -142,12 +151,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         }
                     }
 
-                    points.AddRange(lanes.Select(x => (float)x.TGrid.TotalGrid).Concat(lanes.Select(x => x.Children.LastOrDefault()).FilterNull().Select(x => (float)x.TGrid.TotalGrid)));
+                    points.AddRange(lanes
+                        .Select(x => (float)x.TGrid.TotalGrid)
+                        .Concat(lanes.Select(x => x.Children.LastOrDefault())
+                        .FilterNull()
+                        .Select(x => (float)x.TGrid.TotalGrid))
+                        .Where(x => curRange.Min <= x && x <= curRange.Max)
+                        );
                 }
 
                 var sortedPoints = points.OrderBy(x => x).ToList();
-
-                if (sortedPoints.IsEmpty() || sortedPoints.FirstOrDefault() > minTGrid.TotalGrid)
+                if (sortedPoints.Count == 0 || sortedPoints.FirstOrDefault() > minTGrid.TotalGrid)
                     sortedPoints.Insert(0, minTGrid.TotalGrid);
                 if (sortedPoints.LastOrDefault() < maxTGrid.TotalGrid)
                     sortedPoints.Add(maxTGrid.TotalGrid);
@@ -173,7 +187,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         appendPoint(result, pickLane.CalulateXGrid(fromTGrid), fromY);
 
                         foreach (var pos in pickLane.GenAllPath().Select(x => x.pos).SkipWhile(x => x.Y < fromY).TakeWhile(x => x.Y < toY))
-                            result.Add(new(pos.X, pos.Y));
+                            appendPoint2(result, pos.X, pos.Y);
 
                         var toTGrid = TGrid.FromTotalGrid((int)toY);
                         appendPoint(result, pickLane.CalulateXGrid(toTGrid), toY);
@@ -194,7 +208,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             void FillPoints(List<Vector2> ps)
             {
-                foreach (var point in ps.DistinctContinuousBy(x => x))
+                foreach (var point in ps)
                 {
                     var x = (float)XGridCalculator.ConvertXGridToX(point.X / XGrid.DEFAULT_RES_X, target.Editor);
                     var y = (float)target.ConvertToY(point.Y / TGrid.DEFAULT_RES_T);
