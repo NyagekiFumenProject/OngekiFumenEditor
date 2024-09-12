@@ -95,5 +95,20 @@
     <Setting Name="EnableShowPlayerLocation" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="ColorHoldLeft" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Red</Value>
+    </Setting>
+    <Setting Name="ColorHoldCenter" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Lime</Value>
+    </Setting>
+    <Setting Name="ColorHoldRight" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Blue</Value>
+    </Setting>
+    <Setting Name="ColorHoldWallRight" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">35, 4, 117</Value>
+    </Setting>
+    <Setting Name="ColorHoldWallLeft" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">136, 3, 152</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

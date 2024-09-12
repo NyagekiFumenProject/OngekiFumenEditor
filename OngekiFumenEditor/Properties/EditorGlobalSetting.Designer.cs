@@ -394,5 +394,65 @@ namespace OngekiFumenEditor.Properties {
                 this["EnableShowPlayerLocation"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Red")]
+        public global::System.Drawing.Color ColorHoldLeft {
+            get {
+                return ((global::System.Drawing.Color)(this["ColorHoldLeft"]));
+            }
+            set {
+                this["ColorHoldLeft"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Lime")]
+        public global::System.Drawing.Color ColorHoldCenter {
+            get {
+                return ((global::System.Drawing.Color)(this["ColorHoldCenter"]));
+            }
+            set {
+                this["ColorHoldCenter"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Blue")]
+        public global::System.Drawing.Color ColorHoldRight {
+            get {
+                return ((global::System.Drawing.Color)(this["ColorHoldRight"]));
+            }
+            set {
+                this["ColorHoldRight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("35, 4, 117")]
+        public global::System.Drawing.Color ColorHoldWallRight {
+            get {
+                return ((global::System.Drawing.Color)(this["ColorHoldWallRight"]));
+            }
+            set {
+                this["ColorHoldWallRight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("136, 3, 152")]
+        public global::System.Drawing.Color ColorHoldWallLeft {
+            get {
+                return ((global::System.Drawing.Color)(this["ColorHoldWallLeft"]));
+            }
+            set {
+                this["ColorHoldWallLeft"] = value;
+            }
+        }
     }
 }

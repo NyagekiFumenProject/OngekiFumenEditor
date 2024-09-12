@@ -28,14 +28,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		{
 			lineDrawing = IoC.Get<ISimpleLineDrawing>();
 			stringDrawing = IoC.Get<IStringDrawing>();
+
+
 		}
 
-		public override IEnumerable<string> DrawTargetID { get; } = new[]
-		{
-			"MET","SFL","BPM","EST","CLK","LBK","[LBK_End]","[SFL_End]","[CMT]","[INTP_SFL]","[INTP_SFL_End]","[KEY_SFL]"
-		};
+		public override IEnumerable<string> DrawTargetID { get; } =
+        [
+            "MET","SFL","BPM","EST","CLK","LBK","[LBK_End]","[SFL_End]","[CMT]","[INTP_SFL]","[INTP_SFL_End]","[KEY_SFL]"
+		];
 
-		private static Dictionary<string, FSColor> colors = new()
+		private Dictionary<string, FSColor> colors = new()
 		{
 			{"MET", FSColor.LightGreen },
 			{"SFL", FSColor.LightCyan },

@@ -13,11 +13,11 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class FumenVisualEditorGlobalSettingViewModel : PropertyChangedBase, ISettingsEditor
     {
-        public Properties.EditorGlobalSetting Setting => Properties.EditorGlobalSetting.Default;
+        public EditorGlobalSetting Setting => EditorGlobalSetting.Default;
 
         public FumenVisualEditorGlobalSettingViewModel()
         {
-            Properties.EditorGlobalSetting.Default.PropertyChanged += SettingPropertyChanged;
+            EditorGlobalSetting.Default.PropertyChanged += SettingPropertyChanged;
         }
 
         private void SettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
 
         public void ApplyChanges()
         {
-            Properties.EditorGlobalSetting.Default.Save();
+            EditorGlobalSetting.Default.Save();
         }
 
         public void ClearRecentOpen()
