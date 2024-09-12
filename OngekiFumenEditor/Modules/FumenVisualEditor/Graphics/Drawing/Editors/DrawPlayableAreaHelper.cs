@@ -11,8 +11,6 @@ using System.Linq;
 using OngekiFumenEditor.Utils;
 using System.Numerics;
 using OngekiFumenEditor.Utils.ObjectPool;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using EarcutNet;
 using System.Drawing;
 
@@ -78,6 +76,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
 
+            /*
+             画游戏(黑色可移动)区域
+                1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
+                   如果一个水平面(即y相同)存在多个轨道头尾节点，那么就会分别算point
+                2. 排列 point集合, 然后简化point和补全point
+                3. 将 points集合两两成线，得到线的range[minY, maxY] , 得到Y对应的轨道以及在范围range内轨道所有节点
+                4. 将左右所有的节点合并成一个多边形，渲染
+             */
+
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
 
@@ -92,7 +99,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     .Select(x => new CombinableRange<int>(x.MinTGrid.TotalGrid, x.MaxTGrid.TotalGrid)))
                     .OrderBy(x => isRight ? x.Max : x.Min).ToArray();
 
-                var points = new HashSet<float>();
+                var points = ObjectPool<HashSet<float>>.Get();
+                points.Clear();
 
                 var prevPos = new Vector2((float)MathUtils.Random(), (float)MathUtils.Random());
                 void appendPoint2(List<Vector2> list, float x, float y)
@@ -173,6 +181,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     var midY = ((fromY + toY) / 2);
                     var midTGrid = TGrid.FromTotalGrid((int)midY);
 
+                    //获取这个segement范围内要选取的轨道
                     var pickables = fumen.Lanes
                             .GetVisibleStartObjects(midTGrid, midTGrid)
                             .Where(x => x.LaneType == type)
@@ -180,6 +189,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             .FilterNullBy(x => x.Item1)
                             .ToArray();
 
+                    //选取轨道，如果存在多个轨道(即轨道交叉冲突了)，那么就按左右边规则选取一个
                     (var midXGrid, var pickLane) = pickables.IsEmpty() ? default : (isRight ? pickables.MaxBy(x => x.Item1) : pickables.MinBy(x => x.Item1));
                     if (pickLane is not null)
                     {
@@ -194,11 +204,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     }
                     else
                     {
-                        //默认24咯
+                        //选取不到轨道，表示这个segement是两个轨道之间的空白区域，那么直接填上空白就行
                         result.Add(new(defaultX, fromY));
                         result.Add(new(defaultX, toY));
                     }
                 }
+
+                ObjectPool<HashSet<float>>.Return(points);
             }
 
             using var d3 = ObjectPool<List<double>>.GetWithUsingDisposable(out var points, out _);
@@ -223,28 +235,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var rightPoints, out _);
             rightPoints.Clear();
 
+            //计算左边墙的点
             EnumeratePoints(false, leftPoints);
             FillPoints(leftPoints);
+            //计算右边墙的点，因为要组合成一个多边形，所以右半部分得翻转一下顺序
             EnumeratePoints(true, rightPoints);
             rightPoints.Reverse();
             FillPoints(rightPoints);
-            /*
-            foreach (var seq in points.SequenceWrap(2))
-            {
-                var x = XGrid.FromTotalGrid((int)seq.FirstOrDefault());
-                var y = TGrid.FromTotalGrid((int)seq.LastOrDefault());
 
-
-            }
-            */
-            var list = Earcut.Tessellate(points, idxList);
+            var tessellateList = ObjectPool<List<int>>.Get();
+            tessellateList.Clear();
+            Earcut.Tessellate(points, idxList, tessellateList);
 
             polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
 
-            //var random = new Random(1025);
-            foreach (var seq in list.SequenceWrap(3))
+            foreach (var seq in tessellateList.SequenceWrap(3))
             {
-                //var playFieldForegroundColor = new Vector4((float)random.NextDouble(), (float)random.NextDouble(), (float)random.NextDouble(), 1);
                 foreach (var idx in seq)
                 {
                     var x = (float)points[idx * 2 + 0];
@@ -252,6 +258,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     polygonDrawing.PostPoint(new(x, y), playFieldForegroundColor);
                 }
             }
+
+            ObjectPool<List<int>>.Return(tessellateList);
 
             polygonDrawing.End();
         }
