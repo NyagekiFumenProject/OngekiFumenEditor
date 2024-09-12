@@ -69,6 +69,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private readonly List<(TGrid minTGrid, TGrid maxTGrid)> visibleTGridRanges = new();
     private DrawXGridHelper xGridHelper;
+    private int cacheMagaticXGridLinesHash;
+
     public IEnumerable<CacheDrawXLineResult> CachedMagneticXGridLines => cachedMagneticXGridLines;
 
     public PlayerLocationRecorder PlayerLocationRecorder { get; } = new();
@@ -245,33 +247,30 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
-        //todo 可以把GroupBy()给优化掉
-        var renderObjects =
-            GetDisplayableObjects(fumen, visibleTGridRanges)
-                //.Distinct()
-                .OfType<OngekiTimelineObjectBase>()
-                .GroupBy(x => x.IDShortName);
+        var map = ObjectPool<Dictionary<string, List<OngekiTimelineObjectBase>>>.Get();
+        map.Clear();
+        foreach (var obj in GetDisplayableObjects(fumen, visibleTGridRanges).OfType<OngekiTimelineObjectBase>())
+        {
+            if (!map.TryGetValue(obj.IDShortName, out var list))
+            {
+                list = map[obj.IDShortName] = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
+                list.Clear();
+            }
 
-        var containList = ObjectPool<List<List<OngekiTimelineObjectBase>>>.Get();
-        containList.Clear();
+            list.Add(obj);
+        }
 
-        foreach (var objGroup in renderObjects)
+        foreach (var objGroup in map)
         {
             if (GetDrawingTarget(objGroup.Key) is not IFumenEditorDrawingTarget[] drawingTargets)
                 continue;
-
-            var contain = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
-            contain.Clear();
-
-            contain.AddRange(objGroup);
-            //contain.SortBy(x => x.TGrid);
+            var list = objGroup.Value;
 
             foreach (var drawingTarget in drawingTargets)
                 if (!drawMap.TryGetValue(drawingTarget, out var enums))
-                    drawMap[drawingTarget] = contain;
+                    drawMap[drawingTarget] = list;
                 else
-                    drawMap[drawingTarget] = enums.Concat(contain);
-            containList.Add(contain);
+                    drawMap[drawingTarget] = enums.Concat(list);
         }
 
         if (IsPreviewMode)
@@ -316,9 +315,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         //clean up
         drawMap.Clear();
-        foreach (var contains in containList)
-            ObjectPool<List<OngekiTimelineObjectBase>>.Return(contains);
-        ObjectPool<List<List<OngekiTimelineObjectBase>>>.Return(containList);
+        foreach (var list in map.Values)
+            ObjectPool<List<OngekiTimelineObjectBase>>.Return(list);
+        ObjectPool<Dictionary<string, List<OngekiTimelineObjectBase>>>.Return(map);
 
         PerfomenceMonitor.OnAfterRender();
     }
@@ -497,19 +496,27 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public void OnLoaded(ActionExecutionContext e)
     {
+
     }
 
     private void RecalculateMagaticXGridLines()
     {
-        //todo 可以优化
-        cachedMagneticXGridLines.Clear();
-
         var xOffset = (float)Setting.XOffset;
         var width = ViewWidth;
         if (width == 0)
+        {
+            cachedMagneticXGridLines.Clear();
             return;
+        }
         var xUnitSpace = (float)Setting.XGridUnitSpace;
         var maxDisplayXUnit = Setting.XGridDisplayMaxUnit;
+
+        //check if it is necessary to recalculate and generate
+        var hash = HashCode.Combine(xOffset, width, xUnitSpace, maxDisplayXUnit);
+        if (cacheMagaticXGridLinesHash == hash)
+            return;
+        cacheMagaticXGridLinesHash = hash;
+        cachedMagneticXGridLines.Clear();
 
         var unitSize = (float)XGridCalculator.CalculateXUnitSize(maxDisplayXUnit, width, xUnitSpace);
         var totalUnitValue = 0f;
