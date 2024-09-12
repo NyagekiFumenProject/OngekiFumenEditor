@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 			public LaneBlockArea RefLaneBlockArea { get; internal protected set; }
 
-			public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => IDisplayableObject.EmptyDisplayable;
+			public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => IDisplayableObject.Empty;
 
 			private bool tGridHasSet;
 

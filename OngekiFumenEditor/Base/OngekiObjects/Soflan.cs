@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 			public Soflan RefSoflan { get; internal protected set; }
 
-			public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => IDisplayableObject.EmptyDisplayable;
+			public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => IDisplayableObject.Empty;
 
 			public override TGrid TGrid
 			{
