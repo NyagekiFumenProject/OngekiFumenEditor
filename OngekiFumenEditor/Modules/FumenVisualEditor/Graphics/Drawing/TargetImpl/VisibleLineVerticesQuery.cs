@@ -128,5 +128,109 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             ObjectPool<List<SoflanPoint>>.Return(affectedSoflanPoints);
         }
+
+        //BACKUP
+        public static void _QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
+        {
+            if (start is null)
+                return;
+
+            var resT = start.TGrid.ResT;
+            var resX = start.XGrid.ResX;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)
+            {
+                var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
+                var y = (float)target.ConvertToY(tGridUnit);
+
+                outVertices.Add(new(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash));
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void PostPoint(TGrid tGrid, XGrid xGrid, bool isVailed) => PostPoint2(tGrid.TotalUnit, xGrid.TotalUnit, isVailed);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void PostObject(OngekiMovableObjectBase obj, bool isVailed) => PostPoint(obj.TGrid, obj.XGrid, isVailed);
+
+            var affectedSoflanPoints = ObjectPool<List<SoflanPoint>>.Get();
+
+            var soflanPositionList = target.Editor.IsDesignMode ?
+                target.Editor.Fumen.Soflans.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
+                target.Editor.Fumen.Soflans.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+
+            var cur = start.Children.FirstOrDefault();
+            while (cur != null)
+            {
+                var prev = cur.PrevObject;
+
+                var minTGrid = prev.TGrid;
+                var maxTGrid = cur.TGrid;
+
+                if (minTGrid > maxTGrid)
+                    (minTGrid, maxTGrid) = (maxTGrid, minTGrid);
+
+                if (target.CheckRangeVisible(minTGrid, maxTGrid))
+                {
+                    var minIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(minTGrid, x => x.TGrid);
+                    var maxIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(maxTGrid, x => x.TGrid);
+
+                    affectedSoflanPoints.Clear();
+                    for (int i = maxIdx; i >= minIdx + 1; i--)
+                        affectedSoflanPoints.Add(soflanPositionList[i]);
+
+                    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                    void CheckIfSoflanChanged(TGrid currentTGrid, bool isVailed)
+                        => CheckIfSoflanChanged2(currentTGrid.TotalUnit, isVailed);
+                    void CheckIfSoflanChanged2(double totalTGrid, bool isVailed)
+                    {
+                        /*
+                         Check if there is any SoflanPoint before connectable object
+                         If exist, just interpolate a new point to insert
+                         */
+                        if (affectedSoflanPoints.Count == 0)
+                            return;
+
+                        var checkTGrid = affectedSoflanPoints[^1].TGrid;
+                        var diff = checkTGrid.TotalUnit - totalTGrid;
+
+                        if (diff > 0)
+                            return;
+
+                        if (diff < 0)
+                        {
+                            var xGrid = start.CalulateXGrid(checkTGrid);
+                            PostPoint(checkTGrid, xGrid, isVailed);
+                        }
+
+                        affectedSoflanPoints.RemoveAt(affectedSoflanPoints.Count - 1);
+                        //check again
+                        CheckIfSoflanChanged2(totalTGrid, isVailed);
+                    }
+
+                    //visible, draw then
+                    var isVaild = cur.IsVaildPath;
+
+                    PostObject(prev, isVaild);
+
+                    if (cur.IsCurvePath)
+                    {
+                        foreach (var item in cur.GetConnectionPaths())
+                        {
+                            var tGridUnit = item.pos.Y / resT;
+                            CheckIfSoflanChanged2(tGridUnit, isVaild);
+                            PostPoint2(tGridUnit, item.pos.X / resX, isVaild);
+                        }
+                    }
+                    else
+                    {
+                        CheckIfSoflanChanged(cur.TGrid, isVaild);
+                        PostObject(cur, isVaild);
+                    }
+                }
+
+                cur = cur.NextObject;
+            }
+
+            ObjectPool<List<SoflanPoint>>.Return(affectedSoflanPoints);
+        }
     }
 }
