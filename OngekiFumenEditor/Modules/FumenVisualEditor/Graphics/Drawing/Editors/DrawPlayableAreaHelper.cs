@@ -386,7 +386,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             FillPoints(rightPoints, true);
             //todo 解决左右墙交叉处理问题
 
-            var r = string.Join(Environment.NewLine, points.SequenceWrap(2).Select(x => $"{x.FirstOrDefault(),-20}{x.LastOrDefault()}"));
+            var pointPrint = string.Join(Environment.NewLine, points.SequenceWrap(2).Select(x => $"{x.FirstOrDefault(),-20}{x.LastOrDefault()}"));
 
             var tessellateList = ObjectPool<List<int>>.Get();
             tessellateList.Clear();
