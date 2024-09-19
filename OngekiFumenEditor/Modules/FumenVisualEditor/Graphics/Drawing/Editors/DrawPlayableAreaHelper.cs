@@ -17,6 +17,7 @@ using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using Xv2CoreLib.HslColor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -368,12 +369,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     points.Add(cur.X);
                     points.Add(cur.Y);
                 }
-
-                if (isRight)
-                {
-                    for (var j = s; j < points.Count / 2; j++)
-                        DebugPrintPoint(new((float)points[2 * j], (float)points[2 * j + 1]), isRight, true, 10);
-                }
             }
 
             using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var leftPoints, out _);
@@ -381,65 +376,79 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var rightPoints, out _);
             rightPoints.Clear();
 
-            BeginDebugPrint(target);
-
             //计算左边墙的点
             EnumeratePoints(false, leftPoints);
             FillPoints(leftPoints, false);
             //计算右边墙的点，因为要组合成一个多边形，所以右半部分得翻转一下顺序
+            var rightPointIdx = points.Count;
             EnumeratePoints(true, rightPoints);
             rightPoints.Reverse();
             FillPoints(rightPoints, true);
             //todo 解决左右墙交叉处理问题
 
-            EndDebugPrint();
+            var r = string.Join(Environment.NewLine, points.SequenceWrap(2).Select(x => $"{x.FirstOrDefault(),-20}{x.LastOrDefault()}"));
 
             var tessellateList = ObjectPool<List<int>>.Get();
             tessellateList.Clear();
             Earcut.Tessellate(points, idxList, tessellateList);
 
-            var r = string.Join(Environment.NewLine, points.SequenceWrap(2).Select(x => $"{x.FirstOrDefault(),-20}{x.LastOrDefault()}"));
-
             polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
 
-            var i = 0;
             foreach (var seq in tessellateList.SequenceWrap(3))
             {
-                var normal = i * 1.0f / tessellateList.Count / 2 + 0.5;
-                var hslColor = new HslColor(0.55, normal, 1);
-
-                var rgb = hslColor.ToRgb();
-                var color = new Vector4((float)rgb.R, (float)rgb.G, (float)rgb.B, 0.25f);
-
                 foreach (var idx in seq)
                 {
                     var x = (float)points[idx * 2 + 0];
                     var y = (float)points[idx * 2 + 1];
                     polygonDrawing.PostPoint(new(x, y), playFieldForegroundColor);
                 }
-                i += 3;
             }
             polygonDrawing.End();
-            /*
-            i = 0;
+#if DEBUG
+            var leftColor = new Vector4(1, 51f / 255, 51f / 255, 0.9f);
+            var rightColor = new Vector4(0, 204f / 255, 102f / 255, 0.9f);
+
+            //print WallLane
+            lineDrawing.Draw(target, points[..rightPointIdx]
+                .SequenceWrap(2)
+                .Select(x => new LineVertex(new((float)x.First(), (float)x.Last()), leftColor, VertexDash.Solider)), 6);
+
+            lineDrawing.Draw(target, points[rightPointIdx..]
+                .SequenceWrap(2)
+                .Select(x => new LineVertex(new((float)x.First(), (float)x.Last()), rightColor, VertexDash.Solider)), 6);
+
+            var i = 0;
             foreach (var seq in tessellateList.SequenceWrap(3))
             {
-                var normal = i * 1.0f / tessellateList.Count / 2 + 0.5;
-                var hslColor = new HslColor(0.55, normal, 1);
+                var (r, g, b) = Hsl2Rgb(39, 1f, 0.5f);
+                var color = new Vector4(r, g, b, 0.9f);
 
-                var rgb = hslColor.ToRgb();
-                var color = new Vector4((float)rgb.R, (float)rgb.G, (float)rgb.B, 1);
-                lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault()).Select(idx => new LineVertex(new((float)points[idx * 2 + 0], (float)points[idx * 2 + 1]), color, new(2, 2))), 3);
+                lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault())
+                    .Select(idx => new LineVertex(new((float)points[idx * 2 + 0], (float)points[idx * 2 + 1]), color, new(6, 4))), 2);
+                
                 i += 3;
             }
-            */
+
+            void printPoints(IEnumerable<double> data, Vector4 color)
+            {
+                var points = data.SequenceWrap(2)
+                .Select(x => new Vector2((float)x.First(), (float)x.Last()))
+                .ToArray();
+
+                BeginDebugPrint(target);
+                points.ForEach(x => DebugPrintPoint(x, color, 10));
+                EndDebugPrint();
+            }
+
+            printPoints(points[..rightPointIdx], leftColor);
+            printPoints(points[rightPointIdx..], rightColor);
+#endif
             ObjectPool<List<int>>.Return(tessellateList);
         }
 
         [Conditional("DEBUG")]
-        private void DebugPrintPoint(Vector2 p, bool isRight, bool v1, int v2)
+        private void DebugPrintPoint(Vector2 p, Vector4 color, int v2)
         {
-            var color = isRight ? new Vector4(1, 0, 0, 0.5f) : new Vector4(0, 1, 0, 0.5f);
             circleDrawing.Post(p, color, false, v2);
         }
 
@@ -453,6 +462,56 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private void EndDebugPrint()
         {
             circleDrawing.End();
+        }
+
+        public static (float r, float g, float b) Hsl2Rgb(float h, float s, float l)
+        {
+            // Ensure the Hue is in the range of 0 to 360
+            h = h % 360;
+
+            float c = (1 - Math.Abs(2 * l - 1)) * s;  // Chroma
+            float x = c * (1 - Math.Abs((h / 60) % 2 - 1));
+            float m = l - c / 2;
+
+            float rPrime = 0, gPrime = 0, bPrime = 0;
+
+            if (h >= 0 && h < 60)
+            {
+                rPrime = c;
+                gPrime = x;
+            }
+            else if (h >= 60 && h < 120)
+            {
+                rPrime = x;
+                gPrime = c;
+            }
+            else if (h >= 120 && h < 180)
+            {
+                gPrime = c;
+                bPrime = x;
+            }
+            else if (h >= 180 && h < 240)
+            {
+                gPrime = x;
+                bPrime = c;
+            }
+            else if (h >= 240 && h < 300)
+            {
+                rPrime = x;
+                bPrime = c;
+            }
+            else if (h >= 300 && h < 360)
+            {
+                rPrime = c;
+                bPrime = x;
+            }
+
+            // Convert to final RGB values by adding m and scaling to the 0-1 range
+            float r = rPrime + m;
+            float g = gPrime + m;
+            float b = bPrime + m;
+
+            return (r, g, b);
         }
     }
 }
