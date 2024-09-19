@@ -54,7 +54,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private DrawJudgeLineHelper judgeLineHelper;
     private DrawPlayableAreaHelper playableAreaHelper;
     private DrawPlayerLocationHelper playerLocationHelper;
-    private Vector4 playFieldBackgroundColor;
+    private Vector4 playFieldForegroundColor;
     private int renderViewHeight;
 
     private int renderViewWidth;
@@ -154,7 +154,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         renderViewWidth = (int)(openGLView.ActualWidth * dpiX);
         renderViewHeight = (int)(openGLView.ActualHeight * dpiY);
 
-        playFieldBackgroundColor = Color.FromArgb(EditorGlobalSetting.Default.PlayFieldBackgroundColor).ToVector4();
+        playFieldForegroundColor = Color.FromArgb(EditorGlobalSetting.Default.PlayFieldForegroundColor).ToVector4();
         enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
 
         drawTargets = IoC.GetAll<IFumenEditorDrawingTarget>()
@@ -489,8 +489,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         if (IsDesignMode || !enablePlayFieldDrawing)
             GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
         else
-            GL.ClearColor(playFieldBackgroundColor.X, playFieldBackgroundColor.Y, playFieldBackgroundColor.Z,
-                playFieldBackgroundColor.W);
+            GL.ClearColor(playFieldForegroundColor.X, playFieldForegroundColor.Y, playFieldForegroundColor.Z,
+                playFieldForegroundColor.W);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
     }
 

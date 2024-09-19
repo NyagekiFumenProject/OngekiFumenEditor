@@ -17,6 +17,7 @@ using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using Xv2CoreLib.HslColor;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Base.EditorProjectDataUtils;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -26,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private IPolygonDrawing polygonDrawing;
         private ICircleDrawing circleDrawing;
 
-        private Vector4 playFieldForegroundColor;
+        private Vector4 playFieldBackgroundColor;
         private bool enablePlayFieldDrawing;
 
         LineVertex[] vertices = new LineVertex[2];
@@ -57,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private void UpdateProps()
         {
             enablePlayFieldDrawing = Properties.EditorGlobalSetting.Default.EnablePlayFieldDrawing;
-            playFieldForegroundColor = Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldForegroundColor).ToVector4();
+            playFieldBackgroundColor = Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldBackgroundColor).ToVector4();
         }
 
         public void Draw(IFumenEditorDrawingContext target)
@@ -81,15 +82,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         {
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
-
-            /*
-             画游戏(黑色可移动)区域
-                1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
-                   如果一个水平面(即y相同)存在多个轨道头尾节点，那么就会分别算point
-                2. 排列 point集合, 然后简化point和补全point
-                3. 将 points集合两两成线，得到线的range[minY, maxY] , 得到Y对应的轨道以及在范围range内轨道所有节点
-                4. 将左右所有的节点合并成一个多边形，渲染
-             */
 
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
@@ -219,11 +211,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         var fromTGrid = TGrid.FromTotalGrid((int)fromY);
                         appendPoint(result, pickLane.CalulateXGrid(fromTGrid), fromY);
 
-                        foreach (var pos in pickLane.GenAllPath().Select(x => x.pos).SkipWhile(x => x.Y < fromY).TakeWhile(x => x.Y < toY))
+                        var posArray = pickLane.GenAllPath().Select(x => x.pos).SkipWhile(x => x.Y < fromY).TakeWhile(x => x.Y <= toY).ToArray();
+                        foreach (var pos in posArray)
                             appendPoint2(result, pos.X, pos.Y);
 
-                        var toTGrid = TGrid.FromTotalGrid((int)toY);
-                        appendPoint(result, pickLane.CalulateXGrid(toTGrid), toY);
+                        if (posArray.Length == 0 || toY > posArray[^1].Y)
+                        {
+                            //考虑到存在瞬间变速的情况
+                            var toTGrid = TGrid.FromTotalGrid((int)toY);
+                            appendPoint(result, pickLane.CalulateXGrid(toTGrid), toY);
+                        }
                     }
                     else
                     {
@@ -329,13 +326,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
 
             using var d3 = ObjectPool<List<double>>.GetWithUsingDisposable(out var points, out _);
-            points.Clear();
-            using var d4 = ObjectPool<List<int>>.GetWithUsingDisposable(out var idxList, out _);
-            idxList.Clear();
-
             void FillPoints(List<Vector2> ps, bool isRight)
             {
-                var s = points.Count / 2;
+                points.Clear();
 
                 for (var i = 0; i < ps.Count; i++)
                 {
@@ -368,91 +361,64 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     points.Add(cur.X);
                     points.Add(cur.Y);
                 }
-
-                if (isRight)
-                {
-                    for (var j = s; j < points.Count / 2; j++)
-                        DebugPrintPoint(new((float)points[2 * j], (float)points[2 * j + 1]), isRight, true, 10);
-                }
             }
 
-            using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var leftPoints, out _);
-            leftPoints.Clear();
-            using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var rightPoints, out _);
-            rightPoints.Clear();
-
-            BeginDebugPrint(target);
-
-            //计算左边墙的点
-            EnumeratePoints(false, leftPoints);
-            FillPoints(leftPoints, false);
-            //计算右边墙的点，因为要组合成一个多边形，所以右半部分得翻转一下顺序
-            EnumeratePoints(true, rightPoints);
-            rightPoints.Reverse();
-            FillPoints(rightPoints, true);
-            //todo 解决左右墙交叉处理问题
-
-            EndDebugPrint();
-
+            using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var gridPoints, out _);
+            using var d4 = ObjectPool<List<int>>.GetWithUsingDisposable(out var idxList, out _);
             var tessellateList = ObjectPool<List<int>>.Get();
-            tessellateList.Clear();
-            Earcut.Tessellate(points, idxList, tessellateList);
 
-            var r = string.Join(Environment.NewLine, points.SequenceWrap(2).Select(x => $"{x.FirstOrDefault(),-20}{x.LastOrDefault()}"));
-
-            polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
-
-            var i = 0;
-            foreach (var seq in tessellateList.SequenceWrap(3))
+            void PostDraw()
             {
-                var normal = i * 1.0f / tessellateList.Count / 2 + 0.5;
-                var hslColor = new HslColor(0.55, normal, 1);
+                tessellateList.Clear();
+                idxList.Clear();
 
-                var rgb = hslColor.ToRgb();
-                var color = new Vector4((float)rgb.R, (float)rgb.G, (float)rgb.B, 0.25f);
+                Earcut.Tessellate(points, idxList, tessellateList);
 
-                foreach (var idx in seq)
+                //var r = string.Join(Environment.NewLine, points.SequenceWrap(2).Select(x => $"{x.FirstOrDefault(),-20}{x.LastOrDefault()}"));
+
+                var i = 0;
+                polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+                foreach (var seq in tessellateList.SequenceWrap(3))
                 {
-                    var x = (float)points[idx * 2 + 0];
-                    var y = (float)points[idx * 2 + 1];
-                    polygonDrawing.PostPoint(new(x, y), playFieldForegroundColor);
+                    var normal = i * 1.0f / tessellateList.Count / 2 + 0.5;
+                    var hslColor = new HslColor(0.55, normal, 1);
+
+                    var rgb = hslColor.ToRgb();
+                    var color = new Vector4((float)rgb.R, (float)rgb.G, (float)rgb.B, 0.25f);
+
+                    foreach (var idx in seq)
+                    {
+                        var x = (float)points[idx * 2 + 0];
+                        var y = (float)points[idx * 2 + 1];
+                        polygonDrawing.PostPoint(new(x, y), playFieldBackgroundColor);
+                    }
+                    i += 3;
                 }
-                i += 3;
+                polygonDrawing.End();
             }
-            polygonDrawing.End();
-            /*
-            i = 0;
-            foreach (var seq in tessellateList.SequenceWrap(3))
-            {
-                var normal = i * 1.0f / tessellateList.Count / 2 + 0.5;
-                var hslColor = new HslColor(0.55, normal, 1);
 
-                var rgb = hslColor.ToRgb();
-                var color = new Vector4((float)rgb.R, (float)rgb.G, (float)rgb.B, 1);
-                lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault()).Select(idx => new LineVertex(new((float)points[idx * 2 + 0], (float)points[idx * 2 + 1]), color, new(2, 2))), 3);
-                i += 3;
-            }
-            */
+            //for left wall
+            gridPoints.Clear();
+            EnumeratePoints(false, gridPoints);
+            gridPoints.Insert(0, new(gridPoints.First().X, target.Rect.MinY));
+            gridPoints.Insert(0, new(target.Rect.MinX, target.Rect.MinY));
+            gridPoints.Add(new(gridPoints.Last().X, target.Rect.MaxY));
+            gridPoints.Add(new(target.Rect.MinX, target.Rect.MaxY));
+            FillPoints(gridPoints, false);
+            PostDraw();
+
+            //for right wall
+            gridPoints.Clear();
+            EnumeratePoints(true, gridPoints);
+            gridPoints.Insert(0, new(gridPoints.First().X, target.Rect.MinY));
+            gridPoints.Insert(0, new(target.Rect.MaxX, target.Rect.MinY));
+            gridPoints.Add(new(gridPoints.Last().X, target.Rect.MaxY));
+            gridPoints.Add(new(target.Rect.MaxX, target.Rect.MaxY));
+            FillPoints(gridPoints, true);
+            PostDraw();
+
+
             ObjectPool<List<int>>.Return(tessellateList);
-        }
-
-        [Conditional("DEBUG")]
-        private void DebugPrintPoint(Vector2 p, bool isRight, bool v1, int v2)
-        {
-            var color = isRight ? new Vector4(1, 0, 0, 0.5f) : new Vector4(0, 1, 0, 0.5f);
-            circleDrawing.Post(p, color, false, v2);
-        }
-
-        [Conditional("DEBUG")]
-        private void BeginDebugPrint(IFumenEditorDrawingContext target)
-        {
-            circleDrawing.Begin(target);
-        }
-
-        [Conditional("DEBUG")]
-        private void EndDebugPrint()
-        {
-            circleDrawing.End();
         }
     }
 }
