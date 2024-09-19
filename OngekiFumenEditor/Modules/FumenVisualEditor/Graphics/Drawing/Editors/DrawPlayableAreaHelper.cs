@@ -400,25 +400,58 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             //for left wall
             gridPoints.Clear();
             EnumeratePoints(false, gridPoints);
+            /*
             gridPoints.Insert(0, new(gridPoints.First().X, target.Rect.MinY));
             gridPoints.Insert(0, new(target.Rect.MinX, target.Rect.MinY));
             gridPoints.Add(new(gridPoints.Last().X, target.Rect.MaxY));
             gridPoints.Add(new(target.Rect.MinX, target.Rect.MaxY));
+            */
             FillPoints(gridPoints, false);
-            PostDraw();
+            BeginDebugPrint(target);
+            foreach (var xy in points.SequenceWrap(2))
+                DebugPrintPoint(new((float)xy.First(), (float)xy.Last()), false, 10);
+            EndDebugPrint();
+            lineDrawing.Draw(target, points.SequenceWrap(2).Select(xy => new LineVertex(new((float)xy.First(), (float)xy.Last()), new Vector4(0, 1, 0, 1), VertexDash.Solider)), 4);
+            //PostDraw();
 
             //for right wall
             gridPoints.Clear();
             EnumeratePoints(true, gridPoints);
+            /*
             gridPoints.Insert(0, new(gridPoints.First().X, target.Rect.MinY));
             gridPoints.Insert(0, new(target.Rect.MaxX, target.Rect.MinY));
             gridPoints.Add(new(gridPoints.Last().X, target.Rect.MaxY));
             gridPoints.Add(new(target.Rect.MaxX, target.Rect.MaxY));
+            */
             FillPoints(gridPoints, true);
-            PostDraw();
+            BeginDebugPrint(target);
+            foreach (var xy in points.SequenceWrap(2))
+                DebugPrintPoint(new((float)xy.First(), (float)xy.Last()), true, 10);
+            EndDebugPrint();
+            lineDrawing.Draw(target, points.SequenceWrap(2).Select(xy => new LineVertex(new((float)xy.First(), (float)xy.Last()), new Vector4(1, 0, 0, 1), VertexDash.Solider)), 4);
+            //PostDraw();
 
 
             ObjectPool<List<int>>.Return(tessellateList);
+        }
+
+        [Conditional("DEBUG")]
+        private void DebugPrintPoint(Vector2 p, bool isRight, int v2)
+        {
+            var color = isRight ? new Vector4(1, 0, 0, 1) : new Vector4(0, 1, 0, 1);
+            circleDrawing.Post(p, color, false, v2);
+        }
+
+        [Conditional("DEBUG")]
+        private void BeginDebugPrint(IFumenEditorDrawingContext target)
+        {
+            circleDrawing.Begin(target);
+        }
+
+        [Conditional("DEBUG")]
+        private void EndDebugPrint()
+        {
+            circleDrawing.End();
         }
     }
 }
