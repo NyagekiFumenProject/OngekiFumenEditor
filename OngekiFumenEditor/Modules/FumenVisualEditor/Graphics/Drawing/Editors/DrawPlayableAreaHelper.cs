@@ -221,11 +221,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         var fromTGrid = TGrid.FromTotalGrid((int)fromY);
                         appendPoint(result, pickLane.CalulateXGrid(fromTGrid), fromY);
 
-                        foreach (var pos in pickLane.GenAllPath().Select(x => x.pos).SkipWhile(x => x.Y < fromY).TakeWhile(x => x.Y < toY))
+                        var prevTotalGrid = 0f;
+                        foreach (var pos in pickLane.GenAllPath().Select(x => x.pos).SkipWhile(x => x.Y < fromY).TakeWhile(x => x.Y <= toY))
+                        {
                             appendPoint2(result, pos.X, pos.Y);
+                            prevTotalGrid = pos.Y;
+                        }
 
                         var toTGrid = TGrid.FromTotalGrid((int)toY);
-                        appendPoint(result, pickLane.CalulateXGrid(toTGrid), toY);
+                        if (toTGrid.TotalGrid > prevTotalGrid)
+                            appendPoint(result, pickLane.CalulateXGrid(toTGrid), toY);
                     }
                     else
                     {
@@ -455,7 +460,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 float t = ((q1.X - p1.X) * s.Y - (q1.Y - p1.Y) * s.X) / cross_r_s;
                 float u = ((q1.X - p1.X) * r.Y - (q1.Y - p1.Y) * r.X) / cross_r_s;
 
-                if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+                //不允许交叉点在两个线端点重合
+                //if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+                if (t > 0 && t < 1 && u > 0 && u < 1)
                     return new Vector2(p1.X + t * r.X, p1.Y + t * r.Y);
 
                 return null;
@@ -475,7 +482,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             void exchange(int li, int ri)
             {
-                tempLeft.Clear(); 
+                tempLeft.Clear();
                 tempRight.Clear();
 
                 tempLeft.AddRange(leftPoints[li..]);
