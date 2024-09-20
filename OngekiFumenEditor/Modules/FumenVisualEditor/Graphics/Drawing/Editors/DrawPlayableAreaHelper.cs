@@ -18,6 +18,7 @@ using System.Diagnostics;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using Xv2CoreLib.HslColor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane;
+using System.Windows.Documents;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -84,13 +85,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             /*
-             画游戏(黑色可移动)区域
-                1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
-                   如果一个水平面(即y相同)存在多个轨道头尾节点，那么就会分别算point
-                2. 排列 point集合, 然后简化point和补全point
-                3. 将 points集合两两成线，得到线的range[minY, maxY] , 得到Y对应的轨道以及在范围range内轨道所有节点
-                4. 将左右所有的节点合并成一个多边形，渲染
-             */
+			 画游戏(黑色可移动)区域
+				1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
+				   如果一个水平面(即y相同)存在多个轨道头尾节点，那么就会分别算point
+				2. 排列 point集合, 然后简化point和补全point
+				3. 将 points集合两两成线，得到线的range[minY, maxY] , 得到Y对应的轨道以及在范围range内轨道所有节点
+				4. 将左右所有的节点合并成一个多边形，渲染
+			 */
 
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
@@ -192,9 +193,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 var sortedPoints = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToList();
                 /*
-                if (sortedPoints.Count == 0 || sortedPoints.FirstOrDefault() > minTGrid.TotalGrid)
-                    sortedPoints.Insert(0, minTGrid.TotalGrid);
-                */
+				if (sortedPoints.Count == 0 || sortedPoints.FirstOrDefault() > minTGrid.TotalGrid)
+					sortedPoints.Insert(0, minTGrid.TotalGrid);
+				*/
                 sortedPoints.InsertBySortBy(minTGrid.TotalGrid, x => x);
                 sortedPoints.InsertBySortBy(maxTGrid.TotalGrid, x => x);
 
@@ -234,7 +235,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     }
                 }
 
-                //todo 解决变速过快导致的精度丢失问题
+                //解决变速过快导致的精度丢失问题
                 Vector2? interpolate(TGrid tGrid, float actualY, out bool isPickLane)
                 {
                     isPickLane = false;
@@ -326,71 +327,70 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     }
                 }
 
-                ObjectPool<HashSet<float>>.Return(points);
-            }
-
-            using var d3 = ObjectPool<List<double>>.GetWithUsingDisposable(out var points, out _);
-            points.Clear();
-            using var d4 = ObjectPool<List<int>>.GetWithUsingDisposable(out var idxList, out _);
-            idxList.Clear();
-
-            void FillPoints(List<Vector2> ps, bool isRight)
-            {
-                var s = points.Count / 2;
-
-                for (var i = 0; i < ps.Count; i++)
+                //optimze points
+                for (var i = 0; i < result.Count; i++)
                 {
-                    var cur = ps[i];
-
-                    //remove dup
-                    if (points.Count >= 2)
+                    if (i > 0)
                     {
-                        var prevY = points[^1];
-                        var prevX = points[^2];
-
-                        if (prevY == cur.Y && prevX == cur.X)
-                            continue;
-                    }
-
-                    //optimze prev point if able
-                    if (points.Count >= 4)
-                    {
-                        var prevY = points[^1];
-                        var prevX = points[^2];
-
-                        if ((prevY == cur.Y && prevY == points[^3]) || (prevX == cur.X && prevX == points[^4]))
+                        if (result[i] == result[i - 1])
                         {
-                            //remove
-                            points.RemoveAt(points.Count - 1);
-                            points.RemoveAt(points.Count - 1);
+                            //remove dup
+                            result.RemoveAt(i - 1);
+                            i--;
                         }
                     }
 
-                    points.Add(cur.X);
-                    points.Add(cur.Y);
+                    if (i > 1)
+                    {
+                        // prev2 --- prev --- cur
+                        var prev2 = result[i - 2];
+                        var prev = result[i - 1];
+                        var cur = result[i];
+
+                        if ((prev.Y == cur.Y && prev.Y == prev2.Y) || (prev.X == cur.X && prev.X == prev2.X))
+                        {
+                            //optimze prev point if able
+                            result.RemoveAt(i - 1);
+                            i--;
+                        }
+                    }
                 }
+
+                ObjectPool<HashSet<float>>.Return(points);
             }
+
+            using var d3 = ObjectPool<List<double>>.GetWithUsingDisposable(out var tessellatePoints, out _);
+            tessellatePoints.Clear();
+            using var d4 = ObjectPool<List<int>>.GetWithUsingDisposable(out var idxList, out _);
+            idxList.Clear();
 
             using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var leftPoints, out _);
             leftPoints.Clear();
             using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var rightPoints, out _);
             rightPoints.Clear();
 
-            //计算左边墙的点
+            //计算左右墙的点
             EnumeratePoints(false, leftPoints);
-            FillPoints(leftPoints, false);
-            //计算右边墙的点，因为要组合成一个多边形，所以右半部分得翻转一下顺序
-            var rightPointIdx = points.Count;
             EnumeratePoints(true, rightPoints);
-            rightPoints.Reverse();
-            FillPoints(rightPoints, true);
-            //todo 解决左右墙交叉处理问题
 
-            var pointPrint = string.Join(Environment.NewLine, points.SequenceWrap(2).Select(x => $"{x.FirstOrDefault(),-20}{x.LastOrDefault()}"));
+            //解决左右墙交叉处理问题
+            AdjustLaneIntersection(leftPoints, rightPoints);
+
+            //合并提交，准备进行三角剖分
+            foreach (var pos in leftPoints)
+            {
+                tessellatePoints.Add(pos.X);
+                tessellatePoints.Add(pos.Y);
+            }
+            foreach (var pos in rightPoints.AsEnumerable().Reverse())
+            {
+                tessellatePoints.Add(pos.X);
+                tessellatePoints.Add(pos.Y);
+            }
 
             var tessellateList = ObjectPool<List<int>>.Get();
             tessellateList.Clear();
-            Earcut.Tessellate(points, idxList, tessellateList);
+            Earcut.Tessellate(tessellatePoints, idxList, tessellateList);
 
             polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
 
@@ -398,8 +398,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             {
                 foreach (var idx in seq)
                 {
-                    var x = (float)points[idx * 2 + 0];
-                    var y = (float)points[idx * 2 + 1];
+                    var x = (float)tessellatePoints[idx * 2 + 0];
+                    var y = (float)tessellatePoints[idx * 2 + 1];
                     polygonDrawing.PostPoint(new(x, y), playFieldForegroundColor);
                 }
             }
@@ -409,13 +409,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var rightColor = new Vector4(0, 204f / 255, 102f / 255, 0.9f);
 
             //print WallLane
-            lineDrawing.Draw(target, points[..rightPointIdx]
-                .SequenceWrap(2)
-                .Select(x => new LineVertex(new((float)x.First(), (float)x.Last()), leftColor, VertexDash.Solider)), 6);
+            lineDrawing.Draw(target, leftPoints
+                .Select(p => new LineVertex(p, leftColor, VertexDash.Solider)), 6);
 
-            lineDrawing.Draw(target, points[rightPointIdx..]
-                .SequenceWrap(2)
-                .Select(x => new LineVertex(new((float)x.First(), (float)x.Last()), rightColor, VertexDash.Solider)), 6);
+            lineDrawing.Draw(target, rightPoints
+                .Select(p => new LineVertex(p, rightColor, VertexDash.Solider)), 6);
 
             var i = 0;
             foreach (var seq in tessellateList.SequenceWrap(3))
@@ -424,26 +422,105 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 var color = new Vector4(r, g, b, 0.9f);
 
                 lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault())
-                    .Select(idx => new LineVertex(new((float)points[idx * 2 + 0], (float)points[idx * 2 + 1]), color, new(6, 4))), 2);
-                
+                    .Select(idx => new LineVertex(new((float)tessellatePoints[idx * 2 + 0], (float)tessellatePoints[idx * 2 + 1]), color, new(6, 4))), 2);
+
                 i += 3;
             }
 
-            void printPoints(IEnumerable<double> data, Vector4 color)
+            void printPoints(IEnumerable<Vector2> data, Vector4 color)
             {
-                var points = data.SequenceWrap(2)
-                .Select(x => new Vector2((float)x.First(), (float)x.Last()))
-                .ToArray();
-
                 BeginDebugPrint(target);
-                points.ForEach(x => DebugPrintPoint(x, color, 10));
+                data.ForEach(x => DebugPrintPoint(x, color, 10));
                 EndDebugPrint();
             }
 
-            printPoints(points[..rightPointIdx], leftColor);
-            printPoints(points[rightPointIdx..], rightColor);
+            printPoints(leftPoints, leftColor);
+            printPoints(rightPoints, rightColor);
 #endif
             ObjectPool<List<int>>.Return(tessellateList);
+        }
+
+        private void AdjustLaneIntersection(List<Vector2> leftPoints, List<Vector2> rightPoints)
+        {
+            Vector2? GetIntersection(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2)
+            {
+                var r = new Vector2(p2.X - p1.X, p2.Y - p1.Y);
+                var s = new Vector2(q2.X - q1.X, q2.Y - q1.Y);
+
+                float cross_r_s = r.X * s.Y - r.Y * s.X;
+
+                if (Math.Abs(cross_r_s) < 1e-6)
+                    return null;
+
+                float t = ((q1.X - p1.X) * s.Y - (q1.Y - p1.Y) * s.X) / cross_r_s;
+                float u = ((q1.X - p1.X) * r.Y - (q1.Y - p1.Y) * r.X) / cross_r_s;
+
+                if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+                    return new Vector2(p1.X + t * r.X, p1.Y + t * r.Y);
+
+                return null;
+            }
+
+            //var leftPointsStr = string.Join(Environment.NewLine, leftPoints.Select(p => $"{p.X,-20}{p.Y}"));
+            //var rightPointsStr = string.Join(Environment.NewLine, rightPoints.Select(p => $"{p.X,-20}{p.Y}"));
+
+            using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempLeft, out _);
+            using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempRight, out _);
+
+            if (leftPoints.FirstOrDefault().X > rightPoints.FirstOrDefault().X)
+                exchange(0, 0);
+
+            var leftIdx = 1;
+            var rightIdx = 1;
+
+            void exchange(int li, int ri)
+            {
+                tempLeft.Clear(); 
+                tempRight.Clear();
+
+                tempLeft.AddRange(leftPoints[li..]);
+                tempRight.AddRange(rightPoints[ri..]);
+
+                leftPoints.RemoveRange(li, tempLeft.Count);
+                rightPoints.RemoveRange(ri, tempRight.Count);
+
+                leftPoints.AddRange(tempRight);
+                rightPoints.AddRange(tempLeft);
+            }
+
+            while (leftIdx < leftPoints.Count && rightIdx < rightPoints.Count)
+            {
+                (Vector2 from, Vector2 to) leftLine = (leftPoints[leftIdx - 1], leftPoints[leftIdx]);
+                (Vector2 from, Vector2 to) rightLine = (rightPoints[rightIdx - 1], rightPoints[rightIdx]);
+
+                if (GetIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to) is Vector2 intersectionPoint)
+                {
+                    exchange(leftIdx, rightIdx);
+
+                    leftPoints.Insert(leftIdx, intersectionPoint);
+                    rightPoints.Insert(rightIdx, intersectionPoint);
+
+                    leftIdx++;
+                    rightIdx++;
+                }
+
+                //看看哪一边idx需要递增
+                if (rightLine.from.Y <= leftLine.to.Y && leftLine.to.Y <= rightLine.to.Y)
+                {
+                    //left的末端在right范围内，那么left需要递增
+                    leftIdx++;
+                    continue;
+                }
+
+                if (leftLine.from.Y <= rightLine.to.Y && rightLine.to.Y <= leftLine.to.Y)
+                {
+                    rightIdx++;
+                    continue;
+                }
+
+                leftIdx++;
+                rightIdx++;
+            }
         }
 
         [Conditional("DEBUG")]
