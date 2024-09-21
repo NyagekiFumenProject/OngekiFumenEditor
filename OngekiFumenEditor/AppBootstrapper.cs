@@ -378,7 +378,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                 exceptionHandling = true;
                 Environment.Exit(-1);
 #else
-            throw exception;
+            throw new Exception(exception.Message, exception);
 #endif
         }
 

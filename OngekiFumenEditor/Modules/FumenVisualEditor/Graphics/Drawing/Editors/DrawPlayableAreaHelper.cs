@@ -19,14 +19,21 @@ using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using Xv2CoreLib.HslColor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane;
 using System.Windows.Documents;
+using System.Runtime.CompilerServices;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
+using NAudio.Gui;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
     public class DrawPlayableAreaHelper
     {
+        static readonly Vector4 debugLeftColor = new Vector4(1, 51f / 255, 51f / 255, 0.75f);
+        static readonly Vector4 debugRightColor = new Vector4(0, 204f / 255, 102f / 255, 0.75f);
+
         private ILineDrawing lineDrawing;
         private IPolygonDrawing polygonDrawing;
         private ICircleDrawing circleDrawing;
+        private IStringDrawing stringDrawing;
 
         private Vector4 playFieldForegroundColor;
         private bool enablePlayFieldDrawing;
@@ -38,6 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing = IoC.Get<ISimpleLineDrawing>();
             polygonDrawing = IoC.Get<IPolygonDrawing>();
             circleDrawing = IoC.Get<ICircleDrawing>();
+            stringDrawing = IoC.Get<IStringDrawing>();
 
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -379,7 +387,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             EnumeratePoints(true, rightPoints);
 
             //解决左右墙交叉处理问题
-            AdjustLaneIntersection(leftPoints, rightPoints);
+            AdjustLaneIntersection(target, leftPoints, rightPoints);
 
             //合并提交，准备进行三角剖分
             foreach (var pos in leftPoints)
@@ -398,7 +406,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             Earcut.Tessellate(tessellatePoints, idxList, tessellateList);
 
             polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
-
             foreach (var seq in tessellateList.SequenceWrap(3))
             {
                 foreach (var idx in seq)
@@ -409,16 +416,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 }
             }
             polygonDrawing.End();
+
+
 #if DEBUG
-            var leftColor = new Vector4(1, 51f / 255, 51f / 255, 0.9f);
-            var rightColor = new Vector4(0, 204f / 255, 102f / 255, 0.9f);
-
-            //print WallLane
-            lineDrawing.Draw(target, leftPoints
-                .Select(p => new LineVertex(p, leftColor, VertexDash.Solider)), 6);
-
-            lineDrawing.Draw(target, rightPoints
-                .Select(p => new LineVertex(p, rightColor, VertexDash.Solider)), 6);
+            playFieldForegroundColor.W = 0.4f;
+            lineDrawing.Draw(target, leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
+            lineDrawing.Draw(target, rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
 
             var i = 0;
             foreach (var seq in tessellateList.SequenceWrap(3))
@@ -432,20 +435,47 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 i += 3;
             }
 
-            void printPoints(IEnumerable<Vector2> data, Vector4 color)
+            void printPoints(IEnumerable<Vector2> data, Vector4 color, bool isRight)
             {
-                BeginDebugPrint(target);
-                data.ForEach(x => DebugPrintPoint(x, color, 10));
-                EndDebugPrint();
+                color.W = 1;
+                circleDrawing.Begin(target);
+                foreach (var pos in data)
+                    circleDrawing.Post(pos, color, false, 10);
+                circleDrawing.End();
+                var prevY = 0f;
+                var prevR = 0;
+                foreach (var pos in data)
+                {
+                    if (prevY == pos.Y)
+                        prevR = prevR switch { 1 => 0, 0 => 1 };
+                    else
+                        prevR = 0;
+                    prevY = pos.Y;
+
+                    stringDrawing.Draw(
+                        $"({pos.X}, {pos.Y})",
+                        pos - new Vector2(isRight ? -10 : 10, -prevR * 10),
+                        Vector2.One,
+                        15,
+                        0,
+                        color,
+                        new(isRight ? 0 : 1, prevR),
+                        default,
+                        target,
+                        default,
+                        out _
+                        );
+                }
             }
 
-            printPoints(leftPoints, leftColor);
-            printPoints(rightPoints, rightColor);
+            printPoints(leftPoints, debugLeftColor, false);
+            printPoints(rightPoints, debugRightColor, true);
 #endif
+
             ObjectPool<List<int>>.Return(tessellateList);
         }
 
-        private void AdjustLaneIntersection(List<Vector2> leftPoints, List<Vector2> rightPoints)
+        private void AdjustLaneIntersection(IDrawingContext target, List<Vector2> leftPoints, List<Vector2> rightPoints)
         {
             Vector2? GetIntersection(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2)
             {
@@ -460,9 +490,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 float t = ((q1.X - p1.X) * s.Y - (q1.Y - p1.Y) * s.X) / cross_r_s;
                 float u = ((q1.X - p1.X) * r.Y - (q1.Y - p1.Y) * r.X) / cross_r_s;
 
-                //不允许交叉点在两个线端点重合
-                //if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
-                if (t > 0 && t < 1 && u > 0 && u < 1)
+                if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
                     return new Vector2(p1.X + t * r.X, p1.Y + t * r.Y);
 
                 return null;
@@ -473,17 +501,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempLeft, out _);
             using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempRight, out _);
+            using var d3 = ObjectPool<HashSet<Vector2>>.GetWithUsingDisposable(out var intersectionPoints, out _);
+            intersectionPoints.Clear();
 
             if (leftPoints.FirstOrDefault().X > rightPoints.FirstOrDefault().X)
-                exchange(0, 0);
+                tryExchange(0, 0);
 
             var leftIdx = 1;
             var rightIdx = 1;
 
-            void exchange(int li, int ri)
+            void tryExchange(int li, int ri)
             {
                 tempLeft.Clear();
                 tempRight.Clear();
+
+                var lp = leftPoints[li];
+                var rp = rightPoints[ri];
+
+                /*while*/
+                if (lp == rp)
+                {
+                    if (li + 1 < leftPoints.Count)
+                        lp = leftPoints[li + 1];
+                    if (ri + 1 < rightPoints.Count)
+                        rp = rightPoints[ri + 1];
+                }
+
+                if (lp.X < rp.X)
+                    return;
 
                 tempLeft.AddRange(leftPoints[li..]);
                 tempRight.AddRange(rightPoints[ri..]);
@@ -500,15 +545,101 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 (Vector2 from, Vector2 to) leftLine = (leftPoints[leftIdx - 1], leftPoints[leftIdx]);
                 (Vector2 from, Vector2 to) rightLine = (rightPoints[rightIdx - 1], rightPoints[rightIdx]);
 
-                if (GetIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to) is Vector2 intersectionPoint)
+                if (GetIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to) is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
                 {
-                    exchange(leftIdx, rightIdx);
+                    intersectionPoints.Add(intersectionPoint);
 
-                    leftPoints.Insert(leftIdx, intersectionPoint);
-                    rightPoints.Insert(rightIdx, intersectionPoint);
+                    circleDrawing.Begin(target);
+                    circleDrawing.Post(intersectionPoint, new(1, 1, 0, 1), false, 30);
+                    circleDrawing.End();
+                    stringDrawing.Draw(
+                        $"[{leftIdx}, {rightIdx}]",
+                        intersectionPoint - new Vector2(intersectionPoint.X <= target.Rect.CenterX ? -10 : 10, 10),
+                        Vector2.One,
+                        15,
+                        0,
+                        new(1, 1, 0, 1),
+                        new(intersectionPoint.X <= target.Rect.CenterX ? 0 : 1, 1),
+                        default,
+                        target,
+                        default,
+                        out _
+                        );
 
-                    leftIdx++;
-                    rightIdx++;
+                    var isCross = !(intersectionPoint == leftLine.from ||
+                        intersectionPoint == leftLine.to ||
+                        intersectionPoint == rightLine.from ||
+                        intersectionPoint == rightLine.to);
+
+
+                    if (rightLine.to == intersectionPoint && intersectionPoint == leftLine.to)
+                        isCross = true;
+
+                    if (!(rightLine.from.Y == rightLine.to.Y || leftLine.from.Y == leftLine.to.Y))
+                        isCross &= true;
+
+                    if (isCross)
+                    {
+                        //check cross
+
+                        tryExchange(leftIdx, rightIdx);
+
+                        leftPoints.Insert(leftIdx, intersectionPoint);
+                        rightPoints.Insert(rightIdx, intersectionPoint);
+
+                        leftIdx++;
+                        rightIdx++;
+                    }
+                    else
+                    {
+                        var isRightIntersected = intersectionPoint == rightLine.from ||
+                        intersectionPoint == rightLine.to;
+                        var isLeftIntersected = intersectionPoint == leftLine.from ||
+                        intersectionPoint == leftLine.to;
+                        var isFromIntersected = intersectionPoint == (isRightIntersected ? rightLine : leftLine).from;
+
+                        var insertLeftIdx = leftIdx;
+                        var insertRightIdx = rightIdx;
+
+                        if (isRightIntersected && isLeftIntersected)
+                        {
+                            if (leftLine.from.Y != leftLine.to.Y)
+                            {
+                                insertLeftIdx = leftIdx - 1;
+                            }
+                            if (rightLine.from.Y != rightLine.to.Y)
+                            {
+                                insertRightIdx = rightIdx - 1;
+                            }
+                        }
+                        else
+                        {
+                            if (isFromIntersected)
+                            {
+                                if (isRightIntersected)
+                                {
+                                    insertRightIdx = rightIdx - 1;
+                                }
+                                else
+                                {
+                                    insertLeftIdx = leftIdx - 1;
+                                }
+                            }
+                            else
+                            {
+                                if (isRightIntersected)
+                                {
+                                    insertRightIdx = rightIdx + 1;
+                                }
+                                else
+                                {
+                                    insertLeftIdx = leftIdx + 1;
+                                }
+                            }
+                        }
+
+                        tryExchange(insertLeftIdx, insertRightIdx);
+                    }
                 }
 
                 //看看哪一边idx需要递增
@@ -516,36 +647,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 {
                     //left的末端在right范围内，那么left需要递增
                     leftIdx++;
-                    continue;
                 }
-
-                if (leftLine.from.Y <= rightLine.to.Y && rightLine.to.Y <= leftLine.to.Y)
+                else if (leftLine.from.Y <= rightLine.to.Y && rightLine.to.Y <= leftLine.to.Y)
                 {
                     rightIdx++;
-                    continue;
                 }
-
-                leftIdx++;
-                rightIdx++;
+                else
+                {
+                    leftIdx++;
+                    rightIdx++;
+                }
             }
-        }
-
-        [Conditional("DEBUG")]
-        private void DebugPrintPoint(Vector2 p, Vector4 color, int v2)
-        {
-            circleDrawing.Post(p, color, false, v2);
-        }
-
-        [Conditional("DEBUG")]
-        private void BeginDebugPrint(IFumenEditorDrawingContext target)
-        {
-            circleDrawing.Begin(target);
-        }
-
-        [Conditional("DEBUG")]
-        private void EndDebugPrint()
-        {
-            circleDrawing.End();
         }
 
         public static (float r, float g, float b) Hsl2Rgb(float h, float s, float l)
