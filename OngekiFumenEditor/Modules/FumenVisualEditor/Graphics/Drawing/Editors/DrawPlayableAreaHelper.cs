@@ -14,14 +14,6 @@ using OngekiFumenEditor.Utils.ObjectPool;
 using EarcutNet;
 using System.Drawing;
 using Microsoft.CodeAnalysis;
-using System.Diagnostics;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
-using Xv2CoreLib.HslColor;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane;
-using System.Windows.Documents;
-using System.Runtime.CompilerServices;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
-using NAudio.Gui;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -504,31 +496,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             using var d3 = ObjectPool<HashSet<Vector2>>.GetWithUsingDisposable(out var intersectionPoints, out _);
             intersectionPoints.Clear();
 
-            if (leftPoints.FirstOrDefault().X > rightPoints.FirstOrDefault().X)
-                tryExchange(0, 0);
+            tryExchange(0, 0);
 
             var leftIdx = 1;
             var rightIdx = 1;
 
-            void tryExchange(int li, int ri)
+            bool tryExchange(int li, int ri)
             {
                 tempLeft.Clear();
                 tempRight.Clear();
 
-                var lp = leftPoints[li];
-                var rp = rightPoints[ri];
+                var lpIdx = li;
+                var rpIdx = ri;
+                var lp = leftPoints[lpIdx];
+                var rp = rightPoints[rpIdx];
 
-                /*while*/
-                if (lp == rp)
+                var ck = true;
+                while (lp == rp && ck)
                 {
-                    if (li + 1 < leftPoints.Count)
-                        lp = leftPoints[li + 1];
-                    if (ri + 1 < rightPoints.Count)
-                        rp = rightPoints[ri + 1];
+                    ck = false;
+                    if (lpIdx + 1 < leftPoints.Count)
+                    {
+                        lpIdx++;
+                        lp = leftPoints[lpIdx];
+                        ck = true;
+                    }
+                    if (rpIdx + 1 < rightPoints.Count)
+                    {
+                        rpIdx++;
+                        rp = rightPoints[rpIdx];
+                        ck = true;
+                    }
                 }
 
                 if (lp.X < rp.X)
-                    return;
+                    return false;
 
                 tempLeft.AddRange(leftPoints[li..]);
                 tempRight.AddRange(rightPoints[ri..]);
@@ -538,6 +540,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 leftPoints.AddRange(tempRight);
                 rightPoints.AddRange(tempLeft);
+
+                return true;
             }
 
             while (leftIdx < leftPoints.Count && rightIdx < rightPoints.Count)
@@ -545,26 +549,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 (Vector2 from, Vector2 to) leftLine = (leftPoints[leftIdx - 1], leftPoints[leftIdx]);
                 (Vector2 from, Vector2 to) rightLine = (rightPoints[rightIdx - 1], rightPoints[rightIdx]);
 
+                if (leftLine == rightLine)
+                {
+                    leftIdx++;
+                    rightIdx++;
+
+                    continue;
+                }
+
                 if (GetIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to) is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
                 {
                     intersectionPoints.Add(intersectionPoint);
-
-                    circleDrawing.Begin(target);
-                    circleDrawing.Post(intersectionPoint, new(1, 1, 0, 1), false, 30);
-                    circleDrawing.End();
-                    stringDrawing.Draw(
-                        $"[{leftIdx}, {rightIdx}]",
-                        intersectionPoint - new Vector2(intersectionPoint.X <= target.Rect.CenterX ? -10 : 10, 10),
-                        Vector2.One,
-                        15,
-                        0,
-                        new(1, 1, 0, 1),
-                        new(intersectionPoint.X <= target.Rect.CenterX ? 0 : 1, 1),
-                        default,
-                        target,
-                        default,
-                        out _
-                        );
 
                     var isCross = !(intersectionPoint == leftLine.from ||
                         intersectionPoint == leftLine.to ||
@@ -580,15 +575,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                     if (isCross)
                     {
-                        //check cross
-
-                        tryExchange(leftIdx, rightIdx);
-
-                        leftPoints.Insert(leftIdx, intersectionPoint);
-                        rightPoints.Insert(rightIdx, intersectionPoint);
+                        if (tryExchange(leftIdx, rightIdx))
+                        {
+                            leftPoints.Insert(leftIdx, intersectionPoint);
+                            rightPoints.Insert(rightIdx, intersectionPoint);
+                        }
 
                         leftIdx++;
                         rightIdx++;
+
+                        continue;
                     }
                     else
                     {
@@ -601,47 +597,119 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         var insertLeftIdx = leftIdx;
                         var insertRightIdx = rightIdx;
 
-                        if (isRightIntersected && isLeftIntersected)
+                        //将突出的位置拉回来
+                        if (isRightIntersected != isLeftIntersected)
                         {
-                            if (leftLine.from.Y != leftLine.to.Y)
+                            //先补个点
+                            if (isRightIntersected)
                             {
-                                insertLeftIdx = leftIdx - 1;
+                                leftPoints.Insert(leftIdx, intersectionPoint);
+                                leftIdx++;
                             }
-                            if (rightLine.from.Y != rightLine.to.Y)
+                            else
                             {
-                                insertRightIdx = rightIdx - 1;
+                                rightPoints.Insert(rightIdx, intersectionPoint);
+                                rightIdx++;
                             }
-                        }
-                        else
-                        {
+
                             if (isFromIntersected)
                             {
                                 if (isRightIntersected)
                                 {
-                                    insertRightIdx = rightIdx - 1;
+                                    rightIdx--;
                                 }
                                 else
                                 {
-                                    insertLeftIdx = leftIdx - 1;
+                                    leftIdx--;
                                 }
                             }
                             else
                             {
                                 if (isRightIntersected)
                                 {
-                                    insertRightIdx = rightIdx + 1;
+                                    leftIdx--;
                                 }
                                 else
                                 {
-                                    insertLeftIdx = leftIdx + 1;
+                                    rightIdx--;
+                                }
+                            }
+
+                            //获取左右两点之间的中点
+                            var centerX = (leftPoints[leftIdx].X + rightPoints[rightIdx].X) / 2;
+                            var centerPoint = new Vector2(centerX, intersectionPoint.Y);
+
+                            //两边再插入中点
+                            leftPoints.Insert(leftIdx, centerPoint);
+                            rightPoints.Insert(rightIdx, centerPoint);
+                        }
+                        else
+                        {
+                            //说明是V字形或者A字形
+                            var isVType = rightLine.to.Y > intersectionPoint.Y || leftLine.to.Y > intersectionPoint.Y;
+                            var isAType = rightLine.from.Y < intersectionPoint.Y || leftLine.from.Y < intersectionPoint.Y;
+
+                            //重新定位
+                            if (isVType)
+                            {
+                                if (leftLine.to.Y > leftLine.from.Y)
+                                {
+                                    if (intersectionPoint == leftLine.from)
+                                    {
+                                        leftIdx--;
+                                    }
+                                }
+                                if (rightLine.to.Y > rightLine.from.Y)
+                                {
+                                    if (intersectionPoint == rightLine.from)
+                                    {
+                                        rightIdx--;
+                                    }
+                                }
+                            }
+                            else if (isAType)
+                            {
+                                if (leftLine.to.Y > leftLine.from.Y)
+                                {
+                                    if (intersectionPoint == leftLine.to)
+                                    {
+                                        leftIdx--;
+                                    }
+                                }
+                                if (rightLine.to.Y > rightLine.from.Y)
+                                {
+                                    if (intersectionPoint == rightLine.to)
+                                    {
+                                        rightIdx--;
+                                    }
                                 }
                             }
                         }
 
-                        tryExchange(insertLeftIdx, insertRightIdx);
-                    }
-                }
+                        tryExchange(leftIdx, rightIdx);
 
+                        leftIdx++;
+                        rightIdx++;
+                    }
+#if DEBUG
+                    circleDrawing.Begin(target);
+                    circleDrawing.Post(intersectionPoint, isCross ? new(1, 1, 0, 0.75f) : new(0, 153 / 255f, 153 / 255f, 0.75f), false, 30);
+                    circleDrawing.End();
+                    stringDrawing.Draw(
+                        $"[{leftIdx}, {rightIdx}]",
+                        intersectionPoint - new Vector2(intersectionPoint.X <= target.Rect.CenterX ? -10 : 10, 10),
+                        Vector2.One,
+                        15,
+                        0,
+                        new(1, 1, 0, 1),
+                        new(intersectionPoint.X <= target.Rect.CenterX ? 0 : 1, 1),
+                        default,
+                        target,
+                        default,
+                        out _
+                        );
+#endif
+                }
                 //看看哪一边idx需要递增
                 if (rightLine.from.Y <= leftLine.to.Y && leftLine.to.Y <= rightLine.to.Y)
                 {
