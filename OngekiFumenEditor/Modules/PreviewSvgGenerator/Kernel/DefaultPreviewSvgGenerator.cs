@@ -1,5 +1,4 @@
-﻿using Advanced.Algorithms.Geometry;
-using OngekiFumenEditor.Base;
+﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -1082,12 +1081,12 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                                     if (a == b)
                                         continue;
 
-                                    var lineA = new Line(new(a.Item1.X, a.Item1.Y), new(a.Item2.X, a.Item2.Y));
-                                    var lineB = new Line(new(b.Item1.X, b.Item1.Y), new(b.Item2.X, b.Item2.Y));
-
-                                    var point = LineIntersection.Find(lineA, lineB);
-                                    if (point is not null)
-                                        points.Add((float)point.Y);
+                                    if (GetLinesIntersection(
+                                        a.Item1.ToSystemNumericsVector2(),
+                                        a.Item2.ToSystemNumericsVector2(),
+                                        b.Item1.ToSystemNumericsVector2(),
+                                        b.Item2.ToSystemNumericsVector2()) is System.Numerics.Vector2 p)
+                                        points.Add((float)p.Y);
                                 }
                             }
                         }

@@ -1,5 +1,4 @@
-﻿using Advanced.Algorithms.Geometry;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Graphics;
@@ -151,34 +150,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         .Where(x => x.LaneType == type)
                         .ToArray();
 
-                    var polylines = lanes.Select(x => x.GenAllPath().Where(x => minTGrid.TotalGrid <= x.pos.Y && x.pos.Y <= maxTGrid.TotalGrid).Select(x => x.pos).SequenceConsecutivelyWrap(2).Select(x => (x.FirstOrDefault(), x.LastOrDefault())).ToArray())
-                        .ToArray();
+                    var polylines = lanes
+                        .SelectMany(x =>
+                            x.GenAllPath()
+                            .Where(x => minTGrid.TotalGrid <= x.pos.Y && x.pos.Y <= maxTGrid.TotalGrid)
+                            .Select(x => x.pos)
+                            .SequenceConsecutivelyWrap(2)
+                            .Select(x => (x.FirstOrDefault(), x.LastOrDefault())))
+                        .ToList();
 
-                    for (int r = 0; r < polylines.Length; r++)
+                    polylines.SortBy(x => x.Item1.Y);
+
+                    for (int r = 0; r < polylines.Count; r++)
                     {
-                        var polylineA = polylines[r];
-                        for (int t = r + 1; t < polylines.Length; t++)
+                        var a = polylines[r];
+                        for (int t = r + 1; t < polylines.Count; t++)
                         {
-                            var polylineB = polylines[t];
+                            var b = polylines[t];
 
-                            for (int ai = 0; ai < polylineA.Length; ai++)
-                            {
-                                for (int bi = 0; bi < polylineB.Length; bi++)
-                                {
-                                    var a = polylineA[ai];
-                                    var b = polylineB[bi];
+                            if (a == b)
+                                continue;
 
-                                    if (a == b)
-                                        continue;
+                            if (a.Item2.Y < b.Item1.Y)
+                                break;
 
-                                    var lineA = new Line(new(a.Item1.X, a.Item1.Y), new(a.Item2.X, a.Item2.Y));
-                                    var lineB = new Line(new(b.Item1.X, b.Item1.Y), new(b.Item2.X, b.Item2.Y));
-
-                                    var point = LineIntersection.Find(lineA, lineB);
-                                    if (point is not null)
-                                        points.Add((float)point.Y);
-                                }
-                            }
+                            if (GetLinesIntersection(a.Item1.ToSystemNumericsVector2(), a.Item2.ToSystemNumericsVector2(), b.Item1.ToSystemNumericsVector2(), b.Item2.ToSystemNumericsVector2()) is Vector2 p)
+                                points.Add(p.Y);
                         }
                     }
 
@@ -192,10 +189,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 }
 
                 var sortedPoints = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToList();
-                /*
-				if (sortedPoints.Count == 0 || sortedPoints.FirstOrDefault() > minTGrid.TotalGrid)
-					sortedPoints.Insert(0, minTGrid.TotalGrid);
-				*/
+
                 sortedPoints.InsertBySortBy(minTGrid.TotalGrid, x => x);
                 sortedPoints.InsertBySortBy(maxTGrid.TotalGrid, x => x);
 
@@ -203,7 +197,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 foreach ((var fromY, var toY) in segments)
                 {
-                    var midY = ((fromY + toY) / 2);
+                    var midY = (fromY + toY) / 2;
                     var midTGrid = TGrid.FromTotalGrid((int)midY);
 
                     //获取这个segement范围内要选取的轨道
@@ -469,28 +463,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         private void AdjustLaneIntersection(IDrawingContext target, List<Vector2> leftPoints, List<Vector2> rightPoints)
         {
-            Vector2? GetIntersection(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2)
-            {
-                var r = new Vector2(p2.X - p1.X, p2.Y - p1.Y);
-                var s = new Vector2(q2.X - q1.X, q2.Y - q1.Y);
-
-                float cross_r_s = r.X * s.Y - r.Y * s.X;
-
-                if (Math.Abs(cross_r_s) < 1e-6)
-                    return null;
-
-                float t = ((q1.X - p1.X) * s.Y - (q1.Y - p1.Y) * s.X) / cross_r_s;
-                float u = ((q1.X - p1.X) * r.Y - (q1.Y - p1.Y) * r.X) / cross_r_s;
-
-                if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
-                    return new Vector2(p1.X + t * r.X, p1.Y + t * r.Y);
-
-                return null;
-            }
-
-            //var leftPointsStr = string.Join(Environment.NewLine, leftPoints.Select(p => $"{p.X,-20}{p.Y}"));
-            //var rightPointsStr = string.Join(Environment.NewLine, rightPoints.Select(p => $"{p.X,-20}{p.Y}"));
-
             using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempLeft, out _);
             using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempRight, out _);
             using var d3 = ObjectPool<HashSet<Vector2>>.GetWithUsingDisposable(out var intersectionPoints, out _);
@@ -556,7 +528,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     continue;
                 }
 
-                if (GetIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to) is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
+                if (GetLinesIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to) is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
                 {
                     intersectionPoints.Add(intersectionPoint);
 

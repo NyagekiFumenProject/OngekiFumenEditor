@@ -51,6 +51,25 @@ public static class MathUtils
         return b == 0 ? a : GCD(b, a % b);
     }
 
+    public static System.Numerics.Vector2? GetLinesIntersection(System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 q1, System.Numerics.Vector2 q2)
+    {
+        var r = new System.Numerics.Vector2(p2.X - p1.X, p2.Y - p1.Y);
+        var s = new System.Numerics.Vector2(q2.X - q1.X, q2.Y - q1.Y);
+
+        float cross_r_s = r.X * s.Y - r.Y * s.X;
+
+        if (Math.Abs(cross_r_s) < 1e-6)
+            return null;
+
+        float t = ((q1.X - p1.X) * s.Y - (q1.Y - p1.Y) * s.X) / cross_r_s;
+        float u = ((q1.X - p1.X) * r.Y - (q1.Y - p1.Y) * r.X) / cross_r_s;
+
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+            return new(p1.X + t * r.X, p1.Y + t * r.Y);
+
+        return null;
+    }
+
     public static double CalculateLength(TGrid from, TGrid to, BpmList bpmList)
     {
         var fromBpm = bpmList.GetBpm(from);
@@ -219,7 +238,7 @@ public static class MathUtils
     {
         var timeX = CalculateXFromTwoPointFormFormula(tGrid.TotalGrid, fromXGrid.TotalGrid, fromTGrid.TotalGrid,
             toXGrid.TotalGrid, toTGrid.TotalGrid);
-        var xGrid = new XGrid((float) (timeX / fromXGrid.ResX));
+        var xGrid = new XGrid((float)(timeX / fromXGrid.ResX));
         xGrid.NormalizeSelf();
 
         return xGrid;
@@ -274,14 +293,14 @@ public static class MathUtils
 
         if (sign > 0)
         {
-            begin = (int) Math.Ceiling(from);
-            end = (int) Math.Floor(to);
+            begin = (int)Math.Ceiling(from);
+            end = (int)Math.Floor(to);
         }
 
         if (sign < 0)
         {
-            begin = (int) Math.Floor(from);
-            end = (int) Math.Ceiling(to);
+            begin = (int)Math.Floor(from);
+            end = (int)Math.Ceiling(to);
         }
 
         for (var i = begin; sign > 0 ? i <= end : i >= end; i += sign)
