@@ -553,7 +553,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 {
                     leftIdx++;
                     rightIdx++;
-
                     continue;
                 }
 
@@ -580,11 +579,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             leftPoints.Insert(leftIdx, intersectionPoint);
                             rightPoints.Insert(rightIdx, intersectionPoint);
                         }
-
-                        leftIdx++;
-                        rightIdx++;
-
-                        continue;
                     }
                     else
                     {
@@ -640,8 +634,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             var centerPoint = new Vector2(centerX, intersectionPoint.Y);
 
                             //两边再插入中点
-                            leftPoints.Insert(leftIdx, centerPoint);
-                            rightPoints.Insert(rightIdx, centerPoint);
+                            if (leftPoints[leftIdx] != centerPoint)
+                                leftPoints.Insert(leftIdx, centerPoint);
+                            if (rightPoints[rightIdx] != centerPoint)
+                                rightPoints.Insert(rightIdx, centerPoint);
                         }
                         else
                         {
@@ -687,9 +683,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         }
 
                         tryExchange(leftIdx, rightIdx);
-
-                        leftIdx++;
-                        rightIdx++;
                     }
 #if DEBUG
                     circleDrawing.Begin(target);
@@ -709,7 +702,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         out _
                         );
 #endif
+                    leftIdx++;
+                    rightIdx++;
+                    continue;
                 }
+
                 //看看哪一边idx需要递增
                 if (rightLine.from.Y <= leftLine.to.Y && leftLine.to.Y <= rightLine.to.Y)
                 {
