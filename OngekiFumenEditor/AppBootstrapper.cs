@@ -19,6 +19,7 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.EditorLayout;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -230,6 +231,20 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                                !ProgramSetting.Default.DisableShowSplashScreenAfterBoot;
         if (showSplashWindow)
             await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
+
+        if (ProgramSetting.Default.IsFirstTimeOpenEditor || true)
+        {
+            if (MessageBox.Show(Resources.ShouldLoadSuggestLayout, Resources.Suggest, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                using var stream = ResourceUtils.OpenReadFromLocalAssemblyResourcesFolder("suggestLayout.bin");
+                var result = await IoC.Get<IEditorLayoutManager>().LoadLayout(stream);
+                if (!result)
+                    MessageBox.Show(Resources.LoadLayoutFailed);
+            }
+
+            ProgramSetting.Default.IsFirstTimeOpenEditor = false;
+            ProgramSetting.Default.Save();
+        }
     }
 
     private void InitIPCServer()

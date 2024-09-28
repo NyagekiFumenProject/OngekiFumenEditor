@@ -209,8 +209,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(editorProjectData.AudioFilePath);
                 Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
                 await Dispatcher.Yield();
-
-                CheckAndAdviceSuggestLayout();
             }
             catch (Exception e)
             {
@@ -251,8 +249,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
                 ScrollTo(dispTGrid);
-
-                CheckAndAdviceSuggestLayout();
             }
             catch (Exception e)
             {
@@ -343,22 +339,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         #endregion
-
-        private async void CheckAndAdviceSuggestLayout()
-        {
-            if (!ProgramSetting.Default.IsFirstTimeOpenEditor)
-                return;
-
-            if (MessageBox.Show(Resources.ShouldLoadSuggestLayout, Resources.Suggest, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-            {
-                using var stream = ResourceUtils.OpenReadFromLocalAssemblyResourcesFolder("suggestLayout.bin");
-                var result = await IoC.Get<IEditorLayoutManager>().LoadLayout(stream);
-                if (!result)
-                    MessageBox.Show(Resources.LoadLayoutFailed);
-            }
-
-            ProgramSetting.Default.IsFirstTimeOpenEditor = false;
-            ProgramSetting.Default.Save();
-        }
     }
 }
