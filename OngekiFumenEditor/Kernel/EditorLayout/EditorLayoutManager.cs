@@ -96,8 +96,8 @@ namespace OngekiFumenEditor.Kernel.EditorLayout
 
         public Task<bool> ApplyDefaultSuggestEditorLayout()
         {
-            using var stream = ResourceUtils.OpenReadFromLocalAssemblyResourcesFolder("suggestLayout.bin");
-            return IoC.Get<IEditorLayoutManager>().LoadLayout(stream);
+            var stream = ResourceUtils.OpenReadFromLocalAssemblyResourcesFolder("suggestLayout.bin");
+            return LoadLayout(stream);
         }
     }
 }
