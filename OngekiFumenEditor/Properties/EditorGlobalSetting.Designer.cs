@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool IsEnableAutoSave {
             get {
                 return ((bool)(this["IsEnableAutoSave"]));
@@ -169,7 +169,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        [global::System.Configuration.DefaultSettingValueAttribute("64")]
         public int XGridDisplayMaxUnit {
             get {
                 return ((int)(this["XGridDisplayMaxUnit"]));
@@ -193,7 +193,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.75")]
         public double VerticalDisplayScale {
             get {
                 return ((double)(this["VerticalDisplayScale"]));
@@ -361,7 +361,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-14240057")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-16758145")]
         public int PlayFieldBackgroundColor {
             get {
                 return ((int)(this["PlayFieldBackgroundColor"]));

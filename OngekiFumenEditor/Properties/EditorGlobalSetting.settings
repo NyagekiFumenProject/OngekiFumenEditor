@@ -6,7 +6,7 @@
       <Value Profile="(Default)">5</Value>
     </Setting>
     <Setting Name="IsEnableAutoSave" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="UndoActionSavingLimit" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">50</Value>
@@ -39,13 +39,13 @@
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="XGridDisplayMaxUnit" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">40</Value>
+      <Value Profile="(Default)">64</Value>
     </Setting>
     <Setting Name="ForceXGridMagneticDock" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="VerticalDisplayScale" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">0.75</Value>
     </Setting>
     <Setting Name="DisplayTimeFormat" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
@@ -87,7 +87,7 @@
       <Value Profile="(Default)">-16777216</Value>
     </Setting>
     <Setting Name="PlayFieldBackgroundColor" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">-14240057</Value>
+      <Value Profile="(Default)">-16758145</Value>
     </Setting>
     <Setting Name="EnablePlayFieldDrawing" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
