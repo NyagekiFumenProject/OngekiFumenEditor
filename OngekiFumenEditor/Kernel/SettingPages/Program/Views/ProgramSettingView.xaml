@@ -11,7 +11,7 @@
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:ProgramSettingViewModel}"
-    d:DesignHeight="450"
+    d:DesignHeight="800"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <StackPanel>
@@ -125,6 +125,17 @@
                         cal:Message.Attach="UnRegisterNyagekiAssociations()"
                         Content="{markup:Translate [FileAssociationUnregister]}"
                         IsEnabled="{Binding EnableAssociate, Converter={StaticResource ReverseBoolConverter}}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Margin="5" Header="{markup:Translate [Other]}">
+            <StackPanel>
+                <StackPanel Margin="5" Orientation="Horizontal">
+                    <Button
+                        Padding="10,5"
+                        HorizontalAlignment="Left"
+                        cal:Message.Attach="ResetAllSettings()"
+                        Content="{markup:Translate [ResetAllSettings]}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>

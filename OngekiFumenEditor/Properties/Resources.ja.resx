@@ -1527,4 +1527,16 @@
   <data name="LoadLayoutFailed" xml:space="preserve">
     <value>レイアウトファイルの読み込みに失敗しました</value>
   </data>
+  <data name="ResetAllSettings" xml:space="preserve">
+    <value>すべてのオプションをリセットします</value>
+  </data>
+  <data name="ResetCompleted" xml:space="preserve">
+    <value>リセット操作が完了しました</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="ResetAllSettingComfirm" xml:space="preserve">
+    <value>このアプリケーションのすべての構成オプションをリセットしますか?</value>
+  </data>
 </root>

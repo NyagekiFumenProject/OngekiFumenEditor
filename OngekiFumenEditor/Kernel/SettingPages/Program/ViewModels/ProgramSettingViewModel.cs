@@ -6,7 +6,9 @@ using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;
+using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
@@ -191,6 +193,29 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
             }
 
             NotifyOfPropertyChange(() => EnableAssociate);
+        }
+
+        public void ResetAllSettings()
+        {
+            if (MessageBox.Show(Resources.ResetAllSettingComfirm, Resources.Warning, MessageBoxButtons.YesNo) != DialogResult.Yes)
+                return;
+
+            var settingList = new ApplicationSettingsBase[] {
+                Properties.AudioPlayerToolViewerSetting.Default,
+                Properties.AudioSetting.Default,
+                Properties.EditorGlobalSetting.Default,
+                Properties.LogSetting.Default,
+                Properties.OptionGeneratorToolsSetting.Default,
+                Properties.ProgramSetting.Default,
+            };
+
+            foreach (var setting in settingList)
+            {
+                setting.Reset();
+                setting.Save();
+            }
+
+            MessageBox.Show(Resources.ResetCompleted);
         }
 
         public void UnRegisterNyagekiAssociations()

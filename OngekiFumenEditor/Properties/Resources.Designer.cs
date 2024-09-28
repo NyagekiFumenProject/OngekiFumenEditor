@@ -3400,6 +3400,33 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Do you want to reset all settings for application? 的本地化字符串。
+        /// </summary>
+        public static string ResetAllSettingComfirm {
+            get {
+                return ResourceManager.GetString("ResetAllSettingComfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Reset All Settings 的本地化字符串。
+        /// </summary>
+        public static string ResetAllSettings {
+            get {
+                return ResourceManager.GetString("ResetAllSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Reset operation completed 的本地化字符串。
+        /// </summary>
+        public static string ResetCompleted {
+            get {
+                return ResourceManager.GetString("ResetCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Reset default 的本地化字符串。
         /// </summary>
         public static string ResetDefault {
@@ -4242,6 +4269,15 @@ namespace OngekiFumenEditor.Properties {
         public static string WallConflict3 {
             get {
                 return ResourceManager.GetString("WallConflict3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Warning 的本地化字符串。
+        /// </summary>
+        public static string Warning {
+            get {
+                return ResourceManager.GetString("Warning", resourceCulture);
             }
         }
         

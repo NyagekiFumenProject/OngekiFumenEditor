@@ -1536,4 +1536,16 @@
   <data name="LoadLayoutFailed" xml:space="preserve">
     <value>加载布局文件失败</value>
   </data>
+  <data name="ResetAllSettings" xml:space="preserve">
+    <value>重置所有选项</value>
+  </data>
+  <data name="ResetCompleted" xml:space="preserve">
+    <value>重置已完成</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="ResetAllSettingComfirm" xml:space="preserve">
+    <value>是否重置本应用所有配置选项?</value>
+  </data>
 </root>
