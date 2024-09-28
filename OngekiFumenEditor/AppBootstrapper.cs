@@ -232,7 +232,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         if (showSplashWindow)
             await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
 
-        if (ProgramSetting.Default.IsFirstTimeOpenEditor || true)
+        if (ProgramSetting.Default.IsFirstTimeOpenEditor)
         {
             if (MessageBox.Show(Resources.ShouldLoadSuggestLayout, Resources.Suggest, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
