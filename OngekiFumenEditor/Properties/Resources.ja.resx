@@ -1518,4 +1518,13 @@
   <data name="XOffset" xml:space="preserve">
     <value>水平スクロールオフセット</value>
   </data>
+  <data name="DisableShowSplashScreenAfterBoot" xml:space="preserve">
+    <value>プログラムの起動後に起動ウィンドウのインターフェイスが表示されない</value>
+  </data>
+  <data name="ShouldLoadSuggestLayout" xml:space="preserve">
+    <value>初めてエディタを開いたときに、推奨されるツール レイアウトをロードしますか?</value>
+  </data>
+  <data name="LoadLayoutFailed" xml:space="preserve">
+    <value>レイアウトファイルの読み込みに失敗しました</value>
+  </data>
 </root>

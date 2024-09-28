@@ -25,6 +25,10 @@
                     Margin="10,0,10,10"
                     Content="{markup:Translate [EnableMultiInstances]}"
                     IsChecked="{Binding Setting.EnableMultiInstances}" />
+                <CheckBox
+                    Margin="10,0,10,10"
+                    Content="{markup:Translate [DisableShowSplashScreenAfterBoot]}"
+                    IsChecked="{Binding Setting.DisableShowSplashScreenAfterBoot}" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">

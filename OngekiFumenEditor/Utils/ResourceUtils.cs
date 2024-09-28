@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Utils
 {
 	public static class ResourceUtils
 	{
-		public static Stream OpenReadFromLocalAssemblyResource(string resourceName) => typeof(ResourceUtils).Assembly.GetManifestResourceStream("OngekiFumenEditor.Resources." + resourceName);
+		public static Stream OpenReadFromLocalAssemblyResourcesFolder(string resourceName) => typeof(ResourceUtils).Assembly.GetManifestResourceStream("OngekiFumenEditor.Resources." + resourceName);
 
 		public static Stream OpenReadResourceStream(string relativeUrl)
 		{

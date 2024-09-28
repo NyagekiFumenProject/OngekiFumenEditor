@@ -1527,4 +1527,13 @@
   <data name="EnableShowPlayerLocation" xml:space="preserve">
     <value>Display the player's current position (if there is no AutoPlayFaderLane, it defaults to the center)</value>
   </data>
+  <data name="DisableShowSplashScreenAfterBoot" xml:space="preserve">
+    <value>SplashScreen does not display after program startup</value>
+  </data>
+  <data name="ShouldLoadSuggestLayout" xml:space="preserve">
+    <value>It's first time that the editor is opened. Should loaded the recommended tools layout?</value>
+  </data>
+  <data name="LoadLayoutFailed" xml:space="preserve">
+    <value>Failed to load layout file</value>
+  </data>
 </root>

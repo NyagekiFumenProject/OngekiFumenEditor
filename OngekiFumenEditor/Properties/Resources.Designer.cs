@@ -1231,6 +1231,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 SplashScreen does not display after program startup 的本地化字符串。
+        /// </summary>
+        public static string DisableShowSplashScreenAfterBoot {
+            get {
+                return ResourceManager.GetString("DisableShowSplashScreenAfterBoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Disable snapping for the TGrid 的本地化字符串。
         /// </summary>
         public static string DisableTGridMagneticDock {
@@ -2491,6 +2500,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Failed to load layout file 的本地化字符串。
+        /// </summary>
+        public static string LoadLayoutFailed {
+            get {
+                return ResourceManager.GetString("LoadLayoutFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Load exist Music.xml file 的本地化字符串。
         /// </summary>
         public static string LoadMusicXmlFile {
@@ -3639,6 +3657,15 @@ namespace OngekiFumenEditor.Properties {
         public static string ShootTarget {
             get {
                 return ResourceManager.GetString("ShootTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 It&apos;s first time that the editor is opened. Should loaded the recommended tools layout? 的本地化字符串。
+        /// </summary>
+        public static string ShouldLoadSuggestLayout {
+            get {
+                return ResourceManager.GetString("ShouldLoadSuggestLayout", resourceCulture);
             }
         }
         

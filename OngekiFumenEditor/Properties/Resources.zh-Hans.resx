@@ -1527,4 +1527,13 @@
   <data name="EnableShowPlayerLocation" xml:space="preserve">
     <value>显示玩家当前位置 (若没AutoPlayFaderLane轨道则默认在中心)</value>
   </data>
+  <data name="DisableShowSplashScreenAfterBoot" xml:space="preserve">
+    <value>程序启动后不显示启动窗口</value>
+  </data>
+  <data name="ShouldLoadSuggestLayout" xml:space="preserve">
+    <value>第一次打开编辑器，是否加载推荐的做谱工具布局?</value>
+  </data>
+  <data name="LoadLayoutFailed" xml:space="preserve">
+    <value>加载布局文件失败</value>
+  </data>
 </root>
