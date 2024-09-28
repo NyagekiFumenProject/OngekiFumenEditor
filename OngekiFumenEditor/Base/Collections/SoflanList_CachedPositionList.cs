@@ -37,7 +37,22 @@ namespace OngekiFumenEditor.Base.Collections
         private List<SoflanPoint> cachedSoflanPositionList_DesignMode = new();
         private List<SoflanPoint> cachedSoflanPositionList_PreviewMode = new();
 
-        public record VisibleTGridRange(TGrid minTGrid, TGrid maxTGrid);
+        public record VisibleTGridRange(TGrid minTGrid, TGrid maxTGrid)
+        {
+            public bool TryMerge(VisibleTGridRange another, out VisibleTGridRange mergedResult)
+            {
+                mergedResult = Merge(another);
+                return mergedResult != default;
+            }
+
+            public VisibleTGridRange Merge(VisibleTGridRange another)
+            {
+                if ((minTGrid <= another.minTGrid && another.minTGrid <= maxTGrid) ||
+                    another.minTGrid <= minTGrid && minTGrid <= another.maxTGrid)
+                    return new(MathUtils.Min(minTGrid, another.minTGrid), MathUtils.Max(maxTGrid, another.maxTGrid));
+                return default;
+            }
+        }
         public record SoflanSegment(int curIdx, SoflanPoint cur, SoflanPoint next);
 
         private IIntervalTree<double, SoflanSegment> cachePostionList_PreviewMode;

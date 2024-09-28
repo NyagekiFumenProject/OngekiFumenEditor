@@ -12,7 +12,6 @@ using System.Numerics;
 using OngekiFumenEditor.Utils.ObjectPool;
 using EarcutNet;
 using System.Drawing;
-using Microsoft.CodeAnalysis;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -83,6 +82,48 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
 
+            var fumen = target.Editor.Fumen;
+            var soflanList = fumen.Soflans.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList);
+
+            var minIdx = soflanList.LastOrDefaultIndexByBinarySearch(minTGrid, x => x.TGrid);
+            var maxIdx = soflanList.LastOrDefaultIndexByBinarySearch(maxTGrid, x => x.TGrid);
+
+            // ---|------o----|-----------------------------|---o------|---
+            //           x    x                             x   x
+
+            var curSoflanPoint = soflanList[minIdx];
+            var rangeInfos = ObjectPool<List<(TGrid tGrid, double speed)>>.Get();
+            rangeInfos.Clear();
+            rangeInfos.Add((minTGrid, soflanList[minIdx].Speed));
+
+            for (int i = minIdx + 1; i <= maxIdx; i++)
+            {
+                var soflanPoint = soflanList[i];
+
+                if (soflanPoint.Speed * rangeInfos[^1].speed < 0)
+                    rangeInfos.Add((soflanPoint.TGrid, soflanPoint.Speed));
+
+                curSoflanPoint = soflanPoint;
+            }
+
+            if (rangeInfos[^1].tGrid != maxTGrid)
+                rangeInfos.Add((maxTGrid, rangeInfos[^1].speed));
+
+            for (int i = 0; i < rangeInfos.Count - 1; i++)
+            {
+                var segMinTGrid = rangeInfos[i].tGrid;
+                var segMaxTGrid = rangeInfos[i + 1].tGrid;
+
+                var isPlayback = rangeInfos[i].speed < 0;
+
+                DrawPlayFieldInternal(target, segMinTGrid, segMaxTGrid, isPlayback);
+            }
+
+            ObjectPool<List<(TGrid, double)>>.Return(rangeInfos);
+        }
+
+        public void DrawPlayFieldInternal(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid, bool isPlaybackSoflan)
+        {
             /*
 			 画游戏(黑色可移动)区域
 				1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
@@ -404,7 +445,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             polygonDrawing.End();
 
 
-#if DEBUG
+#if PLAYFIELD_DEBUG
             playFieldForegroundColor.W = 0.4f;
             lineDrawing.Draw(target, leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
             lineDrawing.Draw(target, rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
@@ -656,7 +697,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                         tryExchange(leftIdx, rightIdx);
                     }
-#if DEBUG
+#if PLAYFIELD_DEBUG
                     circleDrawing.Begin(target);
                     circleDrawing.Post(intersectionPoint, isCross ? new(1, 1, 0, 0.75f) : new(0, 153 / 255f, 153 / 255f, 0.75f), false, 30);
                     circleDrawing.End();
