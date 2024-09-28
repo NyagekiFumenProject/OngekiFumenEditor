@@ -236,8 +236,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         {
             if (MessageBox.Show(Resources.ShouldLoadSuggestLayout, Resources.Suggest, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                using var stream = ResourceUtils.OpenReadFromLocalAssemblyResourcesFolder("suggestLayout.bin");
-                var result = await IoC.Get<IEditorLayoutManager>().LoadLayout(stream);
+                var result = await IoC.Get<IEditorLayoutManager>().ApplyDefaultSuggestEditorLayout();
                 if (!result)
                     MessageBox.Show(Resources.LoadLayoutFailed);
             }

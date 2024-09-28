@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Shell.Services;
 using Gemini.Modules.Shell.ViewModels;
@@ -53,7 +54,15 @@ namespace OngekiFumenEditor.Kernel.EditorLayout
                 if (!TryGetDependices(out var shell, out var shellView))
                     return false;
 
-                return layoutItemStatePersister.LoadState(shell, shellView, tempFilePath);
+                var r = layoutItemStatePersister.LoadState(shell, shellView, tempFilePath);
+                if (!r)
+
+                    return false;
+
+                if (shell.Documents.FirstOrDefault() is IDocument document)
+                    await shell.OpenDocumentAsync(document);
+
+                return true;
             }
             catch (Exception e)
             {
@@ -83,6 +92,12 @@ namespace OngekiFumenEditor.Kernel.EditorLayout
                 Log.LogError($"Can't save current program layout:{e.Message}", e);
                 return false;
             }
+        }
+
+        public Task<bool> ApplyDefaultSuggestEditorLayout()
+        {
+            using var stream = ResourceUtils.OpenReadFromLocalAssemblyResourcesFolder("suggestLayout.bin");
+            return IoC.Get<IEditorLayoutManager>().LoadLayout(stream);
         }
     }
 }

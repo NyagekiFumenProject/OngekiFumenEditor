@@ -12,6 +12,6 @@ namespace OngekiFumenEditor.Kernel.EditorLayout
         Task<bool> SaveLayout(Stream outputLayoutDataStream);
         Task<bool> LoadLayout(Stream intputLayoutDataStream);
 
-        //Task CheckAndNotifyUserUseSuggestLayout();
+        Task<bool> ApplyDefaultSuggestEditorLayout();
     }
 }
