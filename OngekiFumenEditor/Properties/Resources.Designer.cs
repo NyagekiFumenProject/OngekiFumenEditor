@@ -349,6 +349,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Batch switch flick direction 的本地化字符串。
+        /// </summary>
+        public static string BatchSwitchFlickDirection {
+            get {
+                return ResourceManager.GetString("BatchSwitchFlickDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Batch set property IsCritical 的本地化字符串。
         /// </summary>
         public static string BatchSetIsCritical {
@@ -2730,6 +2739,15 @@ namespace OngekiFumenEditor.Properties {
         public static string NoEditorTarget {
             get {
                 return ResourceManager.GetString("NoEditorTarget", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No flick could be switched 的本地化字符串。
+        /// </summary>
+        public static string NoFlickCouldBeSwitched {
+            get {
+                return ResourceManager.GetString("NoFlickCouldBeSwitched", resourceCulture);
             }
         }
         
