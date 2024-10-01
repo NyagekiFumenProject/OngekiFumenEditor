@@ -1554,4 +1554,7 @@
   <data name="ResetAllSettingComfirm" xml:space="preserve">
     <value>Do you want to reset all settings for application?</value>
   </data>
+  <data name="NoLimit" xml:space="preserve">
+    <value>(No Limit)</value>
+  </data>
 </root>

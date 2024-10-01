@@ -349,20 +349,20 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Batch switch flick direction 的本地化字符串。
-        /// </summary>
-        public static string BatchSwitchFlickDirection {
-            get {
-                return ResourceManager.GetString("BatchSwitchFlickDirection", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Batch set property IsCritical 的本地化字符串。
         /// </summary>
         public static string BatchSetIsCritical {
             get {
                 return ResourceManager.GetString("BatchSetIsCritical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch switch flick direction 的本地化字符串。
+        /// </summary>
+        public static string BatchSwitchFlickDirection {
+            get {
+                return ResourceManager.GetString("BatchSwitchFlickDirection", resourceCulture);
             }
         }
         
@@ -2741,9 +2741,9 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("NoEditorTarget", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   查找类似 No flick could be switched 的本地化字符串。
+        ///   查找类似 No flicks to switch in selection 的本地化字符串。
         /// </summary>
         public static string NoFlickCouldBeSwitched {
             get {
@@ -2757,6 +2757,15 @@ namespace OngekiFumenEditor.Properties {
         public static string NoFumenInput {
             get {
                 return ResourceManager.GetString("NoFumenInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 (No Limit) 的本地化字符串。
+        /// </summary>
+        public static string NoLimit {
+            get {
+                return ResourceManager.GetString("NoLimit", resourceCulture);
             }
         }
         

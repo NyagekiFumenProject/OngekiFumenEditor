@@ -108,7 +108,7 @@
                         Width="50"
                         Margin="5,0"
                         Text="{Binding Setting.LimitFPS}" />
-                    <TextBlock x:Name="noLimitText" Text="(无限制)">
+                    <TextBlock x:Name="noLimitText" Text="{markup:Translate [NoLimit]}">
                         <Behaviors:Interaction.Triggers>
                             <Behaviors:DataTrigger
                                 Binding="{Binding Setting.LimitFPS}"

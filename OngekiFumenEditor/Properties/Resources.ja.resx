@@ -1545,4 +1545,7 @@
   <data name="ResetAllSettingComfirm" xml:space="preserve">
     <value>このアプリケーションのすべての構成オプションをリセットしますか?</value>
   </data>
+  <data name="NoLimit" xml:space="preserve">
+    <value>(無制限)</value>
+  </data>
 </root>
