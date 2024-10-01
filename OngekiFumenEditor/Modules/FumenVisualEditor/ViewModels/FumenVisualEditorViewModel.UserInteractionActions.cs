@@ -616,7 +616,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
 
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.BatchSwitchFlickDirection, ChangeFlicks, ChangeFlicks));
-            return;
 
             void ChangeFlicks()
             {

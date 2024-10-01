@@ -216,6 +216,9 @@
   <data name="BatchSetIsCritical" xml:space="preserve">
     <value>一括でクリティカル設定</value>
   </data>
+  <data name="BatchSwitchFlickDirection" xml:space="preserve">
+    <value>Flickの向きを一括変更する</value>
+  </data>
   <data name="BeatSplit" xml:space="preserve">
     <value>拍の分割数：</value>
   </data>
@@ -998,6 +1001,9 @@
   </data>
   <data name="NoObjectCouldBeSetIsCritical" xml:space="preserve">
     <value>IsCritical属性を一括設定できるオブジェクトがありません</value>
+  </data>
+  <data name="NoFlickCouldBeSwitched" xml:space="preserve">
+    <value>方向を変更する前にFlickを選択してください</value>
   </data>
   <data name="NotInterpolatedCurve" xml:space="preserve">
     <value>曲線レーンが補完されていません</value>

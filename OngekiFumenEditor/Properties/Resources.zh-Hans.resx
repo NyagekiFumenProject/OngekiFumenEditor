@@ -216,6 +216,9 @@
   <data name="BatchSetIsCritical" xml:space="preserve">
     <value>快速批量设置IsCritical</value>
   </data>
+  <data name="BatchSwitchFlickDirection" xml:space="preserve">
+    <value>批量改变Flick物件方向</value>
+  </data>
   <data name="BeatSplit" xml:space="preserve">
     <value>节奏线细分倍率:</value>
   </data>
@@ -1004,6 +1007,9 @@
   </data>
   <data name="NoObjectCouldBeSetIsCritical" xml:space="preserve">
     <value>无合适物件批量设置IsCritical属性</value>
+  </data>
+  <data name="NoFlickCouldBeSwitched" xml:space="preserve">
+    <value>请先选择Flick物件再更改方向</value>
   </data>
   <data name="NotInterpolatedCurve" xml:space="preserve">
     <value>轨道物件曲线还没被插值</value>
