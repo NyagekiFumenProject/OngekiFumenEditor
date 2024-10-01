@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Views
 			{
 				if (DataContext is IDrawingContext fumenPreviewer)
 				{
-					fumenPreviewer.PrepareEditorLoop(glView);
+					fumenPreviewer.PrepareRenderLoop(glView);
 				}
 			});
 		}

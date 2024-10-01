@@ -134,8 +134,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 
-			CompositionTarget.Rendering += CompositionTarget_Rendering;
-		}
+            UpdateActualRenderInterval();
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
+        }
 
 		private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
 		{
@@ -166,7 +167,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 				return;
 			Process(AudioPlayer.CurrentTime);
 		}
-
 
 		private void Process(TimeSpan time)
 		{

@@ -454,5 +454,17 @@ namespace OngekiFumenEditor.Properties {
                 this["ColorHoldWallLeft"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int LimitFPS {
+            get {
+                return ((int)(this["LimitFPS"]));
+            }
+            set {
+                this["LimitFPS"] = value;
+            }
+        }
     }
 }
