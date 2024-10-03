@@ -105,6 +105,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     enableShowPlayerLocation = EditorGlobalSetting.Default.EnableShowPlayerLocation;
                     PlayerLocationRecorder.Clear();
                     break;
+                case nameof(EditorGlobalSetting.LimitFPS):
+                    UpdateActualRenderInterval();
+                    break;
                 case nameof(EditorGlobalSetting.XGridUnitSpace):
                 case nameof(EditorGlobalSetting.DisplayTimeFormat):
                 case nameof(EditorGlobalSetting.BeatSplit):
@@ -177,7 +180,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             //replace owned impl
             UndoRedoManager = new DefaultEditorUndoManager(this);
 
-            Properties.EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
+            EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
             DisplayName = default;
         }
 

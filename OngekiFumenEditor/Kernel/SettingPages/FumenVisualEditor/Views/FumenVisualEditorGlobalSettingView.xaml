@@ -2,6 +2,7 @@
     x:Class="OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorGlobalSettingView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
@@ -100,56 +101,91 @@
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Render]}">
-            <GroupBox Margin="5" Header="{markup:Translate [PreviewMode]}">
-                <StackPanel Margin="10">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part1]}" />
-                        <TextBox
-                            Width="50"
-                            Margin="5,0,5,0"
-                            Text="{Binding Setting.ParallelCountLimit}">
-                        </TextBox>
-                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part2]}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,10,0,5" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BackgroundColor]}" />
-                        <Border
-                            Width="60"
-                            Height="18"
-                            Margin="10,0"
-                            cal:Message.Attach="[Event MouseDown] = [Action OnSelectBackgroundColor($executionContext)]"
-                            Background="{Binding Setting.PlayFieldBackgroundColor, Converter={StaticResource IntToSolidBrush}}"
-                            BorderBrush="{Binding Setting.PlayFieldBackgroundColor, Converter={StaticResource IntToSolidBrush}, ConverterParameter=True}"
-                            BorderThickness="1"
-                            CornerRadius="7"
-                            Cursor="Hand">
-                        </Border>
-                    </StackPanel>
-                    <CheckBox IsChecked="{Binding Setting.EnablePlayFieldDrawing}">
-                        <TextBlock Text="{markup:Translate [EnablePlayFieldDrawing]}" />
-                    </CheckBox>
-                    <StackPanel
-                        Margin="0,5,0,5"
-                        IsEnabled="{Binding Setting.EnablePlayFieldDrawing}"
-                        Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate [PlayFieldForegroundColor]}" />
-                        <Border
-                            Width="60"
-                            Height="18"
-                            Margin="10,0"
-                            cal:Message.Attach="[Event MouseDown] = [Action OnSelectForegroundColor($executionContext)]"
-                            Background="{Binding Setting.PlayFieldForegroundColor, Converter={StaticResource IntToSolidBrush}}"
-                            BorderBrush="{Binding Setting.PlayFieldForegroundColor, Converter={StaticResource IntToSolidBrush}, ConverterParameter=True}"
-                            BorderThickness="1"
-                            CornerRadius="7"
-                            Cursor="Hand">
-                        </Border>
-                    </StackPanel>
-                    <CheckBox IsChecked="{Binding Setting.EnableShowPlayerLocation}">
-                        <TextBlock Text="{markup:Translate [EnableShowPlayerLocation]}" />
-                    </CheckBox>
+            <StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock Text="Limit FPS:" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0"
+                        Text="{Binding Setting.LimitFPS}" />
+                    <TextBlock x:Name="noLimitText" Text="{markup:Translate [NoLimit]}">
+                        <Behaviors:Interaction.Triggers>
+                            <Behaviors:DataTrigger
+                                Binding="{Binding Setting.LimitFPS}"
+                                Comparison="LessThanOrEqual"
+                                Value="0">
+                                <Behaviors:DataTrigger.Actions>
+                                    <Behaviors:ChangePropertyAction
+                                        PropertyName="Visibility"
+                                        TargetObject="{Binding ElementName=noLimitText}"
+                                        Value="Visible" />
+                                </Behaviors:DataTrigger.Actions>
+                            </Behaviors:DataTrigger>
+                            <Behaviors:DataTrigger
+                                Binding="{Binding Setting.LimitFPS}"
+                                Comparison="GreaterThan"
+                                Value="0">
+                                <Behaviors:DataTrigger.Actions>
+                                    <Behaviors:ChangePropertyAction
+                                        PropertyName="Visibility"
+                                        TargetObject="{Binding ElementName=noLimitText}"
+                                        Value="Hidden" />
+                                </Behaviors:DataTrigger.Actions>
+                            </Behaviors:DataTrigger>
+                        </Behaviors:Interaction.Triggers>
+                    </TextBlock>
                 </StackPanel>
-            </GroupBox>
+                <GroupBox Margin="5,0,5,5" Header="{markup:Translate [PreviewMode]}">
+                    <StackPanel Margin="10">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part1]}" />
+                            <TextBox
+                                Width="50"
+                                Margin="5,0,5,0"
+                                Text="{Binding Setting.ParallelCountLimit}">
+                            </TextBox>
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part2]}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,10,0,5" Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BackgroundColor]}" />
+                            <Border
+                                Width="60"
+                                Height="18"
+                                Margin="10,0"
+                                cal:Message.Attach="[Event MouseDown] = [Action OnSelectBackgroundColor($executionContext)]"
+                                Background="{Binding Setting.PlayFieldBackgroundColor, Converter={StaticResource IntToSolidBrush}}"
+                                BorderBrush="{Binding Setting.PlayFieldBackgroundColor, Converter={StaticResource IntToSolidBrush}, ConverterParameter=True}"
+                                BorderThickness="1"
+                                CornerRadius="7"
+                                Cursor="Hand">
+                            </Border>
+                        </StackPanel>
+                        <CheckBox IsChecked="{Binding Setting.EnablePlayFieldDrawing}">
+                            <TextBlock Text="{markup:Translate [EnablePlayFieldDrawing]}" />
+                        </CheckBox>
+                        <StackPanel
+                            Margin="0,5,0,5"
+                            IsEnabled="{Binding Setting.EnablePlayFieldDrawing}"
+                            Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [PlayFieldForegroundColor]}" />
+                            <Border
+                                Width="60"
+                                Height="18"
+                                Margin="10,0"
+                                cal:Message.Attach="[Event MouseDown] = [Action OnSelectForegroundColor($executionContext)]"
+                                Background="{Binding Setting.PlayFieldForegroundColor, Converter={StaticResource IntToSolidBrush}}"
+                                BorderBrush="{Binding Setting.PlayFieldForegroundColor, Converter={StaticResource IntToSolidBrush}, ConverterParameter=True}"
+                                BorderThickness="1"
+                                CornerRadius="7"
+                                Cursor="Hand">
+                            </Border>
+                        </StackPanel>
+                        <CheckBox IsChecked="{Binding Setting.EnableShowPlayerLocation}">
+                            <TextBlock Text="{markup:Translate [EnableShowPlayerLocation]}" />
+                        </CheckBox>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Other]}">
             <StackPanel Margin="10">

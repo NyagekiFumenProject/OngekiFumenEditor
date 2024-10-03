@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.5.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
     public sealed partial class AudioPlayerToolViewerSetting : global::System.Configuration.ApplicationSettingsBase {
         
         private static AudioPlayerToolViewerSetting defaultInstance = ((AudioPlayerToolViewerSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new AudioPlayerToolViewerSetting())));
@@ -80,6 +80,18 @@ namespace OngekiFumenEditor.Properties {
             }
             set {
                 this["EnableWaveformDisplay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int LimitFPS {
+            get {
+                return ((int)(this["LimitFPS"]));
+            }
+            set {
+                this["LimitFPS"] = value;
             }
         }
     }

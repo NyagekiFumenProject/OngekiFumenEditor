@@ -216,6 +216,9 @@
   <data name="BatchSetIsCritical" xml:space="preserve">
     <value>Batch set property IsCritical</value>
   </data>
+  <data name="BatchSwitchFlickDirection" xml:space="preserve">
+    <value>Batch switch flick direction</value>
+  </data>
   <data name="BeatSplit" xml:space="preserve">
     <value>Subdivision multiplier for the meter:</value>
   </data>
@@ -1014,6 +1017,9 @@
   <data name="NoObjectCouldBeSetIsCritical" xml:space="preserve">
     <value>No suitable objects to setting property IsCritical</value>
   </data>
+  <data name="NoFlickCouldBeSwitched" xml:space="preserve">
+    <value>No flicks to switch in selection</value>
+  </data>
   <data name="NotInterpolatedCurve" xml:space="preserve">
     <value>The curve lane has not been interpolated yet</value>
   </data>
@@ -1565,5 +1571,8 @@
   </data>
   <data name="MirrorSelectionLaneColors" xml:space="preserve">
     <value>Mirror lane colors</value>
+  </data>
+  <data name="NoLimit" xml:space="preserve">
+    <value>(No Limit)</value>
   </data>
 </root>

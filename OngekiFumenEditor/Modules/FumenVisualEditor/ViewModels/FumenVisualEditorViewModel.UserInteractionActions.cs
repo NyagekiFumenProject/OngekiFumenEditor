@@ -753,6 +753,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
+        public void KeyboardAction_FastSwitchFlickDirection(ActionExecutionContext e)
+        {
+            var selectedFlicks = SelectObjects.OfType<Flick>().ToList();
+
+            if (selectedFlicks.Count == 0)
+            {
+                ToastNotify(Resources.NoFlickCouldBeSwitched);
+                return;
+            }
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.BatchSwitchFlickDirection, ChangeFlicks, ChangeFlicks));
+
+            void ChangeFlicks()
+            {
+                foreach (var flick in selectedFlicks)
+                    flick.Direction = flick.Direction == Flick.FlickDirection.Left
+                        ? Flick.FlickDirection.Right
+                        : Flick.FlickDirection.Left;
+            }
+        }
+
         public bool CheckAndNotifyIfPlaceBeyondDuration(Point placePoint)
         {
             if (placePoint.Y > TotalDurationHeight || placePoint.Y < 0)

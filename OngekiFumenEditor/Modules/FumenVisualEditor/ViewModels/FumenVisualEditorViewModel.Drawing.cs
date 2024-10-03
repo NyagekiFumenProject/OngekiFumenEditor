@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using Caliburn.Micro;
+using ControlzEx.Standard;
 using Gemini.Framework;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -85,6 +87,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
     }
 
+    private Stopwatch sw;
+    private float actualRenderInterval;
+
     public string DisplayFPS
     {
         get => displayFPS;
@@ -140,7 +145,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
     }
 
-    public async void PrepareEditorLoop(GLWpfControl openGLView)
+    public async void PrepareRenderLoop(GLWpfControl openGLView)
     {
         Log.LogDebug("ready.");
         await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
@@ -173,6 +178,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         actualPerformenceMonitor = IoC.Get<IPerfomenceMonitor>();
         IsDisplayFPS = IsDisplayFPS;
 
+        UpdateActualRenderInterval();
+        sw = new Stopwatch();
+        sw.Start();
+
         openGLView.Render += OnEditorLoop;
     }
 
@@ -186,14 +195,32 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     public void Render(TimeSpan ts)
         => OnEditorRender(ts);
 
+    private void UpdateActualRenderInterval()
+    {
+        actualRenderInterval = EditorGlobalSetting.Default.LimitFPS switch
+        {
+            <= 0 => 0,
+            _ => 1000.0F / EditorGlobalSetting.Default.LimitFPS
+        };
+    }
+
     private void OnEditorRender(TimeSpan ts)
     {
-        PerfomenceMonitor.PostUIRenderTime(ts);
-        PerfomenceMonitor.OnBeforeRender();
-
 #if DEBUG
         GLUtility.CheckError();
 #endif
+        //limit
+        if (actualRenderInterval > 0)
+        {
+            var ms = sw.ElapsedMilliseconds;
+            if (ms < actualRenderInterval)
+                goto End;
+            ts = TimeSpan.FromMilliseconds(ms);
+            sw.Restart();
+        }
+
+        PerfomenceMonitor.PostUIRenderTime(ts);
+        PerfomenceMonitor.OnBeforeRender();
 
         CleanRender();
         GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
@@ -202,7 +229,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         var fumen = Fumen;
         if (fumen is null)
-            return;
+            goto End;
 
         var tGrid = GetCurrentTGrid();
 
@@ -218,7 +245,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(maxY, this);
 
             if (maxTGrid is null || minTGrid is null)
-                return;
+                goto End;
             visibleTGridRanges.Add((minTGrid, maxTGrid));
         }
         else
@@ -231,7 +258,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             foreach (var x in ranges)
             {
                 if (x.maxTGrid is null || x.minTGrid is null)
-                    return;
+                    goto End;
                 visibleTGridRanges.Add((x.minTGrid, x.maxTGrid));
             }
         }
@@ -312,13 +339,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         playerLocationHelper.Draw(this);
         selectingRangeHelper.Draw(this);
 
-
         //clean up
-        drawMap.Clear();
         foreach (var list in map.Values)
             ObjectPool<List<OngekiTimelineObjectBase>>.Return(list);
         ObjectPool<Dictionary<string, List<OngekiTimelineObjectBase>>>.Return(map);
 
+    End:
+        drawMap.Clear();
         PerfomenceMonitor.OnAfterRender();
     }
 
