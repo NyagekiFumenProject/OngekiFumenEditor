@@ -25,6 +25,8 @@
             </converters1:CultureInfoNameConverter>
             <valueconverters:AsyncImageLoadConverter x:Key="AsyncImageLoadConverter">
             </valueconverters:AsyncImageLoadConverter>
+            <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />
+            <valueconverters:SelectionFullLaneCheckConverter x:Key="SelectionFullLaneCheckConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <local:AppBootstrapper x:Key="bootstrapper" />
