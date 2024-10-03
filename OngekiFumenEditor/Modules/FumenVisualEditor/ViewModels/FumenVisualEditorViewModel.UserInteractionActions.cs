@@ -32,6 +32,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Wall;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -224,6 +227,142 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             await IoC.Get<IFumenEditorClipboard>().PasteObjects(this, mirrorOption, placePoint);
+        }
+        
+        public void MenuItemAction_MirrorSelectionXGridZero()
+        {
+            var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
+            if (selection.Count == 0) {
+                return;
+            }
+            
+            var func = () => MirrorObjectsXGrid(selection, true);
+            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.MirrorSelectionXGridZero, func, func));
+        }
+
+        public void MenuItemAction_MirrorSelectionXGrid()
+        {
+            var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
+            if (selection.Count == 0) {
+                return;
+            }
+            
+            var func = () => MirrorObjectsXGrid(selection, false);
+            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.MirrorSelectionXGrid, func, func));
+        }
+
+        private void MirrorObjectsXGrid(IList<OngekiMovableObjectBase> objects, bool zeroCenter)
+        {
+            int center;
+            if (zeroCenter) {
+                center = 0;
+            }
+            else {
+                var selectionBounds = objects.Aggregate((int.MaxValue, int.MinValue), (bounds, o) =>
+                {
+                    var min = bounds.Item1;
+                    var max = bounds.Item2;
+                    
+                    if (o.XGrid.TotalGrid < min) {
+                        min = o.XGrid.TotalGrid;
+                    }
+
+                    if (o.XGrid.TotalGrid > max) {
+                        max = o.XGrid.TotalGrid;
+                    }
+
+                    return (min, max);
+                });
+                center = (selectionBounds.MinValue + selectionBounds.MaxValue) / 2;
+            }
+            
+            foreach (var obj in objects) {
+                var diff = obj.XGrid.TotalGrid - center;
+                obj.XGrid = XGrid.FromTotalGrid(center - diff);
+            }
+        }
+
+        public void MenuItemAction_MirrorLaneColors()
+        {
+            var laneObjects = SelectObjects.OfType<ConnectableStartObject>()
+                .Where(o => o.IsDockableLane)
+                .Where(o => o.Children.All(c => c.IsSelected))
+                .ToList();
+
+            if (laneObjects.Count == 0) {
+                return;
+            }
+
+            List<ConnectableStartObject> newLaneObjects = null;
+            var executeOrRedo = () =>
+            {
+                if (newLaneObjects is null) {
+                    newLaneObjects = MirrorLaneColors(laneObjects).ToList();
+                }
+                else {
+                    Fumen.RemoveObjects(laneObjects);
+                    Fumen.AddObjects(newLaneObjects);
+                }
+            };
+            var undo = () =>
+            {
+                Fumen.RemoveObjects(newLaneObjects!);
+                Fumen.AddObjects(laneObjects);
+            };
+
+            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.MirrorSelectionLaneColors, executeOrRedo, undo));
+        }
+
+        private IEnumerable<ConnectableStartObject> MirrorLaneColors(List<ConnectableStartObject> laneObjects)
+        {
+            foreach (var obj in laneObjects) {
+                LaneStartBase startNode = obj.LaneType switch
+                {
+                    LaneType.Left => new LaneRightStart(),
+                    LaneType.Right => new LaneLeftStart(),
+                    LaneType.WallLeft => new WallRightStart(),
+                    LaneType.WallRight => new WallLeftStart(),
+                    _ => null
+                };
+                if (startNode is null)
+                    continue;
+
+                startNode.XGrid = obj.XGrid;
+                startNode.TGrid = obj.TGrid;
+                startNode.Tag = obj.Tag;
+
+                foreach (var child in obj.Children) {
+                    var newChild = startNode.CreateChildObject();
+                    newChild.XGrid = child.XGrid;
+                    newChild.TGrid = child.TGrid;
+                    newChild.Tag = child.Tag;
+                    newChild.CurvePrecision = child.CurvePrecision;
+
+                    foreach (var curvePoint in child.PathControls) {
+                        newChild.AddControlObject(new LaneCurvePathControlObject()
+                        {
+                            RefCurveObject = newChild,
+                            XGrid = curvePoint.XGrid,
+                            TGrid = curvePoint.TGrid,
+                            Tag = curvePoint.Tag,
+                        });
+                    }
+
+                    startNode.AddChildObject(newChild);
+                }
+
+                foreach (var tap in Fumen.Taps.Where(t => t.ReferenceLaneStart == obj)) {
+                    tap.ReferenceLaneStart = startNode;
+                }
+
+                foreach (var hold in Fumen.Holds.Where(h => h.ReferenceLaneStart == obj)) {
+                    hold.ReferenceLaneStart = startNode;
+                }
+
+                Fumen.RemoveObject(obj);
+                Fumen.AddObject(startNode);
+                yield return startNode;
+            }
         }
 
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();

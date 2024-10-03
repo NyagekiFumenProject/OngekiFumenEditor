@@ -2598,6 +2598,38 @@ namespace OngekiFumenEditor.Properties {
             }
         }
         
+        public static string MirrorSelectionXGrid {
+            get {
+                return ResourceManager.GetString("MirrorSelectionXGrid", resourceCulture);
+            }
+        }
+        public static string MirrorSelectionXGridZero {
+            get {
+                return ResourceManager.GetString("MirrorSelectionXGridZero", resourceCulture);
+            }
+        }
+        public static string MirrorSelectionLaneColors {
+            get {
+                return ResourceManager.GetString("MirrorSelectionLaneColors", resourceCulture);
+            }
+        }
+        
+        public static string MenuMirrorSelectionXGrid {
+            get {
+                return ResourceManager.GetString("MirrorSelectionXGrid", resourceCulture);
+            }
+        }
+        public static string MenuMirrorSelectionXGridZero {
+            get {
+                return ResourceManager.GetString("MirrorSelectionXGridZero", resourceCulture);
+            }
+        }
+        public static string MenuMirrorSelectionLaneColors {
+            get {
+                return ResourceManager.GetString("MirrorSelectionLaneColors", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   查找类似 Missing EnemySet(Boss) object. It is recommended to place one to designate the timing of the boss&apos;s appearance 的本地化字符串。
         /// </summary>

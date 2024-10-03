@@ -954,6 +954,15 @@
   <data name="MenuSelecting" xml:space="preserve">
     <value>Select...</value>
   </data>
+  <data name="MenuMirrorSelectionXGrid" xml:space="preserve">
+    <value>Mirror _horizontally over selection center</value>
+  </data>
+  <data name="MenuMirrorSelectionXGridZero" xml:space="preserve">
+    <value>Mirror horizontally over _field center</value>
+  </data>
+  <data name="MenuMirrorSelectionLaneColors" xml:space="preserve">
+    <value>Mirror lane _colors</value>
+  </data>
   <data name="MissingBossEnemySet" xml:space="preserve">
     <value>Missing EnemySet(Boss) object. It is recommended to place one to designate the timing of the boss's appearance</value>
   </data>
@@ -1426,7 +1435,7 @@
     <value>To paste...</value>
   </data>
   <data name="ToSelectedObjects" xml:space="preserve">
-    <value>For selected objects...</value>
+    <value>For _selected objects...</value>
   </data>
   <data name="Tutorial" xml:space="preserve">
     <value>Getting Started Tutorial</value>
@@ -1547,5 +1556,14 @@
   </data>
   <data name="ResetAllSettingComfirm" xml:space="preserve">
     <value>Do you want to reset all settings for application?</value>
+  </data>
+  <data name="MirrorSelectionXGrid" xml:space="preserve">
+    <value>Mirror horizontally over selection center</value>
+  </data>
+  <data name="MirrorSelectionXGridZero" xml:space="preserve">
+    <value>Mirror horizontally over field center</value>
+  </data>
+  <data name="MirrorSelectionLaneColors" xml:space="preserve">
+    <value>Mirror lane colors</value>
   </data>
 </root>
