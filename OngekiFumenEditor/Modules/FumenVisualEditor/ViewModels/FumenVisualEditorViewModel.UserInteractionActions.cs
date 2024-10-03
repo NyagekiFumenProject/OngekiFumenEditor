@@ -505,15 +505,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var curTime = CurrentPlayTime;
             var rememberAction = LambdaUndoAction.Create(action.Name, () =>
-                {
-                    curTime = CurrentPlayTime;
-                    action.Execute();
-                },
-                () =>
-                {
-                    action.Undo();
-                    ScrollTo(curTime);
-                });
+            {
+                curTime = CurrentPlayTime;
+                action.Execute();
+            },
+            () =>
+            {
+                action.Undo();
+                ScrollTo(curTime);
+            });
 
             UndoRedoManager.ExecuteAction(rememberAction);
         }
