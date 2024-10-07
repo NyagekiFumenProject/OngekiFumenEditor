@@ -15,7 +15,8 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
 {
-    public class FumenConverterViewModel : WindowBase
+    [Export(typeof(IFumenConverterWindow))]
+    public class FumenConverterViewModel : WindowBase, IFumenConverterWindow
     {
         private string inputFumenFilePath = "";
         public string InputFumenFilePath { get => inputFumenFilePath; set => Set(ref inputFumenFilePath, value); }
@@ -93,9 +94,7 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
             }
 			
             var result = await FumenConverterWrapper.Generate(option, input);
-            if (!result.IsSuccess) {
-                MessageBox.Show(result.Message);
-            }	
+            MessageBox.Show(result.IsSuccess ? Resources.ConvertSuccess : $"{Resources.ConvertFail} {result.Message}");
         }
     }
 }

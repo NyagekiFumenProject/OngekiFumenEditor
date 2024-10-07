@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenConverter.Commands
 
 		public override async Task Run(Command command)
 		{
-			await _windowManager.ShowWindowAsync(IoC.Get<IFumenConverter>());
+			await _windowManager.ShowWindowAsync(IoC.Get<IFumenConverterWindow>());
 		}
 	}
 }
