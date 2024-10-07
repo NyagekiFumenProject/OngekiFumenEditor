@@ -1575,4 +1575,43 @@
   <data name="NoLimit" xml:space="preserve">
     <value>(无限制)</value>
   </data>
+  <data name="ProgramCommandDescriptionSvg" xml:space="preserve">
+    <value>生成预览谱面.svg文件</value>
+  </data>
+  <data name="ProgramOptionSvgMaxXGrid" xml:space="preserve">
+    <value>最大显示XGrid范围</value>
+  </data>
+  <data name="ProgramOptionSvgViewWidth" xml:space="preserve">
+    <value>画面宽度</value>
+  </data>
+  <data name="ProgramOptionSvgVerticalScale" xml:space="preserve">
+    <value>垂直缩放</value>
+  </data>
+  <data name="ProgramOptionInputFile" xml:space="preserve">
+    <value>要生成的谱面文件路径</value>
+  </data>
+  <data name="ProgramOptionInputFileNyageki" xml:space="preserve">
+    <value>要生成的谱面文件路径</value>
+  </data>
+  <data name="ProgramOptionOutputFile" xml:space="preserve">
+    <value>生成文件保存路径</value>
+  </data>
+  <data name="ProgramOptionInputFileAudio" xml:space="preserve">
+    <value>音频文件,用来获取谱面总长度</value>
+  </data>
+  <data name="ProgramOptionSvgSoflanMode" xml:space="preserve">
+    <value>变速模式,不同选项有不同的物件表现</value>
+  </data>
+  <data name="ProgramOptionSvgWeightedSoflanOffset" xml:space="preserve">
+    <value>WeightedSoflan模式下,soflan超过(或在附近)这个值会被加权计算</value>
+  </data>
+  <data name="ProgramOptionSvgWeightedSoflanStress" xml:space="preserve">
+    <value>WeightedSoflan模式下,soflan最低能压到原来的(1-stress)倍</value>
+  </data>
+  <data name="ProgramOptionSvgWeightedSoflanSlope" xml:space="preserve">
+    <value>WeightedSoflan模式下,加权变化速率</value>
+  </data>
+  <data name="ProgramOptionSvgRenderAsPng" xml:space="preserve">
+    <value>是否生成png图片</value>
+  </data>
 </root>

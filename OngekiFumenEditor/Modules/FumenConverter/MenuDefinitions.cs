@@ -2,7 +2,7 @@
 using OngekiFumenEditor.Modules.FumenConverter.Commands;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Modules.SvgToLaneBrowser
+namespace OngekiFumenEditor.Modules.FumenConverter
 {
 	public static class FumenConverter
 	{

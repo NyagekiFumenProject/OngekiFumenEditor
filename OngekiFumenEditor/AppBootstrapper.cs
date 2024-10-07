@@ -165,7 +165,14 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         InitIPCServer();
 
         await IoC.Get<ISchedulerManager>().Init();
-        await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
+
+        try {
+            await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
+        } catch (Exception ex) {
+            await Console.Error.WriteLineAsync($"Unhandled exception processing arguments:\n{ex.Message}");
+            Application.Current.Shutdown(-1);
+            return;
+        }
 
         if (ProgramSetting.Default.UpgradeProcessPriority)
         {

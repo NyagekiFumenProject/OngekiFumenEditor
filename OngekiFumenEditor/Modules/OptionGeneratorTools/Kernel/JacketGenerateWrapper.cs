@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                 return new(false, Resources.InputPictureFileNotFound);
 
             if (option.MusicId < 0)
-                return new(false, Resources.MusicIDInvaild);
+                return new(false, Resources.MusicIDInvaild.Format(option.MusicId));
 
             if (string.IsNullOrWhiteSpace(option.OutputAssetbundleFolderPath))
                 return new(false, Resources.OutputFolderIsEmpty);
