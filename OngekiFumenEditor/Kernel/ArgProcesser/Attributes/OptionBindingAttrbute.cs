@@ -21,7 +21,6 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.Attributes
 
         public string Name { get; set; }
         public string Description { get; set; }
-        public string HelpArgName { get; set; }
         public object DefaultValue { get; set; }
         public Type Type { get; }
         public bool Require { get; set; }

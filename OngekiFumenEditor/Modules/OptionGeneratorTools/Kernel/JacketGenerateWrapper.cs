@@ -185,8 +185,8 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 
                 var newGoBytes = baseField.WriteToByteArray();
                 var assetsReplacer = new AssetsReplacerFromMemory(0, assetInfo.index, (int)assetInfo.curFileType,
-                                                                  AssetHelper.GetScriptIndex(assetsFile.file, assetInfo),
-                                                                  newGoBytes);
+                    AssetHelper.GetScriptIndex(assetsFile.file, assetInfo),
+                    newGoBytes);
 
                 return assetsReplacer;
             }
@@ -248,8 +248,8 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                 imageData.GetValue().Set(byteArray);
                 var newGoBytes = baseField.WriteToByteArray();
                 var assetsReplacer = new AssetsReplacerFromMemory(0, assetInfo.index, (int)assetInfo.curFileType,
-                                                                  AssetHelper.GetScriptIndex(assetsFile.file, assetInfo),
-                                                                  newGoBytes);
+                    AssetHelper.GetScriptIndex(assetsFile.file, assetInfo),
+                    newGoBytes);
 
                 return assetsReplacer;
             }
@@ -321,8 +321,8 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                 verticesDataField.GetValue().Set(new AssetTypeByteArray { size = (uint)bytes.Length, data = bytes });
 
                 var assetsReplacer = new AssetsReplacerFromMemory(0, assetInfo.index, (int)assetInfo.curFileType,
-                                                                  AssetHelper.GetScriptIndex(assetsFile.file, assetInfo),
-                                                                  baseField.WriteToByteArray());
+                    AssetHelper.GetScriptIndex(assetsFile.file, assetInfo),
+                    baseField.WriteToByteArray());
 
                 return assetsReplacer;
             }
