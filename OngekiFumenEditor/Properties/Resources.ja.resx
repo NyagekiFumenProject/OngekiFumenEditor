@@ -816,6 +816,12 @@
   <data name="GenerateSvg" xml:space="preserve">
     <value>生成铺面预览.svg文件</value>
   </data>
+  <data name="GenerateSvgSuccess" xml:space="preserve">
+    <value>谱面プレビュー.svgファイルの生成に成功</value>
+  </data>
+  <data name="GenerateSvgSuccessAndAskIfOpen" xml:space="preserve">
+    <value>.svgファイルの生成に成功しましたが、すぐにファイルを開きますか？</value>
+  </data>
   <data name="Genre" xml:space="preserve">
     <value>ジャンル：</value>
   </data>
@@ -950,6 +956,16 @@
   </data>
   <data name="MenuSelecting" xml:space="preserve">
     <value>選択…</value>
+  </data>
+  <data name="MenuMirrorSelectionXGrid" xml:space="preserve">
+    <value>範囲内で垂直方向にミラーリング</value>
+  </data>
+  <data name="MenuMirrorSelectionXGridZero" xml:space="preserve">
+    <value>X[0, 0]を基準として水平方向にミラーリング</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="MenuMirrorSelectionLaneColors" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
   <data name="MissingBossEnemySet" xml:space="preserve">
     <value>ボスのエネミーセットオブジェクトがありません。BOSSWAVEを判断するために配置することを推奨します。</value>
@@ -1524,6 +1540,9 @@
   <data name="XOffset" xml:space="preserve">
     <value>水平スクロールオフセット</value>
   </data>
+  <data name="EnableShowPlayerLocation" xml:space="preserve">
+    <value>プレーヤーの現在位置を表示します（AutoPlayFaderLaneがない場合のデフォルトは中央）。</value>
+  </data>
   <data name="DisableShowSplashScreenAfterBoot" xml:space="preserve">
     <value>プログラムの起動後に起動ウィンドウのインターフェイスが表示されない</value>
   </data>
@@ -1544,6 +1563,15 @@
   </data>
   <data name="ResetAllSettingComfirm" xml:space="preserve">
     <value>このアプリケーションのすべての構成オプションをリセットしますか?</value>
+  </data>
+  <data name="MirrorSelectionXGrid" xml:space="preserve">
+    <value>範囲内で垂直方向にミラーリング</value>
+  </data>
+  <data name="MirrorSelectionXGridZero" xml:space="preserve">
+    <value>X[0, 0]を基準として水平方向にミラーリング</value>
+  </data>
+  <data name="MirrorSelectionLaneColors" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
   <data name="NoLimit" xml:space="preserve">
     <value>(無制限)</value>

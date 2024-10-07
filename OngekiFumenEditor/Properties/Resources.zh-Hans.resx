@@ -957,6 +957,15 @@
   <data name="MenuSelecting" xml:space="preserve">
     <value>选取...</value>
   </data>
+  <data name="MenuMirrorSelectionXGrid" xml:space="preserve">
+    <value>按整体全体范围水平镜像移动</value>
+  </data>
+  <data name="MenuMirrorSelectionXGridZero" xml:space="preserve">
+    <value>按X[0,0]为基准水平镜像移动</value>
+  </data>
+  <data name="MenuMirrorSelectionLaneColors" xml:space="preserve">
+    <value>镜像击打轨道颜色</value>
+  </data>
   <data name="MissingBossEnemySet" xml:space="preserve">
     <value>缺少Boss的EnemySet物件,建议放置一个来钦定boss出现的时机</value>
   </data>
@@ -1553,6 +1562,15 @@
   </data>
   <data name="ResetAllSettingComfirm" xml:space="preserve">
     <value>是否重置本应用所有配置选项?</value>
+  </data>
+  <data name="MirrorSelectionXGrid" xml:space="preserve">
+    <value>按整体全体范围水平镜像移动</value>
+  </data>
+  <data name="MirrorSelectionXGridZero" xml:space="preserve">
+    <value>按X[0,0]为基准水平镜像移动</value>
+  </data>
+  <data name="MirrorSelectionLaneColors" xml:space="preserve">
+    <value>镜像击打轨道颜色</value>
   </data>
   <data name="NoLimit" xml:space="preserve">
     <value>(无限制)</value>
