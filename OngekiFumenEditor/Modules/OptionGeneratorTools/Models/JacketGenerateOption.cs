@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.ArgProcesser.Attributes;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 {
@@ -7,7 +8,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 	{
 		private int musicId = -1;
 		
-		[LocalizableOptionBinding<int>("musicId", "ProgramOptionMusicId", -1, true)]
+		[LocalizableOptionBinding<int>("musicId", nameof(Resources.ProgramOptionMusicId), -1, true)]
 		public int MusicId
 		{
 			get => musicId; set => Set(ref musicId, value);
@@ -15,7 +16,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 
 		private string outputAssetbundleFilePath;
 		
-		[LocalizableOptionBinding<string>("outputFolder", "ProgramOptionOutputFolderAsset", default, true)]
+		[LocalizableOptionBinding<string>("outputFolder", nameof(Resources.ProgramOptionOutputFolderAsset), default, true)]
 		public string OutputAssetbundleFolderPath
 		{
 			get => outputAssetbundleFilePath; set => Set(ref outputAssetbundleFilePath, value);
@@ -23,7 +24,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 
 		private string inputImageFilePath;
 		
-		[LocalizableOptionBinding<string>("inputFile", "ProgramOptionInputFileJacket", default, true)]
+		[LocalizableOptionBinding<string>("inputFile", nameof(Resources.ProgramOptionInputFileJacket), default, true)]
 		public string InputImageFilePath
 		{
 			get => inputImageFilePath; set => Set(ref inputImageFilePath, value);
@@ -31,7 +32,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 
 		private int width = 520;
 		
-		[LocalizableOptionBinding<int>("outputWidth", "ProgramOptionJacketOutputWidth", 520)]
+		[LocalizableOptionBinding<int>("outputWidth", nameof(Resources.ProgramOptionJacketOutputWidth), 520)]
 		public int Width
 		{
 			get => width; set => Set(ref width, value);
@@ -39,7 +40,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 
 		private int height = 520;
 		
-		[LocalizableOptionBinding<int>("outputHeight", "ProgramOptionJacketOutputHeight", 520)]
+		[LocalizableOptionBinding<int>("outputHeight", nameof(Resources.ProgramOptionJacketOutputHeight), 520)]
 		public int Height
 		{
 			get => height; set => Set(ref height, value);
@@ -47,7 +48,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 
 		private int widthSmall = 220;
 		
-		[LocalizableOptionBinding<int>("outputHeightSmall", "ProgramOptionJacketOutputHeightSmall", 220)]
+		[LocalizableOptionBinding<int>("outputHeightSmall", nameof(Resources.ProgramOptionJacketOutputHeightSmall), 220)]
 		public int WidthSmall
 		{
 			get => widthSmall; set => Set(ref widthSmall, value);
@@ -55,7 +56,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 
 		private int heightSmall = 220;
 		
-		[LocalizableOptionBinding<int>("outputWidthSmall", "ProgramOptionJacketOutputHeightSmall", 220)]
+		[LocalizableOptionBinding<int>("outputWidthSmall", nameof(Resources.ProgramOptionJacketOutputHeightSmall), 220)]
 		public int HeightSmall
 		{
 			get => heightSmall; set => Set(ref heightSmall, value);
