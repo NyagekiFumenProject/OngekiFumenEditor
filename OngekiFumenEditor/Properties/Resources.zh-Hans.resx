@@ -1578,6 +1578,63 @@
   <data name="ProgramCommandDescriptionSvg" xml:space="preserve">
     <value>生成预览谱面.svg文件</value>
   </data>
+  <data name="ProgramCommandConvert" xml:space="preserve">
+    <value>将某谱面转换成另一个格式的谱面</value>
+  </data>
+  <data name="ProgramOptionDescriptionVerbose" xml:space="preserve">
+    <value>显示程序日志</value>
+  </data>
+  <data name="CliArgumentNotAbsolutePath" xml:space="preserve">
+    <value>不允许使用相对路径</value>
+  </data>
+  <data name="CliInputErrorHeader" xml:space="preserve">
+    <value>程序执行命令行出错</value>
+  </data>
+  <data name="ProgramCommandJacket" xml:space="preserve">
+    <value>生成和更新封面图片文件</value>
+  </data>
+  <data name="ProgramCommandAcb" xml:space="preserve">
+    <value>生成.acb音频文件</value>
+  </data>
+  <data name="ProgramOptionInputFile" xml:space="preserve">
+    <value>要生成的谱面文件路径</value>
+  </data>
+  <data name="ProgramOptionOutputFile" xml:space="preserve">
+    <value>生成文件保存路径</value>
+  </data>
+  <data name="ProgramOptionMusicId" xml:space="preserve">
+    <value>用于生成指定的MusicId (范围0000~9999)</value>
+  </data>
+  <data name="ProgramOptionInputFileAudio" xml:space="preserve">
+    <value>音频文件,用来获取谱面总长度</value>
+  </data>
+  <data name="ProgramOptionOutputFolder" xml:space="preserve">
+    <value>保存生成文件的文件夹绝对路径</value>
+  </data>
+  <data name="ProgramOptionPreviewBegin" xml:space="preserve">
+    <value>音频预览起始时间 (毫秒单位)</value>
+  </data>
+  <data name="ProgramOptionPreviewEnd" xml:space="preserve">
+    <value>音频预览中止时间 (毫秒单位)</value>
+  </data>
+  <data name="ProgramOptionOutputFolderAsset" xml:space="preserve">
+    <value>保存生成文件的文件夹绝对路径（可能包含assets.bytes文件）</value>
+  </data>
+  <data name="ProgramOptionInputFileJacket" xml:space="preserve">
+    <value>要生成封面的.png图片文件绝对路径</value>
+  </data>
+  <data name="ProgramOptionJacketOutputHeight" xml:space="preserve">
+    <value>正常尺寸封面高度 (像素单位)</value>
+  </data>
+  <data name="ProgramOptionJacketOutputWidth" xml:space="preserve">
+    <value>正常尺寸封面宽度 (像素单位)</value>
+  </data>
+  <data name="ProgramOptionJacketOutputWidthSmall" xml:space="preserve">
+    <value>小尺寸封面宽度 (像素单位)</value>
+  </data>
+  <data name="ProgramOptionJacketOutputHeightSmall" xml:space="preserve">
+    <value>小尺寸封面高度 (像素单位)</value>
+  </data>
   <data name="ProgramOptionSvgMaxXGrid" xml:space="preserve">
     <value>最大显示XGrid范围</value>
   </data>
@@ -1586,18 +1643,6 @@
   </data>
   <data name="ProgramOptionSvgVerticalScale" xml:space="preserve">
     <value>垂直缩放</value>
-  </data>
-  <data name="ProgramOptionInputFile" xml:space="preserve">
-    <value>要生成的谱面文件路径</value>
-  </data>
-  <data name="ProgramOptionInputFileNyageki" xml:space="preserve">
-    <value>要生成的谱面文件路径</value>
-  </data>
-  <data name="ProgramOptionOutputFile" xml:space="preserve">
-    <value>生成文件保存路径</value>
-  </data>
-  <data name="ProgramOptionInputFileAudio" xml:space="preserve">
-    <value>音频文件,用来获取谱面总长度</value>
   </data>
   <data name="ProgramOptionSvgSoflanMode" xml:space="preserve">
     <value>变速模式,不同选项有不同的物件表现</value>
@@ -1613,5 +1658,8 @@
   </data>
   <data name="ProgramOptionSvgRenderAsPng" xml:space="preserve">
     <value>是否生成png图片</value>
+  </data>
+  <data name="ProgramOptionInputFileNyageki" xml:space="preserve">
+    <value>要生成的谱面文件路径</value>
   </data>
 </root>
