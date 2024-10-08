@@ -36,17 +36,16 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.Attributes
     }
 
     [AttributeUsage(AttributeTargets.Property)]
-    public class LocalizableOptionBindingAttribute<T> : OptionBindingAttrbuteBase
+    public class LocalizableOptionBindingAttribute<T> : OptionBindingAttrbute<T>
     {
         public LocalizableOptionBindingAttribute(string name, string resourceKey, T defaultValue, bool require = false)
-            : base(name, Resources.ResourceManager.GetString(resourceKey) ?? string.Empty, defaultValue, typeof(T))
+            : base(name, Resources.ResourceManager.GetString(resourceKey) ?? string.Empty, defaultValue)
         {
             Require = require;
 #if DEBUG
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (description is string.Empty) {
-                Log.LogDebug($"Invalid resource key '{resourceKey}' for option '{name}'");     
-            }
+            if (string.IsNullOrWhiteSpace(Description))
+                Log.LogDebug($"Invalid resource key '{resourceKey}' for option '{name}'");
 #endif
         }
     }
