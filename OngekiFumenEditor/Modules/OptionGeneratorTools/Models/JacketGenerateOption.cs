@@ -63,7 +63,8 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models
 		}
 
 		private bool updateAssetBytesFile = true;
-		public bool UpdateAssetBytesFile
+        [LocalizableOptionBinding<int>("updateAssetBytesFile", nameof(Resources.UpdateAssetBytesFile), 220)]
+        public bool UpdateAssetBytesFile
 		{
 			get => updateAssetBytesFile; set => Set(ref updateAssetBytesFile, value);
 		}
