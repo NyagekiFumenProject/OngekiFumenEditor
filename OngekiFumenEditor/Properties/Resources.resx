@@ -1662,4 +1662,7 @@
   <data name="ProgramOptionInputFileNyageki" xml:space="preserve">
     <value>absolute path of the file to read (*.nyageki)</value>
   </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
 </root>

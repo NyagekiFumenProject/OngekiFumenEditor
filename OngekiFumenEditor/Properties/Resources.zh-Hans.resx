@@ -1662,4 +1662,7 @@
   <data name="ProgramOptionInputFileNyageki" xml:space="preserve">
     <value>要生成的谱面文件路径</value>
   </data>
+  <data name="Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
 </root>

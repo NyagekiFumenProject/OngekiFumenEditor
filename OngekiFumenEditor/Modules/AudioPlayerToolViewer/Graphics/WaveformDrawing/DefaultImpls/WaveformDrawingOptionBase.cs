@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls
 {
-	public class WaveformDrawingOptionBase : PropertyChangedBase, IWaveformDrawingOption
+	public abstract class WaveformDrawingOptionBase : PropertyChangedBase, IWaveformDrawingOption
 	{
 		[ObjectPropertyBrowserHide]
 		public override bool IsNotifying
@@ -14,5 +14,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set => base.IsNotifying = value;
 		}
-	}
+
+        public abstract void Reload();
+        public abstract void Reset();
+        public abstract void Save();
+    }
 }

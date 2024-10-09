@@ -104,9 +104,28 @@
                                     Step="0.01" />
                             </Grid>
                             <GroupBox Header="{markup:Translate [VisualizerSpecialOption]}">
-                                <objectinspector:ObjectInspectorView Margin="5,10,10,5" InspectObject="{Binding WaveformDrawing.Options}">
-
-                                </objectinspector:ObjectInspectorView>
+                                <StackPanel>
+                                    <objectinspector:ObjectInspectorView Margin="5" InspectObject="{Binding WaveformDrawing.Options}">
+                                        <objectinspector:ObjectInspectorView.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Margin="5,0" Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </objectinspector:ObjectInspectorView.ItemsPanel>
+                                    </objectinspector:ObjectInspectorView>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button
+                                            Padding="5,2,5,2"
+                                            cal:Message.Attach="OnWaveformOptionReset()"
+                                            Content="{markup:Translate [ResetDefault]}">
+                                        </Button>
+                                        <Button
+                                            Margin="5,0"
+                                            Padding="5,2,5,2"
+                                            cal:Message.Attach="OnWaveformOptionSave()"
+                                            Content="{markup:Translate [Save]}">
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
                             </GroupBox>
                         </StackPanel>
                     </GroupBox>

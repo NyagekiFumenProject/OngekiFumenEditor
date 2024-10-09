@@ -4,5 +4,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 {
 	public interface IWaveformDrawingOption : INotifyPropertyChanged
 	{
+		void Reset();
+		void Reload();
+		void Save();
 	}
 }

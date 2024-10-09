@@ -238,6 +238,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             usingPeakData = null;
         }
 
+        public void OnWaveformOptionReset()
+        {
+            WaveformDrawing?.Options?.Reset();
+        }
+
+        public void OnWaveformOptionSave()
+        {
+            WaveformDrawing?.Options?.Save();
+        }
+
         public void Render(TimeSpan ts)
         {
 #if DEBUG

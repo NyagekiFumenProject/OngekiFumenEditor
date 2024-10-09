@@ -1576,4 +1576,7 @@
   <data name="NoLimit" xml:space="preserve">
     <value>(無制限)</value>
   </data>
+  <data name="Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
 </root>
