@@ -122,7 +122,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             set
             {
                 Set(ref limitFPS, value);
-                Properties.AudioPlayerToolViewerSetting.Default.CurrentTimeXOffset = value;
+                Properties.AudioPlayerToolViewerSetting.Default.LimitFPS = value;
                 Properties.AudioPlayerToolViewerSetting.Default.Save();
                 UpdateActualRenderInterval();
             }
