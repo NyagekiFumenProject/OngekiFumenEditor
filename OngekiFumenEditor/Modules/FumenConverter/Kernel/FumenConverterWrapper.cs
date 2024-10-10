@@ -37,7 +37,7 @@ public static class FumenConverterWrapper
             return new(false, Resources.OutputFumenFileNotSelect);
 
         if (option.IsStandarizeFumen) {
-            if (!option.OutputFumenFilePath.EndsWith(".ogkr")) {
+            if (Path.GetExtension(option.OutputFumenFilePath) != ".ogkr") {
                 return new(false, Resources.OutputFumenStandardizeFormatNotSupported);
             }
 
