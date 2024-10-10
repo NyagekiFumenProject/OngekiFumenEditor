@@ -793,13 +793,13 @@
     <value>Generate .dll file fail:</value>
   </data>
   <data name="GenerateAudioFileFail" xml:space="preserve">
-    <value>Generate audio file failed:</value>
+    <value>Failed to generate audio file:</value>
   </data>
   <data name="GenerateAudioSuccess" xml:space="preserve">
     <value>Generate audio file successfully, open output folder?</value>
   </data>
   <data name="GenerateJacketFileFail" xml:space="preserve">
-    <value>Generate jacket files fail:</value>
+    <value>Failed to generate jacket files:</value>
   </data>
   <data name="GenerateJacketFileSuccess" xml:space="preserve">
     <value>Generate jacket files successfully, open output folder?</value>
@@ -1669,6 +1669,6 @@
     <value>standardize the fumen output (only for .ogkr)</value>
   </data>
   <data name="OutputFumenStandardizeFormatNotSupported" xml:space="preserve">
-    <value>Cannot standardize for the designated output format</value>
+    <value>Cannot standardize for the selected output format</value>
   </data>
 </root>
