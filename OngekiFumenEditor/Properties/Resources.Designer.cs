@@ -2122,7 +2122,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Generate audio file failed: 的本地化字符串。
+        ///   查找类似 Failed to generate audio file: 的本地化字符串。
         /// </summary>
         public static string GenerateAudioFileFail {
             get {
@@ -2140,7 +2140,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Generate jacket files fail: 的本地化字符串。
+        ///   查找类似 Failed to generate jacket files: 的本地化字符串。
         /// </summary>
         public static string GenerateJacketFileFail {
             get {
@@ -3139,7 +3139,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Cannot standardize for the designated output format 的本地化字符串。
+        ///   查找类似 Cannot standardize for the selected output format 的本地化字符串。
         /// </summary>
         public static string OutputFumenStandardizeFormatNotSupported {
             get {
