@@ -152,12 +152,9 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
             if (CheckRelativePaths(opt.InputFumenFilePath, opt.OutputFumenFilePath))
                 return;
             
-            var converter = IoC.Get<IFumenConverter>();
-            var parserManager = IoC.Get<IFumenParserManager>();
-                    
             var result = await FumenConverterWrapper.Generate(opt);
             if (!result.IsSuccess) {
-                await Console.Error.WriteLineAsync($"{Resources.ConvertFail}: {result.Message}");
+                await Console.Error.WriteLineAsync($"{Resources.ConvertFail} {result.Message}");
                 Exit(1);
                 return;
             }

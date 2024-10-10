@@ -1665,4 +1665,10 @@
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="ProgramOptionStandardizeFumen" xml:space="preserve">
+    <value>standardize the fumen output (only for .ogkr)</value>
+  </data>
+  <data name="OutputFumenStandardizeFormatNotSupported" xml:space="preserve">
+    <value>Cannot standardize for the designated output format</value>
+  </data>
 </root>
