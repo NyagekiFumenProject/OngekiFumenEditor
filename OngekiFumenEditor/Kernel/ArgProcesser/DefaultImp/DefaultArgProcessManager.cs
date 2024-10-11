@@ -152,12 +152,9 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
             if (CheckRelativePaths(opt.InputFumenFilePath, opt.OutputFumenFilePath))
                 return;
             
-            var converter = IoC.Get<IFumenConverter>();
-            var parserManager = IoC.Get<IFumenParserManager>();
-                    
             var result = await FumenConverterWrapper.Generate(opt);
             if (!result.IsSuccess) {
-                await Console.Error.WriteLineAsync($"{Resources.ConvertFail}: {result.Message}");
+                await Console.Error.WriteLineAsync($"{Resources.ConvertFail} {result.Message}");
                 Exit(1);
                 return;
             }
@@ -179,7 +176,7 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
             }
             
             if (!result.IsSuccess) {
-                await Console.Error.WriteLineAsync($"Failed to generate jacket: {result.Message}");
+                await Console.Error.WriteLineAsync($"{Resources.GenerateJacketFileFail} {result.Message}");
                 Exit(1);
                 return;
             }
@@ -201,7 +198,7 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser.DefaultImp
             }
             
             if (!result.IsSuccess) {
-                await Console.Error.WriteLineAsync($"Failed to generate audio: {result.Message}");
+                await Console.Error.WriteLineAsync($"{Resources.GenerateAudioFileFail} {result.Message}");
                 Exit(1);
                 return;
             }
