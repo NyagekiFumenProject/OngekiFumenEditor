@@ -286,7 +286,7 @@
                                 LargeChange="0.2"
                                 Maximum="1"
                                 SmallChange="0.2"
-                                Value="{Binding AudioPlayer.Volume}">
+                                Value="{Binding MusicVolume}">
                             </Slider>
                         </StackPanel>
                         <StackPanel

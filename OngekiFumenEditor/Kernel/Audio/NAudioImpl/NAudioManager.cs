@@ -1,183 +1,211 @@
-﻿using NAudio.CoreAudioApi;
+﻿using Caliburn.Micro;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Audio.DefaultImp.Music;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 {
-	[Export(typeof(IAudioManager))]
-	public class NAudioManager : IAudioManager
-	{
-		private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
-		private int targetSampleRate;
-		private readonly IWavePlayer audioOutputDevice;
+    [Export(typeof(IAudioManager))]
+    public class NAudioManager : PropertyChangedBase, IAudioManager
+    {
+        private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
+        private int targetSampleRate;
+        private readonly IWavePlayer audioOutputDevice;
 
-		private readonly MixingSampleProvider audioMixer;
-		private readonly MixingSampleProvider soundMixer;
-		private readonly MixingSampleProvider musicMixer;
+        private readonly MixingSampleProvider audioMixer;
+        private readonly MixingSampleProvider soundMixer;
+        private readonly MixingSampleProvider musicMixer;
 
-		private readonly VolumeSampleProvider soundVolumeWrapper;
-		private readonly VolumeSampleProvider musicVolumeWrapper;
+        private readonly VolumeSampleProvider soundVolumeWrapper;
+        private readonly VolumeSampleProvider musicVolumeWrapper;
 
-		public float SoundVolume { get => soundVolumeWrapper.Volume; set => soundVolumeWrapper.Volume = value; }
-		public float MusicVolume { get => musicVolumeWrapper.Volume; set => musicVolumeWrapper.Volume = value; }
+        public float SoundVolume
+        {
+            get => soundVolumeWrapper.Volume;
+            set
+            {
+                soundVolumeWrapper.Volume = value;
 
-		public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; } = new[] {
-			(".mp3","Audio File"),
-			(".wav","Audio File"),
-			(".acb","Criware Audio File"),
-		};
+                AudioSetting.Default.SoundVolume = value;
+                AudioSetting.Default.Save();
+                NotifyOfPropertyChange(() => SoundVolume);
+            }
+        }
 
-		public NAudioManager()
-		{
-			var audioOutputType = (AudioOutputType)Properties.AudioSetting.Default.AudioOutputType;
-			targetSampleRate = Properties.AudioSetting.Default.AudioSampleRate;
-			Log.LogDebug($"targetSampleRate: {targetSampleRate}");
-			Log.LogDebug($"audioOutputType: {audioOutputType}");
+        public float MusicVolume
+        {
+            get => musicVolumeWrapper.Volume;
+            set
+            {
+                musicVolumeWrapper.Volume = value;
 
-			try
-			{
-				audioOutputDevice = audioOutputType switch
-				{
-					AudioOutputType.Asio => new AsioOut() { AutoStop = false },
-					AudioOutputType.Wasapi => new WasapiOut(AudioClientShareMode.Shared, 0),
-					AudioOutputType.WaveOut or _ => new WaveOut() { DesiredLatency = 100 },
-				};
-			}
-			catch (Exception e)
-			{
-				Log.LogError($"Can't create audio output device:{audioOutputType}", e);
-				throw;
-			}
-			Log.LogDebug($"audioOutputDevice: {audioOutputDevice}");
+                AudioSetting.Default.MusicVolume = value;
+                AudioSetting.Default.Save();
+                NotifyOfPropertyChange(() => MusicVolume);
+            }
+        }
 
-			var format = WaveFormat.CreateIeeeFloatWaveFormat(targetSampleRate, 2);
+        public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; } = new[] {
+            (".mp3","Audio File"),
+            (".wav","Audio File"),
+            (".acb","Criware Audio File"),
+        };
 
-			audioMixer = new MixingSampleProvider(format);
-			audioMixer.ReadFully = true;
-			audioOutputDevice.Init(audioMixer);
-			audioOutputDevice.Play();
+        public NAudioManager()
+        {
+            var audioOutputType = (AudioOutputType)Properties.AudioSetting.Default.AudioOutputType;
+            targetSampleRate = Properties.AudioSetting.Default.AudioSampleRate;
+            Log.LogDebug($"targetSampleRate: {targetSampleRate}");
+            Log.LogDebug($"audioOutputType: {audioOutputType}");
 
-			//setup sound
-			soundMixer = new MixingSampleProvider(format);
-			soundMixer.ReadFully = true;
-			soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
-			audioMixer.AddMixerInput(soundVolumeWrapper);
+            try
+            {
+                audioOutputDevice = audioOutputType switch
+                {
+                    AudioOutputType.Asio => new AsioOut() { AutoStop = false },
+                    AudioOutputType.Wasapi => new WasapiOut(AudioClientShareMode.Shared, 0),
+                    AudioOutputType.WaveOut or _ => new WaveOut() { DesiredLatency = 100 },
+                };
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"Can't create audio output device:{audioOutputType}", e);
+                throw;
+            }
+            Log.LogDebug($"audioOutputDevice: {audioOutputDevice}");
 
-			//setup sound
-			musicMixer = new MixingSampleProvider(format);
-			musicMixer.ReadFully = true;
-			musicVolumeWrapper = new VolumeSampleProvider(musicMixer);
-			audioMixer.AddMixerInput(musicVolumeWrapper);
+            var format = WaveFormat.CreateIeeeFloatWaveFormat(targetSampleRate, 2);
 
-			Log.LogInfo($"Audio implement will use {GetType()}");
-		}
+            audioMixer = new MixingSampleProvider(format);
+            audioMixer.ReadFully = true;
+            audioOutputDevice.Init(audioMixer);
+            audioOutputDevice.Play();
 
-		public void PlaySound(CachedSound sound, float volume, TimeSpan init)
-		{
-			ISampleProvider provider = new VolumeSampleProvider(new CachedSoundSampleProvider(sound))
-			{
-				Volume = volume
-			};
-			if (init.TotalMilliseconds != 0)
-			{
-				provider = new OffsetSampleProvider(provider)
-				{
-					SkipOver = init
-				};
-			}
+            //setup sound
+            soundMixer = new MixingSampleProvider(format);
+            soundMixer.ReadFully = true;
+            soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
+            audioMixer.AddMixerInput(soundVolumeWrapper);
+            SoundVolume = AudioSetting.Default.SoundVolume;
 
-			AddSoundMixerInput(provider);
-		}
+            //setup music
+            musicMixer = new MixingSampleProvider(format);
+            musicMixer.ReadFully = true;
+            musicVolumeWrapper = new VolumeSampleProvider(musicMixer);
+            audioMixer.AddMixerInput(musicVolumeWrapper);
+            MusicVolume = AudioSetting.Default.MusicVolume;
 
-		public void AddSoundMixerInput(ISampleProvider input)
-		{
-			soundMixer.AddMixerInput(input);
-		}
+            Log.LogInfo($"Audio implement will use {GetType()}");
+        }
 
-		public void RemoveSoundMixerInput(ISampleProvider input)
-		{
-			soundMixer.RemoveMixerInput(input);
-		}
+        public void PlaySound(CachedSound sound, float volume, TimeSpan init)
+        {
+            ISampleProvider provider = new VolumeSampleProvider(new CachedSoundSampleProvider(sound))
+            {
+                Volume = volume
+            };
+            if (init.TotalMilliseconds != 0)
+            {
+                provider = new OffsetSampleProvider(provider)
+                {
+                    SkipOver = init
+                };
+            }
 
-		public async Task<IAudioPlayer> LoadAudioAsync(string filePath)
-		{
-			if (string.IsNullOrWhiteSpace(filePath))
-				return null;
+            AddSoundMixerInput(provider);
+        }
 
-			if (filePath.EndsWith(".acb"))
-			{
-				filePath = await AcbConverter.ConvertAcbFileToWavFile(filePath);
-				if (filePath is null)
-					return null;
-			}
+        public void AddSoundMixerInput(ISampleProvider input)
+        {
+            soundMixer.AddMixerInput(input);
+        }
 
-			var player = new DefaultMusicPlayer(musicMixer);
-			ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
-			await player.Load(filePath, targetSampleRate);
-			return player;
-		}
+        public void RemoveSoundMixerInput(ISampleProvider input)
+        {
+            soundMixer.RemoveMixerInput(input);
+        }
 
-		public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
-		{
-			using var audioFileReader = new AudioFileReader(filePath);
-			Log.LogInfo($"Load sound file: {filePath}");
+        public async Task<IAudioPlayer> LoadAudioAsync(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return null;
 
-			var provider = await AudioCompatibilizer.CheckCompatible(audioFileReader, targetSampleRate);
+            if (filePath.EndsWith(".acb"))
+            {
+                filePath = await AcbConverter.ConvertAcbFileToWavFile(filePath);
+                if (filePath is null)
+                    return null;
+            }
 
-			return new NAudioSoundPlayer(new CachedSound(provider), this);
-		}
+            var player = new DefaultMusicPlayer(musicMixer);
+            ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
+            await player.Load(filePath, targetSampleRate);
+            return player;
+        }
 
-		public void Dispose()
-		{
-			Log.LogDebug("call DefaultAudioManager.Dispose()");
-			foreach (var weakRef in ownAudioPlayerRefs)
-			{
-				if (weakRef.TryGetTarget(out var player))
-					player?.Dispose();
-			}
-			ownAudioPlayerRefs.Clear();
-			audioOutputDevice?.Dispose();
-		}
+        public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
+        {
+            using var audioFileReader = new AudioFileReader(filePath);
+            Log.LogInfo($"Load sound file: {filePath}");
 
-		public ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init)
-		{
-			ISampleProvider provider = new LoopableProvider(new CachedSoundSampleProvider(sound));
+            var provider = await AudioCompatibilizer.CheckCompatible(audioFileReader, targetSampleRate);
 
-			if (init.TotalMilliseconds != 0)
-			{
-				provider = new OffsetSampleProvider(provider)
-				{
-					SkipOver = init
-				};
-			}
+            return new NAudioSoundPlayer(new CachedSound(provider), this);
+        }
 
-			var handle = new NAudioLoopHandle(new VolumeSampleProvider(provider));
-			handle.Volume = volume;
+        public void Dispose()
+        {
+            Log.LogDebug("call DefaultAudioManager.Dispose()");
+            foreach (var weakRef in ownAudioPlayerRefs)
+            {
+                if (weakRef.TryGetTarget(out var player))
+                    player?.Dispose();
+            }
+            ownAudioPlayerRefs.Clear();
+            audioOutputDevice?.Dispose();
+        }
 
-			//add to mixer
-			AddSoundMixerInput(handle.Provider);
+        public ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init)
+        {
+            ISampleProvider provider = new LoopableProvider(new CachedSoundSampleProvider(sound));
 
-			//Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
-			return handle;
-		}
+            if (init.TotalMilliseconds != 0)
+            {
+                provider = new OffsetSampleProvider(provider)
+                {
+                    SkipOver = init
+                };
+            }
 
-		public void StopLoopSound(ILoopHandle h)
-		{
-			if (h is not NAudioLoopHandle handle)
-				return;
+            var handle = new NAudioLoopHandle(new VolumeSampleProvider(provider));
+            handle.Volume = volume;
 
-			//Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
-			RemoveSoundMixerInput(handle.Provider);
-		}
-	}
+            //add to mixer
+            AddSoundMixerInput(handle.Provider);
+
+            //Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
+            return handle;
+        }
+
+        public void StopLoopSound(ILoopHandle h)
+        {
+            if (h is not NAudioLoopHandle handle)
+                return;
+
+            //Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
+            RemoveSoundMixerInput(handle.Provider);
+        }
+    }
 }

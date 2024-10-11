@@ -113,7 +113,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public bool[] SoundControls { get; set; } = new bool[Enum.GetValues<SoundControl>().Length];
 
-        public SoundVolumeProxy[] SoundVolumes { get; set; } = new SoundVolumeProxy[0];
+        public SoundVolumeProxy[] SoundVolumes { get; set; } = [];
 
         public float SoundVolume
         {
@@ -122,6 +122,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             {
                 IoC.Get<IAudioManager>().SoundVolume = value;
                 NotifyOfPropertyChange(() => SoundVolume);
+            }
+        }
+
+        public float MusicVolume
+        {
+            get => IoC.Get<IAudioManager>().MusicVolume;
+            set
+            {
+                IoC.Get<IAudioManager>().MusicVolume = value;
+                NotifyOfPropertyChange(() => MusicVolume);
             }
         }
 
