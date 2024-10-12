@@ -71,12 +71,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public Visibility EditorLockedVisibility =>
             IsLocked
-            ? Visibility.Hidden : Visibility.Visible;
+                ? Visibility.Hidden : Visibility.Visible;
 
         public Visibility EditorObjectVisibility =>
             IsLocked || // 编辑器被锁住
             IsUserRequestHideEditorObject // 用户要求隐藏(比如按下Q)
-            ? Visibility.Hidden : Visibility.Visible;
+                ? Visibility.Hidden : Visibility.Visible;
 
         public bool IsDesignMode => EditorObjectVisibility == Visibility.Visible;
         public bool IsPreviewMode => !IsDesignMode;
@@ -505,15 +505,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var curTime = CurrentPlayTime;
             var rememberAction = LambdaUndoAction.Create(action.Name, () =>
-            {
-                curTime = CurrentPlayTime;
-                action.Execute();
-            },
-            () =>
-            {
-                action.Undo();
-                ScrollTo(curTime);
-            });
+                {
+                    curTime = CurrentPlayTime;
+                    action.Execute();
+                },
+                () =>
+                {
+                    action.Undo();
+                    ScrollTo(curTime);
+                });
 
             UndoRedoManager.ExecuteAction(rememberAction);
         }
@@ -650,12 +650,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (group.Key == typeof(LaneCurvePathControlObject))
                     {
                         foreach (var item in group.OfType<LaneCurvePathControlObject>().Select(x =>
-                        {
-                            if (cacheCurveControlsMap.TryGetValue(x, out var val))
-                                return (x, val.refObj, val.idx);
-                            else
-                                return default;
-                        }).Where(x => x.x is not null).GroupBy(x => x.refObj))
+                                 {
+                                     if (cacheCurveControlsMap.TryGetValue(x, out var val))
+                                         return (x, val.refObj, val.idx);
+                                     else
+                                         return default;
+                                 }).Where(x => x.x is not null).GroupBy(x => x.refObj))
                         {
                             var refObj = item.Key;
                             foreach ((var cp, _, var idx) in item.OrderBy(x => x.idx))
@@ -1475,6 +1475,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
         }
 
+        public void ScrollPage(int page)
+        {
+            TGrid changeGrid;
+            
+            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(ViewHeight, this).ToList() is [{ } single]) {
+                changeGrid = single;
+            }
+            else {
+                changeGrid = TGridCalculator.ConvertYToTGrid_DesignMode(ViewHeight, this);
+            }
+            
+            var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);
+
+            ScrollTo(GetCurrentTGrid() + new GridOffset(change.Unit, change.Grid));
+        }
+
         private void OnWheelScrollViewer(MouseWheelEventArgs arg)
         {
             if (IsDesignMode && Setting.JudgeLineAlignBeat)
@@ -1547,8 +1563,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /*
          0:            7       11    13 14
          3:     3     6    9      12
-         2: 1 2   4      8  
-         5:         5        10            
+         2: 1 2   4      8
+         5:         5        10
          */
         private readonly static int[] xGridUnitUpJumpTable = new[] { 0, 1, 2, 3, 4, 5, 3, 7, 0, 3, 0, 0, 0, 0, 0, 0 };
         private readonly static int[] xGridUnitDownJumpTable = new[] { 0, 0, -1, 0, -2, 0, -3, 0, -4, -3, -5, 0, -3, 0, 0, 0 };
@@ -1566,7 +1582,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /*
          0:                    11    13
          3:     3     6    9      12
-         2: 1 2   4      8  
+         2: 1 2   4      8
          5:         5        10            15
          7:            7                14
          */
