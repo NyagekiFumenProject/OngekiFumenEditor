@@ -1662,8 +1662,23 @@
   <data name="Save" xml:space="preserve">
     <value>保存</value>
   </data>
+  <data name="BulletPaletteCreateBullet" xml:space="preserve">
+    <value>Bullet</value>
+  </data>
+  <data name="ClickToClonePalette" xml:space="preserve">
+    <value>点击克隆新模板</value>
+  </data>
+  <data name="BulletPaletteCreateBell" xml:space="preserve">
+    <value>Bell</value>
+  </data>
+  <data name="CopiedObjectsBrushAllowed" xml:space="preserve">
+    <value>已复制 {} 个物件(并可用在刷子模式)</value>
+  </data>
   <data name="DragToCreateHoldEndTipText" xml:space="preserve">
     <value>拖动生成HoldEnd物件</value>
+  </data>
+  <data name="DragToCreateNextToolTip" xml:space="preserve">
+    <value>可拖动到编辑器界面生成新的物件</value>
   </data>
   <data name="ObjectId" xml:space="preserve">
     <value>Id</value>
@@ -1673,6 +1688,9 @@
   </data>
   <data name="SelectFile" xml:space="preserve">
     <value>选择文件</value>
+  </data>
+  <data name="VisualEditorLaneColorSettings" xml:space="preserve">
+    <value>轨道颜色</value>
   </data>
   <data name="BellBulletCountOverLimit_Sep" xml:space="preserve">
     <value>时，</value>
