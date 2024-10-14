@@ -171,9 +171,6 @@
   <data name="Artist" xml:space="preserve">
     <value>艺术家:</value>
   </data>
-  <data name="AsBrushSourceObject" xml:space="preserve">
-    <value>并作为刷子模式的批量生成源</value>
-  </data>
   <data name="AudioDuration" xml:space="preserve">
     <value>音频时长:</value>
   </data>
@@ -226,7 +223,7 @@
     <value>当预览时，Bell/Bullet总数超过</value>
   </data>
   <data name="BellBulletCountOverLimit_Part2" xml:space="preserve">
-    <value>时，会使用多线程进行并行计算</value>
+    <value>会使用多线程进行并行计算</value>
   </data>
   <data name="BigJacketSize" xml:space="preserve">
     <value>大图尺寸(通常520x520):</value>
@@ -1664,6 +1661,39 @@
   </data>
   <data name="Save" xml:space="preserve">
     <value>保存</value>
+  </data>
+  <data name="DragToCreateHoldEndTipText" xml:space="preserve">
+    <value>拖动生成HoldEnd物件</value>
+  </data>
+  <data name="ObjectId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="BulletPaletteId" xml:space="preserve">
+    <value>StrID</value>
+  </data>
+  <data name="SelectFile" xml:space="preserve">
+    <value>选择文件</value>
+  </data>
+  <data name="BellBulletCountOverLimit_Sep" xml:space="preserve">
+    <value>时，</value>
+  </data>
+  <data name="ChangeColor" xml:space="preserve">
+    <value>选择</value>
+  </data>
+  <data name="NamedColorChangeTitle" xml:space="preserve">
+    <value>设置新的 {0} 颜色</value>
+  </data>
+  <data name="ApplySuggestedEditorLayout" xml:space="preserve">
+    <value>使用推荐的布局</value>
+  </data>
+  <data name="RecordId" xml:space="preserve">
+    <value>RecordId</value>
+  </data>
+  <data name="CurveInterpolatorFactoryLabel" xml:space="preserve">
+    <value>CurveInterpolatorFactory</value>
+  </data>
+  <data name="CurvePrecisionLabel" xml:space="preserve">
+    <value>CurvePrecision</value>
   </data>
   <data name="ProgramOptionStandardizeFumen" xml:space="preserve">
     <value>生成标准音击谱面</value>

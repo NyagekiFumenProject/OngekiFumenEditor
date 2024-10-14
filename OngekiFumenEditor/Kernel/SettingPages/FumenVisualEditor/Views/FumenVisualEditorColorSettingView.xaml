@@ -37,7 +37,7 @@
                             Margin="5,0"
                             Padding="10,2"
                             cal:Message.Attach="OnSelectColor($executionContext)"
-                            Content="选择" />
+                            Content="{markup:Translate [ChangeColor]}" />
                     </StackPanel>
                 </Grid>
             </DataTemplate>

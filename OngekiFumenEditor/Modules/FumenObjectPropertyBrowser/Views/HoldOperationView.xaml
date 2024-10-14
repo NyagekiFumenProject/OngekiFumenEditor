@@ -23,7 +23,9 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Cursor="Hand"
                 Text="{markup:Translate [DragToCreateHoldEnd]}"
+                ToolTip="{markup:Translate [DragToCreateHoldEndTipText]}"
                 TextWrapping="Wrap" />
         </Border>
     </StackPanel>

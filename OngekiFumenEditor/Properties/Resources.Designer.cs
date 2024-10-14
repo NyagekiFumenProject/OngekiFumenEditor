@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Audio File Generator 的本地化字符串。
+        ///   查找类似 Audio file generator 的本地化字符串。
         /// </summary>
         public static string AcbGenerator {
             get {
@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Add connectable next object 的本地化字符串。
+        ///   查找类似 Add next object 的本地化字符串。
         /// </summary>
         public static string AddConnectableNextObject {
             get {
@@ -115,7 +115,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Automatically docking when objects pasted 的本地化字符串。
+        ///   查找类似 Automatically snap objects when pasted 的本地化字符串。
         /// </summary>
         public static string AdjustPastedObjects {
             get {
@@ -124,7 +124,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Suggest 的本地化字符串。
+        ///   查找类似 Advice 的本地化字符串。
         /// </summary>
         public static string Advice {
             get {
@@ -133,7 +133,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Recalculate all objects after audio delay applied 的本地化字符串。
+        ///   查找类似 Recalculate all object positions with audio delay applied 的本地化字符串。
         /// </summary>
         public static string AllObjectApplyNewDelayAfterCalculated {
             get {
@@ -142,7 +142,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 All File Support 的本地化字符串。
+        ///   查找类似 All supported filetypes 的本地化字符串。
         /// </summary>
         public static string AllSupportFileFormat {
             get {
@@ -169,7 +169,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Processing faild： 的本地化字符串。
+        ///   查找类似 Audio adjustment failed:  的本地化字符串。
         /// </summary>
         public static string ApplyAudioAdjustFail {
             get {
@@ -178,7 +178,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Processing successfully 的本地化字符串。
+        ///   查找类似 Audio adjusted succesfully 的本地化字符串。
         /// </summary>
         public static string ApplyAudioAdjustSuccess {
             get {
@@ -187,7 +187,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Processing successfully. But we recommend saving and reopening the current project to review the latest audio changes or objects position adjustments. 的本地化字符串。
+        ///   查找类似 Audio adjusted successfully. It is strongly recommend to save and reopen the current project. 的本地化字符串。
         /// </summary>
         public static string ApplyAudioAdjustSuccessButSuggest {
             get {
@@ -214,20 +214,20 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Restore suggested editor layout 的本地化字符串。
+        /// </summary>
+        public static string ApplySuggestedEditorLayout {
+            get {
+                return ResourceManager.GetString("ApplySuggestedEditorLayout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Artist: 的本地化字符串。
         /// </summary>
         public static string Artist {
             get {
                 return ResourceManager.GetString("Artist", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 and serve as source object in brush mode. 的本地化字符串。
-        /// </summary>
-        public static string AsBrushSourceObject {
-            get {
-                return ResourceManager.GetString("AsBrushSourceObject", resourceCulture);
             }
         }
         
@@ -295,7 +295,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Audio Time(TGrid) 的本地化字符串。
+        ///   查找类似 Audio Time (TGrid) 的本地化字符串。
         /// </summary>
         public static string AudioTGrid {
             get {
@@ -331,7 +331,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Automatic update time for current selected object  的本地化字符串。
+        ///   查找类似 Automatic update time for selected object 的本地化字符串。
         /// </summary>
         public static string AutoUpdateCurrentObjectTime {
             get {
@@ -349,7 +349,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Batch set property IsCritical 的本地化字符串。
+        ///   查找类似 Batch toggle IsCritical 的本地化字符串。
         /// </summary>
         public static string BatchSetIsCritical {
             get {
@@ -376,7 +376,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 In preview mode, if the total number of Bells/Bullets exceeds 的本地化字符串。
+        ///   查找类似 In preview mode, if the total number of Bells/Bullets exceeds  的本地化字符串。
         /// </summary>
         public static string BellBulletCountOverLimit_Part1 {
             get {
@@ -385,11 +385,20 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 ,parallel computation will be employed using multiple threads 的本地化字符串。
+        ///   查找类似 process with multiple threads 的本地化字符串。
         /// </summary>
         public static string BellBulletCountOverLimit_Part2 {
             get {
                 return ResourceManager.GetString("BellBulletCountOverLimit_Part2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ,  的本地化字符串。
+        /// </summary>
+        public static string BellBulletCountOverLimit_Sep {
+            get {
+                return ResourceManager.GetString("BellBulletCountOverLimit_Sep", resourceCulture);
             }
         }
         
@@ -439,7 +448,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Brushing on the lane with copied object 的本地化字符串。
+        ///   查找类似 Brush along lane with copied object 的本地化字符串。
         /// </summary>
         public static string BrushCopied {
             get {
@@ -448,7 +457,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Batch on the lane based on the multiplied meter with copied object; illegal segments cannot be used. 的本地化字符串。
+        ///   查找类似 Brush along the lane, creating an instance of the brush object at each TGrid subdivision positioned upon the lane 的本地化字符串。
         /// </summary>
         public static string BrushCopiedTipText {
             get {
@@ -457,7 +466,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Brush Mode： 的本地化字符串。
+        ///   查找类似 Brush Mode: 的本地化字符串。
         /// </summary>
         public static string BrushMode {
             get {
@@ -466,7 +475,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Switching brush modes 的本地化字符串。
+        ///   查找类似 Toggle brush mode 的本地化字符串。
         /// </summary>
         public static string BrushModeSwitch {
             get {
@@ -475,7 +484,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 the brush mode is enabled, avoid most object dragging operations. 的本地化字符串。
+        ///   查找类似 Brush mode is enabled. Most dragging operations are disabled. 的本地化字符串。
         /// </summary>
         public static string BrushModeSwitchTipText {
             get {
@@ -484,7 +493,34 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Bullet Size 的本地化字符串。
+        ///   查找类似 Bell 的本地化字符串。
+        /// </summary>
+        public static string BulletPaletteCreateBell {
+            get {
+                return ResourceManager.GetString("BulletPaletteCreateBell", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bullet 的本地化字符串。
+        /// </summary>
+        public static string BulletPaletteCreateBullet {
+            get {
+                return ResourceManager.GetString("BulletPaletteCreateBullet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ID 的本地化字符串。
+        /// </summary>
+        public static string BulletPaletteId {
+            get {
+                return ResourceManager.GetString("BulletPaletteId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Size 的本地化字符串。
         /// </summary>
         public static string BulletSize {
             get {
@@ -493,7 +529,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Bullet Speed 的本地化字符串。
+        ///   查找类似 Speed 的本地化字符串。
         /// </summary>
         public static string BulletSpeed {
             get {
@@ -502,7 +538,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Bullet Shape 的本地化字符串。
+        ///   查找类似 Shape 的本地化字符串。
         /// </summary>
         public static string BulletType {
             get {
@@ -511,7 +547,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Call AcbGeneratorFuck.Generator.Generate() failed 的本地化字符串。
+        ///   查找类似 AcbGeneratorFuck.Generator.Generate() failed 的本地化字符串。
         /// </summary>
         public static string CallAcbGeneratorFuckFail {
             get {
@@ -520,7 +556,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Call GenerateSvgAsync() failed 的本地化字符串。
+        ///   查找类似 GenerateSvgAsync() failed 的本地化字符串。
         /// </summary>
         public static string CallGenerateSvgAsyncFail {
             get {
@@ -538,7 +574,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to save the fumen, project saving canceled. 的本地化字符串。
+        ///   查找类似 Unable to save the fumen. Project saving canceled. 的本地化字符串。
         /// </summary>
         public static string CancelProjectSaveByFumenSaveFail {
             get {
@@ -547,7 +583,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Deselect all. 的本地化字符串。
+        ///   查找类似 Deselect all 的本地化字符串。
         /// </summary>
         public static string CancelSelected {
             get {
@@ -556,7 +592,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to create a new project.: 的本地化字符串。
+        ///   查找类似 Unable to create a new project:  的本地化字符串。
         /// </summary>
         public static string CantCreateProject {
             get {
@@ -565,7 +601,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to open the fumen quickly. 的本地化字符串。
+        ///   查找类似 Unable to fast open the fumen:  的本地化字符串。
         /// </summary>
         public static string CantFastOpenFumen {
             get {
@@ -574,7 +610,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to load the fumen: 的本地化字符串。
+        ///   查找类似 Unable to load the fumen:  的本地化字符串。
         /// </summary>
         public static string CantLoadFumen {
             get {
@@ -583,7 +619,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to load the project: 的本地化字符串。
+        ///   查找类似 Unable to load the project:  的本地化字符串。
         /// </summary>
         public static string CantLoadProject {
             get {
@@ -592,7 +628,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to open {0}, audio file not found. 的本地化字符串。
+        ///   查找类似 Unable to open {0} (audio file not found) 的本地化字符串。
         /// </summary>
         public static string CantOpenByAudioFileNotFound {
             get {
@@ -664,7 +700,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Fumen file is in use or no permission; unable to write. 的本地化字符串。
+        ///   查找类似 fumen file is in use or lacks write permissions 的本地化字符串。
         /// </summary>
         public static string CantWriteFumenFileByIoError {
             get {
@@ -673,7 +709,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Project file is in use or no permission; unable to write. 的本地化字符串。
+        ///   查找类似 project file is in use or lacks write permissions 的本地化字符串。
         /// </summary>
         public static string CantWriteProjectFileByIoError {
             get {
@@ -691,11 +727,20 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Change {0} axuiliary line color. 的本地化字符串。
+        ///   查找类似 Change {0} axuiliary line color 的本地化字符串。
         /// </summary>
         public static string ChangeAxuiliaryLineColor {
             get {
                 return ResourceManager.GetString("ChangeAxuiliaryLineColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Change... 的本地化字符串。
+        /// </summary>
+        public static string ChangeColor {
+            get {
+                return ResourceManager.GetString("ChangeColor", resourceCulture);
             }
         }
         
@@ -718,7 +763,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Clear recent open file history 的本地化字符串。
+        ///   查找类似 Clear recent file history 的本地化字符串。
         /// </summary>
         public static string CleanRecentFilesRecords {
             get {
@@ -736,7 +781,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Clear the history records 的本地化字符串。
+        ///   查找类似 Clear history 的本地化字符串。
         /// </summary>
         public static string ClearHistory {
             get {
@@ -754,6 +799,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Click to clone this palette 的本地化字符串。
+        /// </summary>
+        public static string ClickToClonePalette {
+            get {
+                return ResourceManager.GetString("ClickToClonePalette", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Command line error 的本地化字符串。
         /// </summary>
         public static string CliInputErrorHeader {
@@ -763,7 +817,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 clone 的本地化字符串。
+        ///   查找类似 Clone 的本地化字符串。
         /// </summary>
         public static string ClonePallete {
             get {
@@ -772,7 +826,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 The user cannot complete the new project wizard; close this editor. 的本地化字符串。
+        ///   查找类似 Project setup wizard did not complete. Closing this editor. 的本地化字符串。
         /// </summary>
         public static string CloseEditorByProjectSetupFail {
             get {
@@ -817,7 +871,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 confirmed to close 的本地化字符串。
+        ///   查找类似 Confirm close 的本地化字符串。
         /// </summary>
         public static string ComfirmClose {
             get {
@@ -826,7 +880,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Compilation successful. Execute now? 的本地化字符串。
+        ///   查找类似 Script complied successfully. Execute now? 的本地化字符串。
         /// </summary>
         public static string ComfirmExecuteScript {
             get {
@@ -835,7 +889,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Do you want to interpolate all lanes containing curves?\nThis may delete and regenerate already interpolated lanes without curves.\nSome partially overlapping Tap/Hold objects may change their reference lanes  as a result. 的本地化字符串。
+        ///   查找类似 Do you want to interpolate all lanes containing curves?\nThis may delete and regenerate already interpolated lanes without curves.\nSome partially overlapping Tap/Hold objects may change their reference lanes as a result. 的本地化字符串。
         /// </summary>
         public static string ComfirmInterpolateMessage {
             get {
@@ -862,7 +916,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Audio Delay Adjustment 的本地化字符串。
+        ///   查找类似 Adjust audio delay 的本地化字符串。
         /// </summary>
         public static string CommandAudioAdjustWindow {
             get {
@@ -871,7 +925,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Garbage collection 的本地化字符串。
+        ///   查找类似 Run garbage collector 的本地化字符串。
         /// </summary>
         public static string CommandCallFullGC {
             get {
@@ -880,7 +934,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Interpolate all curved lanes. 的本地化字符串。
+        ///   查找类似 Interpolate all curved lanes 的本地化字符串。
         /// </summary>
         public static string CommandInterpolateAll {
             get {
@@ -889,7 +943,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Interpolate all curved lanes (XGrid Limit) 的本地化字符串。
+        ///   查找类似 Interpolate all curved lanes with XGrid limit 的本地化字符串。
         /// </summary>
         public static string CommandInterpolateAllWithXGridLimit {
             get {
@@ -916,7 +970,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Recently files... 的本地化字符串。
+        ///   查找类似 Recent files... 的本地化字符串。
         /// </summary>
         public static string CommandRecentFiles {
             get {
@@ -934,7 +988,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Always displaying curve control objects 的本地化字符串。
+        ///   查找类似 Displaying all curve control points 的本地化字符串。
         /// </summary>
         public static string CommandShowCurveControlAlways {
             get {
@@ -943,7 +997,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 If enabled, all curve control objects will be displayed continuously 的本地化字符串。
+        ///   查找类似 If enabled, all curve control objects will be displayed at all times 的本地化字符串。
         /// </summary>
         public static string CommandShowCurveControlAlwaysTipText {
             get {
@@ -952,7 +1006,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Compilation failed: 的本地化字符串。
+        ///   查找类似 Compilation failed:  的本地化字符串。
         /// </summary>
         public static string CompileError {
             get {
@@ -970,7 +1024,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Comfirm 的本地化字符串。
+        ///   查找类似 Confirm 的本地化字符串。
         /// </summary>
         public static string Confirm {
             get {
@@ -988,7 +1042,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 The audio file that needs to be converted does not exist 的本地化字符串。
+        ///   查找类似 The audio file to be converted does not exist 的本地化字符串。
         /// </summary>
         public static string ConvertAudioFileNotFound {
             get {
@@ -1015,11 +1069,20 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Choose {0} objects as the source for copy. 的本地化字符串。
+        ///   查找类似 Copied {0} objects 的本地化字符串。
         /// </summary>
         public static string CopiedObjects {
             get {
                 return ResourceManager.GetString("CopiedObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Copied {0} objects (brushable) 的本地化字符串。
+        /// </summary>
+        public static string CopiedObjectsBrushAllowed {
+            get {
+                return ResourceManager.GetString("CopiedObjectsBrushAllowed", resourceCulture);
             }
         }
         
@@ -1042,7 +1105,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Copy (copiable objects). 的本地化字符串。
+        ///   查找类似 Copy (copiable objects) 的本地化字符串。
         /// </summary>
         public static string CopyCopiable {
             get {
@@ -1051,7 +1114,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Need to copy a copiable object only before using the brush. 的本地化字符串。
+        ///   查找类似 A singular object is required in the clipboard to use a brush 的本地化字符串。
         /// </summary>
         public static string CopyOneObjectOnceBeforeUsingBrush {
             get {
@@ -1060,7 +1123,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Copy Right: 的本地化字符串。
+        ///   查找类似 Copyright: 的本地化字符串。
         /// </summary>
         public static string CopyRight {
             get {
@@ -1069,7 +1132,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Cost To Unlock: 的本地化字符串。
+        ///   查找类似 Cost to Unlock: 的本地化字符串。
         /// </summary>
         public static string CostToUnlock {
             get {
@@ -1132,7 +1195,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Default Implement 的本地化字符串。
+        ///   查找类似 Default Implementation 的本地化字符串。
         /// </summary>
         public static string CurveInterpolaterFactoryDefaultImpl {
             get {
@@ -1141,11 +1204,29 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 XGrid.Unit Limit (For Ongeki) 的本地化字符串。
+        ///   查找类似 XGrid.Unit Limit (for Ongeki) 的本地化字符串。
         /// </summary>
         public static string CurveInterpolaterFactoryXGridLimited {
             get {
                 return ResourceManager.GetString("CurveInterpolaterFactoryXGridLimited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Curve Interpolator 的本地化字符串。
+        /// </summary>
+        public static string CurveInterpolatorFactoryLabel {
+            get {
+                return ResourceManager.GetString("CurveInterpolatorFactoryLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Curve Precision 的本地化字符串。
+        /// </summary>
+        public static string CurvePrecisionLabel {
+            get {
+                return ResourceManager.GetString("CurvePrecisionLabel", resourceCulture);
             }
         }
         
@@ -1186,7 +1267,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Parsing fumen file failed: 的本地化字符串。
+        ///   查找类似 Parsing fumen file failed:  的本地化字符串。
         /// </summary>
         public static string DeserializeFumenFileFail {
             get {
@@ -1195,7 +1276,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unsupported parsing of this fumen file: 的本地化字符串。
+        ///   查找类似 unsupported fumen format for import:  的本地化字符串。
         /// </summary>
         public static string DeserializeFumenFileNotSupport {
             get {
@@ -1231,7 +1312,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to add objects beyond the audio/editor range. 的本地化字符串。
+        ///   查找类似 Unable to add objects beyond the audio/editor range 的本地化字符串。
         /// </summary>
         public static string DisableAddObjectBeyondAudioDuration {
             get {
@@ -1240,7 +1321,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 No child, unable to interpolate. 的本地化字符串。
+        ///   查找类似 Unable to interpolate because there are no children 的本地化字符串。
         /// </summary>
         public static string DisableInterpolateByNoConnectableChildren {
             get {
@@ -1249,7 +1330,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to interpolate part path because illegal. 的本地化字符串。
+        ///   查找类似 Unable to interpolate because there is an illegal path 的本地化字符串。
         /// </summary>
         public static string DisableInterpolatePartByInvaild {
             get {
@@ -1258,7 +1339,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 SplashScreen does not display after program startup 的本地化字符串。
+        ///   查找类似 Disable splash screen on program startup 的本地化字符串。
         /// </summary>
         public static string DisableShowSplashScreenAfterBoot {
             get {
@@ -1267,7 +1348,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Disable snapping for the TGrid 的本地化字符串。
+        ///   查找类似 Disable vertical alignment 的本地化字符串。
         /// </summary>
         public static string DisableTGridMagneticDock {
             get {
@@ -1285,7 +1366,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Disable snapping for the XGrid 的本地化字符串。
+        ///   查找类似 Disable horizontal alignment 的本地化字符串。
         /// </summary>
         public static string DisableXGridMagneticDock {
             get {
@@ -1294,7 +1375,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Display time format 的本地化字符串。
+        ///   查找类似 Time format 的本地化字符串。
         /// </summary>
         public static string DisplayTimeFormat {
             get {
@@ -1321,7 +1402,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 new Bell 的本地化字符串。
+        ///   查找类似 Drag to add a new Bell object from this palette 的本地化字符串。
         /// </summary>
         public static string DragToCreateBell {
             get {
@@ -1330,7 +1411,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 new Bullet 的本地化字符串。
+        ///   查找类似 Drag to add a new Bullet object from this palette 的本地化字符串。
         /// </summary>
         public static string DragToCreateBullet {
             get {
@@ -1339,7 +1420,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Drag to add a new CurveControlPoint object 的本地化字符串。
+        ///   查找类似 Create curve point 的本地化字符串。
         /// </summary>
         public static string DragToCreateCurveControlPoint {
             get {
@@ -1348,7 +1429,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Drag to add a new CurveControlPoint object 的本地化字符串。
+        ///   查找类似 Drag to add a new curve control point object 的本地化字符串。
         /// </summary>
         public static string DragToCreateCurveControlPointTipText {
             get {
@@ -1357,7 +1438,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Drag to add a new HoldEnd object 的本地化字符串。
+        ///   查找类似 Create hold end 的本地化字符串。
         /// </summary>
         public static string DragToCreateHoldEnd {
             get {
@@ -1366,11 +1447,29 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Drag to add a new next object 的本地化字符串。
+        ///   查找类似 Drag to create a new hold end object 的本地化字符串。
+        /// </summary>
+        public static string DragToCreateHoldEndTipText {
+            get {
+                return ResourceManager.GetString("DragToCreateHoldEndTipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Create next node 的本地化字符串。
         /// </summary>
         public static string DragToCreateNext {
             get {
                 return ResourceManager.GetString("DragToCreateNext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Drag to create a new node connected to the end of this lane 的本地化字符串。
+        /// </summary>
+        public static string DragToCreateNextToolTip {
+            get {
+                return ResourceManager.GetString("DragToCreateNextToolTip", resourceCulture);
             }
         }
         
@@ -1393,7 +1492,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Drag to split lane 的本地化字符串。
+        ///   查找类似 Split lane 的本地化字符串。
         /// </summary>
         public static string DragToSplit {
             get {
@@ -1402,7 +1501,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Split out two lanes, old and new, at a specific time. 的本地化字符串。
+        ///   查找类似 Drag to split this lane at the designated time 的本地化字符串。
         /// </summary>
         public static string DragToSplitTipText {
             get {
@@ -1429,7 +1528,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Editor jumps to the specified TGrid. 的本地化字符串。
+        ///   查找类似 Jump to specified TGrid 的本地化字符串。
         /// </summary>
         public static string EditorJumpToSpecifyTGrid {
             get {
@@ -1519,7 +1618,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 enable autosave? 的本地化字符串。
+        ///   查找类似 Enable autosave 的本地化字符串。
         /// </summary>
         public static string EnableAutoSave {
             get {
@@ -1528,7 +1627,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 enable dump full memory? 的本地化字符串。
+        ///   查找类似 Enable full memory dumps on crash 的本地化字符串。
         /// </summary>
         public static string EnableDumpFullMemory {
             get {
@@ -1537,7 +1636,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Enable horizon scroll 的本地化字符串。
+        ///   查找类似 Enable horizontal scroll 的本地化字符串。
         /// </summary>
         public static string EnableHorizonScroll {
             get {
@@ -1546,7 +1645,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Enable display horizon scroll bar 的本地化字符串。
+        ///   查找类似 Display horizontal scroll bar 的本地化字符串。
         /// </summary>
         public static string EnableHorizonScrollBarDisplay {
             get {
@@ -1582,7 +1681,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Allow user places objects beyond audio duration(red line at end of editor) 的本地化字符串。
+        ///   查找类似 Allow placement of objects beyond the range of the audio 的本地化字符串。
         /// </summary>
         public static string EnablePlaceObjectBeyondAudioDuration {
             get {
@@ -1591,7 +1690,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Enable draw play field (Experimental) 的本地化字符串。
+        ///   查找类似 Draw the playfield (experimental) 的本地化字符串。
         /// </summary>
         public static string EnablePlayFieldDrawing {
             get {
@@ -1600,7 +1699,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Display the player&apos;s current position (if there is no AutoPlayFaderLane, it defaults to the center) 的本地化字符串。
+        ///   查找类似 Display the player&apos;s current position (defaults to the center if there is no AutoPlayFaderLane) 的本地化字符串。
         /// </summary>
         public static string EnableShowPlayerLocation {
             get {
@@ -1663,7 +1762,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Cannot open this file because an error is thrown: 的本地化字符串。
+        ///   查找类似 Cannot open this file because an error occurred during reading:  的本地化字符串。
         /// </summary>
         public static string ErrorOpenRecentFile {
             get {
@@ -1744,7 +1843,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Failed,reason: 的本地化字符串。
+        ///   查找类似 Failed, reason:  的本地化字符串。
         /// </summary>
         public static string FailedAndReason {
             get {
@@ -1879,7 +1978,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Finish Bouns: 的本地化字符串。
+        ///   查找类似 Finish Bonus: 的本地化字符串。
         /// </summary>
         public static string FinishBouns {
             get {
@@ -1888,7 +1987,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 First Bpm: 的本地化字符串。
+        ///   查找类似 First BPM: 的本地化字符串。
         /// </summary>
         public static string FirstBpm {
             get {
@@ -1897,7 +1996,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Force magnetic dock 的本地化字符串。
+        ///   查找类似 Snap objects to grid 的本地化字符串。
         /// </summary>
         public static string ForceMagneticDock {
             get {
@@ -1915,7 +2014,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Force XGrid to snap automatically. 的本地化字符串。
+        ///   查找类似 Snap to nearest XGrid unit 的本地化字符串。
         /// </summary>
         public static string ForceXGridMagneticDock {
             get {
@@ -1942,7 +2041,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Fumen contains format or content errors that cannot be ignored, preventing further generation. Please use the fumen checking viewer/tool to check and correct the fumen. 的本地化字符串。
+        ///   查找类似 Fumen contains format or content errors that cannot be ignored, preventing further generation. Please use the Fumen Checker panel to check and correct the fumen. 的本地化字符串。
         /// </summary>
         public static string FumenContainUngenerateError {
             get {
@@ -1951,7 +2050,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Fumen File Format Converter 的本地化字符串。
+        ///   查找类似 Fumen file format converter 的本地化字符串。
         /// </summary>
         public static string FumenConverter {
             get {
@@ -2104,7 +2203,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Generate .ab file fail 的本地化字符串。
+        ///   查找类似 Failed to generate .ab file: 的本地化字符串。
         /// </summary>
         public static string GenerateABFileFail {
             get {
@@ -2113,7 +2212,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Generate .dll file fail: 的本地化字符串。
+        ///   查找类似 Failed to generate .dll file: 的本地化字符串。
         /// </summary>
         public static string GenerateAssemblyFileFail {
             get {
@@ -2131,7 +2230,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Generate audio file successfully, open output folder? 的本地化字符串。
+        ///   查找类似 Audio file generated succesfully. Open the output folder? 的本地化字符串。
         /// </summary>
         public static string GenerateAudioSuccess {
             get {
@@ -2149,7 +2248,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Generate jacket files successfully, open output folder? 的本地化字符串。
+        ///   查找类似 Jacket files generated succesfully. Open the output folder? 的本地化字符串。
         /// </summary>
         public static string GenerateJacketFileSuccess {
             get {
@@ -2203,7 +2302,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Successfully generated .svg file. Do you want to open the file now? 的本地化字符串。
+        ///   查找类似 Successfully generated .svg file. Open the file now? 的本地化字符串。
         /// </summary>
         public static string GenerateSvgSuccessAndAskIfOpen {
             get {
@@ -2230,7 +2329,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Compatibility mode (use OpenGL 3.3 full compatibility, try this if the program displays items or crashes with visuals) 的本地化字符串。
+        ///   查找类似 Compatibility mode (use OpenGL 3.3 full compatibility. Try this if the program displays strange visuals, artifacts or crashes) 的本地化字符串。
         /// </summary>
         public static string GraphicsCompatability {
             get {
@@ -2365,7 +2464,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Interpolate curve lane into straight lines, then delete the current track and generate a new one (or more) 的本地化字符串。
+        ///   查找类似 Click to interpolate the curves of this lane into straight line segments 的本地化字符串。
         /// </summary>
         public static string InterpolateLaneTipText {
             get {
@@ -2374,7 +2473,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Interpolate the part of lane 的本地化字符串。
+        ///   查找类似 Interpolate selected region of lane 的本地化字符串。
         /// </summary>
         public static string InterpolatePart {
             get {
@@ -2383,7 +2482,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Interpolate the part of lane 的本地化字符串。
+        ///   查找类似 Interpolate selected region of lane 的本地化字符串。
         /// </summary>
         public static string InterpolatePartCurve {
             get {
@@ -2392,7 +2491,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Interpolate this segment of the lane; illegal segments cannot be used 的本地化字符串。
+        ///   查找类似 Click to interpolate the curves of selected part of the lane into straight line segments 的本地化字符串。
         /// </summary>
         public static string InterpolatePartTipText {
             get {
@@ -2428,7 +2527,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Fumen Jacket Generator 的本地化字符串。
+        ///   查找类似 Fumen jacket generator 的本地化字符串。
         /// </summary>
         public static string JacketGenerator {
             get {
@@ -2437,7 +2536,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Align the scroll judgment line with the meter line by scrolling the wheel. 的本地化字符串。
+        ///   查找类似 Align judgement line with meter when scrolling 的本地化字符串。
         /// </summary>
         public static string JudgeLineAlignBeat {
             get {
@@ -2635,7 +2734,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Option Generate Tool 的本地化字符串。
+        ///   查找类似 Option generation... 的本地化字符串。
         /// </summary>
         public static string MenuOptionGenerateTool {
             get {
@@ -2779,6 +2878,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Changing {0} 的本地化字符串。
+        /// </summary>
+        public static string NamedColorChangeTitle {
+            get {
+                return ResourceManager.GetString("NamedColorChangeTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Add new pallete 的本地化字符串。
         /// </summary>
         public static string NewBulletPallete {
@@ -2806,7 +2914,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 &lt;Need Not Editor&gt; 的本地化字符串。
+        ///   查找类似 &lt;No editor&gt; 的本地化字符串。
         /// </summary>
         public static string NoEditorTarget {
             get {
@@ -2833,7 +2941,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 (No Limit) 的本地化字符串。
+        ///   查找类似 x 的本地化字符串。
         /// </summary>
         public static string NoLimit {
             get {
@@ -2842,7 +2950,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 No suitable objects to setting property IsCritical 的本地化字符串。
+        ///   查找类似 No suitable objects for which to toggle IsCritical 的本地化字符串。
         /// </summary>
         public static string NoObjectCouldBeSetIsCritical {
             get {
@@ -2860,7 +2968,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 (Not show) 的本地化字符串。
+        ///   查找类似 (Don&apos;t show) 的本地化字符串。
         /// </summary>
         public static string NotShow {
             get {
@@ -2896,7 +3004,16 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Changing this value can alter the reference lane of this object 的本地化字符串。
+        ///   查找类似 ID 的本地化字符串。
+        /// </summary>
+        public static string ObjectId {
+            get {
+                return ResourceManager.GetString("ObjectId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Changing this value will alter the reference lane of this object 的本地化字符串。
         /// </summary>
         public static string ObjectLaneGroupId {
             get {
@@ -2905,7 +3022,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 This copied object cannot be used within brush mode 的本地化字符串。
+        ///   查找类似 The copied object cannot be used within brush mode 的本地化字符串。
         /// </summary>
         public static string ObjectNotSupportBrush {
             get {
@@ -2932,7 +3049,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Changing this value can alter the reference bullet pallete of this object 的本地化字符串。
+        ///   查找类似 Changing this value will alter the reference bullet pallete of this object 的本地化字符串。
         /// </summary>
         public static string ObjectPalleteStrId {
             get {
@@ -3022,7 +3139,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Ongek iFumen 的本地化字符串。
+        ///   查找类似 Ongeki Fumen 的本地化字符串。
         /// </summary>
         public static string OngekiFumen {
             get {
@@ -3031,7 +3148,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Standardized ongeki fumen 的本地化字符串。
+        ///   查找类似 Standardized Ongeki Fumen 的本地化字符串。
         /// </summary>
         public static string OngekiFumenStandardized {
             get {
@@ -3076,7 +3193,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Fumen file (Optional): 的本地化字符串。
+        ///   查找类似 Fumen file (optional): 的本地化字符串。
         /// </summary>
         public static string OptionalFumenFile {
             get {
@@ -3121,7 +3238,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Fumen output path is not choose. 的本地化字符串。
+        ///   查找类似 Fumen output path is not set 的本地化字符串。
         /// </summary>
         public static string OutputFumenFileNotSelect {
             get {
@@ -3130,7 +3247,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Fumen output path is not supported 的本地化字符串。
+        ///   查找类似 The given fumen output path is not supported 的本地化字符串。
         /// </summary>
         public static string OutputFumenNotSupport {
             get {
@@ -3157,7 +3274,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Output method： 的本地化字符串。
+        ///   查找类似 Output method 的本地化字符串。
         /// </summary>
         public static string OutputMethod {
             get {
@@ -3193,7 +3310,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Paste with X[0,0] as the reference point for horizontal mirroring 的本地化字符串。
+        ///   查找类似 Paste horizontally mirrored over field center 的本地化字符串。
         /// </summary>
         public static string PasteForZeroXGridMirror {
             get {
@@ -3220,7 +3337,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Play field foreground color: 的本地化字符串。
+        ///   查找类似 Playfield foreground color: 的本地化字符串。
         /// </summary>
         public static string PlayFieldForegroundColor {
             get {
@@ -3229,7 +3346,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 To avoid code confusion, you are temporarily unable to operate this editor simultaneously 的本地化字符串。
+        ///   查找类似 Unable to use this editor while an external editor is open 的本地化字符串。
         /// </summary>
         public static string PreventUsingInternalEditor {
             get {
@@ -3247,7 +3364,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Preview time(msec): 的本地化字符串。
+        ///   查找类似 Preview time (msec): 的本地化字符串。
         /// </summary>
         public static string PreviewTime {
             get {
@@ -3562,7 +3679,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Random Offset Range 的本地化字符串。
+        ///   查找类似 Random Range 的本地化字符串。
         /// </summary>
         public static string RandomOffsetRange {
             get {
@@ -3594,6 +3711,15 @@ namespace OngekiFumenEditor.Properties {
         public static string RecentFiles {
             get {
                 return ResourceManager.GetString("RecentFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Record ID 的本地化字符串。
+        /// </summary>
+        public static string RecordId {
+            get {
+                return ResourceManager.GetString("RecordId", resourceCulture);
             }
         }
         
@@ -3697,7 +3823,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Record the operation position. In design mode, when undoing, if not within the position, jump to this location 的本地化字符串。
+        ///   查找类似 Jump to last operation location when undoing 的本地化字符串。
         /// </summary>
         public static string RememberUndoPlace {
             get {
@@ -3760,7 +3886,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Do you want to reset all settings for application? 的本地化字符串。
+        ///   查找类似 Do you want to reset all settings for the application? 的本地化字符串。
         /// </summary>
         public static string ResetAllSettingComfirm {
             get {
@@ -3823,7 +3949,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 SampleRates 的本地化字符串。
+        ///   查找类似 Sample rate (Hz) 的本地化字符串。
         /// </summary>
         public static string SampleRates {
             get {
@@ -3841,7 +3967,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Maximum save of  的本地化字符串。
+        ///   查找类似 Record up to  的本地化字符串。
         /// </summary>
         public static string SaveMaxCount_Part1 {
             get {
@@ -3949,6 +4075,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Select file 的本地化字符串。
+        /// </summary>
+        public static string SelectFile {
+            get {
+                return ResourceManager.GetString("SelectFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Select game root folder 的本地化字符串。
         /// </summary>
         public static string SelectGameRootFolder {
@@ -4030,7 +4165,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Shoot Offset 的本地化字符串。
+        ///   查找类似 Offset 的本地化字符串。
         /// </summary>
         public static string ShootOffset {
             get {
@@ -4039,7 +4174,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Shoot Source 的本地化字符串。
+        ///   查找类似 Source 的本地化字符串。
         /// </summary>
         public static string ShootSource {
             get {
@@ -4048,7 +4183,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Shoot Target 的本地化字符串。
+        ///   查找类似 Target 的本地化字符串。
         /// </summary>
         public static string ShootTarget {
             get {
@@ -4237,7 +4372,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Invalid/Unsupport SVG content 的本地化字符串。
+        ///   查找类似 Invalid/unsupported SVG content 的本地化字符串。
         /// </summary>
         public static string SvgContentNotSupport {
             get {
@@ -4345,7 +4480,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Time Calculator 的本地化字符串。
+        ///   查找类似 Time calculator 的本地化字符串。
         /// </summary>
         public static string TGridCalculatorToolViewer {
             get {
@@ -4354,7 +4489,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Throw an exception during converting: 的本地化字符串。
+        ///   查找类似 An error occurred during conversion:  的本地化字符串。
         /// </summary>
         public static string ThrowExceptionWhenConvert {
             get {
@@ -4498,7 +4633,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Update the assets.bytes file (if it exists): 的本地化字符串。
+        ///   查找类似 Update the assets.bytes file (if it exists) 的本地化字符串。
         /// </summary>
         public static string UpdateAssetBytesFile {
             get {
@@ -4534,7 +4669,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unable to provide script template file, reason: 的本地化字符串。
+        ///   查找类似 Unable to load script template file:  的本地化字符串。
         /// </summary>
         public static string UseTemplateScriptFileFail {
             get {
@@ -4552,11 +4687,20 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Vertical scale: 的本地化字符串。
+        ///   查找类似 Vertical scale 的本地化字符串。
         /// </summary>
         public static string VerticalDisplayScale {
             get {
                 return ResourceManager.GetString("VerticalDisplayScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lane colors 的本地化字符串。
+        /// </summary>
+        public static string VisualEditorLaneColorSettings {
+            get {
+                return ResourceManager.GetString("VisualEditorLaneColorSettings", resourceCulture);
             }
         }
         
@@ -4651,7 +4795,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Some sound file failed to load. Please check the logs for details 的本地化字符串。
+        ///   查找类似 Some sound files failed to load. Please check the logs for details. 的本地化字符串。
         /// </summary>
         public static string WarnSomeSoundsNotLoad {
             get {
@@ -4696,7 +4840,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Maximum display XGrid range: 的本地化字符串。
+        ///   查找类似 Maximum display XGrid range 的本地化字符串。
         /// </summary>
         public static string XGridDisplayMaxUnit {
             get {
@@ -4714,7 +4858,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Horizontal scroll offset: 的本地化字符串。
+        ///   查找类似 Horizontal scroll offset 的本地化字符串。
         /// </summary>
         public static string XOffset {
             get {

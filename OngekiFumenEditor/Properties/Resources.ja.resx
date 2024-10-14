@@ -171,9 +171,6 @@
   <data name="Artist" xml:space="preserve">
     <value>アーティスト：</value>
   </data>
-  <data name="AsBrushSourceObject" xml:space="preserve">
-    <value>ブラシモードの生成元として使用</value>
-  </data>
   <data name="AudioDuration" xml:space="preserve">
     <value>音源再生時間：</value>
   </data>
@@ -226,7 +223,7 @@
     <value>プレビューモードでは，ベル・弾の数がこの数を超過すると</value>
   </data>
   <data name="BellBulletCountOverLimit_Part2" xml:space="preserve">
-    <value>，マルチスレッドを使用します。</value>
+    <value>マルチスレッドを使用します。</value>
   </data>
   <data name="BigJacketSize" xml:space="preserve">
     <value>大画像サイズ（デフォルト：520×520）</value>
@@ -1578,5 +1575,26 @@
   </data>
   <data name="Save" xml:space="preserve">
     <value>保存</value>
+  </data>
+  <data name="ObjectId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="BulletPaletteId" xml:space="preserve">
+    <value>StrID</value>
+  </data>
+  <data name="SelectFile" xml:space="preserve">
+    <value>ファイルを選択</value>
+  </data>
+  <data name="BellBulletCountOverLimit_Sep" xml:space="preserve">
+    <value>，</value>
+  </data>
+  <data name="RecordId" xml:space="preserve">
+    <value>RecordId</value>
+  </data>
+  <data name="CurveInterpolatorFactoryLabel" xml:space="preserve">
+    <value>CurveInterpolatorFactory</value>
+  </data>
+  <data name="CurvePrecisionLabel" xml:space="preserve">
+    <value>CurvePrecision</value>
   </data>
 </root>

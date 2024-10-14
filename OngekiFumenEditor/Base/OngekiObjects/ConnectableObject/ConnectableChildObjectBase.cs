@@ -7,6 +7,8 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
@@ -17,6 +19,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 		public bool IsEndObject => NextObject is null;
 
 		private float curvePrecision = 0.025f;
+		
+		[LocalizableObjectPropertyBrowserAlias(nameof(Resources.CurvePrecisionLabel))]
 		public float CurvePrecision
 		{
 			get => curvePrecision;
@@ -24,6 +28,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 		}
 
 		private ICurveInterpolaterFactory curveInterpolaterFactory = XGridLimitedCurveInterpolaterFactory.Default;
+		
+		[LocalizableObjectPropertyBrowserAlias(nameof(Resources.CurveInterpolatorFactoryLabel))]
 		public ICurveInterpolaterFactory CurveInterpolaterFactory
 		{
 			get => curveInterpolaterFactory;

@@ -137,15 +137,18 @@
                 </StackPanel>
                 <GroupBox Margin="5,0,5,5" Header="{markup:Translate [PreviewMode]}">
                     <StackPanel Margin="10">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part1]}" />
-                            <TextBox
-                                Width="50"
-                                Margin="5,0,5,0"
-                                Text="{Binding Setting.ParallelCountLimit}">
-                            </TextBox>
-                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part2]}" />
-                        </StackPanel>
+                        <WrapPanel Orientation="Horizontal"> 
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part1]}" TextWrapping="WrapWithOverflow" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox
+                                    Width="50"
+                                    Margin="5,0,2,0"
+                                    Text="{Binding Setting.ParallelCountLimit}">
+                                </TextBox>
+                                <TextBlock Text="{markup:Translate [BellBulletCountOverLimit_Sep]}"></TextBlock>
+                            </StackPanel>
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BellBulletCountOverLimit_Part2]}" TextWrapping="WrapWithOverflow" />
+                        </WrapPanel>
                         <StackPanel Margin="0,10,0,5" Orientation="Horizontal">
                             <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BackgroundColor]}" />
                             <Border
@@ -181,7 +184,7 @@
                             </Border>
                         </StackPanel>
                         <CheckBox IsChecked="{Binding Setting.EnableShowPlayerLocation}">
-                            <TextBlock Text="{markup:Translate [EnableShowPlayerLocation]}" />
+                            <TextBlock Text="{markup:Translate [EnableShowPlayerLocation]}" TextWrapping="WrapWithOverflow" />
                         </CheckBox>
                     </StackPanel>
                 </GroupBox>
