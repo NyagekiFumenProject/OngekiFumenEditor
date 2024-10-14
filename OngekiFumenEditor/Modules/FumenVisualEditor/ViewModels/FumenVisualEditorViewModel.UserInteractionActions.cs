@@ -1556,6 +1556,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 OnWheelBeatSplit(arg);
             else if (Keyboard.IsKeyDown(Key.LeftShift))
                 OnWheelXGridUnit(arg);
+            else if (Keyboard.IsKeyDown(Key.LeftCtrl))
+                OnWheelVerticalScale(arg);
             else
                 OnWheelScrollViewer(arg);
         }
@@ -1597,6 +1599,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var newVal = jump + Setting.BeatSplit;
             if (newVal != 0 && newVal <= 16)
                 Setting.BeatSplit = newVal;
+        }
+
+        private void OnWheelVerticalScale(MouseWheelEventArgs arg)
+        {
+            Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta) * 0.3, 0.1, 3);
         }
 
         private bool isDraggingPlayerLocation = false;
