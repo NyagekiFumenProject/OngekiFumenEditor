@@ -1701,4 +1701,22 @@
   <data name="OutputFumenStandardizeFormatNotSupported" xml:space="preserve">
     <value>无法标准化音击谱面</value>
   </data>
+  <data name="BossCardSelectorWindow" xml:space="preserve">
+    <value>选择...</value>
+  </data>
+  <data name="EnumStructsSelectorWindow" xml:space="preserve">
+    <value>选择...</value>
+  </data>
+  <data name="FumenConverterWindow" xml:space="preserve">
+    <value>谱面转换</value>
+  </data>
+  <data name="BrushTGridRangeDialog" xml:space="preserve">
+    <value>刷子时间钦定</value>
+  </data>
+  <data name="EditorProjectSetupDialog" xml:space="preserve">
+    <value>项目新建向导</value>
+  </data>
+  <data name="AboutWindow" xml:space="preserve">
+    <value>关于</value>
+  </data>
 </root>

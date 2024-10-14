@@ -9,7 +9,7 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
-    Title="项目新建向导"
+    Title="{markup:Translate [EditorProjectSetupDialog]}"
     Width="600"
     Height="600"
     d:DataContext="{d:DesignInstance Type=local2:EditorProjectSetupDialogViewModel,

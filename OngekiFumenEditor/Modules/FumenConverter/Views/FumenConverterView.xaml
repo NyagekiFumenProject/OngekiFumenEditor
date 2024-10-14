@@ -9,7 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenConverter.ViewModels"
-    Title="谱面转换"
+    Title="{markup:Translate [FumenConverterWindow]}"
     Width="500"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:FumenConverterViewModel}"

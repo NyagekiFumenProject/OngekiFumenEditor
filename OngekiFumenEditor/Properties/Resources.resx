@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AcbGenerator" xml:space="preserve">
-    <value>Audio file generator</value>
+    <value>Audio File Generator</value>
   </data>
   <data name="Action" xml:space="preserve">
     <value>Actions</value>
@@ -205,7 +205,7 @@
     <value>Autosave frequency:</value>
   </data>
   <data name="AutoUpdateCurrentObjectTime" xml:space="preserve">
-    <value>Automatic update time for selected object</value>
+    <value>Update input time when selected object changes</value>
   </data>
   <data name="BackgroundColor" xml:space="preserve">
     <value>Background color:</value>
@@ -217,7 +217,7 @@
     <value>Batch switch flick direction</value>
   </data>
   <data name="BeatSplit" xml:space="preserve">
-    <value>Subdivision multiplier for the meter:</value>
+    <value>Subdivisions per beat</value>
   </data>
   <data name="BellBulletCountOverLimit_Part1" xml:space="preserve">
     <value>In preview mode, if the total number of Bells/Bullets exceeds </value>
@@ -376,7 +376,7 @@
     <value>Automatically adjust the XGrid for all dockable objects</value>
   </data>
   <data name="CommandAudioAdjustWindow" xml:space="preserve">
-    <value>Adjust audio delay</value>
+    <value>Adjust Audio Delay</value>
   </data>
   <data name="CommandCallFullGC" xml:space="preserve">
     <value>Run garbage collector</value>
@@ -478,7 +478,7 @@
     <value>Delete objects</value>
   </data>
   <data name="DeleteSelectedPalletes" xml:space="preserve">
-    <value>Delete selected bullete palletes</value>
+    <value>Delete selected bullet palettes</value>
   </data>
   <data name="Description" xml:space="preserve">
     <value>Description</value>
@@ -598,13 +598,13 @@
     <value>Enable full memory dumps on crash</value>
   </data>
   <data name="EnableHorizonScroll" xml:space="preserve">
-    <value>Enable horizontal scroll</value>
+    <value>Enable horizontal scrolling</value>
   </data>
   <data name="EnableHorizonScrollBarDisplay" xml:space="preserve">
     <value>Display horizontal scroll bar</value>
   </data>
   <data name="EnableLoopPlayTiming" xml:space="preserve">
-    <value>Enable the metronome (only in Design Mode)</value>
+    <value>Enable metronome (only in Design Mode)</value>
   </data>
   <data name="EnableMultiInstances" xml:space="preserve">
     <value>Allow multiple program instances to run</value>
@@ -724,22 +724,22 @@
     <value>Snap to nearest XGrid unit</value>
   </data>
   <data name="FumenBulletPalleteListViewer" xml:space="preserve">
-    <value>Bullet Pallete</value>
+    <value>Bullet Palettes</value>
   </data>
   <data name="FumenCheckerListViewer" xml:space="preserve">
-    <value>Checker List</value>
+    <value>Problems</value>
   </data>
   <data name="FumenContainUngenerateError" xml:space="preserve">
-    <value>Fumen contains format or content errors that cannot be ignored, preventing further generation. Please use the Fumen Checker panel to check and correct the fumen.</value>
+    <value>Fumen contains format or content errors that cannot be ignored, preventing further generation. Please see the Problems panel to check and correct the fumen.</value>
   </data>
   <data name="FumenConverter" xml:space="preserve">
-    <value>Fumen file format converter</value>
+    <value>Fumen Converter</value>
   </data>
   <data name="FumenEditorRenderControlViewer" xml:space="preserve">
     <value>Render Control</value>
   </data>
   <data name="FumenEditorSelectingObjectViewer" xml:space="preserve">
-    <value>Editor Selecting</value>
+    <value>Selection</value>
   </data>
   <data name="FumenFileDeserializeNotSupport" xml:space="preserve">
     <value>This fumen file cannot be parsed</value>
@@ -772,7 +772,7 @@
     <value>Fumen Source</value>
   </data>
   <data name="FumenTimeSignatureListViewer" xml:space="preserve">
-    <value>Time Signature</value>
+    <value>Time Signatures</value>
   </data>
   <data name="FumenVisualEditorSettings" xml:space="preserve">
     <value>Editor Settings</value>
@@ -811,7 +811,7 @@
     <value>Generate script project file failed</value>
   </data>
   <data name="GenerateSvg" xml:space="preserve">
-    <value>Generate fumen preview .svg file</value>
+    <value>Generate Preview SVG</value>
   </data>
   <data name="GenerateSvgSuccess" xml:space="preserve">
     <value>Fumen .svg file generated successfully</value>
@@ -892,13 +892,13 @@
     <value>Segment of lane is illegal</value>
   </data>
   <data name="JacketGenerator" xml:space="preserve">
-    <value>Fumen jacket generator</value>
+    <value>Jacket Generator</value>
   </data>
   <data name="JudgeLineAlignBeat" xml:space="preserve">
     <value>Align judgement line with meter when scrolling</value>
   </data>
   <data name="JudgeLineOffsetY" xml:space="preserve">
-    <value>Judgment line offset:</value>
+    <value>Judgment line offset</value>
   </data>
   <data name="JustBefore" xml:space="preserve">
     <value>Just now</value>
@@ -985,7 +985,7 @@
     <value>Music.xml file</value>
   </data>
   <data name="MusicXmlWindow" xml:space="preserve">
-    <value>Music.xml generator</value>
+    <value>Music.xml Generator</value>
   </data>
   <data name="MustMakeEditorActive" xml:space="preserve">
     <value>Switch to the current editor first</value>
@@ -997,7 +997,7 @@
     <value>Name</value>
   </data>
   <data name="NewBulletPallete" xml:space="preserve">
-    <value>Add new pallete</value>
+    <value>Add new palette</value>
   </data>
   <data name="NewFumenFileSaveDone" xml:space="preserve">
     <value>Standardization of the ongeki fumen had completed.\nDo you want to open the output folder immediately</value>
@@ -1045,10 +1045,10 @@
     <value>Multiple objects of the same type ({0}) overlap</value>
   </data>
   <data name="ObjectPalleteStrId" xml:space="preserve">
-    <value>Changing this value will alter the reference bullet pallete of this object</value>
+    <value>Changing this value will alter the reference bullet palette of this object</value>
   </data>
   <data name="ObjectProperty" xml:space="preserve">
-    <value>Object Property</value>
+    <value>Object Properties</value>
   </data>
   <data name="ObjectPropertyChanged" xml:space="preserve">
     <value>Object property ({0}) has been changed</value>
@@ -1414,7 +1414,7 @@
     <value>Throw an error and see</value>
   </data>
   <data name="TGridCalculatorToolViewer" xml:space="preserve">
-    <value>Time calculator</value>
+    <value>Time Calculator</value>
   </data>
   <data name="ThrowExceptionWhenConvert" xml:space="preserve">
     <value>An error occurred during conversion: </value>
@@ -1528,13 +1528,13 @@
     <value>Wrong position</value>
   </data>
   <data name="XGridDisplayMaxUnit" xml:space="preserve">
-    <value>Maximum display XGrid range</value>
+    <value>Display XGrid range</value>
   </data>
   <data name="XGridUnitSpace" xml:space="preserve">
     <value>XGrid unit spacing</value>
   </data>
   <data name="XOffset" xml:space="preserve">
-    <value>Horizontal scroll offset</value>
+    <value>Horizontal offset</value>
   </data>
   <data name="EnableShowPlayerLocation" xml:space="preserve">
     <value>Display the player's current position (defaults to the center if there is no AutoPlayFaderLane)</value>
@@ -1708,15 +1708,33 @@
     <value>Record ID</value>
   </data>
   <data name="CurveInterpolatorFactoryLabel" xml:space="preserve">
-    <value>Curve Interpolator</value>
+    <value>Interpolator</value>
   </data>
   <data name="CurvePrecisionLabel" xml:space="preserve">
-    <value>Curve Precision</value>
+    <value>Precision</value>
   </data>
   <data name="ProgramOptionStandardizeFumen" xml:space="preserve">
     <value>standardize the fumen output (only for .ogkr)</value>
   </data>
   <data name="OutputFumenStandardizeFormatNotSupported" xml:space="preserve">
     <value>Cannot standardize for the selected output format</value>
+  </data>
+  <data name="BossCardSelectorWindow" xml:space="preserve">
+    <value>Select boss card...</value>
+  </data>
+  <data name="EnumStructsSelectorWindow" xml:space="preserve">
+    <value>Select...</value>
+  </data>
+  <data name="FumenConverterWindow" xml:space="preserve">
+    <value>Fumen Converter</value>
+  </data>
+  <data name="BrushTGridRangeDialog" xml:space="preserve">
+    <value>Define range...</value>
+  </data>
+  <data name="EditorProjectSetupDialog" xml:space="preserve">
+    <value>Project Setup</value>
+  </data>
+  <data name="AboutWindow" xml:space="preserve">
+    <value>About</value>
   </data>
 </root>
