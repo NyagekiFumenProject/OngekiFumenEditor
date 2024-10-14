@@ -1672,7 +1672,7 @@
     <value>Bell</value>
   </data>
   <data name="CopiedObjectsBrushAllowed" xml:space="preserve">
-    <value>已复制 {} 个物件(并可用在刷子模式)</value>
+    <value>已复制 {0} 个物件(并可用在刷子模式)</value>
   </data>
   <data name="DragToCreateHoldEndTipText" xml:space="preserve">
     <value>拖动生成HoldEnd物件</value>
