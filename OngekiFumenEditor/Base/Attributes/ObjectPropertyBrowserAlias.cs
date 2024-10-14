@@ -20,13 +20,11 @@ namespace OngekiFumenEditor.Base.Attributes
         public LocalizableObjectPropertyBrowserAlias(string key)
         {
 #if DEBUG
-            if (asResourceKey) {
-                if (key == default) {
-                    throw new ArgumentException("cannot use empty string as resource key");
-                }
-                if (Resources.ResourceManager.GetString(key) is null) {
-                    throw new ArgumentException($"invalid resource key \"{key}\"");
-                }
+            if (key == default) {
+                throw new ArgumentException("cannot use empty string as resource key");
+            }
+            if (Resources.ResourceManager.GetString(key) is null) {
+                throw new ArgumentException($"invalid resource key \"{key}\"");
             }
 #endif
             
