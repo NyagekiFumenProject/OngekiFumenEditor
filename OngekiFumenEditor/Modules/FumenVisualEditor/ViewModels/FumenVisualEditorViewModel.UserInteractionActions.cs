@@ -32,9 +32,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
+using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -119,6 +121,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public bool IsRangeSelecting => SelectionVisibility == Visibility.Visible;
         public bool IsPreventMutualExclusionSelecting { get; set; }
+
+        public void ClearSelection()
+        {
+            foreach (var obj in SelectObjects) {
+                obj.IsSelected = false;
+            }
+        }
+
+        public void AddToSelection(OngekiMovableObjectBase obj)
+        {
+            obj.IsSelected = true;
+            NotifyObjectClicked(obj);
+            Log.LogInfo(obj.IsSelected.ToString());
+        }
+
+        public void ReplaceSelection(OngekiMovableObjectBase obj)
+        {
+            ClearSelection();
+            AddToSelection(obj);
+        }
 
         #endregion
 
@@ -1337,6 +1359,58 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             };
 
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddObjectsByBrush, redo, undo));
+        }
+        
+        #region Quick Add Actions
+
+        public void KeyboardAction_AddNewWallLeft(bool clearSelection = true)
+            => TryCreateObjectAtMouse(new WallLeftStart(), clearSelection);
+        public void KeyboardAction_AddNewWallRight(bool clearSelection = true)
+            => TryCreateObjectAtMouse(new WallRightStart(), clearSelection);
+        public void KeyboardAction_AddNewLaneLeft(bool clearSelection = true)
+            => TryCreateObjectAtMouse(new LaneLeftStart(), clearSelection);
+        public void KeyboardAction_AddNewLaneCenter(bool clearSelection = true)
+            => TryCreateObjectAtMouse(new LaneCenterStart(), clearSelection);
+        public void KeyboardAction_AddNewLaneRight(bool clearSelection = true)
+            => TryCreateObjectAtMouse(new LaneRightStart(), clearSelection);
+        public void KeyboardAction_AddNewLaneColorful(bool clearSelection = true)
+            => TryCreateObjectAtMouse(new ColorfulLaneStart(), clearSelection);
+
+        public void KeyboardAction_AddNewFlick(bool switchDirection = false, bool clearSelection = false)
+            => TryCreateObjectAtMouse(new Flick() { Direction = switchDirection ? Flick.FlickDirection.Right : Flick.FlickDirection.Left}, clearSelection);
+
+        public void KeyboardAction_AddNewBlock(bool switchDirection = false, bool clearSelection = false)
+            => TryCreateObjectAtMouse(
+                new LaneBlockArea()
+                {
+                    Direction = switchDirection ? LaneBlockArea.BlockDirection.Right : LaneBlockArea.BlockDirection.Left
+                }, clearSelection);
+
+        public void KeyboardAction_AddNewTap(bool clearSelection = false)
+        {
+            TryCreateObjectAtMouse(new Tap(), clearSelection, false);
+        }
+
+        #endregion
+
+        private void TryCreateObjectAtMouse(OngekiObjectBase obj, bool clearSelection, bool autoSelectObj = true)
+        {
+            if (!CurrentCursorPosition.HasValue) {
+                return;
+            }
+
+            MoveObjectTo(obj, CurrentCursorPosition.Value);
+            Fumen.AddObject(obj);
+            InteractiveManager.GetInteractive(obj).OnMoveCanvas(obj, CurrentCursorPosition.Value, this);
+
+            if (clearSelection) {
+                SelectObjects.ForEach(o => o.IsSelected = false);
+            }
+
+            if (autoSelectObj) {
+                ((ISelectableObject)obj).IsSelected = true;
+                NotifyObjectClicked(obj);
+            }
         }
 
         #region Object Click&Selection

@@ -16,7 +16,7 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
-    cal:Message.Attach="[Key OemTilde] = [Action KeyboardAction_FastPlaceDockableObjectToWallLeft]; [Key D4] = [Action KeyboardAction_FastPlaceDockableObjectToWallRight]; [Key D3] = [Action KeyboardAction_FastPlaceDockableObjectToRight]; [Key D2] = [Action KeyboardAction_FastPlaceDockableObjectToCenter]; [Key D1] = [Action KeyboardAction_FastPlaceDockableObjectToLeft]; [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];   [Key C] = [Action KeyboardAction_FastSetObjectIsCritical($executionContext)];   [Key Q] = [Action KeyboardAction_HideOrShow];[Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)]; [Key F] = [Action KeyboardAction_FastSwitchFlickDirection($executionContext)]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];     [Key PageUp] = [Action ScrollPage(1)];  [Key PageDown] = [Action ScrollPage(-1)]"
+    cal:Message.Attach="[Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];   [Key C] = [Action KeyboardAction_FastSetObjectIsCritical($executionContext)];   [Key Q] = [Action KeyboardAction_HideOrShow];[Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)]; [Key F] = [Action KeyboardAction_FastSwitchFlickDirection($executionContext)]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];     [Key PageUp] = [Action ScrollPage(1)];  [Key PageDown] = [Action ScrollPage(-1)]"
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -38,6 +38,52 @@
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
+    
+    <i:Interaction.Triggers>
+        <i:KeyTrigger Key="OemTilde">
+            <cal:ActionMessage MethodName="Brush_AddNewWallLeft" IsEnabled="{Binding BrushMode}" />
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToWallLeft" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D1">
+            <cal:ActionMessage MethodName="Brush_AddNewLaneLeft" IsEnabled="{Binding BrushMode}" />
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToLeft" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D2">
+            <cal:ActionMessage MethodName="Brush_AddNewLaneCenter" IsEnabled="{Binding BrushMode}"/>
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToCenter" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D3">
+            <cal:ActionMessage MethodName="Brush_AddNewLaneRight" IsEnabled="{Binding BrushMode}"/>
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToRight" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D4">
+            <cal:ActionMessage MethodName="Brush_AddNewWallRight" IsEnabled="{Binding BrushMode}" />
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToWallRight" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        
+        <i:KeyTrigger Key="OemTilde" Modifiers="Shift">
+            <cal:ActionMessage MethodName="Brush_AddNewWallLeft" IsEnabled="{Binding BrushMode}" />
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D1" Modifiers="Shift">
+            <cal:ActionMessage MethodName="Brush_AddNewLaneLeft" IsEnabled="{Binding BrushMode}" />
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToLeft" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D2" Modifiers="Shift">
+            <cal:ActionMessage MethodName="Brush_AddNewLaneCenter" IsEnabled="{Binding BrushMode}"/>
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToCenter" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D3" Modifiers="Shift">
+            <cal:ActionMessage MethodName="Brush_AddNewLaneRight" IsEnabled="{Binding BrushMode}"/>
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToRight" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D4" Modifiers="Shift">
+            <cal:ActionMessage MethodName="Brush_AddNewWallRight" IsEnabled="{Binding BrushMode}" />
+            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToWallRight" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        
+        <i:KeyTrigger Key="F"></i:KeyTrigger>
+    </i:Interaction.Triggers>
+
     <Grid Focusable="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -47,34 +93,55 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
                 <MenuItem Header="{markup:Translate [MenuSelecting]}">
-                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()" Header="{markup:Translate [SelectAllObjects]}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="{markup:Translate [ReverseSelectAllObjects]}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()"
+                              Header="{markup:Translate [SelectAllObjects]}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()"
+                              Header="{markup:Translate [ReverseSelectAllObjects]}" />
                 </MenuItem>
                 <MenuItem Header="{markup:Translate [ToSelectedObjects]}">
-                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()" Header="{markup:Translate [Delete]}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="{markup:Translate [CopyCopiable]}" />
+                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()"
+                              Header="{markup:Translate [Delete]}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()"
+                              Header="{markup:Translate [CopyCopiable]}" />
                     <MenuItem Header="{markup:Translate [ControlTimeline]}">
-                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="{markup:Translate [RememberAudioTime]}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="{markup:Translate [RecoveryAudioTime]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()"
+                                  Header="{markup:Translate [RememberAudioTime]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()"
+                                  Header="{markup:Translate [RecoveryAudioTime]}" />
                     </MenuItem>
-                    
+
                     <Separator />
-                
-                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorSelectionXGridZero()" Header="{markup:Translate [MenuMirrorSelectionXGridZero]}" IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorSelectionXGrid()" Header="{markup:Translate [MenuMirrorSelectionXGrid]}" IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorLaneColors()" Header="{markup:Translate [MenuMirrorSelectionLaneColors]}" IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}" />
+
+                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorSelectionXGridZero()"
+                              Header="{markup:Translate [MenuMirrorSelectionXGridZero]}"
+                              IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorSelectionXGrid()"
+                              Header="{markup:Translate [MenuMirrorSelectionXGrid]}"
+                              IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorLaneColors()"
+                              Header="{markup:Translate [MenuMirrorSelectionLaneColors]}"
+                              IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}" />
                 </MenuItem>
                 <MenuItem Header="{markup:Translate [ToCopiedObjects]}">
                     <MenuItem Header="{markup:Translate [ToPaste]}">
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsDirectly($executionContext)" Header="{markup:Translate [PasteDirectly]}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteToMouse]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsDirectly($executionContext)"
+                                  Header="{markup:Translate [PasteDirectly]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)"
+                                  Header="{markup:Translate [PasteToMouse]}" />
                         <Separator />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="{markup:Translate [PasteForHorizonMirror]}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="{markup:Translate [PasteForVerticalMirror]}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)" Header="{markup:Translate [PasteForZeroXGridMirror]}" />
+                        <MenuItem
+                            cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)"
+                            Header="{markup:Translate [PasteForHorizonMirror]}" />
+                        <MenuItem
+                            cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)"
+                            Header="{markup:Translate [PasteForVerticalMirror]}" />
+                        <MenuItem
+                            cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)"
+                            Header="{markup:Translate [PasteForZeroXGridMirror]}" />
                     </MenuItem>
                 </MenuItem>
                 <Separator />
@@ -84,11 +151,13 @@
                     IsChecked="{Binding IsDisplayFPS}" />
             </ContextMenu>
         </Grid.ContextMenu>
+
         <opentkcontrol:GLWpfControl
             x:Name="glView"
-            cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
+            cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
             Ready="glView_Ready"
             SizeChanged="glView_SizeChanged" />
+
         <TextBlock
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
