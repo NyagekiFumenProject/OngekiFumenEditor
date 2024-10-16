@@ -15,13 +15,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument
     }
     
     public void Brush_AddNewLaneLeft()
-        => RunCommand(new AddObjectLaneLeftCommandDefinition());
+        => RunCommand(new AddLaneLeftCommandDefinition());
     public void Brush_AddNewLaneCenter()
-        => RunCommand(new AddObjectLaneCenterCommandDefinition());
+        => RunCommand(new AddLaneCenterCommandDefinition());
     public void Brush_AddNewLaneRight()
-        => RunCommand(new AddObjectLaneRightCommandDefinition());
+        => RunCommand(new AddLaneRightCommandDefinition());
     public void Brush_AddNewWallLeft()
-        => RunCommand(new AddObjectWallLeftCommandDefinition());
+        => RunCommand(new AddWallLeftCommandDefinition());
     public void Brush_AddNewWallRight()
-        => RunCommand(new AddObjectWallRightCommandDefinition());
+        => RunCommand(new AddWallRightCommandDefinition());
 }

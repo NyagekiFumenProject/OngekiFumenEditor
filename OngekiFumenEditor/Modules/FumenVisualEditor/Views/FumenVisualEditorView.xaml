@@ -16,7 +16,10 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
-    cal:Message.Attach="[Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];   [Key C] = [Action KeyboardAction_FastSetObjectIsCritical($executionContext)];   [Key Q] = [Action KeyboardAction_HideOrShow];[Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)]; [Key F] = [Action KeyboardAction_FastSwitchFlickDirection($executionContext)]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];     [Key PageUp] = [Action ScrollPage(1)];  [Key PageDown] = [Action ScrollPage(-1)]"
+    xmlns:base="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Base"
+    xmlns:addObject="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Commands.AddObject"
+    xmlns:brushModeSwitch="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch"
+    cal:Message.Attach="[Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];   [Key C] = [Action KeyboardAction_FastSetObjectIsCritical($executionContext)];   [Key Q] = [Action KeyboardAction_HideOrShow];[Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)];  [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];     [Key PageUp] = [Action ScrollPage(1)];  [Key PageDown] = [Action ScrollPage(-1)]"
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -41,47 +44,70 @@
     
     <i:Interaction.Triggers>
         <i:KeyTrigger Key="OemTilde">
-            <cal:ActionMessage MethodName="Brush_AddNewWallLeft" IsEnabled="{Binding BrushMode}" />
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddWallLeftCommandDefinition}" IsEnabled="{Binding BrushMode}" />
             <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToWallLeft" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
         </i:KeyTrigger>
         <i:KeyTrigger Key="D1">
-            <cal:ActionMessage MethodName="Brush_AddNewLaneLeft" IsEnabled="{Binding BrushMode}" />
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneLeftCommandDefinition}" IsEnabled="{Binding BrushMode}" />
             <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToLeft" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
         </i:KeyTrigger>
         <i:KeyTrigger Key="D2">
-            <cal:ActionMessage MethodName="Brush_AddNewLaneCenter" IsEnabled="{Binding BrushMode}"/>
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneCenterCommandDefinition}" IsEnabled="{Binding BrushMode}"/>
             <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToCenter" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
         </i:KeyTrigger>
         <i:KeyTrigger Key="D3">
-            <cal:ActionMessage MethodName="Brush_AddNewLaneRight" IsEnabled="{Binding BrushMode}"/>
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneRightCommandDefinition}" IsEnabled="{Binding BrushMode}"/>
             <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToRight" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
         </i:KeyTrigger>
         <i:KeyTrigger Key="D4">
-            <cal:ActionMessage MethodName="Brush_AddNewWallRight" IsEnabled="{Binding BrushMode}" />
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddWallRightCommandDefinition}" IsEnabled="{Binding BrushMode}" />
             <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToWallRight" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
         </i:KeyTrigger>
+        <i:KeyTrigger Key="D5">
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneColorfulCommandDefinition}" IsEnabled="{Binding BrushMode}" />
+        </i:KeyTrigger>
         
+        <!-- Lane creation bindings, same as above, but with Shift applied. 
+             Holding down Shift automatically keeps the selection, so we don't need to change the command at all. -->
         <i:KeyTrigger Key="OemTilde" Modifiers="Shift">
-            <cal:ActionMessage MethodName="Brush_AddNewWallLeft" IsEnabled="{Binding BrushMode}" />
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddWallLeftCommandDefinition}" IsEnabled="{Binding BrushMode}" />
         </i:KeyTrigger>
         <i:KeyTrigger Key="D1" Modifiers="Shift">
-            <cal:ActionMessage MethodName="Brush_AddNewLaneLeft" IsEnabled="{Binding BrushMode}" />
-            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToLeft" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneLeftCommandDefinition}" IsEnabled="{Binding BrushMode}" />
         </i:KeyTrigger>
         <i:KeyTrigger Key="D2" Modifiers="Shift">
-            <cal:ActionMessage MethodName="Brush_AddNewLaneCenter" IsEnabled="{Binding BrushMode}"/>
-            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToCenter" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneCenterCommandDefinition}" IsEnabled="{Binding BrushMode}"/>
         </i:KeyTrigger>
         <i:KeyTrigger Key="D3" Modifiers="Shift">
-            <cal:ActionMessage MethodName="Brush_AddNewLaneRight" IsEnabled="{Binding BrushMode}"/>
-            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToRight" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneRightCommandDefinition}" IsEnabled="{Binding BrushMode}"/>
         </i:KeyTrigger>
         <i:KeyTrigger Key="D4" Modifiers="Shift">
-            <cal:ActionMessage MethodName="Brush_AddNewWallRight" IsEnabled="{Binding BrushMode}" />
-            <cal:ActionMessage MethodName="KeyboardAction_FastPlaceDockableObjectToWallRight" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddWallRightCommandDefinition}" IsEnabled="{Binding BrushMode}" />
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D5" Modifiers="Shift">
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneColorfulCommandDefinition}" IsEnabled="{Binding BrushMode}" />
         </i:KeyTrigger>
         
-        <i:KeyTrigger Key="F"></i:KeyTrigger>
+        <i:KeyTrigger Key="F">
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddFlickCommandDefinition}" IsEnabled="{Binding BrushMode}" />
+            <cal:ActionMessage MethodName="KeyboardAction_FastSwitchFlickDirection" IsEnabled="{Binding BrushMode, Converter={StaticResource ReverseBoolConverter}}"/>
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="G">
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddFlickReversedCommandDefinition}" IsEnabled="{Binding BrushMode}" />
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="T">
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddTapCommandDefinition}" IsEnabled="{Binding BrushMode}" />
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="D">
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddHoldCommandDefinition}" IsEnabled="{Binding BrushMode}" />
+        </i:KeyTrigger>
+        <i:KeyTrigger Key="C">
+            <base:CommandActionMessage CommandDefinition="{x:Type addObject:AddLaneBlockCommandDefinition}" IsEnabled="{Binding BrushMode}" />
+        </i:KeyTrigger>
+        
+        <i:KeyTrigger Key="B">
+            <base:CommandActionMessage CommandDefinition="{x:Type brushModeSwitch:BrushModeSwitchCommandDefinition}" />
+        </i:KeyTrigger>
     </i:Interaction.Triggers>
 
     <Grid Focusable="False">
