@@ -13,11 +13,11 @@ using System.Linq;
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
 	[Export(typeof(IFumenCheckRule))]
-	internal class MissingEndObjectCheckRule : IFumenCheckRule
+	internal class MissingHoldEndObjectCheckRule : IFumenCheckRule
 	{
 		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
 		{
-			const string RuleName = "MissingEndObject";
+			const string RuleName = "MissingHoldEndObject";
 
 			//IEnumerable<ICheckResult> CheckBeamList(IEnumerable<BeamStart> objs)
 			//{
