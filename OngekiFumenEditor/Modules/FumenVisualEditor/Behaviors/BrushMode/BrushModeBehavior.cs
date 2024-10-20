@@ -52,7 +52,7 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             [Key.E] = new BrushModeInputNormalBell(),
             [Key.F] = new BrushModeInputFlick(),
             [Key.Z] = new BrushModeInputLaneBlock(),
-            [Key.C] = null
+            [Key.V] = null
         }.ToImmutableDictionary();
 
         ClickTriggers = new Dictionary<string, TriggerAction>
