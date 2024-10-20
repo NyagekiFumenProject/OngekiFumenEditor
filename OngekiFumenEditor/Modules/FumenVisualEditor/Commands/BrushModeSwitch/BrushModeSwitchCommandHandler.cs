@@ -1,9 +1,11 @@
-﻿using Gemini.Framework.Commands;
+﻿using System.ComponentModel.Composition;
+using System.Threading.Tasks;
+using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
+using Microsoft.Xaml.Behaviors;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using System.ComponentModel.Composition;
-using System.Threading.Tasks;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch
 {
@@ -25,11 +27,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch
 			command.Checked = editorDocumentManager.CurrentActivatedEditor?.BrushMode ?? false;
 		}
 
-		public override Task Run(Command command)
-		{
-			if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor)
-				editor.BrushMode = !editor.BrushMode;
-			return TaskUtility.Completed;
-		}
-	}
+        public override Task Run(Command command)
+        {
+            if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor) {
+                editor.BrushMode = !editor.BrushMode;
+                
+                if (editor.BrushMode) {
+                    Interaction.GetBehaviors((FumenVisualEditorView)editor.GetView()).Add(editor.BrushModeBehavior);
+                }
+                else {
+                    var behaviors = Interaction.GetBehaviors((FumenVisualEditorView)editor.GetView());
+                    behaviors.Remove(editor.BrushModeBehavior);
+                }
+            }
+
+            return TaskUtility.Completed;
+        }
+    }
 }

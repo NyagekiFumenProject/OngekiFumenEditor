@@ -1,0 +1,304 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Input;
+using Caliburn.Micro;
+using Microsoft.Xaml.Behaviors;
+using Microsoft.Xaml.Behaviors.Core;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
+using OngekiFumenEditor.UI.KeyBinding.Input;
+using OngekiFumenEditor.Utils;
+using EventTrigger = Microsoft.Xaml.Behaviors.EventTrigger;
+using TriggerAction = Microsoft.Xaml.Behaviors.TriggerAction;
+using TriggerBase = Microsoft.Xaml.Behaviors.TriggerBase;
+
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BrushMode;
+
+public class BrushModeBehavior : Behavior<FumenVisualEditorView>
+{
+    private readonly ImmutableDictionary<Key, BrushModeInputObject> CommandDefinitions;
+    private readonly ImmutableDictionary<string, TriggerAction> ClickTriggers;
+
+    public BrushModeInputObject CurrentInputObject
+    {
+        get => (BrushModeInputObject)GetValue(CurrentInputObjectProperty);
+        set => SetValue(CurrentInputObjectProperty, value);
+    }
+
+    private readonly List<TriggerBase> OldTriggers = new();
+    private readonly List<TriggerBase> NewTriggers = new();
+    private readonly IFumenEditorClipboard Clipboard;
+    
+    public BrushModeBehavior()
+    {
+        CommandDefinitions =  new Dictionary<Key, BrushModeInputObject>
+        {
+            [Key.OemTilde] = new BrushModeInputWallLeft(),
+            [Key.D1] = new BrushModeInputLaneLeft(),
+            [Key.D2] = new BrushModeInputLaneCenter(),
+            [Key.D3] = new BrushModeInputLaneRight(),
+            [Key.D4] = new BrushModeInputWallRight(),
+            [Key.D5] = new BrushModeInputLaneColorful(),
+            [Key.T] = new BrushModeInputTap(),
+            [Key.D] = new BrushModeInputHold(),
+            [Key.E] = new BrushModeInputNormalBell(),
+            [Key.F] = new BrushModeInputFlick(),
+            [Key.Z] = new BrushModeInputLaneBlock(),
+            [Key.C] = null
+        }.ToImmutableDictionary();
+
+        ClickTriggers = new Dictionary<string, TriggerAction>
+        {
+            ["PreviewMouseDown"] = new LambdaTriggerAction(o => { MouseDown((MouseButtonEventArgs)o); }),
+            ["PreviewMouseUp"] = new LambdaTriggerAction(o => { MouseUp((MouseButtonEventArgs)o); }),
+            ["MouseMove"] = new LambdaTriggerAction(o => { MouseMove((MouseEventArgs)o);})
+        }.ToImmutableDictionary();
+
+        Clipboard = IoC.Get<IFumenEditorClipboard>();
+    }
+
+    protected override void OnAttached()
+    {
+        var triggerCollection = Interaction.GetTriggers(AssociatedObject);
+        
+        // Create brush key triggers on the FumenVisualEditorView.
+        // Temporarily delete existing ones that clash with brush keys. 
+        foreach (var (key, obj) in CommandDefinitions) {
+            var existingTriggers = triggerCollection.Where(t => t is KeyTrigger tr && tr.Key == key);
+            OldTriggers.AddRange(existingTriggers);
+            OldTriggers.ForEach(t => triggerCollection.Remove(t));
+
+            var newTrigger = new KeyTrigger() { Key = key };
+            newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentInputObject), Value = obj });
+            triggerCollection.Add(newTrigger);
+            NewTriggers.Add(newTrigger);
+        }
+
+        // Add mouse click events directly on the GlView.
+        var glTriggers = Interaction.GetTriggers(AssociatedObject.glView);
+        foreach (var (eventName, action) in ClickTriggers) {
+            var glTrigger = glTriggers.FirstOrDefault(t => t is EventTrigger et && et.EventName == eventName);
+            
+            if (glTrigger is null) {
+                glTrigger = new EventTrigger(eventName);
+                glTriggers.Add(glTrigger);
+            }
+            
+            glTrigger.Actions.Insert(0, action);
+        }
+    }
+
+    protected override void OnDetaching()
+    {
+        var triggerCollection = Interaction.GetTriggers(AssociatedObject);
+        foreach (var trigger in NewTriggers) {
+            triggerCollection.Remove(trigger);
+        }
+
+        foreach (var trigger in OldTriggers) {
+            triggerCollection.Add(trigger);
+        }
+
+        NewTriggers.Clear();
+        OldTriggers.Clear();
+        
+        var glTriggers = Interaction.GetTriggers(AssociatedObject.glView);
+        foreach (var (eventName, action) in ClickTriggers) {
+            var glTrigger = glTriggers.First(t => t is EventTrigger et && et.EventName == eventName);
+            glTrigger.Actions.Remove(action);
+        }
+    }
+
+    private void MouseMove(MouseEventArgs args)
+    {
+        if (CurrentInputObject is null)
+            return;
+        if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
+            return;
+
+        if (Mouse.RightButton == MouseButtonState.Pressed) {
+            var cursor = editor.CurrentCursorPosition!.Value;
+
+            if ((cursor.ToSystemNumericsVector2() - editor.SelectionStartPosition).Length() > 15) {
+                // Begin range mode
+                editor.SelectionVisibility = Visibility.Visible;
+            }
+
+            editor.SelectionCurrentCursorPosition = new((float)cursor.X,  (float)cursor.Y);
+        }
+    }
+
+    private void MouseDown(MouseButtonEventArgs args)
+    {
+        if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
+            return;
+
+        var cursor = editor.CurrentCursorPosition!.Value;
+
+        if (args.ChangedButton == MouseButton.Left) {
+            args.Handled = true;
+        } else if (args.ChangedButton == MouseButton.Right) {
+            editor.SelectionStartPosition = new((float)cursor.X, (float)cursor.Y);
+            args.Handled = true;
+        }
+    }
+
+    private void MouseUp(MouseButtonEventArgs args)
+    {
+        var editor = IoC.Get<IEditorDocumentManager>()?.CurrentActivatedEditor;
+        if (editor is null)
+            return;
+
+        if (args.ChangedButton == MouseButton.Left) {
+            PerformBrush();
+            args.Handled = true;
+        } else if (args.ChangedButton == MouseButton.Right) {
+            if (editor.IsRangeSelecting) {
+                PerformRemoveGroup();
+            }
+            else {
+                PerformRemove();
+            }
+
+            editor.SelectionVisibility = Visibility.Hidden;
+            args.Handled = true;
+        }
+    }
+
+    private void PerformBrush()
+    {
+        var ctrl = (Keyboard.Modifiers & ModifierKeys.Control) > 0;
+        var alt = (Keyboard.Modifiers & ModifierKeys.Alt) > 0;
+
+        var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
+
+        OngekiTimelineObjectBase ongekiObject = null;
+
+        var objectName = CurrentInputObject?.DisplayName ?? ClipboardObjectName;
+        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction($"Brush {objectName}", Redo, Undo));
+
+        return;
+        
+        void Redo()
+        {
+            if (CurrentInputObject is null) {
+                if (!Clipboard.ContainPastableObjects
+                    || !Clipboard.CurrentCopiedObjects.IsOnlyOne(out var clipboardObj)
+                    || clipboardObj is not OngekiTimelineObjectBase) {
+                    return;
+                }
+                ongekiObject = (OngekiTimelineObjectBase)clipboardObj.CopyNew();
+            }
+            else {
+                ongekiObject = CurrentInputObject.GenerateObject();
+                if (ctrl && CurrentInputObject.ModifyObjectCtrl is { } modCtrl)
+                    modCtrl.Function.Invoke(ongekiObject);
+                if (alt && CurrentInputObject.ModifyObjectAlt is { } modAlt)
+                    modAlt.Function.Invoke(ongekiObject);
+            }
+        
+            editor!.MoveObjectTo(ongekiObject, editor.CurrentCursorPosition!.Value);
+            editor.Fumen.AddObject(ongekiObject);
+            editor.InteractiveManager.GetInteractive(ongekiObject).OnMoveCanvas(ongekiObject, editor.CurrentCursorPosition.Value, editor);
+            if (CurrentInputObject?.AddToSelection ?? false)
+                editor.NotifyObjectClicked(ongekiObject);
+        }
+
+        void Undo()
+        {
+            if (ongekiObject is null)
+                return;
+            
+            editor!.RemoveObject(ongekiObject);
+            ongekiObject = null;
+        }
+    }
+
+    private void PerformRemove()
+    {
+        if (CurrentInputObject is null)
+            return;
+
+        var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
+        var hit = editor.GetHits()
+            .Where(kv =>
+                kv.Value.Contains(editor.CurrentCursorPosition!.Value) &&
+                kv.Key.GetType() == CurrentInputObject.ObjectType)
+            .Select(kv => kv.Key).MinBy(o => o.Id);
+
+        if (hit is not null) {
+            editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction("Brush delete", Redo, Undo));
+        }
+
+        return;
+
+        void Redo()
+        {
+            editor.RemoveObject(hit);
+        }
+
+        void Undo()
+        {
+            editor.Fumen.AddObject(hit);
+        }
+    }
+
+    private void PerformRemoveGroup()
+    {
+        if (CurrentInputObject is null)
+            return;
+
+        var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
+        var hits = editor.GetRangeObjects().Where(o => o.GetType() == CurrentInputObject.ObjectType).ToArray();
+
+        if (hits.Length == 0) {
+            return;
+        }
+
+        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction("Brush delete range", Redo, Undo));
+
+        return;
+
+        void Redo()
+        {
+            foreach (var hit in hits) {
+                editor.RemoveObject(hit);
+            }
+        }
+
+        void Undo()
+        {
+            editor.Fumen.AddObjects(hits);
+        }
+    }
+
+    private string ClipboardObjectName => "Clipboard";
+
+    #region Dependency property
+
+    public static readonly DependencyProperty CurrentInputObjectProperty = DependencyProperty.RegisterAttached(nameof(CurrentInputObject), typeof(BrushModeInputObject), typeof(BrushModeBehavior), new PropertyMetadata(null));
+
+    #endregion
+
+}
+
+public class BrushModeInputObjectNameConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return ((BrushModeInputObject)value)?.DisplayName ?? "Clipboard";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

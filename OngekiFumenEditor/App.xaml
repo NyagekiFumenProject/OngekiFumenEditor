@@ -25,6 +25,7 @@
             </converters1:CultureInfoNameConverter>
             <valueconverters:AsyncImageLoadConverter x:Key="AsyncImageLoadConverter">
             </valueconverters:AsyncImageLoadConverter>
+            <valueconverters:NullToZeroConverter x:Key="NullToZeroConverter" />
             <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />
             <valueconverters:SelectionFullLaneCheckConverter x:Key="SelectionFullLaneCheckConverter" />
             <ResourceDictionary.MergedDictionaries>

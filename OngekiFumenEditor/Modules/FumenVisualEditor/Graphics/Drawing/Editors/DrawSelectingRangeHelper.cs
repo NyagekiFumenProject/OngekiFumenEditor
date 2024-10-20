@@ -9,11 +9,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
     public class DrawSelectingRangeHelper
     {
+        private static Vector4 LineColorSelect = new(1, 0, 1, 1);
+        private static Vector4 FillColorSelect = new(1, 1, 1, 0.15f);
+
+        private static Vector4 LineColorDelete = new(1, 0.1f, 0.1f, 1);
+        private static Vector4 FillColorDelete = new(1, 0.1f, 0.1f, 0.15f);
+
         private ISimpleLineDrawing lineDrawing;
         private IPolygonDrawing polygonDrawing;
 
-        private Vector4 lineColor = new(1, 0, 1, 1);
-        private Vector4 fillColor = new(1, 1, 1, 0.15f);
         private VertexDash dash = new()
         {
             DashSize = 8,
@@ -30,6 +34,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         {
             if (target.Editor.SelectionVisibility != System.Windows.Visibility.Visible)
                 return;
+
+            Vector4 lineColor, fillColor;
+            if (target.Editor.BrushMode) {
+                // If this is used during brush mode, it is for the deletion rectangle
+                lineColor = LineColorDelete;
+                fillColor = FillColorDelete;
+            }
+            else {
+                lineColor = LineColorSelect;
+                fillColor = FillColorSelect;
+            }
 
             var topY = Math.Max(target.Editor.SelectionCurrentCursorPosition.Y, target.Editor.SelectionStartPosition.Y);
             var buttomY = Math.Min(target.Editor.SelectionCurrentCursorPosition.Y, target.Editor.SelectionStartPosition.Y);

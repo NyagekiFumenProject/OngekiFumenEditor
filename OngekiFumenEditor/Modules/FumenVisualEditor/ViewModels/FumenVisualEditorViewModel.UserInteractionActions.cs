@@ -5,12 +5,10 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
 using Gemini.Modules.UndoRedo;
-using Microsoft.CodeAnalysis.Differencing;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -25,18 +23,16 @@ using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
-using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -165,6 +161,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public Toast Toast => (GetView() as FumenVisualEditorView)?.mainToast;
 
         public ObjectInteractiveManager InteractiveManager { get; private set; } = new();
+
+        public ImmutableDictionary<OngekiObjectBase, Rect> GetHits() => hits.ToImmutableDictionary();
 
         #region provide extra MenuItem by plugins
 
@@ -470,6 +468,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
 
+            var selectObjects = GetRangeObjects().ToArray();
+
+            if (selectObjects.Length == 1)
+                NotifyObjectClicked(selectObjects.FirstOrDefault());
+            else
+            {
+                foreach (var o in selectObjects.OfType<ISelectableObject>())
+                    o.IsSelected = true;
+                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+            }
+        }
+
+        public IEnumerable<OngekiObjectBase> GetRangeObjects()
+        {
             var topY = Math.Max(SelectionCurrentCursorPosition.Y, SelectionStartPosition.Y);
             var buttomY = Math.Min(SelectionCurrentCursorPosition.Y, SelectionStartPosition.Y);
             var rightX = Math.Max(SelectionCurrentCursorPosition.X, SelectionStartPosition.X);
@@ -480,7 +492,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var minXGrid = XGridCalculator.ConvertXToXGrid(leftX, this);
             var maxXGrid = XGridCalculator.ConvertXToXGrid(rightX, this);
 
-            bool check(OngekiObjectBase obj)
+            return Fumen.GetAllDisplayableObjects()
+                .OfType<OngekiObjectBase>()
+                .Distinct()
+                .Where(Check);
+
+            bool Check(OngekiObjectBase obj)
             {
                 if (obj is ITimelineObject timelineObject)
                 {
@@ -495,21 +512,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
 
                 return true;
-            }
-
-            var selectObjects = Fumen.GetAllDisplayableObjects()
-                .OfType<OngekiObjectBase>()
-                .Distinct()
-                .Where(check)
-                .ToArray();
-
-            if (selectObjects.Length == 1)
-                NotifyObjectClicked(selectObjects.FirstOrDefault());
-            else
-            {
-                foreach (var o in selectObjects.OfType<ISelectableObject>())
-                    o.IsSelected = true;
-                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
             }
         }
 
@@ -970,7 +972,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseUp(ActionExecutionContext e)
         {
-            var arg = e.EventArgs as MouseEventArgs;
+            var arg = e.EventArgs as MouseButtonEventArgs;
+            if (arg is null || arg.Handled) {
+                return;
+            }
+            
+            Log.LogInfo("Visual mouseup");
 
             if (IsLocked)
                 return;
@@ -1069,6 +1076,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseDown(ActionExecutionContext e)
         {
             var arg = e.EventArgs as MouseEventArgs;
+            if (arg is null || arg.Handled) {
+                return;
+            }
+            Log.LogInfo("Visual mousedown");
 
             prevRightButtonState = arg.RightButton;
 
@@ -1300,8 +1311,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryApplyBrushObject(Point p)
         {
-            var copyManager = IoC.Get<IFumenEditorClipboard>();
+            if (BrushMode && BrushModeBehavior.CurrentInputObject is not null) {
+            }
 
+            var copyManager = IoC.Get<IFumenEditorClipboard>();
+            
             if (!(copyManager.CurrentCopiedObjects.IsOnlyOne(out var c) && c is OngekiObjectBase copySouceObj))
                 return;
 
