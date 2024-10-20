@@ -9,6 +9,8 @@
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:kb="clr-namespace:OngekiFumenEditor.UI.KeyBinding.Input"
+    xmlns:kbDefs="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor"
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
@@ -16,7 +18,7 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
-    cal:Message.Attach="[Key OemTilde] = [Action KeyboardAction_FastPlaceDockableObjectToWallLeft]; [Key D4] = [Action KeyboardAction_FastPlaceDockableObjectToWallRight]; [Key D3] = [Action KeyboardAction_FastPlaceDockableObjectToRight];[Key H] = [Action KeyboardAction_FastPlaceNewHold($executionContext)];[Key T] = [Action KeyboardAction_FastPlaceNewTap($executionContext)]; [Key D2] = [Action KeyboardAction_FastPlaceDockableObjectToCenter]; [Key D1] = [Action KeyboardAction_FastPlaceDockableObjectToLeft]; [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];   [Key C] = [Action KeyboardAction_FastSetObjectIsCritical($executionContext)];   [Key Q] = [Action KeyboardAction_HideOrShow];[Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)]; [Key F] = [Action KeyboardAction_FastSwitchFlickDirection($executionContext)]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];    "
+    cal:Message.Attach="[Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];"
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -38,6 +40,29 @@
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
+
+
+    <i:Interaction.Triggers>
+        <!--#region Key Bindings-->
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastSetObjectIsCritical}" Message="KeyboardAction_FastSetObjectIsCritical($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToWallLeft}" Message="KeyboardAction_FastPlaceDockableObjectToWallLeft($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToWallRight}" Message="KeyboardAction_FastPlaceDockableObjectToWallRight($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToRight}" Message="KeyboardAction_FastPlaceDockableObjectToRight($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceNewHold}" Message="KeyboardAction_FastPlaceNewHold($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceNewTap}" Message="KeyboardAction_FastPlaceNewTap($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToCenter}" Message="KeyboardAction_FastPlaceDockableObjectToCenter($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToLeft}" Message="KeyboardAction_FastPlaceDockableObjectToLeft($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_DeleteSelectingObjects}" Message="KeyboardAction_DeleteSelectingObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_SelectAllObjects}" Message="KeyboardAction_SelectAllObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_CancelSelectingObjects}" Message="KeyboardAction_CancelSelectingObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_HideOrShow}" Message="KeyboardAction_HideOrShow($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastAddConnectableChild}" Message="KeyboardAction_FastAddConnectableChild($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastSwitchFlickDirection}" Message="KeyboardAction_FastSwitchFlickDirection($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_CopySelectedObjects}" Message="MenuItemAction_CopySelectedObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_PasteCopiesObjects}" Message="KeyboardAction_PasteCopiesObjects($executionContext)" />
+        <!--#endregion-->
+    </i:Interaction.Triggers>
+
     <Grid Focusable="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -50,29 +75,29 @@
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
                 <MenuItem Header="{markup:Translate [MenuSelecting]}">
-                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll()" Header="{markup:Translate [SelectAllObjects]}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect()" Header="{markup:Translate [ReverseSelectAllObjects]}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll($executionContext)" Header="{markup:Translate [SelectAllObjects]}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect($executionContext)" Header="{markup:Translate [ReverseSelectAllObjects]}" />
                 </MenuItem>
                 <MenuItem Header="{markup:Translate [ToSelectedObjects]}">
-                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects()" Header="{markup:Translate [Delete]}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects()" Header="{markup:Translate [CopyCopiable]}" />
+                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects($executionContext)" Header="{markup:Translate [Delete]}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects($executionContext)" Header="{markup:Translate [CopyCopiable]}" />
                     <MenuItem Header="{markup:Translate [ControlTimeline]}">
-                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="{markup:Translate [RememberAudioTime]}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="{markup:Translate [RecoveryAudioTime]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime($executionContext)" Header="{markup:Translate [RememberAudioTime]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime($executionContext)" Header="{markup:Translate [RecoveryAudioTime]}" />
                     </MenuItem>
 
                     <Separator />
 
                     <MenuItem
-                        cal:Message.Attach="MenuItemAction_MirrorSelectionXGridZero()"
+                        cal:Message.Attach="MenuItemAction_MirrorSelectionXGridZero($executionContext)"
                         Header="{markup:Translate [MenuMirrorSelectionXGridZero]}"
                         IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
                     <MenuItem
-                        cal:Message.Attach="MenuItemAction_MirrorSelectionXGrid()"
+                        cal:Message.Attach="MenuItemAction_MirrorSelectionXGrid($executionContext)"
                         Header="{markup:Translate [MenuMirrorSelectionXGrid]}"
                         IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
                     <MenuItem
-                        cal:Message.Attach="MenuItemAction_MirrorLaneColors()"
+                        cal:Message.Attach="MenuItemAction_MirrorLaneColors($executionContext)"
                         Header="{markup:Translate [MenuMirrorSelectionLaneColors]}"
                         IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}" />
                 </MenuItem>

@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch
 		public override Task Run(Command command)
 		{
 			if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor)
-				editor.KeyboardAction_HideOrShow();
+				editor.KeyboardAction_HideOrShow(default);
 			command.Checked = editorDocumentManager.CurrentActivatedEditor?.IsPreviewMode ?? false;
 			return TaskUtility.Completed;
 		}

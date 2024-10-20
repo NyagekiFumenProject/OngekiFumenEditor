@@ -35,6 +35,7 @@ using System.Windows.Input;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using System.Threading;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -159,7 +160,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Selection Actions
 
-        public void MenuItemAction_SelectAll()
+        public void MenuItemAction_SelectAll(ActionExecutionContext e)
         {
             IsPreventMutualExclusionSelecting = true;
 
@@ -169,7 +170,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IsPreventMutualExclusionSelecting = false;
         }
 
-        public void MenuItemAction_ReverseSelect()
+        public void MenuItemAction_ReverseSelect(ActionExecutionContext e)
         {
             IsPreventMutualExclusionSelecting = true;
 
@@ -179,7 +180,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IsPreventMutualExclusionSelecting = false;
         }
 
-        public async void MenuItemAction_CopySelectedObjects()
+        public async void MenuItemAction_CopySelectedObjects(ActionExecutionContext e)
         {
             await IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);
         }
@@ -193,7 +194,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             None
         }
 
-        public void MenuItemAction_PasteCopiesObjects()
+        public void KeyboardAction_PasteCopiesObjects(ActionExecutionContext ctx)
+            => PasteCopiesObjects(PasteOption.None, ctx);
+
+        public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext e)
         {
             var placePos = Mouse.GetPosition(GetView() as FrameworkElement);
             placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
@@ -205,8 +209,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             PasteCopiesObjects(PasteOption.Direct, default(Point));
         }
 
-        public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
-            => PasteCopiesObjects(PasteOption.None, ctx);
         public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror(ActionExecutionContext ctx)
             => PasteCopiesObjects(PasteOption.SelectedRangeCenterXGridMirror, ctx);
         public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror(ActionExecutionContext ctx)
@@ -399,7 +401,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private bool dragOutBound;
         private int currentDraggingActionId;
 
-        public void MenuItemAction_RememberSelectedObjectAudioTime()
+        public void MenuItemAction_RememberSelectedObjectAudioTime(ActionExecutionContext e)
         {
             if (!IsDesignMode)
             {
@@ -419,7 +421,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             ToastNotify(Resources.RememberObjects.Format(cacheObjectAudioTime.Count));
         }
 
-        public void MenuItemAction_RecoverySelectedObjectToAudioTime()
+        public void MenuItemAction_RecoverySelectedObjectToAudioTime(ActionExecutionContext e)
         {
             if (!IsDesignMode)
             {
@@ -535,15 +537,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Keyboard Actions
 
-        public void KeyboardAction_FastPlaceDockableObjectToCenter()
+        public void KeyboardAction_FastPlaceDockableObjectToCenter(ActionExecutionContext e)
             => KeyboardAction_FastPlaceDockableObject(LaneType.Center);
-        public void KeyboardAction_FastPlaceDockableObjectToLeft()
+        public void KeyboardAction_FastPlaceDockableObjectToLeft(ActionExecutionContext e)
             => KeyboardAction_FastPlaceDockableObject(LaneType.Left);
-        public void KeyboardAction_FastPlaceDockableObjectToRight()
+        public void KeyboardAction_FastPlaceDockableObjectToRight(ActionExecutionContext e)
             => KeyboardAction_FastPlaceDockableObject(LaneType.Right);
-        public void KeyboardAction_FastPlaceDockableObjectToWallLeft()
+        public void KeyboardAction_FastPlaceDockableObjectToWallLeft(ActionExecutionContext e)
             => KeyboardAction_FastPlaceDockableObject(LaneType.WallLeft);
-        public void KeyboardAction_FastPlaceDockableObjectToWallRight()
+        public void KeyboardAction_FastPlaceDockableObjectToWallRight(ActionExecutionContext e)
             => KeyboardAction_FastPlaceDockableObject(LaneType.WallRight);
 
         public void KeyboardAction_FastPlaceNewTap(ActionExecutionContext e)
@@ -668,7 +670,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
-        public void KeyboardAction_DeleteSelectingObjects()
+        public void KeyboardAction_DeleteSelectingObjects(ActionExecutionContext e)
         {
             if (IsLocked)
                 return;
@@ -737,7 +739,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void RemoveObject(OngekiObjectBase obj) => RemoveObjects(obj.Repeat(1));
 
-        public void KeyboardAction_SelectAllObjects()
+        public void KeyboardAction_SelectAllObjects(ActionExecutionContext e)
         {
             if (IsLocked)
                 return;
@@ -746,7 +748,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
         }
 
-        public void KeyboardAction_CancelSelectingObjects()
+        public void KeyboardAction_CancelSelectingObjects(ActionExecutionContext e)
         {
             if (IsLocked)
                 return;
@@ -949,12 +951,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
-        public void KeyboardAction_PlayOrPause()
+        public void KeyboardAction_PlayOrPause(ActionExecutionContext e)
         {
             IoC.Get<IAudioPlayerToolViewer>().RequestPlayOrPause();
         }
 
-        public void KeyboardAction_HideOrShow()
+        public void KeyboardAction_HideOrShow(ActionExecutionContext e)
         {
             SwitchMode(!IsPreviewMode);
         }
