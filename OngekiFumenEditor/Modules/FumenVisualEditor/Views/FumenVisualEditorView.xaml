@@ -60,12 +60,21 @@
                         <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime()" Header="{markup:Translate [RememberAudioTime]}" />
                         <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime()" Header="{markup:Translate [RecoveryAudioTime]}" />
                     </MenuItem>
-                    
+
                     <Separator />
-                
-                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorSelectionXGridZero()" Header="{markup:Translate [MenuMirrorSelectionXGridZero]}" IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorSelectionXGrid()" Header="{markup:Translate [MenuMirrorSelectionXGrid]}" IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
-                    <MenuItem cal:Message.Attach="MenuItemAction_MirrorLaneColors()" Header="{markup:Translate [MenuMirrorSelectionLaneColors]}" IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}" />
+
+                    <MenuItem
+                        cal:Message.Attach="MenuItemAction_MirrorSelectionXGridZero()"
+                        Header="{markup:Translate [MenuMirrorSelectionXGridZero]}"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
+                    <MenuItem
+                        cal:Message.Attach="MenuItemAction_MirrorSelectionXGrid()"
+                        Header="{markup:Translate [MenuMirrorSelectionXGrid]}"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
+                    <MenuItem
+                        cal:Message.Attach="MenuItemAction_MirrorLaneColors()"
+                        Header="{markup:Translate [MenuMirrorSelectionLaneColors]}"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}" />
                 </MenuItem>
                 <MenuItem Header="{markup:Translate [ToCopiedObjects]}">
                     <MenuItem Header="{markup:Translate [ToPaste]}">

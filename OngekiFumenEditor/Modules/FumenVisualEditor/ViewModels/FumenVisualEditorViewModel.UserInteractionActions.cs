@@ -228,14 +228,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             await IoC.Get<IFumenEditorClipboard>().PasteObjects(this, mirrorOption, placePoint);
         }
-        
+
         public void MenuItemAction_MirrorSelectionXGridZero()
         {
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
-            if (selection.Count == 0) {
+            if (selection.Count == 0)
+            {
                 return;
             }
-            
+
             var func = () => MirrorObjectsXGrid(selection, true);
             UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.MirrorSelectionXGridZero, func, func));
         }
@@ -243,10 +244,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void MenuItemAction_MirrorSelectionXGrid()
         {
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
-            if (selection.Count == 0) {
+            if (selection.Count == 0)
+            {
                 return;
             }
-            
+
             var func = () => MirrorObjectsXGrid(selection, false);
             UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.MirrorSelectionXGrid, func, func));
         }
@@ -254,20 +256,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void MirrorObjectsXGrid(IList<OngekiMovableObjectBase> objects, bool zeroCenter)
         {
             int center;
-            if (zeroCenter) {
+            if (zeroCenter)
+            {
                 center = 0;
             }
-            else {
+            else
+            {
                 var selectionBounds = objects.Aggregate((int.MaxValue, int.MinValue), (bounds, o) =>
                 {
                     var min = bounds.Item1;
                     var max = bounds.Item2;
-                    
-                    if (o.XGrid.TotalGrid < min) {
+
+                    if (o.XGrid.TotalGrid < min)
+                    {
                         min = o.XGrid.TotalGrid;
                     }
 
-                    if (o.XGrid.TotalGrid > max) {
+                    if (o.XGrid.TotalGrid > max)
+                    {
                         max = o.XGrid.TotalGrid;
                     }
 
@@ -275,8 +281,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 });
                 center = (selectionBounds.MinValue + selectionBounds.MaxValue) / 2;
             }
-            
-            foreach (var obj in objects) {
+
+            foreach (var obj in objects)
+            {
                 var diff = obj.XGrid.TotalGrid - center;
                 obj.XGrid = XGrid.FromTotalGrid(center - diff);
             }
@@ -289,23 +296,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 .Where(o => o.Children.All(c => c.IsSelected))
                 .ToList();
 
-            if (laneObjects.Count == 0) {
+            if (laneObjects.Count == 0)
+            {
                 return;
             }
 
             List<ConnectableStartObject> newLaneObjects = null;
             var executeOrRedo = () =>
             {
-                if (newLaneObjects is null) {
+                if (newLaneObjects is null)
+                {
                     newLaneObjects = MirrorLaneColors(laneObjects).ToList();
                 }
-                else {
+                else
+                {
                     Fumen.RemoveObjects(laneObjects);
                     Fumen.AddObjects(newLaneObjects);
                 }
                 newLaneObjects.ForEach(SelectLaneObjects);
             };
-            
+
             var undo = () =>
             {
                 Fumen.RemoveObjects(newLaneObjects!);
@@ -318,7 +328,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private IEnumerable<ConnectableStartObject> MirrorLaneColors(List<ConnectableStartObject> laneObjects)
         {
-            foreach (var obj in laneObjects) {
+            foreach (var obj in laneObjects)
+            {
                 LaneStartBase startNode = obj.LaneType switch
                 {
                     LaneType.Left => new LaneRightStart(),
@@ -334,14 +345,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 startNode.TGrid = obj.TGrid;
                 startNode.Tag = obj.Tag;
 
-                foreach (var child in obj.Children) {
+                foreach (var child in obj.Children)
+                {
                     var newChild = startNode.CreateChildObject();
                     newChild.XGrid = child.XGrid;
                     newChild.TGrid = child.TGrid;
                     newChild.Tag = child.Tag;
                     newChild.CurvePrecision = child.CurvePrecision;
 
-                    foreach (var curvePoint in child.PathControls) {
+                    foreach (var curvePoint in child.PathControls)
+                    {
                         newChild.AddControlObject(new LaneCurvePathControlObject()
                         {
                             RefCurveObject = newChild,
@@ -354,11 +367,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     startNode.AddChildObject(newChild);
                 }
 
-                foreach (var tap in Fumen.Taps.Where(t => t.ReferenceLaneStart == obj)) {
+                foreach (var tap in Fumen.Taps.Where(t => t.ReferenceLaneStart == obj))
+                {
                     tap.ReferenceLaneStart = startNode;
                 }
 
-                foreach (var hold in Fumen.Holds.Where(h => h.ReferenceLaneStart == obj)) {
+                foreach (var hold in Fumen.Holds.Where(h => h.ReferenceLaneStart == obj))
+                {
                     hold.ReferenceLaneStart = startNode;
                 }
 
@@ -530,6 +545,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             => KeyboardAction_FastPlaceDockableObject(LaneType.WallLeft);
         public void KeyboardAction_FastPlaceDockableObjectToWallRight()
             => KeyboardAction_FastPlaceDockableObject(LaneType.WallRight);
+
+        public void KeyboardAction_FastPlaceNewTap(ActionExecutionContext e)
+        {
+            var position = Mouse.GetPosition(e.View as FrameworkElement);
+            position.Y = ViewHeight - position.Y + Rect.MinY;
+
+            KeyboardAction_FastPlaceNewObject<Tap>(position);
+        }
+
+        public void KeyboardAction_FastPlaceNewHold(ActionExecutionContext e)
+        {
+            var position = Mouse.GetPosition(e.View as FrameworkElement);
+            position.Y = ViewHeight - position.Y + Rect.MinY;
+
+            KeyboardAction_FastPlaceNewObject<Hold>(position);
+        }
+
+        private void KeyboardAction_FastPlaceNewObject<T>(Point position) where T : OngekiObjectBase, new()
+        {
+            var tap = new T();
+            var isFirst = true;
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Add {0}".Format(typeof(T).Name), () =>
+            {
+                MoveObjectTo(tap, position);
+                Fumen.AddObject(tap);
+
+                if (isFirst)
+                {
+                    NotifyObjectClicked(tap);
+                    isFirst = false;
+                }
+            }, () =>
+            {
+                RemoveObject(tap);
+            }));
+        }
 
         public void KeyboardAction_FastPlaceDockableObject(LaneType targetType)
         {
@@ -819,7 +870,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!IsDesignMode)
                 return;
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
-
 
             var position = Mouse.GetPosition(e.View as FrameworkElement);
             position.Y = ViewHeight - position.Y + Rect.MinY;
