@@ -1603,12 +1603,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnWheelVerticalScale(MouseWheelEventArgs arg)
         {
-            var change = 0.3;
-            if (Editor.Setting.VerticalDisplayScale <= 0.7) {
-                change = 0.1;
-            } else if (Editor.Setting.VerticalDisplayScale <= 1) {
-                change = 0.15;
-            }
+            var change = Editor.Setting.VerticalDisplayScale switch
+            {
+                <= 0.7 => 0.1,
+                <= 1 => 0.15,
+                _ => 0.3
+            };
             Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta) * change, 0.1, 3);
         }
 
