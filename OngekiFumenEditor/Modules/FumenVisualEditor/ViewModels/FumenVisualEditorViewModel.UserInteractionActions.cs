@@ -1603,7 +1603,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnWheelVerticalScale(MouseWheelEventArgs arg)
         {
-            Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta) * 0.3, 0.1, 3);
+            var change = 0.3;
+            if (Editor.Setting.VerticalDisplayScale <= 0.7) {
+                change = 0.1;
+            } else if (Editor.Setting.VerticalDisplayScale <= 1) {
+                change = 0.15;
+            }
+            Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta) * change, 0.1, 3);
         }
 
         private bool isDraggingPlayerLocation = false;
