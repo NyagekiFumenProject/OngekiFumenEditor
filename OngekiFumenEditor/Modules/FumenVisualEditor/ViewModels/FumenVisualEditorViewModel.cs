@@ -148,8 +148,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public bool EnableDragging => !IsBrushMode;
         private bool isSelectRangeDragging;
-        private bool isLeftMouseDown;
 
         private bool isShowCurveControlAlways = false;
         private bool enableShowPlayerLocation;
@@ -169,7 +169,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public EditorSetting Setting { get; } = new EditorSetting();
 
-        [Import] public ICommandService CommandService;
+        public SelectRegionType SelectRegionType = SelectRegionType.Select;
 
         public FumenVisualEditorViewModel() : base()
         {
@@ -338,5 +338,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         #endregion
+    }
+
+    public enum SelectRegionType
+    {
+        Select,
+        Delete
     }
 }

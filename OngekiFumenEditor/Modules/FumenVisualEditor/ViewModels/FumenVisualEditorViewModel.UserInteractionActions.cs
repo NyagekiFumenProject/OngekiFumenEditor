@@ -1001,7 +1001,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (IsDesignMode)
             {
-                if (isLeftMouseDown)
+                if (arg.ChangedButton == MouseButton.Left)
                 {
                     if (IsRangeSelecting && SelectionCurrentCursorPosition != SelectionStartPosition)
                     {
@@ -1032,7 +1032,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }
                     }
 
-                    isLeftMouseDown = false;
                     isSelectRangeDragging = false;
                     SelectionVisibility = Visibility.Collapsed;
                     currentDraggingActionId = int.MaxValue;
@@ -1093,7 +1092,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     position.Y = Math.Max(0, Rect.MaxY - position.Y);
 
-                    isLeftMouseDown = true;
                     isSelectRangeDragging = false;
 
                     var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
@@ -1189,6 +1187,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseMove(ActionExecutionContext e)
         {
+            var args = (MouseEventArgs)e.EventArgs;
+
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
                 return;
             currentDraggingActionId = int.MaxValue;
@@ -1223,7 +1223,43 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
                 }
 
-                if (isLeftMouseDown)
+                if (IsRangeSelecting) {
+                    var rp = 1 - pos.Y / ViewHeight;
+                    var srp = 1 - mouseSelectRangeStartPosition.Y / ViewHeight;
+                    var offsetY = 0d;
+
+                    //const double dragDist = 0.7;
+                    const double trigPrecent = 0.15;
+                    const double autoScrollSpeed = 7;
+
+                    var offsetYAcc = 0d;
+                    if (rp >= (1 - trigPrecent) && dragOutBound)
+                        offsetYAcc = (rp - (1 - trigPrecent)) / trigPrecent;
+                    else if (rp <= trigPrecent && dragOutBound)
+                        offsetYAcc = rp / trigPrecent - 1;
+                    else if (rp < 1 - trigPrecent && rp > trigPrecent)
+                        dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
+                    offsetY = offsetYAcc * autoScrollSpeed;
+                    var y = Rect.MinY + Setting.JudgeLineOffsetY + offsetY;
+
+                    if (offsetY != 0)
+                    {
+                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                        ScrollTo(audioTime);
+
+                        var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
+                        await Task.Delay(1000 / 60);
+                        if (currentDraggingActionId == currentid)
+                            OnMouseMove(pos);
+                    }
+
+                    //拉框
+                    var p = pos;
+                    p.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - p.Y + offsetY));
+                    SelectionCurrentCursorPosition = new Vector2((float)p.X, (float)p.Y);
+                }
+
+                if (Mouse.LeftButton == MouseButtonState.Pressed)
                 {
                     var r = isSelectRangeDragging;
                     isSelectRangeDragging = true;
@@ -1264,30 +1300,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         ScrollTo(audioTime);
                     }
 
-                    //检查判断，确定是拖动已选物品位置，还是说拉框选择区域
-                    if (IsRangeSelecting)
-                    {
-                        //拉框
-                        var p = pos;
-                        p.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - p.Y + offsetY));
-                        SelectionCurrentCursorPosition = new Vector2((float)p.X, (float)p.Y);
-                    }
-                    else
+                    if (EnableDragging)
                     {
                         //拖动已选物件
                         var cp = pos;
                         cp.Y = ViewHeight - cp.Y + Rect.MinY;
                         //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
                         SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
-                    }
-
-                    //持续性的
-                    if (offsetY != 0)
-                    {
-                        var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
-                        await Task.Delay(1000 / 60);
-                        if (currentDraggingActionId == currentid)
-                            OnMouseMove(pos);
                     }
                 }
             }

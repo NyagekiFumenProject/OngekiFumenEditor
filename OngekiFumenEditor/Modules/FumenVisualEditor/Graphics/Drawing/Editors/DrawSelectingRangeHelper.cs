@@ -3,6 +3,7 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Numerics;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
@@ -36,7 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             Vector4 lineColor, fillColor;
-            if (target.Editor.IsBrushMode) {
+            if (target.Editor.SelectRegionType == SelectRegionType.Delete) {
                 // If this is used during brush mode, it is for the deletion rectangle
                 lineColor = LineColorDelete;
                 fillColor = FillColorDelete;

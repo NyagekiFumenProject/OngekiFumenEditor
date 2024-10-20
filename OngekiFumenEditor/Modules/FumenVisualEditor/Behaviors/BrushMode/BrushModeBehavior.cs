@@ -67,6 +67,9 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
 
     protected override void OnAttached()
     {
+        if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
+            return;
+
         var triggerCollection = Interaction.GetTriggers(AssociatedObject);
         
         // Create brush key triggers on the FumenVisualEditorView.
@@ -76,10 +79,13 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             OldTriggers.AddRange(existingTriggers);
             OldTriggers.ForEach(t => triggerCollection.Remove(t));
 
-            var newTrigger = new KeyTrigger() { Key = key };
-            newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentInputObject), Value = obj });
-            triggerCollection.Add(newTrigger);
-            NewTriggers.Add(newTrigger);
+            foreach (var mod in new[] { ModifierKeys.None, ModifierKeys.Shift }) {
+                // It's useful to hold down shift as we place multiple lanes, so bind everything to Shift+ as well.
+                var newTrigger = new KeyTrigger() { Key = key, Modifiers = mod };
+                newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentInputObject), Value = obj });
+                triggerCollection.Add(newTrigger);
+                NewTriggers.Add(newTrigger);
+            }
         }
 
         // Add mouse click events directly on the GlView.
@@ -94,6 +100,10 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             
             glTrigger.Actions.Insert(0, action);
         }
+
+        // Pressing alt normally focuses the menu bar.
+        // That is annoying when we have Alt+Click bindings, so we disable it.
+        AssociatedObject.KeyDown += ConsumeAlt;
     }
 
     protected override void OnDetaching()
@@ -115,7 +125,14 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             var glTrigger = glTriggers.First(t => t is EventTrigger et && et.EventName == eventName);
             glTrigger.Actions.Remove(action);
         }
+
+        AssociatedObject.KeyDown -= ConsumeAlt;
     }
+
+    #region Mouse handling
+
+    private bool lastLeftClickWasAltClick = false;
+    private bool lastRightClickWasAltClick = false;
 
     private void MouseMove(MouseEventArgs args)
     {
@@ -124,15 +141,25 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
         if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
             return;
 
-        if (Mouse.RightButton == MouseButtonState.Pressed) {
+        if ((!lastRightClickWasAltClick && Mouse.RightButton == MouseButtonState.Pressed)
+            || (lastLeftClickWasAltClick && Mouse.LeftButton == MouseButtonState.Pressed)) {
             var cursor = editor.CurrentCursorPosition!.Value;
 
-            if ((cursor.ToSystemNumericsVector2() - editor.SelectionStartPosition).Length() > 15) {
-                // Begin range mode
-                editor.SelectionVisibility = Visibility.Visible;
+            if (!editor.IsRangeSelecting) {
+                if ((cursor.ToSystemNumericsVector2() - editor.SelectionStartPosition).Length() > 15) {
+                    // Begin range mode
+                    editor.ClearSelection();
+                    editor.SelectionVisibility = Visibility.Visible;
+                }
+                else {
+                    // Prevent the VisualEditor mousemove from making a selection rect
+                    args.Handled = true;
+                }
             }
 
-            editor.SelectionCurrentCursorPosition = new((float)cursor.X,  (float)cursor.Y);
+            if (editor.IsRangeSelecting) {
+                editor.SelectionCurrentCursorPosition = new((float)cursor.X,  (float)cursor.Y);
+            }
         }
     }
 
@@ -144,10 +171,22 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
         var cursor = editor.CurrentCursorPosition!.Value;
 
         if (args.ChangedButton == MouseButton.Left) {
+            // If holding down alt, don't handle, use normal mouse behavior instead
+            if ((Keyboard.Modifiers & ModifierKeys.Alt) > 0) {
+                lastLeftClickWasAltClick = true;
+                editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
+            }
+
             args.Handled = true;
         } else if (args.ChangedButton == MouseButton.Right) {
-            editor.SelectionStartPosition = new((float)cursor.X, (float)cursor.Y);
-            args.Handled = true;
+            if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0) {
+                editor.SelectRegionType = SelectRegionType.Delete;
+                editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
+                args.Handled = true;
+            }
+            else {
+                lastRightClickWasAltClick = true;
+            }
         }
     }
 
@@ -158,20 +197,30 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             return;
 
         if (args.ChangedButton == MouseButton.Left) {
-            PerformBrush();
-            args.Handled = true;
+            if (!lastLeftClickWasAltClick || !editor.IsRangeSelecting) {
+                PerformBrush();
+                args.Handled = true;
+            }
         } else if (args.ChangedButton == MouseButton.Right) {
-            if (editor.IsRangeSelecting) {
-                PerformRemoveGroup();
-            }
-            else {
-                PerformRemove();
-            }
+            if (!lastRightClickWasAltClick) {
+                if (editor.IsRangeSelecting) {
+                    PerformRemoveGroup();
+                }
+                else {
+                    PerformRemove();
+                }
 
-            editor.SelectionVisibility = Visibility.Hidden;
-            args.Handled = true;
+                editor.SelectRegionType = SelectRegionType.Select;
+                editor.SelectionVisibility = Visibility.Hidden;
+                args.Handled = true;
+            }
         }
+
+        lastLeftClickWasAltClick = false;
+        lastRightClickWasAltClick = false;
     }
+
+    #endregion
 
     private void PerformBrush()
     {
@@ -208,6 +257,8 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             editor!.MoveObjectTo(ongekiObject, editor.CurrentCursorPosition!.Value);
             editor.Fumen.AddObject(ongekiObject);
             editor.InteractiveManager.GetInteractive(ongekiObject).OnMoveCanvas(ongekiObject, editor.CurrentCursorPosition.Value, editor);
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == 0)
+                editor.ClearSelection();
             if (CurrentInputObject?.AddToSelection ?? false)
                 editor.NotifyObjectClicked(ongekiObject);
         }
@@ -277,6 +328,14 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
         void Undo()
         {
             editor.Fumen.AddObjects(hits);
+        }
+
+    }
+
+    private static void ConsumeAlt(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.System && e.SystemKey == Key.LeftAlt || e.SystemKey == Key.RightAlt) {
+            e.Handled = true;
         }
     }
 
