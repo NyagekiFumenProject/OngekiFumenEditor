@@ -1014,20 +1014,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             var compositeAction = UndoRedoManager.EndCombineAction(Resources.DragObjects);
                             UndoRedoManager.ExecuteAction(compositeAction);
                         }
-                        else
-                        {
+                        else {
                             //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
                             //if no object clicked or alt is pressing , just to process as brush actions.
-                            if (mouseDownHitObject is null || Keyboard.Modifiers.HasFlag(ModifierKeys.Alt))
-                            {
-                                //for object brush
-                                if (BrushMode)
-                                {
-                                    TryApplyBrushObject(pos);
-                                }
-                            }
-                            else
-                            {
+                            if (mouseDownHitObject is not null && !Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
                                 if (mouseDownHitObjectPosition is Point p)
                                     mouseDownHitObject = NotifyObjectClicked(mouseDownHitObject, mouseDownNextHitObject);
                             }
@@ -1116,11 +1106,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }).FilterNull().OrderBy(x => x.Id);
 
                         hitResult = hitResult.Concat(lanes).Distinct().ToList();
-                    }
-                    if (BrushMode)
-                    {
-                        //笔刷模式下，忽略点击线段和节点~
-                        hitResult.RemoveAll(x => x is ConnectableObjectBase);
                     }
 
                     var idx = Math.Max(0, hitResult.IndexOf(mouseDownHitObject));
@@ -1309,72 +1294,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private void TryApplyBrushObject(Point p)
-        {
-            if (BrushMode && BrushModeBehavior.CurrentInputObject is not null) {
-            }
 
-            var copyManager = IoC.Get<IFumenEditorClipboard>();
-            
-            if (!(copyManager.CurrentCopiedObjects.IsOnlyOne(out var c) && c is OngekiObjectBase copySouceObj))
-                return;
-
-            var newObject = copySouceObj.CopyNew();
-            if (newObject is null
-                //不支持笔刷模式下新建以下玩意
-                || newObject is ConnectableStartObject)
-            {
-                ToastNotify(Resources.NotSupportInBrushMode.Format(copySouceObj?.Name));
-                return;
-            }
-
-            p.Y = ViewHeight - p.Y + Rect.MinY;
-            var v = new Vector2((float)p.X, (float)p.Y);
-
-            System.Action undo = () =>
-            {
-                if (newObject is ConnectableChildObjectBase childObject)
-                {
-                    (copySouceObj as ConnectableChildObjectBase)?.ReferenceStartObject.RemoveChildObject(childObject);
-                }
-                else
-                {
-                    RemoveObject(newObject);
-                }
-            };
-
-            System.Action redo = async () =>
-            {
-                InteractiveManager.GetInteractive(newObject).OnMoveCanvas(newObject, p, this);
-                var x = newObject is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, this) : 0;
-                var y = newObject is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, this) : 0;
-                var dist = Vector2.Distance(v, new Vector2((float)x, (float)y));
-                if (dist > 20)
-                {
-                    Log.LogDebug($"dist : {dist:F2} > 20 , undo&&discard");
-                    undo();
-
-                    Mouse.OverrideCursor = Cursors.No;
-                    await Task.Delay(100);
-                    Mouse.OverrideCursor = Cursors.Arrow;
-                }
-                else
-                {
-                    if (newObject is ConnectableChildObjectBase childObject)
-                    {
-                        //todo there is a bug.
-                        (copySouceObj as ConnectableChildObjectBase)?.ReferenceStartObject.AddChildObject(childObject);
-                    }
-                    else
-                    {
-                        Fumen.AddObject(newObject);
-                    }
-                }
-            };
-
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddObjectsByBrush, redo, undo));
-        }
-        
         #region Quick Add Actions
 
         public void KeyboardAction_AddNewWallLeft(bool clearSelection = true)
