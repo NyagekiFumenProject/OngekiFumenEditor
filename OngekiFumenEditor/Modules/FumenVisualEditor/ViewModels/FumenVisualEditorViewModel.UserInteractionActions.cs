@@ -505,15 +505,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var curTime = CurrentPlayTime;
             var rememberAction = LambdaUndoAction.Create(action.Name, () =>
-                {
-                    curTime = CurrentPlayTime;
-                    action.Execute();
-                },
-                () =>
-                {
-                    action.Undo();
-                    ScrollTo(curTime);
-                });
+            {
+                curTime = CurrentPlayTime;
+                action.Execute();
+            },
+            () =>
+            {
+                action.Undo();
+                ScrollTo(curTime);
+            });
 
             UndoRedoManager.ExecuteAction(rememberAction);
         }
@@ -650,12 +650,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (group.Key == typeof(LaneCurvePathControlObject))
                     {
                         foreach (var item in group.OfType<LaneCurvePathControlObject>().Select(x =>
-                                 {
-                                     if (cacheCurveControlsMap.TryGetValue(x, out var val))
-                                         return (x, val.refObj, val.idx);
-                                     else
-                                         return default;
-                                 }).Where(x => x.x is not null).GroupBy(x => x.refObj))
+                        {
+                            if (cacheCurveControlsMap.TryGetValue(x, out var val))
+                                return (x, val.refObj, val.idx);
+                            else
+                                return default;
+                        }).Where(x => x.x is not null).GroupBy(x => x.refObj))
                         {
                             var refObj = item.Key;
                             foreach ((var cp, _, var idx) in item.OrderBy(x => x.idx))
