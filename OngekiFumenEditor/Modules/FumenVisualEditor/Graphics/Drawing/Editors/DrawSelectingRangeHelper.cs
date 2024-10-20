@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             Vector4 lineColor, fillColor;
-            if (target.Editor.BrushMode) {
+            if (target.Editor.IsBrushMode) {
                 // If this is used during brush mode, it is for the deletion rectangle
                 lineColor = LineColorDelete;
                 fillColor = FillColorDelete;

@@ -30,9 +30,11 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Gemini.Framework.Commands;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -796,6 +798,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         ? Flick.FlickDirection.Right
                         : Flick.FlickDirection.Left;
             }
+        }
+
+        public void KeyboardAction_SwitchBrushModeAction()
+        {
+            var command = IoC.Get<ICommandService>().GetCommand(new BrushModeSwitchCommandDefinition());
+            CommandRouterHelper.ExecuteCommand(command).Wait();
         }
 
         public bool CheckAndNotifyIfPlaceBeyondDuration(Point placePoint)

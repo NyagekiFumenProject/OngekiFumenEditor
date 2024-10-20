@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Gemini.Framework.Commands;
 using Microsoft.Xaml.Behaviors;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -150,9 +151,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private bool isSelectRangeDragging;
         private bool isLeftMouseDown;
 
-        public bool BrushMode
-            => Interaction.GetBehaviors((DependencyObject)GetView()).Contains(BrushModeBehavior);
-
         private bool isShowCurveControlAlways = false;
         private bool enableShowPlayerLocation;
 
@@ -166,7 +164,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public bool IsBrushMode
+            => Interaction.GetBehaviors((DependencyObject)GetView()).Contains(BrushModeBehavior);
+
         public EditorSetting Setting { get; } = new EditorSetting();
+
+        [Import] public ICommandService CommandService;
 
         public FumenVisualEditorViewModel() : base()
         {

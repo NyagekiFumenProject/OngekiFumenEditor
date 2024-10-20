@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch
         {
             base.Update(command);
             command.Enabled = editorDocumentManager.CurrentActivatedEditor is not null;
-            command.Checked = editorDocumentManager.CurrentActivatedEditor?.BrushMode ?? false;
+            command.Checked = editorDocumentManager.CurrentActivatedEditor?.IsBrushMode ?? false;
         }
 
         public override Task Run(Command command)
@@ -33,14 +33,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch
             if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor) {
                 var behaviors = Interaction.GetBehaviors((FumenVisualEditorView)editor.GetView());
 
-                if (editor.BrushMode) {
+                if (editor.IsBrushMode) {
                     behaviors.Remove(editor.BrushModeBehavior);
                 }
                 else {
                     behaviors.Add(editor.BrushModeBehavior);
                 }
-                editor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.BrushMode));
-                editor.ToastNotify($"{Resources.BrushMode}{(editor.BrushMode ? Resources.Enable : Resources.Disable)}");
+                editor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.IsBrushMode));
+                editor.ToastNotify($"{Resources.BrushMode}{(editor.IsBrushMode ? Resources.Enable : Resources.Disable)}");
             }
 
             return TaskUtility.Completed;
