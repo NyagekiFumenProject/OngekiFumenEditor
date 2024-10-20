@@ -1,0 +1,72 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Dialogs.ConfigKeyBindingDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="设置快捷键"
+    Width="300"
+    Background="{DynamicResource EnvironmentWindowBackground}"
+    SaveWindowPosition="True"
+    ShowMaxRestoreButton="False"
+    ShowMinButton="False"
+    SizeToContent="WidthAndHeight"
+    Style="{DynamicResource MainWindowStyle}"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <Window.DataContext>
+        <Binding RelativeSource="{RelativeSource Self}">
+        </Binding>
+    </Window.DataContext>
+    <StackPanel Margin="10">
+        <TextBlock
+            HorizontalAlignment="Center"
+            FontSize="16"
+            Text="{Binding Definition.Name, StringFormat=请为 {0} 输入合适的快捷键组合:}" />
+        <TextBlock
+            Margin="0,15"
+            HorizontalAlignment="Center"
+            FontSize="25"
+            FontWeight="Bold"
+            Text="{Binding CurrentExpression}">
+        </TextBlock>
+        <TextBlock
+            HorizontalAlignment="Center"
+            FontSize="16"
+            FontWeight="Bold"
+            Text="{Binding ConflictDefinition.Name, StringFormat=与 {0} 的绑定键位起冲突}" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Button
+                Margin="5"
+                Padding="10,5,10,5"
+                Click="Button_Click_1"
+                FontSize="16">
+                确定
+            </Button>
+
+            <Button
+                Grid.Column="1"
+                Margin="5"
+                Padding="10,5,10,5"
+                Click="Button_Click"
+                FontSize="16">
+                重置
+            </Button>
+
+            <Button
+                Grid.Column="2"
+                Margin="5"
+                Padding="10,5,10,5"
+                Click="Button_Click_2"
+                FontSize="16">
+                清空绑定
+            </Button>
+        </Grid>
+    </StackPanel>
+</mah:MetroWindow>
