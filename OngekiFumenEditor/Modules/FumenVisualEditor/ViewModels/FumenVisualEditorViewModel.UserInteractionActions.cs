@@ -1510,22 +1510,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
         }
 
-        public void ScrollPage(int page)
-        {
-            TGrid changeGrid;
-            
-            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(ViewHeight, this).ToList() is [{ } single]) {
-                changeGrid = single;
-            }
-            else {
-                changeGrid = TGridCalculator.ConvertYToTGrid_DesignMode(ViewHeight, this);
-            }
-            
-            var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);
-
-            ScrollTo(GetCurrentTGrid() + new GridOffset(change.Unit, change.Grid));
-        }
-
         private void OnWheelScrollViewer(MouseWheelEventArgs arg)
         {
             if (IsDesignMode && Setting.JudgeLineAlignBeat)
@@ -1591,8 +1575,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 OnWheelBeatSplit(arg);
             else if (Keyboard.IsKeyDown(Key.LeftShift))
                 OnWheelXGridUnit(arg);
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl))
-                OnWheelVerticalScale(arg);
             else
                 OnWheelScrollViewer(arg);
         }
