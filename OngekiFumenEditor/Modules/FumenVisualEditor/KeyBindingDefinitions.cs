@@ -106,5 +106,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
         public static KeyBindingDefinition KBD_PasteCopiesObjects = new KeyBindingDefinition(
             "kbd_editor_PasteCopiesObjects",
              ModifierKeys.Control, Key.V);
+
+        [Export]
+        //         [Key PageDown] = [Action ScrollPage(-1)]   "
+        public static KeyBindingDefinition KBD_ScrollPageDown = new KeyBindingDefinition(
+            "kbd_editor_ScrollPageDown",
+             Key.PageDown);
+
+        [Export]
+        //        [Key PageUp] = [Action ScrollPage(1)];    "
+        public static KeyBindingDefinition KBD_ScrollPageUp = new KeyBindingDefinition(
+            "kbd_editor_ScrollPageUp",
+             Key.PageUp);
+
     }
 }

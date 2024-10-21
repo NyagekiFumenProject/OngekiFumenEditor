@@ -72,12 +72,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public Visibility EditorLockedVisibility =>
             IsLocked
-            ? Visibility.Hidden : Visibility.Visible;
+                ? Visibility.Hidden : Visibility.Visible;
 
         public Visibility EditorObjectVisibility =>
             IsLocked || // 编辑器被锁住
             IsUserRequestHideEditorObject // 用户要求隐藏(比如按下Q)
-            ? Visibility.Hidden : Visibility.Visible;
+                ? Visibility.Hidden : Visibility.Visible;
 
         public bool IsDesignMode => EditorObjectVisibility == Visibility.Visible;
         public bool IsPreviewMode => !IsDesignMode;
@@ -1527,6 +1527,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
         }
 
+        public void ScrollPage(int page)
+        {
+            TGrid changeGrid;
+            
+            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(ViewHeight, this).ToList() is [{ } single]) {
+                changeGrid = single;
+            }
+            else {
+                changeGrid = TGridCalculator.ConvertYToTGrid_DesignMode(ViewHeight, this);
+            }
+            
+            var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);
+
+            ScrollTo(GetCurrentTGrid() + new GridOffset(change.Unit, change.Grid));
+        }
+
         private void OnWheelScrollViewer(MouseWheelEventArgs arg)
         {
             if (IsDesignMode && Setting.JudgeLineAlignBeat)
@@ -1592,6 +1608,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 OnWheelBeatSplit(arg);
             else if (Keyboard.IsKeyDown(Key.LeftShift))
                 OnWheelXGridUnit(arg);
+            else if (Keyboard.IsKeyDown(Key.LeftCtrl))
+                OnWheelVerticalScale(arg);
             else
                 OnWheelScrollViewer(arg);
         }
@@ -1599,8 +1617,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /*
          0:            7       11    13 14
          3:     3     6    9      12
-         2: 1 2   4      8  
-         5:         5        10            
+         2: 1 2   4      8
+         5:         5        10
          */
         private readonly static int[] xGridUnitUpJumpTable = new[] { 0, 1, 2, 3, 4, 5, 3, 7, 0, 3, 0, 0, 0, 0, 0, 0 };
         private readonly static int[] xGridUnitDownJumpTable = new[] { 0, 0, -1, 0, -2, 0, -3, 0, -4, -3, -5, 0, -3, 0, 0, 0 };
@@ -1618,7 +1636,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /*
          0:                    11    13
          3:     3     6    9      12
-         2: 1 2   4      8  
+         2: 1 2   4      8
          5:         5        10            15
          7:            7                14
          */
@@ -1633,6 +1651,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var newVal = jump + Setting.BeatSplit;
             if (newVal != 0 && newVal <= 16)
                 Setting.BeatSplit = newVal;
+        }
+
+        private void OnWheelVerticalScale(MouseWheelEventArgs arg)
+        {
+            var change = Editor.Setting.VerticalDisplayScale switch
+            {
+                <= 0.7 => 0.1,
+                <= 1 => 0.15,
+                _ => 0.3
+            };
+            Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta) * change, 0.1, 3);
         }
 
         private bool isDraggingPlayerLocation = false;

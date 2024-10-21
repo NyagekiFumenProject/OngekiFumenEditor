@@ -92,12 +92,7 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
                 return false;
 
             var modifier = Keyboard.Modifiers;
-#if DEBUG
-            var str = $"{KeyBindingDefinition.FormatToExpression(key, modifier)} check {defination.Name}({KeyBindingDefinition.FormatToExpression(defination)})";
-            if (QueryKeyBinding(key, modifier) is KeyBindingDefinition query)
-                str += $", query {query.Name}({KeyBindingDefinition.FormatToExpression(query)})";
-            Log.LogDebug(str);
-#endif
+
             return (key == defination.Key) && (modifier == GetActualModifiers(e.Key, defination.Modifiers));
         }
 

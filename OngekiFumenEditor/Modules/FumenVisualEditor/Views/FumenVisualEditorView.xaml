@@ -60,6 +60,8 @@
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastSwitchFlickDirection}" Message="KeyboardAction_FastSwitchFlickDirection($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_CopySelectedObjects}" Message="MenuItemAction_CopySelectedObjects($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_PasteCopiesObjects}" Message="KeyboardAction_PasteCopiesObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ScrollPageDown}" Message="ScrollPage(-1)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ScrollPageUp}" Message="ScrollPage(1)" />
         <!--#endregion-->
     </i:Interaction.Triggers>
 
