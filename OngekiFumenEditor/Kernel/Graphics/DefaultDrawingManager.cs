@@ -1,6 +1,8 @@
 ﻿//#define OGL_LOG
+using OngekiFumenEditor.DirectX;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.Wgl;
 using OpenTK.Windowing.Common;
 using OpenTK.Wpf;
 using System;
@@ -47,13 +49,13 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
 		private void OnInitOpenGL()
 		{
-			if (Properties.ProgramSetting.Default.OutputGraphicsLog)
-			{
+			//if (Properties.ProgramSetting.Default.OutputGraphicsLog)
+			//{
 				GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
 				GL.Enable(EnableCap.DebugOutput);
-				if (Properties.ProgramSetting.Default.GraphicsLogSynchronous)
+				//if (Properties.ProgramSetting.Default.GraphicsLogSynchronous)
 					GL.Enable(EnableCap.DebugOutputSynchronous);
-			}
+			//}
 
 			GL.ClearColor(System.Drawing.Color.Black);
 			GL.Enable(EnableCap.Blend);
@@ -82,11 +84,12 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
 		private static void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
 		{
-			if (id == 131185)
-				return;
+			//if (id == 131185)
+			//	return;
 
 			var str = Marshal.PtrToStringAnsi(message, length);
 			Log.LogDebug($"[{source}.{type}]{id}:  {str}");
+			System.Diagnostics.Debug.WriteLine($"[{source}.{type}]{id}:  {str}");
 		}
 
 		public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)
@@ -94,7 +97,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 			return initTaskSource.Task;
 		}
 
-		public Task CreateGraphicsContext(GLWpfControl glView, CancellationToken cancellation = default)
+		public Task CreateGraphicsContext(Direct3DHostControl glView, CancellationToken cancellation = default)
 		{
 			var isCompatability = Properties.ProgramSetting.Default.GraphicsCompatability;
 			var isOutputLog = Properties.ProgramSetting.Default.OutputGraphicsLog;
@@ -121,8 +124,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 			Log.LogDebug($"GLWpfControlSettings.Version: {setting.MajorVersion}.{setting.MinorVersion}");
 			Log.LogDebug($"GLWpfControlSettings.GraphicsContextFlags: {setting.GraphicsContextFlags}");
 			Log.LogDebug($"GLWpfControlSettings.GraphicsProfile: {setting.GraphicsProfile}");
-
-			glView.Start(setting);
+			glView.Start();
 
 			return Task.CompletedTask;
 		}

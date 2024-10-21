@@ -17,6 +17,7 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels"
     xmlns:wpf="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
+    xmlns:d3d="clr-namespace:OngekiFumenEditor.DirectX"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:AudioPlayerToolViewerViewModel,
                                      IsDesignTimeCreatable=True}"
@@ -40,13 +41,14 @@
                 Visibility="{Binding IsShowWaveform, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static sys:Boolean.TrueString}}">
                 <Line Height="2" Stroke="Red">
                 </Line>
-                <wpf:GLWpfControl
+                <d3d:Direct3DHostControl x:Name="glView" Height="150" Margin="0,0,0,5" SizeChanged="GLWpfControl_SizeChanged"></d3d:Direct3DHostControl>
+                <!--<wpf:GLWpfControl
                     x:Name="glView"
                     Height="150"
                     Margin="0,0,0,5"
                     Ready="GLWpfControl_Ready"
                     SizeChanged="GLWpfControl_SizeChanged">
-                </wpf:GLWpfControl>
+                </wpf:GLWpfControl>-->
 
                 <StackPanel Margin="0,5,0,5">
                     <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [VisualizerRenderOption]}">

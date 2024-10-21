@@ -15,6 +15,7 @@ using Gemini.Framework;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.DirectX;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Scheduler;
@@ -132,7 +133,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public IPerfomenceMonitor PerfomenceMonitor { get; private set; } = new DummyPerformenceMonitor();
 
-    public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
+    public void OnRenderSizeChanged(Direct3DHostControl glView, SizeChangedEventArgs sizeArg)
     {
         Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
 
@@ -145,7 +146,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
     }
 
-    public async void PrepareRenderLoop(GLWpfControl openGLView)
+    public async void PrepareRenderLoop(Direct3DHostControl openGLView)
     {
         Log.LogDebug("ready.");
         await IoC.Get<IDrawingManager>().CheckOrInitGraphics();

@@ -16,6 +16,7 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
+    xmlns:d3d="clr-namespace:OngekiFumenEditor.DirectX"
     cal:Message.Attach="[Key OemTilde] = [Action KeyboardAction_FastPlaceDockableObjectToWallLeft]; [Key D4] = [Action KeyboardAction_FastPlaceDockableObjectToWallRight]; [Key D3] = [Action KeyboardAction_FastPlaceDockableObjectToRight];[Key H] = [Action KeyboardAction_FastPlaceNewHold($executionContext)];[Key T] = [Action KeyboardAction_FastPlaceNewTap($executionContext)]; [Key D2] = [Action KeyboardAction_FastPlaceDockableObjectToCenter]; [Key D1] = [Action KeyboardAction_FastPlaceDockableObjectToLeft]; [Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];     [Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];     [Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];     [Key Escape] = [Action KeyboardAction_CancelSelectingObjects];   [Key C] = [Action KeyboardAction_FastSetObjectIsCritical($executionContext)];   [Key Q] = [Action KeyboardAction_HideOrShow];[Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)]; [Key F] = [Action KeyboardAction_FastSwitchFlickDirection($executionContext)]; [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects]; [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];    "
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel}"
     d:DesignHeight="450"
@@ -93,11 +94,12 @@
                     IsChecked="{Binding IsDisplayFPS}" />
             </ContextMenu>
         </Grid.ContextMenu>
-        <opentkcontrol:GLWpfControl
+        <!--<opentkcontrol:GLWpfControl
             x:Name="glView"
             cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
             Ready="glView_Ready"
-            SizeChanged="glView_SizeChanged" />
+            SizeChanged="glView_SizeChanged" />-->
+        <d3d:Direct3DHostControl x:Name="glView" SizeChanged="glView_SizeChanged"></d3d:Direct3DHostControl>
         <TextBlock
             HorizontalAlignment="Left"
             VerticalAlignment="Top"

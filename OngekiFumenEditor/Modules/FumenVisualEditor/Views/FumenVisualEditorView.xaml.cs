@@ -14,12 +14,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 		public FumenVisualEditorView()
 		{
 			InitializeComponent();
+			DataContext = new FumenVisualEditorViewModel();
+			glView.Ready += glView_Ready;
 			IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
+			glView.InitContext();
 		}
 
 		private void glView_Ready()
 		{
-			Dispatcher.InvokeAsync(() =>
+			Dispatcher.Invoke(() =>
 			{
 				if (DataContext is IDrawingContext fumenPreviewer)
 				{

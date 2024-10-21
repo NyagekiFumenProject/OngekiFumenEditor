@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using OngekiFumenEditor.DirectX;
+using OpenTK.Mathematics;
 using OpenTK.Wpf;
 using System;
 using System.Windows;
@@ -46,8 +47,8 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         IPerfomenceMonitor PerfomenceMonitor { get; }
 
-        void PrepareRenderLoop(GLWpfControl glView);
-        void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs e);
+        void PrepareRenderLoop(Direct3DHostControl glView);
+        void OnRenderSizeChanged(Direct3DHostControl glView, SizeChangedEventArgs e);
 
         void Render(TimeSpan ts);
     }

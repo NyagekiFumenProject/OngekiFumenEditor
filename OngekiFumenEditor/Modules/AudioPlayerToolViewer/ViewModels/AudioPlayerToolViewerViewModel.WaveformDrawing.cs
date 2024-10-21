@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using ControlzEx.Standard;
+using OngekiFumenEditor.DirectX;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
@@ -149,7 +150,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
         }
 
-        public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
+        public void OnRenderSizeChanged(Direct3DHostControl glView, SizeChangedEventArgs sizeArg)
         {
             Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
             var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
@@ -163,7 +164,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             RecalcViewProjectionMatrix();
         }
 
-        public async void PrepareRenderLoop(GLWpfControl glView)
+        public async void PrepareRenderLoop(Direct3DHostControl glView)
         {
             Log.LogDebug($"ready.");
             await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
