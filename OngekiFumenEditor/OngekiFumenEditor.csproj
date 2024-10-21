@@ -13,12 +13,23 @@
 		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<BuildDateTime>$([System.DateTime]::UtcNow.AddHours(8).ToString("yyyy/M/dd H:mm:ss.fff"))</BuildDateTime>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+			<_Parameter1>BuildDateTime</_Parameter1>
+			<_Parameter2>$(BuildDateTime)</_Parameter2>
+		</AssemblyAttribute>
+	</ItemGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 	  <DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <DebugType>embedded</DebugType>
+	  <DebugType>none</DebugType>
 	</PropertyGroup>
 
 	<ItemGroup>

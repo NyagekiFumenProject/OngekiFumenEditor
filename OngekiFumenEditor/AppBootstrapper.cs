@@ -174,7 +174,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         }
     }
 
-    private async void OnStartupForCMD(object sender, StartupEventArgs e)
+    public async void OnStartupForCMD(object sender, StartupEventArgs e)
     {
         await IoC.Get<ISchedulerManager>().Init();
 
@@ -191,7 +191,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         }
     }
 
-    private async void OnStartupForGUI(object sender, StartupEventArgs e)
+    public async void OnStartupForGUI(object sender, StartupEventArgs e)
     {
         InitExceptionCatcher();
         LogBaseInfos();
