@@ -577,7 +577,7 @@
     <value>(值越大,滚动跨度越大)</value>
   </data>
   <data name="EditorMustBeDesignMode" xml:space="preserve">
-    <value>请先将编辑器切换到设计模式</value>
+    <value>请先将编辑器切换到编辑模式</value>
   </data>
   <data name="EditorTarget" xml:space="preserve">
     <value>编辑器目标</value>
@@ -1213,7 +1213,7 @@
     <value>记忆/恢复编辑器时间</value>
   </data>
   <data name="RememberUndoPlace" xml:space="preserve">
-    <value>记录操作位置，设计模式中撤回时如果不在位置内则跳转此位置</value>
+    <value>记录操作位置，编辑模式中撤回时如果不在位置内则跳转此位置</value>
   </data>
   <data name="Render" xml:space="preserve">
     <value>渲染器</value>
@@ -1736,5 +1736,80 @@
   </data>
   <data name="AboutWindow" xml:space="preserve">
     <value>关于</value>
+  </data>
+  <data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
+    <value>快速调整已选的物件Critical属性</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToWallLeft" xml:space="preserve">
+    <value>快速放置依附物件到WallLeft轨道上</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToWallRight" xml:space="preserve">
+    <value>快速放置依附物件到WallRight轨道上</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToRight" xml:space="preserve">
+    <value>快速放置依附物件到Right轨道上</value>
+  </data>
+  <data name="kbd_editor_FastPlaceNewHold" xml:space="preserve">
+    <value>快速放置新的Hold物件</value>
+  </data>
+  <data name="kbd_editor_FastPlaceNewTap" xml:space="preserve">
+    <value>快速放置新的Tap物件</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToCenter" xml:space="preserve">
+    <value>快速放置依附物件到Center轨道上</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToLeft" xml:space="preserve">
+    <value>快速放置依附物件到Left轨道上</value>
+  </data>
+  <data name="kbd_editor_DeleteSelectingObjects" xml:space="preserve">
+    <value>删除已选物件</value>
+  </data>
+  <data name="kbd_editor_SelectAllObjects" xml:space="preserve">
+    <value>选取所有物件</value>
+  </data>
+  <data name="kbd_editor_CancelSelectingObjects" xml:space="preserve">
+    <value>取消选择已选物件</value>
+  </data>
+  <data name="kbd_editor_HideOrShow" xml:space="preserve">
+    <value>切换到预览模式或编辑模式</value>
+  </data>
+  <data name="kbd_editor_FastAddConnectableChild" xml:space="preserve">
+    <value>快速放置轨道子节点</value>
+  </data>
+  <data name="kbd_editor_FastSwitchFlickDirection" xml:space="preserve">
+    <value>快速变更Flick物件的方向</value>
+  </data>
+  <data name="kbd_editor_CopySelectedObjects" xml:space="preserve">
+    <value>复制(可复制的)已选物件</value>
+  </data>
+  <data name="kbd_editor_PasteCopiesObjects" xml:space="preserve">
+    <value>粘贴已被复制的物件</value>
+  </data>
+  <data name="kbd_editor_ScrollPageDown" xml:space="preserve">
+    <value>编辑器向下翻页</value>
+  </data>
+  <data name="kbd_editor_ScrollPageUp" xml:space="preserve">
+    <value>编辑器向上翻页</value>
+  </data>
+  <data name="ComfirmResetAllKeybindingDefinitions" xml:space="preserve">
+    <value>是否将所有按键绑定都重置到默认值?</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>变更</value>
+  </data>
+  <data name="KeyBindingConflictDetect" xml:space="preserve">
+    <value>与 {0} 的绑定键位起冲突</value>
+  </data>
+  <data name="AssignKeyBinding" xml:space="preserve">
+    <value>请为 {0} 输入合适的快捷键组合</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="AssignKeybind" xml:space="preserve">
+    <value>设置键位</value>
   </data>
 </root>

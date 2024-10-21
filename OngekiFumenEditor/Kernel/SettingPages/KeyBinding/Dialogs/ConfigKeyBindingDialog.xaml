@@ -3,9 +3,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="设置快捷键"
+    Title="{markup:Translate [AssignKeybind]}"
     Width="300"
     Background="{DynamicResource EnvironmentWindowBackground}"
     SaveWindowPosition="True"
@@ -22,8 +23,14 @@
     <StackPanel Margin="10">
         <TextBlock
             HorizontalAlignment="Center"
-            FontSize="16"
-            Text="{Binding Definition.Name, StringFormat=请为 {0} 输入合适的快捷键组合:}" />
+            FontSize="16" >
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                    <markup:Translate Path="[AssignKeyBinding]"/>
+                    <Binding Path="Definition.Name"/>
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
         <TextBlock
             Margin="0,15"
             HorizontalAlignment="Center"
@@ -34,8 +41,16 @@
         <TextBlock
             HorizontalAlignment="Center"
             FontSize="16"
-            FontWeight="Bold"
-            Text="{Binding ConflictDefinition.Name, StringFormat=与 {0} 的绑定键位起冲突}" />
+            Visibility="{Binding ConflictDefinition,Converter={StaticResource NullToVisibilityConverter} }"
+            Foreground="OrangeRed"
+            FontWeight="Bold" >
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                    <markup:Translate Path="[KeyBindingConflictDetect]"/>
+                    <Binding Path="ConflictDefinition.Name"/>
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
@@ -46,8 +61,8 @@
                 Margin="5"
                 Padding="10,5,10,5"
                 Click="Button_Click_1"
+                Content="{markup:Translate [Comfirm]}"
                 FontSize="16">
-                确定
             </Button>
 
             <Button
@@ -55,8 +70,8 @@
                 Margin="5"
                 Padding="10,5,10,5"
                 Click="Button_Click"
+                Content="{markup:Translate [Clear]}"
                 FontSize="16">
-                重置
             </Button>
 
             <Button
@@ -64,8 +79,8 @@
                 Margin="5"
                 Padding="10,5,10,5"
                 Click="Button_Click_2"
+                Content="{markup:Translate [Reset]}"
                 FontSize="16">
-                清空绑定
             </Button>
         </Grid>
     </StackPanel>

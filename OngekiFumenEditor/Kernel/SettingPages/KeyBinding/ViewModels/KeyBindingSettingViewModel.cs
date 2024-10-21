@@ -6,8 +6,12 @@ using OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Dialogs;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.Utils;
+using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Windows;
+using System.Windows.Input;
 
 namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
 {
@@ -21,14 +25,50 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
         {
             keybindingManager = IoC.Get<IKeyBindingManager>();
 
-            Definitions = keybindingManager.KeyBindingDefinations.ToArray();
+            definitions = keybindingManager.KeyBindingDefinations.ToArray();
+            UpdateDisplayList();
+        }
+
+        private void UpdateDisplayList()
+        {
+            Definitions.Clear();
+            var list = definitions.AsEnumerable();
+
+            if (IsShowNotAssignOnly)
+                list = list.Where(x => x.Key == Key.None);
+
+            if (!string.IsNullOrWhiteSpace(FilterKeywords))
+                list = list.Where(x => string.Join(" ", [
+                    x.Name,
+                    x.Key,
+                    x.Modifiers,
+                    x.ConfigKey
+                    ]).Contains(FilterKeywords, StringComparison.InvariantCultureIgnoreCase));
+
+            Definitions.AddRange(list);
         }
 
         public string SettingsPagePath => "快捷键";
 
         public string SettingsPageName => "键位设置";
 
-        public KeyBindingDefinition[] Definitions { get; }
+        private KeyBindingDefinition[] definitions;
+
+        public ObservableCollection<KeyBindingDefinition> Definitions { get; } = new();
+
+        private bool isShowNotAssignOnly;
+        public bool IsShowNotAssignOnly
+        {
+            get => isShowNotAssignOnly;
+            set => Set(ref isShowNotAssignOnly, value);
+        }
+
+        private string filterKeywords;
+        public string FilterKeywords
+        {
+            get => filterKeywords;
+            set => Set(ref filterKeywords, value);
+        }
 
         public void ApplyChanges()
         {
@@ -46,6 +86,15 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
                 if (KeyBindingDefinition.TryParseExpression(dialog.CurrentExpression, out var newKey, out var newModifier))
                     keybindingManager.ChangeKeyBinding(definition, newKey, newModifier);
             }
+            if (dialog.ConflictDefinition is KeyBindingDefinition conflictDefinition)
+                keybindingManager.ChangeKeyBinding(conflictDefinition, Key.None, ModifierKeys.None);
+        }
+        public void ResetAllDefinitions()
+        {
+            if (MessageBox.Show(Resources.ComfirmResetAllKeybindingDefinitions, Resources.Warning, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                return;
+            foreach (var definition in Definitions)
+                keybindingManager.DefaultKeyBinding(definition);
         }
     }
 }

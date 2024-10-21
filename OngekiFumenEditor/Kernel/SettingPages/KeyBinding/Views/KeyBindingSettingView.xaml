@@ -48,7 +48,7 @@
                         Margin="30,3,3,3"
                         Padding="10,5"
                         cal:Message.Attach="ChangeKeybind($executionContext)"
-                        Content="更改绑定" />
+                        Content="{markup:Translate [Change]}" />
                 </Grid>
             </DataTemplate>
         </ItemsControl.ItemTemplate>

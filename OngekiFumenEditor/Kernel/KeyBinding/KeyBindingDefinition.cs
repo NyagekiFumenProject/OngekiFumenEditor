@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
 
         public string ConfigKey => resourceName;
 
-        public string Name => resourceName/*Resources.ResourceManager.GetString(resourceName)*/;
+        public string Name => Resources.ResourceManager.GetString(resourceName);
 
         public KeyBindingDefinition(string resourceName, Key defaultKey) : this(resourceName, ModifierKeys.None, defaultKey)
         {
