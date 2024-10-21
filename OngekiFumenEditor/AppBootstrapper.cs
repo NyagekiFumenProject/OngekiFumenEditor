@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +20,7 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.CommandExecutor;
 using OngekiFumenEditor.Kernel.EditorLayout;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
@@ -158,7 +160,38 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
 
-    protected override async void OnStartup(object sender, StartupEventArgs e)
+    protected override void OnStartup(object sender, StartupEventArgs e)
+    {
+        var isGUIMode = (App.Current as App)?.IsGUIMode ?? false;
+
+        if (isGUIMode)
+        {
+            OnStartupForGUI(sender, e);
+        }
+        else
+        {
+            OnStartupForCMD(sender, e);
+        }
+    }
+
+    private async void OnStartupForCMD(object sender, StartupEventArgs e)
+    {
+        await IoC.Get<ISchedulerManager>().Init();
+
+        var executor = IoC.Get<ICommandExecutor>();
+
+        try
+        {
+            Application.Current.Shutdown(await executor.Execute(e.Args));
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Unhandled exception processing arguments:\n{ex.Message}");
+            Application.Current.Shutdown(1);
+        }
+    }
+
+    private async void OnStartupForGUI(object sender, StartupEventArgs e)
     {
         InitExceptionCatcher();
         LogBaseInfos();
@@ -166,9 +199,13 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
         await IoC.Get<ISchedulerManager>().Init();
 
-        try {
+        try
+        {
+            //process command args
             await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             await Console.Error.WriteLineAsync($"Unhandled exception processing arguments:\n{ex.Message}");
             Application.Current.Shutdown(-1);
             return;
@@ -186,11 +223,6 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             curProc.PriorityBoostEnabled = true;
         }
 
-        ShowStartupGUI();
-    }
-
-    private void OnStartupForGUI()
-    {
         //overwrite ViewLocator
         var locateForModel = ViewLocator.LocateForModel;
         ViewLocator.LocateForModel = (model, hostControl, ctx) =>
@@ -227,11 +259,6 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             window.AllowDrop = true;
             window.Drop += MainWindow_Drop;
         }
-    }
-
-    public async void ShowStartupGUI()
-    {
-        OnStartupForGUI();
 
         await DisplayRootViewForAsync<IMainWindow>();
         var showSplashWindow = IoC.Get<IShell>().Documents.IsEmpty() &&
@@ -257,14 +284,14 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     {
         //if (ProgramSetting.Default.EnableMultiInstances)
         //    return;
-        ipcThread = new AbortableThread(async cancelToken =>
+        ipcThread = new AbortableThread(cancelToken =>
         {
             while (!cancelToken.IsCancellationRequested)
             {
                 if (!IPCHelper.IsSelfHost())
                 {
                     //如果自己不是host那就检查另一个host死了没,来个随机sleep那样的话可以避免多个实例撞车
-                    await Task.Delay(MathUtils.Random(0, 1000));
+                    Thread.Sleep(MathUtils.Random(0, 1000));
                     if (!IPCHelper.IsHostAlive())
                     {
                         //似了就继承大业
@@ -275,14 +302,14 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
                 try
                 {
-                    var line = IPCHelper.ReadLineAsync(cancelToken)?.Trim();
+                    var line = IPCHelper.ReadLine(cancelToken)?.Trim();
                     if (string.IsNullOrWhiteSpace(line))
                         continue;
                     Log.LogDebug($"Recv line by IPC:{line}");
                     if (line.StartsWith("CMD:"))
                     {
                         var args = JsonSerializer.Deserialize<IPCHelper.ArgsWrapper>(line[4..]).Args;
-                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        Application.Current.Dispatcher.Invoke(() =>
                             IoC.Get<IProgramArgProcessManager>().ProcessArgs(args));
                     }
                 }

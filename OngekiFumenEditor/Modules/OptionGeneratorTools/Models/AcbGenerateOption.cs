@@ -1,5 +1,5 @@
 ﻿using Caliburn.Micro;
-using OngekiFumenEditor.Kernel.ArgProcesser.Attributes;
+using OngekiFumenEditor.Kernel.CommandExecutor.Attributes;
 using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models

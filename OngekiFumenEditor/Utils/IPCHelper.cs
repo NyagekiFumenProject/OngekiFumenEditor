@@ -51,10 +51,7 @@ namespace OngekiFumenEditor.Utils
                     //send to host
                     var r = "CMD:" + JsonSerializer.Serialize(new ArgsWrapper() { Args = args });
 
-                    var buffer = Encoding.UTF8.GetBytes(r);
-                    accessor.WriteArray(sizeof(int) * 2, buffer, 0, Math.Min(buffer.Length, FileSize - sizeof(int) * 2));
-                    accessor.Write(sizeof(int), buffer.Length);
-                    accessor.Flush();
+                    WriteLine(r, default);
 
                     Environment.Exit(0);
                     return;
@@ -64,7 +61,7 @@ namespace OngekiFumenEditor.Utils
             accessor.Write(0, Process.GetCurrentProcess().Id);
         }
 
-        public static string ReadLineAsync(CancellationToken cancellation)
+        public static string ReadLine(CancellationToken cancellation)
         {
             if (enableMultiProc)
                 return string.Empty;
@@ -74,17 +71,42 @@ namespace OngekiFumenEditor.Utils
             while (!cancellation.IsCancellationRequested)
             {
                 var size = accessor.ReadInt32(sizeof(int));
+                //check if readable
                 if (size > 0)
                 {
                     var bytes = new byte[size];
                     accessor.ReadArray(sizeof(int) * 2, bytes, 0, size);
-                    accessor.Write(sizeof(int), 0);
+                    accessor.Write(sizeof(int), 0); //set 0, notify others mmf is writable.
 
                     return Encoding.UTF8.GetString(bytes);
                 }
+                Thread.Sleep(10);
             }
 
             return string.Empty;
+        }
+
+        public static void WriteLine(string content, CancellationToken cancellation)
+        {
+            using var accessor = mmf.CreateViewAccessor(0, FileSize);
+
+            while (!cancellation.IsCancellationRequested)
+            {
+                var size = accessor.ReadInt32(sizeof(int));
+                //check if writable 
+                if (size > 0)
+                {
+                    Thread.Sleep(0);
+                    continue;
+                }
+
+                var buffer = Encoding.UTF8.GetBytes(content);
+                accessor.WriteArray(sizeof(int) * 2, buffer, 0, Math.Min(buffer.Length, FileSize - sizeof(int) * 2));
+                accessor.Write(sizeof(int), buffer.Length); //notify others mmf is readable.
+                accessor.Flush();
+
+                break;
+            }
         }
 
         public static bool IsSelfHost()
