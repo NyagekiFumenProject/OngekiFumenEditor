@@ -31,6 +31,7 @@ using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.DeadHandler;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
+using SevenZip.Compression.LZ;
 #if !DEBUG
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -52,6 +53,13 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     public AppBootstrapper(bool useApplication = true) : base(useApplication)
     {
+    }
+
+    private bool? isGUIMode = null;
+    public bool IsGUIMode
+    {
+        get => isGUIMode ?? ((App.Current as App)?.IsGUIMode ?? false);
+        set => isGUIMode = value;
     }
 
     protected override void BindServices(CompositionBatch batch)
@@ -176,6 +184,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     public async void OnStartupForCMD(object sender, StartupEventArgs e)
     {
+        IsGUIMode = false;
         await IoC.Get<ISchedulerManager>().Init();
 
         var executor = IoC.Get<ICommandExecutor>();
@@ -193,6 +202,8 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     public async void OnStartupForGUI(object sender, StartupEventArgs e)
     {
+        IsGUIMode = true;
+
         InitExceptionCatcher();
         LogBaseInfos();
         InitIPCServer();
@@ -254,13 +265,26 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
         Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
 
+        await DisplayRootViewForAsync<IMainWindow>();
+
         if (Application.MainWindow is Window window)
         {
             window.AllowDrop = true;
             window.Drop += MainWindow_Drop;
+
+            //program will forget position/size when it has been called as commandline.
+            //so we have to remember and restore windows' position/size manually.
+            window.Closed += MainWindow_Closed;
+            if (!string.IsNullOrWhiteSpace(ProgramSetting.Default.WindowSizePositionLastTime))
+            {
+                var arr = ProgramSetting.Default.WindowSizePositionLastTime.Split(",").Select(x => double.Parse(x.Trim())).ToArray();
+                window.Left = arr[0];
+                window.Top = arr[1];
+                window.Width = arr[2];
+                window.Height = arr[3];
+            }
         }
 
-        await DisplayRootViewForAsync<IMainWindow>();
         var showSplashWindow = IoC.Get<IShell>().Documents.IsEmpty() &&
                                !ProgramSetting.Default.DisableShowSplashScreenAfterBoot;
         if (showSplashWindow)
@@ -278,6 +302,21 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             ProgramSetting.Default.IsFirstTimeOpenEditor = false;
             ProgramSetting.Default.Save();
         }
+    }
+
+    private void MainWindow_Closed(object sender, EventArgs e)
+    {
+        if (sender is not Window mainWindow)
+            return;
+
+        ProgramSetting.Default.WindowSizePositionLastTime = string.Join(", ", new[] {
+            mainWindow.Left,
+            mainWindow.Top,
+            mainWindow.Width,
+            mainWindow.Height
+        });
+        ProgramSetting.Default.Save();
+        Log.LogInfo($"WindowSizePositionLastTime = {ProgramSetting.Default.WindowSizePositionLastTime}");
     }
 
     private void InitIPCServer()

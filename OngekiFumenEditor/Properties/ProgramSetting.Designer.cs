@@ -142,5 +142,17 @@ namespace OngekiFumenEditor.Properties {
                 this["IsFirstTimeOpenEditor"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string WindowSizePositionLastTime {
+            get {
+                return ((string)(this["WindowSizePositionLastTime"]));
+            }
+            set {
+                this["WindowSizePositionLastTime"] = value;
+            }
+        }
     }
 }
