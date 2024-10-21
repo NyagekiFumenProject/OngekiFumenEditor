@@ -241,6 +241,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Assign keybinding 的本地化字符串。
+        /// </summary>
+        public static string AssignKeybind {
+            get {
+                return ResourceManager.GetString("AssignKeybind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please assign keybinding for {0} 的本地化字符串。
+        /// </summary>
+        public static string AssignKeyBinding {
+            get {
+                return ResourceManager.GetString("AssignKeyBinding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Audio duration: 的本地化字符串。
         /// </summary>
         public static string AudioDuration {
@@ -754,6 +772,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Change 的本地化字符串。
+        /// </summary>
+        public static string Change {
+            get {
+                return ResourceManager.GetString("Change", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Change {0} axuiliary line color 的本地化字符串。
         /// </summary>
         public static string ChangeAxuiliaryLineColor {
@@ -795,6 +822,15 @@ namespace OngekiFumenEditor.Properties {
         public static string CleanRecentFilesRecords {
             get {
                 return ResourceManager.GetString("CleanRecentFilesRecords", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Clear 的本地化字符串。
+        /// </summary>
+        public static string Clear {
+            get {
+                return ResourceManager.GetString("Clear", resourceCulture);
             }
         }
         
@@ -2788,6 +2824,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Conflicts with keybinding {0} 的本地化字符串。
+        /// </summary>
+        public static string KeyBindingConflictDetect {
+            get {
+                return ResourceManager.GetString("KeyBindingConflictDetect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 KeyMap 的本地化字符串。
+        /// </summary>
+        public static string KeyMap {
+            get {
+                return ResourceManager.GetString("KeyMap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Keywords sorting: 的本地化字符串。
         /// </summary>
         public static string KeywordSortFilter {
@@ -4111,6 +4165,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Reset 的本地化字符串。
+        /// </summary>
+        public static string Reset {
+            get {
+                return ResourceManager.GetString("Reset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Reset all keybindings 的本地化字符串。
+        /// </summary>
+        public static string ResetAllKeybindings {
+            get {
+                return ResourceManager.GetString("ResetAllKeybindings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Do you want to reset all settings for the application? 的本地化字符串。
         /// </summary>
         public static string ResetAllSettingComfirm {
@@ -4440,6 +4512,15 @@ namespace OngekiFumenEditor.Properties {
         public static string ShowFPS {
             get {
                 return ResourceManager.GetString("ShowFPS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Show not assign keybinding only 的本地化字符串。
+        /// </summary>
+        public static string ShowNotAssignKeybindingOnly {
+            get {
+                return ResourceManager.GetString("ShowNotAssignKeybindingOnly", resourceCulture);
             }
         }
         

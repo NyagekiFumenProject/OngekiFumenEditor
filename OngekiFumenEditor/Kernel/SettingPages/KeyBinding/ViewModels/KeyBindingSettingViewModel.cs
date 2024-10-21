@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
             UpdateDisplayList();
         }
 
-        private void UpdateDisplayList()
+        public void UpdateDisplayList()
         {
             Definitions.Clear();
             var list = definitions.AsEnumerable();
@@ -48,9 +48,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
             Definitions.AddRange(list);
         }
 
-        public string SettingsPagePath => "快捷键";
+        public string SettingsPagePath => Resources.TabDocument;
 
-        public string SettingsPageName => "键位设置";
+        public string SettingsPageName => Resources.KeyMap;
 
         private KeyBindingDefinition[] definitions;
 
@@ -88,6 +88,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
             }
             if (dialog.ConflictDefinition is KeyBindingDefinition conflictDefinition)
                 keybindingManager.ChangeKeyBinding(conflictDefinition, Key.None, ModifierKeys.None);
+            UpdateDisplayList();
         }
         public void ResetAllDefinitions()
         {
@@ -95,6 +96,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
                 return;
             foreach (var definition in Definitions)
                 keybindingManager.DefaultKeyBinding(definition);
+            UpdateDisplayList();
         }
     }
 }

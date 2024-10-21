@@ -1812,4 +1812,13 @@
   <data name="AssignKeybind" xml:space="preserve">
     <value>设置键位</value>
   </data>
+  <data name="ShowNotAssignKeybindingOnly" xml:space="preserve">
+    <value>只显示未绑定的键位</value>
+  </data>
+  <data name="ResetAllKeybindings" xml:space="preserve">
+    <value>重置所有键位</value>
+  </data>
+  <data name="KeyMap" xml:space="preserve">
+    <value>快捷键</value>
+  </data>
 </root>

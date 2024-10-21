@@ -17,40 +17,61 @@
     <UserControl.Resources>
         <valueconverters:ShowKeybindExpressionValueConverter x:Key="ShowKeybindExpressionValueConverter" />
     </UserControl.Resources>
-
-    <ItemsControl
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="15,15,15,0" >
+            <StackPanel Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Filter],StringFormat={}:}" FontSize="15"/>
+                <TextBox cal:Message.Attach="UpdateDisplayList()" Padding="0,4" Text="{Binding FilterKeywords}" Width="200" Margin="10,0"/>
+            </StackPanel>
+            <StackPanel Margin="0,5,0,15" Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding IsShowNotAssignOnly}" Content="{markup:Translate [ShowNotAssignKeybindingOnly]}" cal:Message.Attach="UpdateDisplayList()" VerticalAlignment="Center"/>
+                <Button 
+                 VerticalAlignment="Center"
+                        Margin="10,0"
+                        Padding="10,5"
+                        cal:Message.Attach="ResetAllDefinitions()"
+                        Content="{markup:Translate [ResetAllKeybindings]}" />
+            </StackPanel>
+            <Border Background="Gray" Height="1"/>
+        </StackPanel>
+        <ItemsControl Grid.Row="1"
         ItemsSource="{Binding Definitions}"
         ScrollViewer.CanContentScroll="True"
         VirtualizingPanel.IsVirtualizing="True"
         VirtualizingPanel.VirtualizationMode="Recycling">
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <Grid Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Label VerticalAlignment="Center" Content="{Binding Name}" />
-                    <Label
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
+                        <Label
                         Grid.Column="1"
                         VerticalAlignment="Center"
                         FontWeight="Black">
-                        <Label.Content>
-                            <MultiBinding Converter="{StaticResource ShowKeybindExpressionValueConverter}">
-                                <Binding Path="Key" />
-                                <Binding Path="Modifiers" />
-                            </MultiBinding>
-                        </Label.Content>
-                    </Label>
-                    <Button
+                            <Label.Content>
+                                <MultiBinding Converter="{StaticResource ShowKeybindExpressionValueConverter}">
+                                    <Binding Path="Key" />
+                                    <Binding Path="Modifiers" />
+                                </MultiBinding>
+                            </Label.Content>
+                        </Label>
+                        <Button
                         Grid.Column="2"
                         Margin="30,3,3,3"
                         Padding="10,5"
                         cal:Message.Attach="ChangeKeybind($executionContext)"
                         Content="{markup:Translate [Change]}" />
-                </Grid>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
 </UserControl>

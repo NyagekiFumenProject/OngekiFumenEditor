@@ -1767,8 +1767,7 @@
   <data name="kbd_editor_SelectAllObjects" xml:space="preserve">
     <value />
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="kbd_editor_CancelSelectingObjects" type="System.Resources.ResXNullRef, System.Windows.Forms">
+  <data name="kbd_editor_CancelSelectingObjects" xml:space="preserve">
     <value />
   </data>
   <data name="kbd_editor_HideOrShow" xml:space="preserve">
@@ -1812,5 +1811,14 @@
   </data>
   <data name="AssignKeybind" xml:space="preserve">
     <value>Assign keybinding</value>
+  </data>
+  <data name="ShowNotAssignKeybindingOnly" xml:space="preserve">
+    <value>Show not assign keybinding only</value>
+  </data>
+  <data name="ResetAllKeybindings" xml:space="preserve">
+    <value>Reset all keybindings</value>
+  </data>
+  <data name="KeyMap" xml:space="preserve">
+    <value>KeyMap</value>
   </data>
 </root>

@@ -363,9 +363,9 @@
 			<AutoGen>True</AutoGen>
 		</Compile>
 		<Compile Update="Properties\Resources.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Resources.resx</DependentUpon>
+		  <DesignTime>True</DesignTime>
+		  <AutoGen>True</AutoGen>
+		  <DependentUpon>Resources.resx</DependentUpon>
 		</Compile>
 		<Compile Update="UI\Controls\ObjectInspector\Views\EnumValueTypeUIView.xaml.cs">
 			<SubType>Code</SubType>
