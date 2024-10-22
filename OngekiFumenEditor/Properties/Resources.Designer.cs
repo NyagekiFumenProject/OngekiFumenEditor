@@ -4444,6 +4444,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 There is a new update! New version: {0}({1}) 的本地化字符串。
+        /// </summary>
+        public static string SettingHasNewVersion {
+            get {
+                return ResourceManager.GetString("SettingHasNewVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Setup 的本地化字符串。
         /// </summary>
         public static string Setup {

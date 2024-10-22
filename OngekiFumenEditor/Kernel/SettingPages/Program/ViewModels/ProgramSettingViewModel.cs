@@ -2,6 +2,8 @@
 using AssocSupport.Models;
 using Caliburn.Micro;
 using Gemini.Modules.Settings;
+using OngekiFumenEditor.Kernel.ProgramUpdater;
+using OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
@@ -48,6 +50,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 
         public ProgramSettingViewModel()
         {
+            ProgramUpdater = IoC.Get<IProgramUpdater>();
             Setting.PropertyChanged += SettingPropertyChanged;
         }
 
@@ -59,6 +62,8 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
         public string SettingsPageName => Resources.TabProgram;
 
         public string SettingsPagePath => Resources.TabEnviorment;
+
+        public IProgramUpdater ProgramUpdater { get; }
 
         public void ApplyChanges()
         {
@@ -216,6 +221,18 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
             }
 
             MessageBox.Show(Resources.ResetCompleted);
+        }
+
+        public async Task CheckUpdate()
+        {
+            await ProgramUpdater.CheckUpdatable();
+        }
+
+        public async Task OpenShowNewVersionDialog(ActionExecutionContext e)
+        {
+            using var _ = e.DisableSourceByDisposable();
+            await IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel());
+            await Task.Delay(4000);
         }
 
         public void UnRegisterNyagekiAssociations()

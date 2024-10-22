@@ -1821,4 +1821,7 @@
   <data name="KeyMap" xml:space="preserve">
     <value>快捷键</value>
   </data>
+  <data name="SettingHasNewVersion" xml:space="preserve">
+    <value>有新的更新! 新版本号: {0}({1})</value>
+  </data>
 </root>

@@ -128,6 +128,48 @@
                 </StackPanel>
             </StackPanel>
         </GroupBox>
+        <GroupBox Margin="5" Header="Program Updates">
+            <StackPanel>
+                <CheckBox
+                    Margin="10,10,10,10"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{Binding Setting.EnableUpdateCheck}">
+                    <TextBlock Text="允许程序检查是否有更新" TextWrapping="Wrap" />
+                </CheckBox>
+                <CheckBox
+                    Margin="30,0,10,5"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{Binding Setting.UpdaterCheckMasterBrunchOnly}"
+                    IsEnabled="{Binding Setting.EnableUpdateCheck}">
+                    <TextBlock Text="只检查master分支(稳定版)的更新" TextWrapping="Wrap" />
+                </CheckBox>
+                <StackPanel Orientation="Horizontal">
+                    <Button
+                        Margin="5,5,5,5"
+                        Padding="10,5"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        cal:Message.Attach="CheckUpdate()"
+                        Content="检查更新" />
+                    <TextBlock
+                        Margin="5,0"
+                        VerticalAlignment="Center"
+                        cal:Message.Attach="[Event MouseLeftButtonDown]=[OpenShowNewVersionDialog($executioncontext)]"
+                        Cursor="Hand"
+                        FontWeight="Bold"
+                        Foreground="{StaticResource MahApps.Brushes.Highlight}"
+                        Visibility="{Binding ProgramUpdater.HasNewVersion, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                                <markup:Translate Path="[SettingHasNewVersion]" />
+                                <Binding Path="ProgramUpdater.RemoteVersionInfo.Version" />
+                                <Binding Path="ProgramUpdater.RemoteVersionInfo.Branch" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Other]}">
             <StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">

@@ -1821,4 +1821,7 @@
   <data name="KeyMap" xml:space="preserve">
     <value>KeyMap</value>
   </data>
+  <data name="SettingHasNewVersion" xml:space="preserve">
+    <value>There is a new update! New version: {0}({1})</value>
+  </data>
 </root>

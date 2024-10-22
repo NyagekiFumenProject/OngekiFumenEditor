@@ -55,6 +55,11 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             {
                 Set(ref remoteVersionInfo, value);
                 NotifyOfPropertyChange(nameof(HasNewVersion));
+
+                if (HasNewVersion)
+                    menuBar.Add(menuItem);
+                else
+                    menuBar.Remove(menuItem);
             }
         }
 
@@ -96,19 +101,6 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
 
         public async Task CheckUpdatable()
         {
-            RemoteVersionInfo = new VersionInfo()
-            {
-                Branch = "master",
-                FileSize = 6184851,
-                Time = DateTime.Now,
-                Version = new Version(8, 0, 5, 20)
-            };
-
-            menuBar.Add(menuItem);
-
-
-            /*
-
             if (!ProgramSetting.Default.EnableUpdateCheck)
             {
                 RemoteVersionInfo = null;
@@ -125,7 +117,6 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 Log.LogError($"Can't check update because exception:{e.Message}", e);
                 RemoteVersionInfo = null;
             }
-            */
         }
 
         public async Task StartUpdate()
@@ -157,7 +148,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
 
             var targetFolder = Path.GetDirectoryName(typeof(DefaultProgramUpdater).Assembly.Location);
             var args = new string[] { "updater", "-v", "--targetFolder", targetFolder, "--sourceFolder", sourceFolder, "--sourceVersion", ThisAssembly.AssemblyFileVersion };
-            
+
             Log.LogInfo($"updaterFilePath: {updaterFilePath}");
             Log.LogInfo($"targetFolder: {updaterFilePath}");
             Log.LogInfo($"args: {string.Join(" ", args)}");
