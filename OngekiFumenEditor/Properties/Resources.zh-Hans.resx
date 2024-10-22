@@ -1824,4 +1824,46 @@
   <data name="SettingHasNewVersion" xml:space="preserve">
     <value>有新的更新! 新版本号: {0}({1})</value>
   </data>
+  <data name="UpdateProgramReady" xml:space="preserve">
+    <value>我已保存好项目和数据, 准备好了</value>
+  </data>
+  <data name="UpdateStart" xml:space="preserve">
+    <value>开始更新</value>
+  </data>
+  <data name="ShowNewVersionTitle" xml:space="preserve">
+    <value>检查新版本</value>
+  </data>
+  <data name="CurrentVersion" xml:space="preserve">
+    <value>当前版本</value>
+  </data>
+  <data name="NewVersion" xml:space="preserve">
+    <value>最新版本</value>
+  </data>
+  <data name="Branch" xml:space="preserve">
+    <value>代码分支</value>
+  </data>
+  <data name="FileSize" xml:space="preserve">
+    <value>文件大小</value>
+  </data>
+  <data name="ReleaseTime" xml:space="preserve">
+    <value>发布时间</value>
+  </data>
+  <data name="HasNewVersion" xml:space="preserve">
+    <value>有新版本！</value>
+  </data>
+  <data name="ProgramReadyToUpdate" xml:space="preserve">
+    <value>程序更新文件准备完成, 是否关闭程序, 开始更新?</value>
+  </data>
+  <data name="EnableUpdateCheck" xml:space="preserve">
+    <value>允许程序检查是否有更新</value>
+  </data>
+  <data name="UpdaterCheckMasterBranchOnly" xml:space="preserve">
+    <value>只检查master分支(稳定版)的更新</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="ProgramUpdates" xml:space="preserve">
+    <value>程序更新</value>
+  </data>
 </root>

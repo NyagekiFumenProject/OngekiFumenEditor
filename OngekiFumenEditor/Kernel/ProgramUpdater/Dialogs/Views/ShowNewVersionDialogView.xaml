@@ -6,9 +6,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.Views"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels"
-    Title="ShowNewVersionDialogView"
+    Title="{markup:Translate [ShowNewVersionTitle]}"
     d:DataContext="{d:DesignInstance Type=vm:ShowNewVersionDialogViewModel}"
     Background="{DynamicResource EnvironmentWindowBackground}"
     ResizeMode="NoResize"
@@ -32,7 +33,10 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label VerticalAlignment="Center" FontSize="15">Current Version</Label>
+            <Label
+                VerticalAlignment="Center"
+                Content="{markup:Translate [CurrentVersion]}"
+                FontSize="15" />
             <Label
                 Grid.Row="0"
                 Grid.Column="1"
@@ -46,8 +50,8 @@
             <Label
                 Grid.Row="1"
                 VerticalAlignment="Center"
+                Content="{markup:Translate [NewVersion]}"
                 FontSize="15">
-                New Version
             </Label>
             <Label
                 Grid.Row="1"
@@ -62,8 +66,8 @@
             <Label
                 Grid.Row="2"
                 VerticalAlignment="Center"
+                Content="{markup:Translate [Branch]}"
                 FontSize="15">
-                Branch
             </Label>
             <Label
                 Grid.Row="2"
@@ -78,8 +82,8 @@
             <Label
                 Grid.Row="3"
                 VerticalAlignment="Center"
+                Content="{markup:Translate [FileSize]}"
                 FontSize="15">
-                File Size
             </Label>
             <Label
                 Grid.Row="3"
@@ -94,8 +98,8 @@
             <Label
                 Grid.Row="4"
                 VerticalAlignment="Center"
+                Content="{markup:Translate [ReleaseTime]}"
                 FontSize="15">
-                Release Time
             </Label>
             <Label
                 Grid.Row="4"
@@ -110,13 +114,13 @@
         <CheckBox
             Margin="10,0"
             HorizontalAlignment="Right"
-            Content="我已保存好项目和数据, 准备好了"
+            Content="{markup:Translate [UpdateProgramReady]}"
             IsChecked="{Binding IsReady}" />
         <Button
             Margin="5,10,5,5"
             Padding="10"
             cal:Message.Attach="StartUpdate()"
-            Content="开始更新"
+            Content="{markup:Translate [UpdateStart]}"
             IsEnabled="{Binding IsReady}" />
     </StackPanel>
 </mah:MetroWindow>

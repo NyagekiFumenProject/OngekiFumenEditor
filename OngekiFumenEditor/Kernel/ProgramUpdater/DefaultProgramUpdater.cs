@@ -8,7 +8,9 @@ using Gemini.Modules.MainMenu.Views;
 using Gemini.Modules.MainWindow.Views;
 using OngekiFumenEditor.Kernel.MiscMenu.Commands.About;
 using OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels;
+using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.UI.Markup;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,7 +33,9 @@ using System.Windows.Media.Imaging;
 namespace OngekiFumenEditor.Kernel.ProgramUpdater
 {
     [Export(typeof(IProgramUpdater))]
-    internal class DefaultProgramUpdater : PropertyChangedBase, IProgramUpdater
+    [Export(typeof(ISchedulable))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    internal class DefaultProgramUpdater : PropertyChangedBase, IProgramUpdater, ISchedulable
     {
         private const string ApiEndPoint = "https://fumen.naominet.live";
 
@@ -63,6 +68,10 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                     updatableButton.Visibility = HasNewVersion ? Visibility.Visible : Visibility.Collapsed;
             }
         }
+
+        public string SchedulerName => "Program Update Check Scheduler";
+
+        public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromMinutes(5);
 
         private HttpClient http;
 
@@ -108,6 +117,12 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
 
             var icon = new BitmapImage(new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/notication.png"));
             icon.Freeze();
+            var textblock = new TextBlock()
+            {
+                FontWeight = FontWeights.Bold,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            textblock.SetBinding(TextBlock.TextProperty, new TranslateExtension("HasNewVersion"));
             updatableButton = new Button()
             {
                 BorderThickness = new Thickness(0),
@@ -123,12 +138,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                             Height = 20,
                             Source = icon
                         },
-                        new TextBlock()
-                        {
-                            FontWeight = FontWeights.Bold,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            Text = "有新版本!"
-                        }
+                        textblock
                     }
                 },
                 HorizontalAlignment = HorizontalAlignment.Right,
@@ -151,11 +161,6 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
         public DefaultProgramUpdater()
         {
             http = new HttpClient();
-
-            if ((App.Current as App)?.IsGUIMode ?? false)
-            {
-                ModifyFrameworkMenuView();
-            }
         }
 
         public async Task CheckUpdatable()
@@ -166,9 +171,12 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 return;
             }
 
+            if ((App.Current as App)?.IsGUIMode ?? false)
+                ModifyFrameworkMenuView();
+
             try
             {
-                var url = $"{ApiEndPoint}/editor/getVersionInfo?requireMasterBranch={ProgramSetting.Default.UpdaterCheckMasterBrunchOnly}";
+                var url = $"{ApiEndPoint}/editor/getVersionInfo?requireMasterBranch={ProgramSetting.Default.UpdaterCheckMasterBranchOnly}";
                 RemoteVersionInfo = await http.GetFromJsonAsync<VersionInfo>(url);
             }
             catch (Exception e)
@@ -212,7 +220,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             Log.LogInfo($"targetFolder: {updaterFilePath}");
             Log.LogInfo($"args: {string.Join(" ", args)}");
 
-            if (MessageBox.Show($"程序更新文件准备完成, 是否关闭程序, 开始更新?", Resources.Warning, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+            if (MessageBox.Show(Resources.ProgramReadyToUpdate, Resources.Warning, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
                 return;
 
             Log.LogInfo($"user comfirmed.");
@@ -350,9 +358,14 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             return (0, string.Empty);
         }
 
-        public Task NotifyUpdateResult(bool isSuccess, string message)
+        public void OnSchedulerTerm()
         {
-            throw new NotImplementedException();
+
+        }
+
+        public async Task OnScheduleCall(CancellationToken cancellationToken)
+        {
+            await CheckUpdatable();
         }
     }
 }

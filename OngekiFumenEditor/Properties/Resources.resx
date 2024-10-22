@@ -1824,4 +1824,46 @@
   <data name="SettingHasNewVersion" xml:space="preserve">
     <value>There is a new update! New version: {0}({1})</value>
   </data>
+  <data name="UpdateProgramReady" xml:space="preserve">
+    <value />
+  </data>
+  <data name="UpdateStart" xml:space="preserve">
+    <value>Start Update</value>
+  </data>
+  <data name="ShowNewVersionTitle" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CurrentVersion" xml:space="preserve">
+    <value>Current Version</value>
+  </data>
+  <data name="NewVersion" xml:space="preserve">
+    <value>New Version</value>
+  </data>
+  <data name="Branch" xml:space="preserve">
+    <value>Branch</value>
+  </data>
+  <data name="FileSize" xml:space="preserve">
+    <value>File Size</value>
+  </data>
+  <data name="ReleaseTime" xml:space="preserve">
+    <value>Release Time</value>
+  </data>
+  <data name="HasNewVersion" xml:space="preserve">
+    <value>Program Updatable!</value>
+  </data>
+  <data name="ProgramReadyToUpdate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EnableUpdateCheck" xml:space="preserve">
+    <value>Enable program check updates</value>
+  </data>
+  <data name="UpdaterCheckMasterBranchOnly" xml:space="preserve">
+    <value>Check updates for branch master(stable) only</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Check Updates</value>
+  </data>
+  <data name="ProgramUpdates" xml:space="preserve">
+    <value>Program Updates</value>
+  </data>
 </root>

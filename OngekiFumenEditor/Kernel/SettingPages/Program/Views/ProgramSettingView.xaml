@@ -128,20 +128,20 @@
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <GroupBox Margin="5" Header="Program Updates">
+        <GroupBox Margin="5" Header="{markup:Translate [ProgramUpdates]}">
             <StackPanel>
                 <CheckBox
                     Margin="10,10,10,10"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.EnableUpdateCheck}">
-                    <TextBlock Text="允许程序检查是否有更新" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate [EnableUpdateCheck]}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="30,0,10,5"
                     VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.UpdaterCheckMasterBrunchOnly}"
+                    IsChecked="{Binding Setting.UpdaterCheckMasterBranchOnly}"
                     IsEnabled="{Binding Setting.EnableUpdateCheck}">
-                    <TextBlock Text="只检查master分支(稳定版)的更新" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate [UpdaterCheckMasterBranchOnly]}" TextWrapping="Wrap" />
                 </CheckBox>
                 <StackPanel Orientation="Horizontal">
                     <Button
@@ -150,7 +150,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         cal:Message.Attach="CheckUpdate($executioncontext)"
-                        Content="检查更新" />
+                        Content="{markup:Translate [CheckUpdates]}" />
                     <TextBlock
                         Margin="5,0"
                         VerticalAlignment="Center"

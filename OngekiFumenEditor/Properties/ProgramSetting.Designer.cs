@@ -158,12 +158,12 @@ namespace OngekiFumenEditor.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool UpdaterCheckMasterBrunchOnly {
+        public bool UpdaterCheckMasterBranchOnly {
             get {
-                return ((bool)(this["UpdaterCheckMasterBrunchOnly"]));
+                return ((bool)(this["UpdaterCheckMasterBranchOnly"]));
             }
             set {
-                this["UpdaterCheckMasterBrunchOnly"] = value;
+                this["UpdaterCheckMasterBranchOnly"] = value;
             }
         }
         

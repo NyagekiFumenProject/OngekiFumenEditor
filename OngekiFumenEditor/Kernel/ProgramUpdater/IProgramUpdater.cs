@@ -16,7 +16,5 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
         Task StartUpdate();
 
         (int exitCode, string message) CommandExecuteUpdate(UpdaterOption option);
-
-        Task NotifyUpdateResult(bool isSuccess, string message);
     }
 }

@@ -475,6 +475,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Branch 的本地化字符串。
+        /// </summary>
+        public static string Branch {
+            get {
+                return ResourceManager.GetString("Branch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Browser 的本地化字符串。
         /// </summary>
         public static string Browser {
@@ -813,6 +822,15 @@ namespace OngekiFumenEditor.Properties {
         public static string CheckScript {
             get {
                 return ResourceManager.GetString("CheckScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Check Updates 的本地化字符串。
+        /// </summary>
+        public static string CheckUpdates {
+            get {
+                return ResourceManager.GetString("CheckUpdates", resourceCulture);
             }
         }
         
@@ -1263,6 +1281,15 @@ namespace OngekiFumenEditor.Properties {
         public static string CurrentTimeOffset {
             get {
                 return ResourceManager.GetString("CurrentTimeOffset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Current Version 的本地化字符串。
+        /// </summary>
+        public static string CurrentVersion {
+            get {
+                return ResourceManager.GetString("CurrentVersion", resourceCulture);
             }
         }
         
@@ -1789,6 +1816,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Enable program check updates 的本地化字符串。
+        /// </summary>
+        public static string EnableUpdateCheck {
+            get {
+                return ResourceManager.GetString("EnableUpdateCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Enable display visualizer 的本地化字符串。
         /// </summary>
         public static string EnableVisualizerDisplay {
@@ -2055,6 +2091,15 @@ namespace OngekiFumenEditor.Properties {
         public static string FileAssociationUnregister {
             get {
                 return ResourceManager.GetString("FileAssociationUnregister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 File Size 的本地化字符串。
+        /// </summary>
+        public static string FileSize {
+            get {
+                return ResourceManager.GetString("FileSize", resourceCulture);
             }
         }
         
@@ -2460,6 +2505,15 @@ namespace OngekiFumenEditor.Properties {
         public static string HalfHourAgo {
             get {
                 return ResourceManager.GetString("HalfHourAgo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Program Updatable! 的本地化字符串。
+        /// </summary>
+        public static string HasNewVersion {
+            get {
+                return ResourceManager.GetString("HasNewVersion", resourceCulture);
             }
         }
         
@@ -3189,6 +3243,15 @@ namespace OngekiFumenEditor.Properties {
         public static string NewFumenFileSavePath {
             get {
                 return ResourceManager.GetString("NewFumenFileSavePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 New Version 的本地化字符串。
+        /// </summary>
+        public static string NewVersion {
+            get {
+                return ResourceManager.GetString("NewVersion", resourceCulture);
             }
         }
         
@@ -3940,11 +4003,29 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似  的本地化字符串。
+        /// </summary>
+        public static string ProgramReadyToUpdate {
+            get {
+                return ResourceManager.GetString("ProgramReadyToUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 The program has captured an unhandled exception. Logs and dump files have been stored in the corresponding folder in the program directory. You can send them to the developers for further analysis 的本地化字符串。
         /// </summary>
         public static string ProgramThrowAndDump {
             get {
                 return ResourceManager.GetString("ProgramThrowAndDump", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Program Updates 的本地化字符串。
+        /// </summary>
+        public static string ProgramUpdates {
+            get {
+                return ResourceManager.GetString("ProgramUpdates", resourceCulture);
             }
         }
         
@@ -4062,6 +4143,15 @@ namespace OngekiFumenEditor.Properties {
         public static string RegisterSuccess {
             get {
                 return ResourceManager.GetString("RegisterSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Release Time 的本地化字符串。
+        /// </summary>
+        public static string ReleaseTime {
+            get {
+                return ResourceManager.GetString("ReleaseTime", resourceCulture);
             }
         }
         
@@ -4525,6 +4615,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似  的本地化字符串。
+        /// </summary>
+        public static string ShowNewVersionTitle {
+            get {
+                return ResourceManager.GetString("ShowNewVersionTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Show not assign keybinding only 的本地化字符串。
         /// </summary>
         public static string ShowNotAssignKeybindingOnly {
@@ -4962,6 +5061,33 @@ namespace OngekiFumenEditor.Properties {
         public static string UpdateHoldEndPosition {
             get {
                 return ResourceManager.GetString("UpdateHoldEndPosition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似  的本地化字符串。
+        /// </summary>
+        public static string UpdateProgramReady {
+            get {
+                return ResourceManager.GetString("UpdateProgramReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Check updates for branch master(stable) only 的本地化字符串。
+        /// </summary>
+        public static string UpdaterCheckMasterBranchOnly {
+            get {
+                return ResourceManager.GetString("UpdaterCheckMasterBranchOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start Update 的本地化字符串。
+        /// </summary>
+        public static string UpdateStart {
+            get {
+                return ResourceManager.GetString("UpdateStart", resourceCulture);
             }
         }
         
