@@ -156,14 +156,17 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 throw new Exception($"Downloaded wrong file, updater file is not found: {updaterFilePath}");
 
             var targetFolder = Path.GetDirectoryName(typeof(DefaultProgramUpdater).Assembly.Location);
+            var args = new string[] { "updater", "-v", "--targetFolder", targetFolder, "--sourceFolder", sourceFolder, "--sourceVersion", ThisAssembly.AssemblyFileVersion };
+            
             Log.LogInfo($"updaterFilePath: {updaterFilePath}");
             Log.LogInfo($"targetFolder: {updaterFilePath}");
+            Log.LogInfo($"args: {string.Join(" ", args)}");
 
             if (MessageBox.Show($"程序更新文件准备完成, 是否关闭程序, 开始更新?", Resources.Warning, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
                 return;
 
             Log.LogInfo($"user comfirmed.");
-            Process.Start(updaterFilePath, ["updater", "-v", "--targetFolder", targetFolder, "--sourceFolder", sourceFolder, "--sourceVersion", ThisAssembly.AssemblyFileVersion]);
+            Process.Start(updaterFilePath, args);
             App.Current.Shutdown();
         }
 

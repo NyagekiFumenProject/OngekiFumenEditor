@@ -43,7 +43,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label VerticalAlignment="Center" FontSize="15">Product Verion</Label>
+            <Label VerticalAlignment="Center" FontSize="15">Product Version</Label>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <StackPanel Orientation="Horizontal" Visibility="{Binding IsNotifyUpdateSuccess, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
                     <Label
