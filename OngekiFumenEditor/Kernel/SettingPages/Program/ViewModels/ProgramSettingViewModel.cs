@@ -223,16 +223,15 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
             MessageBox.Show(Resources.ResetCompleted);
         }
 
-        public async Task CheckUpdate()
+        public async Task CheckUpdate(ActionExecutionContext e)
         {
+            using var _ = e.DisableSourceByDisposable();
             await ProgramUpdater.CheckUpdatable();
         }
 
         public async Task OpenShowNewVersionDialog(ActionExecutionContext e)
         {
-            using var _ = e.DisableSourceByDisposable();
             await IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel());
-            await Task.Delay(4000);
         }
 
         public void UnRegisterNyagekiAssociations()

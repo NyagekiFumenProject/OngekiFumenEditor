@@ -149,7 +149,7 @@
                         Padding="10,5"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        cal:Message.Attach="CheckUpdate()"
+                        cal:Message.Attach="CheckUpdate($executioncontext)"
                         Content="检查更新" />
                     <TextBlock
                         Margin="5,0"
