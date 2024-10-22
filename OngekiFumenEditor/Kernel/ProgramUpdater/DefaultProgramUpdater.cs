@@ -4,8 +4,10 @@ using Gemini.Framework.Menus;
 using Gemini.Modules.MainMenu;
 using Gemini.Modules.MainMenu.Controls;
 using Gemini.Modules.MainMenu.Models;
+using Gemini.Modules.MainMenu.Views;
+using Gemini.Modules.MainWindow.Views;
 using OngekiFumenEditor.Kernel.MiscMenu.Commands.About;
-using OngekiFumenEditor.Kernel.ProgramUpdater.Commands.About;
+using OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
@@ -21,6 +23,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -56,46 +59,102 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 Set(ref remoteVersionInfo, value);
                 NotifyOfPropertyChange(nameof(HasNewVersion));
 
-                if (HasNewVersion)
-                    menuBar.Add(menuItem);
-                else
-                    menuBar.Remove(menuItem);
+                if (updatableButton is not null)
+                    updatableButton.Visibility = HasNewVersion ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
         private HttpClient http;
-        private IMenu menuBar;
-        private ICommandService commandService;
-        private MenuItemBase menuItem;
 
-        private BitmapImage icon;
-        private Image iconImg;
+        private bool isModified = false;
+        private Button updatableButton;
+
+        private void ModifyFrameworkMenuView()
+        {
+            if (isModified)
+                return;
+
+            IEnumerable<T> GetAllMenuItems2<T>(DependencyObject parent)
+            {
+                if (parent is T menuItem)
+                    yield return menuItem;
+
+                foreach (var child in LogicalTreeHelper.GetChildren(parent).OfType<DependencyObject>())
+                    foreach (var f in GetAllMenuItems2<T>(child))
+                        yield return f;
+            }
+
+            var mainMenuView2 = GetAllMenuItems2<MainMenuView>(App.Current.MainWindow).FirstOrDefault();
+            var contentPresent = mainMenuView2.Parent as ContentControl;
+            contentPresent.Content = null;
+
+            var grid = new Grid();
+
+            grid.SetResourceReference(Grid.BackgroundProperty, "MenuDefaultBackground");
+
+            ColumnDefinition column1 = new ColumnDefinition()
+            {
+                Width = new GridLength(1, GridUnitType.Star)
+            };
+            ColumnDefinition column2 = new ColumnDefinition()
+            {
+                Width = GridLength.Auto
+            };
+            grid.ColumnDefinitions.Add(column1);
+            grid.ColumnDefinitions.Add(column2);
+
+            Grid.SetColumn(mainMenuView2, 0);
+            grid.Children.Add(mainMenuView2);
+
+            var icon = new BitmapImage(new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/notication.png"));
+            icon.Freeze();
+            updatableButton = new Button()
+            {
+                BorderThickness = new Thickness(0),
+                BorderBrush = Brushes.Transparent,
+                Visibility = Visibility.Collapsed,
+                Content = new StackPanel()
+                {
+                    Orientation = Orientation.Horizontal,
+                    Children =
+                    {
+                        new Image()
+                        {
+                            Height = 20,
+                            Source = icon
+                        },
+                        new TextBlock()
+                        {
+                            FontWeight = FontWeights.Bold,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Text = "有新版本!"
+                        }
+                    }
+                },
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            updatableButton.SetResourceReference(Button.BackgroundProperty, "MenuDefaultBackground");
+            updatableButton.Click += (e, ee) =>
+            {
+                IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel()).Wait();
+            };
+
+            Grid.SetColumn(updatableButton, 1);
+            grid.Children.Add(updatableButton);
+
+            contentPresent.Content = grid;
+
+            isModified = true;
+        }
 
         public DefaultProgramUpdater()
         {
             http = new HttpClient();
-            menuBar = IoC.Get<IMenu>();
 
-            //build
-            var menuBuilder = IoC.Get<IMenuBuilder>();
-            var dummyModel = new MenuModel();
-            menuBuilder.BuildMenuBar(MenuDefinitions.dummyMenuBar, dummyModel);
-            menuItem = dummyModel.FirstOrDefault();
-            icon = new BitmapImage(new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/notication.png"));
-            icon.Freeze();
-        }
-
-        IEnumerable<T> GetAllMenuItems<T>(DependencyObject parent)
-        {
-            int childCount = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < childCount; i++)
+            if ((App.Current as App)?.IsGUIMode ?? false)
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T menuItem)
-                    yield return menuItem;
-
-                foreach (var child2 in GetAllMenuItems<T>(child))
-                    yield return child2;
+                ModifyFrameworkMenuView();
             }
         }
 
