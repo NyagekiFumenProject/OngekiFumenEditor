@@ -42,23 +42,39 @@ namespace OngekiFumenEditor.Utils
             mmf = MemoryMappedFile.CreateOrOpen("OngekiFumenEditor_MMF", FileSize, MemoryMappedFileAccess.ReadWrite);
             using var accessor = mmf.CreateViewAccessor(0, FileSize);
 
-            var pid = accessor.ReadInt32(0);
-            if (pid != 0)
+            var isWaitForPrev = args.Contains("--wait", StringComparer.InvariantCultureIgnoreCase);
+
+            while (true)
             {
-                var process = Process.GetProcessById(pid);
-                if (process is not null)
+                var pid = accessor.ReadInt32(0);
+                //there are other editors registered
+                if (pid != 0)
                 {
-                    //send to host
-                    var r = "CMD:" + JsonSerializer.Serialize(new ArgsWrapper() { Args = args });
+                    //check if host editor is dead or not 
+                    var process = Process.GetProcessById(pid);
+                    if (process is not null)
+                    {
+                        //check if have to wait for host editor
+                        if (isWaitForPrev)
+                        {
+                            Thread.Sleep(10);
+                            continue;
+                        }
 
-                    WriteLine(r, default);
+                        //send args to host editor and later will process them
+                        var r = "CMD:" + JsonSerializer.Serialize(new ArgsWrapper() { Args = args });
 
-                    Environment.Exit(0);
-                    return;
+                        WriteLine(r, default);
+
+                        Environment.Exit(0);
+                        return;
+                    }
+                    break;
                 }
-            }
 
-            accessor.Write(0, Process.GetCurrentProcess().Id);
+                accessor.Write(0, Process.GetCurrentProcess().Id);
+                return;
+            }
         }
 
         public static string ReadLine(CancellationToken cancellation)

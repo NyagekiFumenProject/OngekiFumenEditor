@@ -22,6 +22,7 @@ using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor;
 using OngekiFumenEditor.Kernel.EditorLayout;
+using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -302,6 +303,8 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             ProgramSetting.Default.IsFirstTimeOpenEditor = false;
             ProgramSetting.Default.Save();
         }
+
+        IoC.Get<IProgramUpdater>().CheckUpdatable().NoWait();
     }
 
     private void MainWindow_Closed(object sender, EventArgs e)

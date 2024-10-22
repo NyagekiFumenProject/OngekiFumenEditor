@@ -1,8 +1,7 @@
 {
   "profiles": {
     "OngekiFumenEditor": {
-      "commandName": "Project",
-      "commandLineArgs": ""
+      "commandName": "Project"
     }
   }
 }

@@ -46,6 +46,7 @@
 		<Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
 		<Page Remove="_bin\**" />
 		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\playerLoc.png" />
+		<None Remove="Resources\Icons\notication.png" />
 		<None Remove="Resources\suggestLayout.bin" />
 		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\playerLoc.png" />
 	</ItemGroup>
@@ -292,6 +293,7 @@
 		<Resource Include="Resources\Icons\icons8-paint-brush-16.png" />
 		<Resource Include="Resources\Icons\logo.ico" />
 		<Resource Include="Resources\Icons\logo32.ico" />
+		<Resource Include="Resources\Icons\notication.png" />
 		<Resource Include="Resources\Icons\open-folder.png" />
 		<Resource Include="Resources\Icons\preview.png" />
 		<Resource Include="Resources\Icons\search.png" />

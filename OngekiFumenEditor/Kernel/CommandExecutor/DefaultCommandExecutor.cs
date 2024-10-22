@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor.Attributes;
+using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Modules.FumenConverter;
 using OngekiFumenEditor.Modules.FumenConverter.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
@@ -24,6 +25,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static OngekiFumenEditor.Modules.FumenVisualEditor.Base.EditorProjectDataUtils;
 
 namespace OngekiFumenEditor.Kernel.CommandExecutor
 {
@@ -39,6 +41,7 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
             rootCommand.AddCommand(GenerateVerbCommands<FumenConvertOption>("convert", Resources.ProgramCommandConvert, ProcessConvertCommand));
             rootCommand.AddCommand(GenerateVerbCommands<JacketGenerateOption>("jacket", Resources.ProgramCommandJacket, ProcessJacketCommand));
             rootCommand.AddCommand(GenerateVerbCommands<AcbGenerateOption>("acb", Resources.ProgramCommandAcb, ProcessAcbCommand));
+            rootCommand.AddCommand(GenerateVerbCommands<UpdaterOption>("updater", string.Empty, ProcessUpdaterCommand));
 
             var verbosityOption = new Option<bool>(new[] { "--verbose", "-v" }, Resources.ProgramOptionDescriptionVerbose);
             verbosityOption.AddValidator(res =>
@@ -49,10 +52,16 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
             rootCommand.AddGlobalOption(verbosityOption);
         }
 
-        public async Task<int> Execute(string[] args)
+        private async Task<int> ProcessUpdaterCommand(UpdaterOption option)
         {
-            return await rootCommand.InvokeAsync(args);
+            var (exitCode, message) = IoC.Get<IProgramUpdater>().CommandExecuteUpdate(option);
+            if (exitCode != 0)
+                await Console.Error.WriteLineAsync(message);
+            return exitCode;
         }
+
+        public Task<int> Execute(string[] args)
+            => rootCommand.InvokeAsync(args);
 
         private Command GenerateVerbCommands<T>(string verb, string description, Func<T, Task<int>> callbackFunc) where T : new()
         {

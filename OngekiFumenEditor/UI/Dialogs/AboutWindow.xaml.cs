@@ -1,9 +1,11 @@
 ﻿using MahApps.Metro.Controls;
 using OngekiFumenEditor.Utils;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.UI.Dialogs
 {
@@ -22,8 +24,14 @@ namespace OngekiFumenEditor.UI.Dialogs
         public string BuildConfiguration => ThisAssembly.AssemblyConfiguration;
         public string CommitDate => ThisAssembly.GitCommitDate.AddHours(8).ToString("yyyy/M/dd H:mm:ss.fff");
 
-        public AboutWindow()
+        public bool IsNotifyUpdateSuccess { get; }
+        public string SourceVersion { get; }
+
+        public AboutWindow(bool isNotifyUpdateSuccess = false, Version sourceVersion = null)
         {
+            IsNotifyUpdateSuccess = isNotifyUpdateSuccess;
+            if (sourceVersion != null)
+                SourceVersion = sourceVersion.ToString();
             InitializeComponent();
             DataContext = this;
         }

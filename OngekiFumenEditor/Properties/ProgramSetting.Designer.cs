@@ -154,5 +154,29 @@ namespace OngekiFumenEditor.Properties {
                 this["WindowSizePositionLastTime"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UpdaterCheckMasterBrunchOnly {
+            get {
+                return ((bool)(this["UpdaterCheckMasterBrunchOnly"]));
+            }
+            set {
+                this["UpdaterCheckMasterBrunchOnly"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableUpdateCheck {
+            get {
+                return ((bool)(this["EnableUpdateCheck"]));
+            }
+            set {
+                this["EnableUpdateCheck"] = value;
+            }
+        }
     }
 }

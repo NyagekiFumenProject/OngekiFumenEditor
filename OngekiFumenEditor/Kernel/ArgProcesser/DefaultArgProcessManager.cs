@@ -24,6 +24,7 @@ using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
 using Expression = System.Linq.Expressions.Expression;
 using OngekiFumenEditor.Kernel.CommandExecutor.Attributes;
+using OngekiFumenEditor.UI.Dialogs;
 
 namespace OngekiFumenEditor.Kernel.ArgProcesser
 {
@@ -48,6 +49,23 @@ namespace OngekiFumenEditor.Kernel.ArgProcesser
                             Application.Current?.MainWindow?.Focus();
                     });
                 }
+            }
+
+            if (args.Contains("--notifySucess", StringComparer.InvariantCultureIgnoreCase))
+            {
+                Version sourceVersion = default;
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if ("--sourceVersion".Equals(args[i], StringComparison.InvariantCultureIgnoreCase) && Version.TryParse(args.ElementAtOrDefault(i + 1), out var sv))
+                        sourceVersion = sv;
+                }
+                Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    //wait for styles/resources have been loaded.
+                    while (Application.Current.MainWindow is not Window mainWindow)
+                        await Task.Delay(100);
+                    new AboutWindow(true, sourceVersion).Show();
+                }).NoWait();
             }
         }
     }

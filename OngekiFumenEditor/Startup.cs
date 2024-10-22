@@ -24,20 +24,7 @@ namespace OngekiFumenEditor
         [STAThread]
         public static int Main(string[] args)
         {
-            var isGUIMode = false;
-
-            if (args.Length == 0)
-            {
-                isGUIMode = true;
-            }
-            else
-            {
-                //there is args, check others
-                if (args.IsOnlyOne(out var firstArg) && File.Exists(firstArg))
-                {
-                    isGUIMode = true;
-                }
-            }
+            var isGUIMode = !(args.Length > 0 && !args[0].StartsWith("--"));
 
             if (isGUIMode)
             {
