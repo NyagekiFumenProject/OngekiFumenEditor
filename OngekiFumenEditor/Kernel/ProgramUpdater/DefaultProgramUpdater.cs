@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
         {
             get
             {
-                if (RemoteVersionInfo.Version is not Version remoteVersion)
+                if (RemoteVersionInfo?.Version is not Version remoteVersion)
                     return false;
                 var localVersion = Version.Parse(ThisAssembly.AssemblyFileVersion);
 
@@ -64,8 +64,11 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 Set(ref remoteVersionInfo, value);
                 NotifyOfPropertyChange(nameof(HasNewVersion));
 
-                if (updatableButton is not null)
-                    updatableButton.Visibility = HasNewVersion ? Visibility.Visible : Visibility.Collapsed;
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    if (updatableButton is not null)
+                        updatableButton.Visibility = HasNewVersion ? Visibility.Visible : Visibility.Collapsed;
+                });
             }
         }
 
@@ -172,7 +175,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             }
 
             if ((App.Current as App)?.IsGUIMode ?? false)
-                ModifyFrameworkMenuView();
+                App.Current.Dispatcher.Invoke(ModifyFrameworkMenuView);
 
             try
             {
