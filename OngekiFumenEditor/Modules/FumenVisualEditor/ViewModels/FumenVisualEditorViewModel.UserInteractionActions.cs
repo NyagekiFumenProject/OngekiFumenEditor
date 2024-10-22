@@ -231,7 +231,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             await IoC.Get<IFumenEditorClipboard>().PasteObjects(this, mirrorOption, placePoint);
         }
 
-        public void MenuItemAction_MirrorSelectionXGridZero()
+        public void MenuItemAction_MirrorSelectionXGridZero(ActionExecutionContext ctx)
         {
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
             if (selection.Count == 0)
@@ -243,7 +243,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.MirrorSelectionXGridZero, func, func));
         }
 
-        public void MenuItemAction_MirrorSelectionXGrid()
+        public void MenuItemAction_MirrorSelectionXGrid(ActionExecutionContext ctx)
         {
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
             if (selection.Count == 0)
@@ -291,7 +291,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public void MenuItemAction_MirrorLaneColors()
+        public void MenuItemAction_MirrorLaneColors(ActionExecutionContext ctx)
         {
             var laneObjects = SelectObjects.OfType<ConnectableStartObject>()
                 .Where(o => o.IsDockableLane)
@@ -1530,14 +1530,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void ScrollPage(int page)
         {
             TGrid changeGrid;
-            
-            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(ViewHeight, this).ToList() is [{ } single]) {
+
+            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(ViewHeight, this).ToList() is [{ } single])
+            {
                 changeGrid = single;
             }
-            else {
+            else
+            {
                 changeGrid = TGridCalculator.ConvertYToTGrid_DesignMode(ViewHeight, this);
             }
-            
+
             var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);
 
             ScrollTo(GetCurrentTGrid() + new GridOffset(change.Unit, change.Grid));
