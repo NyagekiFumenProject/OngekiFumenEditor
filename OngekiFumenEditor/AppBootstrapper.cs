@@ -320,6 +320,8 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         });
         ProgramSetting.Default.Save();
         Log.LogInfo($"WindowSizePositionLastTime = {ProgramSetting.Default.WindowSizePositionLastTime}");
+
+        App.Current.Shutdown();
     }
 
     private void InitIPCServer()
