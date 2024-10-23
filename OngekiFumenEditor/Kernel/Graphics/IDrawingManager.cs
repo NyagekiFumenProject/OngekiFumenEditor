@@ -1,5 +1,4 @@
-﻿using OngekiFumenEditor.DirectX;
-using OpenTK.Wpf;
+﻿using OpenTK.Wpf;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +18,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 		/// </summary>
 		/// <param name="cancellation"></param>
 		/// <returns></returns>
-		Task CreateGraphicsContext(Direct3DHostControl glView, CancellationToken cancellation = default);
+		Task CreateGraphicsContext(DCompGL glView, CancellationToken cancellation = default);
 
 		/// <summary>
 		/// 检查并试图初始化渲染环境

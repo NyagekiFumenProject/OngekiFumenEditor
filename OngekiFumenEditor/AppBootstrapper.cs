@@ -264,7 +264,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                 if (!IPCHelper.IsSelfHost())
                 {
                     //如果自己不是host那就检查另一个host死了没,来个随机sleep那样的话可以避免多个实例撞车
-                    await Task.Delay(MathUtils.Random(0, 1000));
+                    await Task.Delay(MathUtils.Random(0, 1000), cancelToken);
                     if (!IPCHelper.IsHostAlive())
                     {
                         //似了就继承大业
@@ -275,7 +275,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
                 try
                 {
-                    var line = IPCHelper.ReadLineAsync(cancelToken)?.Trim();
+                    var line = (await IPCHelper.ReadLineAsync(cancelToken))?.Trim();
                     if (string.IsNullOrWhiteSpace(line))
                         continue;
                     Log.LogDebug($"Recv line by IPC:{line}");

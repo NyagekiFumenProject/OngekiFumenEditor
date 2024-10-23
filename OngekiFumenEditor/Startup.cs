@@ -20,10 +20,14 @@ namespace OngekiFumenEditor
         [DllImport("user32.dll")]
         static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [STAThread]
+		[DllImport("Shcore.dll")]
+		static extern int SetProcessDpiAwareness(int value);
+
+		[STAThread]
         public static int Main(string[] args)
         {
-            if (args.Length == 0)
+			SetProcessDpiAwareness(2);           
+			if (args.Length == 0)
                 ShowWindow(GetConsoleWindow(), 0);
 
             IPCHelper.Init(args);

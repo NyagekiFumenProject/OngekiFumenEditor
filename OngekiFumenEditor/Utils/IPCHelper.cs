@@ -22,6 +22,7 @@ namespace OngekiFumenEditor.Utils
         private static MemoryMappedFile mmf;
         private static bool enableMultiProc;
         private static readonly int currentPid;
+        private static EventWaitHandle waitHandle;
 
         internal class ArgsWrapper
         {
@@ -40,6 +41,7 @@ namespace OngekiFumenEditor.Utils
                 return;
 
             mmf = MemoryMappedFile.CreateOrOpen("OngekiFumenEditor_MMF", FileSize, MemoryMappedFileAccess.ReadWrite);
+            waitHandle = new(false,EventResetMode.AutoReset, "OngekiFumenEditor_WaitHandle");
             using var accessor = mmf.CreateViewAccessor(0, FileSize);
 
             var pid = accessor.ReadInt32(0);
@@ -55,35 +57,37 @@ namespace OngekiFumenEditor.Utils
                     accessor.WriteArray(sizeof(int) * 2, buffer, 0, Math.Min(buffer.Length, FileSize - sizeof(int) * 2));
                     accessor.Write(sizeof(int), buffer.Length);
                     accessor.Flush();
+                    waitHandle.Set();
 
                     Environment.Exit(0);
                     return;
                 }
             }
 
-            accessor.Write(0, Process.GetCurrentProcess().Id);
+            accessor.Write(0, Environment.ProcessId);
         }
 
-        public static string ReadLineAsync(CancellationToken cancellation)
+        public static async Task<string> ReadLineAsync(CancellationToken cancellation)
         {
             if (enableMultiProc)
                 return string.Empty;
-
-            using var accessor = mmf.CreateViewAccessor(0, FileSize);
+			using var accessor = mmf.CreateViewAccessor(0, FileSize);
 
             while (!cancellation.IsCancellationRequested)
             {
-                var size = accessor.ReadInt32(sizeof(int));
-                if (size > 0)
+                if (waitHandle.WaitOne(1000))
                 {
-                    var bytes = new byte[size];
-                    accessor.ReadArray(sizeof(int) * 2, bytes, 0, size);
-                    accessor.Write(sizeof(int), 0);
-
-                    return Encoding.UTF8.GetString(bytes);
-                }
+					var size = accessor.ReadInt32(sizeof(int));
+					if (size > 0)
+					{
+						var bytes = new byte[size];
+						accessor.ReadArray(sizeof(int) * 2, bytes, 0, size);
+						accessor.Write(sizeof(int), 0);
+						return Encoding.UTF8.GetString(bytes);
+					}
+				};
+                await Task.Yield();
             }
-
             return string.Empty;
         }
 

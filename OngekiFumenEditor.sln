@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caliburn.Micro.Platform.Cor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caliburn.Micro.Platform", "Dependences\gemini\Dependences\Caliburn.Micro\src\Caliburn.Micro.Platform\Caliburn.Micro.Platform.csproj", "{8EC53E25-C1D3-4D46-907F-10FF64D70FD7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GLWpfControl", "Dependences\GLWpfControl\GLWpfControl.csproj", "{F5918886-9102-4DCA-810F-28F12FF00C59}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{8EC53E25-C1D3-4D46-907F-10FF64D70FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EC53E25-C1D3-4D46-907F-10FF64D70FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EC53E25-C1D3-4D46-907F-10FF64D70FD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5918886-9102-4DCA-810F-28F12FF00C59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5918886-9102-4DCA-810F-28F12FF00C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5918886-9102-4DCA-810F-28F12FF00C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5918886-9102-4DCA-810F-28F12FF00C59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

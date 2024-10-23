@@ -15,9 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 		{
 			InitializeComponent();
 			DataContext = new FumenVisualEditorViewModel();
-			glView.Ready += glView_Ready;
 			IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
-			glView.InitContext();
 		}
 
 		private void glView_Ready()

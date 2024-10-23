@@ -179,8 +179,8 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="OpenTK" Version="4.3.0" />
-		<PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
+		<PackageReference Include="OpenTK" Version="4.8.2" />
+		<!--<PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />-->
 		<PackageReference Include="PixiEditor.ColorPicker" Version="3.3.1" />
 		<PackageReference Include="SharpVectors" Version="1.8.4" />
 		<PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
@@ -199,6 +199,7 @@
 		<ProjectReference Include="..\Dependences\earcut.net\src\Earcut.csproj">
 			<PrivateAssets>all</PrivateAssets>
 		</ProjectReference>
+		<ProjectReference Include="..\Dependences\GLWpfControl\GLWpfControl.csproj" />
 		<ProjectReference Include="..\Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj">
 			<PrivateAssets>all</PrivateAssets>
 		</ProjectReference>
