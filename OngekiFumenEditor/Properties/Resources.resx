@@ -1737,62 +1737,62 @@
   <data name="AboutWindow" xml:space="preserve">
     <value>About</value>
   </data>
-  <data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
-    <value />
+<data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
+    <value>Set object critical</value>
   </data>
   <data name="kbd_editor_FastPlaceDockableObjectToWallLeft" xml:space="preserve">
-    <value />
+    <value>Dock object to Wall Left</value>
   </data>
   <data name="kbd_editor_FastPlaceDockableObjectToWallRight" xml:space="preserve">
-    <value />
+    <value>Dock object to Wall Right</value>
   </data>
   <data name="kbd_editor_FastPlaceDockableObjectToRight" xml:space="preserve">
-    <value />
+    <value>Dock object to Right Lane</value>
   </data>
   <data name="kbd_editor_FastPlaceNewHold" xml:space="preserve">
-    <value />
+    <value>Place new Hold at cursor</value>
   </data>
   <data name="kbd_editor_FastPlaceNewTap" xml:space="preserve">
-    <value />
+    <value>Place new Tap at cursor</value>
   </data>
   <data name="kbd_editor_FastPlaceDockableObjectToCenter" xml:space="preserve">
-    <value />
+    <value>Dock object to Center Lane</value>
   </data>
   <data name="kbd_editor_FastPlaceDockableObjectToLeft" xml:space="preserve">
-    <value />
+    <value>Dock object to Left Lane</value>
   </data>
   <data name="kbd_editor_DeleteSelectingObjects" xml:space="preserve">
-    <value />
+    <value>Delete selected objects</value>
   </data>
   <data name="kbd_editor_SelectAllObjects" xml:space="preserve">
-    <value />
+    <value>Select all objects</value>
   </data>
   <data name="kbd_editor_CancelSelectingObjects" xml:space="preserve">
-    <value />
+    <value>Clear selection</value>
   </data>
   <data name="kbd_editor_HideOrShow" xml:space="preserve">
-    <value />
+    <value>Toggle display mode</value>
   </data>
   <data name="kbd_editor_FastAddConnectableChild" xml:space="preserve">
-    <value />
+    <value>Add new node to selected lanes</value>
   </data>
   <data name="kbd_editor_FastSwitchFlickDirection" xml:space="preserve">
-    <value />
+    <value>Switch directions of selected flicks</value>
   </data>
   <data name="kbd_editor_CopySelectedObjects" xml:space="preserve">
-    <value />
+    <value>Copy selection to clipboard</value>
   </data>
   <data name="kbd_editor_PasteCopiesObjects" xml:space="preserve">
-    <value />
+    <value>Paste clipboard contents at cursor</value>
   </data>
   <data name="kbd_editor_ScrollPageDown" xml:space="preserve">
-    <value />
+    <value>Scroll a page down</value>
   </data>
   <data name="kbd_editor_ScrollPageUp" xml:space="preserve">
-    <value />
+    <value>Scroll a page up</value>
   </data>
   <data name="ComfirmResetAllKeybindingDefinitions" xml:space="preserve">
-    <value>Does it reset all key bindings to their default values?</value>
+    <value>Reset all keybindings to their default?</value>
   </data>
   <data name="Change" xml:space="preserve">
     <value>Change</value>
@@ -1801,7 +1801,7 @@
     <value>Conflicts with keybinding {0}</value>
   </data>
   <data name="AssignKeyBinding" xml:space="preserve">
-    <value>Please assign keybinding for {0}</value>
+    <value>Please assign a keybinding for {0}</value>
   </data>
   <data name="Reset" xml:space="preserve">
     <value>Reset</value>
@@ -1813,7 +1813,7 @@
     <value>Assign keybinding</value>
   </data>
   <data name="ShowNotAssignKeybindingOnly" xml:space="preserve">
-    <value>Show not assign keybinding only</value>
+    <value>Show unassigned keybindings only</value>
   </data>
   <data name="ResetAllKeybindings" xml:space="preserve">
     <value>Reset all keybindings</value>
@@ -1825,13 +1825,13 @@
     <value>There is a new update! New version: {0}({1})</value>
   </data>
   <data name="UpdateProgramReady" xml:space="preserve">
-    <value />
+    <value>Confirm program restart. Any unsaved data will be lost.</value>
   </data>
   <data name="UpdateStart" xml:space="preserve">
     <value>Start Update</value>
   </data>
   <data name="ShowNewVersionTitle" xml:space="preserve">
-    <value />
+    <value>Updater</value>
   </data>
   <data name="CurrentVersion" xml:space="preserve">
     <value>Current Version</value>
@@ -1852,7 +1852,7 @@
     <value>Program Updatable!</value>
   </data>
   <data name="ProgramReadyToUpdate" xml:space="preserve">
-    <value />
+    <value>Close the application and update?</value>
   </data>
   <data name="EnableUpdateCheck" xml:space="preserve">
     <value>Enable program check updates</value>
@@ -1865,5 +1865,38 @@
   </data>
   <data name="ProgramUpdates" xml:space="preserve">
     <value>Program Updates</value>
+  </data>
+  <data name="kbd_batch_ModeWallLeft" xml:space="preserve">
+    <value>Batch: Wall Left</value>
+  </data>
+  <data name="kbd_batch_ModeLaneLeft" xml:space="preserve">
+    <value>Batch: Lane Left</value>
+  </data>
+  <data name="kbd_batch_ModeLaneCenter" xml:space="preserve">
+    <value>Batch: Lane Center</value>
+  </data>
+  <data name="kbd_batch_ModeLaneRight" xml:space="preserve">
+    <value>Batch: Lane Right</value>
+  </data>
+  <data name="kbd_batch_ModeWallRight" xml:space="preserve">
+    <value>Batch: Wall Right</value>
+  </data>
+  <data name="kbd_batch_ModeLaneColorful" xml:space="preserve">
+    <value>Batch: Lane Colorful</value>
+  </data>
+  <data name="kbd_batch_ModeTap" xml:space="preserve">
+    <value>Batch: Tap</value>
+  </data>
+  <data name="kbd_batch_ModeHold" xml:space="preserve">
+    <value>Batch: Hold</value>
+  </data>
+  <data name="kbd_batch_ModeFlick" xml:space="preserve">
+    <value>Batch: Flick</value>
+  </data>
+  <data name="kbd_batch_ModeLaneBlock" xml:space="preserve">
+    <value>Batch: Lane Block</value>
+  </data>
+  <data name="kbd_batch_ModeNormalBell" xml:space="preserve">
+    <value>Batch: Bell</value>
   </data>
 </root>

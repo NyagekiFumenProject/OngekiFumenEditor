@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
                     x.Key,
                     x.Modifiers,
                     x.ConfigKey
-                    ]).Contains(FilterKeywords, StringComparison.InvariantCultureIgnoreCase));
+                ]).Contains(FilterKeywords, StringComparison.InvariantCultureIgnoreCase));
 
             Definitions.AddRange(list);
         }
@@ -83,11 +83,12 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
             var dialog = new ConfigKeyBindingDialog(definition);
             if (dialog.ShowDialog() is true)
             {
+                if (dialog.ConflictDefinition is KeyBindingDefinition conflictDefinition)
+                    keybindingManager.ChangeKeyBinding(conflictDefinition, Key.None, ModifierKeys.None);
+
                 if (KeyBindingDefinition.TryParseExpression(dialog.CurrentExpression, out var newKey, out var newModifier))
                     keybindingManager.ChangeKeyBinding(definition, newKey, newModifier);
             }
-            if (dialog.ConflictDefinition is KeyBindingDefinition conflictDefinition)
-                keybindingManager.ChangeKeyBinding(conflictDefinition, Key.None, ModifierKeys.None);
             UpdateDisplayList();
         }
         public void ResetAllDefinitions()

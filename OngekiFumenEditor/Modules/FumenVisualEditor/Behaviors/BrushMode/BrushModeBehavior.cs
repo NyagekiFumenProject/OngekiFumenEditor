@@ -10,6 +10,7 @@ using Caliburn.Micro;
 using Microsoft.Xaml.Behaviors;
 using Microsoft.Xaml.Behaviors.Core;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -24,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BrushMode;
 
 public class BrushModeBehavior : Behavior<FumenVisualEditorView>
 {
-    private readonly ImmutableDictionary<Key, BrushModeInputObject> CommandDefinitions;
+    private readonly ImmutableDictionary<KeyBindingDefinition, BrushModeInputObject> CommandDefinitions;
     private readonly ImmutableDictionary<string, TriggerAction> ClickTriggers;
 
     public BrushModeInputObject CurrentInputObject
@@ -39,20 +40,19 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
     
     public BrushModeBehavior()
     {
-        CommandDefinitions =  new Dictionary<Key, BrushModeInputObject>
+        CommandDefinitions =  new Dictionary<KeyBindingDefinition, BrushModeInputObject>
         {
-            [Key.OemTilde] = new BrushModeInputWallLeft(),
-            [Key.D1] = new BrushModeInputLaneLeft(),
-            [Key.D2] = new BrushModeInputLaneCenter(),
-            [Key.D3] = new BrushModeInputLaneRight(),
-            [Key.D4] = new BrushModeInputWallRight(),
-            [Key.D5] = new BrushModeInputLaneColorful(),
-            [Key.T] = new BrushModeInputTap(),
-            [Key.D] = new BrushModeInputHold(),
-            [Key.E] = new BrushModeInputNormalBell(),
-            [Key.F] = new BrushModeInputFlick(),
-            [Key.Z] = new BrushModeInputLaneBlock(),
-            [Key.V] = null
+            [KeyBindingDefinitions.KBD_Batch_ModeWallLeft] = new BrushModeInputWallLeft(),
+            [KeyBindingDefinitions.KBD_Batch_ModeLaneLeft] = new BrushModeInputLaneLeft(),
+            [KeyBindingDefinitions.KBD_Batch_ModeLaneCenter] = new BrushModeInputLaneCenter(),
+            [KeyBindingDefinitions.KBD_Batch_ModeLaneRight] = new BrushModeInputLaneRight(),
+            [KeyBindingDefinitions.KBD_Batch_ModeWallRight] = new BrushModeInputWallRight(),
+            [KeyBindingDefinitions.KBD_Batch_ModeLaneColorful] = new BrushModeInputLaneColorful(),
+            [KeyBindingDefinitions.KBD_Batch_ModeTap] = new BrushModeInputTap(),
+            [KeyBindingDefinitions.KBD_Batch_ModeHold] = new BrushModeInputHold(),
+            [KeyBindingDefinitions.KBD_Batch_ModeFlick] = new BrushModeInputFlick(),
+            [KeyBindingDefinitions.KBD_Batch_ModeLaneBlock] = new BrushModeInputLaneBlock(),
+            [KeyBindingDefinitions.KBD_Batch_ModeNormalBell] = new BrushModeInputNormalBell(),
         }.ToImmutableDictionary();
 
         ClickTriggers = new Dictionary<string, TriggerAction>
@@ -71,17 +71,19 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             return;
 
         var triggerCollection = Interaction.GetTriggers(AssociatedObject);
-        
+
         // Create brush key triggers on the FumenVisualEditorView.
         // Temporarily delete existing ones that clash with brush keys. 
         foreach (var (key, obj) in CommandDefinitions) {
-            var existingTriggers = triggerCollection.Where(t => t is KeyTrigger tr && tr.Key == key);
+            var existingTriggers = triggerCollection.Where(t =>
+                t is ActionMessageKeyBinding am && am.Definition.Key == key.Key &&
+                am.Definition.Modifiers == key.Modifiers);
             OldTriggers.AddRange(existingTriggers);
             OldTriggers.ForEach(t => triggerCollection.Remove(t));
 
             foreach (var mod in new[] { ModifierKeys.None, ModifierKeys.Shift }) {
                 // It's useful to hold down shift as we place multiple lanes, so bind everything to Shift+ as well.
-                var newTrigger = new KeyTrigger() { Key = key, Modifiers = mod };
+                var newTrigger = new KeyTrigger() { Key = key.Key, Modifiers = mod };
                 newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentInputObject), Value = obj });
                 triggerCollection.Add(newTrigger);
                 NewTriggers.Add(newTrigger);
