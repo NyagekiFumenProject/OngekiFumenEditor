@@ -7,6 +7,7 @@ using OngekiFumenEditor.Modules.OptionGeneratorTools.Base;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Parser.DefaultImpl;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils.Ogkr;
 
 namespace OngekiFumenEditor.Modules.FumenConverter.Kernel;
 
@@ -35,6 +36,19 @@ public static class FumenConverterWrapper
         if (string.IsNullOrWhiteSpace(option.OutputFumenFilePath)) 
             return new(false, Resources.OutputFumenFileNotSelect);
 
+        if (option.IsStandarizeFumen) {
+            if (Path.GetExtension(option.OutputFumenFilePath) != ".ogkr") {
+                return new(false, Resources.OutputFumenStandardizeFormatNotSupported);
+            }
+
+            var res = await StandardizeFormat.Process(fumen);
+            if (!res.IsSuccess) {
+                return new(false, res.Message);
+            }
+
+            fumen = res.SerializedFumen;
+        }
+        
         var converter = IoC.Get<IFumenConverter>();
         try {
             var output = await converter.ConvertFumenAsync(fumen, option.OutputFumenFilePath);

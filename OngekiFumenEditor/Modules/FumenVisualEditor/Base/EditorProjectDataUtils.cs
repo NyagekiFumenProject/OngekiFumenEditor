@@ -130,7 +130,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			}
 			catch (Exception e)
 			{
-				var msg = $"{Resources.CantSaveFumenProject}{e.Message}{Environment.NewLine}{e.StackTrace}";
+				var msg = $"{Resources.CantSaveFumenProject} {e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 			}
 		}

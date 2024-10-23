@@ -21,7 +21,9 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             DecoratorBrush="Green"
-            Text="{markup:Translate [DragToCreateNext]}" />
+            Cursor="Hand"
+            Text="{markup:Translate [DragToCreateNext]}"
+            ToolTip="{markup:Translate [DragToCreateNextToolTip]}"/>
         <!--<controls:CommonOperationButton
             Width="150"
             Margin="0,10,0,0"
@@ -41,6 +43,7 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove3($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             DecoratorBrush="DarkCyan"
+            Cursor="Hand"
             Text="{markup:Translate [DragToSplit]}"
             ToolTip="{markup:Translate [DragToSplitTipText]}" />
         <controls:CommonOperationButton
@@ -49,6 +52,7 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove4($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             DecoratorBrush="DarkKhaki"
+            Cursor="Hand"
             Text="{markup:Translate [DragToCreateCurveControlPoint]}"
             ToolTip="{markup:Translate [DragToCreateCurveControlPointTipText]}"
             Visibility="{Binding IsEnableDragPathControl, Converter={StaticResource BooleanToVisibilityConverter}}" />

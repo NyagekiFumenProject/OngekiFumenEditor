@@ -1,10 +1,14 @@
 ﻿using OngekiFumenEditor.Utils;
 using System.Linq;
+using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
 	public abstract class ConnectableObjectBase : OngekiMovableObjectBase
 	{
+		[LocalizableObjectPropertyBrowserAlias(nameof(Resources.RecordId))]
+		[ObjectPropertyBrowserReadOnly]
 		public abstract int RecordId { get; set; }
 
 		public abstract LaneType LaneType { get; }

@@ -46,7 +46,8 @@
 * 塞小功能&修BUG.... **<--- we are here! ---**
 ....、
 
-## 编译&下载
+## 编译&下载&Wiki
+[*下载最新最热制谱器*](https://nageki-net.com/fumen/editor/get)
 [![Build Program](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml/badge.svg)](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml)
 [wiki](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki)
 

@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels.Dialogs"
-    Title="选择..."
+    Title="{markup:Translate [EnumStructsSelectorWindow]}"
     Width="700"
     Height="500"
     d:Background="White"

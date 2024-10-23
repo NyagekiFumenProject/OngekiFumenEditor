@@ -42,29 +42,42 @@ namespace OngekiFumenEditor.Utils
             mmf = MemoryMappedFile.CreateOrOpen("OngekiFumenEditor_MMF", FileSize, MemoryMappedFileAccess.ReadWrite);
             using var accessor = mmf.CreateViewAccessor(0, FileSize);
 
-            var pid = accessor.ReadInt32(0);
-            if (pid != 0)
+            var isWaitForPrev = args.Contains("--wait", StringComparer.InvariantCultureIgnoreCase);
+
+            while (true)
             {
-                var process = Process.GetProcessById(pid);
-                if (process is not null)
+                var pid = accessor.ReadInt32(0);
+                //there are other editors registered
+                if (pid != 0)
                 {
-                    //send to host
-                    var r = "CMD:" + JsonSerializer.Serialize(new ArgsWrapper() { Args = args });
+                    //check if host editor is dead or not 
+                    var process = Process.GetProcessById(pid);
+                    if (process is not null)
+                    {
+                        //check if have to wait for host editor
+                        if (isWaitForPrev)
+                        {
+                            Thread.Sleep(10);
+                            continue;
+                        }
 
-                    var buffer = Encoding.UTF8.GetBytes(r);
-                    accessor.WriteArray(sizeof(int) * 2, buffer, 0, Math.Min(buffer.Length, FileSize - sizeof(int) * 2));
-                    accessor.Write(sizeof(int), buffer.Length);
-                    accessor.Flush();
+                        //send args to host editor and later will process them
+                        var r = "CMD:" + JsonSerializer.Serialize(new ArgsWrapper() { Args = args });
 
-                    Environment.Exit(0);
-                    return;
+                        WriteLine(r, default);
+
+                        Environment.Exit(0);
+                        return;
+                    }
+                    break;
                 }
-            }
 
-            accessor.Write(0, Process.GetCurrentProcess().Id);
+                accessor.Write(0, Process.GetCurrentProcess().Id);
+                return;
+            }
         }
 
-        public static string ReadLineAsync(CancellationToken cancellation)
+        public static string ReadLine(CancellationToken cancellation)
         {
             if (enableMultiProc)
                 return string.Empty;
@@ -74,17 +87,42 @@ namespace OngekiFumenEditor.Utils
             while (!cancellation.IsCancellationRequested)
             {
                 var size = accessor.ReadInt32(sizeof(int));
+                //check if readable
                 if (size > 0)
                 {
                     var bytes = new byte[size];
                     accessor.ReadArray(sizeof(int) * 2, bytes, 0, size);
-                    accessor.Write(sizeof(int), 0);
+                    accessor.Write(sizeof(int), 0); //set 0, notify others mmf is writable.
 
                     return Encoding.UTF8.GetString(bytes);
                 }
+                Thread.Sleep(10);
             }
 
             return string.Empty;
+        }
+
+        public static void WriteLine(string content, CancellationToken cancellation)
+        {
+            using var accessor = mmf.CreateViewAccessor(0, FileSize);
+
+            while (!cancellation.IsCancellationRequested)
+            {
+                var size = accessor.ReadInt32(sizeof(int));
+                //check if writable 
+                if (size > 0)
+                {
+                    Thread.Sleep(0);
+                    continue;
+                }
+
+                var buffer = Encoding.UTF8.GetBytes(content);
+                accessor.WriteArray(sizeof(int) * 2, buffer, 0, Math.Min(buffer.Length, FileSize - sizeof(int) * 2));
+                accessor.Write(sizeof(int), buffer.Length); //notify others mmf is readable.
+                accessor.Flush();
+
+                break;
+            }
         }
 
         public static bool IsSelfHost()

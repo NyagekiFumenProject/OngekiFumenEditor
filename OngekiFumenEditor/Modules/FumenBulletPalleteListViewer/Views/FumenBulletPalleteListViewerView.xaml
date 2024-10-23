@@ -80,7 +80,7 @@
                     <GridViewColumn
                         Width="60"
                         DisplayMemberBinding="{Binding StrID}"
-                        Header="StrID" />
+                        Header="{markup:Translate [BulletPaletteId]}" />
                     <GridViewColumn Width="120" Header="{markup:Translate [Name]}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -168,14 +168,18 @@
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBullet($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
-                                        Text="{markup:Translate [DragToCreateBullet]}"
+                                        Cursor="Hand"
+                                        Text="{markup:Translate [BulletPaletteCreateBullet]}"
+                                        ToolTip="{markup:Translate [DragToCreateBullet]}"
                                         TextDecorations="Baseline">
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
-                                        Text="{markup:Translate [DragToCreateBell]}"
+                                        Cursor="Hand"
+                                        Text="{markup:Translate [BulletPaletteCreateBell]}"
+                                        ToolTip="{markup:Translate [DragToCreateBell]}"
                                         TextDecorations="Baseline">
                                     </TextBlock>
                                     <TextBlock
@@ -183,6 +187,7 @@
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnCopyNewBPL($executionContext)];"
                                         Text="{markup:Translate [ClonePallete]}"
+                                        ToolTip="{markup:Translate [ClickToClonePalette]}"
                                         TextDecorations="Baseline">
                                     </TextBlock>
                                 </StackPanel>

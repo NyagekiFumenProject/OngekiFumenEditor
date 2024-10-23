@@ -18,11 +18,14 @@ namespace OngekiFumenEditor
     /// </summary>
     public partial class App : Application
     {
-        public App()
+        public bool IsGUIMode { get; }
+
+        public App(bool isGUIMode = true)
         {
             AppDomain.CurrentDomain.AssemblyResolve += OnSatelliteAssemblyResolve;
             // 设置工作目录为执行文件所在的目录
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            IsGUIMode = isGUIMode;
         }
 
         private Assembly OnSatelliteAssemblyResolve(object sender, ResolveEventArgs args)

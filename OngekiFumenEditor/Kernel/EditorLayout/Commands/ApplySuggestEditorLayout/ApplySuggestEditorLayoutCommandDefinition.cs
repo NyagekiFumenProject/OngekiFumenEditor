@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.EditorLayout.Commands.About
 
 		public override string Text
 		{
-			get { return "使用推荐的布局"; }
+			get { return Resources.ApplySuggestedEditorLayout; }
 		}
 
 		public override string ToolTip

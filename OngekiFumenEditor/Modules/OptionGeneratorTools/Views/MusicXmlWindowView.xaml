@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels"
-    Title="Music.xml生成器"
+    Title="{markup:Translate [MusicXmlWindow]}"
     Width="500"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:MusicXmlWindowViewModel}"

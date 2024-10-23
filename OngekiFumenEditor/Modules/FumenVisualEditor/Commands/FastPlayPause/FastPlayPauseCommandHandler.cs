@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPlayPause
 
 		public override Task Run(Command command)
 		{
-			editorDocumentManager?.CurrentActivatedEditor?.KeyboardAction_PlayOrPause();
+			editorDocumentManager?.CurrentActivatedEditor?.KeyboardAction_PlayOrPause(default);
 			return TaskUtility.Completed;
 		}
 	}

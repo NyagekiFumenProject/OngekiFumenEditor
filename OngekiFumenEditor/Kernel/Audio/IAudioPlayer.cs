@@ -16,15 +16,17 @@ namespace OngekiFumenEditor.Kernel.Audio
 		/// </summary>
 		float Speed { get; set; }
 
+        /* control by IAudioManager
 		/// <summary>
 		/// 音量,0~1
 		/// </summary>
 		float Volume { get; set; }
+		*/
 
-		/// <summary>
-		/// 总长度,毫秒
-		/// </summary>
-		TimeSpan Duration { get; }
+        /// <summary>
+        /// 总长度,毫秒
+        /// </summary>
+        TimeSpan Duration { get; }
 
 		/// <summary>
 		/// 是否正在播放

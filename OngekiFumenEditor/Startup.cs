@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -23,12 +24,15 @@ namespace OngekiFumenEditor
         [STAThread]
         public static int Main(string[] args)
         {
-            if (args.Length == 0)
+            var isGUIMode = !(args.Length > 0 && !args[0].StartsWith("--"));
+
+            if (isGUIMode)
+            {
                 ShowWindow(GetConsoleWindow(), 0);
+                IPCHelper.Init(args);
+            }
 
-            IPCHelper.Init(args);
-
-            var app = new App();
+            var app = new App(isGUIMode);
             app.InitializeComponent();
 
             return app.Run();

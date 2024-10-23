@@ -5,8 +5,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:OngekiFumenEditor.UI.Dialogs"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="关于"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    Title="{markup:Translate [AboutWindow]}"
     Width="300"
     Background="{DynamicResource EnvironmentWindowBackground}"
     SizeToContent="WidthAndHeight"
@@ -21,6 +23,12 @@
             FontWeight="ExtraBlack">
             Ongeki Fumen Editor
         </Label>
+        <Label
+            Margin="10,0"
+            HorizontalAlignment="Right"
+            Opacity="0.5">
+            Let's play ONGEKI forever!!!
+        </Label>
         <Grid Margin="10,15,10,15">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -30,44 +38,97 @@
                 <RowDefinition />
                 <RowDefinition />
                 <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Label VerticalAlignment="Center" FontSize="15">Product Verion</Label>
-            <Label
-                Grid.Column="1"
-                VerticalAlignment="Center"
-                d:Content="1.5.0"
-                Content="{Binding ProductVersion}"
-                FontSize="15"
-                FontWeight="Bold">
-            </Label>
+            <Label VerticalAlignment="Center" FontSize="15">Product Version</Label>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Visibility="{Binding IsNotifyUpdateSuccess, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                    <Label
+                        VerticalAlignment="Center"
+                        d:Content="1.5.0"
+                        Content="{Binding SourceVersion}"
+                        FontSize="15"
+                        FontWeight="Bold">
+                    </Label>
+                    <Label
+                        VerticalAlignment="Center"
+                        Content="-&gt;"
+                        FontSize="15"
+                        FontWeight="Bold">
+                    </Label>
+                </StackPanel>
+                <Label
+                    VerticalAlignment="Center"
+                    d:Content="1.5.0"
+                    Content="{Binding ProductVersion}"
+                    FontSize="15"
+                    FontWeight="Bold">
+                </Label>
+            </StackPanel>
+
             <Label
                 Grid.Row="1"
                 VerticalAlignment="Center"
                 FontSize="15">
-                Verion
+                Commit Hash
             </Label>
             <Label
                 Grid.Row="1"
                 Grid.Column="1"
                 VerticalAlignment="Center"
-                d:Content="1.5.0"
-                Content="{Binding Version}"
+                d:Content="abcdefg"
+                Content="{Binding CommitHash}"
                 FontSize="15"
                 FontWeight="Bold">
             </Label>
+
             <Label
                 Grid.Row="2"
                 VerticalAlignment="Center"
                 FontSize="15">
-                Commit Hash
+                Commit Time
             </Label>
             <Label
                 Grid.Row="2"
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 d:Content="abcdefg"
-                Content="{Binding CommitHash}"
+                Content="{Binding CommitDate}"
+                FontSize="15"
+                FontWeight="Bold">
+            </Label>
+
+            <Label
+                Grid.Row="3"
+                VerticalAlignment="Center"
+                FontSize="15">
+                Build Time
+            </Label>
+            <Label
+                Grid.Row="3"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                d:Content="abcdefg"
+                Content="{Binding BuildTime}"
+                FontSize="15"
+                FontWeight="Bold">
+            </Label>
+
+            <Label
+                Grid.Row="4"
+                VerticalAlignment="Center"
+                FontSize="15">
+                Build Configuration
+            </Label>
+            <Label
+                Grid.Row="4"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                d:Content="abcdefg"
+                Content="{Binding BuildConfiguration}"
                 FontSize="15"
                 FontWeight="Bold">
             </Label>

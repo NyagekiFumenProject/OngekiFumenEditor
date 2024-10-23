@@ -171,9 +171,6 @@
   <data name="Artist" xml:space="preserve">
     <value>艺术家:</value>
   </data>
-  <data name="AsBrushSourceObject" xml:space="preserve">
-    <value>并作为刷子模式的批量生成源</value>
-  </data>
   <data name="AudioDuration" xml:space="preserve">
     <value>音频时长:</value>
   </data>
@@ -226,7 +223,7 @@
     <value>当预览时，Bell/Bullet总数超过</value>
   </data>
   <data name="BellBulletCountOverLimit_Part2" xml:space="preserve">
-    <value>时，会使用多线程进行并行计算</value>
+    <value>会使用多线程进行并行计算</value>
   </data>
   <data name="BigJacketSize" xml:space="preserve">
     <value>大图尺寸(通常520x520):</value>
@@ -580,7 +577,7 @@
     <value>(值越大,滚动跨度越大)</value>
   </data>
   <data name="EditorMustBeDesignMode" xml:space="preserve">
-    <value>请先将编辑器切换到设计模式</value>
+    <value>请先将编辑器切换到编辑模式</value>
   </data>
   <data name="EditorTarget" xml:space="preserve">
     <value>编辑器目标</value>
@@ -1216,7 +1213,7 @@
     <value>记忆/恢复编辑器时间</value>
   </data>
   <data name="RememberUndoPlace" xml:space="preserve">
-    <value>记录操作位置，设计模式中撤回时如果不在位置内则跳转此位置</value>
+    <value>记录操作位置，编辑模式中撤回时如果不在位置内则跳转此位置</value>
   </data>
   <data name="Render" xml:space="preserve">
     <value>渲染器</value>
@@ -1664,5 +1661,209 @@
   </data>
   <data name="Save" xml:space="preserve">
     <value>保存</value>
+  </data>
+  <data name="BulletPaletteCreateBullet" xml:space="preserve">
+    <value>Bullet</value>
+  </data>
+  <data name="ClickToClonePalette" xml:space="preserve">
+    <value>点击克隆新模板</value>
+  </data>
+  <data name="BulletPaletteCreateBell" xml:space="preserve">
+    <value>Bell</value>
+  </data>
+  <data name="CopiedObjectsBrushAllowed" xml:space="preserve">
+    <value>已复制 {0} 个物件(并可用在刷子模式)</value>
+  </data>
+  <data name="DragToCreateHoldEndTipText" xml:space="preserve">
+    <value>拖动生成HoldEnd物件</value>
+  </data>
+  <data name="DragToCreateNextToolTip" xml:space="preserve">
+    <value>可拖动到编辑器界面生成新的物件</value>
+  </data>
+  <data name="ObjectId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="BulletPaletteId" xml:space="preserve">
+    <value>StrID</value>
+  </data>
+  <data name="SelectFile" xml:space="preserve">
+    <value>选择文件</value>
+  </data>
+  <data name="VisualEditorLaneColorSettings" xml:space="preserve">
+    <value>轨道颜色</value>
+  </data>
+  <data name="BellBulletCountOverLimit_Sep" xml:space="preserve">
+    <value>时，</value>
+  </data>
+  <data name="ChangeColor" xml:space="preserve">
+    <value>选择</value>
+  </data>
+  <data name="NamedColorChangeTitle" xml:space="preserve">
+    <value>设置新的 {0} 颜色</value>
+  </data>
+  <data name="ApplySuggestedEditorLayout" xml:space="preserve">
+    <value>使用推荐的布局</value>
+  </data>
+  <data name="RecordId" xml:space="preserve">
+    <value>RecordId</value>
+  </data>
+  <data name="CurveInterpolatorFactoryLabel" xml:space="preserve">
+    <value>CurveInterpolatorFactory</value>
+  </data>
+  <data name="CurvePrecisionLabel" xml:space="preserve">
+    <value>CurvePrecision</value>
+  </data>
+  <data name="ProgramOptionStandardizeFumen" xml:space="preserve">
+    <value>生成标准音击谱面</value>
+  </data>
+  <data name="OutputFumenStandardizeFormatNotSupported" xml:space="preserve">
+    <value>无法标准化音击谱面</value>
+  </data>
+  <data name="BossCardSelectorWindow" xml:space="preserve">
+    <value>选择...</value>
+  </data>
+  <data name="EnumStructsSelectorWindow" xml:space="preserve">
+    <value>选择...</value>
+  </data>
+  <data name="FumenConverterWindow" xml:space="preserve">
+    <value>谱面转换</value>
+  </data>
+  <data name="BrushTGridRangeDialog" xml:space="preserve">
+    <value>刷子时间钦定</value>
+  </data>
+  <data name="EditorProjectSetupDialog" xml:space="preserve">
+    <value>项目新建向导</value>
+  </data>
+  <data name="AboutWindow" xml:space="preserve">
+    <value>关于</value>
+  </data>
+  <data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
+    <value>快速调整已选的物件Critical属性</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToWallLeft" xml:space="preserve">
+    <value>快速放置依附物件到WallLeft轨道上</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToWallRight" xml:space="preserve">
+    <value>快速放置依附物件到WallRight轨道上</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToRight" xml:space="preserve">
+    <value>快速放置依附物件到Right轨道上</value>
+  </data>
+  <data name="kbd_editor_FastPlaceNewHold" xml:space="preserve">
+    <value>快速放置新的Hold物件</value>
+  </data>
+  <data name="kbd_editor_FastPlaceNewTap" xml:space="preserve">
+    <value>快速放置新的Tap物件</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToCenter" xml:space="preserve">
+    <value>快速放置依附物件到Center轨道上</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToLeft" xml:space="preserve">
+    <value>快速放置依附物件到Left轨道上</value>
+  </data>
+  <data name="kbd_editor_DeleteSelectingObjects" xml:space="preserve">
+    <value>删除已选物件</value>
+  </data>
+  <data name="kbd_editor_SelectAllObjects" xml:space="preserve">
+    <value>选取所有物件</value>
+  </data>
+  <data name="kbd_editor_CancelSelectingObjects" xml:space="preserve">
+    <value>取消选择已选物件</value>
+  </data>
+  <data name="kbd_editor_HideOrShow" xml:space="preserve">
+    <value>切换到预览模式或编辑模式</value>
+  </data>
+  <data name="kbd_editor_FastAddConnectableChild" xml:space="preserve">
+    <value>快速放置轨道子节点</value>
+  </data>
+  <data name="kbd_editor_FastSwitchFlickDirection" xml:space="preserve">
+    <value>快速变更Flick物件的方向</value>
+  </data>
+  <data name="kbd_editor_CopySelectedObjects" xml:space="preserve">
+    <value>复制(可复制的)已选物件</value>
+  </data>
+  <data name="kbd_editor_PasteCopiesObjects" xml:space="preserve">
+    <value>粘贴已被复制的物件</value>
+  </data>
+  <data name="kbd_editor_ScrollPageDown" xml:space="preserve">
+    <value>编辑器向下翻页</value>
+  </data>
+  <data name="kbd_editor_ScrollPageUp" xml:space="preserve">
+    <value>编辑器向上翻页</value>
+  </data>
+  <data name="ComfirmResetAllKeybindingDefinitions" xml:space="preserve">
+    <value>是否将所有按键绑定都重置到默认值?</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>变更</value>
+  </data>
+  <data name="KeyBindingConflictDetect" xml:space="preserve">
+    <value>与 {0} 的绑定键位起冲突</value>
+  </data>
+  <data name="AssignKeyBinding" xml:space="preserve">
+    <value>请为 {0} 输入合适的快捷键组合</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="AssignKeybind" xml:space="preserve">
+    <value>设置键位</value>
+  </data>
+  <data name="ShowNotAssignKeybindingOnly" xml:space="preserve">
+    <value>只显示未绑定的键位</value>
+  </data>
+  <data name="ResetAllKeybindings" xml:space="preserve">
+    <value>重置所有键位</value>
+  </data>
+  <data name="KeyMap" xml:space="preserve">
+    <value>快捷键</value>
+  </data>
+  <data name="SettingHasNewVersion" xml:space="preserve">
+    <value>有新的更新! 新版本号: {0}({1})</value>
+  </data>
+  <data name="UpdateProgramReady" xml:space="preserve">
+    <value>我已保存好项目和数据, 准备好了</value>
+  </data>
+  <data name="UpdateStart" xml:space="preserve">
+    <value>开始更新</value>
+  </data>
+  <data name="ShowNewVersionTitle" xml:space="preserve">
+    <value>检查新版本</value>
+  </data>
+  <data name="CurrentVersion" xml:space="preserve">
+    <value>当前版本</value>
+  </data>
+  <data name="NewVersion" xml:space="preserve">
+    <value>最新版本</value>
+  </data>
+  <data name="Branch" xml:space="preserve">
+    <value>代码分支</value>
+  </data>
+  <data name="FileSize" xml:space="preserve">
+    <value>文件大小</value>
+  </data>
+  <data name="ReleaseTime" xml:space="preserve">
+    <value>发布时间</value>
+  </data>
+  <data name="HasNewVersion" xml:space="preserve">
+    <value>有新版本！</value>
+  </data>
+  <data name="ProgramReadyToUpdate" xml:space="preserve">
+    <value>程序更新文件准备完成, 是否关闭程序, 开始更新?</value>
+  </data>
+  <data name="EnableUpdateCheck" xml:space="preserve">
+    <value>允许程序检查是否有更新</value>
+  </data>
+  <data name="UpdaterCheckMasterBranchOnly" xml:space="preserve">
+    <value>只检查master分支(稳定版)的更新</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="ProgramUpdates" xml:space="preserve">
+    <value>程序更新</value>
   </data>
 </root>
