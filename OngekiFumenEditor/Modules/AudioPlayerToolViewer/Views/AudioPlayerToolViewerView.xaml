@@ -171,6 +171,7 @@
                             <CheckBox Content="HoldEnd" IsChecked="{Binding SoundControls[15]}" />
                             <CheckBox Content="MetronomeStrongBeat" IsChecked="{Binding SoundControls[19]}" />
                             <CheckBox Content="MetronomeWeakBeat" IsChecked="{Binding SoundControls[20]}" />
+                            <CheckBox Content="BossWave" IsChecked="{Binding SoundControls[21]}" />
                         </WrapPanel>
                         <ItemsControl ItemsSource="{Binding SoundVolumes}">
                             <ItemsControl.ItemTemplate>
