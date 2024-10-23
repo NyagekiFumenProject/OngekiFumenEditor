@@ -15,6 +15,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using EventTrigger = Microsoft.Xaml.Behaviors.EventTrigger;
@@ -227,14 +228,14 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
     private void PerformBrush()
     {
         var ctrl = (Keyboard.Modifiers & ModifierKeys.Control) > 0;
-        var alt = (Keyboard.Modifiers & ModifierKeys.Alt) > 0;
+        var shift = (Keyboard.Modifiers & ModifierKeys.Shift) > 0;
 
         var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
 
         OngekiTimelineObjectBase ongekiObject = null;
 
         var objectName = CurrentInputObject?.DisplayName ?? ClipboardObjectName;
-        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction($"Brush {objectName}", Redo, Undo));
+        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.BatchModeAddObject.Format(objectName), Redo, Undo));
 
         return;
         
@@ -251,9 +252,9 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             else {
                 ongekiObject = CurrentInputObject.GenerateObject();
                 if (ctrl && CurrentInputObject.ModifyObjectCtrl is { } modCtrl)
-                    modCtrl.Function.Invoke(ongekiObject);
-                if (alt && CurrentInputObject.ModifyObjectAlt is { } modAlt)
-                    modAlt.Function.Invoke(ongekiObject);
+                    modCtrl.Function?.Invoke(ongekiObject);
+                if (shift && CurrentInputObject.ModifyObjectShift is { } modShift)
+                    modShift.Function?.Invoke(ongekiObject);
             }
         
             editor!.MoveObjectTo(ongekiObject, editor.CurrentCursorPosition!.Value);
@@ -261,7 +262,7 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             editor.InteractiveManager.GetInteractive(ongekiObject).OnMoveCanvas(ongekiObject, editor.CurrentCursorPosition.Value, editor);
             if ((Keyboard.Modifiers & ModifierKeys.Shift) == 0)
                 editor.ClearSelection();
-            if (CurrentInputObject?.AddToSelection ?? false)
+            if (CurrentInputObject?.IsKeepExistingSelection ?? false)
                 editor.NotifyObjectClicked(ongekiObject);
         }
 
@@ -288,7 +289,7 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             .Select(kv => kv.Key).MinBy(o => o.Id);
 
         if (hit is not null) {
-            editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction("Brush delete", Redo, Undo));
+            editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.DeleteSpecificObject.Format(CurrentInputObject.DisplayName), Redo, Undo));
         }
 
         return;
@@ -316,7 +317,7 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             return;
         }
 
-        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction("Brush delete range", Redo, Undo));
+        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.BatchModeDeleteRangeOfObjectType.Format(CurrentInputObject.DisplayName, hits.Length), Redo, Undo));
 
         return;
 

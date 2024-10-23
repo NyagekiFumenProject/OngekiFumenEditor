@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -7,10 +8,10 @@ using OngekiFumenEditor.Base.OngekiObjects.Wall;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BrushMode;
 
-public class ObjectModificationAction(Action<OngekiObjectBase> modifier, string description)
+public class ObjectModificationAction(Action<OngekiObjectBase>? modifier, string description)
 {
     public string Description { get; } = description;
-    public Action<OngekiObjectBase> Function { get; } = modifier;
+    public Action<OngekiObjectBase>? Function { get; } = modifier;
 }
 
 public abstract class BrushModeInputObject
@@ -19,10 +20,13 @@ public abstract class BrushModeInputObject
     public abstract Type ObjectType { get; }
     public abstract OngekiTimelineObjectBase GenerateObject();
 
-    public virtual bool AddToSelection => false;
+    public virtual bool IsKeepExistingSelection => false;
 
-    public virtual ObjectModificationAction ModifyObjectCtrl { get; } = null;
-    public virtual ObjectModificationAction ModifyObjectAlt { get; } = null;
+    public virtual ObjectModificationAction? ModifyObjectCtrl { get; } = null;
+    public virtual ObjectModificationAction? ModifyObjectShift =>
+        IsKeepExistingSelection
+            ? new ObjectModificationAction(null, "Add to selection")
+            : null;
 }
 
 public abstract class BrushModeInputObject<T> : BrushModeInputObject
@@ -39,7 +43,7 @@ public abstract class BrushModeInputObject<T> : BrushModeInputObject
 public abstract class BrushModeInputLane<T> : BrushModeInputObject<T>
     where T : LaneStartBase, new()
 {
-    public override bool AddToSelection => true;
+    public override bool IsKeepExistingSelection => true;
 }
 
 public class BrushModeInputLaneLeft : BrushModeInputLane<LaneLeftStart>
@@ -75,7 +79,7 @@ public class BrushModeInputLaneColorful : BrushModeInputLane<ColorfulLaneStart>
 public abstract class BrushModeInputHitObject<T> : BrushModeInputObject<T>
     where T : OngekiTimelineObjectBase, ICriticalableObject
 {
-    public override ObjectModificationAction ModifyObjectAlt { get; } = new(CritObject, "Set critical");
+    public override ObjectModificationAction ModifyObjectCtrl { get; } = new(CritObject, "Set critical");
 
     private static void CritObject(OngekiObjectBase baseObject)
     {
@@ -91,12 +95,12 @@ public class BrushModeInputTap : BrushModeInputHitObject<Tap>
 public class BrushModeInputHold : BrushModeInputHitObject<Hold>
 {
     public override string DisplayName => "Hold";
-    public override bool AddToSelection => true;
+    public override bool IsKeepExistingSelection => true;
 }
 
 public class BrushModeInputFlick : BrushModeInputHitObject<Flick>
 {
-    public override ObjectModificationAction ModifyObjectCtrl { get; } = new(SwitchFlick, "Switch direction");
+    public override ObjectModificationAction ModifyObjectShift { get; } = new(SwitchFlick, "Switch direction");
 
     private static void SwitchFlick(OngekiObjectBase baseObject)
     {
