@@ -14,9 +14,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private Dictionary<SelectRegionType, (Vector4 lineColor, Vector4 rectColor)> RegionColors = new()
         {
             [SelectRegionType.Select] = (new(1, 0, 1, 1), new(1, 1, 1, 0.15f)),
-            [SelectRegionType.SelectFiltered] = (new(0.5f, 0.1f, 0.5f, 1), new(0.5f, 0.0f, 0.5f, 0.15f)),
+            [SelectRegionType.SelectFiltered] = (new(1, 0, 1, 1), new(0.8f, 0.0f, 0.8f, 0.15f)),
             [SelectRegionType.Delete] = (new(1, 0.1f, 0.1f, 1), new(1, 0.1f, 0.1f, 0.15f)),
-            [SelectRegionType.DeleteFiltered] = (new(1, 0.1f, 0.1f, 1), new(0.8f, 0.2f, 0.2f, 0.15f))
+            [SelectRegionType.DeleteFiltered] = (new(1, 0.1f, 0.1f, 1), new(0.8f, 0.8f, 0, 0.15f))
         };
 
         private ISimpleLineDrawing lineDrawing;

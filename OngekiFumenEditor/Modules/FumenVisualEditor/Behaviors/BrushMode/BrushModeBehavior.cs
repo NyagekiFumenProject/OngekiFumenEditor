@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -27,22 +28,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BrushMode;
 
 public class BrushModeBehavior : Behavior<FumenVisualEditorView>
 {
-    private readonly ImmutableDictionary<KeyBindingDefinition, Type> CommandDefinitions;
-    private readonly ImmutableDictionary<string, TriggerAction> ClickTriggers;
-
-    public BatchModeSubmode CurrentSubmode
-    {
-        get => (BatchModeSubmode)GetValue(CurrentSubmodeProperty);
-        set => SetValue(CurrentSubmodeProperty, value);
-    }
-
-    private readonly List<TriggerBase> OldTriggers = new();
-    private readonly List<TriggerBase> NewTriggers = new();
-    private readonly IFumenEditorClipboard Clipboard;
-    
-    public BrushModeBehavior()
-    {
-        CommandDefinitions =  new Dictionary<KeyBindingDefinition, Type>
+    private static readonly ImmutableDictionary<KeyBindingDefinition, BatchModeSubmode> CommandDefinitions =
+        new Dictionary<KeyBindingDefinition, Type>
         {
             [KeyBindingDefinitions.KBD_Batch_ModeWallLeft] = typeof(BatchModeInputWallLeft),
             [KeyBindingDefinitions.KBD_Batch_ModeLaneLeft] = typeof(BatchModeInputLaneLeft),
@@ -59,15 +46,30 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             [KeyBindingDefinitions.KBD_Batch_ModeFilterLanes] = typeof(BatchModeFilterLanes),
             [KeyBindingDefinitions.KBD_Batch_ModeFilterDockableObjects] = typeof(BatchModeFilterDockableObjects),
             [KeyBindingDefinitions.KBD_Batch_ModeFilterFloatingObjects] = typeof(BatchModeFilterFloatingObjects),
-        }.ToImmutableDictionary();
+        }.ToImmutableDictionary(kv => kv.Key, kv => (BatchModeSubmode)Activator.CreateInstance(kv.Value));
 
-        ClickTriggers = new Dictionary<string, TriggerAction>
+    private static readonly ImmutableDictionary<string, Func<BrushModeBehavior, TriggerAction>> ClickTriggers =
+        new Dictionary<string, Func<BrushModeBehavior, TriggerAction>>()
         {
-            ["PreviewMouseDown"] = new LambdaTriggerAction(o => { MouseDown((MouseButtonEventArgs)o); }),
-            ["PreviewMouseUp"] = new LambdaTriggerAction(o => { MouseUp((MouseButtonEventArgs)o); }),
-            ["MouseMove"] = new LambdaTriggerAction(o => { MouseMove((MouseEventArgs)o);})
+            ["PreviewMouseDown"] = b => new LambdaTriggerAction(o => { b.MouseDown((MouseButtonEventArgs)o); }),
+            ["PreviewMouseUp"] = b => new LambdaTriggerAction(o => { b.MouseUp((MouseButtonEventArgs)o); }),
+            ["MouseMove"] = b => new LambdaTriggerAction(o => { b.MouseMove((MouseEventArgs)o);})
         }.ToImmutableDictionary();
 
+    public BatchModeSubmode CurrentSubmode
+    {
+        get => (BatchModeSubmode)GetValue(CurrentSubmodeProperty);
+        set => SetValue(CurrentSubmodeProperty, value);
+    }
+
+    private readonly Dictionary<string, TriggerAction> GeneratedClickTriggerActions = new();
+    private readonly List<TriggerBase> OldKeyTriggers = new();
+    private readonly List<TriggerBase> NewKeyTriggers = new();
+
+    private readonly IFumenEditorClipboard Clipboard;
+    
+    public BrushModeBehavior()
+    {
         Clipboard = IoC.Get<IFumenEditorClipboard>();
     }
 
@@ -80,59 +82,63 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
 
         // Create brush key triggers on the FumenVisualEditorView.
         // Temporarily delete existing ones that clash with brush keys. 
-        foreach (var (key, type) in CommandDefinitions) {
+        foreach (var (key, submode) in CommandDefinitions) {
             var existingTriggers = triggerCollection.Where(t =>
                 t is ActionMessageKeyBinding am && am.Definition.Key == key.Key &&
                 am.Definition.Modifiers == key.Modifiers);
-            OldTriggers.AddRange(existingTriggers);
-            OldTriggers.ForEach(t => triggerCollection.Remove(t));
+            OldKeyTriggers.AddRange(existingTriggers);
+            OldKeyTriggers.ForEach(t => triggerCollection.Remove(t));
 
             foreach (var mod in new[] { ModifierKeys.None, ModifierKeys.Shift }) {
                 // It's useful to hold down shift as we place multiple lanes, so bind everything to Shift+ as well.
                 var newTrigger = new KeyTrigger() { Key = key.Key, Modifiers = mod };
-                newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentSubmode), Value = Activator.CreateInstance(type) });
+                newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentSubmode), Value = submode });
                 triggerCollection.Add(newTrigger);
-                NewTriggers.Add(newTrigger);
+                NewKeyTriggers.Add(newTrigger);
             }
         }
 
         // Add mouse click events directly on the GlView.
         var glTriggers = Interaction.GetTriggers(AssociatedObject.glView);
-        foreach (var (eventName, action) in ClickTriggers) {
+        foreach (var (eventName, actionGenerator) in ClickTriggers) {
             var glTrigger = glTriggers.FirstOrDefault(t => t is EventTrigger et && et.EventName == eventName);
-            
+
             if (glTrigger is null) {
                 glTrigger = new EventTrigger(eventName);
                 glTriggers.Add(glTrigger);
             }
-            
+
+            var action = actionGenerator.Invoke(this);
             glTrigger.Actions.Insert(0, action);
+            GeneratedClickTriggerActions[eventName] = action;
         }
 
         // Pressing alt normally focuses the menu bar.
-        // That is annoying when we have Alt+Click bindings, so we disable it.
+        // That is annoying when we have Alt+Click bindings, so disable it.
         AssociatedObject.KeyDown += ConsumeAlt;
     }
 
     protected override void OnDetaching()
     {
         var triggerCollection = Interaction.GetTriggers(AssociatedObject);
-        foreach (var trigger in NewTriggers) {
+        foreach (var trigger in NewKeyTriggers) {
             triggerCollection.Remove(trigger);
         }
 
-        foreach (var trigger in OldTriggers) {
+        foreach (var trigger in OldKeyTriggers) {
             triggerCollection.Add(trigger);
         }
 
-        NewTriggers.Clear();
-        OldTriggers.Clear();
+        NewKeyTriggers.Clear();
+        OldKeyTriggers.Clear();
         
         var glTriggers = Interaction.GetTriggers(AssociatedObject.glView);
-        foreach (var (eventName, action) in ClickTriggers) {
+        foreach (var (eventName, action) in GeneratedClickTriggerActions) {
             var glTrigger = glTriggers.First(t => t is EventTrigger et && et.EventName == eventName);
             glTrigger.Actions.Remove(action);
         }
+
+        GeneratedClickTriggerActions.Clear();
 
         AssociatedObject.KeyDown -= ConsumeAlt;
     }
@@ -152,6 +158,7 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             return;
 
         if (Mouse.RightButton == MouseButtonState.Pressed) {
+            // In normal mode, right mouse is not used to drag, so we manually do that here
             editor.SelectionVisibility = Visibility.Visible;
             editor.SelectionCurrentCursorPosition = editor.CurrentCursorPosition?.ToSystemNumericsVector2()
                                                     ?? args.GetPosition(null).ToSystemNumericsVector2();
@@ -179,19 +186,22 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             if (CurrentSubmode is BatchModeFilterSubmode) {
                 // If it's a FilterSubmode, dragging without Alt will apply the filter.
                 editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
+                editor.SelectRegionType = SelectRegionType.SelectFiltered;
                 return;
             }
 
             args.Handled = true;
         } else if (args.ChangedButton == MouseButton.Right) {
+            editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
             if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0) {
-                editor.SelectRegionType = SelectRegionType.Delete;
-                editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
-                args.Handled = true;
+                editor.SelectRegionType = SelectRegionType.DeleteFiltered;
             }
             else {
                 lastRightClickWasAltClick = true;
+                editor.SelectRegionType = SelectRegionType.Delete;
             }
+
+            args.Handled = true;
         }
     }
 
@@ -214,9 +224,13 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
                 }
                 args.Handled = true;
             }
+            else {
+                lastLeftClickWasAltClick = false;
+            }
         } else if (args.ChangedButton == MouseButton.Right) {
             if (!lastRightClickWasAltClick) {
                 if (editor.IsRangeSelecting) {
+                    // Drag filter delete
                     if (CurrentSubmode is BatchModeSingleInputSubmode typeSubmode) {
                         PerformRemoveGroup(typeSubmode);
                     } else if (CurrentSubmode is BatchModeFilterSubmode filterSubmode) {
@@ -224,6 +238,7 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
                     }
                 }
                 else {
+                    // Delete single
                     if (CurrentSubmode is BatchModeSingleInputSubmode typeSubmode) {
                         PerformRemove(typeSubmode);
                     }
@@ -231,17 +246,22 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
 
                 editor.SelectRegionType = SelectRegionType.Select;
                 editor.SelectionVisibility = Visibility.Hidden;
-                args.Handled = true;
             }
             else {
-                // Alt + RMB clears selection
-                // TODO Should this do something else?
-                editor.ClearSelection();
+                lastRightClickWasAltClick = false;
+                if (editor.IsRangeSelecting) {
+                    PerformRemoveGroup(null, "objects");
+                }
             }
-        }
 
-        lastLeftClickWasAltClick = false;
-        lastRightClickWasAltClick = false;
+            if (editor.IsRangeSelecting) {
+                // End selection
+                editor.SelectRegionType = SelectRegionType.Select;
+                editor.SelectionVisibility = Visibility.Hidden;
+            }
+
+            args.Handled = true;
+        }
     }
 
     #endregion
@@ -265,7 +285,6 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             return;
         }
 
-
         var objectName = CurrentSubmode.DisplayName;
         editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.BatchModeAddObject.Format(objectName), Redo, Undo));
 
@@ -273,6 +292,7 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
 
         void Redo()
         {
+            // TODO Support multiple objects in clipboard
             var ongekiObject = ongekiObjects.Single();
 
             if (ctrl && submode.ModifyObjectCtrl is { } modCtrl)
@@ -296,7 +316,6 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
                 return;
 
             editor.RemoveObjects(ongekiObjects);
-            ongekiObjects = null;
         }
     }
 
@@ -348,16 +367,17 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
         PerformRemoveGroup(filter.FilterFunction, filter.DisplayName);
     }
 
-    private void PerformRemoveGroup(Func<OngekiObjectBase, bool> filterFunc, string displayName)
+    private void PerformRemoveGroup(Func<OngekiObjectBase, bool>? filterFunc, string displayName)
     {
         var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
-        var hits = editor.GetRangeObjects().Where(filterFunc).ToArray();
+        var hits = editor.GetRangeObjects().Where(filterFunc ?? (_ => true)).ToArray();
 
         if (hits.Length == 0) {
             return;
         }
 
-        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.BatchModeDeleteRangeOfObjectType.Format(displayName, hits.Length), Redo, Undo));
+        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(
+            Resources.BatchModeDeleteRangeOfObjectType.Format(displayName, hits.Length), Redo, Undo));
 
         return;
 
@@ -382,11 +402,9 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
         }
     }
 
-    private string ClipboardObjectName => "Clipboard";
-
     #region Dependency property
 
-    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BrushModeBehavior), new PropertyMetadata(null));
+    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BrushModeBehavior), new PropertyMetadata(CommandDefinitions[KeyBindingDefinitions.KBD_Batch_ModeClipboard]));
 
     #endregion
 
