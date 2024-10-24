@@ -2,18 +2,26 @@
 using OngekiFumenEditor.Kernel.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
     public class DrawSelectingRangeHelper
     {
+        private Dictionary<SelectRegionType, (Vector4 lineColor, Vector4 rectColor)> RegionColors = new()
+        {
+            [SelectRegionType.Select] = (new(1, 0, 1, 1), new(1, 1, 1, 0.15f)),
+            [SelectRegionType.SelectFiltered] = (new(1, 0, 1, 1), new(0.8f, 0.0f, 0.8f, 0.15f)),
+            [SelectRegionType.Delete] = (new(1, 0.1f, 0.1f, 1), new(1, 0.1f, 0.1f, 0.15f)),
+            [SelectRegionType.DeleteFiltered] = (new(1, 0.1f, 0.1f, 1), new(0.8f, 0.8f, 0, 0.15f))
+        };
+
         private ISimpleLineDrawing lineDrawing;
         private IPolygonDrawing polygonDrawing;
 
-        private Vector4 lineColor = new(1, 0, 1, 1);
-        private Vector4 fillColor = new(1, 1, 1, 0.15f);
         private VertexDash dash = new()
         {
             DashSize = 8,
@@ -30,6 +38,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         {
             if (target.Editor.SelectionVisibility != System.Windows.Visibility.Visible)
                 return;
+
+            var (lineColor, fillColor) = RegionColors[target.Editor.SelectRegionType];
 
             var topY = Math.Max(target.Editor.SelectionCurrentCursorPosition.Y, target.Editor.SelectionStartPosition.Y);
             var buttomY = Math.Min(target.Editor.SelectionCurrentCursorPosition.Y, target.Editor.SelectionStartPosition.Y);

@@ -1,0 +1,48 @@
+<UserControl x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.BatchModeOverlayView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:batchMode="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode"
+             mc:Ignorable="d"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             HorizontalContentAlignment="Left"
+             VerticalContentAlignment="Bottom"
+             d:DataContext="{d:DesignInstance Type=batchMode:BatchModeBehavior}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <batchMode:BatchModeSubmodeNameConverter x:Key="NameConverter" />
+            <batchMode:IsInstanceOfToVisibilityConverter x:Key="InstanceOfToVisibilityConverter" />
+            <system:Double x:Key="Zero">0.0</system:Double>
+            <system:Double x:Key="GridRowHeight">100.0</system:Double>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <StackPanel Background="White">
+        <StackPanel Orientation="Horizontal">
+            <Image Visibility="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeInputSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-paint-brush-16.png" />
+            <Image Visibility="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeFilterSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-selection-16.png" />
+            <Label Content="{Binding CurrentSubmode, Converter={StaticResource NameConverter}}" FontStyle="Normal" FontWeight="Bold" />
+        </StackPanel>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <!-- <RowDefinition IsEnabled="{Binding CurrentInputObject.ModifyObjectCtrl, Converter={StaticResource NotNullToBooleanConverter}, FallbackValue={StaticResource False}}" /> -->
+                <RowDefinition MaxHeight="{Binding Path=CurrentSubmode.(batchMode:BatchModeInputSubmode.ModifyObjectCtrl), Converter={StaticResource NullToZeroConverter}, ConverterParameter={StaticResource GridRowHeight}, FallbackValue={StaticResource Zero}}" />
+                <RowDefinition MaxHeight="{Binding Path=CurrentSubmode.(batchMode:BatchModeInputSubmode.ModifyObjectShift), Converter={StaticResource NullToZeroConverter}, ConverterParameter={StaticResource GridRowHeight}, FallbackValue={StaticResource Zero}}" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Content="Ctrl:" />
+            <Label Grid.Row="0" Grid.Column="1" Content="{Binding Path=CurrentSubmode.(batchMode:BatchModeInputSubmode.ModifyObjectCtrl).Description}" />
+            <Label Grid.Row="1" Grid.Column="0" Content="Shift:" />
+            <Label Grid.Row="1" Grid.Column="1" Content="{Binding Path=CurrentSubmode.(batchMode:BatchModeInputSubmode.ModifyObjectShift).Description}" />
+        </Grid>
+    </StackPanel>
+</UserControl>

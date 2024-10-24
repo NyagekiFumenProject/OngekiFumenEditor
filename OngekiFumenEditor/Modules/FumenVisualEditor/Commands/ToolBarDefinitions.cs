@@ -1,8 +1,8 @@
 ﻿using Gemini.Framework.ToolBars;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ShowCurveControlAlways;
 using System.ComponentModel.Composition;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands
 {
@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands
 		public static ToolBarItemGroupDefinition EditorStatusToolBarGroup = new ToolBarItemGroupDefinition(EditorToolBar, 0);
 
 		[Export]
-		public static ToolBarItemDefinition BrushModeSwitchToolBarItem = new CommandToolBarItemDefinition<BrushModeSwitchCommandDefinition>(
+		public static ToolBarItemDefinition BatchModeSwitchToolBarItem = new CommandToolBarItemDefinition<BatchModeToggleCommandDefinition>(
 			EditorStatusToolBarGroup, 0);
 
 		[Export]

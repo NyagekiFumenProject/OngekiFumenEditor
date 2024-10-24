@@ -14,8 +14,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch
 		public override string ToolTip => Resources.EditorModeSwitch;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/preview.png");
-
-		//[Export]
-		//public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<BrushModeSwitchCommandDefinition>(new (Key.Q, ModifierKeys.Alt));
 	}
 }

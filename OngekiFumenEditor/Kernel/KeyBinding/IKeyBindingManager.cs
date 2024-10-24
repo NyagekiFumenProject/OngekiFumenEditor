@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
         void DefaultKeyBinding(KeyBindingDefinition definition) =>
             ChangeKeyBinding(definition, definition.DefaultKey, definition.DefaultModifiers);
 
-        KeyBindingDefinition QueryKeyBinding(Key key, ModifierKeys modifier);
+        KeyBindingDefinition QueryKeyBinding(Key key, ModifierKeys modifier, KeyBindingLayer layer);
 
         void SaveConfig();
 

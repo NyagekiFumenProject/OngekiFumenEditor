@@ -127,12 +127,13 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
             definition.Modifiers = newModifier;
         }
 
-        public KeyBindingDefinition QueryKeyBinding(Key key, ModifierKeys modifier)
+        public KeyBindingDefinition QueryKeyBinding(Key key, ModifierKeys modifier, KeyBindingLayer layer)
         {
             if (key is Key.None)
                 return default;
 
-            return KeyBindingDefinations.FirstOrDefault(x => x.Key == key && modifier == x.Modifiers);
+            return KeyBindingDefinations.FirstOrDefault(
+                x => x.Key == key && modifier == x.Modifiers && (x.Layer == KeyBindingLayer.Global || layer == KeyBindingLayer.Global || x.Layer == layer));
         }
     }
 }

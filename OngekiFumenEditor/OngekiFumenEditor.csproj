@@ -49,6 +49,8 @@
 		<None Remove="Resources\Icons\notication.png" />
 		<None Remove="Resources\suggestLayout.bin" />
 		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\playerLoc.png" />
+		<None Remove="Resources\Icons\icons8-selection-16.png" />
+		<Resource Include="Resources\Icons\icons8-selection-16.png" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -132,9 +132,6 @@
   <data name="AddObject" xml:space="preserve">
     <value>添加物件</value>
   </data>
-  <data name="AddObjectsByBrush" xml:space="preserve">
-    <value>刷子物件添加</value>
-  </data>
   <data name="AdjustPastedObjects" xml:space="preserve">
     <value>粘贴物件时自动停靠</value>
   </data>
@@ -240,19 +237,16 @@
   <data name="Browser" xml:space="preserve">
     <value>浏览</value>
   </data>
-  <data name="BrushCopied" xml:space="preserve">
+  <data name="BrushAlongLane" xml:space="preserve">
     <value>按轨道刷已复制物件</value>
   </data>
-  <data name="BrushCopiedTipText" xml:space="preserve">
+  <data name="BrushAlongLaneTipText" xml:space="preserve">
     <value>根据当前节奏线，在轨道上批量生成已经复制的单个物件，非法线段无法使用</value>
   </data>
-  <data name="BrushMode" xml:space="preserve">
-    <value>笔刷模式：</value>
-  </data>
-  <data name="BrushModeSwitch" xml:space="preserve">
+  <data name="BatchModeToggle" xml:space="preserve">
     <value>切换笔刷模式</value>
   </data>
-  <data name="BrushModeSwitchTipText" xml:space="preserve">
+  <data name="BatchModeToggleTipText" xml:space="preserve">
     <value>如果开启笔刷模式,避免大部分物件拖拉操作</value>
   </data>
   <data name="BulletSize" xml:space="preserve">
@@ -1026,7 +1020,7 @@
   <data name="NotShowAnymore" xml:space="preserve">
     <value>不再显示此窗口</value>
   </data>
-  <data name="NotSupportInBrushMode" xml:space="preserve">
+  <data name="NotSupportInBatchMode" xml:space="preserve">
     <value>笔刷模式下不支持{0}</value>
   </data>
   <data name="ObjectBatchBrush" xml:space="preserve">
@@ -1035,7 +1029,7 @@
   <data name="ObjectLaneGroupId" xml:space="preserve">
     <value>改变此值可以改变此物件对应的轨道所属</value>
   </data>
-  <data name="ObjectNotSupportBrush" xml:space="preserve">
+  <data name="ObjectNotSupportedInBatchMode" xml:space="preserve">
     <value>此复制的物件无法使用刷子功能</value>
   </data>
   <data name="ObjectOverlap" xml:space="preserve">
