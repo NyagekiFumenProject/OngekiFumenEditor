@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -24,9 +23,9 @@ using EventTrigger = Microsoft.Xaml.Behaviors.EventTrigger;
 using TriggerAction = Microsoft.Xaml.Behaviors.TriggerAction;
 using TriggerBase = Microsoft.Xaml.Behaviors.TriggerBase;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BrushMode;
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
 
-public class BrushModeBehavior : Behavior<FumenVisualEditorView>
+public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 {
     private static readonly ImmutableDictionary<KeyBindingDefinition, BatchModeSubmode> CommandDefinitions =
         new Dictionary<KeyBindingDefinition, Type>
@@ -48,8 +47,8 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
             [KeyBindingDefinitions.KBD_Batch_ModeFilterFloatingObjects] = typeof(BatchModeFilterFloatingObjects),
         }.ToImmutableDictionary(kv => kv.Key, kv => (BatchModeSubmode)Activator.CreateInstance(kv.Value));
 
-    private static readonly ImmutableDictionary<string, Func<BrushModeBehavior, TriggerAction>> ClickTriggers =
-        new Dictionary<string, Func<BrushModeBehavior, TriggerAction>>()
+    private static readonly ImmutableDictionary<string, Func<BatchModeBehavior, TriggerAction>> ClickTriggers =
+        new Dictionary<string, Func<BatchModeBehavior, TriggerAction>>()
         {
             ["PreviewMouseDown"] = b => new LambdaTriggerAction(o => { b.MouseDown((MouseButtonEventArgs)o); }),
             ["PreviewMouseUp"] = b => new LambdaTriggerAction(o => { b.MouseUp((MouseButtonEventArgs)o); }),
@@ -68,7 +67,7 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
 
     private readonly IFumenEditorClipboard Clipboard;
     
-    public BrushModeBehavior()
+    public BatchModeBehavior()
     {
         Clipboard = IoC.Get<IFumenEditorClipboard>();
     }
@@ -404,13 +403,13 @@ public class BrushModeBehavior : Behavior<FumenVisualEditorView>
 
     #region Dependency property
 
-    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BrushModeBehavior), new PropertyMetadata(CommandDefinitions[KeyBindingDefinitions.KBD_Batch_ModeClipboard]));
+    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BatchModeBehavior), new PropertyMetadata(CommandDefinitions[KeyBindingDefinitions.KBD_Batch_ModeClipboard]));
 
     #endregion
 
 }
 
-public class BrushModeObjectNameConverter : IValueConverter
+public class BatchModeSubmodeNameConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

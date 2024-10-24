@@ -84,6 +84,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             "kbd_editor_HideOrShow",
              Key.Q);
 
+        [Export] public static KeyBindingDefinition KBD_ToggleBatchMode = new KeyBindingDefinition(
+            nameof(Resources.BrushModeSwitch),
+            ModifierKeys.Alt,
+            Key.B,
+            layer: KeyBindingLayer.Global);
+
         [Export]
         //        [Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)]; 
         public static KeyBindingDefinition KBD_FastAddConnectableChild = new KeyBindingDefinition(

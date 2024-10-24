@@ -1,15 +1,15 @@
 using Gemini.Framework;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BrushMode;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 public partial class FumenVisualEditorViewModel : PersistedDocument
 {
-    private BrushModeBehavior _brushModeBehavior = new();
+    private BatchModeBehavior _batchModeBehavior = new();
 
-    public BrushModeBehavior BrushModeBehavior
+    public BatchModeBehavior BatchModeBehavior
     {
-        get => _brushModeBehavior;
-        set => Set(ref _brushModeBehavior, value);
+        get => _batchModeBehavior;
+        set => Set(ref _batchModeBehavior, value);
     }
 }

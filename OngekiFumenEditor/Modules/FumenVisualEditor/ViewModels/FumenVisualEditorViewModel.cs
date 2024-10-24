@@ -149,7 +149,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public bool EnableDragging => !IsBrushMode || (Keyboard.Modifiers & ModifierKeys.Alt) != 0;
+        public bool EnableDragging => !IsBatchMode || (Keyboard.Modifiers & ModifierKeys.Alt) != 0;
         private bool isSelectRangeDragging;
 
         private bool isShowCurveControlAlways = false;
@@ -165,8 +165,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public bool IsBrushMode
-            => Interaction.GetBehaviors((DependencyObject)GetView()).Contains(BrushModeBehavior);
+        public bool IsBatchMode
+            => Interaction.GetBehaviors((DependencyObject)GetView()).Contains(BatchModeBehavior);
 
         public EditorSetting Setting { get; } = new EditorSetting();
 

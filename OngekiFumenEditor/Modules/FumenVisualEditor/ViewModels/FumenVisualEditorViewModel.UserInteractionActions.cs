@@ -34,8 +34,8 @@ using Gemini.Framework.Commands;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch;
 using System.Threading;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -854,9 +854,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public void KeyboardAction_SwitchBrushModeAction()
+        public void KeyboardAction_ToggleBatchMode(ActionExecutionContext ctx)
         {
-            var command = IoC.Get<ICommandService>().GetCommand(new BrushModeSwitchCommandDefinition());
+            var command = IoC.Get<ICommandService>().GetCommand(new BatchModeToggleCommandDefinition());
             CommandRouterHelper.ExecuteCommand(command).Wait();
         }
 

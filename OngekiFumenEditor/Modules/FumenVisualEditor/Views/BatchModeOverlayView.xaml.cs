@@ -2,9 +2,9 @@ using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 
-public partial class BrushModeOverlayView : UserControl
+public partial class BatchModeOverlayView : UserControl
 {
-    public BrushModeOverlayView()
+    public BatchModeOverlayView()
     {
         InitializeComponent();
     }
