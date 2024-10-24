@@ -168,6 +168,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             nameof(Resources.kbd_batch_ModeNormalBell),
             Key.E,
             layer: KeyBindingLayer.Batch);
+        [Export] public static KeyBindingDefinition KBD_Batch_ModeClipboard = new KeyBindingDefinition(
+            nameof(Resources.kbd_batch_ModeClipboard),
+            Key.V,
+            layer: KeyBindingLayer.Batch);
+        [Export] public static KeyBindingDefinition KBD_Batch_ModeFilterLanes = new KeyBindingDefinition(
+            nameof(Resources.kbd_batch_ModeFilterLanes),
+            Key.D6,
+            layer: KeyBindingLayer.Batch);
+        [Export] public static KeyBindingDefinition KBD_Batch_ModeFilterDockableObjects = new KeyBindingDefinition(
+            nameof(Resources.kbd_batch_ModeFilterDockableObjects),
+            Key.Y,
+            layer: KeyBindingLayer.Batch);
+        [Export] public static KeyBindingDefinition KBD_Batch_ModeFilterFloatingObjects = new KeyBindingDefinition(
+            nameof(Resources.kbd_batch_ModeFilterFloatingObjects),
+            Key.U,
+            layer: KeyBindingLayer.Batch);
 
     }
 }

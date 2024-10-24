@@ -1908,4 +1908,16 @@
   <data name="BatchModeAddObject" xml:space="preserve">
     <value>Add {0}</value>
   </data>
+  <data name="kbd_batch_ModeClipboard" xml:space="preserve">
+    <value>Batch: Clipboard</value>
+  </data>
+  <data name="kbd_batch_ModeFilterLanes" xml:space="preserve">
+    <value>Batch: Select Lanes</value>
+  </data>
+  <data name="kbd_batch_ModeFilterDockableObjects" xml:space="preserve">
+    <value>Batch: Select Dockable</value>
+  </data>
+  <data name="kbd_batch_ModeFilterFloatingObjects" xml:space="preserve">
+    <value>Batch: Select Floating</value>
+  </data>
 </root>

@@ -2742,6 +2742,42 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Batch: Clipboard.
+        /// </summary>
+        public static string kbd_batch_ModeClipboard {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeClipboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Batch: Select Dockable.
+        /// </summary>
+        public static string kbd_batch_ModeFilterDockableObjects {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeFilterDockableObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Batch: Select Floating.
+        /// </summary>
+        public static string kbd_batch_ModeFilterFloatingObjects {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeFilterFloatingObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Batch: Select Lanes.
+        /// </summary>
+        public static string kbd_batch_ModeFilterLanes {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeFilterLanes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Batch: Flick.
         /// </summary>
         public static string kbd_batch_ModeFlick {

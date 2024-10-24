@@ -23,6 +23,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Gemini.Framework.Commands;
 using Microsoft.Xaml.Behaviors;
@@ -148,7 +149,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public bool EnableDragging => !IsBrushMode;
+        public bool EnableDragging => !IsBrushMode || (Keyboard.Modifiers & ModifierKeys.Alt) != 0;
         private bool isSelectRangeDragging;
 
         private bool isShowCurveControlAlways = false;
@@ -343,6 +344,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     public enum SelectRegionType
     {
         Select,
-        Delete
+        SelectFiltered,
+        Delete,
+        DeleteFiltered
     }
 }

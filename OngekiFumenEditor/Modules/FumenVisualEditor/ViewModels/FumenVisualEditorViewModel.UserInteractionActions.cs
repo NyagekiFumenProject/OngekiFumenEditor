@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Selection
 
-        private Visibility selectionVisibility;
+        private Visibility selectionVisibility = Visibility.Collapsed;
         public Visibility SelectionVisibility
         {
             get => selectionVisibility;
@@ -157,6 +157,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private double startXOffset;
         private double startScrollOffset;
         private bool isCanvasDragging;
+        private bool isLeftMouseDown;
         private bool isMiddleMouseDown;
         private MouseButtonState prevRightButtonState;
         private Point contextMenuPosition;
@@ -1076,38 +1077,40 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }
                         else {
                             //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
-                            //if no object clicked or alt is pressing , just to process as brush actions.
-                            if (mouseDownHitObject is not null && !Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
+                            if (mouseDownHitObject is not null) {
                                 if (mouseDownHitObjectPosition is Point p)
                                     mouseDownHitObject = NotifyObjectClicked(mouseDownHitObject, mouseDownNextHitObject);
                             }
                         }
                     }
 
+                    if (isMiddleMouseDown) {
+                        if (isCanvasDragging)
+                        {
+                            var diffX = pos.X - mouseCanvasStartPosition.X;
+                            Setting.XOffset = startXOffset + diffX;
+
+                            var curY = pos.Y;
+                            var diffY = curY - mouseCanvasStartPosition.Y;
+
+                            var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(startScrollOffset + diffY, this);
+                            //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
+                            ScrollTo(audioTime);
+                        }
+                        else
+                        {
+                            Setting.XOffset = 0;
+                        }
+                    }
+
+                    isLeftMouseDown = false;
                     isSelectRangeDragging = false;
                     SelectionVisibility = Visibility.Collapsed;
                     currentDraggingActionId = int.MaxValue;
                 }
 
-                if (isMiddleMouseDown)
+                if (arg.ChangedButton == MouseButton.Middle)
                 {
-                    if (isCanvasDragging)
-                    {
-                        var diffX = pos.X - mouseCanvasStartPosition.X;
-                        Setting.XOffset = startXOffset + diffX;
-
-                        var curY = pos.Y;
-                        var diffY = curY - mouseCanvasStartPosition.Y;
-
-                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(startScrollOffset + diffY, this);
-                        //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
-                        ScrollTo(audioTime);
-                    }
-                    else
-                    {
-                        Setting.XOffset = 0;
-                    }
-
                     isCanvasDragging = false;
                     isMiddleMouseDown = false;
                 }
@@ -1124,8 +1127,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseDown(ActionExecutionContext e)
         {
-            var arg = e.EventArgs as MouseEventArgs;
-            if (arg is null || arg.Handled) {
+            if (e.EventArgs is not MouseButtonEventArgs arg || arg.Handled) {
                 return;
             }
             Log.LogInfo("Visual mousedown");
@@ -1140,10 +1142,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (IsLocked)
                     return;
 
-                if (arg.LeftButton == MouseButtonState.Pressed)
+                if (arg.ChangedButton == MouseButton.Left)
                 {
                     position.Y = Math.Max(0, Rect.MaxY - position.Y);
 
+                    isLeftMouseDown = true;
                     isSelectRangeDragging = false;
 
                     var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
@@ -1202,7 +1205,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject}");
                 }
 
-                if (arg.MiddleButton == MouseButtonState.Pressed)
+                if (arg.ChangedButton == MouseButton.Middle)
                 {
                     mouseCanvasStartPosition = position;
                     startXOffset = Setting.XOffset;
@@ -1214,7 +1217,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             else
             {
-                if (arg.LeftButton == MouseButtonState.Pressed && EditorGlobalSetting.Default.EnableShowPlayerLocation)
+                if (arg.ChangedButton == MouseButton.Left && EditorGlobalSetting.Default.EnableShowPlayerLocation)
                 {
                     //check if is dragging playerlocation
 
@@ -1239,12 +1242,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseMove(ActionExecutionContext e)
         {
-            var args = (MouseEventArgs)e.EventArgs;
+            if (e.EventArgs is not MouseEventArgs args || args.Handled) {
+                return;
+            }
 
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
                 return;
             currentDraggingActionId = int.MaxValue;
-            OnMouseMove((e.EventArgs as MouseEventArgs).GetPosition(parent));
+            OnMouseMove(args.GetPosition(parent));
         }
 
         public async void OnMouseMove(Point pos)
