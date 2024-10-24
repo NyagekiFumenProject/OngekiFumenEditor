@@ -16,20 +16,20 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
     [Export(typeof(IFumenCheckRule))]
     [Export(typeof(IOngekiFumenCheckRule))]
-    internal class ColorIdCheckRule : IOngekiFumenCheckRule
+    internal class ColorfulLaneBrightnessCheckRule : IOngekiFumenCheckRule
     {
         public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
         {
             IEnumerable<ICheckResult> CheckList(IEnumerable<ColorfulLaneStart> objs)
             {
-                const string RuleName = "[Ongeki] ColorIdInvaild";
+                const string RuleName = "[Ongeki] ColorfulLaneBrightnessInvaild";
 
-                foreach (var obj in objs.Where(x => !ColorIdConst.AllColors.Any(t => t.Id == x.ColorId.Id)))
+                foreach (var obj in objs.Where(x => x.Brightness > 3 || x.Brightness < -3))
                 {
                     yield return new CommonCheckResult()
                     {
                         Severity = RuleSeverity.Error,
-                        Description = Resources.InvalidColorId.Format(obj.ColorId.ToString()),
+                        Description = Resources.InvalidBrightness.Format(obj.Brightness),
                         LocationDescription = $"{obj.XGrid} {obj.TGrid}",
                         NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
                         RuleName = RuleName,

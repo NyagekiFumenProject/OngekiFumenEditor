@@ -250,7 +250,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Please assign keybinding for {0} 的本地化字符串。
+        ///   查找类似 Please assign a keybinding for {0} 的本地化字符串。
         /// </summary>
         public static string AssignKeyBinding {
             get {
@@ -979,7 +979,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Does it reset all key bindings to their default values? 的本地化字符串。
+        ///   查找类似 Reset all keybindings to their default? 的本地化字符串。
         /// </summary>
         public static string ComfirmResetAllKeybindingDefinitions {
             get {
@@ -2671,6 +2671,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Invalid Brightness: {0} is not in range [-3, 3] 的本地化字符串。
+        /// </summary>
+        public static string InvalidBrightness {
+            get {
+                return ResourceManager.GetString("InvalidBrightness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Invalid ColorId: {0} 的本地化字符串。
+        /// </summary>
+        public static string InvalidColorId {
+            get {
+                return ResourceManager.GetString("InvalidColorId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Segment of lane is illegal 的本地化字符串。
         /// </summary>
         public static string InvalidConnectablePath {
@@ -2716,7 +2734,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Clear selection 的本地化字符串。
         /// </summary>
         public static string kbd_editor_CancelSelectingObjects {
             get {
@@ -2725,7 +2743,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Copy selection to clipboard 的本地化字符串。
         /// </summary>
         public static string kbd_editor_CopySelectedObjects {
             get {
@@ -2734,7 +2752,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Delete selected objects 的本地化字符串。
         /// </summary>
         public static string kbd_editor_DeleteSelectingObjects {
             get {
@@ -2743,7 +2761,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Add new node to selected lanes 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastAddConnectableChild {
             get {
@@ -2752,7 +2770,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Dock object to Center Lane 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastPlaceDockableObjectToCenter {
             get {
@@ -2761,7 +2779,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Dock object to Left Lane 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastPlaceDockableObjectToLeft {
             get {
@@ -2770,7 +2788,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Dock object to Right Lane 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastPlaceDockableObjectToRight {
             get {
@@ -2779,7 +2797,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Dock object to Wall Left 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastPlaceDockableObjectToWallLeft {
             get {
@@ -2788,7 +2806,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Dock object to Wall Right 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastPlaceDockableObjectToWallRight {
             get {
@@ -2797,7 +2815,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Place new Hold at cursor 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastPlaceNewHold {
             get {
@@ -2806,7 +2824,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Place new Tap at cursor 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastPlaceNewTap {
             get {
@@ -2815,7 +2833,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Set object critical 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastSetObjectIsCritical {
             get {
@@ -2824,7 +2842,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Switch directions of selected flicks 的本地化字符串。
         /// </summary>
         public static string kbd_editor_FastSwitchFlickDirection {
             get {
@@ -2833,7 +2851,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Toggle display mode 的本地化字符串。
         /// </summary>
         public static string kbd_editor_HideOrShow {
             get {
@@ -2842,7 +2860,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Paste clipboard contents at cursor 的本地化字符串。
         /// </summary>
         public static string kbd_editor_PasteCopiesObjects {
             get {
@@ -2851,7 +2869,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Scroll a page down 的本地化字符串。
         /// </summary>
         public static string kbd_editor_ScrollPageDown {
             get {
@@ -2860,7 +2878,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Scroll a page up 的本地化字符串。
         /// </summary>
         public static string kbd_editor_ScrollPageUp {
             get {
@@ -2869,7 +2887,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Select all objects 的本地化字符串。
         /// </summary>
         public static string kbd_editor_SelectAllObjects {
             get {
@@ -4003,7 +4021,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Close the application and update? 的本地化字符串。
         /// </summary>
         public static string ProgramReadyToUpdate {
             get {
@@ -4615,7 +4633,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Updater 的本地化字符串。
         /// </summary>
         public static string ShowNewVersionTitle {
             get {
@@ -4624,7 +4642,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Show not assign keybinding only 的本地化字符串。
+        ///   查找类似 Show unassigned keybindings only 的本地化字符串。
         /// </summary>
         public static string ShowNotAssignKeybindingOnly {
             get {
@@ -5065,7 +5083,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Confirm program restart. Any unsaved data will be lost. 的本地化字符串。
         /// </summary>
         public static string UpdateProgramReady {
             get {

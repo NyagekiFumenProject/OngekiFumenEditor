@@ -1866,4 +1866,10 @@
   <data name="ProgramUpdates" xml:space="preserve">
     <value>程序更新</value>
   </data>
+  <data name="InvalidBrightness" xml:space="preserve">
+    <value>亮度(Brightness)值 {0} 不在范围[-3,3]内</value>
+  </data>
+  <data name="InvalidColorId" xml:space="preserve">
+    <value>颜色Id(ColorId)值无效: {0}</value>
+  </data>
 </root>

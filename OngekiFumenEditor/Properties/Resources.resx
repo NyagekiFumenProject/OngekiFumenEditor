@@ -1737,7 +1737,7 @@
   <data name="AboutWindow" xml:space="preserve">
     <value>About</value>
   </data>
-<data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
+  <data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
     <value>Set object critical</value>
   </data>
   <data name="kbd_editor_FastPlaceDockableObjectToWallLeft" xml:space="preserve">
@@ -1865,5 +1865,11 @@
   </data>
   <data name="ProgramUpdates" xml:space="preserve">
     <value>Program Updates</value>
+  </data>
+  <data name="InvalidBrightness" xml:space="preserve">
+    <value>Invalid Brightness: {0} is not in range [-3, 3]</value>
+  </data>
+  <data name="InvalidColorId" xml:space="preserve">
+    <value>Invalid ColorId: {0}</value>
   </data>
 </root>
