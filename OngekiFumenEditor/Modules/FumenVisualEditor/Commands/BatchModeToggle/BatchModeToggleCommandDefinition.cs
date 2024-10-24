@@ -11,9 +11,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle
 	{
 		public override string Name => "Toolbar.BatchModeToggle";
 
-		public override string Text => Resources.BrushModeSwitch;
+		public override string Text => Resources.BatchModeToggle;
 
-		public override string ToolTip => Resources.BrushModeSwitchTipText;
+		public override string ToolTip => Resources.BatchModeToggleTipText;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-paint-brush-16.png");
 	}

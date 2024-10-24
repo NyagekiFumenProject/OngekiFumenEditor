@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle
                     behaviors.Add(editor.BatchModeBehavior);
                 }
                 editor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.IsBatchMode));
-                editor.ToastNotify($"{Resources.BrushMode}{(editor.IsBatchMode ? Resources.Enable : Resources.Disable)}");
+                editor.ToastNotify($"{Resources.BatchModeToggle}{(editor.IsBatchMode ? Resources.Enable : Resources.Disable)}");
             }
 
             return TaskUtility.Completed;

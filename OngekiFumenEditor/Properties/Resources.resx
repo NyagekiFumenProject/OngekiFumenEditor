@@ -132,9 +132,6 @@
   <data name="AddObject" xml:space="preserve">
     <value>Add object</value>
   </data>
-  <data name="AddObjectsByBrush" xml:space="preserve">
-    <value>Add objects by brush</value>
-  </data>
   <data name="AdjustPastedObjects" xml:space="preserve">
     <value>Automatically snap objects when pasted</value>
   </data>
@@ -240,20 +237,17 @@
   <data name="Browser" xml:space="preserve">
     <value>Browser</value>
   </data>
-  <data name="BrushCopied" xml:space="preserve">
+  <data name="BrushAlongLane" xml:space="preserve">
     <value>Brush along lane with copied object</value>
   </data>
-  <data name="BrushCopiedTipText" xml:space="preserve">
+  <data name="BrushAlongLaneTipText" xml:space="preserve">
     <value>Brush along the lane, creating an instance of the brush object at each TGrid subdivision positioned upon the lane</value>
   </data>
-  <data name="BrushMode" xml:space="preserve">
-    <value>Brush Mode:</value>
+  <data name="BatchModeToggle" xml:space="preserve">
+    <value>Toggle batch mode</value>
   </data>
-  <data name="BrushModeSwitch" xml:space="preserve">
-    <value>Toggle brush mode</value>
-  </data>
-  <data name="BrushModeSwitchTipText" xml:space="preserve">
-    <value>Brush mode is enabled. Most dragging operations are disabled.</value>
+  <data name="BatchModeToggleTipText" xml:space="preserve">
+    <value>Enable batch mode, which allows for placing objects with the mouse.</value>
   </data>
   <data name="BulletSize" xml:space="preserve">
     <value>Size</value>
@@ -1032,17 +1026,17 @@
   <data name="NotShowAnymore" xml:space="preserve">
     <value>Do not show this window again</value>
   </data>
-  <data name="NotSupportInBrushMode" xml:space="preserve">
-    <value>{0} is not supported in brush mode.</value>
+  <data name="NotSupportInBatchMode" xml:space="preserve">
+    <value>{0} is not supported in batch mode.</value>
   </data>
   <data name="ObjectBatchBrush" xml:space="preserve">
-    <value>Batch paste brush</value>
+    <value>Batch paste brush object</value>
   </data>
   <data name="ObjectLaneGroupId" xml:space="preserve">
     <value>Changing this value will alter the reference lane of this object</value>
   </data>
-  <data name="ObjectNotSupportBrush" xml:space="preserve">
-    <value>The copied object cannot be used within brush mode</value>
+  <data name="ObjectNotSupportedInBatchMode" xml:space="preserve">
+    <value>The copied object cannot be used within batch mode</value>
   </data>
   <data name="ObjectOverlap" xml:space="preserve">
     <value>Multiple ITimelineObject objects of the same type ({0}) overlap</value>
