@@ -132,7 +132,22 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public IPerfomenceMonitor PerfomenceMonitor { get; private set; } = new DummyPerformenceMonitor();
 
-    public void OnRenderSizeChanged(DCompGL glView, SizeChangedEventArgs sizeArg)
+	protected override void OnViewAttached(object view, object context)
+	{
+		base.OnViewAttached(view, context);
+		IEnumerable<T> GetAllObject<T>(DependencyObject parent)
+		{
+			if (parent is T menuItem)
+				yield return menuItem;
+			foreach (var child in LogicalTreeHelper.GetChildren(parent).OfType<DependencyObject>())
+				foreach (var f in GetAllObject<T>(child))
+					yield return f;
+		}
+		var glView = GetAllObject<DCompGL>((DependencyObject)view).FirstOrDefault();
+		IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
+	}
+
+	public void OnRenderSizeChanged(DCompGL glView, SizeChangedEventArgs sizeArg)
     {
         Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
 

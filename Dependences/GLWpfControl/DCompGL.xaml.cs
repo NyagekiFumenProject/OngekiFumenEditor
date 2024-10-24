@@ -33,6 +33,11 @@ namespace OpenTK.Wpf
 
 		public event Action? Ready { add { GLCore.Ready += value; } remove { GLCore.Ready -= value; } }
 		public event Action<TimeSpan>? Render { add { GLCore.Render += value; } remove { GLCore.Render -= value; } }
+		public new event System.Windows.Input.MouseWheelEventHandler MouseWheel { add { host.MouseWheel += value; } remove { host.MouseWheel -= value; } }
+		public new event System.Windows.Input.MouseButtonEventHandler PreviewMouseDown { add { host.PreviewMouseDown += value; } remove { host.PreviewMouseDown -= value; } }
+		public new event System.Windows.Input.MouseButtonEventHandler PreviewMouseUp { add { host.PreviewMouseUp += value; } remove { host.PreviewMouseUp -= value; } }
+		public new event System.Windows.Input.MouseEventHandler MouseMove { add { host.MouseMove += value; } remove { host.MouseMove -= value; } }
+		public new event System.Windows.Input.MouseEventHandler MouseLeave { add { host.MouseLeave += value; } remove { host.MouseLeave -= value; } }
 		private object disposeLock = new object();
 		volatile bool loop = true;
 

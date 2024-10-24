@@ -1,6 +1,8 @@
 ﻿using OpenTK.Wpf.Interop;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +34,9 @@ namespace OpenTK.Wpf
 		private Vortice.Direct2D1.ID2D1Factory1 _factory2D = null;
 		private Vortice.Direct2D1.ID2D1Device _device2D = null;
 		private Vortice.Direct2D1.ID2D1DeviceContext _deviceContext2D = null;
-		private Vortice.Direct2D1.ID2D1RenderTarget _renderTarget2D = null;
+
+		private Vortice.DirectWrite.IDWriteFactory _DWriteFactory = null;
+		private Vortice.DirectWrite.IDWriteTextFormat _DWriteTextFormat = null;
 
 		private DpiScale currentDpi;
 		private IntPtr hwndHost;
@@ -45,6 +49,7 @@ namespace OpenTK.Wpf
 			currentDpi = new(dpi, dpi);
 			hostWidth = (int)(ControlWidth * currentDpi.DpiScaleX);
 			hostHeight = (int)(ControlHeight * currentDpi.DpiScaleY);
+			stopwatch = new();
 		}
 
 		public DComp(int PixelWidth, int PixelHeight)
@@ -53,6 +58,7 @@ namespace OpenTK.Wpf
 			currentDpi = new(dpi, dpi);
 			hostWidth = PixelWidth;
 			hostHeight = PixelHeight;
+			stopwatch = new();
 		}
 
 		public void Resize(double ControlWidth, double ControlHeight)
@@ -111,6 +117,8 @@ namespace OpenTK.Wpf
 			_factory2D = Vortice.Direct2D1.D2D1.D2D1CreateFactory<Vortice.Direct2D1.ID2D1Factory1>(Vortice.Direct2D1.FactoryType.MultiThreaded, Vortice.Direct2D1.DebugLevel.None);
 			_device2D = _factory2D.CreateDevice(_DXGIDevice);
 			_deviceContext2D = _device2D.CreateDeviceContext(Vortice.Direct2D1.DeviceContextOptions.EnableMultithreadedOptimizations);
+			_DWriteFactory = Vortice.DirectWrite.DWrite.DWriteCreateFactory<Vortice.DirectWrite.IDWriteFactory>();
+			_DWriteTextFormat = _DWriteFactory.CreateTextFormat("Cascadia Mono", 16);
 		}
 
 		public void CreateRenderResources()
@@ -118,16 +126,17 @@ namespace OpenTK.Wpf
 			_texture2D = _device.CreateTexture2D(Vortice.DXGI.Format.R8G8B8A8_UNorm, (uint)hostWidth, (uint)hostHeight, bindFlags: Vortice.Direct3D11.BindFlags.RenderTarget | Vortice.Direct3D11.BindFlags.ShaderResource);
 			_texture2DDepth = _device.CreateTexture2D(Vortice.DXGI.Format.D24_UNorm_S8_UInt, (uint)hostWidth, (uint)hostHeight, bindFlags: Vortice.Direct3D11.BindFlags.DepthStencil);
 			_t2dSurface = _texture2D.QueryInterface<Vortice.DXGI.IDXGISurface1>();
-			var hr2 = Vortice.DirectComposition.DComp.DCompositionCreateDevice(_DXGIDevice, out _DcompDevice);
+			var hr2 = Vortice.DirectComposition.DComp.DCompositionCreateDevice2(_device2D, out _DcompDevice);
 			var hr3 = _DcompDevice.CreateTargetForHwnd(hwndHost, true, out _DcompTarget);
 			var hr4 = _DcompDevice.CreateVisual(out _DcompVisual);
 			var hr5 = _DcompDevice.CreateSurface((uint)hostWidth, (uint)hostHeight, Vortice.DXGI.Format.R8G8B8A8_UNorm, Vortice.DXGI.AlphaMode.Premultiplied, out _DcompSurface);
 			_DcompVisual.SetContent(_DcompSurface);
 			_DcompVisual.SetOffsetX(0);
 			_DcompVisual.SetOffsetY(0);
-			_DcompVisual.SetTransform(System.Numerics.Matrix3x2.CreateScale(1,-1,new(0f, hostHeight/2f)));
+			_DcompVisual.SetTransform(System.Numerics.Matrix3x2.CreateScale(1, -1, new(0f, hostHeight / 2f)));
 			_DcompTarget.SetRoot(_DcompVisual);
 			_DcompDevice.Commit();
+			stopwatch.Restart();
 		}
 
 		public void DestoryRenderResources()
@@ -160,29 +169,71 @@ namespace OpenTK.Wpf
 			_device?.Dispose();
 			_commandQueue12?.Dispose();
 			_device12?.Dispose();
+			_DWriteFactory?.Dispose();
+			_DWriteTextFormat?.Dispose();
 		}
+
+		private TimeSpan lastTime;
+		private Stopwatch stopwatch;
 
 		public void Draw()
 		{
-			var dXGISurface1 = _DcompSurface.BeginDraw<Vortice.DXGI.IDXGISurface1>(null, out _);
-			var rt = _factory2D.CreateDxgiSurfaceRenderTarget(dXGISurface1, new() { DpiX = (float)(currentDpi.DpiScaleX * 96d), DpiY = (float)(currentDpi.DpiScaleY * 96d), MinLevel = Vortice.Direct2D1.FeatureLevel.Default, PixelFormat = new(Vortice.DXGI.Format.R8G8B8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied), Type = Vortice.Direct2D1.RenderTargetType.Hardware, Usage = Vortice.Direct2D1.RenderTargetUsage.None });
-			rt.BeginDraw();
-            if (_t2dBitmap == null)
-            {
-            _t2dBitmap = rt.CreateSharedBitmap(_t2dSurface,new(new(Vortice.DXGI.Format.R8G8B8A8_UNorm,Vortice.DCommon.AlphaMode.Premultiplied), (float)(currentDpi.DpiScaleX * 96d), (float)(currentDpi.DpiScaleY * 96d)));
+			var rt = _DcompSurface.BeginDraw<Vortice.Direct2D1.ID2D1DeviceContext>(null, out _);
+			rt.Transform = System.Numerics.Matrix3x2.Identity;
+			rt.SetDpi((float)(currentDpi.DpiScaleX * 96d), (float)(currentDpi.DpiScaleY * 96d));
+			if (_t2dBitmap == null)
+			{
+				_t2dBitmap = rt.CreateSharedBitmap(_t2dSurface, new(new(Vortice.DXGI.Format.R8G8B8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied), (float)(currentDpi.DpiScaleX * 96d), (float)(currentDpi.DpiScaleY * 96d)));
 			}
 			rt.DrawBitmap(_t2dBitmap);
-			rt.EndDraw();
-			rt.Dispose();
-			dXGISurface1.Dispose();
+			var brush = rt.CreateSolidColorBrush(new Vortice.Mathematics.Color(255, 255, 255, 255));
+			TimeSpan now = stopwatch.Elapsed;
+			TimeSpan time = now - lastTime;
+			lastTime = now;
+			Add(1000d / time.TotalMilliseconds);
+			rt.Transform = System.Numerics.Matrix3x2.CreateScale(1, -1, new(0f, (float)(hostHeight / 2d / currentDpi.DpiScaleY)));
+			rt.DrawText(avg().ToString(), _DWriteTextFormat, new(256, 64), brush);
 			_DcompSurface.EndDraw();
+			rt.Dispose();
+			//_t2dBitmap.Dispose();
+
+			brush.Dispose();
 			_DcompDevice.Commit();
+		}
+
+		public double[] pool = new double[1000];
+		public int size = 0;
+		public int index = 0;
+
+		public void Add(double v)
+		{
+			if (index == 1000)
+			{
+				index = 0;
+			}
+			if (size != 1000)
+			{
+				size++;
+			}
+			pool[index] = v;
+			index++;
+		}
+
+		public double avg()
+		{
+			double t = 0;
+			for (int i = 0; i < size; i++)
+			{
+				t += pool[i];
+			}
+			t /= size;
+			return t;
 		}
 
 		public void WaitForVBlank()
 		{
 			_DcompDevice.WaitForCommitCompletion();
-			_DXGIOutput.WaitForVBlank();
+			//_DXGIOutput.WaitForVBlank();
 		}
 	}
 }

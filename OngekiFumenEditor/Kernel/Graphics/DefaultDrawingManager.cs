@@ -48,13 +48,13 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
 		private void OnInitOpenGL()
 		{
-			if (Properties.ProgramSetting.Default.OutputGraphicsLog)
-			{
+			//if (Properties.ProgramSetting.Default.OutputGraphicsLog)
+			//{
 				GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
 				GL.Enable(EnableCap.DebugOutput);
-				if (Properties.ProgramSetting.Default.GraphicsLogSynchronous)
+				//if (Properties.ProgramSetting.Default.GraphicsLogSynchronous)
 					GL.Enable(EnableCap.DebugOutputSynchronous);
-			}
+			//}
 
 			GL.ClearColor(System.Drawing.Color.Black);
 			GL.Enable(EnableCap.Blend);
@@ -89,7 +89,11 @@ namespace OngekiFumenEditor.Kernel.Graphics
 			var str = Marshal.PtrToStringAnsi(message, length);
 			Log.LogDebug($"[{source}.{type}]{id}:  {str}");
 			System.Diagnostics.Debug.WriteLine($"[{source}.{type}]{id}:  {str}");
-		}
+            if (type == DebugType.DebugTypeError)
+            {
+				System.Diagnostics.Debugger.Break();
+            }
+        }
 
 		public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)
 		{

@@ -6,5 +6,5 @@
              xmlns:local="clr-namespace:OpenTK.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Border Name="CompositionHostElement"/>
+    <Border Name="CompositionHostElement" Background="#0F0F0F"/>
 </UserControl>
