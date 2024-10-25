@@ -1737,7 +1737,7 @@
   <data name="AboutWindow" xml:space="preserve">
     <value>About</value>
   </data>
-<data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
+  <data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
     <value>Set object critical</value>
   </data>
   <data name="kbd_editor_FastPlaceDockableObjectToWallLeft" xml:space="preserve">
