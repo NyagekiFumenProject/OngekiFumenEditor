@@ -236,7 +236,16 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
                 // Can hold alt while releasing to "cancel" the left click
                 if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0) {
                     if (CurrentSubmode is BatchModeInputSubmode inputSubmode) {
-                        PerformBrush(inputSubmode);
+                        if (inputSubmode is BatchModeSingleInputSubmode singleInputSubmode
+                            && editor.GetHits().Where(kv =>
+                                    kv.Value.Contains(editor.CurrentCursorPosition!.Value) &&
+                                    singleInputSubmode.ObjectType.IsInstanceOfType(kv.Key)).Select(kv => kv.Key)
+                                .FirstOrDefault() is { } hit) {
+                            editor.NotifyObjectClicked(hit);
+                        }
+                        else {
+                            PerformBrush(inputSubmode);
+                        }
                     }
                     else if (CurrentSubmode is BatchModeFilterSubmode filterSubmode && editor.IsRangeSelecting) {
                         editor.SelectionVisibility = Visibility.Hidden;
