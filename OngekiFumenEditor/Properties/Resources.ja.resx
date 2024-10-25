@@ -132,9 +132,6 @@
   <data name="AddObject" xml:space="preserve">
     <value>オブジェクトを追加</value>
   </data>
-  <data name="AddObjectsByBrush" xml:space="preserve">
-    <value>ブラシでオブジェクトを追加</value>
-  </data>
   <data name="AdjustPastedObjects" xml:space="preserve">
     <value>オブジェクト貼り付け時に自動的に結合</value>
   </data>
@@ -240,19 +237,16 @@
   <data name="Browser" xml:space="preserve">
     <value>参照</value>
   </data>
-  <data name="BrushCopied" xml:space="preserve">
+  <data name="BrushAlongLane" xml:space="preserve">
     <value>コピーされたオブジェクトをブラシでレーンに追加</value>
   </data>
-  <data name="BrushCopiedTipText" xml:space="preserve">
+  <data name="BrushAlongLaneTipText" xml:space="preserve">
     <value>現在のリズムラインでレーン上にオブジェクトを一括生成します。不正なセグメントは使用できません。</value>
   </data>
-  <data name="BrushMode" xml:space="preserve">
-    <value>ブラシモード：</value>
-  </data>
-  <data name="BrushModeSwitch" xml:space="preserve">
+  <data name="BatchModeToggle" xml:space="preserve">
     <value>ブラシモードを切り替え</value>
   </data>
-  <data name="BrushModeSwitchTipText" xml:space="preserve">
+  <data name="BatchModeToggleTipText" xml:space="preserve">
     <value>ブラシモードが有効な場合，ほとんどのオブジェクトはドラッグできません。</value>
   </data>
   <data name="BulletSize" xml:space="preserve">
@@ -1027,7 +1021,7 @@
   <data name="NotShowAnymore" xml:space="preserve">
     <value>再度表示しない</value>
   </data>
-  <data name="NotSupportInBrushMode" xml:space="preserve">
+  <data name="NotSupportInBatchMode" xml:space="preserve">
     <value>{0} はブラシモードでサポートされていません</value>
   </data>
   <data name="ObjectBatchBrush" xml:space="preserve">
@@ -1036,7 +1030,7 @@
   <data name="ObjectLaneGroupId" xml:space="preserve">
     <value>この値を変更することで，このオブジェクトの参照先レーンが変更されることがあります</value>
   </data>
-  <data name="ObjectNotSupportBrush" xml:space="preserve">
+  <data name="ObjectNotSupportedInBatchMode" xml:space="preserve">
     <value>コピーしたオブジェクトはブラシモードで使用できません</value>
   </data>
   <data name="ObjectOverlap" xml:space="preserve">

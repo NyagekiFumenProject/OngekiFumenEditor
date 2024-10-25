@@ -192,7 +192,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
 			if (copiedObjectViewModel?.CopyNew() is null)
 			{
-				MessageBox.Show(Resources.ObjectNotSupportBrush);
+				MessageBox.Show(Resources.ObjectNotSupportedInBatchMode);
 				return;
 			}
 
