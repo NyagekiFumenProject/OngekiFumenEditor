@@ -12,6 +12,7 @@ using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -43,6 +44,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 		private bool isPlaying = false;
 		public bool IsPlaying => isPlaying && (player?.IsPlaying ?? false);
 		private static int loopIdGen = 0;
+		private Stopwatch stopwatch = new();
 
 		public SoundControl SoundControl { get; set; } = SoundControl.All;
 
@@ -141,7 +143,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 			this.editor = editor;
 
 			RebuildEvents();
-
+			stopwatch.Restart();
 			thread = new AbortableThread(OnUpdate);
 			thread.Name = $"DefaultFumenSoundPlayer_Thread";
 			UpdateInternal(thread.CancellationToken);
@@ -442,7 +444,16 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 		{
 			while (!cancel.IsCancellationRequested)
 			{
-				UpdateInternal(cancel);
+				if (stopwatch.ElapsedMilliseconds >= 16)
+				{
+					UpdateInternal(cancel);
+					stopwatch.Restart();
+				}
+				else
+				{
+					Thread.Sleep(4);
+				}
+
 			}
 		}
 
