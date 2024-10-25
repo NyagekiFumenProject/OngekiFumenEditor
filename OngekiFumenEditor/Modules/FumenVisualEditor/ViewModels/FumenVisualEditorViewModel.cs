@@ -149,7 +149,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public bool EnableDragging => !IsBatchMode || (Keyboard.Modifiers & ModifierKeys.Alt) != 0;
+        public bool EnableDragging => !IsBatchMode || (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt) &&
+                                                       !Keyboard.Modifiers.HasFlag(ModifierKeys.Control));
         private bool isSelectRangeDragging;
 
         private bool isShowCurveControlAlways = false;

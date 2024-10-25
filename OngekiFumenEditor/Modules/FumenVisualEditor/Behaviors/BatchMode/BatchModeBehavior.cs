@@ -19,6 +19,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
+using Xceed.Wpf.Toolkit.Core.Input;
 using EventTrigger = Microsoft.Xaml.Behaviors.EventTrigger;
 using TriggerAction = Microsoft.Xaml.Behaviors.TriggerAction;
 using TriggerBase = Microsoft.Xaml.Behaviors.TriggerBase;
@@ -178,6 +179,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
                 editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
                 if ((Keyboard.Modifiers & ModifierKeys.Control) > 0) {
                     editor.SelectRegionType = SelectRegionType.SelectFiltered;
+                    editor.SelectionVisibility = Visibility.Visible;
                 }
                 return;
             }
@@ -211,14 +213,34 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             return;
 
         if (args.ChangedButton == MouseButton.Left) {
+            if (editor.IsRangeSelecting) {
+                // Selection mode
+                Func<OngekiObjectBase, bool> filterFunc = null;
+                if (editor.SelectRegionType == SelectRegionType.SelectFiltered && CurrentSubmode is BatchModeFilterSubmode filterSubmode) {
+                    filterFunc = filterSubmode.FilterFunction;
+                } else if (editor.SelectRegionType == SelectRegionType.SelectFiltered && CurrentSubmode is BatchModeSingleInputSubmode singleInputSubmode) {
+                    filterFunc = o => o.GetType() == singleInputSubmode.ObjectType || o.GetType().IsSubclassOf(singleInputSubmode.ObjectType);
+                }
+
+                if (filterFunc != null) {
+                    editor.SelectionVisibility = Visibility.Hidden;
+                    PerformFilterSelect(filterFunc);
+                    args.Handled = true;
+                }
+
+                editor.SelectRegionType = SelectRegionType.Select;
+                // otherwise fall through to FumenVisualEditorViewModel click handler
+            }
+
             if (!lastLeftClickWasAltClick) {
                 // Can hold alt while releasing to "cancel" the left click
                 if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0) {
-                    if (CurrentSubmode is BatchModeInputSubmode inputSubmode)
+                    if (CurrentSubmode is BatchModeInputSubmode inputSubmode) {
                         PerformBrush(inputSubmode);
+                    }
                     else if (CurrentSubmode is BatchModeFilterSubmode filterSubmode && editor.IsRangeSelecting) {
                         editor.SelectionVisibility = Visibility.Hidden;
-                        PerformFilterSelect(filterSubmode);
+                        PerformFilterSelect(filterSubmode.FilterFunction);
                     }
                 }
                 args.Handled = true;
@@ -243,7 +265,6 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
                     }
                 }
 
-                editor.SelectRegionType = SelectRegionType.Select;
                 editor.SelectionVisibility = Visibility.Hidden;
             }
             else {
@@ -318,10 +339,15 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         }
     }
 
-    private void PerformFilterSelect(BatchModeFilterSubmode submode)
+    // TODO Refactor into `SelectionBox` class or something
+    private void PerformFilterSelect(Func<OngekiObjectBase, bool> filterFunction)
     {
         var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
-        var hits = editor.GetRangeObjects().Where(o => submode.FilterFunction(o)).ToList();
+        var hits = editor.GetRangeObjects().Where(filterFunction).ToList();
+
+        if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) {
+            editor.ClearSelection();
+        }
 
         foreach (var hit in hits) {
             if (hit is OngekiMovableObjectBase selectable)
