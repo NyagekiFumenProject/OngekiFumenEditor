@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -24,9 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             Texture LoadTex(string rPath)
             {
-                var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + rPath, UriKind.Relative));
-                using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-                return new Texture(bitmap);
+                return ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
             }
 
             texture = LoadTex("bell.png");

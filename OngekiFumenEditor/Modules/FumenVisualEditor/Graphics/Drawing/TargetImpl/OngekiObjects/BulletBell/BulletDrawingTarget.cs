@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -28,9 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             Texture LoadTex(string rPath)
             {
-                var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + rPath, UriKind.Relative));
-                using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-                return new Texture(bitmap);
+                return ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
             }
 
             var _spritesOriginOffset = new Dictionary<Texture, Vector2>();
@@ -62,25 +61,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var origOffset = new Vector2(0, 0);
             var sizeLarge = size * 1.4f;
             var origOffsetLarge = origOffset * 1.4f;
-            SetTexture(BulletDamageType.Normal, BulletType.Circle, "nt_mine_red.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Hard, BulletType.Circle, "nt_mine_pur.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Danger, BulletType.Circle, "nt_mine_blk.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Normal, BulletType.Circle, "bulletCircleNormal.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Hard, BulletType.Circle, "bulletCircleHard.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Danger, BulletType.Circle, "bulletCircleDanger.png", size, origOffset, sizeLarge, origOffsetLarge);
 
             size = new(30, 80);
             origOffset = new Vector2(0, 35);
             sizeLarge = size * 1.4f;
             origOffsetLarge = origOffset * 1.4f;
-            SetTexture(BulletDamageType.Normal, BulletType.Needle, "tri_bullet0.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Hard, BulletType.Needle, "tri_bullet1.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Danger, BulletType.Needle, "tri_bullet2.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Normal, BulletType.Needle, "bulletNeedleNormal.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Hard, BulletType.Needle, "bulletNeedleHard.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Danger, BulletType.Needle, "bulletNeedleDanger.png", size, origOffset, sizeLarge, origOffsetLarge);
 
             size = new(30, 80);
             origOffset = new Vector2(0, 35);
             sizeLarge = size * 1.4f;
             origOffsetLarge = origOffset * 1.4f;
-            SetTexture(BulletDamageType.Normal, BulletType.Square, "sqrt_bullet0.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Hard, BulletType.Square, "sqrt_bullet1.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Danger, BulletType.Square, "sqrt_bullet2.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Normal, BulletType.Square, "bulletSquareNormal.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Hard, BulletType.Square, "bulletSquareHard.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Danger, BulletType.Square, "bulletSquareDanger.png", size, origOffset, sizeLarge, origOffsetLarge);
 
             spritesMap = _spritesMap.ToImmutableDictionary();
             spritesSize = _spritesSize.ToImmutableDictionary();

@@ -23,7 +23,7 @@ public class DrawPlayerLocationHelper
         textureDrawing = IoC.Get<ITextureDrawing>();
         arr[0].rotation = 0f;
 
-        texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\playerLoc.png");
+        texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\playerLoc.png");
 
         UpdateProps();
         Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;

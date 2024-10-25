@@ -34,8 +34,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 		public FlickDrawingTarget() : base()
 		{
-			texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\flick.png");
-			exFlickEffTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png");
+			texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\flick.png");
+			exFlickEffTexture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\exflickEffect.png");
 
 			leftSize = new Vector2(104, 69.333f);
 			rightSize = new Vector2(-104, 69.333f);

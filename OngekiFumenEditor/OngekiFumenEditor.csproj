@@ -45,10 +45,8 @@
 		<Page Remove="Dependencies\**" />
 		<Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
 		<Page Remove="_bin\**" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\playerLoc.png" />
 		<None Remove="Resources\Icons\notication.png" />
 		<None Remove="Resources\suggestLayout.bin" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\playerLoc.png" />
 		<None Remove="Resources\Icons\icons8-selection-16.png" />
 		<Resource Include="Resources\Icons\icons8-selection-16.png" />
 	</ItemGroup>
@@ -58,40 +56,6 @@
 		<None Remove="Costura64\ispc_texcomp.dll" />
 		<None Remove="Costura64\PVRTexLib.dll" />
 		<None Remove="Costura64\TexToolWrap.dll" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NE.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NN.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\NS.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
-		<None Remove="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\bell.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\flick.png" />
@@ -250,40 +214,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BE.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\beam_body.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\beam_warn.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\bell.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BN.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\BS.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\CC.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\flick.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NE.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NN.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\NS.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_linehold_pur.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_blk.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_pur.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\nt_mine_red.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet0.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet1.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\sqrt_bullet2.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet0.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet1.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\tri_bullet2.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WE.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WN.png" />
-		<Resource Include="Modules\FumenVisualEditor\Views\OngekiObjects\WS.png" />
 		<Resource Include="Resources\Icons\add-folder.png" />
 		<Resource Include="Resources\Icons\book.png" />
 		<Resource Include="Resources\Icons\close.png" />
@@ -394,15 +324,6 @@
 		<Compile Update="Modules\FumenObjectPropertyBrowser\Views\FumenObjectPropertyBrowserView.xaml.cs">
 			<SubType>Code</SubType>
 		</Compile>
-		<Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml.cs">
-			<SubType>Code</SubType>
-		</Compile>
-		<Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml.cs">
-			<SubType>Code</SubType>
-		</Compile>
-		<Compile Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml.cs">
-			<SubType>Code</SubType>
-		</Compile>
 		<Compile Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml.cs">
 			<SubType>Code</SubType>
 		</Compile>
@@ -466,6 +387,111 @@
 		</None>
 		<None Update="bass_fx.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\BE.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\beamBody.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\beamWarn.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bell.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\BN.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\BS.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\commonCircle.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\exflickEffect.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\flick.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\unsetTap.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\greenTap.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\blueTap.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\redTap.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\laneEnd.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\laneNext.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\laneStart.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletCircleDanger.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletCircleHard.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletCircleNormal.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\playerLoc.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\sqrt_bullet.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletSquareNormal.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletSquareHard.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletSquareDanger.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\tapCritical.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\exTapEffect.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\tri_bullet.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletNeedleNormal.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletNeedleHard.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\bulletNeedleDanger.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\wallTap.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\wallTapEffect.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\wallEnd.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\wallNext.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Resources\editor\wallStart.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Resources\NewScriptTemplate.nyagekiScript">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -647,21 +673,6 @@
 		<Page Update="Modules\EditorSvgObjectControlProvider\Views\SvgPrefabView.xaml">
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 			<SubType>Designer</SubType>
-		</Page>
-		<Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\WallTapView.xaml">
-			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\TapView.xaml">
-			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\BulletView.xaml">
-			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Update="Modules\FumenVisualEditor\Views\OngekiObjects\FlickView.xaml">
-			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 		</Page>
 		<Page Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml">
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

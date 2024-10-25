@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 		public SvgObjectDrawingTarget()
 		{
-			texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\CC.png");
+			texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\commonCircle.png");
 
 			cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();
 			lineDrawing = IoC.Get<ISimpleLineDrawing>();
