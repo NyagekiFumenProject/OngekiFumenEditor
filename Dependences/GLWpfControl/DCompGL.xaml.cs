@@ -33,11 +33,11 @@ namespace OpenTK.Wpf
 
 		public event Action? Ready { add { GLCore.Ready += value; } remove { GLCore.Ready -= value; } }
 		public event Action<TimeSpan>? Render { add { GLCore.Render += value; } remove { GLCore.Render -= value; } }
-		public new event System.Windows.Input.MouseWheelEventHandler MouseWheel { add { host.MouseWheel += value; } remove { host.MouseWheel -= value; } }
-		public new event System.Windows.Input.MouseButtonEventHandler PreviewMouseDown { add { host.PreviewMouseDown += value; } remove { host.PreviewMouseDown -= value; } }
-		public new event System.Windows.Input.MouseButtonEventHandler PreviewMouseUp { add { host.PreviewMouseUp += value; } remove { host.PreviewMouseUp -= value; } }
-		public new event System.Windows.Input.MouseEventHandler MouseMove { add { host.MouseMove += value; } remove { host.MouseMove -= value; } }
-		public new event System.Windows.Input.MouseEventHandler MouseLeave { add { host.MouseLeave += value; } remove { host.MouseLeave -= value; } }
+		public new event System.Windows.Input.MouseWheelEventHandler MouseWheel { add { CompositionHostElement.MouseWheel += value; } remove { CompositionHostElement.MouseWheel -= value; } }
+		public new event System.Windows.Input.MouseButtonEventHandler PreviewMouseDown { add { CompositionHostElement.PreviewMouseDown += value; } remove { CompositionHostElement.PreviewMouseDown -= value; } }
+		public new event System.Windows.Input.MouseButtonEventHandler PreviewMouseUp { add { CompositionHostElement.PreviewMouseUp += value; } remove { CompositionHostElement.PreviewMouseUp -= value; } }
+		public new event System.Windows.Input.MouseEventHandler MouseMove { add { CompositionHostElement.MouseMove += value; } remove { CompositionHostElement.MouseMove -= value; } }
+		public new event System.Windows.Input.MouseEventHandler MouseLeave { add { CompositionHostElement.MouseLeave += value; } remove { CompositionHostElement.MouseLeave -= value; } }
 		private object disposeLock = new object();
 		volatile bool loop = true;
 
@@ -59,8 +59,6 @@ namespace OpenTK.Wpf
 			host = new(GetParentSize);
 			host.Resized += HostResized;
 			CompositionHostElement.Child = host;
-			//LoopThread = new(EntryPoint);
-			//LoopThread.Start();
 		}
 
 		private (double, double) GetParentSize()

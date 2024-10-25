@@ -67,48 +67,52 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
 		public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IDrawingContext target, IStringDrawing.FontHandle handle, out Vector2? measureTextSize)
 		{
 			target.PerfomenceMonitor.OnBeginDrawing(this);
-			{
-				handle = handle ?? DefaultFont;
 
-				var fontStyle = TextStyle.None;
+			measureTextSize = OpenTK.Wpf.DWriteCore.Measure(text, fontSize, (int)style);
+			OpenTK.Wpf.DWriteCore.Draw(text, pos, fontSize, color, origin,target,(int)style);
 
-				IStringDrawing.FontHandle GetSubFont(IStringDrawing.FontHandle handle, string sub)
-				{
-					var boldFontName = handle.Name + "b";
-					return SupportFonts.FirstOrDefault(x => x.Name == boldFontName);
-				}
+			//{
+			//	handle = handle ?? DefaultFont;
 
-				if (style.HasFlag(IStringDrawing.StringStyle.Underline))
-					fontStyle = TextStyle.Underline;
-				if (style.HasFlag(IStringDrawing.StringStyle.Strike))
-					fontStyle = TextStyle.Strikethrough;
-				if (style.HasFlag(IStringDrawing.StringStyle.Bold))
-				{
-					if (GetSubFont(handle, "b") is IStringDrawing.FontHandle sb)
-						handle = sb;
-				}
-				if (style.HasFlag(IStringDrawing.StringStyle.Italic))
-				{
-					if (GetSubFont(handle, "i") is IStringDrawing.FontHandle sb)
-						handle = sb;
-				}
-				if (style.HasFlag(IStringDrawing.StringStyle.Italic) && style.HasFlag(IStringDrawing.StringStyle.Bold))
-				{
-					if (GetSubFont(handle, "z") is IStringDrawing.FontHandle sb)
-						handle = sb;
-				}
+			//	var fontStyle = TextStyle.None;
 
-				renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target), target.PerfomenceMonitor, this);
-				var font = GetFontSystem(handle).GetFont(fontSize);
-				var size = font.MeasureString(text, scale);
-				origin.X = origin.X * 2;
-				origin = origin * size;
-				scale.Y = -scale.Y;
+			//	IStringDrawing.FontHandle GetSubFont(IStringDrawing.FontHandle handle, string sub)
+			//	{
+			//		var boldFontName = handle.Name + "b";
+			//		return SupportFonts.FirstOrDefault(x => x.Name == boldFontName);
+			//	}
 
-				font.DrawText(renderer, text, pos, new FSColor(color.X, color.Y, color.Z, color.W), scale, rotate, origin, textStyle: fontStyle);
-				measureTextSize = size;
-				renderer.End();
-			}
+			//	if (style.HasFlag(IStringDrawing.StringStyle.Underline))
+			//		fontStyle = TextStyle.Underline;
+			//	if (style.HasFlag(IStringDrawing.StringStyle.Strike))
+			//		fontStyle = TextStyle.Strikethrough;
+			//	if (style.HasFlag(IStringDrawing.StringStyle.Bold))
+			//	{
+			//		if (GetSubFont(handle, "b") is IStringDrawing.FontHandle sb)
+			//			handle = sb;
+			//	}
+			//	if (style.HasFlag(IStringDrawing.StringStyle.Italic))
+			//	{
+			//		if (GetSubFont(handle, "i") is IStringDrawing.FontHandle sb)
+			//			handle = sb;
+			//	}
+			//	if (style.HasFlag(IStringDrawing.StringStyle.Italic) && style.HasFlag(IStringDrawing.StringStyle.Bold))
+			//	{
+			//		if (GetSubFont(handle, "z") is IStringDrawing.FontHandle sb)
+			//			handle = sb;
+			//	}
+
+			//	renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target), target.PerfomenceMonitor, this);
+			//	var font = GetFontSystem(handle).GetFont(fontSize);
+			//	var size = font.MeasureString(text, scale);
+			//	origin.X = origin.X * 2;
+			//	origin = origin * size;
+			//	scale.Y = -scale.Y;
+
+			//	//font.DrawText(renderer, text, pos, new FSColor(color.X, color.Y, color.Z, color.W), scale, rotate, origin, textStyle: fontStyle);
+			//	measureTextSize = size;
+			//	renderer.End();
+			//}
 			target.PerfomenceMonitor.OnAfterDrawing(this);
 		}
 

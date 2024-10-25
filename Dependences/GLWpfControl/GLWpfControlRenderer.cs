@@ -235,6 +235,7 @@ namespace OpenTK.Wpf
             }
 
             _context.GraphicsContext.MakeCurrent();
+            DWriteCore.SetCurrent(_context.dComp);
 
             TimeSpan curFrameStamp = _stopwatch.Elapsed;
             TimeSpan deltaT = curFrameStamp - _lastFrameStamp;

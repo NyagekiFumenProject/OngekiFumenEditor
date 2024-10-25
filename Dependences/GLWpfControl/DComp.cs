@@ -11,7 +11,7 @@ using System.Windows.Media;
 
 namespace OpenTK.Wpf
 {
-	internal class DComp
+	public class DComp
 	{
 		private Vortice.Direct3D11.ID3D11Device _device = null;
 		private Vortice.Direct3D11.ID3D11DeviceContext _deviceContext = null;
@@ -34,9 +34,6 @@ namespace OpenTK.Wpf
 		private Vortice.Direct2D1.ID2D1Factory1 _factory2D = null;
 		private Vortice.Direct2D1.ID2D1Device _device2D = null;
 		private Vortice.Direct2D1.ID2D1DeviceContext _deviceContext2D = null;
-
-		private Vortice.DirectWrite.IDWriteFactory _DWriteFactory = null;
-		private Vortice.DirectWrite.IDWriteTextFormat _DWriteTextFormat = null;
 
 		private DpiScale currentDpi;
 		private IntPtr hwndHost;
@@ -103,11 +100,11 @@ namespace OpenTK.Wpf
 			{
 				var hr = Vortice.Direct3D12.D3D12.D3D12CreateDevice(null, out _device12);
 				_commandQueue12 = _device12.CreateCommandQueue(Vortice.Direct3D12.CommandListType.Direct);
-				var hr1 = Vortice.Direct3D11on12.Apis.D3D11On12CreateDevice(_device12, Vortice.Direct3D11.DeviceCreationFlags.BgraSupport, [Vortice.Direct3D.FeatureLevel.Level_11_0], [_commandQueue12], 0, out _device, out _deviceContext, out _);
+				var hr1 = Vortice.Direct3D11on12.Apis.D3D11On12CreateDevice(_device12, Vortice.Direct3D11.DeviceCreationFlags.BgraSupport, [Vortice.Direct3D.FeatureLevel.Level_11_1], [_commandQueue12], 0, out _device, out _deviceContext, out _);
 			}
 			else
 			{
-				var hr = Vortice.Direct3D11.D3D11.D3D11CreateDevice(null, Vortice.Direct3D.DriverType.Hardware, Vortice.Direct3D11.DeviceCreationFlags.BgraSupport, [Vortice.Direct3D.FeatureLevel.Level_11_0], out _device);
+				var hr = Vortice.Direct3D11.D3D11.D3D11CreateDevice(null, Vortice.Direct3D.DriverType.Hardware, Vortice.Direct3D11.DeviceCreationFlags.BgraSupport, [Vortice.Direct3D.FeatureLevel.Level_11_1], out _device);
 				_deviceContext = _device.CreateDeferredContext();
 			}
 			_DXGIDevice = _device.QueryInterface<Vortice.DXGI.IDXGIDevice>();
@@ -117,8 +114,6 @@ namespace OpenTK.Wpf
 			_factory2D = Vortice.Direct2D1.D2D1.D2D1CreateFactory<Vortice.Direct2D1.ID2D1Factory1>(Vortice.Direct2D1.FactoryType.MultiThreaded, Vortice.Direct2D1.DebugLevel.None);
 			_device2D = _factory2D.CreateDevice(_DXGIDevice);
 			_deviceContext2D = _device2D.CreateDeviceContext(Vortice.Direct2D1.DeviceContextOptions.EnableMultithreadedOptimizations);
-			_DWriteFactory = Vortice.DirectWrite.DWrite.DWriteCreateFactory<Vortice.DirectWrite.IDWriteFactory>();
-			_DWriteTextFormat = _DWriteFactory.CreateTextFormat("Cascadia Mono", 16);
 		}
 
 		public void CreateRenderResources()
@@ -133,7 +128,7 @@ namespace OpenTK.Wpf
 			_DcompVisual.SetContent(_DcompSurface);
 			_DcompVisual.SetOffsetX(0);
 			_DcompVisual.SetOffsetY(0);
-			_DcompVisual.SetTransform(System.Numerics.Matrix3x2.CreateScale(1, -1, new(0f, hostHeight / 2f)));
+			//_DcompVisual.SetTransform(System.Numerics.Matrix3x2.CreateScale(1, -1, new(0f, hostHeight / 2f)));
 			_DcompTarget.SetRoot(_DcompVisual);
 			_DcompDevice.Commit();
 			stopwatch.Restart();
@@ -169,8 +164,6 @@ namespace OpenTK.Wpf
 			_device?.Dispose();
 			_commandQueue12?.Dispose();
 			_device12?.Dispose();
-			_DWriteFactory?.Dispose();
-			_DWriteTextFormat?.Dispose();
 		}
 
 		private TimeSpan lastTime;
@@ -179,55 +172,31 @@ namespace OpenTK.Wpf
 		public void Draw()
 		{
 			var rt = _DcompSurface.BeginDraw<Vortice.Direct2D1.ID2D1DeviceContext>(null, out _);
-			rt.Transform = System.Numerics.Matrix3x2.Identity;
+			rt.Transform = System.Numerics.Matrix3x2.CreateScale(1, -1, new(0f, (float)(hostHeight / 2f / currentDpi.DpiScaleY)));
 			rt.SetDpi((float)(currentDpi.DpiScaleX * 96d), (float)(currentDpi.DpiScaleY * 96d));
 			if (_t2dBitmap == null)
 			{
 				_t2dBitmap = rt.CreateSharedBitmap(_t2dSurface, new(new(Vortice.DXGI.Format.R8G8B8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied), (float)(currentDpi.DpiScaleX * 96d), (float)(currentDpi.DpiScaleY * 96d)));
 			}
 			rt.DrawBitmap(_t2dBitmap);
+			rt.Transform = System.Numerics.Matrix3x2.Identity;
 			var brush = rt.CreateSolidColorBrush(new Vortice.Mathematics.Color(255, 255, 255, 255));
 			TimeSpan now = stopwatch.Elapsed;
 			TimeSpan time = now - lastTime;
 			lastTime = now;
-			Add(1000d / time.TotalMilliseconds);
-			rt.Transform = System.Numerics.Matrix3x2.CreateScale(1, -1, new(0f, (float)(hostHeight / 2d / currentDpi.DpiScaleY)));
-			rt.DrawText(avg().ToString(), _DWriteTextFormat, new(256, 64), brush);
-			_DcompSurface.EndDraw();
+			var queue = DWriteCore.GetCommands(this);
+			float height = (float)(hostHeight / currentDpi.DpiScaleY);
+			foreach (var item in queue)
+			{
+				item.Invoke(rt, height);
+			}
+			queue.Clear();
+            _DcompSurface.EndDraw();
 			rt.Dispose();
 			//_t2dBitmap.Dispose();
 
 			brush.Dispose();
 			_DcompDevice.Commit();
-		}
-
-		public double[] pool = new double[1000];
-		public int size = 0;
-		public int index = 0;
-
-		public void Add(double v)
-		{
-			if (index == 1000)
-			{
-				index = 0;
-			}
-			if (size != 1000)
-			{
-				size++;
-			}
-			pool[index] = v;
-			index++;
-		}
-
-		public double avg()
-		{
-			double t = 0;
-			for (int i = 0; i < size; i++)
-			{
-				t += pool[i];
-			}
-			t /= size;
-			return t;
 		}
 
 		public void WaitForVBlank()

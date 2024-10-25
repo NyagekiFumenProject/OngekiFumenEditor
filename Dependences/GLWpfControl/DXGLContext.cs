@@ -90,9 +90,9 @@ namespace OpenTK.Wpf
                 }
 
 #if DEBUG
-                GL.DebugMessageCallback(DebugProcCallback, IntPtr.Zero);
-                GL.Enable(EnableCap.DebugOutput);
-                GL.Enable(EnableCap.DebugOutputSynchronous);
+                //GL.DebugMessageCallback(DebugProcCallback, IntPtr.Zero);
+                //GL.Enable(EnableCap.DebugOutput);
+                //GL.Enable(EnableCap.DebugOutputSynchronous);
 #endif
             }
 
