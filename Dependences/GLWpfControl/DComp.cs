@@ -46,7 +46,6 @@ namespace OpenTK.Wpf
 			currentDpi = new(dpi, dpi);
 			hostWidth = (int)(ControlWidth * currentDpi.DpiScaleX);
 			hostHeight = (int)(ControlHeight * currentDpi.DpiScaleY);
-			stopwatch = new();
 		}
 
 		public DComp(int PixelWidth, int PixelHeight)
@@ -55,7 +54,6 @@ namespace OpenTK.Wpf
 			currentDpi = new(dpi, dpi);
 			hostWidth = PixelWidth;
 			hostHeight = PixelHeight;
-			stopwatch = new();
 		}
 
 		public void Resize(double ControlWidth, double ControlHeight)
@@ -131,7 +129,6 @@ namespace OpenTK.Wpf
 			//_DcompVisual.SetTransform(System.Numerics.Matrix3x2.CreateScale(1, -1, new(0f, hostHeight / 2f)));
 			_DcompTarget.SetRoot(_DcompVisual);
 			_DcompDevice.Commit();
-			stopwatch.Restart();
 		}
 
 		public void DestoryRenderResources()
@@ -166,9 +163,6 @@ namespace OpenTK.Wpf
 			_device12?.Dispose();
 		}
 
-		private TimeSpan lastTime;
-		private Stopwatch stopwatch;
-
 		public void Draw()
 		{
 			var rt = _DcompSurface.BeginDraw<Vortice.Direct2D1.ID2D1DeviceContext>(null, out _);
@@ -181,9 +175,6 @@ namespace OpenTK.Wpf
 			rt.DrawBitmap(_t2dBitmap);
 			rt.Transform = System.Numerics.Matrix3x2.Identity;
 			var brush = rt.CreateSolidColorBrush(new Vortice.Mathematics.Color(255, 255, 255, 255));
-			TimeSpan now = stopwatch.Elapsed;
-			TimeSpan time = now - lastTime;
-			lastTime = now;
 			var queue = DWriteCore.GetCommands(this);
 			float height = (float)(hostHeight / currentDpi.DpiScaleY);
 			foreach (var item in queue)
@@ -191,7 +182,7 @@ namespace OpenTK.Wpf
 				item.Invoke(rt, height);
 			}
 			queue.Clear();
-            _DcompSurface.EndDraw();
+			_DcompSurface.EndDraw();
 			rt.Dispose();
 			//_t2dBitmap.Dispose();
 

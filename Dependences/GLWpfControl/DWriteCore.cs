@@ -43,6 +43,24 @@ namespace OpenTK.Wpf
 			Underline = 16,
 		}
 
+		public static void DrawRaw(string text, Vector2 pos, int fontSize, Vector4 color, Vortice.DirectWrite.FontStyle fontStyle, Vortice.DirectWrite.FontWeight fontWeight)
+		{
+			if (string.IsNullOrEmpty(text))
+			{
+				return;
+			}
+			DcompDWriteCommandQueue[CurrentDComp].Enqueue((rt, height) =>
+			{
+				var format = _DWriteFactory.CreateTextFormat("Cascadia Mono", fontWeight, fontStyle, fontSize);
+				var layout = _DWriteFactory.CreateTextLayout(text, format, float.PositiveInfinity, float.PositiveInfinity);
+				var brush = rt.CreateSolidColorBrush(new Vortice.Mathematics.Color4(color));
+				rt.DrawTextLayout(pos, layout, brush);
+				brush.Dispose();
+				layout.Dispose();
+				format.Dispose();
+			});
+		}
+
 		public static void Draw(string text, Vector2 pos, int fontSize, Vector4 color, Vector2 origin, dynamic target, int StringStyle)
 		{
 			if (string.IsNullOrEmpty(text))
@@ -52,13 +70,12 @@ namespace OpenTK.Wpf
 			var style = (StringStyle)StringStyle;
 			Vortice.DirectWrite.FontStyle fontStyle = style.HasFlag(DWriteCore.StringStyle.Italic) ? Vortice.DirectWrite.FontStyle.Italic : Vortice.DirectWrite.FontStyle.Normal;
 			Vortice.DirectWrite.FontWeight fontWeight = style.HasFlag(DWriteCore.StringStyle.Bold) ? Vortice.DirectWrite.FontWeight.Bold : Vortice.DirectWrite.FontWeight.Normal;
-			var y = (float)target.ConvertToY(target.Editor.GetCurrentTGrid().TotalUnit);
 			DcompDWriteCommandQueue[CurrentDComp].Enqueue((rt, height) =>
 			{
 				var format = _DWriteFactory.CreateTextFormat("Cascadia Mono", fontWeight, fontStyle, fontSize);
 				var layout = _DWriteFactory.CreateTextLayout(text, format, float.PositiveInfinity, float.PositiveInfinity);
 				var brush = rt.CreateSolidColorBrush(new Vortice.Mathematics.Color4(color));
-				rt.DrawTextLayout(new(pos.X - origin.X * layout.Metrics.WidthIncludingTrailingWhitespace, height - (pos.Y + origin.Y * layout.Metrics.Height) + y - 49f), layout, brush);
+				rt.DrawTextLayout(new(pos.X - origin.X * layout.Metrics.WidthIncludingTrailingWhitespace + +target.MinX, height - (pos.Y + origin.Y * layout.Metrics.Height) + target.MinY), layout, brush);
 				brush.Dispose();
 				layout.Dispose();
 				format.Dispose();

@@ -35,6 +35,7 @@ using System.Windows.Input;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using System.Data;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -1638,6 +1639,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnEditorUpdate(TimeSpan ts)
         {
+            if (AudioPlayer != null && AudioPlayer.IsPlaying)
+            {
+				var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(AudioPlayer.CurrentTime, Editor);
+				ScrollTo(tGrid);
+			}
             if (IsPreviewMode)
             {
                 //record player location

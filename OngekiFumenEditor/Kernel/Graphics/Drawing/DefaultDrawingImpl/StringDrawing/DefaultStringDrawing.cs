@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
 			target.PerfomenceMonitor.OnBeginDrawing(this);
 
 			measureTextSize = OpenTK.Wpf.DWriteCore.Measure(text, fontSize, (int)style);
-			OpenTK.Wpf.DWriteCore.Draw(text, pos, fontSize, color, origin,target,(int)style);
+			OpenTK.Wpf.DWriteCore.Draw(text, pos, fontSize, color, origin,target.Rect,(int)style);
 
 			//{
 			//	handle = handle ?? DefaultFont;
