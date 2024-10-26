@@ -326,6 +326,24 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             return;
         }
 
+        // TODO Support multiple objects in clipboard
+        var ongekiObject = ongekiObjects.Single();
+        editor!.MoveObjectTo(ongekiObject, editor.CurrentCursorPosition!.Value);
+        if (ctrl && submode.ModifyObjectCtrl is { } modCtrl)
+            modCtrl.Function?.Invoke(ongekiObject);
+        if (shift && submode.ModifyObjectShift is { } modShift)
+            modShift.Function?.Invoke(ongekiObject);
+
+        // Find existing objects of the same type at the same position.
+        // TODO Separate this check into a function somehow
+        if (editor.Fumen.GetAllDisplayableObjects().FirstOrDefault(o =>
+                o is OngekiTimelineObjectBase obj && obj.GetType().IsInstanceOfType(ongekiObject) && obj.TGrid == ongekiObject.TGrid &&
+                (obj is not OngekiMovableObjectBase oObj ||
+                 (ongekiObject is OngekiMovableObjectBase movObj && movObj.XGrid == oObj.XGrid))) is { } existingObj) {
+            editor.NotifyObjectClicked((OngekiObjectBase)existingObj);
+            return;
+        }
+
         var objectName = CurrentSubmode.DisplayName;
         editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.BatchModeAddObject.Format(objectName), Redo, Undo));
 
@@ -333,15 +351,6 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
         void Redo()
         {
-            // TODO Support multiple objects in clipboard
-            var ongekiObject = ongekiObjects.Single();
-
-            if (ctrl && submode.ModifyObjectCtrl is { } modCtrl)
-                modCtrl.Function?.Invoke(ongekiObject);
-            if (shift && submode.ModifyObjectShift is { } modShift)
-                modShift.Function?.Invoke(ongekiObject);
-
-            editor!.MoveObjectTo(ongekiObject, editor.CurrentCursorPosition!.Value);
             editor.Fumen.AddObject(ongekiObject);
             editor.InteractiveManager.GetInteractive(ongekiObject).OnMoveCanvas(ongekiObject, editor.CurrentCursorPosition.Value, editor);
 
