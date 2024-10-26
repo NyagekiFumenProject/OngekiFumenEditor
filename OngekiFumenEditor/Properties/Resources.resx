@@ -259,7 +259,7 @@
     <value>Shape</value>
   </data>
   <data name="BatchModeDeleteRangeOfObjectType" xml:space="preserve">
-    <value>Batch delete {0}</value>
+    <value>Batch delete {0} (x{1})</value>
   </data>
   <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>AcbGeneratorFuck.Generator.Generate() failed</value>
@@ -1967,5 +1967,14 @@
   </data>
   <data name="Clipboard" xml:space="preserve">
     <value>Clipboard</value>
+  </data>
+  <data name="Objects" xml:space="preserve">
+    <value>Objects</value>
+  </data>
+  <data name="CannotBatchInputClipboardEmpty" xml:space="preserve">
+    <value>The clipboard is empty</value>
+  </data>
+  <data name="CannotBatchInputClipboardNotBrushable" xml:space="preserve">
+    <value>The clipboard contents are not brushable</value>
   </data>
 </root>

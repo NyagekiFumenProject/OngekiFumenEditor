@@ -375,7 +375,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Batch delete {0} 的本地化字符串。
+        ///   查找类似 Batch delete {0} (x{1}) 的本地化字符串。
         /// </summary>
         public static string BatchModeDeleteRangeOfObjectType {
             get {
@@ -677,6 +677,24 @@ namespace OngekiFumenEditor.Properties {
         public static string CancelSelected {
             get {
                 return ResourceManager.GetString("CancelSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The clipboard is empty 的本地化字符串。
+        /// </summary>
+        public static string CannotBatchInputClipboardEmpty {
+            get {
+                return ResourceManager.GetString("CannotBatchInputClipboardEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The clipboard contents are not brushable 的本地化字符串。
+        /// </summary>
+        public static string CannotBatchInputClipboardNotBrushable {
+            get {
+                return ResourceManager.GetString("CannotBatchInputClipboardNotBrushable", resourceCulture);
             }
         }
         
@@ -3692,6 +3710,15 @@ namespace OngekiFumenEditor.Properties {
         public static string ObjectPropertyChanged {
             get {
                 return ResourceManager.GetString("ObjectPropertyChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Objects 的本地化字符串。
+        /// </summary>
+        public static string Objects {
+            get {
+                return ResourceManager.GetString("Objects", resourceCulture);
             }
         }
         
