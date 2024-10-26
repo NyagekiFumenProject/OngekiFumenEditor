@@ -833,7 +833,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
-        public void KeyboardAction_FastSwitchFlickDirection()
+        public void KeyboardAction_FastSwitchFlickDirection(ActionExecutionContext _)
         {
             var selectedFlicks = SelectObjects.OfType<Flick>().ToList();
 
