@@ -17,6 +17,7 @@ public class DrawPlayerLocationHelper
     private readonly Texture texture;
     private readonly ITextureDrawing textureDrawing;
     private bool enableShowPlayerLocation;
+    private readonly Vector2 size;
 
     public DrawPlayerLocationHelper()
     {
@@ -24,6 +25,8 @@ public class DrawPlayerLocationHelper
         arr[0].rotation = 0f;
 
         texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\playerLoc.png");
+        if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("playerLoc", out size, out _))
+            size = new Vector2(48, 48);
 
         UpdateProps();
         Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -60,7 +63,7 @@ public class DrawPlayerLocationHelper
         var y = target.ConvertToY(tGrid);
 
         arr[0].position = new Vector2((float)x, (float)y);
-        arr[0].size = new Vector2(48, 48);
+        arr[0].size = size;
 
         textureDrawing.Draw(target, texture, arr);
     }

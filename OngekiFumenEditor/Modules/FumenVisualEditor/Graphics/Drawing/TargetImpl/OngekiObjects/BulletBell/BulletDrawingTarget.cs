@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -27,18 +28,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public BulletDrawingTarget()
         {
-            Texture LoadTex(string rPath)
-            {
-                return ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
-            }
-
             var _spritesOriginOffset = new Dictionary<Texture, Vector2>();
             var _spritesSize = new Dictionary<Texture, Vector2>();
             var _spritesOriginOffsetLarge = new Dictionary<Texture, Vector2>();
             var _spritesSizeLarge = new Dictionary<Texture, Vector2>();
             var _spritesMap = new Dictionary<BulletDamageType, Dictionary<BulletType, Texture>>();
 
-            void SetTexture(BulletDamageType k1, BulletType k2, string rPath, Vector2 size, Vector2 origOffset, Vector2 sizeLarge, Vector2 origOffsetLarge)
+            void SetTexture(BulletDamageType k1, BulletType k2, string rPath, string key, Vector2 size, Vector2 origOffset, Vector2 sizeLarge, Vector2 origOffsetLarge)
             {
                 if (!_spritesMap.TryGetValue(k1, out var dic))
                 {
@@ -46,40 +42,51 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     _spritesMap[k1] = dic;
                 }
 
-                var tex = LoadTex(rPath);
+                var tex = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
                 dic[k2] = tex;
                 normalDrawList[tex] = new();
                 selectedDrawList[tex] = new();
 
-                _spritesSize[tex] = size;
-                _spritesOriginOffset[tex] = origOffset;
-                _spritesSizeLarge[tex] = sizeLarge;
-                _spritesOriginOffsetLarge[tex] = origOffsetLarge;
+                if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile(key + "Normal", out var cfgSize, out var cfgOrigin))
+                {
+                    cfgSize = size;
+                    cfgOrigin = origOffset;
+                }
+                _spritesSize[tex] = cfgSize;
+                _spritesOriginOffset[tex] = cfgOrigin;
+
+                if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile(key + "Large", out cfgSize, out cfgOrigin))
+                {
+                    cfgSize = sizeLarge;
+                    cfgOrigin = origOffsetLarge;
+                }
+                _spritesSizeLarge[tex] = cfgSize;
+                _spritesOriginOffsetLarge[tex] = cfgOrigin;
             }
 
             var size = new Vector2(40, 40);
             var origOffset = new Vector2(0, 0);
             var sizeLarge = size * 1.4f;
             var origOffsetLarge = origOffset * 1.4f;
-            SetTexture(BulletDamageType.Normal, BulletType.Circle, "bulletCircleNormal.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Hard, BulletType.Circle, "bulletCircleHard.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Danger, BulletType.Circle, "bulletCircleDanger.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Normal, BulletType.Circle, "bulletCircleNormal.png", "bulletCircle", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Hard, BulletType.Circle, "bulletCircleHard.png", "bulletCircle", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Danger, BulletType.Circle, "bulletCircleDanger.png", "bulletCircle", size, origOffset, sizeLarge, origOffsetLarge);
 
             size = new(30, 80);
             origOffset = new Vector2(0, 35);
             sizeLarge = size * 1.4f;
             origOffsetLarge = origOffset * 1.4f;
-            SetTexture(BulletDamageType.Normal, BulletType.Needle, "bulletNeedleNormal.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Hard, BulletType.Needle, "bulletNeedleHard.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Danger, BulletType.Needle, "bulletNeedleDanger.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Normal, BulletType.Needle, "bulletNeedleNormal.png", "bulletNeedle", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Hard, BulletType.Needle, "bulletNeedleHard.png", "bulletNeedle", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Danger, BulletType.Needle, "bulletNeedleDanger.png", "bulletNeedle", size, origOffset, sizeLarge, origOffsetLarge);
 
             size = new(30, 80);
             origOffset = new Vector2(0, 35);
             sizeLarge = size * 1.4f;
             origOffsetLarge = origOffset * 1.4f;
-            SetTexture(BulletDamageType.Normal, BulletType.Square, "bulletSquareNormal.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Hard, BulletType.Square, "bulletSquareHard.png", size, origOffset, sizeLarge, origOffsetLarge);
-            SetTexture(BulletDamageType.Danger, BulletType.Square, "bulletSquareDanger.png", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Normal, BulletType.Square, "bulletSquareNormal.png", "bulletSquare", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Hard, BulletType.Square, "bulletSquareHard.png", "bulletSquare", size, origOffset, sizeLarge, origOffsetLarge);
+            SetTexture(BulletDamageType.Danger, BulletType.Square, "bulletSquareDanger.png", "bulletSquare", size, origOffset, sizeLarge, origOffsetLarge);
 
             spritesMap = _spritesMap.ToImmutableDictionary();
             spritesSize = _spritesSize.ToImmutableDictionary();

@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Utils;
 using System;
 using System.Drawing;
+using System.IO;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.Lane
 {
@@ -9,8 +10,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public static Texture LoadTextrueFromDefaultResource(string rPath)
         {
-            var texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
-            return texture;
+            return ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
         }
 
         public override Texture StartEditorTexture { get; }

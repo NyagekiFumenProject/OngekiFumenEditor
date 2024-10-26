@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
@@ -11,6 +12,8 @@ namespace OngekiFumenEditor.Utils
 {
     public static class ResourceUtils
     {
+        private static Dictionary<string, string> textureSizeOriginMap = new();
+
         public static Stream OpenReadFromLocalAssemblyResourcesFolder(string resourceName)
             => typeof(ResourceUtils).Assembly.GetManifestResourceStream("OngekiFumenEditor.Resources." + resourceName);
 
@@ -34,42 +37,60 @@ namespace OngekiFumenEditor.Utils
             return new Texture(bitmap);
         }
 
-        [DllImport("kernel32", CharSet = CharSet.Auto)]
-        private static extern int GetPrivateProfileString(
-        string section, string key, string defaultValue,
-        StringBuilder retVal, int size, string filePath);
-
-        public static string ReadIniConfig(string filePath, string section, string key)
+        static ResourceUtils()
         {
-            var result = new StringBuilder(255);
+            var iniFilePath = Path.GetFullPath(@".\Resources\editor\textureSizeOrigin.ini");
+            foreach (var line in File.ReadAllLines(iniFilePath))
+            {
+                var split = line.Split("=");
+                if (split.Length != 2)
+                    continue;
 
-            try
-            {
-                GetPrivateProfileString(section, key, string.Empty, result, 255, filePath);
-                return result.ToString();
-            }
-            catch (Exception e)
-            {
-                Log.LogError($"Read .ini file {filePath} failed: {e.Message}");
-                return default;
+                textureSizeOriginMap[split[0]] = split[1];
             }
         }
 
-        public static bool OpenReadTextureSizeOriginByConfigFile(string iniFilePath, string textureName, out Vector2 size, out Vector2 origin)
+        public static string ReadTextureSizeOrigin(string key)
+        {
+            if (textureSizeOriginMap.TryGetValue(key, out var val))
+                return val;
+            return string.Empty;
+        }
+
+        public static bool OpenReadTextureSizeOriginByConfigFile(string textureName, out Vector2 size, out Vector2 origin)
         {
             size = default;
             origin = default;
+            var good = false;
 
             try
             {
-                var str = ReadIniConfig(iniFilePath, "TextureSizeOrigin", textureName + "Size");
-                var split = str.Split(',');
-                size = new(float.Parse(split[0]), float.Parse(split[1]));
+                var key = textureName + "Size";
+                var str = ReadTextureSizeOrigin(key);
+                if (!string.IsNullOrWhiteSpace(str))
+                {
+                    var split = str.Split(',');
+                    size = new(float.Parse(split[0].Trim()), float.Parse(split[1].Trim()));
+                    good = true;
+                }
+                else
+                {
+                    Log.LogWarn($"size key {key} is not found.");
+                }
 
-                str = ReadIniConfig(iniFilePath, "TextureSizeOrigin", textureName + "Origin");
-                split = str.Split(',');
-                origin = new(float.Parse(split[0]), float.Parse(split[1]));
-                return true;
+                key = textureName + "Origin";
+                str = ReadTextureSizeOrigin(key);
+                if (!string.IsNullOrWhiteSpace(str))
+                {
+                    var split = str.Split(',');
+                    origin = new(float.Parse(split[0].Trim()), float.Parse(split[1].Trim()));
+                }
+                else
+                {
+                    //Log.LogWarn($"origin key {key} is not found.");
+                }
+
+                return good;
             }
             catch (Exception e)
             {

@@ -23,14 +23,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public BellDrawingTarget()
         {
-            Texture LoadTex(string rPath)
-            {
-                return ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
-            }
+            texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\bell.png");
 
-            texture = LoadTex("bell.png");
-            sizeNormal = new Vector2(40, 40);
+            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("bell", out var size, out _))
+                size = new Vector2(40, 40);
+            sizeNormal = size;
             sizeLarge = sizeNormal * 1.4f;
+
             normalDrawList[texture] = new();
             selectedDrawList[texture] = new();
         }
