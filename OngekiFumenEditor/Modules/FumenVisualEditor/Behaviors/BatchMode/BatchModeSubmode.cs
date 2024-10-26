@@ -45,18 +45,17 @@ public abstract class BatchModeInputSubmode : BatchModeSubmode
 
 public class BatchModeInputClipboard : BatchModeInputSubmode
 {
-    private IReadOnlyCollection<OngekiTimelineObjectBase> ClipboardContents;
+    private IFumenEditorClipboard Clipboard;
+
     public BatchModeInputClipboard()
     {
-        ClipboardContents = IoC.Get<IFumenEditorClipboard>()
-            .CurrentCopiedObjects.OfType<OngekiTimelineObjectBase>()
-            .Select(obj => (OngekiTimelineObjectBase)obj.CopyNew()).ToList();
+        Clipboard = IoC.Get<IFumenEditorClipboard>();
     }
 
     public override string DisplayName => Resources.Clipboard;
     public override IEnumerable<OngekiTimelineObjectBase> GenerateObject()
     {
-        return ClipboardContents.Select(obj => (OngekiTimelineObjectBase)obj.CopyNew());
+        return Clipboard.CurrentCopiedObjects.Select(obj => (OngekiTimelineObjectBase)obj.CopyNew());
     }
 }
 

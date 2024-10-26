@@ -8,7 +8,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using Caliburn.Micro;
 using Microsoft.Xaml.Behaviors;
-using Microsoft.Xaml.Behaviors.Core;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -19,7 +18,6 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
-using Xceed.Wpf.Toolkit.Core.Input;
 using EventTrigger = Microsoft.Xaml.Behaviors.EventTrigger;
 using TriggerAction = Microsoft.Xaml.Behaviors.TriggerAction;
 using TriggerBase = Microsoft.Xaml.Behaviors.TriggerBase;
@@ -28,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
 
 public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 {
-    private static readonly ImmutableDictionary<KeyBindingDefinition, Type> CommandDefinitions =
+    private static readonly ImmutableDictionary<KeyBindingDefinition, BatchModeSubmode> CommandDefinitions =
         new Dictionary<KeyBindingDefinition, Type>
         {
             [KeyBindingDefinitions.KBD_Batch_ModeWallLeft] = typeof(BatchModeInputWallLeft),
@@ -46,7 +44,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             [KeyBindingDefinitions.KBD_Batch_ModeFilterLanes] = typeof(BatchModeFilterLanes),
             [KeyBindingDefinitions.KBD_Batch_ModeFilterDockableObjects] = typeof(BatchModeFilterDockableObjects),
             [KeyBindingDefinitions.KBD_Batch_ModeFilterFloatingObjects] = typeof(BatchModeFilterFloatingObjects),
-        }.ToImmutableDictionary();
+        }.ToImmutableDictionary(kv => kv.Key, kv => (BatchModeSubmode)Activator.CreateInstance(kv.Value));
 
     private static readonly ImmutableDictionary<string, Func<BatchModeBehavior, TriggerAction>> ClickTriggers =
         new Dictionary<string, Func<BatchModeBehavior, TriggerAction>>()
@@ -92,7 +90,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             foreach (var mod in new[] { ModifierKeys.None, ModifierKeys.Shift }) {
                 // It's useful to hold down shift as we place multiple lanes, so bind everything to Shift+ as well.
                 var newTrigger = new KeyTrigger() { Key = key.Key, Modifiers = mod };
-                newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentSubmode), Value = Activator.CreateInstance(submodeType) });
+                newTrigger.Actions.Add(new LambdaTriggerAction(_ => ApplySubmode(submodeType)));
                 triggerCollection.Add(newTrigger);
                 NewKeyTriggers.Add(newTrigger);
             }
@@ -145,6 +143,11 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         if (AssociatedObject.DataContext is FumenVisualEditorViewModel edtior) {
             edtior.SelectRegionType = SelectRegionType.Select;
         }
+    }
+
+    private void ApplySubmode(BatchModeSubmode submode)
+    {
+        CurrentSubmode = submode;
     }
 
     #region Mouse handling
@@ -447,7 +450,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
     #region Dependency property
 
-    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BatchModeBehavior), new PropertyMetadata(Activator.CreateInstance(CommandDefinitions[KeyBindingDefinitions.KBD_Batch_ModeClipboard])));
+    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BatchModeBehavior), new(CommandDefinitions[KeyBindingDefinitions.KBD_Batch_ModeClipboard]));
 
     #endregion
 
