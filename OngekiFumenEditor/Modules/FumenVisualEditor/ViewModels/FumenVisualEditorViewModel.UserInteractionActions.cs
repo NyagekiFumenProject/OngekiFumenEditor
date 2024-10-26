@@ -1184,7 +1184,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         SelectionStartPosition = new Vector2((float)position.X, (float)position.Y);
                         SelectionCurrentCursorPosition = SelectionStartPosition;
                         SelectionVisibility = Visibility.Visible;
-                        SelectRegionType = SelectRegionType.Select;
                     }
                     else
                     {

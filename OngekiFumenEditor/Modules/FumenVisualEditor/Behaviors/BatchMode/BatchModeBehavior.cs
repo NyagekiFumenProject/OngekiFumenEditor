@@ -141,6 +141,10 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         GeneratedClickTriggerActions.Clear();
 
         AssociatedObject.KeyDown -= ConsumeAlt;
+
+        if (AssociatedObject.DataContext is FumenVisualEditorViewModel edtior) {
+            edtior.SelectRegionType = SelectRegionType.Select;
+        }
     }
 
     #region Mouse handling
@@ -175,6 +179,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         if (args.ChangedButton == MouseButton.Left) {
             // In all sub-modes, Alt forces normal mouse behavior
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
+                editor.SelectRegionType = SelectRegionType.Select;
                 lastLeftClickWasAltClick = true;
                 editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
                 if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) {
