@@ -36,8 +36,6 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
 
         public DefaultCommandExecutor()
         {
-            Log.Instance.RemoveOutput<ConsoleLogOutput>();
-
             rootCommand = new RootCommand("CommandLine for OngekiFumenEditor");
             rootCommand.AddCommand(GenerateVerbCommands<GenerateOption>("svg", Resources.ProgramCommandDescriptionSvg, ProcessSvgCommand));
             rootCommand.AddCommand(GenerateVerbCommands<FumenConvertOption>("convert", Resources.ProgramCommandConvert, ProcessConvertCommand));
