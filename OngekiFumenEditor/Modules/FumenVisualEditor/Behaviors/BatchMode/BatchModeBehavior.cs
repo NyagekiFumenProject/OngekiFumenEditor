@@ -19,6 +19,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
+using Xceed.Wpf.Toolkit.Core.Input;
 using EventTrigger = Microsoft.Xaml.Behaviors.EventTrigger;
 using TriggerAction = Microsoft.Xaml.Behaviors.TriggerAction;
 using TriggerBase = Microsoft.Xaml.Behaviors.TriggerBase;
@@ -27,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
 
 public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 {
-    private static readonly ImmutableDictionary<KeyBindingDefinition, BatchModeSubmode> CommandDefinitions =
+    private static readonly ImmutableDictionary<KeyBindingDefinition, Type> CommandDefinitions =
         new Dictionary<KeyBindingDefinition, Type>
         {
             [KeyBindingDefinitions.KBD_Batch_ModeWallLeft] = typeof(BatchModeInputWallLeft),
@@ -45,7 +46,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             [KeyBindingDefinitions.KBD_Batch_ModeFilterLanes] = typeof(BatchModeFilterLanes),
             [KeyBindingDefinitions.KBD_Batch_ModeFilterDockableObjects] = typeof(BatchModeFilterDockableObjects),
             [KeyBindingDefinitions.KBD_Batch_ModeFilterFloatingObjects] = typeof(BatchModeFilterFloatingObjects),
-        }.ToImmutableDictionary(kv => kv.Key, kv => (BatchModeSubmode)Activator.CreateInstance(kv.Value));
+        }.ToImmutableDictionary();
 
     private static readonly ImmutableDictionary<string, Func<BatchModeBehavior, TriggerAction>> ClickTriggers =
         new Dictionary<string, Func<BatchModeBehavior, TriggerAction>>()
@@ -81,7 +82,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
         // Create brush key triggers on the FumenVisualEditorView.
         // Temporarily delete existing ones that clash with brush keys. 
-        foreach (var (key, submode) in CommandDefinitions) {
+        foreach (var (key, submodeType) in CommandDefinitions) {
             var existingTriggers = triggerCollection.Where(t =>
                 t is ActionMessageKeyBinding am && am.Definition.Key == key.Key &&
                 am.Definition.Modifiers == key.Modifiers);
@@ -91,7 +92,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             foreach (var mod in new[] { ModifierKeys.None, ModifierKeys.Shift }) {
                 // It's useful to hold down shift as we place multiple lanes, so bind everything to Shift+ as well.
                 var newTrigger = new KeyTrigger() { Key = key.Key, Modifiers = mod };
-                newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentSubmode), Value = submode });
+                newTrigger.Actions.Add(new ChangePropertyAction() { TargetObject = this, PropertyName = nameof(CurrentSubmode), Value = Activator.CreateInstance(submodeType) });
                 triggerCollection.Add(newTrigger);
                 NewKeyTriggers.Add(newTrigger);
             }
@@ -140,6 +141,10 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         GeneratedClickTriggerActions.Clear();
 
         AssociatedObject.KeyDown -= ConsumeAlt;
+
+        if (AssociatedObject.DataContext is FumenVisualEditorViewModel edtior) {
+            edtior.SelectRegionType = SelectRegionType.Select;
+        }
     }
 
     #region Mouse handling
@@ -173,11 +178,13 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
         if (args.ChangedButton == MouseButton.Left) {
             // In all sub-modes, Alt forces normal mouse behavior
-            if ((Keyboard.Modifiers & ModifierKeys.Alt) > 0) {
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
+                editor.SelectRegionType = SelectRegionType.Select;
                 lastLeftClickWasAltClick = true;
                 editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
-                if ((Keyboard.Modifiers & ModifierKeys.Control) > 0) {
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) {
                     editor.SelectRegionType = SelectRegionType.SelectFiltered;
+                    editor.SelectionVisibility = Visibility.Visible;
                 }
                 return;
             }
@@ -192,12 +199,12 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             args.Handled = true;
         } else if (args.ChangedButton == MouseButton.Right) {
             editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
-            if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0) {
-                editor.SelectRegionType = SelectRegionType.DeleteFiltered;
-            }
-            else {
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
                 lastRightClickWasAltClick = true;
                 editor.SelectRegionType = SelectRegionType.Delete;
+            }
+            else {
+                editor.SelectRegionType = SelectRegionType.DeleteFiltered;
             }
 
             args.Handled = true;
@@ -211,14 +218,43 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             return;
 
         if (args.ChangedButton == MouseButton.Left) {
+            if (editor.IsRangeSelecting) {
+                // Selection mode
+                Func<OngekiObjectBase, bool> filterFunc = null;
+                if (editor.SelectRegionType == SelectRegionType.SelectFiltered && CurrentSubmode is BatchModeFilterSubmode filterSubmode) {
+                    filterFunc = filterSubmode.FilterFunction;
+                } else if (editor.SelectRegionType == SelectRegionType.SelectFiltered && CurrentSubmode is BatchModeSingleInputSubmode singleInputSubmode) {
+                    filterFunc = o => o.GetType() == singleInputSubmode.ObjectType || o.GetType().IsSubclassOf(singleInputSubmode.ObjectType);
+                }
+
+                if (filterFunc != null) {
+                    editor.SelectionVisibility = Visibility.Hidden;
+                    PerformFilterSelect(filterFunc);
+                    args.Handled = true;
+                }
+
+                editor.SelectRegionType = SelectRegionType.Select;
+                // otherwise fall through to FumenVisualEditorViewModel click handler
+            }
+
             if (!lastLeftClickWasAltClick) {
                 // Can hold alt while releasing to "cancel" the left click
                 if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0) {
-                    if (CurrentSubmode is BatchModeInputSubmode inputSubmode)
-                        PerformBrush(inputSubmode);
+                    if (CurrentSubmode is BatchModeInputSubmode inputSubmode) {
+                        if (inputSubmode is BatchModeSingleInputSubmode singleInputSubmode
+                            && editor.GetHits().Where(kv =>
+                                    kv.Value.Contains(editor.CurrentCursorPosition!.Value) &&
+                                    singleInputSubmode.ObjectType.IsInstanceOfType(kv.Key)).Select(kv => kv.Key)
+                                .FirstOrDefault() is { } hit) {
+                            editor.NotifyObjectClicked(hit);
+                        }
+                        else {
+                            PerformBrush(inputSubmode);
+                        }
+                    }
                     else if (CurrentSubmode is BatchModeFilterSubmode filterSubmode && editor.IsRangeSelecting) {
                         editor.SelectionVisibility = Visibility.Hidden;
-                        PerformFilterSelect(filterSubmode);
+                        PerformFilterSelect(filterSubmode.FilterFunction);
                     }
                 }
                 args.Handled = true;
@@ -243,13 +279,12 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
                     }
                 }
 
-                editor.SelectRegionType = SelectRegionType.Select;
                 editor.SelectionVisibility = Visibility.Hidden;
             }
             else {
                 lastRightClickWasAltClick = false;
                 if (editor.IsRangeSelecting) {
-                    PerformRemoveGroup(null, "objects");
+                    PerformRemoveGroup(null, Resources.Objects);
                 }
             }
 
@@ -276,10 +311,14 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         ongekiObjects = submode.GenerateObject().ToImmutableList();
 
         if (ongekiObjects.Count == 0) {
+            if (submode is BatchModeInputClipboard)
+                editor.ToastNotify(Resources.CannotBatchInputClipboardEmpty);
             return;
         }
 
         if (ongekiObjects.Count > 1) {
+            if (submode is BatchModeInputClipboard)
+                editor.ToastNotify(Resources.CannotBatchInputClipboardNotBrushable);
             Log.LogWarn("Multiple object placement is currently not supported");
             return;
         }
@@ -318,10 +357,15 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         }
     }
 
-    private void PerformFilterSelect(BatchModeFilterSubmode submode)
+    // TODO Refactor into `SelectionBox` class or something
+    private void PerformFilterSelect(Func<OngekiObjectBase, bool> filterFunction)
     {
         var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
-        var hits = editor.GetRangeObjects().Where(o => submode.FilterFunction(o)).ToList();
+        var hits = editor.GetRangeObjects().Where(filterFunction).ToList();
+
+        if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) {
+            editor.ClearSelection();
+        }
 
         foreach (var hit in hits) {
             if (hit is OngekiMovableObjectBase selectable)
@@ -403,7 +447,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
     #region Dependency property
 
-    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BatchModeBehavior), new PropertyMetadata(CommandDefinitions[KeyBindingDefinitions.KBD_Batch_ModeClipboard]));
+    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BatchModeBehavior), new PropertyMetadata(Activator.CreateInstance(CommandDefinitions[KeyBindingDefinitions.KBD_Batch_ModeClipboard])));
 
     #endregion
 

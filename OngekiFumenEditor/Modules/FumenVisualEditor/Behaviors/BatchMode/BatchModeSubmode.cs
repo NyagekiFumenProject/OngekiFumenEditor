@@ -9,6 +9,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
 
@@ -38,7 +39,7 @@ public abstract class BatchModeInputSubmode : BatchModeSubmode
     public virtual BatchModeObjectModificationAction? ModifyObjectCtrl { get; } = null;
     public virtual BatchModeObjectModificationAction? ModifyObjectShift =>
         AutoSelect
-            ? new BatchModeObjectModificationAction(null, "Add to selection")
+            ? new BatchModeObjectModificationAction(null, Resources.BatchModeModifierAddToSelection)
             : null;
 }
 
@@ -52,7 +53,7 @@ public class BatchModeInputClipboard : BatchModeInputSubmode
             .Select(obj => (OngekiTimelineObjectBase)obj.CopyNew()).ToList();
     }
 
-    public override string DisplayName => "Clipboard";
+    public override string DisplayName => Resources.Clipboard;
     public override IEnumerable<OngekiTimelineObjectBase> GenerateObject()
     {
         return ClipboardContents.Select(obj => (OngekiTimelineObjectBase)obj.CopyNew());
@@ -83,38 +84,38 @@ public abstract class BatchModeInputLane<T> : BatchModeInputSubmode<T>
 
 public class BatchModeInputLaneLeft : BatchModeInputLane<LaneLeftStart>
 {
-    public override string DisplayName => "LaneLeft";
+    public override string DisplayName => Resources.LaneLeft;
 }
 
 public class BatchModeInputLaneCenter : BatchModeInputLane<LaneCenterStart>
 {
-    public override string DisplayName => "LaneCenter";
+    public override string DisplayName => Resources.LaneCenter;
 }
 
 public class BatchModeInputLaneRight : BatchModeInputLane<LaneRightStart>
 {
-    public override string DisplayName => "LaneRight";
+    public override string DisplayName => Resources.LaneRight;
 }
 
 public class BatchModeInputWallRight : BatchModeInputLane<WallRightStart>
 {
-    public override string DisplayName => "WallRight";
+    public override string DisplayName => Resources.WallRight;
 }
 
 public class BatchModeInputWallLeft : BatchModeInputLane<WallLeftStart>
 {
-    public override string DisplayName => "WallLeft";
+    public override string DisplayName => Resources.WallLeft;
 }
 
 public class BatchModeInputLaneColorful : BatchModeInputLane<ColorfulLaneStart>
 {
-    public override string DisplayName => "LaneColorful";
+    public override string DisplayName => Resources.LaneColorful;
 }
 
 public abstract class BatchModeInputHitSubmode<T> : BatchModeInputSubmode<T>
     where T : OngekiTimelineObjectBase, ICriticalableObject
 {
-    public override BatchModeObjectModificationAction ModifyObjectCtrl { get; } = new(CritObject, "Set critical");
+    public override BatchModeObjectModificationAction ModifyObjectCtrl { get; } = new(CritObject, Resources.BatchModeModifierSetCritical);
 
     private static void CritObject(OngekiObjectBase baseObject)
     {
@@ -124,60 +125,60 @@ public abstract class BatchModeInputHitSubmode<T> : BatchModeInputSubmode<T>
 
 public class BatchModeInputTap : BatchModeInputHitSubmode<Tap>
 {
-    public override string DisplayName => "Tap";
+    public override string DisplayName => Resources.Tap;
 }
 
 public class BatchModeInputHold : BatchModeInputHitSubmode<Hold>
 {
-    public override string DisplayName => "Hold";
+    public override string DisplayName => Resources.Hold;
     public override bool AutoSelect => true;
 }
 
 public class BatchModeInputFlick : BatchModeInputHitSubmode<Flick>
 {
-    public override BatchModeObjectModificationAction ModifyObjectShift { get; } = new(SwitchFlick, "Switch direction");
+    public override BatchModeObjectModificationAction ModifyObjectShift { get; } = new(SwitchFlick, Resources.BatchModeModifierSwitchDirection);
 
     private static void SwitchFlick(OngekiObjectBase baseObject)
     {
         ((Flick)baseObject).Direction = Flick.FlickDirection.Right;
     }
 
-    public override string DisplayName => "Flick";
+    public override string DisplayName => Resources.Flick;
 }
 
 public class BatchModeInputLaneBlock : BatchModeInputSubmode<LaneBlockArea>
 {
     public override BatchModeObjectModificationAction ModifyObjectCtrl { get; } =
-        new BatchModeObjectModificationAction(SwitchDirection, "Switch direction");
+        new BatchModeObjectModificationAction(SwitchDirection, Resources.BatchModeModifierSwitchDirection);
 
     private static void SwitchDirection(OngekiObjectBase baseObject)
     {
         ((LaneBlockArea)baseObject).Direction = LaneBlockArea.BlockDirection.Right;
     }
 
-    public override string DisplayName => "LaneBlock";
+    public override string DisplayName => Resources.LaneBlock;
 }
 
 public class BatchModeInputNormalBell : BatchModeInputSubmode<Bell>
 {
-    public override string DisplayName => "Bell";
+    public override string DisplayName => Resources.Bell;
 }
 
 public class BatchModeFilterLanes : BatchModeFilterSubmode
 {
-    public override string DisplayName => "Lanes";
+    public override string DisplayName => Resources.ObjectFilterLanes;
     public override Func<OngekiObjectBase, bool> FilterFunction => obj => obj is LaneStartBase or LaneNextBase;
 }
 
 public class BatchModeFilterDockableObjects : BatchModeFilterSubmode
 {
-    public override string DisplayName => "Dockable objects";
+    public override string DisplayName => Resources.ObjectFilterDockables;
     public override Func<OngekiObjectBase, bool> FilterFunction => obj => obj is Tap or Hold or HoldEnd;
 }
 
 public class BatchModeFilterFloatingObjects : BatchModeFilterSubmode
 {
-    public override string DisplayName => "Floating objects";
+    public override string DisplayName => Resources.ObjectFilterFloating;
     public override Func<OngekiObjectBase, bool> FilterFunction => obj => obj is Bell or Bullet or Flick;
 }
 

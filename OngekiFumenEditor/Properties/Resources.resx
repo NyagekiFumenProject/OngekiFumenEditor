@@ -259,7 +259,7 @@
     <value>Shape</value>
   </data>
   <data name="BatchModeDeleteRangeOfObjectType" xml:space="preserve">
-    <value>Batch delete {0}</value>
+    <value>Batch delete {0} (x{1})</value>
   </data>
   <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>AcbGeneratorFuck.Generator.Generate() failed</value>
@@ -1919,5 +1919,68 @@
   </data>
   <data name="kbd_batch_ModeFilterFloatingObjects" xml:space="preserve">
     <value>Batch: Select Floating</value>
+  </data>
+  <data name="BatchModeModifierAddToSelection" xml:space="preserve">
+    <value>Add to selection</value>
+  </data>
+  <data name="LaneLeft" xml:space="preserve">
+    <value>Lane Left</value>
+  </data>
+  <data name="LaneCenter" xml:space="preserve">
+    <value>Lane Center</value>
+  </data>
+  <data name="LaneRight" xml:space="preserve">
+    <value>Lane Right</value>
+  </data>
+  <data name="WallLeft" xml:space="preserve">
+    <value>Wall Left</value>
+  </data>
+  <data name="WallRight" xml:space="preserve">
+    <value>Wall Right</value>
+  </data>
+  <data name="Tap" xml:space="preserve">
+    <value>Tap</value>
+  </data>
+  <data name="Hold" xml:space="preserve">
+    <value>Hold</value>
+  </data>
+  <data name="Flick" xml:space="preserve">
+    <value>Flick</value>
+  </data>
+  <data name="LaneBlock" xml:space="preserve">
+    <value>Lane Block</value>
+  </data>
+  <data name="LaneColorful" xml:space="preserve">
+    <value>Lane Colorful</value>
+  </data>
+  <data name="BatchModeModifierSetCritical" xml:space="preserve">
+    <value>Set critical</value>
+  </data>
+  <data name="BatchModeModifierSwitchDirection" xml:space="preserve">
+    <value>Switch direction</value>
+  </data>
+  <data name="ObjectFilterLanes" xml:space="preserve">
+    <value>Lanes</value>
+  </data>
+  <data name="ObjectFilterDockables" xml:space="preserve">
+    <value>Dockable Objects</value>
+  </data>
+  <data name="ObjectFilterFloating" xml:space="preserve">
+    <value>Floating Objects</value>
+  </data>
+  <data name="Bell" xml:space="preserve">
+    <value>Bell</value>
+  </data>
+  <data name="Clipboard" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="Objects" xml:space="preserve">
+    <value>Objects</value>
+  </data>
+  <data name="CannotBatchInputClipboardEmpty" xml:space="preserve">
+    <value>The clipboard is empty</value>
+  </data>
+  <data name="CannotBatchInputClipboardNotBrushable" xml:space="preserve">
+    <value>The clipboard contents are not brushable</value>
   </data>
 </root>

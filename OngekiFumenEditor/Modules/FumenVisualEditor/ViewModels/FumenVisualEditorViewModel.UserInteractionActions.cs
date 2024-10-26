@@ -158,7 +158,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private double startXOffset;
         private double startScrollOffset;
         private bool isCanvasDragging;
-        private bool isLeftMouseDown;
         private bool isMiddleMouseDown;
         private MouseButtonState prevRightButtonState;
         private Point contextMenuPosition;
@@ -1108,7 +1107,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }
                     }
 
-                    isLeftMouseDown = false;
                     isSelectRangeDragging = false;
                     SelectionVisibility = Visibility.Collapsed;
                     currentDraggingActionId = int.MaxValue;
@@ -1152,7 +1150,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     position.Y = Math.Max(0, Rect.MaxY - position.Y);
 
-                    isLeftMouseDown = true;
                     isSelectRangeDragging = false;
 
                     var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
@@ -1365,7 +1362,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         ScrollTo(audioTime);
                     }
 
-                    if (EnableDragging)
+                    if (EnableDragging && !IsRangeSelecting)
                     {
                         //拖动已选物件
                         var cp = pos;
