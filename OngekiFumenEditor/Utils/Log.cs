@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -48,8 +49,12 @@ public class Log
             output.WriteLog(severity, message);
     }
 
-    private string BuildLogMessage(string message, Severity severity, bool new_line, bool time, string prefix)
+    private string BuildLogMessage(string message, Severity severity, bool new_line, bool time, string prefix, string filePath, int lineNumber)
     {
+        if (prefix == ".ctor")
+            prefix = Path.GetFileNameWithoutExtension(filePath) + prefix;
+        prefix += $":{lineNumber}";
+
         lock (sb)
         {
             sb.Clear();
@@ -71,48 +76,48 @@ public class Log
 
     [Conditional("DEBUG")]
     public static void LogDebug(string message, bool newLine = true, bool time = true,
-        [CallerMemberName] string prefix = "<Unknown>")
+        [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
         var instance = Instance;
         var severity = Severity.Debug;
-        var msg = instance.BuildLogMessage(message, severity, newLine, time, prefix);
+        var msg = instance.BuildLogMessage(message, severity, newLine, time, prefix, filePath, lineNumber);
         instance.Output(severity, msg);
     }
 
     public static void LogInfo(string message, bool newLine = true, bool time = true,
-        [CallerMemberName] string prefix = "<Unknown>")
+        [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
         var instance = Instance;
         var severity = Severity.Info;
-        var msg = instance.BuildLogMessage(message, severity, newLine, time, prefix);
+        var msg = instance.BuildLogMessage(message, severity, newLine, time, prefix, filePath, lineNumber);
         instance.Output(severity, msg);
     }
 
     public static void LogWarn(string message, bool newLine = true, bool time = true,
-        [CallerMemberName] string prefix = "<Unknown>")
+        [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
         var instance = Instance;
         var severity = Severity.Warn;
-        var msg = instance.BuildLogMessage(message, severity, newLine, time, prefix);
+        var msg = instance.BuildLogMessage(message, severity, newLine, time, prefix, filePath, lineNumber);
         instance.Output(severity, msg);
     }
 
     public static void LogError(string message, bool newLine = true, bool time = true,
-        [CallerMemberName] string prefix = "<Unknown>")
+        [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
         var instance = Instance;
         var severity = Severity.Error;
-        var msg = instance.BuildLogMessage(message, severity, newLine, time, prefix);
+        var msg = instance.BuildLogMessage(message, severity, newLine, time, prefix, filePath, lineNumber);
         instance.Output(severity, msg);
     }
 
     public static void LogError(string message, Exception e, bool newLine = true, bool time = true,
-        [CallerMemberName] string prefix = "<Unknown>")
+        [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
         var instance = Instance;
         var severity = Severity.Error;
         var msg = instance.BuildLogMessage($"{message}\nContains exception:{e.Message}\n{e.StackTrace}", severity,
-            newLine, time, prefix);
+            newLine, time, prefix, filePath, lineNumber);
         instance.Output(severity, msg);
     }
 }
