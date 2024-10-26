@@ -1,5 +1,4 @@
 ﻿using Gemini.Framework.ToolBars;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BrushModeSwitch;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.EditorModeSwitch;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.ShowCurveControlAlways;
 using OngekiFumenEditor.Modules.SplashScreen.Commands.ShowSplashScreen;

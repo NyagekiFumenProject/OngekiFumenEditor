@@ -597,9 +597,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 		});
 	}
 
-	public void OnSizeChanged(ActionExecutionContext e)
-	{
-		var scrollViewer = e.Source as AnimatedScrollViewer;
-		scrollViewer?.InvalidateMeasure();
-	}
+    public void OnSizeChanged(ActionExecutionContext e)
+    {
+        Log.LogInfo("resize");
+        var scrollViewer = e.Source as AnimatedScrollViewer;
+        scrollViewer?.InvalidateMeasure();
+    }
 }

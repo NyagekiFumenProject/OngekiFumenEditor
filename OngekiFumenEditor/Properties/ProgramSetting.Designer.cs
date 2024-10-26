@@ -142,5 +142,53 @@ namespace OngekiFumenEditor.Properties {
                 this["IsFirstTimeOpenEditor"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string WindowSizePositionLastTime {
+            get {
+                return ((string)(this["WindowSizePositionLastTime"]));
+            }
+            set {
+                this["WindowSizePositionLastTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UpdaterCheckMasterBranchOnly {
+            get {
+                return ((bool)(this["UpdaterCheckMasterBranchOnly"]));
+            }
+            set {
+                this["UpdaterCheckMasterBranchOnly"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableUpdateCheck {
+            get {
+                return ((bool)(this["EnableUpdateCheck"]));
+            }
+            set {
+                this["EnableUpdateCheck"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowConsoleWindowInGUIMode {
+            get {
+                return ((bool)(this["ShowConsoleWindowInGUIMode"]));
+            }
+            set {
+                this["ShowConsoleWindowInGUIMode"] = value;
+            }
+        }
     }
 }

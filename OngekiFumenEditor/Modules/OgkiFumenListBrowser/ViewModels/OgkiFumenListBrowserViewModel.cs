@@ -300,7 +300,10 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
 				var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
 				var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
-				var viewAware = (IViewAware)editor;
+                var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
+                editor.DisplayName = docName;
+
+                var viewAware = (IViewAware)editor;
 				viewAware.ViewAttached += (sender, e) =>
 				{
 					var frameworkElement = (FrameworkElement)e.View;
@@ -310,9 +313,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 					{
 						frameworkElement.Loaded -= loadedHandler;
 						await fumenProvider.Open(editor, newProj);
-						var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
 
-						editor.DisplayName = docName;
 						IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));
 					};
 					frameworkElement.Loaded += loadedHandler;

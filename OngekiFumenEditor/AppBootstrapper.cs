@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,7 +20,9 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.CommandExecutor;
 using OngekiFumenEditor.Kernel.EditorLayout;
+using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -29,6 +32,7 @@ using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.DeadHandler;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
+using SevenZip.Compression.LZ;
 #if !DEBUG
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -50,6 +54,13 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     public AppBootstrapper(bool useApplication = true) : base(useApplication)
     {
+    }
+
+    private bool? isGUIMode = null;
+    public bool IsGUIMode
+    {
+        get => isGUIMode ?? ((App.Current as App)?.IsGUIMode ?? false);
+        set => isGUIMode = value;
     }
 
     protected override void BindServices(CompositionBatch batch)
@@ -158,17 +169,63 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
 
-    protected override async void OnStartup(object sender, StartupEventArgs e)
+    protected override void OnStartup(object sender, StartupEventArgs e)
     {
+        var isGUIMode = (App.Current as App)?.IsGUIMode ?? false;
+
+        if (isGUIMode)
+        {
+            OnStartupForGUI(sender, e);
+        }
+        else
+        {
+            OnStartupForCMD(sender, e);
+        }
+    }
+
+    public async void OnStartupForCMD(object sender, StartupEventArgs e)
+    {
+        IsGUIMode = false;
+        Log.Instance.RemoveOutput<ConsoleLogOutput>();
+
+        await IoC.Get<ISchedulerManager>().Init();
+
+        var executor = IoC.Get<ICommandExecutor>();
+
+        try
+        {
+            Application.Current.Shutdown(await executor.Execute(e.Args));
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Unhandled exception processing arguments:\n{ex.Message}");
+            Application.Current.Shutdown(1);
+        }
+    }
+
+    public async void OnStartupForGUI(object sender, StartupEventArgs e)
+    {
+        IsGUIMode = true;
+
+#if DEBUG
+        ConsoleWindowHelper.SetConsoleWindowVisible(true);
+#else
+        ConsoleWindowHelper.SetConsoleWindowVisible(ProgramSetting.Default.ShowConsoleWindowInGUIMode);
+#endif
+
         InitExceptionCatcher();
         LogBaseInfos();
         InitIPCServer();
 
         await IoC.Get<ISchedulerManager>().Init();
 
-        try {
+        try
+        {
+            //process command args
             await IoC.Get<IProgramArgProcessManager>().ProcessArgs(e.Args);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             await Console.Error.WriteLineAsync($"Unhandled exception processing arguments:\n{ex.Message}");
             Application.Current.Shutdown(-1);
             return;
@@ -186,11 +243,6 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             curProc.PriorityBoostEnabled = true;
         }
 
-        ShowStartupGUI();
-    }
-
-    private void OnStartupForGUI()
-    {
         //overwrite ViewLocator
         var locateForModel = ViewLocator.LocateForModel;
         ViewLocator.LocateForModel = (model, hostControl, ctx) =>
@@ -205,12 +257,10 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         if (CheckIfAdminPermission())
         {
             Log.LogWarn("Program is within admin permission.");
-            IoC.Get<WindowTitleHelper>().TitleContent = "(以管理员权限运行)";
+            var prevSuffix = IoC.Get<WindowTitleHelper>().TitleSuffix;
+            IoC.Get<WindowTitleHelper>().TitleSuffix = prevSuffix + "(以管理员权限运行)";
         }
-        else
-        {
-            IoC.Get<WindowTitleHelper>().TitleContent = "";
-        }
+        IoC.Get<WindowTitleHelper>().UpdateWindowTitle();
 
         IoC.Get<IShell>().ToolBars.Visible = true;
 
@@ -222,18 +272,26 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
         Log.LogInfo(IoC.Get<CommonStatusBar>().MainContentViewModel.Message = "Application is Ready.");
 
+        await DisplayRootViewForAsync<IMainWindow>();
+
         if (Application.MainWindow is Window window)
         {
             window.AllowDrop = true;
             window.Drop += MainWindow_Drop;
+
+            //program will forget position/size when it has been called as commandline.
+            //so we have to remember and restore windows' position/size manually.
+            window.Closed += MainWindow_Closed;
+            if (!string.IsNullOrWhiteSpace(ProgramSetting.Default.WindowSizePositionLastTime))
+            {
+                var arr = ProgramSetting.Default.WindowSizePositionLastTime.Split(",").Select(x => double.Parse(x.Trim())).ToArray();
+                window.Left = arr[0];
+                window.Top = arr[1];
+                window.Width = arr[2];
+                window.Height = arr[3];
+            }
         }
-    }
 
-    public async void ShowStartupGUI()
-    {
-        OnStartupForGUI();
-
-        await DisplayRootViewForAsync<IMainWindow>();
         var showSplashWindow = IoC.Get<IShell>().Documents.IsEmpty() &&
                                !ProgramSetting.Default.DisableShowSplashScreenAfterBoot;
         if (showSplashWindow)
@@ -251,6 +309,25 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             ProgramSetting.Default.IsFirstTimeOpenEditor = false;
             ProgramSetting.Default.Save();
         }
+
+        IoC.Get<IProgramUpdater>().CheckUpdatable().NoWait();
+    }
+
+    private void MainWindow_Closed(object sender, EventArgs e)
+    {
+        if (sender is not Window mainWindow)
+            return;
+
+        ProgramSetting.Default.WindowSizePositionLastTime = string.Join(", ", new[] {
+            mainWindow.Left,
+            mainWindow.Top,
+            mainWindow.Width,
+            mainWindow.Height
+        });
+        ProgramSetting.Default.Save();
+        Log.LogInfo($"WindowSizePositionLastTime = {ProgramSetting.Default.WindowSizePositionLastTime}");
+
+        App.Current.Shutdown();
     }
 
     private void InitIPCServer()
@@ -275,15 +352,15 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
                 try
                 {
-                    var line = (await IPCHelper.ReadLineAsync(cancelToken))?.Trim();
+                    var line = IPCHelper.ReadLine(cancelToken)?.Trim();
                     if (string.IsNullOrWhiteSpace(line))
                         continue;
                     Log.LogDebug($"Recv line by IPC:{line}");
                     if (line.StartsWith("CMD:"))
                     {
                         var args = JsonSerializer.Deserialize<IPCHelper.ArgsWrapper>(line[4..]).Args;
-                        await Application.Current.Dispatcher.InvokeAsync(() =>
-                            IoC.Get<IProgramArgProcessManager>().ProcessArgs(args));
+                        Application.Current.Dispatcher.Invoke(() =>
+                            IoC.Get<IProgramArgProcessManager>().ProcessArgs(args)).NoWait();
                     }
                 }
                 catch (Exception e)

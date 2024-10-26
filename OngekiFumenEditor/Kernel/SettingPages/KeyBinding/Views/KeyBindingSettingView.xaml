@@ -1,0 +1,77 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Views.KeyBindingSettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
+                                     Type=vm:KeyBindingSettingViewModel}"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:ShowKeybindExpressionValueConverter x:Key="ShowKeybindExpressionValueConverter" />
+    </UserControl.Resources>
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="15,15,15,0" >
+            <StackPanel Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Filter],StringFormat={}:}" FontSize="15"/>
+                <TextBox cal:Message.Attach="UpdateDisplayList()" Padding="0,4" Text="{Binding FilterKeywords}" Width="200" Margin="10,0"/>
+            </StackPanel>
+            <StackPanel Margin="0,5,0,15" Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding IsShowNotAssignOnly}" Content="{markup:Translate [ShowNotAssignKeybindingOnly]}" cal:Message.Attach="UpdateDisplayList()" VerticalAlignment="Center"/>
+                <Button 
+                 VerticalAlignment="Center"
+                        Margin="10,0"
+                        Padding="10,5"
+                        cal:Message.Attach="ResetAllDefinitions()"
+                        Content="{markup:Translate [ResetAllKeybindings]}" />
+            </StackPanel>
+            <Border Background="Gray" Height="1"/>
+        </StackPanel>
+        <ItemsControl Grid.Row="1"
+        ItemsSource="{Binding Definitions}"
+        ScrollViewer.CanContentScroll="True"
+        VirtualizingPanel.IsVirtualizing="True"
+        VirtualizingPanel.VirtualizationMode="Recycling">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
+                        <Label
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        FontWeight="Black">
+                            <Label.Content>
+                                <MultiBinding Converter="{StaticResource ShowKeybindExpressionValueConverter}">
+                                    <Binding Path="Key" />
+                                    <Binding Path="Modifiers" />
+                                </MultiBinding>
+                            </Label.Content>
+                        </Label>
+                        <Button
+                        Grid.Column="2"
+                        Margin="30,3,3,3"
+                        Padding="10,5"
+                        cal:Message.Attach="ChangeKeybind($executionContext)"
+                        Content="{markup:Translate [Change]}" />
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>

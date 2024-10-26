@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -132,9 +132,6 @@
   <data name="AddObject" xml:space="preserve">
     <value>Add object</value>
   </data>
-  <data name="AddObjectsByBrush" xml:space="preserve">
-    <value>Add objects by brush</value>
-  </data>
   <data name="AdjustPastedObjects" xml:space="preserve">
     <value>Automatically snap objects when pasted</value>
   </data>
@@ -240,20 +237,17 @@
   <data name="Browser" xml:space="preserve">
     <value>Browser</value>
   </data>
-  <data name="BrushCopied" xml:space="preserve">
+  <data name="BrushAlongLane" xml:space="preserve">
     <value>Brush along lane with copied object</value>
   </data>
-  <data name="BrushCopiedTipText" xml:space="preserve">
+  <data name="BrushAlongLaneTipText" xml:space="preserve">
     <value>Brush along the lane, creating an instance of the brush object at each TGrid subdivision positioned upon the lane</value>
   </data>
-  <data name="BrushMode" xml:space="preserve">
-    <value>Brush Mode:</value>
+  <data name="BatchModeToggle" xml:space="preserve">
+    <value>Toggle batch mode</value>
   </data>
-  <data name="BrushModeSwitch" xml:space="preserve">
-    <value>Toggle brush mode</value>
-  </data>
-  <data name="BrushModeSwitchTipText" xml:space="preserve">
-    <value>Brush mode is enabled. Most dragging operations are disabled.</value>
+  <data name="BatchModeToggleTipText" xml:space="preserve">
+    <value>Enable batch mode, which allows for placing objects with the mouse.</value>
   </data>
   <data name="BulletSize" xml:space="preserve">
     <value>Size</value>
@@ -263,6 +257,9 @@
   </data>
   <data name="BulletType" xml:space="preserve">
     <value>Shape</value>
+  </data>
+  <data name="BatchModeDeleteRangeOfObjectType" xml:space="preserve">
+    <value>Batch delete {0} (x{1})</value>
   </data>
   <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>AcbGeneratorFuck.Generator.Generate() failed</value>
@@ -476,6 +473,9 @@
   </data>
   <data name="DeleteObjects" xml:space="preserve">
     <value>Delete objects</value>
+  </data>
+  <data name="DeleteSpecificObject" xml:space="preserve">
+    <value>Delete {0}</value>
   </data>
   <data name="DeleteSelectedPalletes" xml:space="preserve">
     <value>Delete selected bullet palettes</value>
@@ -1026,17 +1026,17 @@
   <data name="NotShowAnymore" xml:space="preserve">
     <value>Do not show this window again</value>
   </data>
-  <data name="NotSupportInBrushMode" xml:space="preserve">
-    <value>{0} is not supported in brush mode.</value>
+  <data name="NotSupportInBatchMode" xml:space="preserve">
+    <value>{0} is not supported in batch mode.</value>
   </data>
   <data name="ObjectBatchBrush" xml:space="preserve">
-    <value>Batch paste brush</value>
+    <value>Batch paste brush object</value>
   </data>
   <data name="ObjectLaneGroupId" xml:space="preserve">
     <value>Changing this value will alter the reference lane of this object</value>
   </data>
-  <data name="ObjectNotSupportBrush" xml:space="preserve">
-    <value>The copied object cannot be used within brush mode</value>
+  <data name="ObjectNotSupportedInBatchMode" xml:space="preserve">
+    <value>The copied object cannot be used within batch mode</value>
   </data>
   <data name="ObjectOverlap" xml:space="preserve">
     <value>Multiple ITimelineObject objects of the same type ({0}) overlap</value>
@@ -1736,5 +1736,251 @@
   </data>
   <data name="AboutWindow" xml:space="preserve">
     <value>About</value>
+  </data>
+  <data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
+    <value>Set object critical</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToWallLeft" xml:space="preserve">
+    <value>Dock object to Wall Left</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToWallRight" xml:space="preserve">
+    <value>Dock object to Wall Right</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToRight" xml:space="preserve">
+    <value>Dock object to Right Lane</value>
+  </data>
+  <data name="kbd_editor_FastPlaceNewHold" xml:space="preserve">
+    <value>Place new Hold at cursor</value>
+  </data>
+  <data name="kbd_editor_FastPlaceNewTap" xml:space="preserve">
+    <value>Place new Tap at cursor</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToCenter" xml:space="preserve">
+    <value>Dock object to Center Lane</value>
+  </data>
+  <data name="kbd_editor_FastPlaceDockableObjectToLeft" xml:space="preserve">
+    <value>Dock object to Left Lane</value>
+  </data>
+  <data name="kbd_editor_DeleteSelectingObjects" xml:space="preserve">
+    <value>Delete selected objects</value>
+  </data>
+  <data name="kbd_editor_SelectAllObjects" xml:space="preserve">
+    <value>Select all objects</value>
+  </data>
+  <data name="kbd_editor_CancelSelectingObjects" xml:space="preserve">
+    <value>Clear selection</value>
+  </data>
+  <data name="kbd_editor_HideOrShow" xml:space="preserve">
+    <value>Toggle display mode</value>
+  </data>
+  <data name="kbd_editor_FastAddConnectableChild" xml:space="preserve">
+    <value>Add new node to selected lanes</value>
+  </data>
+  <data name="kbd_editor_FastSwitchFlickDirection" xml:space="preserve">
+    <value>Switch directions of selected flicks</value>
+  </data>
+  <data name="kbd_editor_CopySelectedObjects" xml:space="preserve">
+    <value>Copy selection to clipboard</value>
+  </data>
+  <data name="kbd_editor_PasteCopiesObjects" xml:space="preserve">
+    <value>Paste clipboard contents at cursor</value>
+  </data>
+  <data name="kbd_editor_ScrollPageDown" xml:space="preserve">
+    <value>Scroll a page down</value>
+  </data>
+  <data name="kbd_editor_ScrollPageUp" xml:space="preserve">
+    <value>Scroll a page up</value>
+  </data>
+  <data name="ComfirmResetAllKeybindingDefinitions" xml:space="preserve">
+    <value>Reset all keybindings to their default?</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="KeyBindingConflictDetect" xml:space="preserve">
+    <value>Conflicts with keybinding {0}</value>
+  </data>
+  <data name="AssignKeyBinding" xml:space="preserve">
+    <value>Please assign a keybinding for {0}</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="AssignKeybind" xml:space="preserve">
+    <value>Assign keybinding</value>
+  </data>
+  <data name="ShowNotAssignKeybindingOnly" xml:space="preserve">
+    <value>Show unassigned keybindings only</value>
+  </data>
+  <data name="ResetAllKeybindings" xml:space="preserve">
+    <value>Reset all keybindings</value>
+  </data>
+  <data name="KeyMap" xml:space="preserve">
+    <value>KeyMap</value>
+  </data>
+  <data name="SettingHasNewVersion" xml:space="preserve">
+    <value>There is a new update! New version: {0}({1})</value>
+  </data>
+  <data name="UpdateProgramReady" xml:space="preserve">
+    <value>Confirm program restart. Any unsaved data will be lost.</value>
+  </data>
+  <data name="UpdateStart" xml:space="preserve">
+    <value>Start Update</value>
+  </data>
+  <data name="ShowNewVersionTitle" xml:space="preserve">
+    <value>Updater</value>
+  </data>
+  <data name="CurrentVersion" xml:space="preserve">
+    <value>Current Version</value>
+  </data>
+  <data name="NewVersion" xml:space="preserve">
+    <value>New Version</value>
+  </data>
+  <data name="Branch" xml:space="preserve">
+    <value>Branch</value>
+  </data>
+  <data name="FileSize" xml:space="preserve">
+    <value>File Size</value>
+  </data>
+  <data name="ReleaseTime" xml:space="preserve">
+    <value>Release Time</value>
+  </data>
+  <data name="HasNewVersion" xml:space="preserve">
+    <value>Program Updatable!</value>
+  </data>
+  <data name="ProgramReadyToUpdate" xml:space="preserve">
+    <value>Close the application and update?</value>
+  </data>
+  <data name="EnableUpdateCheck" xml:space="preserve">
+    <value>Enable program check updates</value>
+  </data>
+  <data name="UpdaterCheckMasterBranchOnly" xml:space="preserve">
+    <value>Check updates for branch master(stable) only</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Check Updates</value>
+  </data>
+  <data name="ProgramUpdates" xml:space="preserve">
+    <value>Program Updates</value>
+  </data>
+  <data name="InvalidBrightness" xml:space="preserve">
+    <value>Invalid Brightness: {0} is not in range [-3, 3]</value>
+  </data>
+  <data name="InvalidColorId" xml:space="preserve">
+    <value>Invalid ColorId: {0}</value>
+    </data>
+  <data name="kbd_batch_ModeWallLeft" xml:space="preserve">
+    <value>Batch: Wall Left</value>
+  </data>
+  <data name="kbd_batch_ModeLaneLeft" xml:space="preserve">
+    <value>Batch: Lane Left</value>
+  </data>
+  <data name="kbd_batch_ModeLaneCenter" xml:space="preserve">
+    <value>Batch: Lane Center</value>
+  </data>
+  <data name="kbd_batch_ModeLaneRight" xml:space="preserve">
+    <value>Batch: Lane Right</value>
+  </data>
+  <data name="kbd_batch_ModeWallRight" xml:space="preserve">
+    <value>Batch: Wall Right</value>
+  </data>
+  <data name="kbd_batch_ModeLaneColorful" xml:space="preserve">
+    <value>Batch: Lane Colorful</value>
+  </data>
+  <data name="kbd_batch_ModeTap" xml:space="preserve">
+    <value>Batch: Tap</value>
+  </data>
+  <data name="kbd_batch_ModeHold" xml:space="preserve">
+    <value>Batch: Hold</value>
+  </data>
+  <data name="kbd_batch_ModeFlick" xml:space="preserve">
+    <value>Batch: Flick</value>
+  </data>
+  <data name="kbd_batch_ModeLaneBlock" xml:space="preserve">
+    <value>Batch: Lane Block</value>
+  </data>
+  <data name="kbd_batch_ModeNormalBell" xml:space="preserve">
+    <value>Batch: Bell</value>
+  </data>
+  <data name="BatchModeAddObject" xml:space="preserve">
+    <value>Add {0}</value>
+  </data>
+  <data name="kbd_batch_ModeClipboard" xml:space="preserve">
+    <value>Batch: Clipboard</value>
+  </data>
+  <data name="kbd_batch_ModeFilterLanes" xml:space="preserve">
+    <value>Batch: Select Lanes</value>
+  </data>
+  <data name="kbd_batch_ModeFilterDockableObjects" xml:space="preserve">
+    <value>Batch: Select Dockable</value>
+  </data>
+  <data name="kbd_batch_ModeFilterFloatingObjects" xml:space="preserve">
+    <value>Batch: Select Floating</value>
+  </data>
+  <data name="BatchModeModifierAddToSelection" xml:space="preserve">
+    <value>Add to selection</value>
+  </data>
+  <data name="LaneLeft" xml:space="preserve">
+    <value>Lane Left</value>
+  </data>
+  <data name="LaneCenter" xml:space="preserve">
+    <value>Lane Center</value>
+  </data>
+  <data name="LaneRight" xml:space="preserve">
+    <value>Lane Right</value>
+  </data>
+  <data name="WallLeft" xml:space="preserve">
+    <value>Wall Left</value>
+  </data>
+  <data name="WallRight" xml:space="preserve">
+    <value>Wall Right</value>
+  </data>
+  <data name="Tap" xml:space="preserve">
+    <value>Tap</value>
+  </data>
+  <data name="Hold" xml:space="preserve">
+    <value>Hold</value>
+  </data>
+  <data name="Flick" xml:space="preserve">
+    <value>Flick</value>
+  </data>
+  <data name="LaneBlock" xml:space="preserve">
+    <value>Lane Block</value>
+  </data>
+  <data name="LaneColorful" xml:space="preserve">
+    <value>Lane Colorful</value>
+  </data>
+  <data name="BatchModeModifierSetCritical" xml:space="preserve">
+    <value>Set critical</value>
+  </data>
+  <data name="BatchModeModifierSwitchDirection" xml:space="preserve">
+    <value>Switch direction</value>
+  </data>
+  <data name="ObjectFilterLanes" xml:space="preserve">
+    <value>Lanes</value>
+  </data>
+  <data name="ObjectFilterDockables" xml:space="preserve">
+    <value>Dockable Objects</value>
+  </data>
+  <data name="ObjectFilterFloating" xml:space="preserve">
+    <value>Floating Objects</value>
+  </data>
+  <data name="Bell" xml:space="preserve">
+    <value>Bell</value>
+  </data>
+  <data name="Clipboard" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="Objects" xml:space="preserve">
+    <value>Objects</value>
+  </data>
+  <data name="CannotBatchInputClipboardEmpty" xml:space="preserve">
+    <value>The clipboard is empty</value>
+  </data>
+  <data name="CannotBatchInputClipboardNotBrushable" xml:space="preserve">
+    <value>The clipboard contents are not brushable</value>
   </data>
 </root>

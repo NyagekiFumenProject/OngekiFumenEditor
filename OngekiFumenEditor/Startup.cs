@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,25 +15,21 @@ namespace OngekiFumenEditor
 {
     internal class Startup
     {
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetConsoleWindow();
-
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
 		[DllImport("Shcore.dll")]
 		static extern int SetProcessDpiAwareness(int value);
-
-		[STAThread]
+        
+        [STAThread]
         public static int Main(string[] args)
         {
 			SetProcessDpiAwareness(2);           
-			if (args.Length == 0)
-                ShowWindow(GetConsoleWindow(), 0);
+            var isGUIMode = !(args.Length > 0 && !args[0].StartsWith("--"));
 
-            IPCHelper.Init(args);
+            if (isGUIMode)
+            {
+                IPCHelper.Init(args);
+            }
 
-            var app = new App();
+            var app = new App(isGUIMode);
             app.InitializeComponent();
 
             return app.Run();

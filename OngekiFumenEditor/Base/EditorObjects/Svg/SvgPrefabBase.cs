@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 			set => Set(ref isForceColorful, value);
 		}
 
-		private ColorId colorfulLaneColor = ColorIdConst.LaneGreen;
+		private ColorId colorfulLaneColor = ColorIdConst.Yuzu;
 		public ColorId ColorfulLaneColor
 		{
 			get => colorfulLaneColor;

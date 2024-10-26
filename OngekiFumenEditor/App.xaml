@@ -23,8 +23,15 @@
             </valueconverters:EnumToStringConverter>
             <converters1:CultureInfoNameConverter x:Key="CultureInfoNameConverter">
             </converters1:CultureInfoNameConverter>
+            <valueconverters:NullToVisibilityConverter x:Key="NullToVisibilityConverter">
+            </valueconverters:NullToVisibilityConverter>
+            <valueconverters:LocalizeConverter x:Key="LocalizeConverter">
+            </valueconverters:LocalizeConverter>
             <valueconverters:AsyncImageLoadConverter x:Key="AsyncImageLoadConverter">
             </valueconverters:AsyncImageLoadConverter>
+            <valueconverters:NullToZeroConverter x:Key="NullToZeroConverter" />
+            <valueconverters:DisplayFileSizeConverter x:Key="DisplayFileSizeConverter">
+            </valueconverters:DisplayFileSizeConverter>
             <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />
             <valueconverters:SelectionFullLaneCheckConverter x:Key="SelectionFullLaneCheckConverter" />
             <ResourceDictionary.MergedDictionaries>

@@ -20,7 +20,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		private IHighlightBatchTextureDrawing highlightDrawing;
 		private IStringDrawing stringDrawing;
 		private ILineDrawing lineDrawing;
-		private static readonly Vector4 Transparent = new Vector4(0, 0, 0, 0);
+        private Vector2 size;
+        private static readonly Vector4 Transparent = new Vector4(0, 0, 0, 0);
 		private static readonly VertexDash LineDash = new VertexDash()
 		{
 			DashSize = 6,
@@ -34,8 +35,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 		public LaneCurvePathControlDrawingTarget()
 		{
-			texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\CC.png");
-			textureDrawing = IoC.Get<IBatchTextureDrawing>();
+			texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\commonCircle.png");
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
+                size = new Vector2(16, 16);
+
+            textureDrawing = IoC.Get<IBatchTextureDrawing>();
 			stringDrawing = IoC.Get<IStringDrawing>();
 			highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
 			lineDrawing = IoC.Get<ISimpleLineDrawing>();
@@ -49,7 +53,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 		public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<LaneCurvePathControlObject> objs)
 		{
-			var size = new Vector2(16, 16);
 			var isAlwaysShow = target.Editor.IsShowCurveControlAlways;
 			using var d = objs.Where(x => x.RefCurveObject.IsSelected || x.RefCurveObject.IsAnyControlSelecting || isAlwaysShow).Select(x => (
 				(float)target.ConvertToY(x.TGrid),
