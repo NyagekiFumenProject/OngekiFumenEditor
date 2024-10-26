@@ -335,12 +335,8 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             modShift.Function?.Invoke(ongekiObject);
 
         // Find existing objects of the same type at the same position.
-        // TODO Separate this check into a function somehow
-        if (editor.Fumen.GetAllDisplayableObjects().FirstOrDefault(o =>
-                o is OngekiTimelineObjectBase obj && obj.GetType().IsInstanceOfType(ongekiObject) && obj.TGrid == ongekiObject.TGrid &&
-                (obj is not OngekiMovableObjectBase oObj ||
-                 (ongekiObject is OngekiMovableObjectBase movObj && movObj.XGrid == oObj.XGrid))) is { } existingObj) {
-            editor.NotifyObjectClicked((OngekiObjectBase)existingObj);
+        if (editor.Fumen.GetAllDisplayableObjects().FirstOrDefault(o => o is OngekiTimelineObjectBase timelineObj && timelineObj.Clashes(ongekiObject)) is { } clash) {
+            editor.NotifyObjectClicked((OngekiObjectBase)clash);
             return;
         }
 

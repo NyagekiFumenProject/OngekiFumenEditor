@@ -117,5 +117,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 			ReferenceBulletPallete = from.ReferenceBulletPallete;
 		}
+
+		public override bool Clashes(OngekiTimelineObjectBase other)
+		{
+			return other is Bell otherBell && base.Clashes(other) && otherBell.ReferenceBulletPallete == ReferenceBulletPallete;
+		}
 	}
 }

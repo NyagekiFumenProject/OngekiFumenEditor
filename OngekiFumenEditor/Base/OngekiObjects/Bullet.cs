@@ -134,5 +134,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			ReferenceBulletPallete = from.ReferenceBulletPallete;
 			BulletDamageTypeValue = from.BulletDamageTypeValue;
 		}
+
+		public override bool Clashes(OngekiTimelineObjectBase other)
+		{
+			if (other is Bullet bullet) {
+				return base.Clashes(bullet) && bullet.ReferenceBulletPallete == ReferenceBulletPallete;
+			}
+
+			return false;
+		}
 	}
 }

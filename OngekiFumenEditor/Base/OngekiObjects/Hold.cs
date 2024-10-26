@@ -92,5 +92,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			yield return this;
 			yield return HoldEnd;
 		}
+
+		public override bool Clashes(OngekiTimelineObjectBase other)
+		{
+			return other is OngekiMovableObjectBase movable and (Tap or Hold) && base.Clashes(movable);
+		}
 	}
 }
