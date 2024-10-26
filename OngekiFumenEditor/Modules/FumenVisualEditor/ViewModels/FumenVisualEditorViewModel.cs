@@ -66,6 +66,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
 
                 setupFumen(editorProjectData?.Fumen, prevFumen);
+
+                if (EditorManager.CurrentActivatedEditor == this)
+                    IoC.Get<WindowTitleHelper>().UpdateWindowTitleByEditor(this);
             }
         }
 

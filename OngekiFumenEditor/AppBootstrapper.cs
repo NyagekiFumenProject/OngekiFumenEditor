@@ -257,12 +257,10 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         if (CheckIfAdminPermission())
         {
             Log.LogWarn("Program is within admin permission.");
-            IoC.Get<WindowTitleHelper>().TitleContent = "(以管理员权限运行)";
+            var prevSuffix = IoC.Get<WindowTitleHelper>().TitleSuffix;
+            IoC.Get<WindowTitleHelper>().TitleSuffix = prevSuffix + "(以管理员权限运行)";
         }
-        else
-        {
-            IoC.Get<WindowTitleHelper>().TitleContent = "";
-        }
+        IoC.Get<WindowTitleHelper>().UpdateWindowTitle();
 
         IoC.Get<IShell>().ToolBars.Visible = true;
 

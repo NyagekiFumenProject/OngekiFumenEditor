@@ -44,9 +44,11 @@ namespace OngekiFumenEditor.Utils
             var newProj = await TryCreateEditorProjectDataModel(ogkrFilePath);
             if (newProj is null)
                 return false;
+            var docName = await TryFormatOpenFileName(ogkrFilePath);
 
-            var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
             var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
+            editor.DisplayName = docName;
+
             var viewAware = (IViewAware)editor;
             viewAware.ViewAttached += (sender, e) =>
             {
@@ -56,10 +58,8 @@ namespace OngekiFumenEditor.Utils
                 loadedHandler = async (sender2, e2) =>
                 {
                     frameworkElement.Loaded -= loadedHandler;
-                    await fumenProvider.Open(editor, newProj);
-                    var docName = await TryFormatOpenFileName(ogkrFilePath);
+                    await IoC.Get<IFumenVisualEditorProvider>().Open(editor, newProj);
 
-                    editor.DisplayName = docName;
                     IoC.Get<IEditorRecentFilesManager>().PostRecord(new(ogkrFilePath, docName, RecentOpenType.CommandOpen));
                 };
                 frameworkElement.Loaded += loadedHandler;
