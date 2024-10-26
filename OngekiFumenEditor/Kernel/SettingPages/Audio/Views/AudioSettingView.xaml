@@ -35,25 +35,32 @@
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Sound]}">
-            <Grid Margin="10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SoundFolderPath]}" />
-                <TextBox
-                    Grid.Column="1"
-                    Margin="10,0,10,0"
-                    VerticalAlignment="Center"
-                    Text="{Binding Setting.SoundFolderPath}">
-                </TextBox>
-                <Button
-                    Grid.Column="2"
-                    Padding="20,2,20,2"
-                    cal:Message.Attach="OnSoundFolderPathButtonClick()"
-                    Content="{markup:Translate [Browser]}" />
-            </Grid>
+            <StackPanel Margin="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SoundFolderPath]}" />
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="10,0,10,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Setting.SoundFolderPath}">
+                    </TextBox>
+                    <Button
+                        Grid.Column="2"
+                        Padding="20,2,20,2"
+                        cal:Message.Attach="OnSoundFolderPathButtonClick()"
+                        Content="{markup:Translate [Browser]}" />
+                </Grid>
+
+                <CheckBox
+                    Margin="0,10,0,0"
+                    Content="Allow one sound to be played multiple times at the same time. (require restart program)"
+                    IsChecked="{Binding Setting.EnableSoundMultiPlay}" />
+            </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Visualizer]}">
             <StackPanel Margin="10">

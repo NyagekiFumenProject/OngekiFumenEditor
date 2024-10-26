@@ -205,6 +205,10 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     {
         IsGUIMode = true;
 
+#if DEBUG
+        ConsoleWindowHelper.SetConsoleWindowVisible(true);
+#endif
+
         InitExceptionCatcher();
         LogBaseInfos();
         InitIPCServer();
