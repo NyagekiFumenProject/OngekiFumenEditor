@@ -106,20 +106,12 @@
                 </MenuItem>
                 <MenuItem Header="{markup:Translate [ToCopiedObjects]}">
                     <MenuItem Header="{markup:Translate [ToPaste]}">
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsDirectly($executionContext)"
-                                  Header="{markup:Translate [PasteDirectly]}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)"
-                                  Header="{markup:Translate [PasteToMouse]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsDirectly($executionContext)" Header="{markup:Translate [PasteDirectly]}" />
+                        <!--<MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteToMouse]}" />-->
                         <Separator />
-                        <MenuItem
-                            cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)"
-                            Header="{markup:Translate [PasteForHorizonMirror]}" />
-                        <MenuItem
-                            cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)"
-                            Header="{markup:Translate [PasteForVerticalMirror]}" />
-                        <MenuItem
-                            cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)"
-                            Header="{markup:Translate [PasteForZeroXGridMirror]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="{markup:Translate [PasteForHorizonMirror]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="{markup:Translate [PasteForVerticalMirror]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)" Header="{markup:Translate [PasteForZeroXGridMirror]}" />
                     </MenuItem>
                 </MenuItem>
                 <Separator />
@@ -136,9 +128,7 @@
             Ready="glView_Ready"
             SizeChanged="glView_SizeChanged" />
 
-        <views:BatchModeOverlayView
-            DataContext="{Binding BatchModeBehavior}"
-            Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:FumenVisualEditorView}}, Path=DataContext.IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <views:BatchModeOverlayView DataContext="{Binding BatchModeBehavior}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:FumenVisualEditorView}}, Path=DataContext.IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
 
         <TextBlock
             HorizontalAlignment="Left"

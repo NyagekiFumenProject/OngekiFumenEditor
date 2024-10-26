@@ -30,7 +30,7 @@ public class Log
     private IEnumerable<ILogOutput> LogOutputs => outputs;
     public static Log Instance => cacheInstance ?? (cacheInstance = IoC.Get<Log>());
 
-    public void RemoveOutputIfNotExist<T>() where T : ILogOutput
+    public void RemoveOutput<T>() where T : ILogOutput
     {
         outputs.RemoveAll(x => x is T);
     }
@@ -58,9 +58,9 @@ public class Log
                 severity.ToString().ToUpper(), Thread.CurrentThread.ManagedThreadId);
 
             if (!string.IsNullOrWhiteSpace(prefix))
-                sb.AppendFormat("{0}", prefix);
+                sb.AppendFormat("<{0}>", prefix);
 
-            sb.AppendFormat(":{0}", message);
+            sb.AppendFormat(" {0}", message.TrimStart());
 
             if (new_line)
                 sb.AppendLine();

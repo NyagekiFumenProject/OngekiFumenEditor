@@ -14,11 +14,6 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 		public WaveFormat WaveFormat { get; init; }
 		public TimeSpan Duration { get; init; }
 
-		private CachedSound()
-		{
-			//no way
-		}
-
 		public CachedSound(ISampleProvider copySourceProvider)
 		{
 			AudioData = copySourceProvider.ToArray();

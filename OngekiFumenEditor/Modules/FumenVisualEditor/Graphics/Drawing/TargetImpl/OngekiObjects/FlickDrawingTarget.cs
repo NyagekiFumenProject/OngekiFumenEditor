@@ -10,87 +10,92 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-	[Export(typeof(IFumenEditorDrawingTarget))]
-	public class FlickDrawingTarget : CommonBatchDrawTargetBase<Flick>, IDisposable
-	{
-		public override int DefaultRenderOrder => 1000;
+    [Export(typeof(IFumenEditorDrawingTarget))]
+    public class FlickDrawingTarget : CommonBatchDrawTargetBase<Flick>, IDisposable
+    {
+        public override int DefaultRenderOrder => 1000;
 
-		private Texture texture;
-		private Texture exFlickEffTexture;
+        private Texture texture;
+        private Texture exFlickEffTexture;
 
-		private Vector2 leftSize;
-		private Vector2 rightSize;
-		private Vector2 exTapEffSize;
-		private Vector2 selectedEffSize;
+        private Vector2 leftSize;
+        private Vector2 rightSize;
+        private Vector2 exTapEffSize;
+        private Vector2 selectedEffSize;
 
-		private List<(Vector2, Vector2, float)> exFlickList = new();
-		private List<(Vector2, Vector2, float)> selectedFlickList = new();
-		private List<(Vector2, Vector2, float)> normalFlichList = new();
+        private List<(Vector2, Vector2, float)> exFlickList = new();
+        private List<(Vector2, Vector2, float)> selectedFlickList = new();
+        private List<(Vector2, Vector2, float)> normalFlichList = new();
 
-		private IBatchTextureDrawing batchTextureDrawing;
-		private IHighlightBatchTextureDrawing highlightDrawing;
+        private IBatchTextureDrawing batchTextureDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
 
-		public override IEnumerable<string> DrawTargetID { get; } = new[] { "FLK", "CFK" };
+        public override IEnumerable<string> DrawTargetID { get; } = new[] { "FLK", "CFK" };
 
-		public FlickDrawingTarget() : base()
-		{
-			texture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\flick.png");
-			exFlickEffTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\exflick_Eff.png");
+        public FlickDrawingTarget() : base()
+        {
+            texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\flick.png");
+            exFlickEffTexture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\exflickEffect.png");
 
-			leftSize = new Vector2(104, 69.333f);
-			rightSize = new Vector2(-104, 69.333f);
-			exTapEffSize = new Vector2(106, 67f);
-			selectedEffSize = new Vector2(106, 67f) * 1.05f;
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("flick", out var size, out _))
+                size = new Vector2(104, 69.333f);
+            leftSize = size;
+            rightSize = size * new Vector2(-1, 1);
 
-			batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
-			highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
-		}
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exflickEffect", out size, out _))
+                size = new Vector2(106, 67f);
+            exTapEffSize = size;
+            selectedEffSize = size * 1.05f;
 
-		public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)
-		{
-			foreach (var obj in objs)
-			{
-				var x = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-				var y = target.ConvertToY(obj.TGrid) + 24;
-				var pos = new Vector2((float)x, (float)y);
-				var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
-				normalFlichList.Add((size, pos, 0f));
+            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
+            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+        }
 
-				if (obj.IsCritical)
-				{
-					var exTapSize = exTapEffSize;
-					exTapSize.X = Math.Sign(size.X) * exTapSize.X;
-					pos.Y -= 1;
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)
+        {
+            foreach (var obj in objs)
+            {
+                var x = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
+                var y = target.ConvertToY(obj.TGrid) + 24;
+                var pos = new Vector2((float)x, (float)y);
+                var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
+                normalFlichList.Add((size, pos, 0f));
 
-					exFlickList.Add((exTapSize, pos, 0));
-				}
+                if (obj.IsCritical)
+                {
+                    var exTapSize = exTapEffSize;
+                    exTapSize.X = Math.Sign(size.X) * exTapSize.X;
+                    pos.Y -= 1;
 
-				if (obj.IsSelected)
-				{
-					var selectTapSize = selectedEffSize;
-					selectTapSize.X = Math.Sign(size.X) * selectTapSize.X;
-					pos.Y -= 1;
+                    exFlickList.Add((exTapSize, pos, 0));
+                }
 
-					selectedFlickList.Add((selectTapSize, pos, 0));
-				}
+                if (obj.IsSelected)
+                {
+                    var selectTapSize = selectedEffSize;
+                    selectTapSize.X = Math.Sign(size.X) * selectTapSize.X;
+                    pos.Y -= 1;
 
-				size.X = Math.Abs(size.X);
-				target.RegisterSelectableObject(obj, pos, size);
-			}
+                    selectedFlickList.Add((selectTapSize, pos, 0));
+                }
 
-			highlightDrawing.Draw(target, texture, selectedFlickList);
-			batchTextureDrawing.Draw(target, texture, normalFlichList);
-			batchTextureDrawing.Draw(target, exFlickEffTexture, exFlickList);
+                size.X = Math.Abs(size.X);
+                target.RegisterSelectableObject(obj, pos, size);
+            }
 
-			exFlickList.Clear();
-			selectedFlickList.Clear();
-			normalFlichList.Clear();
-		}
+            highlightDrawing.Draw(target, texture, selectedFlickList);
+            batchTextureDrawing.Draw(target, texture, normalFlichList);
+            batchTextureDrawing.Draw(target, exFlickEffTexture, exFlickList);
 
-		public void Dispose()
-		{
-			texture?.Dispose();
-			texture = null;
-		}
-	}
+            exFlickList.Clear();
+            selectedFlickList.Clear();
+            normalFlichList.Clear();
+        }
+
+        public void Dispose()
+        {
+            texture?.Dispose();
+            texture = null;
+        }
+    }
 }

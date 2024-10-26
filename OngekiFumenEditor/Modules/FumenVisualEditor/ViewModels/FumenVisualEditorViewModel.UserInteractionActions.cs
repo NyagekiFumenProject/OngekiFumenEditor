@@ -123,7 +123,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void ClearSelection()
         {
-            foreach (var obj in SelectObjects) {
+            foreach (var obj in SelectObjects)
+            {
                 obj.IsSelected = false;
             }
         }
@@ -216,10 +217,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             None
         }
 
-        public void KeyboardAction_PasteCopiesObjects(ActionExecutionContext ctx)
-            => PasteCopiesObjects(PasteOption.None, ctx);
+        public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
+            => KeyboardAction_PasteCopiesObjects(ctx);
 
-        public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext e)
+        public void KeyboardAction_PasteCopiesObjects(ActionExecutionContext e)
         {
             var placePos = Mouse.GetPosition(GetView() as FrameworkElement);
             placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
@@ -1033,7 +1034,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void OnMouseUp(ActionExecutionContext e)
         {
             var arg = e.EventArgs as MouseButtonEventArgs;
-            if (arg is null || arg.Handled) {
+            if (arg is null || arg.Handled)
+            {
                 return;
             }
 
@@ -1074,16 +1076,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             var compositeAction = UndoRedoManager.EndCombineAction(Resources.DragObjects);
                             UndoRedoManager.ExecuteAction(compositeAction);
                         }
-                        else {
+                        else
+                        {
                             //Log.LogDebug($"mouseDownHitObject = {mouseDownHitObject?.ReferenceOngekiObject}");
-                            if (mouseDownHitObject is not null) {
+                            if (mouseDownHitObject is not null)
+                            {
                                 if (mouseDownHitObjectPosition is Point p)
                                     mouseDownHitObject = NotifyObjectClicked(mouseDownHitObject, mouseDownNextHitObject);
                             }
                         }
                     }
 
-                    if (isMiddleMouseDown) {
+                    if (isMiddleMouseDown)
+                    {
                         if (isCanvasDragging)
                         {
                             var diffX = pos.X - mouseCanvasStartPosition.X;
@@ -1125,7 +1130,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseDown(ActionExecutionContext e)
         {
-            if (e.EventArgs is not MouseButtonEventArgs arg || arg.Handled) {
+            if (e.EventArgs is not MouseButtonEventArgs arg || arg.Handled)
+            {
                 return;
             }
             Log.LogInfo("Visual mousedown");
@@ -1239,7 +1245,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseMove(ActionExecutionContext e)
         {
-            if (e.EventArgs is not MouseEventArgs args || args.Handled) {
+            if (e.EventArgs is not MouseEventArgs args || args.Handled)
+            {
                 return;
             }
 
@@ -1277,7 +1284,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
                 }
 
-                if (IsRangeSelecting) {
+                if (IsRangeSelecting)
+                {
                     var rp = 1 - pos.Y / ViewHeight;
                     var srp = 1 - mouseSelectRangeStartPosition.Y / ViewHeight;
                     var offsetY = 0d;
@@ -1392,7 +1400,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             => TryCreateObjectAtMouse(new ColorfulLaneStart(), clearSelection);
 
         public void KeyboardAction_AddNewFlick(bool switchDirection = false, bool clearSelection = false)
-            => TryCreateObjectAtMouse(new Flick() { Direction = switchDirection ? Flick.FlickDirection.Right : Flick.FlickDirection.Left}, clearSelection);
+            => TryCreateObjectAtMouse(new Flick() { Direction = switchDirection ? Flick.FlickDirection.Right : Flick.FlickDirection.Left }, clearSelection);
 
         public void KeyboardAction_AddNewBlock(bool switchDirection = false, bool clearSelection = false)
             => TryCreateObjectAtMouse(
@@ -1410,7 +1418,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryCreateObjectAtMouse(OngekiObjectBase obj, bool clearSelection, bool autoSelectObj = true)
         {
-            if (!CurrentCursorPosition.HasValue) {
+            if (!CurrentCursorPosition.HasValue)
+            {
                 return;
             }
 
@@ -1418,11 +1427,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             Fumen.AddObject(obj);
             InteractiveManager.GetInteractive(obj).OnMoveCanvas(obj, CurrentCursorPosition.Value, this);
 
-            if (clearSelection) {
+            if (clearSelection)
+            {
                 SelectObjects.ForEach(o => o.IsSelected = false);
             }
 
-            if (autoSelectObj) {
+            if (autoSelectObj)
+            {
                 ((ISelectableObject)obj).IsSelected = true;
                 NotifyObjectClicked(obj);
             }

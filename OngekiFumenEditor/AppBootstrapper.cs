@@ -186,6 +186,8 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     public async void OnStartupForCMD(object sender, StartupEventArgs e)
     {
         IsGUIMode = false;
+        Log.Instance.RemoveOutput<ConsoleLogOutput>();
+
         await IoC.Get<ISchedulerManager>().Init();
 
         var executor = IoC.Get<ICommandExecutor>();
@@ -204,6 +206,12 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     public async void OnStartupForGUI(object sender, StartupEventArgs e)
     {
         IsGUIMode = true;
+
+#if DEBUG
+        ConsoleWindowHelper.SetConsoleWindowVisible(true);
+#else
+        ConsoleWindowHelper.SetConsoleWindowVisible(ProgramSetting.Default.ShowConsoleWindowInGUIMode);
+#endif
 
         InitExceptionCatcher();
         LogBaseInfos();

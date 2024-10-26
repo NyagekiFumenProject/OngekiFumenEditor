@@ -244,10 +244,10 @@
     <value>根据当前节奏线，在轨道上批量生成已经复制的单个物件，非法线段无法使用</value>
   </data>
   <data name="BatchModeToggle" xml:space="preserve">
-    <value>切换笔刷模式</value>
+    <value>切换批量模式</value>
   </data>
   <data name="BatchModeToggleTipText" xml:space="preserve">
-    <value>如果开启笔刷模式,避免大部分物件拖拉操作</value>
+    <value>如果开启批量模式,避免大部分物件拖拉操作</value>
   </data>
   <data name="BulletSize" xml:space="preserve">
     <value>子弹大小</value>
@@ -1021,7 +1021,7 @@
     <value>不再显示此窗口</value>
   </data>
   <data name="NotSupportInBatchMode" xml:space="preserve">
-    <value>笔刷模式下不支持{0}</value>
+    <value>批量模式下不支持{0}</value>
   </data>
   <data name="ObjectBatchBrush" xml:space="preserve">
     <value>批量粘贴刷子</value>
@@ -1859,5 +1859,11 @@
   </data>
   <data name="ProgramUpdates" xml:space="preserve">
     <value>程序更新</value>
+  </data>
+  <data name="InvalidBrightness" xml:space="preserve">
+    <value>亮度(Brightness)值 {0} 不在范围[-3,3]内</value>
+  </data>
+  <data name="InvalidColorId" xml:space="preserve">
+    <value>颜色Id(ColorId)值无效: {0}</value>
   </data>
 </root>

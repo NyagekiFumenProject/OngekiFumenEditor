@@ -15,12 +15,6 @@ namespace OngekiFumenEditor
 {
     internal class Startup
     {
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetConsoleWindow();
-
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
         [STAThread]
         public static int Main(string[] args)
         {
@@ -28,7 +22,6 @@ namespace OngekiFumenEditor
 
             if (isGUIMode)
             {
-                ShowWindow(GetConsoleWindow(), 0);
                 IPCHelper.Init(args);
             }
 
