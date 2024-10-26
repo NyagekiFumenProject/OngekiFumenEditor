@@ -209,6 +209,8 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
 #if DEBUG
         ConsoleWindowHelper.SetConsoleWindowVisible(true);
+#else
+        ConsoleWindowHelper.SetConsoleWindowVisible(ProgramSetting.Default.ShowConsoleWindowInGUIMode);
 #endif
 
         InitExceptionCatcher();
