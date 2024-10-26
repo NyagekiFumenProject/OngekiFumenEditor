@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\bell.png");
 
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("bell", out var size, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("bell", out var size, out _))
                 size = new Vector2(40, 40);
             sizeNormal = size;
             sizeLarge = sizeNormal * 1.4f;

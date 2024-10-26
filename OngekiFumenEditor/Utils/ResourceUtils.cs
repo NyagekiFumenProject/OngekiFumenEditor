@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Utils
 
         static ResourceUtils()
         {
-            var iniFilePath = Path.GetFullPath(@".\Resources\editor\textureSizeOrigin.ini");
+            var iniFilePath = Path.GetFullPath(@".\Resources\editor\textureSizeAnchor.ini");
             foreach (var line in File.ReadAllLines(iniFilePath))
             {
                 var split = line.Split("=");
@@ -50,23 +50,23 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
-        public static string ReadTextureSizeOrigin(string key)
+        public static string ReadTextureSizeAnchor(string key)
         {
             if (textureSizeOriginMap.TryGetValue(key, out var val))
                 return val;
             return string.Empty;
         }
 
-        public static bool OpenReadTextureSizeOriginByConfigFile(string textureName, out Vector2 size, out Vector2 origin)
+        public static bool OpenReadTextureSizeAnchorByConfigFile(string textureName, out Vector2 size, out Vector2 anchor)
         {
             size = default;
-            origin = default;
+            anchor = default;
             var good = false;
 
             try
             {
                 var key = textureName + "Size";
-                var str = ReadTextureSizeOrigin(key);
+                var str = ReadTextureSizeAnchor(key);
                 if (!string.IsNullOrWhiteSpace(str))
                 {
                     var split = str.Split(',');
@@ -78,16 +78,16 @@ namespace OngekiFumenEditor.Utils
                     Log.LogWarn($"size key {key} is not found.");
                 }
 
-                key = textureName + "Origin";
-                str = ReadTextureSizeOrigin(key);
+                key = textureName + "Anchor";
+                str = ReadTextureSizeAnchor(key);
                 if (!string.IsNullOrWhiteSpace(str))
                 {
                     var split = str.Split(',');
-                    origin = new(float.Parse(split[0].Trim()), float.Parse(split[1].Trim()));
+                    anchor = new(float.Parse(split[0].Trim()), float.Parse(split[1].Trim()));
                 }
                 else
                 {
-                    //Log.LogWarn($"origin key {key} is not found.");
+                    //Log.LogWarn($"anchor key {key} is not found.");
                 }
 
                 return good;

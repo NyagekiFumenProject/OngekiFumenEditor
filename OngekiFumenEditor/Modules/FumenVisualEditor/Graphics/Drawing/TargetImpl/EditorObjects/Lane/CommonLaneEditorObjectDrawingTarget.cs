@@ -32,11 +32,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             textureDrawing = IoC.Get<IBatchTextureDrawing>();
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
 
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("laneStart", out startSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
                 startSize = new Vector2(16, 16);
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("laneNext", out nextSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneNext", out nextSize, out _))
                 nextSize = new Vector2(16, 16);
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("laneEnd", out endSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneEnd", out endSize, out _))
                 endSize = new Vector2(16, 16);
         }
 

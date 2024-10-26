@@ -25,7 +25,7 @@ public class DrawPlayerLocationHelper
         arr[0].rotation = 0f;
 
         texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\playerLoc.png");
-        if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("playerLoc", out size, out _))
+        if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("playerLoc", out size, out _))
             size = new Vector2(48, 48);
 
         UpdateProps();

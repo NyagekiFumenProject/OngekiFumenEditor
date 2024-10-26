@@ -37,12 +37,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\flick.png");
             exFlickEffTexture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\exflickEffect.png");
 
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("flick", out var size, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("flick", out var size, out _))
                 size = new Vector2(104, 69.333f);
             leftSize = size;
             rightSize = size * new Vector2(-1, 1);
 
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("exflickEffect", out size, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exflickEffect", out size, out _))
                 size = new Vector2(106, 67f);
             exTapEffSize = size;
             selectedEffSize = size * 1.05f;

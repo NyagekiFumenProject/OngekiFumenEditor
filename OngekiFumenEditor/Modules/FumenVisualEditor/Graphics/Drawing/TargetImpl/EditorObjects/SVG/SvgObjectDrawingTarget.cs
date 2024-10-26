@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public SvgObjectDrawingTarget()
         {
             texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\commonCircle.png");
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("commonCircle", out size, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
 
             cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();

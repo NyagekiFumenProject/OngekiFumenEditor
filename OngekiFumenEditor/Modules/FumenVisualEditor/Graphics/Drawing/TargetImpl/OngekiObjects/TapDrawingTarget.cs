@@ -52,17 +52,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 selectTapList[texture] = new();
             }
 
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("tap", out tapSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("tap", out tapSize, out _))
                 tapSize = new Vector2(40, 16);
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("exTapEffect", out exTapEffSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exTapEffect", out exTapEffSize, out _))
                 exTapEffSize = new Vector2(70, 30);
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("wall", out leftWallSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("wall", out leftWallSize, out _))
                 leftWallSize = new Vector2(40, 40);
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("selectWallTapEffect", out selectWallTapEffSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("selectWallTapEffect", out selectWallTapEffSize, out _))
                 selectWallTapEffSize = new Vector2(50, 50);
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("selectTapEffect", out selectTapEffSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("selectTapEffect", out selectTapEffSize, out _))
                 selectTapEffSize = tapSize * new Vector2(1.5f, 1.5f);
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("exWallTapEffect", out exWallTapEffSize, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exWallTapEffect", out exWallTapEffSize, out _))
                 exWallTapEffSize = new Vector2(43, 43);
 
             init(ref redTexture, "redTap.png");

@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 normalDrawList[tex] = new();
                 selectedDrawList[tex] = new();
 
-                if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile(key + "Normal", out var cfgSize, out var cfgOrigin))
+                if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile(key + "Normal", out var cfgSize, out var cfgOrigin))
                 {
                     cfgSize = size;
                     cfgOrigin = origOffset;
@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 _spritesSize[tex] = cfgSize;
                 _spritesOriginOffset[tex] = cfgOrigin;
 
-                if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile(key + "Large", out cfgSize, out cfgOrigin))
+                if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile(key + "Large", out cfgSize, out cfgOrigin))
                 {
                     cfgSize = sizeLarge;
                     cfgOrigin = origOffsetLarge;

@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		public LaneCurvePathControlDrawingTarget()
 		{
 			texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\commonCircle.png");
-            if (!ResourceUtils.OpenReadTextureSizeOriginByConfigFile("commonCircle", out size, out _))
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
 
             textureDrawing = IoC.Get<IBatchTextureDrawing>();
