@@ -1354,7 +1354,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         ScrollTo(audioTime);
                     }
 
-                    if (EnableDragging)
+                    if (EnableDragging && !IsRangeSelecting)
                     {
                         //拖动已选物件
                         var cp = pos;
