@@ -15,7 +15,7 @@ namespace OpenTK.Wpf
 
 		private static DComp CurrentDComp;
 
-		private static Dictionary<DComp, Queue<Action<Vortice.Direct2D1.ID2D1DeviceContext, float>>> DcompDWriteCommandQueue = new();
+		private static Dictionary<DComp, Queue<Action<Vortice.Direct2D1.ID2D1RenderTarget, float>>> DcompDWriteCommandQueue = new();
 
 		//private static Dictionary<Vortice.DirectWrite.IDWriteTextFormat> formats;
 
@@ -28,7 +28,7 @@ namespace OpenTK.Wpf
 			}
 		}
 
-		public static Queue<Action<Vortice.Direct2D1.ID2D1DeviceContext, float>> GetCommands(DComp DComp)
+		public static Queue<Action<Vortice.Direct2D1.ID2D1RenderTarget, float>> GetCommands(DComp DComp)
 		{
 			return DcompDWriteCommandQueue[DComp];
 		}

@@ -39,7 +39,6 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-
     <i:Interaction.Triggers>
         <!--#region Key Bindings-->
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastSetObjectIsCritical}" Message="KeyboardAction_FastSetObjectIsCritical($executionContext)" />
@@ -64,8 +63,7 @@
         <!--#endregion-->
     </i:Interaction.Triggers>
 
-
-    <Grid Focusable="False">
+    <Grid Focusable="False" Background="#0F0F0F">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
