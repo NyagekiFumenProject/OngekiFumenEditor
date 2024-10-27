@@ -702,49 +702,49 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //删除已选择的物件
-            var selectedObjectGroup = SelectObjects.OfType<OngekiObjectBase>().GroupBy(x => x.GetType()).ToArray();
+            //获取要删除的物件
+            var selects = SelectObjects.OfType<OngekiObjectBase>().ToArray();
 
-            //特殊处理LaneCurvePathControlObject
-            var cacheCurveControlsMap = new Dictionary<LaneCurvePathControlObject, (ConnectableChildObjectBase refObj, int idx)>();
+            //依附于其他对象的子物件，比如轨道节点，曲线控制节点，无法做到单纯删除和添加
+            //记录它们子节点相对于集合的位置，下次恢复的时候就是插入了
+            var curveControlMaps = selects
+                        .OfType<LaneCurvePathControlObject>()
+                        .GroupBy(x => x.RefCurveObject)
+                        .ToDictionary(x => x.Key, x => x.Select(c => (c, x.Key.PathControls.FirstIndexOf(p => p == c))).OrderBy(x => x.Item2).ToArray());
+            var connectablesMaps = selects
+                        .OfType<ConnectableChildObjectBase>()
+                        .GroupBy(x => x.ReferenceStartObject)
+                        .ToDictionary(x => x.Key, x => x.Select(c => (c, x.Key.Children.FirstIndexOf(p => p == c))).OrderBy(x => x.Item2).ToArray());
+
+            var expectedObjects = selects.Where(x => x switch
+            {
+                LaneCurvePathControlObject => false,
+                ConnectableChildObjectBase => false,
+                _ => true
+            });
 
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.DeleteObjects, () =>
             {
-                foreach (var group in selectedObjectGroup)
-                {
-                    if (group.Key == typeof(LaneCurvePathControlObject))
-                    {
-                        foreach (var controlObject in group.OfType<LaneCurvePathControlObject>())
-                        {
-                            var refObj = controlObject.RefCurveObject;
-                            cacheCurveControlsMap[controlObject] = (refObj, refObj.PathControls.FirstIndexOf(x => x == controlObject));
-                        }
-                    }
-
-                    RemoveObjects(group);
-                }
+                RemoveObjects(selects);
             }, () =>
             {
-                foreach (var group in selectedObjectGroup)
+                expectedObjects.ForEach(Fumen.AddObject);
+
+                foreach (var item in curveControlMaps)
                 {
-                    if (group.Key == typeof(LaneCurvePathControlObject))
+                    var child = item.Key;
+                    foreach (var (curve, idx) in item.Value)
                     {
-                        foreach (var item in group.OfType<LaneCurvePathControlObject>().Select(x =>
-                                 {
-                                     if (cacheCurveControlsMap.TryGetValue(x, out var val))
-                                         return (x, val.refObj, val.idx);
-                                     else
-                                         return default;
-                                 }).Where(x => x.x is not null).GroupBy(x => x.refObj))
-                        {
-                            var refObj = item.Key;
-                            foreach ((var cp, _, var idx) in item.OrderBy(x => x.idx))
-                                refObj.InsertControlObject(idx, cp);
-                        }
+                        child.InsertControlObject(idx, curve);
                     }
-                    else
+                }
+
+                foreach (var item in connectablesMaps)
+                {
+                    var start = item.Key;
+                    foreach (var (child, idx) in item.Value)
                     {
-                        group.ForEach(Fumen.AddObject);
+                        start.InsertChildObject(idx, child);
                     }
                 }
             }));
