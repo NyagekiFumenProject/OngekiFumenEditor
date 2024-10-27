@@ -1174,6 +1174,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             SelectionArea.SelectionAreaKind = kind;
             SelectionArea.IsActive = true;
+            SelectionArea.FilterFunc = null;
             SelectionArea.StartPoint = cursor;
             SelectionArea.EndPoint = cursor;
         }
