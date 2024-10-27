@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Vortice.Direct2D1.Effects;
 using Vortice.Mathematics;
 
 namespace OpenTK.Wpf
@@ -40,6 +41,8 @@ namespace OpenTK.Wpf
 		public new event System.Windows.Input.MouseEventHandler MouseLeave { add { CompositionHostElement.MouseLeave += value; } remove { CompositionHostElement.MouseLeave -= value; } }
 		private object disposeLock = new object();
 		volatile bool loop = true;
+		private double hostWidthWithDPI;
+		private double hostHeightWithDPI;
 
 		public DCompGL()
 		{
@@ -59,7 +62,9 @@ namespace OpenTK.Wpf
 		private void DCompGL_Loaded(object sender, RoutedEventArgs e)
 		{
 			loop = true;
-            host = new(GetParentSize);
+			hostWidthWithDPI = RenderSize.Width;
+			hostHeightWithDPI = RenderSize.Height;
+			host = new(GetParentSize);
 			host.Resized += HostResized;
 			CompositionHostElement.Child = host;
 		}
@@ -76,6 +81,13 @@ namespace OpenTK.Wpf
 				hwndHost = hWnd;
 				LoopThread = new(EntryPoint);
 				LoopThread.Start();
+				//host.WMPaint += GLCore.RenderD3D;
+				host.WMResize += (width, height) =>
+				{
+					double dpi = DXInterop.GetDpiForSystem() / 96d;
+					hostWidthWithDPI = width/ dpi;
+					hostHeightWithDPI = height/ dpi;
+				};
 			}
 			else
 			{
@@ -96,7 +108,7 @@ namespace OpenTK.Wpf
 				{
 					Dispatcher.Invoke(() =>
 					{
-						GLCore.OnRender(DesignMode, RenderSize.Width, RenderSize.Height, hwndHost);
+						GLCore.OnRender(DesignMode, hostWidthWithDPI, hostHeightWithDPI, hwndHost);
 					});
 					GLCore.RenderD3D();
 					GLCore.WaitForVBlank();
@@ -131,6 +143,10 @@ namespace OpenTK.Wpf
 		public Func<(double, double)> getSizeFunc;
 
 		public Action<IntPtr>? Resized;
+
+		public Action<uint,uint>? WMResize;
+
+		public Action? WMPaint;
 
 		public DCompGLHost(Func<(double, double)> GetSize)
 		{
@@ -175,13 +191,19 @@ namespace OpenTK.Wpf
 			WS_VSCROLL = 0x00200000,
 			WS_BORDER = 0x00800000,
 		}
+
+		[Flags]
+		enum WindowStyleEx : int
+		{
+			WS_EX_NOREDIRECTIONBITMAP = 0x00200000,
+		}
 		protected override HandleRef BuildWindowCore(HandleRef hwndParent)
 		{
 			var (width, height) = getSizeFunc();
 			Resize(width, height);
 			hwndHost = CreateWindowEx(
-			0, "STATIC", "",
-			(int)(WindowStyle.WS_CHILD | WindowStyle.WS_VISIBLE | WindowStyle.WS_CLIPCHILDREN),
+			(int)(WindowStyleEx.WS_EX_NOREDIRECTIONBITMAP), "STATIC", "",
+			(int)(WindowStyle.WS_CHILD | WindowStyle.WS_VISIBLE),
 			0, 0,
 			hostWidth, hostHeight,
 			hwndParent.Handle,
@@ -189,6 +211,37 @@ namespace OpenTK.Wpf
 			IntPtr.Zero, 0);
 			Resized?.Invoke(hwndHost);
 			return new HandleRef(this, hwndHost);
+		}
+
+		protected override nint WndProc(nint hwnd, int msg, nint wParam, nint lParam, ref bool handled)
+		{
+			switch (msg)
+			{
+				case 0x0005:
+					var width = LOWORD((uint)lParam);
+					var height = HIWORD((uint)lParam);
+					WMResize?.Invoke(width, height);
+					//SetWindowPos(hwnd, 0, 0, 0, (int)width, (int)height, 0x4000 | 0x0200 | 0x0008 | 0x0002 | 0x0004);
+					handled = true;
+					return 0;
+				case 0x000F:
+					WMPaint?.Invoke();
+					handled = true;
+					return 0;
+				default:
+					break;
+			}
+			return base.WndProc(hwnd, msg, wParam, lParam, ref handled);
+		}
+
+		private static ushort LOWORD(uint value)
+		{
+			return (ushort)(value & 0xFFFF);
+		}
+
+		private static ushort HIWORD(uint value)
+		{
+			return (ushort)(value >> 16);
 		}
 
 		protected override void DestroyWindowCore(HandleRef hwnd)
@@ -210,5 +263,8 @@ namespace OpenTK.Wpf
 
 		[DllImport("user32.dll", EntryPoint = "DestroyWindow", CharSet = CharSet.Unicode)]
 		private static extern bool DestroyWindow(IntPtr hwnd);
+
+		[DllImport("user32.dll")]
+		private static extern bool SetWindowPos(IntPtr hwnd, IntPtr hwndInsertAfter, int X, int Y, int cx, int cy, uint flag);
 	}
 }

@@ -38,7 +38,7 @@
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Focusable="False">
+    <Grid Focusable="False" Background="#0F0F0F">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
@@ -93,7 +93,7 @@
                     IsChecked="{Binding IsDisplayFPS}" />
             </ContextMenu>
         </Grid.ContextMenu>
-        <opentkcontrol:DCompGL x:Name="glView" Ready="glView_Ready" SizeChanged="glView_SizeChanged" cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"></opentkcontrol:DCompGL>
+        <opentkcontrol:DCompGL x:Name="glView" Ready="glView_Ready" SizeChanged="glView_SizeChanged" Background="#0F0F0F" cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"></opentkcontrol:DCompGL>
         <!--<opentkcontrol:GLWpfControl
             x:Name="glView"
             cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
