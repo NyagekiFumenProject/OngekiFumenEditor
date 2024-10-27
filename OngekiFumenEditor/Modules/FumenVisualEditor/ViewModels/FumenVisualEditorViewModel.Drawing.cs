@@ -179,13 +179,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 target.Visible = target.DefaultVisible;
             }
         }
-        Log.LogError($"loaded.");
+        Log.LogInfo($"loaded.");
     }
 
     public void SaveRenderOrderVisible()
     {
         var targets = drawTargets.Values.SelectMany(x => x).Distinct().ToArray();
-        var map = targets.ToDictionary(x => x, x => new RenderTargetOrderVisible()
+        var map = targets.ToDictionary(x => x.GetType().Name, x => new RenderTargetOrderVisible()
         {
             Order = x.CurrentRenderOrder,
             Visible = x.Visible
@@ -196,7 +196,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             var json = JsonSerializer.Serialize(map);
             EditorGlobalSetting.Default.RenderTargetOrderVisibleMap = json;
             EditorGlobalSetting.Default.Save();
-            Log.LogError($"saved.");
+            Log.LogInfo($"saved.");
         }
         catch (Exception e)
         {
