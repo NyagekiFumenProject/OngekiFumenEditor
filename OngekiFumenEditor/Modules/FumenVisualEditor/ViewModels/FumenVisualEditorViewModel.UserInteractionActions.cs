@@ -1778,6 +1778,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MoveObjectTo(OngekiObjectBase obj, Point point) => InteractiveManager.GetInteractive(obj).OnMoveCanvas(obj, point, this);
 
+        public OngekiTimelineObjectBase? GetConflictingObject(OngekiTimelineObjectBase obj)
+        {
+            return (OngekiTimelineObjectBase)Fumen.GetAllDisplayableObjects().FirstOrDefault(x =>
+            {
+                if (x is not OngekiTimelineObjectBase tX) return false;
+
+                // Check coordinates are the same
+                if (tX.TGrid != obj.TGrid) return false;
+                if (obj is OngekiMovableObjectBase movable) {
+                    var mX = (OngekiMovableObjectBase)x;
+                    if (movable.XGrid != mX.XGrid) return false;
+                }
+
+                return obj switch
+                {
+                    Tap => x is Tap or Hold or HoldEnd,
+                    Hold => x is Hold or Tap,
+                    HoldEnd => x is Tap,
+                    IBulletPalleteReferencable bullet => x is IBulletPalleteReferencable bX && bX.ReferenceBulletPallete == bullet.ReferenceBulletPallete,
+                    _ => obj.GetType().IsInstanceOfType(x)
+                };
+            });
+        }
+
         #endregion
     }
 }

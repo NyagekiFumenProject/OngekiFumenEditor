@@ -19,11 +19,6 @@ namespace OngekiFumenEditor.Base
             }
         }
 
-        public bool Clashes(OngekiMovableObjectBase other)
-        {
-            return base.Clashes(other) && other.XGrid == XGrid;
-        }
-
         public override string ToString() => $"{base.ToString()} {XGrid}";
 
         public override void Copy(OngekiObjectBase fromObj)
@@ -40,11 +35,6 @@ namespace OngekiFumenEditor.Base
         {
             base.Dispose();
             XGrid = default;
-        }
-
-        public override bool Clashes(OngekiTimelineObjectBase other)
-        {
-            return base.Clashes(other) && other is OngekiMovableObjectBase mov && mov.XGrid == XGrid;
         }
     }
 }

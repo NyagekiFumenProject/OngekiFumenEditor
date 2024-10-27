@@ -67,16 +67,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			IsCritical = from.IsCritical;
 			ReferenceLaneStart = from.ReferenceLaneStart;
 		}
-
-		public override bool Clashes(OngekiTimelineObjectBase other)
-		{
-			if (other is OngekiMovableObjectBase movable) {
-				if (other.TGrid == TGrid && movable.XGrid == XGrid && movable is Tap or Hold or HoldEnd) {
-					return true;
-				}
-			}
-
-			return false;
-		}
 	}
 }

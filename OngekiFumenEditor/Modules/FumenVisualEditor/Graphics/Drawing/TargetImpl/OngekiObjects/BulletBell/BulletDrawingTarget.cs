@@ -100,6 +100,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bullet obj, Vector2 pos, float rotate)
         {
+            if (obj.ReferenceBulletPallete is null) {
+                Log.LogWarn($"Bullet {obj.Id} has null reference bullet pallete");
+                return;
+            }
             var damageType = obj.BulletDamageTypeValue;
             var bulletType = obj.ReferenceBulletPallete.TypeValue;
 

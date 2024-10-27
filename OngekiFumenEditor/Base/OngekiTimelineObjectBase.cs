@@ -52,11 +52,6 @@ namespace OngekiFumenEditor.Base
             TGrid = timelineObject.TGrid;
         }
 
-        public virtual bool Clashes(OngekiTimelineObjectBase other)
-        {
-            return GetType().IsInstanceOfType(other) && other.TGrid == TGrid;
-        }
-
         public override string ToString() => $"{base.ToString()} {TGrid}";
 
         public virtual void Dispose()
