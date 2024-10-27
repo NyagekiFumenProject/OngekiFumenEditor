@@ -29,6 +29,12 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
 
         private Dictionary<string, KeyBindingDefinition> definitionMap = new();
 
+        private JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
+        {
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+
         [ImportingConstructor]
         public DefaultKeyBindingManager([ImportMany] KeyBindingDefinition[] definations)
         {
@@ -42,7 +48,7 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
 
         public void SaveConfig()
         {
-            var json = JsonSerializer.Serialize(new Config() { KeyBindings = definitionMap.ToDictionary(x => x.Key, x => KeyBindingDefinition.FormatToExpression(x.Value.Key, x.Value.Modifiers)) });
+            var json = JsonSerializer.Serialize(new Config() { KeyBindings = definitionMap.ToDictionary(x => x.Key, x => KeyBindingDefinition.FormatToExpression(x.Value.Key, x.Value.Modifiers)) }, serializerOptions);
             File.WriteAllText(jsonConfigFilePath, json);
 
             Log.LogInfo($"Saved.");
@@ -121,7 +127,7 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
 
         public void ChangeKeyBinding(KeyBindingDefinition definition, Key newKey, ModifierKeys newModifier)
         {
-            Log.LogInfo($"[{definition.Key}] {KeyBindingDefinition.FormatToExpression(definition.Key, definition.Modifiers)}  -->  {KeyBindingDefinition.FormatToExpression(newKey, newModifier)}");
+            Log.LogInfo($"[{definition.Name}] {KeyBindingDefinition.FormatToExpression(definition.Key, definition.Modifiers)}  -->  {KeyBindingDefinition.FormatToExpression(newKey, newModifier)}");
 
             definition.Key = newKey;
             definition.Modifiers = newModifier;
