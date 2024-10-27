@@ -203,7 +203,7 @@ namespace OpenTK.Wpf
 			}
 			queue.Clear();
 			_D2D1RenderTarget.EndDraw();
-			_DXGISwapChain1.Present(1);
+			_DXGISwapChain1.Present(0, Vortice.DXGI.PresentFlags.AllowTearing);
 			//rt.Dispose();
 			//_t2dBitmap.Dispose();
 
@@ -214,7 +214,7 @@ namespace OpenTK.Wpf
 		public void WaitForVBlank()
 		{
 			//_DcompDevice.WaitForCommitCompletion();
-			//_DXGIOutput.WaitForVBlank();
+			_DXGIOutput.WaitForVBlank();
 		}
 	}
 }
