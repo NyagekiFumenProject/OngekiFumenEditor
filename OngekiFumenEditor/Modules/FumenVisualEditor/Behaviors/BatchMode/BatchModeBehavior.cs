@@ -166,9 +166,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
         if (Mouse.RightButton == MouseButtonState.Pressed) {
             // In normal mode, right mouse is not used to drag, so we manually do that here
-            editor.SelectionVisibility = Visibility.Visible;
-            editor.SelectionCurrentCursorPosition = editor.CurrentCursorPosition?.ToSystemNumericsVector2()
-                                                    ?? args.GetPosition(null).ToSystemNumericsVector2();
+            editor.SelectionArea = new SelectionArea(editor, SelectionAreaKind.Delete);
         }
     }
 
@@ -182,32 +180,36 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         if (args.ChangedButton == MouseButton.Left) {
             // In all sub-modes, Alt forces normal mouse behavior
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
-                editor.SelectRegionType = SelectRegionType.Select;
                 lastLeftClickWasAltClick = true;
-                editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
+
+                editor.SelectionArea = new SelectionArea(editor, SelectionAreaKind.Select);
                 if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) {
-                    editor.SelectRegionType = SelectRegionType.SelectFiltered;
-                    editor.SelectionVisibility = Visibility.Visible;
+                    editor.SelectionArea.FilterFunc = GetFilterFunc();
                 }
                 return;
             }
 
             if (CurrentSubmode is BatchModeFilterSubmode) {
                 // If it's a FilterSubmode, dragging without Alt will apply the filter.
-                editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
-                editor.SelectRegionType = SelectRegionType.SelectFiltered;
+                editor.SelectionArea = new SelectionArea(editor, SelectionAreaKind.Select)
+                {
+                    FilterFunc = GetFilterFunc()
+                };
                 return;
             }
 
             args.Handled = true;
         } else if (args.ChangedButton == MouseButton.Right) {
-            editor.SelectionStartPosition = cursor.ToSystemNumericsVector2();
+            editor.SelectionArea = new SelectionArea(editor, SelectionAreaKind.Delete);
+
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
                 lastRightClickWasAltClick = true;
-                editor.SelectRegionType = SelectRegionType.Delete;
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) {
+                    editor.SelectionArea.FilterFunc = GetFilterFunc();
+                }
             }
             else {
-                editor.SelectRegionType = SelectRegionType.DeleteFiltered;
+                editor.SelectionArea.FilterFunc = GetFilterFunc();
             }
 
             args.Handled = true;
@@ -222,43 +224,23 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
         if (args.ChangedButton == MouseButton.Left) {
             if (editor.IsRangeSelecting) {
-                // Selection mode
-                Func<OngekiObjectBase, bool> filterFunc = null;
-                if (editor.SelectRegionType == SelectRegionType.SelectFiltered && CurrentSubmode is BatchModeFilterSubmode filterSubmode) {
-                    filterFunc = filterSubmode.FilterFunction;
-                } else if (editor.SelectRegionType == SelectRegionType.SelectFiltered && CurrentSubmode is BatchModeSingleInputSubmode singleInputSubmode) {
-                    filterFunc = o => o.GetType() == singleInputSubmode.ObjectType || o.GetType().IsSubclassOf(singleInputSubmode.ObjectType);
-                }
-
-                if (filterFunc != null) {
-                    editor.SelectionVisibility = Visibility.Hidden;
-                    PerformFilterSelect(filterFunc);
-                    args.Handled = true;
-                }
-
-                editor.SelectRegionType = SelectRegionType.Select;
-                // otherwise fall through to FumenVisualEditorViewModel click handler
+                // Let VisualEditorViewModel code handle it
+                lastLeftClickWasAltClick = false;
+                return;
             }
 
             if (!lastLeftClickWasAltClick) {
                 // Can hold alt while releasing to "cancel" the left click
-                if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0) {
-                    if (CurrentSubmode is BatchModeInputSubmode inputSubmode) {
-                        if (inputSubmode is BatchModeSingleInputSubmode singleInputSubmode
-                            && editor.GetHits().Where(kv =>
-                                    kv.Value.Contains(editor.CurrentCursorPosition!.Value) &&
-                                    singleInputSubmode.ObjectType.IsInstanceOfType(kv.Key)).Select(kv => kv.Key)
-                                .FirstOrDefault() is { } hit) {
-                            editor.NotifyObjectClicked(hit);
-                        }
-                        else {
-                            PerformBrush(inputSubmode);
-                        }
-                    }
-                    else if (CurrentSubmode is BatchModeFilterSubmode filterSubmode && editor.IsRangeSelecting) {
-                        editor.SelectionVisibility = Visibility.Hidden;
-                        PerformFilterSelect(filterSubmode.FilterFunction);
-                    }
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
+                    args.Handled = true;
+                    return;
+                }
+
+                if (CurrentSubmode is BatchModeInputSubmode inputSubmode) {
+                    PerformBrush(inputSubmode);
+                }
+                else if (CurrentSubmode is BatchModeFilterSubmode filterSubmode && editor.IsRangeSelecting) {
+                    editor.ConsumeSelectionArea();
                 }
                 args.Handled = true;
             }
@@ -268,12 +250,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         } else if (args.ChangedButton == MouseButton.Right) {
             if (!lastRightClickWasAltClick) {
                 if (editor.IsRangeSelecting) {
-                    // Drag filter delete
-                    if (CurrentSubmode is BatchModeSingleInputSubmode typeSubmode) {
-                        PerformRemoveGroup(typeSubmode);
-                    } else if (CurrentSubmode is BatchModeFilterSubmode filterSubmode) {
-                        PerformRemoveGroup(filterSubmode);
-                    }
+                    editor.ConsumeSelectionArea();
                 }
                 else {
                     // Delete single
@@ -281,24 +258,33 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
                         PerformRemove(typeSubmode);
                     }
                 }
-
-                editor.SelectionVisibility = Visibility.Hidden;
             }
             else {
                 lastRightClickWasAltClick = false;
                 if (editor.IsRangeSelecting) {
-                    PerformRemoveGroup(null, Resources.Objects);
+                    editor.ConsumeSelectionArea();
                 }
             }
 
             if (editor.IsRangeSelecting) {
-                // End selection
-                editor.SelectRegionType = SelectRegionType.Select;
-                editor.SelectionVisibility = Visibility.Hidden;
+                editor.SelectionArea!.ApplyRangeAction();
+                editor.SelectionArea = null;
             }
 
             args.Handled = true;
         }
+    }
+
+    private Func<OngekiObjectBase, bool>? GetFilterFunc()
+    {
+        if (CurrentSubmode is BatchModeFilterSubmode filterSubmode) {
+            return filterSubmode.FilterFunction;
+        }
+        if (CurrentSubmode is BatchModeSingleInputSubmode singleInputSubmode) {
+            return obj => singleInputSubmode.ObjectType.IsInstanceOfType(obj);
+        }
+
+        return null;
     }
 
     #endregion
@@ -365,23 +351,6 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         }
     }
 
-    // TODO Refactor into `SelectionBox` class or something
-    private void PerformFilterSelect(Func<OngekiObjectBase, bool> filterFunction)
-    {
-        var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
-        var hits = editor.GetRangeObjects().Where(filterFunction).ToList();
-
-        if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) {
-            editor.ClearSelection();
-        }
-
-        foreach (var hit in hits) {
-            if (hit is OngekiMovableObjectBase selectable)
-                selectable.IsSelected = true;
-        }
-        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
-    }
-
     private void PerformRemove(BatchModeSingleInputSubmode submode)
     {
         var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
@@ -406,44 +375,6 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         {
             editor.Fumen.AddObject(hit);
         }
-    }
-
-    private void PerformRemoveGroup(BatchModeSingleInputSubmode submode)
-    {
-        PerformRemoveGroup(obj => obj.GetType() == submode.ObjectType, submode.DisplayName);
-    }
-
-    private void PerformRemoveGroup(BatchModeFilterSubmode filter)
-    {
-        PerformRemoveGroup(filter.FilterFunction, filter.DisplayName);
-    }
-
-    private void PerformRemoveGroup(Func<OngekiObjectBase, bool>? filterFunc, string displayName)
-    {
-        var editor = (FumenVisualEditorViewModel)AssociatedObject.DataContext;
-        var hits = editor.GetRangeObjects().Where(filterFunc ?? (_ => true)).ToArray();
-
-        if (hits.Length == 0) {
-            return;
-        }
-
-        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(
-            Resources.BatchModeDeleteRangeOfObjectType.Format(displayName, hits.Length), Redo, Undo));
-
-        return;
-
-        void Redo()
-        {
-            foreach (var hit in hits) {
-                editor.RemoveObject(hit);
-            }
-        }
-
-        void Undo()
-        {
-            editor.Fumen.AddObjects(hits);
-        }
-
     }
 
     private static void ConsumeAlt(object sender, KeyEventArgs e)
