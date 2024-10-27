@@ -181,6 +181,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
             DisplayName = default;
+
+            SelectionArea = new(this);
         }
 
         #region Document New/Save/Load

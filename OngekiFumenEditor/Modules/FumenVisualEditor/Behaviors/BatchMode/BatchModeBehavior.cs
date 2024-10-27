@@ -163,11 +163,6 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             return;
         if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
             return;
-
-        if (Mouse.RightButton == MouseButtonState.Pressed) {
-            // In normal mode, right mouse is not used to drag, so we manually do that here
-            editor.SelectionArea = new SelectionArea(editor, SelectionAreaKind.Delete);
-        }
     }
 
     private void MouseDown(MouseButtonEventArgs args)
@@ -175,32 +170,23 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
             return;
 
-        var cursor = editor.CurrentCursorPosition!.Value;
-
         if (args.ChangedButton == MouseButton.Left) {
             // In all sub-modes, Alt forces normal mouse behavior
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
                 lastLeftClickWasAltClick = true;
-
-                editor.SelectionArea = new SelectionArea(editor, SelectionAreaKind.Select);
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) {
-                    editor.SelectionArea.FilterFunc = GetFilterFunc();
-                }
                 return;
             }
 
             if (CurrentSubmode is BatchModeFilterSubmode) {
                 // If it's a FilterSubmode, dragging without Alt will apply the filter.
-                editor.SelectionArea = new SelectionArea(editor, SelectionAreaKind.Select)
-                {
-                    FilterFunc = GetFilterFunc()
-                };
+                editor.InitializeSelectionArea(SelectionAreaKind.Select);
+                editor.SelectionArea.FilterFunc = GetFilterFunc();
                 return;
             }
 
             args.Handled = true;
         } else if (args.ChangedButton == MouseButton.Right) {
-            editor.SelectionArea = new SelectionArea(editor, SelectionAreaKind.Delete);
+            editor.InitializeSelectionArea(SelectionAreaKind.Delete);
 
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
                 lastRightClickWasAltClick = true;
@@ -238,37 +224,29 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
                 if (CurrentSubmode is BatchModeInputSubmode inputSubmode) {
                     PerformBrush(inputSubmode);
+                    args.Handled = true;
                 }
-                else if (CurrentSubmode is BatchModeFilterSubmode filterSubmode && editor.IsRangeSelecting) {
-                    editor.ConsumeSelectionArea();
-                }
-                args.Handled = true;
             }
             else {
                 lastLeftClickWasAltClick = false;
             }
         } else if (args.ChangedButton == MouseButton.Right) {
             if (!lastRightClickWasAltClick) {
-                if (editor.IsRangeSelecting) {
-                    editor.ConsumeSelectionArea();
-                }
-                else {
+                if (!editor.IsRangeSelecting) {
                     // Delete single
                     if (CurrentSubmode is BatchModeSingleInputSubmode typeSubmode) {
                         PerformRemove(typeSubmode);
                     }
+                    args.Handled = true;
+                    return;
                 }
             }
             else {
                 lastRightClickWasAltClick = false;
-                if (editor.IsRangeSelecting) {
-                    editor.ConsumeSelectionArea();
-                }
             }
 
             if (editor.IsRangeSelecting) {
-                editor.SelectionArea!.ApplyRangeAction();
-                editor.SelectionArea = null;
+                editor.ConsumeSelectionArea();
             }
 
             args.Handled = true;

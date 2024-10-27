@@ -7,6 +7,7 @@ using Caliburn.Micro;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 public class SelectionArea : PropertyChangedBase
 {
-    public readonly SelectionAreaKind SelectionAreaKind;
+    public SelectionAreaKind SelectionAreaKind;
 
     private FumenVisualEditorViewModel editor;
 
@@ -56,15 +57,18 @@ public class SelectionArea : PropertyChangedBase
         set => Set(ref rect, value);
     }
 
-    public SelectionArea(FumenVisualEditorViewModel editor, SelectionAreaKind selectionAreaKind, Func<OngekiObjectBase, bool>? filterFunc = null)
+    private bool isActive = true;
+    public bool IsActive
+    {
+        get => isActive;
+        set => Set(ref isActive, value);
+    }
+
+    public SelectionArea(FumenVisualEditorViewModel editor)
     {
         this.editor = editor;
-
-        SelectionAreaKind = selectionAreaKind;
-        StartPoint = editor.CurrentCursorPosition ?? throw new InvalidOperationException("No cursor position");
-        EndPoint = StartPoint;
-        Rect = new Rect(this.startPoint, this.endPoint);
-        FilterFunc = filterFunc;
+        SelectionAreaKind = SelectionAreaKind.Select;
+        IsActive = false;
     }
 
     public bool IsClick()
@@ -74,8 +78,8 @@ public class SelectionArea : PropertyChangedBase
 
     public IEnumerable<OngekiObjectBase> GetRangeObjects(bool applyFilter = true)
     {
-        var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(Rect.Bottom, editor);
-        var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(Rect.Top, editor);
+        var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(Rect.Top, editor);
+        var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(Rect.Bottom, editor);
         var minXGrid = XGridCalculator.ConvertXToXGrid(Rect.Left, editor);
         var maxXGrid = XGridCalculator.ConvertXToXGrid(Rect.Right, editor);
 
@@ -98,7 +102,7 @@ public class SelectionArea : PropertyChangedBase
                     return false;
             }
 
-            if (applyFilter && (FilterFunc?.Invoke(obj) ?? false)) {
+            if (applyFilter && (!FilterFunc?.Invoke(obj) ?? false)) {
                 return false;
             }
 
@@ -135,9 +139,27 @@ public class SelectionAreaKind
 
     public static readonly SelectionAreaKind Delete = new SelectionAreaKind((editor, objs) =>
     {
-        foreach (var o in objs)
-            editor.Fumen.RemoveObject(o);
+        objs = objs.ToArray();
+        if (!objs.Any())
+            return;
+
         IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
+
+        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.DeleteObjects, Redo, Undo));
+
+        return;
+
+        void Redo()
+        {
+            foreach (var o in objs)
+                editor.Fumen.RemoveObject(o);
+        }
+
+        void Undo()
+        {
+            foreach (var o in objs)
+                editor.Fumen.AddObject(o);
+        }
     });
 
     public readonly Action<FumenVisualEditorViewModel, IEnumerable<OngekiObjectBase>> SelectAction;

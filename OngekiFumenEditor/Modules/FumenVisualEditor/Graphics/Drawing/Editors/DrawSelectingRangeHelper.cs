@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void Draw(IFumenEditorDrawingContext target)
         {
-            if (target.Editor.SelectionArea is not { } selectionArea || selectionArea.Rect is { Height: 0, Width: 0 })
+            if (target.Editor.SelectionArea is not { } selectionArea || selectionArea.Rect is { Height: 0, Width: 0 } || !selectionArea.IsActive)
                 return;
 
             RangeColors colors;
