@@ -171,9 +171,17 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
             return;
 
         if (args.ChangedButton == MouseButton.Left) {
-            // In all sub-modes, Alt forces normal mouse behavior
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
+                // Holding alt forces Normal Mode click behavior.
                 lastLeftClickWasAltClick = true;
+
+                if (CurrentSubmode is BatchModeSingleInputSubmode single &&
+                    Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) {
+                    // Ctrl+Alt will filter for single objects
+                    editor.InitializeSelectionArea(SelectionAreaKind.Select);
+                    editor.SelectionArea.FilterFunc = o => single.ObjectType.IsInstanceOfType(o);
+                }
+
                 return;
             }
 
