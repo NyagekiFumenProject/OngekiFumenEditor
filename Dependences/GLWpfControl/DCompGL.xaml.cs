@@ -52,11 +52,14 @@ namespace OpenTK.Wpf
 		private void DCompGL_Unloaded(object sender, RoutedEventArgs e)
 		{
 			loop = false;
+			hwndHost = IntPtr.Zero;
+			host?.Dispose();
 		}
 
 		private void DCompGL_Loaded(object sender, RoutedEventArgs e)
 		{
-			host = new(GetParentSize);
+			loop = true;
+            host = new(GetParentSize);
 			host.Resized += HostResized;
 			CompositionHostElement.Child = host;
 		}
@@ -105,14 +108,17 @@ namespace OpenTK.Wpf
 			}
 			Dispatcher.Invoke(() =>
 			{
-				GLCore.Dispose();
+				//GLCore.Dispose();
 				host.Dispose();
 			});
 		}
 
 		public void Start(GLWpfControlSettings settings)
 		{
-			GLCore.Start(settings);
+			Dispatcher.Invoke(() =>
+			{
+				GLCore.Start(settings);
+			});
 		}
 	}
 

@@ -82,12 +82,16 @@ namespace OpenTK.Wpf
 			var newWidth = (int)(width * dpiScale.DpiScaleX);
 			var newHeight = (int)(height * dpiScale.DpiScaleY);
 
-			// FIXME: It seems we can't use this function to detect if MSAA will work with NV_DX_interop or not...
-			//int result = _context.DxContext.CheckDeviceMultiSampleType(0, DeviceType.HAL, format, true, msaaType, out uint qualityLevels);
-
-			if (_context.dComp.GetD3D11Texture2D() == null || FramebufferWidth != newWidth || FramebufferHeight != newHeight || _hWnd != hWnd)
+            if (hWnd == IntPtr.Zero)
             {
-                _context.GraphicsContext.MakeCurrent();
+                return;
+            }
+            // FIXME: It seems we can't use this function to detect if MSAA will work with NV_DX_interop or not...
+            //int result = _context.DxContext.CheckDeviceMultiSampleType(0, DeviceType.HAL, format, true, msaaType, out uint qualityLevels);
+
+            if (_context.dComp.GetD3D11Texture2D() == null || FramebufferWidth != newWidth || FramebufferHeight != newHeight || _hWnd != hWnd)
+            {
+                //_context.GraphicsContext.MakeCurrent();
 
                 if (_context.dComp.GetD3D11Texture2D() != null)
                 {
@@ -234,7 +238,7 @@ namespace OpenTK.Wpf
                 return;
             }
 
-            _context.GraphicsContext.MakeCurrent();
+            //_context.GraphicsContext.MakeCurrent();
             DWriteCore.SetCurrent(_context.dComp);
 
             TimeSpan curFrameStamp = _stopwatch.Elapsed;

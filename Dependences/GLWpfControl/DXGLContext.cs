@@ -13,81 +13,93 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Wpf.Interop;
 using WindowState = OpenTK.Windowing.Common.WindowState;
 
-namespace OpenTK.Wpf 
+namespace OpenTK.Wpf
 {
-    /// This contains the DirectX and OpenGL contexts used in this control.
-    internal sealed class DxGlContext : IDisposable 
-    {
-        /// <summary>The DirectX context. This is basically the root of all DirectX state.</summary>
-        //public DXInterop.IDirect3D9Ex DxContext { get; }
+	/// This contains the DirectX and OpenGL contexts used in this control.
+	internal sealed class DxGlContext : IDisposable
+	{
+		/// <summary>The DirectX context. This is basically the root of all DirectX state.</summary>
+		//public DXInterop.IDirect3D9Ex DxContext { get; }
 
-        /// <summary>The DirectX device handle. This is the graphics card we're running on.</summary> 
-        //public DXInterop.IDirect3DDevice9Ex DxDevice { get; }
-        public DComp dComp { get; private set; }
+		/// <summary>The DirectX device handle. This is the graphics card we're running on.</summary> 
+		//public DXInterop.IDirect3DDevice9Ex DxDevice { get; }
+		public DComp dComp { get; private set; }
 
-        /// <summary>The OpenGL Context. This is basically the root of all OpenGL state.</summary>
+		/// <summary>The OpenGL Context. This is basically the root of all OpenGL state.</summary>
 		public IGraphicsContext GraphicsContext { get; }
 
-        /// <summary>An OpenGL handle to the DirectX device. Created and used by the WGL_dx_interop extension.</summary>
-        public IntPtr GLDeviceHandle { get; }
-        
-        /// <summary>The GLFW window that provides the OpenGL context. Null if a context was provided externally.</summary>
-        private NativeWindow? GlfwWindow { get; }
+		/// <summary>An OpenGL handle to the DirectX device. Created and used by the WGL_dx_interop extension.</summary>
+		public IntPtr GLDeviceHandle { get; }
+
+		/// <summary>The GLFW window that provides the OpenGL context. Null if a context was provided externally.</summary>
+		private static NativeWindow? GlfwWindow;
+
+		private static IGraphicsContext? SharedGraphicsContext;
 
 #if DEBUG
-        private readonly static DebugProc DebugProcCallback = Window_DebugProc;
+		private readonly static DebugProc DebugProcCallback = Window_DebugProc;
 #endif
 
-        public DxGlContext(GLWpfControlSettings settings)
-        {
-            // if the graphics context is null, we use the shared context.
-            if (settings.ContextToUse != null)
-            {
-                GraphicsContext = settings.ContextToUse;
-            }
-            else
-            {
-                NativeWindowSettings nws = NativeWindowSettings.Default;
-                nws.StartFocused = false;
-                nws.StartVisible = false;
-                nws.NumberOfSamples = 0;
-                nws.SharedContext = settings.SharedContext;
-                // If we ask GLFW for 1.0, we should get the highest level context available with full compat.
-                nws.APIVersion = new Version(settings.MajorVersion, settings.MinorVersion);
-                nws.Flags = ContextFlags.Offscreen | settings.ContextFlags;
-                // We have to ask for any compat in this case.
-                nws.Profile = settings.Profile;
-                nws.WindowBorder = WindowBorder.Hidden;
-                nws.WindowState = WindowState.Minimized;
-                GlfwWindow = new NativeWindow(nws);
-                GraphicsContext = GlfwWindow.Context;
-                GraphicsContext.MakeCurrent();
+		public DxGlContext(GLWpfControlSettings settings)
+		{
+			// if the graphics context is null, we use the shared context.
+			if (settings.ContextToUse != null)
+			{
+				GraphicsContext = settings.ContextToUse;
+			}
+			else
+			{
+				if (SharedGraphicsContext == null)
+				{
 
-                IBindingsContext provider = settings.BindingsContext ?? new GLFWBindingsContext();
-                Wgl.LoadBindings(provider);
+					NativeWindowSettings nws = NativeWindowSettings.Default;
+					nws.StartFocused = false;
+					nws.StartVisible = false;
+					nws.NumberOfSamples = 0;
+					nws.SharedContext = settings.SharedContext;
+					// If we ask GLFW for 1.0, we should get the highest level context available with full compat.
+					nws.APIVersion = new Version(settings.MajorVersion, settings.MinorVersion);
+					nws.Flags = ContextFlags.Offscreen | settings.ContextFlags;
+					// We have to ask for any compat in this case.
+					nws.Profile = settings.Profile;
+					nws.WindowBorder = WindowBorder.Hidden;
+					nws.WindowState = WindowState.Minimized;
+					GlfwWindow = new NativeWindow(nws);
+					GraphicsContext = GlfwWindow.Context;
+					SharedGraphicsContext = GlfwWindow.Context;
+					GraphicsContext.MakeCurrent();
 
-                bool hasNVDXInterop = false;
-                unsafe
+					IBindingsContext provider = settings.BindingsContext ?? new GLFWBindingsContext();
+					Wgl.LoadBindings(provider);
+
+					bool hasNVDXInterop = false;
+					unsafe
+					{
+						IntPtr hwnd = GLFW.GetWin32Window(GlfwWindow.WindowPtr);
+						IntPtr hdc = DXInterop.GetDC(hwnd);
+						string exts = Wgl.Arb.GetExtensionsString(hdc);
+						DXInterop.ReleaseDC(hwnd, hdc);
+
+						foreach (string ext in exts.Split(' '))
+						{
+							if (ext == "WGL_NV_DX_interop" || ext == "NV_DX_interop")
+							{
+								hasNVDXInterop = true;
+								break;
+							}
+						}
+					}
+
+					if (hasNVDXInterop == false)
+					{
+						throw new PlatformNotSupportedException("NV_DX_interop extension is not suppored. This extensions is currently needed for GLWpfControl to work.");
+					}
+				}
+                else
                 {
-                    IntPtr hwnd = GLFW.GetWin32Window(GlfwWindow.WindowPtr);
-                    IntPtr hdc = DXInterop.GetDC(hwnd);
-                    string exts = Wgl.Arb.GetExtensionsString(hdc);
-                    DXInterop.ReleaseDC(hwnd, hdc);
-
-                    foreach (string ext in exts.Split(' '))
-                    {
-                        if (ext == "WGL_NV_DX_interop" || ext == "NV_DX_interop")
-                        {
-                            hasNVDXInterop = true;
-                            break;
-                        }
-                    }
+					GraphicsContext = SharedGraphicsContext;
                 }
 
-                if (hasNVDXInterop == false)
-                {
-                    throw new PlatformNotSupportedException("NV_DX_interop extension is not suppored. This extensions is currently needed for GLWpfControl to work.");
-                }
 
 #if DEBUG
                 //GL.DebugMessageCallback(DebugProcCallback, IntPtr.Zero);
@@ -96,113 +108,113 @@ namespace OpenTK.Wpf
 #endif
             }
 
-            //DXInterop.Direct3DCreate9Ex(DXInterop.DefaultSdkVersion, out DXInterop.IDirect3D9Ex dxContext);
-            //DxContext = dxContext;
+			//DXInterop.Direct3DCreate9Ex(DXInterop.DefaultSdkVersion, out DXInterop.IDirect3D9Ex dxContext);
+			//DxContext = dxContext;
 
-            PresentationParameters deviceParameters = new PresentationParameters
-            {
-                Windowed = 1,
-                SwapEffect = SwapEffect.Discard,
-                DeviceWindowHandle = IntPtr.Zero,
-                PresentationInterval = 0,
-                BackBufferFormat = Format.X8R8G8B8,
-                BackBufferWidth = 1,
-                BackBufferHeight = 1,
-                AutoDepthStencilFormat = Format.Unknown,
-                BackBufferCount = 1,
-                EnableAutoDepthStencil = 0,
-                Flags = 0,
-                FullScreen_RefreshRateInHz = 0,
-                MultiSampleQuality = 0,
-                MultiSampleType = MultisampleType.D3DMULTISAMPLE_NONE,
-            };
+			PresentationParameters deviceParameters = new PresentationParameters
+			{
+				Windowed = 1,
+				SwapEffect = SwapEffect.Discard,
+				DeviceWindowHandle = IntPtr.Zero,
+				PresentationInterval = 0,
+				BackBufferFormat = Format.X8R8G8B8,
+				BackBufferWidth = 1,
+				BackBufferHeight = 1,
+				AutoDepthStencilFormat = Format.Unknown,
+				BackBufferCount = 1,
+				EnableAutoDepthStencil = 0,
+				Flags = 0,
+				FullScreen_RefreshRateInHz = 0,
+				MultiSampleQuality = 0,
+				MultiSampleType = MultisampleType.D3DMULTISAMPLE_NONE,
+			};
 
-            //dxContext.CreateDeviceEx(
-            //    0,
-            //    DeviceType.HAL,
-            //    IntPtr.Zero,
-            //    CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.PureDevice | CreateFlags.FpuPreserve,
-            //    ref deviceParameters,
-            //    IntPtr.Zero,
-            //    out DXInterop.IDirect3DDevice9Ex dxDevice);
-            dComp = new(1,1);
-            dComp.InitDirect3D(false);
-            var device = dComp.GetD3D11Device();
+			//dxContext.CreateDeviceEx(
+			//    0,
+			//    DeviceType.HAL,
+			//    IntPtr.Zero,
+			//    CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.PureDevice | CreateFlags.FpuPreserve,
+			//    ref deviceParameters,
+			//    IntPtr.Zero,
+			//    out DXInterop.IDirect3DDevice9Ex dxDevice);
+			dComp = new(1, 1);
+			dComp.InitDirect3D(false);
+			var device = dComp.GetD3D11Device();
 
-            GLDeviceHandle = Wgl.DXOpenDeviceNV(device.NativePointer);
-            if (GLDeviceHandle == IntPtr.Zero)
-            {
-                throw new Win32Exception(DXInterop.GetLastError());
-            }
-        }
+			GLDeviceHandle = Wgl.DXOpenDeviceNV(device.NativePointer);
+			if (GLDeviceHandle == IntPtr.Zero)
+			{
+				throw new Win32Exception(DXInterop.GetLastError());
+			}
+		}
 
-        ~DxGlContext()
-        {
-            Dispose();
-        }
+		~DxGlContext()
+		{
+			Dispose();
+		}
 
-        public void Dispose()
-        {
-            if (Wgl.DXCloseDeviceNV(GLDeviceHandle) == false)
-            {
-                throw new Win32Exception(DXInterop.GetLastError());
-            }
-            GlfwWindow?.Dispose();
-            dComp.DestoryRenderResources();
-            dComp.DestoryDirect3D();
+		public void Dispose()
+		{
+			if (Wgl.DXCloseDeviceNV(GLDeviceHandle) == false)
+			{
+				throw new Win32Exception(DXInterop.GetLastError());
+			}
+			//GlfwWindow?.Dispose();
+			dComp.DestoryRenderResources();
+			dComp.DestoryDirect3D();
 
-            GC.SuppressFinalize(this);
-        }
+			GC.SuppressFinalize(this);
+		}
 
 #if DEBUG
-        private static void Window_DebugProc(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr messagePtr, IntPtr userParam)
-        {
-            string message = Marshal.PtrToStringAnsi(messagePtr, length);
+		private static void Window_DebugProc(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr messagePtr, IntPtr userParam)
+		{
+			string message = Marshal.PtrToStringAnsi(messagePtr, length);
 
-            bool showMessage = true;
+			bool showMessage = true;
 
-            switch (source)
-            {
-                case DebugSource.DebugSourceApplication:
-                    showMessage = false;
-                    break;
-                case DebugSource.DontCare:
-                case DebugSource.DebugSourceApi:
-                case DebugSource.DebugSourceWindowSystem:
-                case DebugSource.DebugSourceShaderCompiler:
-                case DebugSource.DebugSourceThirdParty:
-                case DebugSource.DebugSourceOther:
-                default:
-                    showMessage = true;
-                    break;
-            }
+			switch (source)
+			{
+				case DebugSource.DebugSourceApplication:
+					showMessage = false;
+					break;
+				case DebugSource.DontCare:
+				case DebugSource.DebugSourceApi:
+				case DebugSource.DebugSourceWindowSystem:
+				case DebugSource.DebugSourceShaderCompiler:
+				case DebugSource.DebugSourceThirdParty:
+				case DebugSource.DebugSourceOther:
+				default:
+					showMessage = true;
+					break;
+			}
 
-            if (showMessage)
-            {
-                switch (severity)
-                {
-                    case DebugSeverity.DontCare:
-                        Debug.Print($"[DontCare] {message}");
-                        break;
-                    case DebugSeverity.DebugSeverityNotification:
-                        //Debug.Print($"[Notification] [{source}] {message}");
-                        break;
-                    case DebugSeverity.DebugSeverityHigh:
-                        Debug.Print($"[Error] [{source}] {message}");
-                        //Debug.Break();
-                        break;
-                    case DebugSeverity.DebugSeverityMedium:
-                        Debug.Print($"[Warning] [{source}] {message}");
-                        break;
-                    case DebugSeverity.DebugSeverityLow:
-                        Debug.Print($"[Info] [{source}] {message}");
-                        break;
-                    default:
-                        Debug.Print($"[default] {message}");
-                        break;
-                }
-            }
-        }
+			if (showMessage)
+			{
+				switch (severity)
+				{
+					case DebugSeverity.DontCare:
+						Debug.Print($"[DontCare] {message}");
+						break;
+					case DebugSeverity.DebugSeverityNotification:
+						//Debug.Print($"[Notification] [{source}] {message}");
+						break;
+					case DebugSeverity.DebugSeverityHigh:
+						Debug.Print($"[Error] [{source}] {message}");
+						//Debug.Break();
+						break;
+					case DebugSeverity.DebugSeverityMedium:
+						Debug.Print($"[Warning] [{source}] {message}");
+						break;
+					case DebugSeverity.DebugSeverityLow:
+						Debug.Print($"[Info] [{source}] {message}");
+						break;
+					default:
+						Debug.Print($"[default] {message}");
+						break;
+				}
+			}
+		}
 #endif
-    }
+	}
 }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Caliburn.Micro;
 using ControlzEx.Standard;
@@ -132,6 +133,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
 	public IPerfomenceMonitor PerfomenceMonitor { get; private set; } = new DummyPerformenceMonitor();
 
+	private DCompGL glView;
+
 	protected override void OnViewAttached(object view, object context)
 	{
 		base.OnViewAttached(view, context);
@@ -144,6 +147,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 					yield return f;
 		}
 		var glView = GetAllObject<DCompGL>((DependencyObject)view).FirstOrDefault();
+		IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
+		this.glView = glView;
+		//((UserControl)view).Loaded += FumenVisualEditorViewModel_Loaded;
+	}
+
+	private void FumenVisualEditorViewModel_Loaded(object sender, RoutedEventArgs e)
+	{
 		IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
 	}
 
