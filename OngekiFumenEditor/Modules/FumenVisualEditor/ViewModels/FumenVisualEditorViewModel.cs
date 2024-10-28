@@ -172,8 +172,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public EditorSetting Setting { get; } = new EditorSetting();
 
-        public SelectRegionType SelectRegionType = SelectRegionType.Select;
-
         public FumenVisualEditorViewModel() : base()
         {
             //replace owned impl

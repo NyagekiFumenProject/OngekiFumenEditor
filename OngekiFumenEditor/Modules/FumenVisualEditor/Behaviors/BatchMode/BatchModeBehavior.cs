@@ -50,8 +50,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         new Dictionary<string, Func<BatchModeBehavior, TriggerAction>>()
         {
             ["PreviewMouseDown"] = b => new LambdaTriggerAction(o => { b.MouseDown((MouseButtonEventArgs)o); }),
-            ["PreviewMouseUp"] = b => new LambdaTriggerAction(o => { b.MouseUp((MouseButtonEventArgs)o); }),
-            ["MouseMove"] = b => new LambdaTriggerAction(o => { b.MouseMove((MouseEventArgs)o);})
+            ["PreviewMouseUp"] = b => new LambdaTriggerAction(o => { b.MouseUp((MouseButtonEventArgs)o); })
         }.ToImmutableDictionary();
 
     public BatchModeSubmode CurrentSubmode
@@ -64,11 +63,8 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
     private readonly List<TriggerBase> OldKeyTriggers = new();
     private readonly List<TriggerBase> NewKeyTriggers = new();
 
-    private readonly IFumenEditorClipboard Clipboard;
-    
     public BatchModeBehavior()
     {
-        Clipboard = IoC.Get<IFumenEditorClipboard>();
     }
 
     protected override void OnAttached()
@@ -76,24 +72,27 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
             return;
 
-        var triggerCollection = Interaction.GetTriggers(AssociatedObject);
+        var editorTriggers = Interaction.GetTriggers(AssociatedObject);
 
         // Create brush key triggers on the FumenVisualEditorView.
-        // Temporarily delete existing ones that clash with brush keys. 
-        foreach (var (key, submodeType) in CommandDefinitions) {
-            var existingTriggers = triggerCollection.Where(t =>
-                t is ActionMessageKeyBinding am && am.Definition.Key == key.Key &&
-                am.Definition.Modifiers == key.Modifiers);
-            OldKeyTriggers.AddRange(existingTriggers);
-            OldKeyTriggers.ForEach(t => triggerCollection.Remove(t));
+        // Temporarily delete existing ones that clash with brush keys.
+        var allCommands = CommandDefinitions.SelectMany
+            <KeyValuePair<KeyBindingDefinition, BatchModeSubmode>, ((Key, ModifierKeys), BatchModeSubmode)>(kv =>
+            [
+                ((kv.Key.Key, kv.Key.Modifiers), kv.Value),
+                ((kv.Key.Key, kv.Key.Modifiers | ModifierKeys.Shift), kv.Value)
+            ]);
 
-            foreach (var mod in new[] { ModifierKeys.None, ModifierKeys.Shift }) {
-                // It's useful to hold down shift as we place multiple lanes, so bind everything to Shift+ as well.
-                var newTrigger = new KeyTrigger() { Key = key.Key, Modifiers = mod };
-                newTrigger.Actions.Add(new LambdaTriggerAction(_ => ApplySubmode(submodeType)));
-                triggerCollection.Add(newTrigger);
-                NewKeyTriggers.Add(newTrigger);
-            }
+        foreach (var ((key, modifiers), submodeType) in allCommands) {
+            var existingTriggers = editorTriggers.Where(t =>
+                t is ActionMessageKeyBinding am && am.Definition.Key == key && am.Definition.Modifiers == modifiers);
+            OldKeyTriggers.AddRange(existingTriggers);
+            OldKeyTriggers.ForEach(t => editorTriggers.Remove(t));
+
+            var newTrigger = new KeyTrigger() { Key = key, Modifiers = modifiers };
+            newTrigger.Actions.Add(new LambdaTriggerAction(_ => ApplySubmode(submodeType)));
+            editorTriggers.Add(newTrigger);
+            NewKeyTriggers.Add(newTrigger);
         }
 
         // Add mouse click events directly on the GlView.
@@ -139,10 +138,6 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         GeneratedClickTriggerActions.Clear();
 
         AssociatedObject.KeyDown -= ConsumeAlt;
-
-        if (AssociatedObject.DataContext is FumenVisualEditorViewModel edtior) {
-            edtior.SelectRegionType = SelectRegionType.Select;
-        }
     }
 
     private void ApplySubmode(BatchModeSubmode submode)
@@ -154,16 +149,6 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
     private bool lastLeftClickWasAltClick = false;
     private bool lastRightClickWasAltClick = false;
-
-    private void MouseMove(MouseEventArgs args)
-    {
-        if (Mouse.LeftButton != MouseButtonState.Pressed && Mouse.RightButton != MouseButtonState.Pressed)
-            return;
-        if (CurrentSubmode is null)
-            return;
-        if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
-            return;
-    }
 
     private void MouseDown(MouseButtonEventArgs args)
     {
