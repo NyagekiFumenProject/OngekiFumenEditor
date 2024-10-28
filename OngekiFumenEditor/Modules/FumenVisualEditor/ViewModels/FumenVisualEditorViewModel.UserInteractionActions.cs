@@ -514,6 +514,84 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             KeyboardAction_FastPlaceNewObject<Hold>(position);
         }
 
+        public void KeyboardAction_ChangeDockableLaneType(ActionExecutionContext e)
+        {
+            if (!(
+                SelectObjects.IsOnlyOne(out var r) &&
+                r is ConnectableObjectBase connectable &&
+                connectable.ReferenceStartObject is LaneStartBase start &&
+                start.IsDockableLane))
+            {
+                ToastNotify(Resources.SelectOneDockableLaneOnly);
+                return;
+            }
+
+            LaneStartBase genStart = start.LaneType switch
+            {
+                LaneType.Left => new LaneCenterStart(),
+                LaneType.Center => new LaneRightStart(),
+                LaneType.Right => new LaneLeftStart(),
+
+                LaneType.WallRight => new WallLeftStart(),
+                LaneType.WallLeft => new WallRightStart(),
+
+                _ => throw new NotSupportedException(),
+            };
+
+            void CopyCommon(ConnectableObjectBase s, ConnectableObjectBase t)
+            {
+                t.TGrid = s.TGrid;
+                t.XGrid = s.XGrid;
+            }
+
+            void CopyChild(ConnectableChildObjectBase s, ConnectableChildObjectBase t)
+            {
+                CopyCommon(s, t);
+
+                t.CurveInterpolaterFactory = s.CurveInterpolaterFactory;
+                t.CurvePrecision = s.CurvePrecision;
+                foreach (var ctrl in s.PathControls)
+                {
+                    var cp = (LaneCurvePathControlObject)ctrl.CopyNew();
+                    cp.TGrid = cp.TGrid;
+                    cp.XGrid = cp.XGrid;
+                    t.AddControlObject(cp);
+                }
+            }
+
+            //generate and setup new lane.
+            CopyCommon(start, genStart);
+            foreach (var child in start.Children)
+            {
+                var cpChild = genStart.CreateChildObject();
+                CopyChild(child, cpChild);
+                genStart.AddChildObject(cpChild);
+            }
+
+            var affactedDockableObjects = Fumen.GetAllDisplayableObjects()
+                .OfType<ILaneDockable>()
+                .Where(x => x.ReferenceLaneStart == start)
+                .ToArray();
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.kbd_editor_ChangeDockableLaneType, () =>
+            {
+                RemoveObject(start);
+                Fumen.AddObject(genStart);
+                NotifyObjectClicked(genStart);
+
+                foreach (var obj in affactedDockableObjects)
+                    obj.ReferenceLaneStart = genStart;
+            }, () =>
+            {
+                RemoveObject(genStart);
+                Fumen.AddObject(start);
+                NotifyObjectClicked(start);
+
+                foreach (var obj in affactedDockableObjects)
+                    obj.ReferenceLaneStart = start;
+            }));
+        }
+
         private void KeyboardAction_FastPlaceNewObject<T>(Point position) where T : OngekiObjectBase, new()
         {
             var tap = new T();
@@ -1113,7 +1191,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         TryCancelAllObjectSelecting();
                         Log.LogInfo($"SelectionArea ${CurrentCursorPosition}");
 
-                        if (!SelectionArea.IsActive) {
+                        if (!SelectionArea.IsActive)
+                        {
                             InitializeSelectionArea(SelectionAreaKind.Select);
                         }
                     }
@@ -1173,7 +1252,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var cursor = position ?? CurrentCursorPosition!.Value;
 
-            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) {
+            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
                 TryCancelAllObjectSelecting();
             }
 
@@ -1709,7 +1789,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 // Check coordinates are the same
                 if (tX.TGrid != obj.TGrid) return false;
-                if (obj is OngekiMovableObjectBase movable) {
+                if (obj is OngekiMovableObjectBase movable)
+                {
                     var mX = (OngekiMovableObjectBase)x;
                     if (movable.XGrid != mX.XGrid) return false;
                 }

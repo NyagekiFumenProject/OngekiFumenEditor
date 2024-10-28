@@ -1992,4 +1992,10 @@
   <data name="kbd_layer_Batch" xml:space="preserve">
     <value>Batch</value>
   </data>
+  <data name="kbd_editor_ChangeDockableLaneType" xml:space="preserve">
+    <value>Change type of dockable lane</value>
+  </data>
+  <data name="SelectOneDockableLaneOnly" xml:space="preserve">
+    <value />
+  </data>
 </root>

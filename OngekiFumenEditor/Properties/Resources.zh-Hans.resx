@@ -1875,4 +1875,7 @@
   <data name="kbd_layer_Batch" xml:space="preserve">
     <value>批量模式</value>
   </data>
+  <data name="SelectOneDockableLaneOnly" xml:space="preserve">
+    <value>请选择单独选择一个可击打轨道节点</value>
+  </data>
 </root>

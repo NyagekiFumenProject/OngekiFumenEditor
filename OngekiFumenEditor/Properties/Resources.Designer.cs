@@ -2968,6 +2968,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Change type of dockable lane 的本地化字符串。
+        /// </summary>
+        public static string kbd_editor_ChangeDockableLaneType {
+            get {
+                return ResourceManager.GetString("kbd_editor_ChangeDockableLaneType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Copy selection to clipboard 的本地化字符串。
         /// </summary>
         public static string kbd_editor_CopySelectedObjects {
@@ -4845,6 +4854,15 @@ namespace OngekiFumenEditor.Properties {
         public static string SelectMusicXmlFile {
             get {
                 return ResourceManager.GetString("SelectMusicXmlFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似  的本地化字符串。
+        /// </summary>
+        public static string SelectOneDockableLaneOnly {
+            get {
+                return ResourceManager.GetString("SelectOneDockableLaneOnly", resourceCulture);
             }
         }
         
