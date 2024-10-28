@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Base.Collections
         private IIntervalTree<double, SoflanSegment> cachePostionList_PreviewMode;
 
         [Flags]
-        public enum ChgEvt
+        private enum ChgEvt
         {
             None = 0,
             BpmChanged = 1,
