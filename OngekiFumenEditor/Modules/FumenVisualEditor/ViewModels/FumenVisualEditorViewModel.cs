@@ -175,8 +175,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public EditorSetting Setting { get; } = new EditorSetting();
 
-        public SelectRegionType SelectRegionType = SelectRegionType.Select;
-
         public FumenVisualEditorViewModel() : base()
         {
             //replace owned impl
@@ -184,6 +182,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
             DisplayName = default;
+
+            SelectionArea = new(this);
         }
 
         #region Document New/Save/Load

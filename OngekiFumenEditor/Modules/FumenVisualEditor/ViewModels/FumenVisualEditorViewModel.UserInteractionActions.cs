@@ -86,40 +86,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Selection
 
-        private Visibility selectionVisibility = Visibility.Collapsed;
-        public Visibility SelectionVisibility
-        {
-            get => selectionVisibility;
-            set => Set(ref selectionVisibility, value);
-        }
+        public readonly SelectionArea SelectionArea;
 
-        private Vector2 selectionStartPosition;
-        public Vector2 SelectionStartPosition
-        {
-            get => selectionStartPosition;
-            set => Set(ref selectionStartPosition, value);
-        }
-
-        private Vector2 selectionCurrentCursorPosition;
-        public Vector2 SelectionCurrentCursorPosition
-        {
-            get => selectionCurrentCursorPosition;
-            set
-            {
-                Set(ref selectionCurrentCursorPosition, value);
-                RecalculateSelectionRect();
-            }
-        }
-
-        private Rect selectionRect;
-        public Rect SelectionRect
-        {
-            get => selectionRect;
-            set => Set(ref selectionRect, value);
-        }
-
-        public bool IsRangeSelecting => SelectionVisibility == Visibility.Visible;
+        public bool IsRangeSelecting => SelectionArea.IsActive;
         public bool IsPreventMutualExclusionSelecting { get; set; }
+
+        public void ConsumeSelectionArea()
+        {
+            if (!SelectionArea.IsActive)
+                return;
+
+            SelectionArea.ApplyRangeAction();
+            SelectionArea.IsActive = false;
+        }
 
         public void ClearSelection()
         {
@@ -417,7 +396,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private Dictionary<ITimelineObject, double> cacheObjectAudioTime = new();
         private OngekiObjectBase mouseDownHitObject;
         private Point? mouseDownHitObjectPosition;
-        private Point mouseSelectRangeStartPosition;
         /// <summary>
         /// 表示指针是否出拖动出滚动范围
         /// </summary>
@@ -479,61 +457,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         #endregion
-
-        private void SelectRangeObjects()
-        {
-            if (!IsDesignMode)
-            {
-                ToastNotify(Resources.EditorMustBeDesignMode);
-                return;
-            }
-
-            var selectObjects = GetRangeObjects().ToArray();
-
-            if (selectObjects.Length == 1)
-                NotifyObjectClicked(selectObjects.FirstOrDefault());
-            else
-            {
-                foreach (var o in selectObjects.OfType<ISelectableObject>())
-                    o.IsSelected = true;
-                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
-            }
-        }
-
-        public IEnumerable<OngekiObjectBase> GetRangeObjects()
-        {
-            var topY = Math.Max(SelectionCurrentCursorPosition.Y, SelectionStartPosition.Y);
-            var buttomY = Math.Min(SelectionCurrentCursorPosition.Y, SelectionStartPosition.Y);
-            var rightX = Math.Max(SelectionCurrentCursorPosition.X, SelectionStartPosition.X);
-            var leftX = Math.Min(SelectionCurrentCursorPosition.X, SelectionStartPosition.X);
-
-            var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(buttomY, this);
-            var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(topY, this);
-            var minXGrid = XGridCalculator.ConvertXToXGrid(leftX, this);
-            var maxXGrid = XGridCalculator.ConvertXToXGrid(rightX, this);
-
-            return Fumen.GetAllDisplayableObjects()
-                .OfType<OngekiObjectBase>()
-                .Distinct()
-                .Where(Check);
-
-            bool Check(OngekiObjectBase obj)
-            {
-                if (obj is ITimelineObject timelineObject)
-                {
-                    if (timelineObject.TGrid > maxTGrid || timelineObject.TGrid < minTGrid)
-                        return false;
-                }
-
-                if (obj is IHorizonPositionObject horizonPositionObject)
-                {
-                    if (horizonPositionObject.XGrid > maxXGrid || horizonPositionObject.XGrid < minXGrid)
-                        return false;
-                }
-
-                return true;
-            }
-        }
 
         public void OnFocusableChanged(ActionExecutionContext e)
         {
@@ -1057,9 +980,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 if (arg.ChangedButton == MouseButton.Left)
                 {
-                    if (IsRangeSelecting && SelectionCurrentCursorPosition != SelectionStartPosition)
+                    if (SelectionArea.IsActive && !SelectionArea.IsClick())
                     {
-                        SelectRangeObjects();
+                        ConsumeSelectionArea();
                     }
                     else
                     {
@@ -1108,8 +1031,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     }
 
                     isSelectRangeDragging = false;
-                    SelectionVisibility = Visibility.Collapsed;
                     currentDraggingActionId = int.MaxValue;
+                    SelectionArea.IsActive = false;
                 }
 
                 if (arg.ChangedButton == MouseButton.Middle)
@@ -1178,23 +1101,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     mouseDownHitObject = null;
                     mouseDownNextHitObject = null;
                     mouseDownHitObjectPosition = default;
-                    mouseSelectRangeStartPosition = position;
                     dragOutBound = false;
 
                     if (hitOngekiObject is null)
                     {
                         TryCancelAllObjectSelecting();
+                        Log.LogInfo($"SelectionArea ${CurrentCursorPosition}");
 
-                        //enable show selection
-
-                        SelectionStartPosition = new Vector2((float)position.X, (float)position.Y);
-                        SelectionCurrentCursorPosition = SelectionStartPosition;
-                        SelectionVisibility = Visibility.Visible;
+                        if (!SelectionArea.IsActive) {
+                            InitializeSelectionArea(SelectionAreaKind.Select);
+                        }
                     }
                     else
                     {
                         //这里如果已经有物件选择了就判断是否还有其他物件可以选择
-                        SelectionVisibility = Visibility.Collapsed;
+                        SelectionArea.IsActive = false;
                         mouseDownHitObject = hitOngekiObject;
                         mouseDownHitObjectPosition = position;
 
@@ -1243,6 +1164,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             (e.View as FrameworkElement)?.Focus();
         }
 
+        public void InitializeSelectionArea(SelectionAreaKind kind, Point? position = null)
+        {
+            var cursor = position ?? CurrentCursorPosition!.Value;
+
+            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) {
+                TryCancelAllObjectSelecting();
+            }
+
+            SelectionArea.SelectionAreaKind = kind;
+            SelectionArea.IsActive = true;
+            SelectionArea.FilterFunc = null;
+            SelectionArea.StartPoint = cursor;
+            SelectionArea.EndPoint = cursor;
+        }
+
         public void OnMouseMove(ActionExecutionContext e)
         {
             if (e.EventArgs is not MouseEventArgs args || args.Handled)
@@ -1284,10 +1220,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
                 }
 
-                if (IsRangeSelecting)
+                if (SelectionArea.IsActive)
                 {
                     var rp = 1 - pos.Y / ViewHeight;
-                    var srp = 1 - mouseSelectRangeStartPosition.Y / ViewHeight;
                     var offsetY = 0d;
 
                     //const double dragDist = 0.7;
@@ -1318,7 +1253,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     //拉框
                     var p = pos;
                     p.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - p.Y + offsetY));
-                    SelectionCurrentCursorPosition = new Vector2((float)p.X, (float)p.Y);
+                    SelectionArea.EndPoint = p;
                 }
 
                 if (Mouse.LeftButton == MouseButtonState.Pressed)
@@ -1335,7 +1270,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     });
 
                     var rp = 1 - pos.Y / ViewHeight;
-                    var srp = 1 - mouseSelectRangeStartPosition.Y / ViewHeight;
                     var offsetY = 0d;
 
                     //const double dragDist = 0.7;
@@ -1483,22 +1417,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         #endregion
-
-        private void RecalculateSelectionRect()
-        {
-            var sx = Math.Min(SelectionStartPosition.X, SelectionCurrentCursorPosition.X);
-            var sy = Math.Min(SelectionStartPosition.Y, SelectionCurrentCursorPosition.Y);
-
-            var ex = Math.Max(SelectionStartPosition.X, SelectionCurrentCursorPosition.X);
-            var ey = Math.Max(SelectionStartPosition.Y, SelectionCurrentCursorPosition.Y);
-
-            var width = Math.Abs(sx - ex);
-            var height = Math.Abs(sy - ey);
-
-            SelectionRect = new Rect(sx, sy, width, height);
-
-            //Log.LogDebug($"SelectionRect = {SelectionRect}");
-        }
 
         private void UpdateCurrentCursorPosition(Point pos)
         {
@@ -1777,6 +1695,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         #region Object Interaction
 
         public void MoveObjectTo(OngekiObjectBase obj, Point point) => InteractiveManager.GetInteractive(obj).OnMoveCanvas(obj, point, this);
+
+        public OngekiObjectBase? GetConflictingObject(OngekiTimelineObjectBase obj)
+        {
+            return (OngekiObjectBase)Fumen.GetAllDisplayableObjects().FirstOrDefault(x =>
+            {
+                if (x is not OngekiTimelineObjectBase tX) return false;
+
+                // Check coordinates are the same
+                if (tX.TGrid != obj.TGrid) return false;
+                if (obj is OngekiMovableObjectBase movable) {
+                    var mX = (OngekiMovableObjectBase)x;
+                    if (movable.XGrid != mX.XGrid) return false;
+                }
+
+                return obj switch
+                {
+                    Tap => x is Tap or Hold or HoldEnd,
+                    Hold => x is Hold or Tap,
+                    HoldEnd => x is Tap,
+                    IBulletPalleteReferencable bullet => x is IBulletPalleteReferencable bX && bX.ReferenceBulletPallete == bullet.ReferenceBulletPallete,
+                    _ => obj.GetType().IsInstanceOfType(x)
+                };
+            });
+        }
 
         #endregion
     }
