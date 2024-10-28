@@ -39,7 +39,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg
             {
                 try
                 {
-                    var opt = new GenerateOption()
+                    var opt = new SvgGenerateOption()
                     {
                         Duration = editor.EditorProjectData.AudioDuration,
                         OutputFilePath = Path.GetTempFileName() + ".svg"

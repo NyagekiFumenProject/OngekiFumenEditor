@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
         public DefaultCommandExecutor()
         {
             rootCommand = new RootCommand("CommandLine for OngekiFumenEditor");
-            rootCommand.AddCommand(GenerateVerbCommands<GenerateOption>("svg", Resources.ProgramCommandDescriptionSvg, ProcessSvgCommand));
+            rootCommand.AddCommand(GenerateVerbCommands<SvgGenerateOption>("svg", Resources.ProgramCommandDescriptionSvg, ProcessSvgCommand));
             rootCommand.AddCommand(GenerateVerbCommands<FumenConvertOption>("convert", Resources.ProgramCommandConvert, ProcessConvertCommand));
             rootCommand.AddCommand(GenerateVerbCommands<JacketGenerateOption>("jacket", Resources.ProgramCommandJacket, ProcessJacketCommand));
             rootCommand.AddCommand(GenerateVerbCommands<AcbGenerateOption>("acb", Resources.ProgramCommandAcb, ProcessAcbCommand));
@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
             return command;
         }
 
-        private async Task<int> ProcessSvgCommand(GenerateOption opt)
+        private async Task<int> ProcessSvgCommand(SvgGenerateOption opt)
         {
             if (CheckRelativePaths(opt.AudioFilePath, opt.InputFumenFilePath, opt.OutputFilePath))
                 return -1;

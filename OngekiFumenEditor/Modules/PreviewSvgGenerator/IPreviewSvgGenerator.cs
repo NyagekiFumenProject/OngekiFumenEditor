@@ -11,6 +11,6 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator
 {
     public interface IPreviewSvgGenerator
     {
-        Task<byte[]> GenerateSvgAsync(OngekiFumen fumen, GenerateOption option);
+        Task<byte[]> GenerateSvgAsync(OngekiFumen fumen, SvgGenerateOption option);
     }
 }
