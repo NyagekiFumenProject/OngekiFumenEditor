@@ -123,7 +123,7 @@ namespace OngekiFumenEditor.Base.Collections
 			removeSet.Clear();
 			foreach (var conflicts in conflictGroups)
 			{
-				removeSet.AddRange(conflicts.Skip(1));
+				removeSet.AddRange(conflicts.SkipLast(1));
 				/*
                 Log.LogDebug("detect meter positions conflict : ");
                 foreach (var item in conflicts)
