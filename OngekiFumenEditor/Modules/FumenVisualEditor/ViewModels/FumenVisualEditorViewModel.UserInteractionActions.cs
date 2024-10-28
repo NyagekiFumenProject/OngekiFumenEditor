@@ -622,22 +622,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_DeleteSelectingObjects(ActionExecutionContext e)
         {
+            DeleteSelection();
+        }
+
+        public void DeleteSelection(IEnumerable<OngekiObjectBase> selection = null)
+        {
             if (IsLocked)
                 return;
 
             //获取要删除的物件
-            var selects = SelectObjects.OfType<OngekiObjectBase>().ToArray();
+            var selects = selection?.ToArray() ?? SelectObjects.OfType<OngekiObjectBase>().ToArray();
 
             //依附于其他对象的子物件，比如轨道节点，曲线控制节点，无法做到单纯删除和添加
             //记录它们子节点相对于集合的位置，下次恢复的时候就是插入了
             var curveControlMaps = selects
-                        .OfType<LaneCurvePathControlObject>()
-                        .GroupBy(x => x.RefCurveObject)
-                        .ToDictionary(x => x.Key, x => x.Select(c => (c, x.Key.PathControls.FirstIndexOf(p => p == c))).OrderBy(x => x.Item2).ToArray());
+                .OfType<LaneCurvePathControlObject>()
+                .GroupBy(x => x.RefCurveObject)
+                .ToDictionary(x => x.Key, x => x.Select(c => (c, x.Key.PathControls.FirstIndexOf(p => p == c))).OrderBy(x => x.Item2).ToArray());
             var connectablesMaps = selects
-                        .OfType<ConnectableChildObjectBase>()
-                        .GroupBy(x => x.ReferenceStartObject)
-                        .ToDictionary(x => x.Key, x => x.Select(c => (c, x.Key.Children.FirstIndexOf(p => p == c))).OrderBy(x => x.Item2).ToArray());
+                .OfType<ConnectableChildObjectBase>()
+                .GroupBy(x => x.ReferenceStartObject)
+                .ToDictionary(x => x.Key, x => x.Select(c => (c, x.Key.Children.FirstIndexOf(p => p == c))).OrderBy(x => x.Item2).ToArray());
 
             var expectedObjects = selects.Where(x => x switch
             {

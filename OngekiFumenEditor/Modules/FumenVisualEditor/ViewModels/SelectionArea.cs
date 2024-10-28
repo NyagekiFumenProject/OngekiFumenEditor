@@ -143,23 +143,7 @@ public class SelectionAreaKind
         if (!objs.Any())
             return;
 
-        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
-
-        editor.UndoRedoManager.ExecuteAction(new LambdaUndoAction(Resources.DeleteObjects, Redo, Undo));
-
-        return;
-
-        void Redo()
-        {
-            foreach (var o in objs)
-                editor.Fumen.RemoveObject(o);
-        }
-
-        void Undo()
-        {
-            foreach (var o in objs)
-                editor.Fumen.AddObject(o);
-        }
+        editor.DeleteSelection();
     });
 
     public readonly Action<FumenVisualEditorViewModel, IEnumerable<OngekiObjectBase>> SelectAction;
