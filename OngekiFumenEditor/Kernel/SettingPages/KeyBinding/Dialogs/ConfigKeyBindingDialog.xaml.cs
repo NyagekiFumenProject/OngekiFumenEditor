@@ -141,7 +141,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Dialogs
         {
             if (ConflictDefinition is not null)
             {
-                if (MessageBox.Show($"你绑定的键位和 {ConflictDefinition.Name} 冲突, 如果继续绑定则清空对方冲突的键位, 是否继续?", "警告", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                if (MessageBox.Show($"你绑定的键位和 {ConflictDefinition.DisplayName} 冲突, 如果继续绑定则清空对方冲突的键位, 是否继续?", "警告", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                     return;
             }
             UpdateExpression();

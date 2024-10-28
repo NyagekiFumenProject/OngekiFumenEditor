@@ -18,6 +18,8 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
 
         public string Name => Resources.ResourceManager.GetString(resourceName);
 
+        public string DisplayName => $"[{Resources.ResourceManager.GetString($"kbd_layer_{Layer}")}]{Name}";
+
         public KeyBindingDefinition(string resourceName, Key defaultKey, KeyBindingLayer layer = KeyBindingLayer.Normal) : this(resourceName, ModifierKeys.None, defaultKey, layer)
         { }
 

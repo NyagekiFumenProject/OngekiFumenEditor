@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels
         {
             keybindingManager = IoC.Get<IKeyBindingManager>();
 
-            definitions = keybindingManager.KeyBindingDefinations.ToArray();
+            definitions = keybindingManager.KeyBindingDefinations.OrderBy(x => x.DisplayName).ToArray();
             UpdateDisplayList();
         }
 

@@ -127,7 +127,7 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
 
         public void ChangeKeyBinding(KeyBindingDefinition definition, Key newKey, ModifierKeys newModifier)
         {
-            Log.LogInfo($"[{definition.Name}] {KeyBindingDefinition.FormatToExpression(definition.Key, definition.Modifiers)}  -->  {KeyBindingDefinition.FormatToExpression(newKey, newModifier)}");
+            Log.LogInfo($"[{definition.DisplayName}] {KeyBindingDefinition.FormatToExpression(definition.Key, definition.Modifiers)}  -->  {KeyBindingDefinition.FormatToExpression(newKey, newModifier)}");
 
             definition.Key = newKey;
             definition.Modifiers = newModifier;

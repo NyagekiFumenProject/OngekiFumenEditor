@@ -3121,6 +3121,33 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Batch 的本地化字符串。
+        /// </summary>
+        public static string kbd_layer_Batch {
+            get {
+                return ResourceManager.GetString("kbd_layer_Batch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Global 的本地化字符串。
+        /// </summary>
+        public static string kbd_layer_Global {
+            get {
+                return ResourceManager.GetString("kbd_layer_Global", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Normal 的本地化字符串。
+        /// </summary>
+        public static string kbd_layer_Normal {
+            get {
+                return ResourceManager.GetString("kbd_layer_Normal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Conflicts with keybinding {0} 的本地化字符串。
         /// </summary>
         public static string KeyBindingConflictDetect {

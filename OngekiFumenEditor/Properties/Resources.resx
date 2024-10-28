@@ -1871,7 +1871,7 @@
   </data>
   <data name="InvalidColorId" xml:space="preserve">
     <value>Invalid ColorId: {0}</value>
-    </data>
+  </data>
   <data name="kbd_batch_ModeWallLeft" xml:space="preserve">
     <value>Batch: Wall Left</value>
   </data>
@@ -1982,5 +1982,14 @@
   </data>
   <data name="CannotBatchInputClipboardNotBrushable" xml:space="preserve">
     <value>The clipboard contents are not brushable</value>
+  </data>
+  <data name="kbd_layer_Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="kbd_layer_Global" xml:space="preserve">
+    <value>Global</value>
+  </data>
+  <data name="kbd_layer_Batch" xml:space="preserve">
+    <value>Batch</value>
   </data>
 </root>
