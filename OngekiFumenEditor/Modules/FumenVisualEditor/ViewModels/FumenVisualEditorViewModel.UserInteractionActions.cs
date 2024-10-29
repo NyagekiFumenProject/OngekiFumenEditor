@@ -1791,8 +1791,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (tX.TGrid != obj.TGrid) return false;
                 if (obj is OngekiMovableObjectBase movable)
                 {
-                    var mX = (OngekiMovableObjectBase)x;
-                    if (movable.XGrid != mX.XGrid) return false;
+                    var mX = x as OngekiMovableObjectBase;
+                    if (movable.XGrid != mX?.XGrid) return false;
                 }
 
                 return obj switch
