@@ -12,6 +12,7 @@ using System.Numerics;
 using OngekiFumenEditor.Utils.ObjectPool;
 using EarcutNet;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
