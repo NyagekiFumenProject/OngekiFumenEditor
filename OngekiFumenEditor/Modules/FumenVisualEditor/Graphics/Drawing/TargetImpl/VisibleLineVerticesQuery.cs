@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
         {
             if (start is null)
                 return;
@@ -21,13 +21,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
 
+            var tempVertices = ObjectPool<List<LineVertex>>.Get();
+            tempVertices.Clear();
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
                 var y = (float)target.ConvertToY(tGridUnit);
+                var vert = new LineVertex(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash);
 
-                outVertices.Add(new(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash));
+                tempVertices.Add(vert);
             }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint(TGrid tGrid, XGrid xGrid, bool isVailed) => PostPoint2(tGrid.TotalUnit, xGrid.TotalUnit, isVailed);
@@ -124,7 +128,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 prevVisible = visible;
             }
 
+            //optimze vertices
+            for (var i = 0; i < tempVertices.Count - 3; i++)
+            {
+                var a1 = tempVertices[i];
+                var a2 = tempVertices[i + 1];
+                var b1 = tempVertices[i + 2];
+                var b2 = tempVertices[i + 3];
+
+                if (!(a1 == b1 && a2 == b2))
+                    outVertices.Add(a1);
+
+                if ((a1.Point.X == a2.Point.X && a2.Point.X == b1.Point.X) || (a1.Point.Y == a2.Point.Y && a2.Point.Y == b1.Point.Y))
+                {
+                    outVertices.Add(b1);
+                    i += 2;
+                }
+                else if (a1.Point == a2.Point)
+                {
+                    i += 1;
+                }
+            }
+
+            //add remain vertices
+            outVertices.AddRange(tempVertices.Skip(tempVertices.Count - 3));
+
             ObjectPool<List<SoflanPoint>>.Return(affectedSoflanPoints);
+            ObjectPool<List<LineVertex>>.Return(tempVertices);
         }
 
         //BACKUP
