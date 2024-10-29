@@ -67,24 +67,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                  Check if there is any SoflanPoint before connectable object
                  If exist, just interpolate a new point to insert
                  */
-                if (affectedSoflanPoints.Count == 0)
-                    return;
-
-                var checkTGrid = affectedSoflanPoints[^1].TGrid;
-                var diff = checkTGrid.TotalUnit - totalTGrid;
-
-                if (diff > 0)
-                    return;
-
-                if (diff < 0)
+                while (affectedSoflanPoints.Count > 0)
                 {
-                    var xGrid = start.CalulateXGrid(checkTGrid);
-                    PostPoint(checkTGrid, xGrid, isVailed);
-                }
+                    var checkTGrid = affectedSoflanPoints[^1].TGrid;
+                    var diff = checkTGrid.TotalUnit - totalTGrid;
 
-                affectedSoflanPoints.RemoveAt(affectedSoflanPoints.Count - 1);
-                //check again
-                CheckIfSoflanChanged2(totalTGrid, isVailed);
+                    if (diff > 0)
+                        return;
+
+                    if (diff < 0)
+                    {
+                        var xGrid = start.CalulateXGrid(checkTGrid);
+                        PostPoint(checkTGrid, xGrid, isVailed);
+                    }
+
+                    affectedSoflanPoints.RemoveAt(affectedSoflanPoints.Count - 1);
+                }
             }
 
             foreach (var childObj in start.Children)
