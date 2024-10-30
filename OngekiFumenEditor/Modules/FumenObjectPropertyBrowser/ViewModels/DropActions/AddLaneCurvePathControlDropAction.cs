@@ -25,15 +25,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(dragEndPoint))
                 return;
 
-            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
-            var dragXGrid = XGridCalculator.ConvertXToXGrid(dragEndPoint.X, editor);
             var isFirst = true;
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddCurveControlPoint, () =>
             {
-                cachePathControl.TGrid = dragTGrid;
-                cachePathControl.XGrid = dragXGrid;
                 curveObject.AddControlObject(cachePathControl);
+                editor.MoveObjectTo(cachePathControl, dragEndPoint);
                 if (isFirst)
                 {
                     editor.NotifyObjectClicked(cachePathControl);

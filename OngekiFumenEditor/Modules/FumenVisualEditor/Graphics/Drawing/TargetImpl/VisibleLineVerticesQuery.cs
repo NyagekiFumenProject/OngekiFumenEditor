@@ -129,12 +129,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             //optimze vertices
-            for (var i = 0; i < tempVertices.Count - 3; i++)
+            var idx = 0;
+            for (; idx < tempVertices.Count - 3; idx++)
             {
-                var a1 = tempVertices[i];
-                var a2 = tempVertices[i + 1];
-                var b1 = tempVertices[i + 2];
-                var b2 = tempVertices[i + 3];
+                var a1 = tempVertices[idx];
+                var a2 = tempVertices[idx + 1];
+                var b1 = tempVertices[idx + 2];
+                var b2 = tempVertices[idx + 3];
 
                 if (!(a1 == b1 && a2 == b2))
                     outVertices.Add(a1);
@@ -142,16 +143,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if ((a1.Point.X == a2.Point.X && a2.Point.X == b1.Point.X) || (a1.Point.Y == a2.Point.Y && a2.Point.Y == b1.Point.Y))
                 {
                     outVertices.Add(b1);
-                    i += 2;
+                    idx += 2;
                 }
                 else if (a1.Point == a2.Point)
                 {
-                    i += 1;
+                    idx += 1;
                 }
             }
 
             //add remain vertices
-            outVertices.AddRange(tempVertices.Skip(tempVertices.Count - 3));
+            outVertices.AddRange(tempVertices.Skip(idx));
 
             ObjectPool<List<SoflanPoint>>.Return(affectedSoflanPoints);
             ObjectPool<List<LineVertex>>.Return(tempVertices);

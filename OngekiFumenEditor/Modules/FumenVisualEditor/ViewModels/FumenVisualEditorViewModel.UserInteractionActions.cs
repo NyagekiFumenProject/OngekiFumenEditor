@@ -886,15 +886,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             var curvePoint = new LaneCurvePathControlObject();
-            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this);
-            var dragXGrid = XGridCalculator.ConvertXToXGrid(position.X, this);
             var isFirst = true;
 
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddCurveControlPoint, () =>
             {
-                curvePoint.TGrid = dragTGrid;
-                curvePoint.XGrid = dragXGrid;
                 child.AddControlObject(curvePoint);
+                MoveObjectTo(curvePoint, position);
                 if (isFirst)
                 {
                     NotifyObjectClicked(curvePoint);
