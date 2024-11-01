@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             enableSoundMultiPlay = AudioSetting.Default.EnableSoundMultiPlay;
             targetSampleRate = AudioSetting.Default.AudioSampleRate;
             enableVarspeed = AudioSetting.Default.EnableVarspeed;
-            SpeedCostDelayMs = AudioSetting.Default.VarspeedReadDurationMs;
+            SpeedCostDelayMs = enableVarspeed ? AudioSetting.Default.VarspeedReadDurationMs : 0;
 
             Log.LogDebug($"targetSampleRate: {targetSampleRate}");
             Log.LogDebug($"audioOutputType: {audioOutputType}");

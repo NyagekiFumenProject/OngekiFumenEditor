@@ -34,6 +34,27 @@
                 </StackPanel>
             </StackPanel>
         </GroupBox>
+        <GroupBox Margin="5" Header="{markup:Translate [Music]}">
+            <StackPanel Margin="10">
+                <CheckBox
+                    VerticalContentAlignment="Center"
+                    Content="允许变速播放音乐 (需要重启程序)"
+                    IsChecked="{Binding Setting.EnableVarspeed}" />
+                <StackPanel
+                    Margin="20,10,0,0"
+                    IsEnabled="{Binding Setting.EnableVarspeed}"
+                    Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="变速采样缓存时间窗口" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Setting.VarspeedReadDurationMs}">
+                    </TextBox>
+                    <TextBlock VerticalAlignment="Center" Text="毫秒" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Sound]}">
             <StackPanel Margin="10">
                 <Grid>

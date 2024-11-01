@@ -144,7 +144,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
             if (!IsPlaying)
                 return pauseTime;
             var offset = TimeSpan.FromTicks(sw.ElapsedTicks) * manager.MusicSpeed;
-            var adjustedTime = offset + baseOffset - TimeSpan.FromMilliseconds(manager.SpeedCostDelayMs);
+            var adjustedTime = offset + baseOffset - TimeSpan.FromMilliseconds(manager.SpeedCostDelayMs / 2);
             var actualTime = MathUtils.Max(TimeSpan.Zero, adjustedTime);
             return actualTime;
         }
