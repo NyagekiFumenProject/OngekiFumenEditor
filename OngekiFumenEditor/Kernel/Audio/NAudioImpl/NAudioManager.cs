@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
         private int targetSampleRate;
         private readonly IWavePlayer audioOutputDevice;
 
-        private readonly MixingSampleProvider audioMixer;
+        private readonly MixingSampleProvider masterMixer;
         private readonly MixingSampleProvider soundMixer;
         private readonly MixingSampleProvider musicMixer;
 
@@ -96,9 +96,9 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
             var format = WaveFormat.CreateIeeeFloatWaveFormat(targetSampleRate, 2);
 
-            audioMixer = new MixingSampleProvider(format);
-            audioMixer.ReadFully = true;
-            audioOutputDevice.Init(audioMixer);
+            masterMixer = new MixingSampleProvider(format);
+            masterMixer.ReadFully = true;
+            audioOutputDevice.Init(masterMixer);
             audioOutputDevice.Play();
 
             //setup sound
@@ -106,14 +106,14 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             soundMixer.ReadFully = true;
             soundMixer.MixerInputEnded += SoundMixer_MixerInputEnded;
             soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
-            audioMixer.AddMixerInput(soundVolumeWrapper);
+            masterMixer.AddMixerInput(soundVolumeWrapper);
             SoundVolume = AudioSetting.Default.SoundVolume;
 
             //setup music
             musicMixer = new MixingSampleProvider(format);
             musicMixer.ReadFully = true;
             musicVolumeWrapper = new VolumeSampleProvider(musicMixer);
-            audioMixer.AddMixerInput(musicVolumeWrapper);
+            masterMixer.AddMixerInput(musicVolumeWrapper);
             MusicVolume = AudioSetting.Default.MusicVolume;
 
             Log.LogInfo($"Audio implement will use {GetType()}");
@@ -189,7 +189,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
                     return null;
             }
 
-            var player = new DefaultMusicPlayer(musicMixer);
+            var player = new DefaultMusicPlayer(musicMixer, this);
             ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
             await player.Load(filePath, targetSampleRate);
             return player;
