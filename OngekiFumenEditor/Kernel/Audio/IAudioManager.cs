@@ -8,6 +8,7 @@ namespace OngekiFumenEditor.Kernel.Audio
 	{
 		float SoundVolume { get; set; }
         float MusicVolume { get; set; }
+        float MusicSpeed { get; set; }
 
         Task<ISoundPlayer> LoadSoundAsync(string filePath);
 		Task<IAudioPlayer> LoadAudioAsync(string filePath);

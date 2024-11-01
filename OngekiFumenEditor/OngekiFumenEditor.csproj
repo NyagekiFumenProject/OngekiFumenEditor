@@ -45,6 +45,7 @@
 		<Page Remove="Dependencies\**" />
 		<Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
 		<Page Remove="_bin\**" />
+		<None Remove="Costura64\SoundTouch_x64.dll" />
 		<None Remove="Resources\Icons\notication.png" />
 		<None Remove="Resources\suggestLayout.bin" />
 		<None Remove="Resources\Icons\icons8-selection-16.png" />
@@ -102,6 +103,8 @@
 		</EmbeddedResource>
 		<EmbeddedResource Include="Costura64\PVRTexLib.dll">
 		</EmbeddedResource>
+		<EmbeddedResource Include="Costura64\SoundTouch.dll">
+		</EmbeddedResource>
 		<EmbeddedResource Include="Costura64\TexToolWrap.dll">
 		</EmbeddedResource>
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\bell.png" />
@@ -142,9 +145,6 @@
 			<IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="FontStashSharp" Version="1.2.8" />
-		<PackageReference Include="ManagedBass" Version="3.1.1" />
-		<PackageReference Include="ManagedBass.Fx" Version="3.1.1" />
-		<PackageReference Include="ManagedBass.Mix" Version="3.1.1" />
 		<PackageReference Include="Microsoft.Build" Version="17.3.2" />
 		<PackageReference Include="Microsoft.Build.Framework" Version="17.3.2" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />

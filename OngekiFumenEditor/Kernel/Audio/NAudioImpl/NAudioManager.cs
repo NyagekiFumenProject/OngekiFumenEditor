@@ -5,6 +5,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Audio.DefaultImp.Music;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.SoundTouch;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
@@ -24,6 +25,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
         private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
         private bool enableSoundMultiPlay;
         private int targetSampleRate;
+        private bool enableVarspeed;
         private readonly IWavePlayer audioOutputDevice;
 
         private readonly MixingSampleProvider masterMixer;
@@ -35,6 +37,11 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
         private readonly VolumeSampleProvider soundVolumeWrapper;
         private readonly VolumeSampleProvider musicVolumeWrapper;
+
+        private VarispeedSampleProvider speedProvider;
+
+        public bool EnableVarspeed => speedProvider is not null;
+        public int SpeedCostDelayMs { get; init; }
 
         public float SoundVolume
         {
@@ -62,6 +69,21 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             }
         }
 
+        public float MusicSpeed
+        {
+            get => EnableVarspeed ? speedProvider.PlaybackRate : 1;
+            set
+            {
+                if (EnableVarspeed)
+                {
+                    //we can able to change speed when all player is not playing 
+                    if (!ownAudioPlayerRefs.Any(x => x.TryGetTarget(out var player) ? player.IsPlaying : false))
+                        speedProvider.PlaybackRate = value;
+                }
+                NotifyOfPropertyChange(() => MusicSpeed);
+            }
+        }
+
         public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; } = new[] {
             (".mp3","Audio File"),
             (".wav","Audio File"),
@@ -73,10 +95,14 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             var audioOutputType = (AudioOutputType)AudioSetting.Default.AudioOutputType;
             enableSoundMultiPlay = AudioSetting.Default.EnableSoundMultiPlay;
             targetSampleRate = AudioSetting.Default.AudioSampleRate;
+            enableVarspeed = AudioSetting.Default.EnableVarspeed;
+            SpeedCostDelayMs = AudioSetting.Default.VarspeedReadDurationMs;
 
             Log.LogDebug($"targetSampleRate: {targetSampleRate}");
             Log.LogDebug($"audioOutputType: {audioOutputType}");
             Log.LogDebug($"enableSoundMultiPlay: {enableSoundMultiPlay}");
+            Log.LogDebug($"enableVarspeed: {enableVarspeed}");
+            Log.LogDebug($"SpeedCostDelayMs: {SpeedCostDelayMs}");
 
             try
             {
@@ -112,7 +138,15 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             //setup music
             musicMixer = new MixingSampleProvider(format);
             musicMixer.ReadFully = true;
-            musicVolumeWrapper = new VolumeSampleProvider(musicMixer);
+            if (enableVarspeed)
+            {
+                speedProvider = new VarispeedSampleProvider(musicMixer, SpeedCostDelayMs, new SoundTouchProfile(true, false));
+                musicVolumeWrapper = new VolumeSampleProvider(speedProvider);
+            }
+            else
+            {
+                musicVolumeWrapper = new VolumeSampleProvider(musicMixer);
+            }
             masterMixer.AddMixerInput(musicVolumeWrapper);
             MusicVolume = AudioSetting.Default.MusicVolume;
 
@@ -251,6 +285,11 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
             //Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
             RemoveSoundMixerInput(handle.Provider, true);
+        }
+
+        public void Reposition()
+        {
+            speedProvider?.Reposition();
         }
     }
 }

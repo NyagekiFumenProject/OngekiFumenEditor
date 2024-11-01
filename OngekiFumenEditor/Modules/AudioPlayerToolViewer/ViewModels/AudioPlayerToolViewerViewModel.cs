@@ -135,6 +135,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
+        public float MusicSpeed
+        {
+            get => IoC.Get<IAudioManager>().MusicSpeed;
+            set
+            {
+                IoC.Get<IAudioManager>().MusicSpeed = value;
+                NotifyOfPropertyChange(() => MusicSpeed);
+            }
+        }
+
         public bool IsAudioButtonEnabled => AudioPlayer is not null;
 
         public AudioPlayerToolViewerViewModel()

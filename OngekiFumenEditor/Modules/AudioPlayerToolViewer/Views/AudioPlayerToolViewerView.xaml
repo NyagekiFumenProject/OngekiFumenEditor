@@ -256,6 +256,7 @@
                         <StackPanel
                             Margin="5"
                             HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding AudioPlayer.IsPlaying, Converter={StaticResource ReverseBoolConverter}}"
                             Orientation="Horizontal">
                             <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Speed]}" />
                             <Slider
@@ -269,7 +270,7 @@
                                 Minimum="0.25"
                                 TickFrequency="0.25"
                                 TickPlacement="BottomRight"
-                                Value="{Binding AudioPlayer.Speed}">
+                                Value="{Binding MusicSpeed}">
                             </Slider>
                         </StackPanel>
                         <StackPanel

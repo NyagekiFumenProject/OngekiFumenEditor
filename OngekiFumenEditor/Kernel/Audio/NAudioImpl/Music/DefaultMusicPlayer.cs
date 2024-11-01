@@ -3,6 +3,7 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.SoundTouch;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Utils;
@@ -112,18 +113,19 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
             }
         }
 
-        public void Seek(TimeSpan time, bool pause)
+        public void Seek(TimeSpan seekTime, bool pause)
         {
-            time = MathUtils.Max(TimeSpan.FromMilliseconds(0), MathUtils.Min(time, Duration));
+            seekTime = MathUtils.Max(TimeSpan.FromMilliseconds(0), MathUtils.Min(seekTime, Duration));
 
-            audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * time.TotalSeconds), SeekOrigin.Begin);
-            baseOffset = time;
+            audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds), SeekOrigin.Begin);
+            //more accurate
+            baseOffset = audioFileReader.CurrentTime;
 
             finishProvider.StartListen();
 
-            UpdatePropsManually();
             if (!pause)
                 Play();
+            UpdatePropsManually();
         }
 
         public async void Play()
@@ -131,6 +133,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
             IsPlaying = true;
             sw.Restart();
             musicMixer.AddMixerInput(finishProvider);
+            UpdatePropsManually();
+            manager.Reposition();
+
             await IoC.Get<ISchedulerManager>().AddScheduler(this);
         }
 
@@ -138,8 +143,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
         {
             if (!IsPlaying)
                 return pauseTime;
-            var offset = TimeSpan.FromTicks(sw.ElapsedTicks);
-            var actualTime = offset + baseOffset;
+            var offset = TimeSpan.FromTicks(sw.ElapsedTicks) * manager.MusicSpeed;
+            var adjustedTime = offset + baseOffset - TimeSpan.FromMilliseconds(manager.SpeedCostDelayMs);
+            var actualTime = MathUtils.Max(TimeSpan.Zero, adjustedTime);
             return actualTime;
         }
 
@@ -149,6 +155,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
             musicMixer.RemoveMixerInput(finishProvider);
             await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
             Seek(TimeSpan.FromMilliseconds(0), true);
+            UpdatePropsManually();
         }
 
         public async void Pause()
