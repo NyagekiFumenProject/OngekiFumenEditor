@@ -1570,7 +1570,7 @@
     <value>Mirror lane colors</value>
   </data>
   <data name="NoLimit" xml:space="preserve">
-    <value>x</value>
+    <value>(No Limit)</value>
   </data>
   <data name="ProgramCommandDescriptionSvg" xml:space="preserve">
     <value>Generate a preview image for a chart</value>
@@ -1996,6 +1996,18 @@
     <value>Change type of dockable lane</value>
   </data>
   <data name="SelectOneDockableLaneOnly" xml:space="preserve">
-    <value />
+    <value>Please select a dockable lane</value>
+  </data>
+  <data name="EnableVarspeed" xml:space="preserve">
+    <value>Allow variable speed music playback (requires program restart)</value>
+  </data>
+  <data name="VarspeedReadDurationMs" xml:space="preserve">
+    <value>Sampling audio buffer window size</value>
+  </data>
+  <data name="Millisecond" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="ConflictNotifyComfirm" xml:space="preserve">
+    <value>The key you bind to conflicts with {0}, if you continue to bind, the conflicting key will be cleared, do you want to continue?</value>
   </data>
 </root>

@@ -1186,6 +1186,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 The key you bind to conflicts with {0}, if you continue to bind, the conflicting key will be cleared, do you want to continue? 的本地化字符串。
+        /// </summary>
+        public static string ConflictNotifyComfirm {
+            get {
+                return ResourceManager.GetString("ConflictNotifyComfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 To control object time... 的本地化字符串。
         /// </summary>
         public static string ControlTimeline {
@@ -1893,6 +1902,15 @@ namespace OngekiFumenEditor.Properties {
         public static string EnableUpdateCheck {
             get {
                 return ResourceManager.GetString("EnableUpdateCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Allow variable speed music playback (requires program restart) 的本地化字符串。
+        /// </summary>
+        public static string EnableVarspeed {
+            get {
+                return ResourceManager.GetString("EnableVarspeed", resourceCulture);
             }
         }
         
@@ -3409,6 +3427,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 ms 的本地化字符串。
+        /// </summary>
+        public static string Millisecond {
+            get {
+                return ResourceManager.GetString("Millisecond", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Mirror lane colors 的本地化字符串。
         /// </summary>
         public static string MirrorSelectionLaneColors {
@@ -3607,7 +3634,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 x 的本地化字符串。
+        ///   查找类似 (No Limit) 的本地化字符串。
         /// </summary>
         public static string NoLimit {
             get {
@@ -4858,7 +4885,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Please select a dockable lane 的本地化字符串。
         /// </summary>
         public static string SelectOneDockableLaneOnly {
             get {
@@ -5502,6 +5529,15 @@ namespace OngekiFumenEditor.Properties {
         public static string UsingExtendScriptEditor {
             get {
                 return ResourceManager.GetString("UsingExtendScriptEditor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sampling audio buffer window size 的本地化字符串。
+        /// </summary>
+        public static string VarspeedReadDurationMs {
+            get {
+                return ResourceManager.GetString("VarspeedReadDurationMs", resourceCulture);
             }
         }
         

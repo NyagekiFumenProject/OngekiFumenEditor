@@ -258,6 +258,9 @@
   <data name="BulletType" xml:space="preserve">
     <value>子弹形状</value>
   </data>
+  <data name="BatchModeDeleteRangeOfObjectType" xml:space="preserve">
+    <value>批量删除 {0} (x{1})</value>
+  </data>
   <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>调用AcbGeneratorFuck.Generator.Generate()失败</value>
   </data>
@@ -470,6 +473,9 @@
   </data>
   <data name="DeleteObjects" xml:space="preserve">
     <value>删除物件</value>
+  </data>
+  <data name="DeleteSpecificObject" xml:space="preserve">
+    <value>删除 {0}</value>
   </data>
   <data name="DeleteSelectedPalletes" xml:space="preserve">
     <value>删除已选的子弹类型</value>
@@ -1866,6 +1872,67 @@
   <data name="InvalidColorId" xml:space="preserve">
     <value>颜色Id(ColorId)值无效: {0}</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="BatchModeAddObject" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="BatchModeModifierAddToSelection" xml:space="preserve">
+    <value>添加并选中</value>
+  </data>
+  <data name="LaneLeft" xml:space="preserve">
+    <value>红线</value>
+  </data>
+  <data name="LaneCenter" xml:space="preserve">
+    <value>绿线</value>
+  </data>
+  <data name="LaneRight" xml:space="preserve">
+    <value>蓝钱</value>
+  </data>
+  <data name="WallLeft" xml:space="preserve">
+    <value>左墙</value>
+  </data>
+  <data name="WallRight" xml:space="preserve">
+    <value>右墙</value>
+  </data>
+  <data name="Tap" xml:space="preserve">
+    <value>Tap</value>
+  </data>
+  <data name="Hold" xml:space="preserve">
+    <value>Hold</value>
+  </data>
+  <data name="Flick" xml:space="preserve">
+    <value>Flick</value>
+  </data>
+  <data name="LaneBlock" xml:space="preserve">
+    <value>锁边</value>
+  </data>
+  <data name="LaneColorful" xml:space="preserve">
+    <value>彩色装饰轨道</value>
+  </data>
+  <data name="BatchModeModifierSetCritical" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="BatchModeModifierSwitchDirection" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="ObjectFilterLanes" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="Bell" xml:space="preserve">
+    <value>Bell</value>
+  </data>
+  <data name="Clipboard" xml:space="preserve">
+    <value>剪贴板</value>
+  </data>
+  <data name="Objects" xml:space="preserve">
+    <value>物件</value>
+  </data>
+  <data name="CannotBatchInputClipboardEmpty" xml:space="preserve">
+    <value>剪贴板为空</value>
+  </data>
+  <data name="CannotBatchInputClipboardNotBrushable" xml:space="preserve">
+    <value>剪贴板里的内容并不支持批量操作</value>
+  </data>
   <data name="kbd_layer_Normal" xml:space="preserve">
     <value>通常模式</value>
   </data>
@@ -1875,7 +1942,22 @@
   <data name="kbd_layer_Batch" xml:space="preserve">
     <value>批量模式</value>
   </data>
+  <data name="kbd_editor_ChangeDockableLaneType" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
   <data name="SelectOneDockableLaneOnly" xml:space="preserve">
     <value>请选择单独选择一个可击打轨道节点</value>
+  </data>
+  <data name="EnableVarspeed" xml:space="preserve">
+    <value>允许变速播放音乐 (需要重启程序)</value>
+  </data>
+  <data name="VarspeedReadDurationMs" xml:space="preserve">
+    <value>变速采样缓存时间窗口</value>
+  </data>
+  <data name="Millisecond" xml:space="preserve">
+    <value>毫秒</value>
+  </data>
+  <data name="ConflictNotifyComfirm" xml:space="preserve">
+    <value>你绑定的键位和 {0} 冲突, 如果继续绑定则清空对方冲突的键位, 是否继续?</value>
   </data>
 </root>
