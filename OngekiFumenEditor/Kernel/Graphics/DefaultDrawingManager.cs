@@ -115,7 +115,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 				GraphicsProfile = ContextProfile.Core
 			};
 
-			Log.LogDebug($"GraphicsCompatability: {isCompatability}");
+            Log.LogDebug($"GraphicsCompatability: {isCompatability}");
 			Log.LogDebug($"OutputGraphicsLog: {isOutputLog}");
 
 			Log.LogDebug($"GLWpfControlSettings.Version: {setting.MajorVersion}.{setting.MinorVersion}");
@@ -124,7 +124,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
 			glView.Start(setting);
 
-			return Task.CompletedTask;
+            return Task.CompletedTask;
 		}
 	}
 }
