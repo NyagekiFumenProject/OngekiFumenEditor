@@ -5,7 +5,6 @@
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<DebugType>embedded</DebugType>
 		<LangVersion>preview</LangVersion>
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 		<DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
