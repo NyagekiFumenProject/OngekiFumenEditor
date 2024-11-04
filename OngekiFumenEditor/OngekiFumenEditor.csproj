@@ -151,18 +151,18 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.7.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-		<PackageReference Include="NAudio" Version="2.0.1" />
-		<PackageReference Include="Nerdbank.GitVersioning" Version="3.6.133">
+		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="Nerdbank.GitVersioning" Version="3.6.146">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="OpenTK" Version="4.3.0" />
+		<PackageReference Include="OpenTK" Version="4.8.2" />
 		<PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
-		<PackageReference Include="PixiEditor.ColorPicker" Version="3.3.1" />
-		<PackageReference Include="SharpVectors" Version="1.8.4" />
+		<PackageReference Include="PixiEditor.ColorPicker" Version="3.4.1" />
+		<PackageReference Include="SharpVectors" Version="1.8.4.2" />
 		<PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
 		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
-		<PackageReference Include="Svg" Version="3.4.6" />
+		<PackageReference Include="Svg" Version="3.4.7" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
 	</ItemGroup>
