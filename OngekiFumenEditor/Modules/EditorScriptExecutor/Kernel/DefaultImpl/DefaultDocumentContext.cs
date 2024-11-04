@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel.DefaultImpl
 			var result = await CompletionService.GetCompletionsAsync(document, cursorPos);
 			if (result is null)
 				yield break;
-			foreach (var item in result.Items)
+			foreach (var item in result.ItemsList)
 			{
 				var desc = await CompletionService.GetDescriptionAsync(document, item);
 				yield return new DefaultCompletionItem()

@@ -7,15 +7,31 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>preview</LangVersion>
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
-		<DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
 		<StartupObject>OngekiFumenEditor.Startup</StartupObject>
 		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
 	</PropertyGroup>
 
+	<!--当Debug编译时禁止Costura.Fody处理-->
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<DisableFody>true</DisableFody>
+	</PropertyGroup>
+
+	<!--当Debug编译时, SoundTouch.dll就复制到输出目录-->
+	<Target Condition="'$(Configuration)' == 'Debug'" Name="CopySoundTouchDll" AfterTargets="AfterBuild">
+		<Copy SourceFiles="Costura64\SoundTouch.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+	</Target>
+
+	<!--当Release编译时, SoundTouch.dll就交给Costura.Fody处理-->
+	<ItemGroup Condition="'$(Configuration)' != 'Debug'">
+		<None Remove="Costura64\SoundTouch_x64.dll" />
+		<EmbeddedResource Include="Costura64\SoundTouch.dll">
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<!--记录编译时间-->
 	<PropertyGroup>
 		<BuildDateTime>$([System.DateTime]::UtcNow.AddHours(8).ToString("yyyy/M/dd H:mm:ss.fff"))</BuildDateTime>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
 			<_Parameter1>BuildDateTime</_Parameter1>
@@ -23,11 +39,11 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	<!--处理pdb-->
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<DebugType>full</DebugType>
 	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<DebugType>none</DebugType>
 	</PropertyGroup>
 
@@ -102,8 +118,6 @@
 		</EmbeddedResource>
 		<EmbeddedResource Include="Costura64\PVRTexLib.dll">
 		</EmbeddedResource>
-		<EmbeddedResource Include="Costura64\SoundTouch.dll">
-		</EmbeddedResource>
 		<EmbeddedResource Include="Costura64\TexToolWrap.dll">
 		</EmbeddedResource>
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\bell.png" />
@@ -144,9 +158,9 @@
 			<IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="FontStashSharp" Version="1.3.9" />
-		<PackageReference Include="Microsoft.Build" Version="17.3.2" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.7.0" />
-		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.7.0" />
+		<PackageReference Include="Microsoft.Build" Version="17.7.2" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.11.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" ExcludeAssets="contentfiles;runtime;" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
 		<PackageReference Include="NAudio" Version="2.2.1" />
 		<PackageReference Include="Nerdbank.GitVersioning" Version="3.6.146">
@@ -680,14 +694,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProgramRootFiles Include="Resources/Binaries/ProgramRoot/**/*.*" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProgramRootFiles Remove="_bin\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<EmbeddedResource Update="Properties\Resources.zh-Hans.resx">
 			<LastGenOutput>Resources.zh-Hans.Designer.cs</LastGenOutput>
 			<Generator>PublicResXFileCodeGenerator</Generator>
@@ -702,15 +708,9 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
-	<Target Name="CopyProgramRootFiles" AfterTargets="AfterBuild">
-		<Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+	<!--删除.xml文件-->
+	<Target Name="DeleteXmlFiles" AfterTargets="AfterBuild">
+		<Delete Files="$(OutputPath)/*.xml" />
 	</Target>
-	<Target Name="CopyProgramRootFiles" AfterTargets="Publish">
-		<Copy SourceFiles="@(ProgramRootFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
-	</Target>
-	<!--
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="echo &quot;$(OutDir)&quot; &amp; xcopy &quot;$(ProjectDir)Resources\Binaries\ProgramRoot\*.*&quot; &quot;$(OutDir)&quot; /s /y" />
-  </Target>
-  -->
+	
 </Project>
