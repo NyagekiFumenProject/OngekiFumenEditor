@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel.DefaultImpl
 			root.Sdk = "Microsoft.NET.Sdk";
 
 			var projCommonGroup = root.AddPropertyGroup();
-			projCommonGroup.AddProperty("TargetFramework", "net6.0-windows");
+			projCommonGroup.AddProperty("TargetFramework", "net8.0-windows");
 			projCommonGroup.AddProperty("OutputType", "Exe");
 
 
