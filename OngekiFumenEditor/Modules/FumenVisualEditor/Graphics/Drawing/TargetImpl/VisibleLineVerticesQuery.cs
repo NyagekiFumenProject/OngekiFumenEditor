@@ -82,7 +82,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     if (diff < 0)
                     {
                         var xGrid = start.CalulateXGrid(checkTGrid);
-                        PostPoint(checkTGrid, xGrid, isVailed);
+                        if (xGrid is not null)
+                            PostPoint(checkTGrid, xGrid, isVailed);
                     }
 
                     affectedSoflanPoints.RemoveAt(affectedSoflanPoints.Count - 1);
