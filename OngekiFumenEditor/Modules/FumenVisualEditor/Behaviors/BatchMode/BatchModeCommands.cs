@@ -52,15 +52,13 @@ public abstract class BatchModeSubmodeCommandHandler<TCommandDefinition, TBatchS
     {
         base.Update(command);
 
-        if (Editor.CurrentActivatedEditor is null) {
-            command.Enabled = false;
-            command.Checked = false;
-            return;
-        }
-
-        if (Editor.CurrentActivatedEditor.IsBatchMode) {
+        if (Editor.CurrentActivatedEditor is not null && Editor.CurrentActivatedEditor.IsBatchMode) {
             command.Enabled = true;
             command.Checked = Editor.CurrentActivatedEditor.BatchModeBehavior.CurrentSubmode == Submode;
+        }
+        else {
+            command.Enabled = false;
+            command.Checked = false;
         }
     }
 
