@@ -21,7 +21,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
 /// </summary>
 public abstract class BatchModeSubmode
 {
-    public abstract string DisplayName { get; }
+    public abstract string ResourceKey { get; }
+    public string DisplayName => Resources.ResourceManager.GetString(ResourceKey)!;
 }
 
 /// <summary>
@@ -52,7 +53,7 @@ public class BatchModeInputClipboard : BatchModeInputSubmode
         Clipboard = IoC.Get<IFumenEditorClipboard>();
     }
 
-    public override string DisplayName => Resources.Clipboard;
+    public override string ResourceKey => nameof(Resources.Clipboard);
     public override IEnumerable<OngekiTimelineObjectBase> GenerateObject()
     {
         return Clipboard.CurrentCopiedObjects.Select(obj => (OngekiTimelineObjectBase)obj.CopyNew());
@@ -61,7 +62,7 @@ public class BatchModeInputClipboard : BatchModeInputSubmode
 
 public abstract class BatchModeSingleInputSubmode : BatchModeInputSubmode
 {
-    public abstract Type ObjectType { get;}
+    public abstract Type ObjectType { get; }
 }
 
 public abstract class BatchModeInputSubmode<T> : BatchModeSingleInputSubmode
@@ -83,32 +84,32 @@ public abstract class BatchModeInputLane<T> : BatchModeInputSubmode<T>
 
 public class BatchModeInputLaneLeft : BatchModeInputLane<LaneLeftStart>
 {
-    public override string DisplayName => Resources.LaneLeft;
+    public override string ResourceKey => nameof(Resources.LaneLeft);
 }
 
 public class BatchModeInputLaneCenter : BatchModeInputLane<LaneCenterStart>
 {
-    public override string DisplayName => Resources.LaneCenter;
+    public override string ResourceKey => nameof(Resources.LaneCenter);
 }
 
 public class BatchModeInputLaneRight : BatchModeInputLane<LaneRightStart>
 {
-    public override string DisplayName => Resources.LaneRight;
+    public override string ResourceKey => nameof(Resources.LaneRight);
 }
 
 public class BatchModeInputWallRight : BatchModeInputLane<WallRightStart>
 {
-    public override string DisplayName => Resources.WallRight;
+    public override string ResourceKey => nameof(Resources.WallRight);
 }
 
 public class BatchModeInputWallLeft : BatchModeInputLane<WallLeftStart>
 {
-    public override string DisplayName => Resources.WallLeft;
+    public override string ResourceKey => nameof(Resources.WallLeft);
 }
 
 public class BatchModeInputLaneColorful : BatchModeInputLane<ColorfulLaneStart>
 {
-    public override string DisplayName => Resources.LaneColorful;
+    public override string ResourceKey => nameof(Resources.LaneColorful);
 }
 
 public abstract class BatchModeInputHitSubmode<T> : BatchModeInputSubmode<T>
@@ -124,12 +125,12 @@ public abstract class BatchModeInputHitSubmode<T> : BatchModeInputSubmode<T>
 
 public class BatchModeInputTap : BatchModeInputHitSubmode<Tap>
 {
-    public override string DisplayName => Resources.Tap;
+    public override string ResourceKey => nameof(Resources.Tap);
 }
 
 public class BatchModeInputHold : BatchModeInputHitSubmode<Hold>
 {
-    public override string DisplayName => Resources.Hold;
+    public override string ResourceKey => nameof(Resources.Hold);
     public override bool AutoSelect => true;
 }
 
@@ -142,7 +143,7 @@ public class BatchModeInputFlick : BatchModeInputHitSubmode<Flick>
         ((Flick)baseObject).Direction = Flick.FlickDirection.Right;
     }
 
-    public override string DisplayName => Resources.Flick;
+    public override string ResourceKey => nameof(Resources.Flick);
 }
 
 public class BatchModeInputLaneBlock : BatchModeInputSubmode<LaneBlockArea>
@@ -155,29 +156,29 @@ public class BatchModeInputLaneBlock : BatchModeInputSubmode<LaneBlockArea>
         ((LaneBlockArea)baseObject).Direction = LaneBlockArea.BlockDirection.Right;
     }
 
-    public override string DisplayName => Resources.LaneBlock;
+    public override string ResourceKey => nameof(Resources.LaneBlock);
 }
 
 public class BatchModeInputNormalBell : BatchModeInputSubmode<Bell>
 {
-    public override string DisplayName => Resources.Bell;
+    public override string ResourceKey => nameof(Resources.Bell);
 }
 
 public class BatchModeFilterLanes : BatchModeFilterSubmode
 {
-    public override string DisplayName => Resources.ObjectFilterLanes;
+    public override string ResourceKey => nameof(Resources.ObjectFilterLanes);
     public override Func<OngekiObjectBase, bool> FilterFunction => obj => obj is LaneStartBase or LaneNextBase;
 }
 
 public class BatchModeFilterDockableObjects : BatchModeFilterSubmode
 {
-    public override string DisplayName => Resources.ObjectFilterDockables;
+    public override string ResourceKey => nameof(Resources.ObjectFilterDockables);
     public override Func<OngekiObjectBase, bool> FilterFunction => obj => obj is Tap or Hold or HoldEnd;
 }
 
 public class BatchModeFilterFloatingObjects : BatchModeFilterSubmode
 {
-    public override string DisplayName => Resources.ObjectFilterFloating;
+    public override string ResourceKey => nameof(Resources.ObjectFilterFloating);
     public override Func<OngekiObjectBase, bool> FilterFunction => obj => obj is Bell or Bullet or Flick;
 }
 
