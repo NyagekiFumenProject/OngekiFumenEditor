@@ -304,6 +304,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public override async Task<bool> CanCloseAsync(CancellationToken cancellationToken)
+        {
+            if (!IsDirty)
+                return true;
+
+            var result = MessageBox.Show(
+                Resources.SaveBeforeClosingPrompt.Format(FileName),
+                FileName,
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Warning,
+                MessageBoxResult.Cancel);
+
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    if (IsNew)
+                        return await DoSaveAs(this);
+                    await Save(FilePath);
+                    return true;
+                case MessageBoxResult.No:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         #endregion
 
         #region Activation

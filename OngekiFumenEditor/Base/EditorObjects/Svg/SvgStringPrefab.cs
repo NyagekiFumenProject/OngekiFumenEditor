@@ -84,7 +84,7 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 			brush.Freeze();
 			var pen = new Pen(brush, 1);
 			pen.Freeze();
-			var dpiInfo = VisualTreeHelper.GetDpi(Application.Current.MainWindow);
+			var dpiInfo = Application.Current.MainWindow is not null ? VisualTreeHelper.GetDpi(Application.Current.MainWindow) : new();
 
 			var direction = ContentFlowDirection switch
 			{

@@ -42,7 +42,10 @@
 * 打包生成工具
 * 完全实现Soflan倒车变速！
 * 多语言支持 (English/Japanese DONE) [For translators](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/For-translators)
-* 谱面预览生成 
+* 谱面预览生成
+* 程序更新检测/下载安装
+* 更好的CLI支持
+* 自定义快捷键按键绑定
 * 塞小功能&修BUG.... **<--- we are here! ---**
 ....、
 

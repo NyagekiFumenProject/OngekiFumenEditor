@@ -4370,7 +4370,16 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("Save", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Save changes to &quot;{0}&quot; before closing? 的本地化字符串。
+        /// </summary>
+        public static string SaveBeforeClosingPrompt {
+            get {
+                return ResourceManager.GetString("SaveBeforeClosingPrompt", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Record up to  的本地化字符串。
         /// </summary>

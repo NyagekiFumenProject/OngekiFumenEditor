@@ -1872,4 +1872,7 @@
   <data name="InvalidColorId" xml:space="preserve">
     <value>Invalid ColorId: {0}</value>
   </data>
+  <data name="SaveBeforeClosingPrompt" xml:space="preserve">
+    <value>Save changes to "{0}" before closing?</value>
+  </data>
 </root>
