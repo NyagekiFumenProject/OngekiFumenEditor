@@ -1866,4 +1866,7 @@
   <data name="ProgramUpdates" xml:space="preserve">
     <value>Program Updates</value>
   </data>
+  <data name="SaveBeforeClosingPrompt" xml:space="preserve">
+    <value>Save changes to "{0}" before closing?</value>
+  </data>
 </root>
