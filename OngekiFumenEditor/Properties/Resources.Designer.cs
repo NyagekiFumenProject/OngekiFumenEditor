@@ -385,6 +385,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Filter {0} 的本地化字符串。
+        /// </summary>
+        public static string BatchModeFilterTooltipFormat {
+            get {
+                return ResourceManager.GetString("BatchModeFilterTooltipFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Add to selection 的本地化字符串。
         /// </summary>
         public static string BatchModeModifierAddToSelection {

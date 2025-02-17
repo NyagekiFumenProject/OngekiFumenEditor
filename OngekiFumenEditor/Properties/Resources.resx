@@ -2013,4 +2013,7 @@
   <data name="SaveBeforeClosingPrompt" xml:space="preserve">
     <value>Save changes to "{0}" before closing?</value>
   </data>
+  <data name="BatchModeFilterTooltipFormat" xml:space="preserve">
+    <value>Filter {0}</value>
+  </data>
 </root>

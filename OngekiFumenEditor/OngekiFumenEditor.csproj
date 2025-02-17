@@ -65,6 +65,36 @@
 		<None Remove="Resources\suggestLayout.bin" />
 		<None Remove="Resources\Icons\icons8-selection-16.png" />
 		<Resource Include="Resources\Icons\icons8-selection-16.png" />
+		<None Remove="Resources\Icons\Batch\LaneLeft.png" />
+		<Resource Include="Resources\Icons\Batch\LaneLeft.png" />
+		<None Remove="Resources\Icons\Batch\Tap.png" />
+		<Resource Include="Resources\Icons\Batch\Tap.png" />
+		<None Remove="Resources\Icons\Batch\WallLeft.png" />
+		<Resource Include="Resources\Icons\Batch\WallLeft.png" />
+		<None Remove="Resources\Icons\Batch\WallRight.png" />
+		<Resource Include="Resources\Icons\Batch\WallRight.png" />
+		<None Remove="Resources\Icons\Batch\LaneRight.png" />
+		<Resource Include="Resources\Icons\Batch\LaneRight.png" />
+		<None Remove="Resources\Icons\Batch\LaneCenter.png" />
+		<Resource Include="Resources\Icons\Batch\LaneCenter.png" />
+		<None Remove="Resources\Icons\Batch\Flick.png" />
+		<Resource Include="Resources\Icons\Batch\Flick.png" />
+		<None Remove="Resources\Icons\Batch\Hold.png" />
+		<Resource Include="Resources\Icons\Batch\Hold.png" />
+		<None Remove="Resources\Icons\Batch\LaneColorful.png" />
+		<Resource Include="Resources\Icons\Batch\LaneColorful.png" />
+		<None Remove="Resources\Icons\Batch\ObjectFilterFloating.png" />
+		<Resource Include="Resources\Icons\Batch\ObjectFilterFloating.png" />
+		<None Remove="Resources\Icons\Batch\ObjectFilterDockables.png" />
+		<Resource Include="Resources\Icons\Batch\ObjectFilterDockables.png" />
+		<None Remove="Resources\Icons\Batch\ObjectFilterLanes.png" />
+		<Resource Include="Resources\Icons\Batch\ObjectFilterLanes.png" />
+		<None Remove="Resources\Icons\Batch\Bell.png" />
+		<Resource Include="Resources\Icons\Batch\Bell.png" />
+		<None Remove="Resources\Icons\Batch\LaneBlock.png" />
+		<Resource Include="Resources\Icons\Batch\LaneBlock.png" />
+		<None Remove="Resources\Icons\Batch\Clipboard.png" />
+		<Resource Include="Resources\Icons\Batch\Clipboard.png" />
 	</ItemGroup>
 
 	<ItemGroup>
