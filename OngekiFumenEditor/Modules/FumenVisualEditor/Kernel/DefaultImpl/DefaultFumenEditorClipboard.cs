@@ -377,11 +377,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 						var mirrorBaseX = mirrorXOpt is double _mirrorX ? _mirrorX : x;
 						var mirroredX = mirrorBaseX + mirrorBaseX - x;
-						offsetedX = mirroredX + offset.X;
 
-						return offsetedX;
+						return mirroredX + offset.X;
 					}
 
+					var mirrorBaseX = mirrorXOpt is double _mirrorX ? _mirrorX : sourceCanvasPos.X;
+					var mirroredX = mirrorBaseX + mirrorBaseX - sourceCanvasPos.X;
+					offsetedX = mirroredX + offset.X;
 					var newX = CalcX(sourceCanvasPos.X);
 
 					if (XGridCalculator.ConvertXToXGrid(newX, targetEditor) is not XGrid nx)
