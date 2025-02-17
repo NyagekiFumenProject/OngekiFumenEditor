@@ -28,6 +28,11 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
+	<!--使用nvpatch工具让程序默认使用独显运行(核显给爷爬)-->
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="$(ProjectDir)Dependencies\Topten.nvpatch.exe --enable $(TargetDir)$(TargetName).exe" />
+	</Target>
+	
 	<!--记录编译时间-->
 	<PropertyGroup>
 		<BuildDateTime>$([System.DateTime]::UtcNow.AddHours(8).ToString("yyyy/M/dd H:mm:ss.fff"))</BuildDateTime>
