@@ -310,8 +310,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return true;
 
             var result = MessageBox.Show(
-                Resources.SaveBeforeClosingPrompt.Format(FileName),
-                FileName,
+                Resources.SaveBeforeClosingPrompt.Format(DisplayName),
+                Resources.Warning,
                 MessageBoxButton.YesNoCancel,
                 MessageBoxImage.Warning,
                 MessageBoxResult.Cancel);

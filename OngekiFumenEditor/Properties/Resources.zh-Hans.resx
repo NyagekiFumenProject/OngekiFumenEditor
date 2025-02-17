@@ -1872,4 +1872,7 @@
   <data name="InvalidColorId" xml:space="preserve">
     <value>颜色Id(ColorId)值无效: {0}</value>
   </data>
+  <data name="SaveBeforeClosingPrompt" xml:space="preserve">
+    <value>关闭文档前是否要保存文件 {0} ?</value>
+  </data>
 </root>
