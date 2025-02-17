@@ -29,6 +29,10 @@
                     Margin="10,0,10,10"
                     Content="{markup:Translate [DisableShowSplashScreenAfterBoot]}"
                     IsChecked="{Binding Setting.DisableShowSplashScreenAfterBoot}" />
+                <CheckBox
+                    Margin="10,0,10,10"
+                    Content="Show console window"
+                    IsChecked="{Binding Setting.ShowConsoleWindowInGUIMode}" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">

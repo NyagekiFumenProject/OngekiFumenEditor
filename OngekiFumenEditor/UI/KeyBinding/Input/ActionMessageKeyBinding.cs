@@ -95,8 +95,14 @@ namespace OngekiFumenEditor.UI.KeyBinding.Input
 
         private void OnAssociatedObjectKeyDown(object sender, KeyEventArgs e)
         {
-            if (Definition is KeyBindingDefinition def && IoC.Get<IKeyBindingManager>().CheckKeyBinding(def, e))
+            if (Definition is KeyBindingDefinition def && IoC.Get<IKeyBindingManager>().CheckKeyBinding(def, e)) {
                 InvokeActions(e);
+
+                if (def.Modifiers.HasFlag(ModifierKeys.Alt)) {
+                    // Windows plays an annoying "ding" sound if Alt keys are not handled.
+                    e.Handled = true;
+                }
+            }
         }
     }
 }

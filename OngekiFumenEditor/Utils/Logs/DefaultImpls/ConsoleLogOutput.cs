@@ -10,6 +10,7 @@ using static OngekiFumenEditor.Utils.Logs.ILogOutput;
 
 namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
 {
+    [Export(typeof(ILogOutput))]
     internal class ConsoleLogOutput : ILogOutput
     {
         public void WriteLog(Severity severity, string content)

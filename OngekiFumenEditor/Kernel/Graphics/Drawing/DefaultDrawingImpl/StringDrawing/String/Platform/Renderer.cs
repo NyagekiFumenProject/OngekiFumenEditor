@@ -1,4 +1,5 @@
 ﻿using FontStashSharp.Interfaces;
+using OngekiFumenEditor.Kernel.Graphics.Base;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
@@ -57,7 +58,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
 		private const int MAX_VERTICES = MAX_SPRITES * 4;
 		private const int MAX_INDICES = MAX_SPRITES * 6;
 
-		private readonly Shader _shader;
+		private readonly StringShader _shader;
 		private readonly BufferObject<VertexPositionColorTexture> _vertexBuffer;
 		private readonly BufferObject<short> _indexBuffer;
 		private readonly VertexArrayObject _vao;
@@ -80,8 +81,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
 			_indexBuffer = new BufferObject<short>(indexData.Length, BufferTarget.ElementArrayBuffer, false);
 			_indexBuffer.SetData(indexData, 0, indexData.Length);
 
-			_shader = new Shader(vert, frag);
-			_shader.Use();
+			_shader = new (vert, frag);
+            _shader.Compile();
+            _shader.Begin();
 
 			_vao = new VertexArrayObject(sizeof(VertexPositionColorTexture));
 			_vao.Bind();
@@ -117,10 +119,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
 			performenceMonitor = perfomenceMonitor;
 			this.refDrawing = refDrawing;
 
-			_shader.Use();
-			_shader.SetUniform("TextureSampler", 0);
+			_shader.Begin();
 
-			_shader.SetUniform("MVP", mvp);
+			_shader.PassUniform("TextureSampler", 0);
+			_shader.PassUniform("MVP", mvp);
 
 			_vao.Bind();
 			_indexBuffer.Bind();

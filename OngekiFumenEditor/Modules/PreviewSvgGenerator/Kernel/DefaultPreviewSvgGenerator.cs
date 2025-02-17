@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
     [Export(typeof(IPreviewSvgGenerator))]
     public class DefaultPreviewSvgGenerator : IPreviewSvgGenerator
     {
-        private SoflanList GenerateWeightedSoflan(SoflanList soflans, GenerateOption opt)
+        private SoflanList GenerateWeightedSoflan(SoflanList soflans, SvgGenerateOption opt)
         {
             var offset = opt.WeightedSoflanOffset;
             var stress = opt.WeightedSoflanStress;
@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             return newList;
         }
 
-        public async Task<byte[]> GenerateSvgAsync(OngekiFumen rawFumen, GenerateOption option)
+        public async Task<byte[]> GenerateSvgAsync(OngekiFumen rawFumen, SvgGenerateOption option)
         {
             var svgDocument = new SvgDocument();
 

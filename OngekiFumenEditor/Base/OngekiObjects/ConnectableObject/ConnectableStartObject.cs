@@ -11,425 +11,428 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
-	public abstract class ConnectableStartObject : ConnectableObjectBase
-	{
-		public event Action<object, PropertyChangedEventArgs> ConnectableObjectsPropertyChanged;
+    public abstract class ConnectableStartObject : ConnectableObjectBase
+    {
+        public event Action<object, PropertyChangedEventArgs> ConnectableObjectsPropertyChanged;
 
-		private ICurveInterpolaterFactory curveInterpolaterFactory = XGridLimitedCurveInterpolaterFactory.Default;
-		public ICurveInterpolaterFactory CurveInterpolaterFactory
-		{
-			get => curveInterpolaterFactory;
-			set => Set(ref curveInterpolaterFactory, value);
-		}
+        private ICurveInterpolaterFactory curveInterpolaterFactory = XGridLimitedCurveInterpolaterFactory.Default;
+        public ICurveInterpolaterFactory CurveInterpolaterFactory
+        {
+            get => curveInterpolaterFactory;
+            set => Set(ref curveInterpolaterFactory, value);
+        }
 
-		private List<ConnectableChildObjectBase> children = new();
-		public IEnumerable<ConnectableChildObjectBase> Children => children;
+        private List<ConnectableChildObjectBase> children = new();
+        public IEnumerable<ConnectableChildObjectBase> Children => children;
 
-		public override ConnectableStartObject ReferenceStartObject => this;
+        public override ConnectableStartObject ReferenceStartObject => this;
 
-		private TGrid cachedMinTGrid = default;
-		public TGrid MinTGrid
-		{
-			get
-			{
-				if (cachedMinTGrid is null)
-				{
-					var minTGrid = TGrid;
-					if (!Children.All(x => x.IsVaildPath))
-					{
-						var shareTGrid = new TGrid();
-						foreach (var child in Children)
-						{
-							if (child.IsVaildPath)
-							{
-								minTGrid = MathUtils.Min(minTGrid, child.TGrid);
-							}
-							else
-							{
-								foreach (var path in child.GetConnectionPaths())
-								{
-									shareTGrid.Unit = path.pos.Y / TGrid.ResT;
-									if (shareTGrid < minTGrid)
-										minTGrid = shareTGrid.CopyNew();
-								}
-							}
-						}
-					}
+        private TGrid cachedMinTGrid = default;
+        public TGrid MinTGrid
+        {
+            get
+            {
+                if (cachedMinTGrid is null)
+                {
+                    var minTGrid = TGrid;
+                    if (!Children.All(x => x.IsVaildPath))
+                    {
+                        var shareTGrid = new TGrid();
+                        foreach (var child in Children)
+                        {
+                            if (child.IsVaildPath)
+                            {
+                                minTGrid = MathUtils.Min(minTGrid, child.TGrid);
+                            }
+                            else
+                            {
+                                foreach (var path in child.GetConnectionPaths())
+                                {
+                                    shareTGrid.Unit = path.pos.Y / TGrid.ResT;
+                                    if (shareTGrid < minTGrid)
+                                        minTGrid = shareTGrid.CopyNew();
+                                }
+                            }
+                        }
+                    }
 
-					cachedMinTGrid = minTGrid;
-					cachedMinTGrid.NormalizeSelf();
-				}
-				return cachedMinTGrid;
-			}
-		}
+                    cachedMinTGrid = minTGrid;
+                    cachedMinTGrid.NormalizeSelf();
+                }
+                return cachedMinTGrid;
+            }
+        }
 
-		private TGrid cachedMaxTGrid = default;
-		public TGrid MaxTGrid
-		{
-			get
-			{
-				//children.Count == 0 ? MinTGrid : children[children.Count - 1].TGrid
-				if (cachedMaxTGrid is null)
-				{
-					var maxTGrid = TGrid;
-					if (children.Count == 0)
-					{
-						maxTGrid = MinTGrid;
-					}
-					else if (Children.All(x => x.IsVaildPath))
-					{
-						maxTGrid = children[children.Count - 1].TGrid;
-					}
-					else
-					{
-						var shareTGrid = new TGrid();
-						foreach (var child in Children)
-						{
-							if (child.IsVaildPath)
-							{
-								maxTGrid = MathUtils.Max(maxTGrid, child.TGrid);
-							}
-							else
-							{
-								foreach (var path in child.GetConnectionPaths())
-								{
-									shareTGrid.Unit = path.pos.Y / TGrid.ResT;
-									if (shareTGrid > maxTGrid)
-										maxTGrid = shareTGrid.CopyNew();
-								}
-							}
-						}
-					}
+        private TGrid cachedMaxTGrid = default;
+        public TGrid MaxTGrid
+        {
+            get
+            {
+                //children.Count == 0 ? MinTGrid : children[children.Count - 1].TGrid
+                if (cachedMaxTGrid is null)
+                {
+                    var maxTGrid = TGrid;
+                    if (children.Count == 0)
+                    {
+                        maxTGrid = MinTGrid;
+                    }
+                    else if (Children.All(x => x.IsVaildPath))
+                    {
+                        maxTGrid = children[children.Count - 1].TGrid;
+                    }
+                    else
+                    {
+                        var shareTGrid = new TGrid();
+                        foreach (var child in Children)
+                        {
+                            if (child.IsVaildPath)
+                            {
+                                maxTGrid = MathUtils.Max(maxTGrid, child.TGrid);
+                            }
+                            else
+                            {
+                                foreach (var path in child.GetConnectionPaths())
+                                {
+                                    shareTGrid.Unit = path.pos.Y / TGrid.ResT;
+                                    if (shareTGrid > maxTGrid)
+                                        maxTGrid = shareTGrid.CopyNew();
+                                }
+                            }
+                        }
+                    }
 
-					cachedMaxTGrid = maxTGrid;
-					cachedMaxTGrid.NormalizeSelf();
-				}
-				return cachedMaxTGrid;
-			}
-		}
+                    cachedMaxTGrid = maxTGrid;
+                    cachedMaxTGrid.NormalizeSelf();
+                }
+                return cachedMaxTGrid;
+            }
+        }
 
-		private int recordId = -1;
-		public override int RecordId { get => recordId; set => Set(ref recordId, value); }
+        private int recordId = -1;
+        public override int RecordId { get => recordId; set => Set(ref recordId, value); }
 
-		public abstract ConnectableChildObjectBase CreateChildObject();
+        public abstract ConnectableChildObjectBase CreateChildObject();
 
-		public ConnectableStartObject()
-		{
-			PropertyChanged += OnPropertyChanged;
-		}
+        public ConnectableStartObject()
+        {
+            PropertyChanged += OnPropertyChanged;
+        }
 
-		public void AddChildObject(ConnectableChildObjectBase child)
-		{
-			var insertIdx = child.CacheRecoveryChildIndex;
-			if (!children.Contains(child))
-			{
-				if (insertIdx >= 0)
-				{
-					var nextObj = children.ElementAtOrDefault(insertIdx);
-					var prevObj = children.ElementAtOrDefault(insertIdx - 1) ?? this as ConnectableObjectBase;
+        public void AddChildObject(ConnectableChildObjectBase child)
+        {
+            InsertChildObject(children.Count, child);
+        }
 
-					//build their relations: prev -> cur(child) -> next
-					if (nextObj is not null)
-						nextObj.PrevObject = child;
-					child.PrevObject = prevObj;
+        public void InsertChildObject(int idx, ConnectableChildObjectBase child)
+        {
+            if (!children.Contains(child))
+            {
+                if (idx >= 0)
+                {
+                    var nextObj = children.ElementAtOrDefault(idx);
+                    var prevObj = children.ElementAtOrDefault(idx - 1) ?? this as ConnectableObjectBase;
 
-					insertIdx = Math.Min(insertIdx, children.Count);
-					children.Insert(insertIdx, child);
-				}
-				else
-				{
-					child.PrevObject = Children.LastOrDefault() ?? this as ConnectableObjectBase;
-					children.Add(child);
-				}
-				child.PropertyChanged += OnPropertyChanged;
-				NotifyWhenChildrenChanged();
-			}
-			child.SetReferenceStartObject(this);
-			child.RecordId = RecordId;
-		}
+                    //build their relations: prev -> cur(child) -> next
+                    if (nextObj is not null)
+                        nextObj.PrevObject = child;
+                    child.PrevObject = prevObj;
 
-		private void NotifyWhenChildrenChanged()
-		{
-			NotifyOfPropertyChange(() => Children);
-			NotifyRefreshMinMaxTGrid();
-		}
+                    idx = Math.Min(idx, children.Count);
+                    children.Insert(idx, child);
+                }
+                else
+                {
+                    child.PrevObject = Children.LastOrDefault() ?? this as ConnectableObjectBase;
+                    children.Add(child);
+                }
+                child.PropertyChanged += OnPropertyChanged;
+                NotifyWhenChildrenChanged();
+            }
+            child.SetReferenceStartObject(this);
+            child.RecordId = RecordId;
+        }
 
-		public void InsertChildObject(TGrid dragTGrid, ConnectableChildObjectBase child)
-		{
-			if (!children.Contains(child))
-			{
-				child.PrevObject = default;
-				for (int i = 0; i < children.Count; i++)
-				{
-					var next = children[i];
+        private void NotifyWhenChildrenChanged()
+        {
+            NotifyOfPropertyChange(() => Children);
+            NotifyRefreshMinMaxTGrid();
+        }
 
-					if (dragTGrid < next.TGrid)
-					{
-						ConnectableObjectBase prev = i == 0 ? this : children[i - 1];
-						children.Insert(i, child);
-						next.PrevObject = child;
-						child.PrevObject = prev;
+        public void InsertChildObject(TGrid dragTGrid, ConnectableChildObjectBase child)
+        {
+            if (!children.Contains(child))
+            {
+                child.PrevObject = default;
+                for (int i = 0; i < children.Count; i++)
+                {
+                    var next = children[i];
 
-						child.PropertyChanged += OnPropertyChanged;
-						child.RecordId = RecordId;
-						break;
-					}
-				}
+                    if (dragTGrid < next.TGrid)
+                    {
+                        ConnectableObjectBase prev = i == 0 ? this : children[i - 1];
+                        children.Insert(i, child);
+                        next.PrevObject = child;
+                        child.PrevObject = prev;
 
-				if (child.PrevObject is null)
-					AddChildObject(child);
-				else
-					NotifyWhenChildrenChanged();
-			}
+                        child.PropertyChanged += OnPropertyChanged;
+                        child.RecordId = RecordId;
+                        break;
+                    }
+                }
 
-			child.SetReferenceStartObject(this);
-		}
+                if (child.PrevObject is null)
+                    AddChildObject(child);
+                else
+                    NotifyWhenChildrenChanged();
+            }
 
-		public void RemoveChildObject(ConnectableChildObjectBase child)
-		{
-			var idx = children.IndexOf(child);
-			children.Remove(child);
+            child.SetReferenceStartObject(this);
+        }
 
-			var prev = child.PrevObject;
-			var next = children.FirstOrDefault(x => x.PrevObject == child);
-			if (next is not null)
-				next.PrevObject = prev;
-			else
-				child.PrevObject = default;
+        public void RemoveChildObject(ConnectableChildObjectBase child)
+        {
+            var idx = children.IndexOf(child);
+            children.Remove(child);
 
-			child.SetReferenceStartObject(default);
-			child.PropertyChanged -= OnPropertyChanged;
-			child.CacheRecoveryChildIndex = idx;
+            var prev = child.PrevObject;
+            var next = children.FirstOrDefault(x => x.PrevObject == child);
+            if (next is not null)
+                next.PrevObject = prev;
+            else
+                child.PrevObject = default;
 
-			NotifyWhenChildrenChanged();
-		}
+            child.SetReferenceStartObject(default);
+            child.PropertyChanged -= OnPropertyChanged;
 
-		private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			ConnectableObjectsPropertyChanged?.Invoke(sender, e);
-			switch (e.PropertyName)
-			{
-				case nameof(TGrid):
-					if (sender is ConnectableChildObjectBase child)
-					{
-						child.NotifyRefreshPaths();
-						child.NextObject?.NotifyRefreshPaths();
-					}
-					else
-						NextObject?.NotifyRefreshPaths();
-					NotifyRefreshMinMaxTGrid();
-					break;
-				case nameof(XGrid):
-					if (sender is ConnectableChildObjectBase child2)
-					{
-						child2.NotifyRefreshPaths();
-						child2.NextObject?.NotifyRefreshPaths();
-					}
-					break;
-				default:
-					break;
-			}
-		}
+            NotifyWhenChildrenChanged();
+        }
 
-		private void NotifyRefreshMinMaxTGrid()
-		{
-			cachedMaxTGrid = default;
-			cachedMinTGrid = default;
-			NotifyOfPropertyChange(() => MinTGrid);
-			NotifyOfPropertyChange(() => MaxTGrid);
-		}
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            ConnectableObjectsPropertyChanged?.Invoke(sender, e);
+            switch (e.PropertyName)
+            {
+                case nameof(TGrid):
+                    if (sender is ConnectableChildObjectBase child)
+                    {
+                        child.NotifyRefreshPaths();
+                        child.NextObject?.NotifyRefreshPaths();
+                    }
+                    else
+                        NextObject?.NotifyRefreshPaths();
+                    NotifyRefreshMinMaxTGrid();
+                    break;
+                case nameof(XGrid):
+                    if (sender is ConnectableChildObjectBase child2)
+                    {
+                        child2.NotifyRefreshPaths();
+                        child2.NextObject?.NotifyRefreshPaths();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
 
-		public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
-		{
-			yield return this;
-			foreach (var child in Children.SelectMany(x => x.GetDisplayableObjects().Append(x)))
-				yield return child;
-		}
+        private void NotifyRefreshMinMaxTGrid()
+        {
+            cachedMaxTGrid = default;
+            cachedMinTGrid = default;
+            NotifyOfPropertyChange(() => MinTGrid);
+            NotifyOfPropertyChange(() => MaxTGrid);
+        }
 
-		public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
-		{
-			if (maxVisibleTGrid < MinTGrid)
-				return false;
+        public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
+        {
+            yield return this;
+            foreach (var child in Children.SelectMany(x => x.GetDisplayableObjects().Append(x)))
+                yield return child;
+        }
 
-			if (MaxTGrid < minVisibleTGrid)
-				return false;
+        public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
+        {
+            if (maxVisibleTGrid < MinTGrid)
+                return false;
 
-			return true;
-		}
+            if (MaxTGrid < minVisibleTGrid)
+                return false;
 
-		public GridRange GetTGridRange()
-		{
-			var x = children.AsEnumerable<ITimelineObject>().Append(this).Select(x => x.TGrid).MaxMinBy();
-			return new GridRange()
-			{
-				Max = x.max,
-				Min = x.min,
-			};
-		}
+            return true;
+        }
 
-		public GridRange GetXGridRange()
-		{
-			var x = children.AsEnumerable<IHorizonPositionObject>().Append(this).Select(x => x.XGrid).MaxMinBy();
-			return new GridRange()
-			{
-				Max = x.max,
-				Min = x.min,
-			};
-		}
+        public GridRange GetTGridRange()
+        {
+            var x = children.AsEnumerable<ITimelineObject>().Append(this).Select(x => x.TGrid).MaxMinBy();
+            return new GridRange()
+            {
+                Max = x.max,
+                Min = x.min,
+            };
+        }
 
-		public ConnectableChildObjectBase GetChildObjectFromTGrid(TGrid tGrid)
-		{
-			if (tGrid < TGrid)
-				return default;
+        public GridRange GetXGridRange()
+        {
+            var x = children.AsEnumerable<IHorizonPositionObject>().Append(this).Select(x => x.XGrid).MaxMinBy();
+            return new GridRange()
+            {
+                Max = x.max,
+                Min = x.min,
+            };
+        }
 
-			foreach (var cur in Children)
-			{
-				if (tGrid <= cur.TGrid)
-					return cur;
-			}
+        public ConnectableChildObjectBase GetChildObjectFromTGrid(TGrid tGrid)
+        {
+            if (tGrid < TGrid)
+                return default;
 
-			return default;
-		}
+            foreach (var cur in Children)
+            {
+                if (tGrid <= cur.TGrid)
+                    return cur;
+            }
 
-		public XGrid CalulateXGrid(TGrid tGrid)
-		{
-			if (GetChildObjectFromTGrid(tGrid) is ConnectableChildObjectBase child)
-				return child.CalulateXGrid(tGrid);
-			return default;
-		}
+            return default;
+        }
 
-		public bool IsPathVaild() => GenAllPath().All(x => x.isVaild);
+        public XGrid CalulateXGrid(TGrid tGrid)
+        {
+            if (GetChildObjectFromTGrid(tGrid) is ConnectableChildObjectBase child)
+                return child.CalulateXGrid(tGrid);
+            return default;
+        }
 
-		public IEnumerable<(Vector2 pos, bool isVaild)> GenAllPath(bool filterSamePointSameSeq = true)
-		{
-			Vector2? prevP = null;
-			var isVaild = true;
+        public bool IsPathVaild() => GenAllPath().All(x => x.isVaild);
 
-			foreach (var child in Children)
-			{
-				foreach (var cg in child.GetConnectionPaths())
-				{
-					if (cg.pos == prevP && filterSamePointSameSeq)
-						continue;
+        public IEnumerable<(Vector2 pos, bool isVaild)> GenAllPath(bool filterSamePointSameSeq = true)
+        {
+            Vector2? prevP = null;
+            var isVaild = true;
 
-					isVaild = isVaild && cg.isVaild;
+            foreach (var child in Children)
+            {
+                foreach (var cg in child.GetConnectionPaths())
+                {
+                    if (cg.pos == prevP && filterSamePointSameSeq)
+                        continue;
 
-					yield return (cg.pos, isVaild);
+                    isVaild = isVaild && cg.isVaild;
 
-					prevP = cg.pos;
-				}
-			}
-		}
+                    yield return (cg.pos, isVaild);
 
-		public IEnumerable<ConnectableStartObject> InterpolateCurve(ICurveInterpolaterFactory factory = default)
-			=> InterpolateCurve(() => CopyNew() as ConnectableStartObject, () => CreateChildObject(), factory).OfType<ConnectableStartObject>();
+                    prevP = cg.pos;
+                }
+            }
+        }
 
-		public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType, ICurveInterpolaterFactory factory = default)
-			=> InterpolateCurve(
-				() => LambdaActivator.CreateInstance(startType) as ConnectableStartObject,
-				() => LambdaActivator.CreateInstance(nextType) as ConnectableChildObjectBase,
-				factory
-				).OfType<ConnectableStartObject>();
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(ICurveInterpolaterFactory factory = default)
+            => InterpolateCurve(() => CopyNew() as ConnectableStartObject, () => CreateChildObject(), factory).OfType<ConnectableStartObject>();
 
-		public IEnumerable<START> InterpolateCurve<START, NEXT, END>(ICurveInterpolaterFactory factory = default)
-			where START : ConnectableStartObject, new()
-			where NEXT : ConnectableChildObjectBase, new()
-			=> InterpolateCurve(() => new START(), () => new NEXT(), factory).OfType<START>();
+        public IEnumerable<ConnectableStartObject> InterpolateCurve(Type startType, Type nextType, Type endType, ICurveInterpolaterFactory factory = default)
+            => InterpolateCurve(
+                () => LambdaActivator.CreateInstance(startType) as ConnectableStartObject,
+                () => LambdaActivator.CreateInstance(nextType) as ConnectableChildObjectBase,
+                factory
+                ).OfType<ConnectableStartObject>();
 
-		public virtual IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableChildObjectBase> genNextFunc, ICurveInterpolaterFactory factory = default)
-		{
-			var traveller = (factory ?? CurveInterpolaterFactory).CreateInterpolaterForAll(this);
+        public IEnumerable<START> InterpolateCurve<START, NEXT, END>(ICurveInterpolaterFactory factory = default)
+            where START : ConnectableStartObject, new()
+            where NEXT : ConnectableChildObjectBase, new()
+            => InterpolateCurve(() => new START(), () => new NEXT(), factory).OfType<START>();
 
-			float calcGradient(CurvePoint a, CurvePoint b)
-			{
-				if (a.TGrid == b.TGrid)
-					return float.MaxValue;
+        public virtual IEnumerable<ConnectableStartObject> InterpolateCurve(Func<ConnectableStartObject> genStartFunc, Func<ConnectableChildObjectBase> genNextFunc, ICurveInterpolaterFactory factory = default)
+        {
+            var traveller = (factory ?? CurveInterpolaterFactory).CreateInterpolaterForAll(this);
 
-				var offset = a.TGrid - b.TGrid;
-				return -(offset.Unit * a.TGrid.ResT + offset.Grid);
-			}
+            float calcGradient(CurvePoint a, CurvePoint b)
+            {
+                if (a.TGrid == b.TGrid)
+                    return float.MaxValue;
 
-			IEnumerable<List<CurvePoint>> split()
-			{
-				var list = new List<CurvePoint>();
-				if (traveller.EnumerateNext() is not CurvePoint p)
-					yield break;
-				var prevPoint = p;
-				traveller.PushBack(p);
-				var prevSign = 0;
+                var offset = a.TGrid - b.TGrid;
+                return -(offset.Unit * a.TGrid.ResT + offset.Grid);
+            }
 
-				while (true)
-				{
-					if (traveller.EnumerateNext() is not CurvePoint point)
-						break;
-					var gradient = calcGradient(prevPoint, point);
-					var sign = MathF.Sign(gradient);
+            IEnumerable<List<CurvePoint>> split()
+            {
+                var list = new List<CurvePoint>();
+                if (traveller.EnumerateNext() is not CurvePoint p)
+                    yield break;
+                var prevPoint = p;
+                traveller.PushBack(p);
+                var prevSign = 0;
 
-					if (prevSign != sign && list.Count != 0)
-					{
-						yield return list;
-						list = new List<CurvePoint>();
-						list.Add(prevPoint);
-					}
+                while (true)
+                {
+                    if (traveller.EnumerateNext() is not CurvePoint point)
+                        break;
+                    var gradient = calcGradient(prevPoint, point);
+                    var sign = MathF.Sign(gradient);
 
-					prevPoint = point;
-					prevSign = sign;
+                    if (prevSign != sign && list.Count != 0)
+                    {
+                        yield return list;
+                        list = new List<CurvePoint>();
+                        list.Add(prevPoint);
+                    }
 
-					list.Add(point);
-				}
+                    prevPoint = point;
+                    prevSign = sign;
 
-				if (list.Count != 0)
-					yield return list;
-			}
+                    list.Add(point);
+                }
 
-			void build(OngekiMovableObjectBase o, CurvePoint p)
-			{
-				o.TGrid = p.TGrid;
-				o.XGrid = p.XGrid;
-			}
+                if (list.Count != 0)
+                    yield return list;
+            }
 
-			foreach (var lineSegment in split().Where(x => x.Count() >= 2))
-			{
-				if (calcGradient(lineSegment[0], lineSegment[1]) < 0)
-					lineSegment.Reverse();
+            void build(OngekiMovableObjectBase o, CurvePoint p)
+            {
+                o.TGrid = p.TGrid;
+                o.XGrid = p.XGrid;
+            }
 
-				var start = genStartFunc();
-				build(start, lineSegment[0]);
-				foreach (var childPos in lineSegment.Skip(1).SkipLast(1))
-				{
-					var next = genNextFunc();
-					build(next, childPos);
-					start.AddChildObject(next);
-				}
-				var end = genNextFunc();
-				build(end, lineSegment[lineSegment.Count - 1]);
-				start.AddChildObject(end);
+            foreach (var lineSegment in split().Where(x => x.Count() >= 2))
+            {
+                if (calcGradient(lineSegment[0], lineSegment[1]) < 0)
+                    lineSegment.Reverse();
 
-				yield return start;
-			}
-		}
+                var start = genStartFunc();
+                build(start, lineSegment[0]);
+                foreach (var childPos in lineSegment.Skip(1).SkipLast(1))
+                {
+                    var next = genNextFunc();
+                    build(next, childPos);
+                    start.AddChildObject(next);
+                }
+                var end = genNextFunc();
+                build(end, lineSegment[lineSegment.Count - 1]);
+                start.AddChildObject(end);
 
-		public override void Copy(OngekiObjectBase fromObj)
-		{
-			base.Copy(fromObj);
+                yield return start;
+            }
+        }
 
-			if (fromObj is not ConnectableStartObject from)
-				return;
+        public override void Copy(OngekiObjectBase fromObj)
+        {
+            base.Copy(fromObj);
 
-			RecordId = -Math.Abs(from.RecordId);
-		}
+            if (fromObj is not ConnectableStartObject from)
+                return;
 
-		public void CopyEntireConnectableObject(ConnectableStartObject from)
-		{
-			Copy(from);
+            RecordId = -Math.Abs(from.RecordId);
+        }
 
-			RecordId = -Math.Abs(from.RecordId);
+        public void CopyEntireConnectableObject(ConnectableStartObject from)
+        {
+            Copy(from);
 
-			foreach (var child in from.Children)
-			{
-				var copyChild = child.CopyNew() as ConnectableChildObjectBase;
-				AddChildObject(copyChild);
-			}
-		}
-	}
+            RecordId = -Math.Abs(from.RecordId);
+
+            foreach (var child in from.Children)
+            {
+                var copyChild = child.CopyNew() as ConnectableChildObjectBase;
+                AddChildObject(copyChild);
+            }
+        }
+    }
 }

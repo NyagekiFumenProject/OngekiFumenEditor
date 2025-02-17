@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Microsoft.CodeAnalysis.Differencing;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -39,6 +40,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 var old = currentActivatedEditor;
                 currentActivatedEditor = value;
                 OnActivateEditorChanged?.Invoke(value, old);
+
+                IoC.Get<WindowTitleHelper>().UpdateWindowTitleByEditor(value);
             }
         }
 

@@ -23,7 +23,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
+using Gemini.Framework.Commands;
+using Microsoft.Xaml.Behaviors;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -63,6 +66,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
 
                 setupFumen(editorProjectData?.Fumen, prevFumen);
+
+                if (EditorManager.CurrentActivatedEditor == this)
+                    IoC.Get<WindowTitleHelper>().UpdateWindowTitleByEditor(this);
             }
         }
 
@@ -146,19 +152,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public bool EnableDragging => !IsBatchMode || (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt) &&
+                                                       !Keyboard.Modifiers.HasFlag(ModifierKeys.Control) &&
+                                                       !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift));
         private bool isSelectRangeDragging;
-        private bool isLeftMouseDown;
-
-        private bool brushMode = false;
-        public bool BrushMode
-        {
-            get => brushMode;
-            set
-            {
-                Set(ref brushMode, value);
-                ToastNotify($"{Resources.BrushMode}{(BrushMode ? Resources.Enable : Resources.Disable)}");
-            }
-        }
 
         private bool isShowCurveControlAlways = false;
         private bool enableShowPlayerLocation;
@@ -173,6 +170,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public bool IsBatchMode
+            => Interaction.GetBehaviors((DependencyObject)GetView()).Contains(BatchModeBehavior);
+
         public EditorSetting Setting { get; } = new EditorSetting();
 
         public FumenVisualEditorViewModel() : base()
@@ -182,6 +182,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
             DisplayName = default;
+
+            SelectionArea = new(this);
         }
 
         #region Document New/Save/Load
@@ -342,5 +344,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         #endregion
+    }
+
+    public enum SelectRegionType
+    {
+        Select,
+        SelectFiltered,
+        Delete,
+        DeleteFiltered
     }
 }

@@ -12,170 +12,175 @@ using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-	[Export(typeof(IFumenEditorDrawingTarget))]
-	[Export(typeof(TapDrawingTarget))]
-	public class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
-	{
-		public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };
+    [Export(typeof(IFumenEditorDrawingTarget))]
+    [Export(typeof(TapDrawingTarget))]
+    public class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
+    {
+        public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };
 
-		public override int DefaultRenderOrder => 1200;
+        public override int DefaultRenderOrder => 1200;
 
-		private Texture redTexture;
-		private Texture greenTexture;
-		private Texture blueTexture;
-		private Texture wallTexture;
-		private Texture tapExTexture;
-		private Texture wallExTexture;
-		private Texture untagExTexture;
+        private Texture redTexture;
+        private Texture greenTexture;
+        private Texture blueTexture;
+        private Texture wallTexture;
+        private Texture tapExTexture;
+        private Texture wallExTexture;
+        private Texture untagExTexture;
 
-		private Vector2 tapSize = new Vector2(40, 16);
-		private Vector2 exTapEffSize = new Vector2(40, 16);
-		private Vector2 leftWallSize = new Vector2(40, 40);
-		private Vector2 rightWallSize = new Vector2(-40, 40);
+        private Vector2 tapSize = new Vector2(40, 16);
+        private Vector2 exTapEffSize = new Vector2(40, 16);
+        private Vector2 leftWallSize = new Vector2(40, 40);
+        private Vector2 selectWallTapEffSize = new Vector2(39, 39);
+        private Vector2 selectTapEffSize = new Vector2(39, 39);
+        private Vector2 exWallTapEffSize = new Vector2(42, 42);
 
-		private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> normalList = new();
-		private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> exList = new();
-		private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> selectTapList = new();
+        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> normalList = new();
+        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> exList = new();
+        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> selectTapList = new();
 
-		private IBatchTextureDrawing batchTextureDrawing;
-		private IHighlightBatchTextureDrawing highlightDrawing;
+        private IBatchTextureDrawing batchTextureDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
 
-		public TapDrawingTarget() : base()
-		{
-			redTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_tap_02.png");
+        public TapDrawingTarget() : base()
+        {
+            void init(ref Texture texture, string resourceName)
+            {
+                texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + resourceName);
 
-			greenTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_02.png");
+                normalList[texture] = new();
+                selectTapList[texture] = new();
+            }
 
-			blueTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_hold_02.png");
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("tap", out tapSize, out _))
+                tapSize = new Vector2(40, 16);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exTapEffect", out exTapEffSize, out _))
+                exTapEffSize = new Vector2(70, 30);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("wall", out leftWallSize, out _))
+                leftWallSize = new Vector2(40, 40);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("selectWallTapEffect", out selectWallTapEffSize, out _))
+                selectWallTapEffSize = new Vector2(50, 50);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("selectTapEffect", out selectTapEffSize, out _))
+                selectTapEffSize = tapSize * new Vector2(1.5f, 1.5f);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exWallTapEffect", out exWallTapEffSize, out _))
+                exWallTapEffSize = new Vector2(43, 43);
 
-			wallTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\walltap.png");
+            init(ref redTexture, "redTap.png");
+            init(ref greenTexture, "greenTap.png");
+            init(ref blueTexture, "blueTap.png");
+            init(ref wallTexture, "wallTap.png");
+            init(ref tapExTexture, "exTapEffect.png");
+            init(ref wallExTexture, "wallTapEffect.png");
+            init(ref untagExTexture, "unsetTap.png");
 
-			tapExTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\tap_exEff.png");
+            exList[tapExTexture] = new();
+            exList[wallExTexture] = new();
 
-			wallExTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\walltap_Eff.png");
+            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
+            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+        }
 
-			untagExTexture = ResourceUtils.OpenReadTextureFromResource(@"Modules\FumenVisualEditor\Views\OngekiObjects\mu3_nt_extap_01.png");
+        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical)
+        {
+            var texture = laneType switch
+            {
+                LaneType.Left => redTexture,
+                LaneType.Center => greenTexture,
+                LaneType.Right => blueTexture,
+                LaneType.WallRight or LaneType.WallLeft => wallTexture,
+                _ => untagExTexture
+            };
 
-			void init(Texture texture)
-			{
-				normalList[texture] = new();
-				selectTapList[texture] = new();
-			}
+            if (texture is null)
+                return;
 
-			init(redTexture);
-			init(greenTexture);
-			init(blueTexture);
-			init(wallTexture);
-			init(untagExTexture);
+            var size = laneType switch
+            {
+                LaneType.WallRight => leftWallSize * new Vector2(-1, 1),
+                LaneType.WallLeft => leftWallSize,
+                _ => tapSize
+            };
 
-			exList[tapExTexture] = new();
-			exList[wallExTexture] = new();
+            var x = XGridCalculator.ConvertXGridToX(tap.XGrid, target.Editor);
+            var y = target.ConvertToY(tap.TGrid);
 
-			batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
-			highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
-		}
+            var pos = new Vector2((float)x, (float)y);
+            normalList[texture].Add((size, pos, 0f));
 
-		public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical)
-		{
-			var texture = laneType switch
-			{
-				LaneType.Left => redTexture,
-				LaneType.Center => greenTexture,
-				LaneType.Right => blueTexture,
-				LaneType.WallRight or LaneType.WallLeft => wallTexture,
-				_ => untagExTexture
-			};
+            if (tap.IsSelected)
+            {
+                if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
+                {
+                    size = selectWallTapEffSize * new Vector2(Math.Sign(size.X), 1);
+                }
+                else
+                {
+                    size = selectTapEffSize;
+                }
 
-			if (texture is null)
-				return;
+                selectTapList[texture].Add((size, pos, 0f));
+            }
 
-			var size = laneType switch
-			{
-				LaneType.WallRight => rightWallSize,
-				LaneType.WallLeft => leftWallSize,
-				_ => tapSize
-			};
+            if (isCritical)
+            {
+                if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
+                {
+                    size = exWallTapEffSize * new Vector2(Math.Sign(size.X), 1);
+                    texture = wallExTexture;
+                }
+                else
+                {
+                    size = exTapEffSize;
+                    texture = tapExTexture;
+                }
 
-			var x = XGridCalculator.ConvertXGridToX(tap.XGrid, target.Editor);
-			var y = target.ConvertToY(tap.TGrid);
+                exList[texture].Add((size, pos, 0f));
+            }
 
-			var pos = new Vector2((float)x, (float)y);
-			normalList[texture].Add((size, pos, 0f));
+            size.X = Math.Abs(size.X);
+            target.RegisterSelectableObject(tap, pos, size);
+        }
 
-			if (tap.IsSelected)
-			{
-				if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
-				{
-					size = new(Math.Sign(size.X) * 42, 42);
-				}
-				else
-				{
-					size = tapSize * new Vector2(1.5f, 1.5f);
-				}
+        private void ClearList()
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void clear(Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> map)
+            {
+                foreach (var list in map.Values)
+                    list.Clear();
+            }
 
-				selectTapList[texture].Add((size, pos, 0f));
-			}
+            clear(normalList);
+            clear(exList);
+            clear(selectTapList);
+        }
 
-			if (isCritical)
-			{
-				if (laneType == LaneType.WallLeft || laneType == LaneType.WallRight)
-				{
-					size = new(Math.Sign(size.X) * 39, 39);
-					texture = wallExTexture;
-				}
-				else
-				{
-					size = new(68, 30);
-					texture = tapExTexture;
-				}
+        public void Dispose()
+        {
+            redTexture?.Dispose();
+            greenTexture?.Dispose();
+            blueTexture?.Dispose();
+            wallTexture?.Dispose();
+        }
 
-				exList[texture].Add((size, pos, 0f));
-			}
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Tap> objs)
+        {
+            foreach (var tap in objs)
+                Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
 
-			size.X = Math.Abs(size.X);
-			target.RegisterSelectableObject(tap, pos, size);
-		}
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void draw(Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> map)
+            {
+                foreach (var item in map)
+                    batchTextureDrawing.Draw(target, item.Key, item.Value);
+            }
 
-		private void ClearList()
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			void clear(Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> map)
-			{
-				foreach (var list in map.Values)
-					list.Clear();
-			}
+            foreach (var item in selectTapList)
+                highlightDrawing.Draw(target, item.Key, item.Value);
+            draw(exList);
+            draw(normalList);
 
-			clear(normalList);
-			clear(exList);
-			clear(selectTapList);
-		}
-
-		public void Dispose()
-		{
-			redTexture?.Dispose();
-			greenTexture?.Dispose();
-			blueTexture?.Dispose();
-			wallTexture?.Dispose();
-		}
-
-		public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Tap> objs)
-		{
-			foreach (var tap in objs)
-				Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			void draw(Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> map)
-			{
-				foreach (var item in map)
-					batchTextureDrawing.Draw(target, item.Key, item.Value);
-			}
-
-			foreach (var item in selectTapList)
-				highlightDrawing.Draw(target, item.Key, item.Value);
-			draw(exList);
-			draw(normalList);
-
-			ClearList();
-		}
-	}
+            ClearList();
+        }
+    }
 }

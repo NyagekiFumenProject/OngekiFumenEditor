@@ -132,9 +132,6 @@
   <data name="AddObject" xml:space="preserve">
     <value>添加物件</value>
   </data>
-  <data name="AddObjectsByBrush" xml:space="preserve">
-    <value>刷子物件添加</value>
-  </data>
   <data name="AdjustPastedObjects" xml:space="preserve">
     <value>粘贴物件时自动停靠</value>
   </data>
@@ -240,20 +237,17 @@
   <data name="Browser" xml:space="preserve">
     <value>浏览</value>
   </data>
-  <data name="BrushCopied" xml:space="preserve">
+  <data name="BrushAlongLane" xml:space="preserve">
     <value>按轨道刷已复制物件</value>
   </data>
-  <data name="BrushCopiedTipText" xml:space="preserve">
+  <data name="BrushAlongLaneTipText" xml:space="preserve">
     <value>根据当前节奏线，在轨道上批量生成已经复制的单个物件，非法线段无法使用</value>
   </data>
-  <data name="BrushMode" xml:space="preserve">
-    <value>笔刷模式：</value>
+  <data name="BatchModeToggle" xml:space="preserve">
+    <value>切换批量模式</value>
   </data>
-  <data name="BrushModeSwitch" xml:space="preserve">
-    <value>切换笔刷模式</value>
-  </data>
-  <data name="BrushModeSwitchTipText" xml:space="preserve">
-    <value>如果开启笔刷模式,避免大部分物件拖拉操作</value>
+  <data name="BatchModeToggleTipText" xml:space="preserve">
+    <value>如果开启批量模式,避免大部分物件拖拉操作</value>
   </data>
   <data name="BulletSize" xml:space="preserve">
     <value>子弹大小</value>
@@ -1026,8 +1020,8 @@
   <data name="NotShowAnymore" xml:space="preserve">
     <value>不再显示此窗口</value>
   </data>
-  <data name="NotSupportInBrushMode" xml:space="preserve">
-    <value>笔刷模式下不支持{0}</value>
+  <data name="NotSupportInBatchMode" xml:space="preserve">
+    <value>批量模式下不支持{0}</value>
   </data>
   <data name="ObjectBatchBrush" xml:space="preserve">
     <value>批量粘贴刷子</value>
@@ -1035,7 +1029,7 @@
   <data name="ObjectLaneGroupId" xml:space="preserve">
     <value>改变此值可以改变此物件对应的轨道所属</value>
   </data>
-  <data name="ObjectNotSupportBrush" xml:space="preserve">
+  <data name="ObjectNotSupportedInBatchMode" xml:space="preserve">
     <value>此复制的物件无法使用刷子功能</value>
   </data>
   <data name="ObjectOverlap" xml:space="preserve">
@@ -1865,5 +1859,23 @@
   </data>
   <data name="ProgramUpdates" xml:space="preserve">
     <value>程序更新</value>
+  </data>
+  <data name="InvalidBrightness" xml:space="preserve">
+    <value>亮度(Brightness)值 {0} 不在范围[-3,3]内</value>
+  </data>
+  <data name="InvalidColorId" xml:space="preserve">
+    <value>颜色Id(ColorId)值无效: {0}</value>
+  </data>
+  <data name="kbd_layer_Normal" xml:space="preserve">
+    <value>通常模式</value>
+  </data>
+  <data name="kbd_layer_Global" xml:space="preserve">
+    <value>全局</value>
+  </data>
+  <data name="kbd_layer_Batch" xml:space="preserve">
+    <value>批量模式</value>
+  </data>
+  <data name="SelectOneDockableLaneOnly" xml:space="preserve">
+    <value>请选择单独选择一个可击打轨道节点</value>
   </data>
 </root>

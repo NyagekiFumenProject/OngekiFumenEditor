@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                     yield return new CommonCheckResult()
                     {
                         Severity = RuleSeverity.Error,
-                        Description = "Invalid ColorId: {0}".Format(obj.ColorId.ToString()),
+                        Description = Resources.InvalidColorId.Format(obj.ColorId.ToString()),
                         LocationDescription = $"{obj.XGrid} {obj.TGrid}",
                         NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
                         RuleName = RuleName,

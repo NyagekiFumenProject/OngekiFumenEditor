@@ -29,6 +29,7 @@
             </valueconverters:LocalizeConverter>
             <valueconverters:AsyncImageLoadConverter x:Key="AsyncImageLoadConverter">
             </valueconverters:AsyncImageLoadConverter>
+            <valueconverters:NullToZeroConverter x:Key="NullToZeroConverter" />
             <valueconverters:DisplayFileSizeConverter x:Key="DisplayFileSizeConverter">
             </valueconverters:DisplayFileSizeConverter>
             <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />

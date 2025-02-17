@@ -54,8 +54,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Dialogs
 
             var key = (e.Key == Key.System ? e.SystemKey : e.Key);
 
-            if (TryGetModifier(key, out var modifier))
-                this.modifier = modifier;
+            if (Definition.Key == Key.None) {
+                TryClearModifier(key);
+            }
 
             UpdateExpression();
         }
@@ -67,8 +68,10 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Dialogs
 
             var key = (e.Key == Key.System ? e.SystemKey : e.Key);
 
-            if (TryGetModifier(key, out var modifier))
+            if (TryGetModifier(key, out var modifier)) {
                 this.modifier = modifier;
+                this.key = Key.None;
+            }
             else
                 this.key = key;
 
@@ -97,6 +100,21 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Dialogs
             }
         }
 
+        private bool TryClearModifier(Key key)
+        {
+            switch (key)
+            {
+                case Key.LeftCtrl or Key.RightCtrl:
+                case Key.LeftShift or Key.RightShift:
+                case Key.LeftAlt or Key.RightAlt:
+                case Key.LWin or Key.RWin:
+                    modifier = ModifierKeys.None;
+                    return true;
+            }
+
+            return false;
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             //重新设置
@@ -112,7 +130,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Dialogs
 
             if (!string.IsNullOrWhiteSpace(CurrentExpression))
             {
-                ConflictDefinition = IoC.Get<IKeyBindingManager>().QueryKeyBinding(key, modifier);
+                ConflictDefinition = IoC.Get<IKeyBindingManager>().QueryKeyBinding(key, modifier, Definition.Layer);
                 if (ConflictDefinition == Definition)
                     ConflictDefinition = default;
                 PropertyChanged?.Invoke(this, new(nameof(ConflictDefinition)));
@@ -123,7 +141,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Dialogs
         {
             if (ConflictDefinition is not null)
             {
-                if (MessageBox.Show($"你绑定的键位和 {ConflictDefinition.Name} 冲突, 如果继续绑定则清空对方冲突的键位, 是否继续?", "警告", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                if (MessageBox.Show($"你绑定的键位和 {ConflictDefinition.DisplayName} 冲突, 如果继续绑定则清空对方冲突的键位, 是否继续?", "警告", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                     return;
             }
             UpdateExpression();

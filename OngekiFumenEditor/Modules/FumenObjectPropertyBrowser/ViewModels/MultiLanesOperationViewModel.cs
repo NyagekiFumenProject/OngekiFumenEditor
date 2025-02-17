@@ -59,7 +59,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 				foreach (var laterChild in laterStart.Children.ToArray())
 				{
 					laterStart.RemoveChildObject(laterChild);
-					laterChild.CacheRecoveryChildIndex = -1;
 					frontStart.AddChildObject(laterChild);
 				}
 
@@ -71,7 +70,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 				while (next != null)
 				{
 					frontStart.RemoveChildObject(next);
-					next.CacheRecoveryChildIndex = -1;
 					laterStart.AddChildObject(next);
 					next = next.NextObject;
 				}

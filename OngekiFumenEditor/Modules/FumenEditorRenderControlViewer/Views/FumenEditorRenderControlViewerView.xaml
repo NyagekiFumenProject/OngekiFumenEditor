@@ -7,8 +7,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:jas="clr-namespace:WPF.JoshSmith.ServiceProviders.UI"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels"
     d:DesignHeight="800"
     d:DesignWidth="300"
@@ -43,8 +44,11 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <ToolBar>
-                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{markup:Translate [ResetDefault]}">
-                </Button>
+                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{markup:Translate [ResetDefault]}" />
+                <Button
+                    Margin="5,0"
+                    cal:Message.Attach="[Event Click] = [Action Save()]"
+                    Content="{markup:Translate [Save]}" />
             </ToolBar>
         </StackPanel>
         <ListView

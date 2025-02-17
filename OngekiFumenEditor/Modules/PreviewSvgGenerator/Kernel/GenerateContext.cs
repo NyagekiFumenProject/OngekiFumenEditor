@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 {
     public class GenerateContext
     {
-        public GenerateOption Option { get; init; }
+        public SvgGenerateOption Option { get; init; }
         public double TotalWidth => Option.ViewWidth;
         public double TotalHeight { get; init; }
         public TGrid MaxTGrid { get; init; }

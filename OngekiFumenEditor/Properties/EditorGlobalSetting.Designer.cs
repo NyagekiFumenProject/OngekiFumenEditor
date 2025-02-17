@@ -466,5 +466,17 @@ namespace OngekiFumenEditor.Properties {
                 this["LimitFPS"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RenderTargetOrderVisibleMap {
+            get {
+                return ((string)(this["RenderTargetOrderVisibleMap"]));
+            }
+            set {
+                this["RenderTargetOrderVisibleMap"] = value;
+            }
+        }
     }
 }

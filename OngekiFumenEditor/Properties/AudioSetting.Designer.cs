@@ -82,5 +82,17 @@ namespace OngekiFumenEditor.Properties {
                 this["SoundVolume"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableSoundMultiPlay {
+            get {
+                return ((bool)(this["EnableSoundMultiPlay"]));
+            }
+            set {
+                this["EnableSoundMultiPlay"] = value;
+            }
+        }
     }
 }

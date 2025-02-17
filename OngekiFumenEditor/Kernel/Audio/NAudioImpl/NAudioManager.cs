@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using ControlzEx.Standard;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
@@ -21,12 +22,16 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
     public class NAudioManager : PropertyChangedBase, IAudioManager
     {
         private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
+        private bool enableSoundMultiPlay;
         private int targetSampleRate;
         private readonly IWavePlayer audioOutputDevice;
 
         private readonly MixingSampleProvider audioMixer;
         private readonly MixingSampleProvider soundMixer;
         private readonly MixingSampleProvider musicMixer;
+
+        private readonly Dictionary<CachedSound, ISampleProvider> cs2providerMap = new();
+        private readonly Dictionary<ISampleProvider, CachedSound> provider2csMap = new();
 
         private readonly VolumeSampleProvider soundVolumeWrapper;
         private readonly VolumeSampleProvider musicVolumeWrapper;
@@ -65,10 +70,13 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
         public NAudioManager()
         {
-            var audioOutputType = (AudioOutputType)Properties.AudioSetting.Default.AudioOutputType;
-            targetSampleRate = Properties.AudioSetting.Default.AudioSampleRate;
+            var audioOutputType = (AudioOutputType)AudioSetting.Default.AudioOutputType;
+            enableSoundMultiPlay = AudioSetting.Default.EnableSoundMultiPlay;
+            targetSampleRate = AudioSetting.Default.AudioSampleRate;
+
             Log.LogDebug($"targetSampleRate: {targetSampleRate}");
             Log.LogDebug($"audioOutputType: {audioOutputType}");
+            Log.LogDebug($"enableSoundMultiPlay: {enableSoundMultiPlay}");
 
             try
             {
@@ -96,6 +104,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             //setup sound
             soundMixer = new MixingSampleProvider(format);
             soundMixer.ReadFully = true;
+            soundMixer.MixerInputEnded += SoundMixer_MixerInputEnded;
             soundVolumeWrapper = new VolumeSampleProvider(soundMixer);
             audioMixer.AddMixerInput(soundVolumeWrapper);
             SoundVolume = AudioSetting.Default.SoundVolume;
@@ -110,8 +119,20 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             Log.LogInfo($"Audio implement will use {GetType()}");
         }
 
+        private void SoundMixer_MixerInputEnded(object sender, SampleProviderEventArgs e)
+        {
+            RemoveSoundMixerInput(e.SampleProvider, false);
+        }
+
         public void PlaySound(CachedSound sound, float volume, TimeSpan init)
         {
+            if (!enableSoundMultiPlay)
+            {
+                //stop previous
+                if (cs2providerMap.TryGetValue(sound, out var prevProvider))
+                    RemoveSoundMixerInput(prevProvider, true);
+            }
+
             ISampleProvider provider = new VolumeSampleProvider(new CachedSoundSampleProvider(sound))
             {
                 Volume = volume
@@ -124,17 +145,36 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
                 };
             }
 
-            AddSoundMixerInput(provider);
+            AddSoundMixerInput(provider, sound);
         }
 
-        public void AddSoundMixerInput(ISampleProvider input)
+        public void AddSoundMixerInput(ISampleProvider input, CachedSound cachedSound)
         {
+            if (!enableSoundMultiPlay)
+            {
+                cs2providerMap[cachedSound] = input;
+                provider2csMap[input] = cachedSound;
+            }
+
             soundMixer.AddMixerInput(input);
         }
 
-        public void RemoveSoundMixerInput(ISampleProvider input)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="mixerRemove">mixer是否需要调用RemoveMixerInput()</param>
+        public void RemoveSoundMixerInput(ISampleProvider input, bool mixerRemove)
         {
-            soundMixer.RemoveMixerInput(input);
+            if (mixerRemove)
+                soundMixer.RemoveMixerInput(input);
+
+            if (!enableSoundMultiPlay)
+            {
+                if (provider2csMap.TryGetValue(input, out var cachedSound))
+                    cs2providerMap.Remove(cachedSound);
+                provider2csMap.Remove(input);
+            }
         }
 
         public async Task<IAudioPlayer> LoadAudioAsync(string filePath)
@@ -179,6 +219,11 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
         public ILoopHandle PlayLoopSound(CachedSound sound, float volume, TimeSpan init)
         {
+            if (!enableSoundMultiPlay)
+            {
+
+            }
+
             ISampleProvider provider = new LoopableProvider(new CachedSoundSampleProvider(sound));
 
             if (init.TotalMilliseconds != 0)
@@ -193,7 +238,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             handle.Volume = volume;
 
             //add to mixer
-            AddSoundMixerInput(handle.Provider);
+            AddSoundMixerInput(handle.Provider, sound);
 
             //Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
             return handle;
@@ -205,7 +250,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
                 return;
 
             //Log.LogDebug($"handle hashcode = {handle.GetHashCode()}");
-            RemoveSoundMixerInput(handle.Provider);
+            RemoveSoundMixerInput(handle.Provider, true);
         }
     }
 }
