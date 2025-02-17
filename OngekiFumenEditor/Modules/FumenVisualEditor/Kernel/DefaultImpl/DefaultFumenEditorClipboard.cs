@@ -12,9 +12,11 @@ using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Formats.Tar;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using static OngekiFumenEditor.Base.OngekiObjects.Flick;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel;
 
@@ -68,27 +70,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				return new Point(x, y);
 			}
 
-			foreach (var obj in objects.Where(x => x switch
-			{
-				//不允许被复制
-				ConnectableObjectBase and not (ConnectableStartObject) => false,
-				LaneCurvePathControlObject => false,
-				LaneBlockArea.LaneBlockAreaEndIndicator => false,
-				Soflan.SoflanEndIndicator => false,
-				//允许被复制
-				_ => true,
-			}))
-			{
-				//这里还是得再次详细过滤:
-				// * Hold头可以直接被复制
-				// * 轨道如果是整个轨道节点都被选中，那么它也可以被复制，否则就不准
-				if (obj is ConnectableStartObject start && obj is not Hold)
-				{
-					//检查start轨道节点是否全被选中了
-					if (!start.Children.OfType<ConnectableObjectBase>().Append(start).All(x => x.IsSelected))
-						continue;
+			var newConnectables = CopyConnectables(objects);
+			foreach (var laneStart in newConnectables) {
+				currentCopiedSources[laneStart] = CalcPos(laneStart);
+				foreach (var child in laneStart.Children) {
+					currentCopiedSources[child] = CalcPos(child);
 				}
+			}
 
+			foreach (var obj in objects.Where(x => x switch
+				{
+					ConnectableObjectBase => false,
+					LaneCurvePathControlObject => false,
+					LaneBlockArea.LaneBlockAreaEndIndicator => false,
+					Soflan.SoflanEndIndicator => false,
+					_ => true,
+				}))
+			{
 				var canvasPos = CalcPos(obj);
 
 				var source = obj as OngekiObjectBase;
@@ -98,11 +96,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 				switch (copied)
 				{
-					//特殊处理ConnectableStart:连Child和Control一起复制了,顺便删除RecordId(添加时需要重新分配而已)
-					case ConnectableStartObject _start:
-						_start.CopyEntireConnectableObject((ConnectableStartObject)source);
-						_start.RecordId = -1;
-						break;
 					//特殊处理LBK:连End物件一起复制了
 					case LaneBlockArea _lbk:
 						_lbk.CopyEntire((LaneBlockArea)source);
@@ -137,6 +130,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     : Resources.CopiedObjects.Format(currentCopiedSources.Count));
 			}
 			return;
+		}
+
+		private IEnumerable<ConnectableStartObject> CopyConnectables(IEnumerable<ISelectableObject> objects)
+		{
+			var newLanes = new List<ConnectableStartObject>();
+			foreach (var laneStart in objects.OfType<ConnectableObjectBase>().DistinctBy(c => c.RecordId)
+				         .Select(c => c.ReferenceStartObject)) {
+				var allNodes = laneStart.ReferenceStartObject.Children.Append<ConnectableObjectBase>(laneStart)
+					.Where(n => n.IsSelected)
+					.OrderBy(n => n.TGrid).ToList();
+				var first = allNodes.First();
+
+				var start = first.LaneType.CreateStartConnectable();
+				start.Copy(first);
+
+				foreach (var selectedNode in allNodes.Skip(1)) {
+					var newNode = selectedNode.LaneType.CreateChildConnectable();
+					newNode.Copy(selectedNode);
+					start.AddChildObject(newNode);
+				}
+
+				newLanes.Add(start);
+			}
+
+			return newLanes;
 		}
 
 		public async Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteOption pasteOption, Point? placePoint = null)
