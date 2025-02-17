@@ -9,8 +9,6 @@ using System.Windows.Input;
 using Caliburn.Micro;
 using Microsoft.Xaml.Behaviors;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Kernel.KeyBinding;
-using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -26,25 +24,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
 
 public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 {
-    public static readonly ImmutableDictionary<BatchModeSubmode, KeyBindingDefinition> Submodes =
-        new Dictionary<Type, KeyBindingDefinition>
+    public static readonly ImmutableList<BatchModeSubmode> Submodes =
+        new List<BatchModeSubmode>
         {
-            [typeof(BatchModeInputClipboard)] = KeyBindingDefinitions.KBD_Batch_ModeClipboard,
-            [typeof(BatchModeInputWallLeft)] = KeyBindingDefinitions.KBD_Batch_ModeWallLeft,
-            [typeof(BatchModeInputLaneLeft)] = KeyBindingDefinitions.KBD_Batch_ModeLaneLeft,
-            [typeof(BatchModeInputLaneCenter)] = KeyBindingDefinitions.KBD_Batch_ModeLaneCenter,
-            [typeof(BatchModeInputLaneRight)] = KeyBindingDefinitions.KBD_Batch_ModeLaneRight,
-            [typeof(BatchModeInputWallRight)] = KeyBindingDefinitions.KBD_Batch_ModeWallRight,
-            [typeof(BatchModeInputLaneColorful)] = KeyBindingDefinitions.KBD_Batch_ModeLaneColorful,
-            [typeof(BatchModeInputTap)] = KeyBindingDefinitions.KBD_Batch_ModeTap,
-            [typeof(BatchModeInputHold)] = KeyBindingDefinitions.KBD_Batch_ModeHold,
-            [typeof(BatchModeInputFlick)] = KeyBindingDefinitions.KBD_Batch_ModeFlick,
-            [typeof(BatchModeInputLaneBlock)] = KeyBindingDefinitions.KBD_Batch_ModeLaneBlock,
-            [typeof(BatchModeInputNormalBell)] = KeyBindingDefinitions.KBD_Batch_ModeNormalBell,
-            [typeof(BatchModeFilterLanes)] = KeyBindingDefinitions.KBD_Batch_ModeFilterLanes,
-            [typeof(BatchModeFilterDockableObjects)] = KeyBindingDefinitions.KBD_Batch_ModeFilterDockableObjects,
-            [typeof(BatchModeFilterFloatingObjects)] = KeyBindingDefinitions.KBD_Batch_ModeFilterFloatingObjects,
-        }.ToImmutableDictionary(kv => (BatchModeSubmode)Activator.CreateInstance(kv.Key), kv => kv.Value);
+            new BatchModeInputClipboard(),
+            new BatchModeInputWallLeft(),
+            new BatchModeInputLaneLeft(),
+            new BatchModeInputLaneCenter(),
+            new BatchModeInputLaneRight(),
+            new BatchModeInputWallRight(),
+            new BatchModeInputLaneColorful(),
+            new BatchModeInputTap(),
+            new BatchModeInputHold(),
+            new BatchModeInputFlick(),
+            new BatchModeInputLaneBlock(),
+            new BatchModeInputNormalBell(),
+            new BatchModeFilterLanes(),
+            new BatchModeFilterDockableObjects(),
+            new BatchModeFilterFloatingObjects(),
+        }.ToImmutableList();
 
     private static readonly ImmutableDictionary<string, Func<BatchModeBehavior, TriggerAction>> ClickTriggers =
         new Dictionary<string, Func<BatchModeBehavior, TriggerAction>>()
@@ -73,10 +71,10 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         // Create brush key triggers on the FumenVisualEditorView.
         // Temporarily delete existing ones that clash with brush keys.
         var allCommands = Submodes.SelectMany
-            <KeyValuePair<BatchModeSubmode, KeyBindingDefinition>, ((Key, ModifierKeys), BatchModeSubmode)>(kv =>
+            <BatchModeSubmode, ((Key, ModifierKeys), BatchModeSubmode)>(submode =>
             [
-                ((kv.Value.Key, kv.Value.Modifiers), kv.Key),
-                ((kv.Value.Key, kv.Value.Modifiers | ModifierKeys.Shift), kv.Key)
+                ((submode.KeyBinding.Key, submode.KeyBinding.Modifiers), submode),
+                ((submode.KeyBinding.Key, submode.KeyBinding.Modifiers | ModifierKeys.Shift), submode)
             ]);
 
         foreach (var ((key, modifiers), submodeType) in allCommands) {
@@ -124,7 +122,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
         NewKeyTriggers.Clear();
         OldKeyTriggers.Clear();
-        
+
         var glTriggers = Interaction.GetTriggers(AssociatedObject.glView);
         foreach (var (eventName, action) in GeneratedClickTriggerActions) {
             var glTrigger = glTriggers.First(t => t is EventTrigger et && et.EventName == eventName);
@@ -353,7 +351,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
 
     #region Dependency property
 
-    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BatchModeBehavior), new(Submodes.First().Key));
+    public static readonly DependencyProperty CurrentSubmodeProperty = DependencyProperty.RegisterAttached(nameof(CurrentSubmode), typeof(BatchModeSubmode), typeof(BatchModeBehavior), new(Submodes.First()));
 
     #endregion
 
