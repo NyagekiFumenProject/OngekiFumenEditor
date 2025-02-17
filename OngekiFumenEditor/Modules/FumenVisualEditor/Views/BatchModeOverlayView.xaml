@@ -21,7 +21,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <StackPanel Background="White">
+    <StackPanel Background="{DynamicResource EnvironmentWindowBackground}">
         <StackPanel Orientation="Horizontal">
             <Image Visibility="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeInputSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-paint-brush-16.png" />
             <Image Visibility="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeFilterSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-selection-16.png" />
