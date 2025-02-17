@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Caliburn.Micro;
 using Gemini.Framework.Commands;
+using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
@@ -12,6 +13,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
 
@@ -26,6 +28,7 @@ public abstract class BatchModeSubmode : CommandDefinition
     public abstract KeyBindingDefinition KeyBinding { get; }
     public abstract string ResourceKey { get; }
 
+    public string HelperText => $"{DisplayName} ({KeyBindingDefinition.FormatToExpression(KeyBinding)})";
     public string DisplayName => Resources.ResourceManager.GetString(ResourceKey)!;
 
     public override string Name => $"BatchMode.{GetType().Name}";
@@ -40,14 +43,13 @@ public abstract class BatchModeSubmode : CommandDefinition
 /// </summary>
 public abstract class BatchModeFilterSubmode : BatchModeSubmode
 {
-    public sealed override string ToolTip => $"Filter {Text}";
+    public sealed override string ToolTip => Resources.BatchModeFilterTooltipFormat.Format(HelperText);
     public abstract Func<OngekiObjectBase, bool> FilterFunction { get; }
 }
 
 public abstract class BatchModeInputSubmode : BatchModeSubmode
 {
-    public override string ToolTip =>
-        $"{DisplayName} ({KeyBindingDefinition.FormatToExpression(KeyBinding)})";
+    public override string ToolTip => HelperText;
 
     public abstract IEnumerable<OngekiTimelineObjectBase> GenerateObject();
     public virtual bool AutoSelect => false;

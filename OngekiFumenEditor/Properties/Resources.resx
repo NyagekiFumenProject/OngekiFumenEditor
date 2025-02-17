@@ -1998,4 +1998,7 @@
   <data name="SelectOneDockableLaneOnly" xml:space="preserve">
     <value />
   </data>
+  <data name="BatchModeFilterTooltipFormat" xml:space="preserve">
+    <value>Filter {0}</value>
+  </data>
 </root>
