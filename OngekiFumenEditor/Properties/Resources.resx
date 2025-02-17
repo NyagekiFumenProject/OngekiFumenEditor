@@ -2010,4 +2010,7 @@
   <data name="ConflictNotifyComfirm" xml:space="preserve">
     <value>The key you bind to conflicts with {0}, if you continue to bind, the conflicting key will be cleared, do you want to continue?</value>
   </data>
+  <data name="SaveBeforeClosingPrompt" xml:space="preserve">
+    <value>Save changes to "{0}" before closing?</value>
+  </data>
 </root>

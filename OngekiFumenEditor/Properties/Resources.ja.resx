@@ -1591,4 +1591,7 @@
   <data name="CurvePrecisionLabel" xml:space="preserve">
     <value>CurvePrecision</value>
   </data>
+  <data name="SaveBeforeClosingPrompt" xml:space="preserve">
+    <value>閉じる前に変更された"{0}" を保存しますか？</value>
+  </data>
 </root>

@@ -1959,5 +1959,7 @@
   </data>
   <data name="ConflictNotifyComfirm" xml:space="preserve">
     <value>你绑定的键位和 {0} 冲突, 如果继续绑定则清空对方冲突的键位, 是否继续?</value>
+  <data name="SaveBeforeClosingPrompt" xml:space="preserve">
+    <value>关闭文档前是否要保存文件 {0} ?</value>
   </data>
 </root>
