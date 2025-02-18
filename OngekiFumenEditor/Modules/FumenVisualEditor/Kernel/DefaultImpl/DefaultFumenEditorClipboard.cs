@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿#nullable enable
+using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -16,9 +17,11 @@ using System.Formats.Tar;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms.VisualStyles;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using static OngekiFumenEditor.Base.OngekiObjects.Flick;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel;
+using ILaneDockable = OngekiFumenEditor.Base.ILaneDockable;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {
@@ -26,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 	[PartCreationPolicy(CreationPolicy.Shared)]
 	internal class DefaultFumenEditorClipboard : IFumenEditorClipboard
 	{
-		private Dictionary<OngekiObjectBase, Point> currentCopiedSources = new();
+		private Dictionary<OngekiObjectBase, (XGrid? x, TGrid y)> currentCopiedSources = new();
 		private FumenVisualEditorViewModel sourceEditor;
 		private double prevScale;
 
@@ -36,17 +39,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 		public async Task CopyObjects(FumenVisualEditorViewModel sourceEditor, IEnumerable<ISelectableObject> objects)
 		{
+			objects = objects.ToList();
+
 			if (sourceEditor.IsLocked)
 				return;
 			if (sourceEditor.Fumen is null)
 				return;
-			if (!sourceEditor.IsDesignMode)
-			{
+			if (!sourceEditor.IsDesignMode) {
 				sourceEditor.ToastNotify(Resources.EditorMustBeDesignMode);
 				return;
 			}
-			if (objects.IsEmpty())
-			{
+
+			if (objects.IsEmpty()) {
 				sourceEditor.ToastNotify(Resources.ClearCopyList);
 				return;
 			}
@@ -55,108 +59,172 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 			//清空一下
 			currentCopiedSources.Clear();
-			this.sourceEditor = default;
 
-			Point CalcPos(ISelectableObject obj)
-			{
-				var x = 0d;
-				if (obj is IHorizonPositionObject horizon)
-					x = XGridCalculator.ConvertXGridToX(horizon.XGrid, sourceEditor);
+			// TODO WTF?
+			//this.sorceEditor = default;
 
-				var y = 0d;
-				if (obj is ITimelineObject timeline)
-					y = TGridCalculator.ConvertTGridToY_DesignMode(timeline.TGrid, sourceEditor);
+			Dictionary<ILaneDockable, ConnectableStartObject> sourceDockablesToCopiedLanes = new();
+			Dictionary<OngekiObjectBase, OngekiObjectBase> copiedObjectMap = new();
+			List<OngekiObjectBase> generatedObjects = new();
 
-				return new Point(x, y);
-			}
+			// Process each lane that has connectables in the selection
+			foreach (var laneStart in objects.OfType<ConnectableObjectBase>().DistinctBy(c => c.RecordId)
+				         .Select(c => c.ReferenceStartObject)) {
+				var selectedNodes = laneStart.Children.Prepend<ConnectableObjectBase>(laneStart)
+					.Intersect(objects.OfType<ConnectableObjectBase>())
+					.ToList();
+				var first = selectedNodes.First();
 
-			var newConnectables = CopyConnectables(objects);
-			foreach (var laneStart in newConnectables) {
-				currentCopiedSources[laneStart] = CalcPos(laneStart);
-				foreach (var child in laneStart.Children) {
-					currentCopiedSources[child] = CalcPos(child);
+				var start = first.LaneType.CreateStartConnectable();
+				start.Copy(first);
+				var skipNodes = 1;
+
+				// Create new nodes for any dockables outside of the selected lane range
+				foreach (var dockable in objects.OfType<ILaneDockable>().Where(d => laneStart == d.ReferenceLaneStart)) {
+					sourceDockablesToCopiedLanes[dockable] = start;
+
+					if (dockable.TGrid < selectedNodes.First().TGrid) {
+						skipNodes = 0;
+						start.TGrid = dockable.TGrid;
+						start.XGrid = dockable.XGrid;
+					}
+
+					generatedObjects.Add(start);
+				}
+
+				copiedObjectMap[first] = start;
+
+				foreach (var selectedNode in selectedNodes.Skip(skipNodes)) {
+					var newNode = selectedNode.LaneType.CreateChildConnectable();
+					newNode.Copy(selectedNode);
+					copiedObjectMap[selectedNode] = newNode;
+					start.AddChildObject(newNode);
 				}
 			}
 
 			foreach (var obj in objects.Where(x => x switch
-				{
-					ConnectableObjectBase => false,
-					LaneCurvePathControlObject => false,
-					LaneBlockArea.LaneBlockAreaEndIndicator => false,
-					Soflan.SoflanEndIndicator => false,
-					_ => true,
-				}))
-			{
-				var canvasPos = CalcPos(obj);
-
-				var source = obj as OngekiObjectBase;
-				var copied = source?.CopyNew();
-				if (copied is null)
+			         {
+				         ConnectableObjectBase => false,
+				         LaneCurvePathControlObject => false,
+				         LaneBlockArea.LaneBlockAreaEndIndicator => false,
+				         Soflan.SoflanEndIndicator => false,
+				         _ => true,
+			         })) {
+				if (obj is not OngekiObjectBase source)
 					continue;
+				var copied = source.CopyNew();
 
-				switch (copied)
-				{
+				var position = (
+					obj is IHorizonPositionObject xPosObject ? xPosObject.XGrid : null,
+					((ITimelineObject)obj).TGrid
+				);
+
+				switch (copied) {
+					case ILaneDockable dockable:
+						dockable.ReferenceLaneStart = (LaneStartBase)sourceDockablesToCopiedLanes[(ILaneDockable)source].ReferenceStartObject;
+						break;
 					//特殊处理LBK:连End物件一起复制了
-					case LaneBlockArea _lbk:
-						_lbk.CopyEntire((LaneBlockArea)source);
+					case LaneBlockArea laneBlock:
+						laneBlock.CopyEntire((LaneBlockArea)source);
 						break;
 					//特殊处理SFL:连End物件一起复制了
-					case Soflan _sfl:
-						_sfl.CopyEntire((Soflan)source);
+					case Soflan soflan:
+						soflan.CopyEntire((Soflan)source);
 						break;
-					//特殊处理Hold:清除Id
-					case Hold hold:
-						hold.ReferenceLaneStart = default;
-						break;
+
 					case IBulletPalleteReferencable bulletPalleteObject:
 						if (bulletPalleteObject.ReferenceBulletPallete is BulletPallete bpl)
 							bulletPalleteObject.ReferenceBulletPallete = bpl;
 						break;
-					default:
-						break;
 				}
 
 				//注册,并记录当前位置
-				currentCopiedSources[copied] = canvasPos;
+				currentCopiedSources[copied] = position;
+			}
+
+			foreach (var copiedObject in generatedObjects.Concat(copiedObjectMap.Values)) {
+				var position = (
+					copiedObject is IHorizonPositionObject xPosObject ? xPosObject.XGrid : null,
+					((ITimelineObject)copiedObject).TGrid
+				);
+				currentCopiedSources[copiedObject] = position;
 			}
 
 			if (currentCopiedSources.Count == 0)
 				sourceEditor.ToastNotify(Resources.ClearCopyList);
-			else
-			{
+			else {
 				this.sourceEditor = sourceEditor;
-                sourceEditor.ToastNotify(currentCopiedSources.Count == 1
-                    ? Resources.CopiedObjectsBrushAllowed.Format(currentCopiedSources.Count)
-                    : Resources.CopiedObjects.Format(currentCopiedSources.Count));
+				sourceEditor.ToastNotify(currentCopiedSources.Count == 1
+					? Resources.CopiedObjectsBrushAllowed.Format(currentCopiedSources.Count)
+					: Resources.CopiedObjects.Format(currentCopiedSources.Count));
 			}
+
 			return;
 		}
 
-		private IEnumerable<ConnectableStartObject> CopyConnectables(IEnumerable<ISelectableObject> objects)
+		public Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteOption pasteOption,
+			Point? placePoint = null)
 		{
-			var newLanes = new List<ConnectableStartObject>();
-			foreach (var laneStart in objects.OfType<ConnectableObjectBase>().DistinctBy(c => c.RecordId)
-				         .Select(c => c.ReferenceStartObject)) {
-				var allNodes = laneStart.ReferenceStartObject.Children.Append<ConnectableObjectBase>(laneStart)
-					.Where(n => n.IsSelected)
-					.OrderBy(n => n.TGrid).ToList();
-				var first = allNodes.First();
+			var (gridPlaceX, gridPlaceY) = placePoint is not null
+				? (XGridCalculator.ConvertXToXGrid(placePoint.Value.X, targetEditor),
+					TGridCalculator.ConvertYToTGrid_DesignMode(placePoint.Value.Y, targetEditor))
+				: (XGrid.Zero,
+					TGridCalculator.ConvertYToTGrid_DesignMode(targetEditor.Setting.JudgeLineOffsetY, targetEditor));
 
-				var start = first.LaneType.CreateStartConnectable();
-				start.Copy(first);
+			var redo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
+			var undo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
 
-				foreach (var selectedNode in allNodes.Skip(1)) {
-					var newNode = selectedNode.LaneType.CreateChildConnectable();
-					newNode.Copy(selectedNode);
-					start.AddChildObject(newNode);
+			var clipboardObjectsRootPosition = (
+				currentCopiedSources.Values.MinBy(pos => pos.x ?? XGrid.MaxValue).x,
+				currentCopiedSources.Values.MinBy(pos => pos.y).y
+			);
+
+			var clipboardCopyMap = currentCopiedSources.Keys.ToDictionary(o => o, o => o.CopyNew());
+
+			foreach (var (clipboardObject, (xGrid, tGrid)) in currentCopiedSources) {
+				var newObject = clipboardCopyMap[clipboardObject];
+
+				var tGridObject = (ITimelineObject)newObject;
+				var offsetY = tGridObject.TGrid - clipboardObjectsRootPosition.y;
+				var destinationY = gridPlaceY + offsetY;
+				((ITimelineObject)newObject).TGrid = destinationY;
+
+				if (xGrid is not null) {
+					var offsetX = xGrid - clipboardObjectsRootPosition.x;
+					var destinationX = gridPlaceX + offsetX;
+					((IHorizonPositionObject)newObject).XGrid = destinationX;
 				}
 
-				newLanes.Add(start);
+				((ISelectableObject)newObject).IsSelected = true;
+				redo += () =>
+				{
+					if (newObject is ILaneDockable { ReferenceLaneStart: not null } dockedObject) {
+						dockedObject.ReferenceLaneStart = (LaneStartBase)clipboardCopyMap[((ILaneDockable)clipboardObject).ReferenceLaneStart];
+					}
+
+					if (newObject is ConnectableChildObjectBase child) {
+						var clipboardChild = (ConnectableChildObjectBase)clipboardObject;
+						((LaneStartBase)clipboardCopyMap[clipboardChild.ReferenceStartObject]).AddChildObject(child);
+					}
+					targetEditor.Fumen.AddObject(newObject);
+				};
+				undo += () =>
+				{
+					targetEditor.Fumen.RemoveObject(newObject);
+				};
 			}
 
-			return newLanes;
+			foreach (var newConnectableChild in currentCopiedSources.Select(kv => kv.Key)
+				         .OfType<ConnectableChildObjectBase>()) {
+
+			}
+
+			targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CopyAndPaste, redo, undo));
+
+			return Task.CompletedTask;
 		}
 
+		/*
 		public async Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteOption pasteOption, Point? placePoint = null)
 		{
 			if (targetEditor.IsLocked)
@@ -187,6 +255,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				var offsetTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(y, sourceEditor);
 				var fixedY = TGridCalculator.ConvertTGridToY_DesignMode(offsetTGrid, targetEditor);
 				return fixedY;
+			}
+
+			double adjustX(double x)
+			{
+				if (isSameEditorCopy)
+					return x;
+				var offsetXGrid = XGridCalculator.ConvertXToXGrid(x, sourceEditor);
+				var fixedX = XGridCalculator.ConvertXGridToX(offsetXGrid, targetEditor);
+				return fixedX;
 			}
 
 			//计算出镜像中心位置
@@ -233,7 +310,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					pos.xGrid = xGrid;
 					posMap[obj] = pos;
 				}
-
 
 				switch (copied)
 				{
@@ -403,7 +479,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 						foreach (var child in start.Children)
 						{
 							var oldChildXGrid = child.XGrid.CopyNew();
-							var x = XGridCalculator.ConvertXGridToX(oldChildXGrid, targetEditor);
+							var x = adjustX(XGridCalculator.ConvertXGridToX(oldChildXGrid, targetEditor));
 							var newChildX = CalcX(x);
 
 							if (XGridCalculator.ConvertXToXGrid(newChildX, targetEditor) is not XGrid newChildXGrid)
@@ -574,75 +650,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 			targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CopyAndPaste, redo, undo));
 		}
-
-		private double? CalculateYMirror(IEnumerable<OngekiObjectBase> objects, PasteOption mirrorOption)
-		{
-			if (mirrorOption != PasteOption.SelectedRangeCenterTGridMirror)
-				return null;
-
-			(var minY, var maxY) = objects
-					.Where(x => x is not ConnectableObjectBase)
-					.Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
-					.Where(x => x.Item1)
-					.Select(x => x.Y)
-					.MaxMinBy(x => x);
-
-			var diffY = maxY - minY;
-			var mirrorY = minY + diffY / 2f;
-			return mirrorY;
-		}
-
-		private double? CalculateXMirror(FumenVisualEditorViewModel targetEditor, IEnumerable<OngekiObjectBase> objects, PasteOption mirrorOption)
-		{
-			if (mirrorOption == PasteOption.XGridZeroMirror)
-				return XGridCalculator.ConvertXGridToX(0, targetEditor);
-
-			if (mirrorOption == PasteOption.SelectedRangeCenterXGridMirror)
-			{
-				(var minX, var maxX) = objects
-					.Where(x => x is not ConnectableObjectBase)
-					.Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
-					.Where(x => x.Item1)
-					.Select(x => x.X)
-					.MaxMinBy(x => x);
-
-				var diffX = maxX - minX;
-				var mirrorX = minX + diffX / 2f;
-				return mirrorX;
-			}
-
-			return null;
-		}
-
-		private Point CalculateRangeCenter(IEnumerable<OngekiObjectBase> objects)
-		{
-			var mesureObjects = objects;
-
-			//如果是纯轨道复制，那么给所有轨道都计算,如果不是，就过滤掉所有轨道
-			if (!mesureObjects.All(x => x is ConnectableObjectBase))
-				mesureObjects = mesureObjects.Where(x => x is not ConnectableObjectBase);
-			else
-				mesureObjects = mesureObjects.Where(x => x is ConnectableStartObject);
-
-			(var minX, var maxX) = mesureObjects
-					.Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
-					.Where(x => x.Item1)
-					.Select(x => x.X)
-					.MaxMinBy(x => x);
-
-			var diffX = maxX - minX;
-			var x = minX + diffX / 2f;
-
-			(var minY, var maxY) = mesureObjects
-					.Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
-					.Where(x => x.Item1)
-					.Select(x => x.Y)
-					.MaxMinBy(x => x);
-
-			var diffY = maxY - minY;
-			var y = minY + diffY / 2f;
-
-			return new(x, y);
-		}
+	}
+	*/
 	}
 }
