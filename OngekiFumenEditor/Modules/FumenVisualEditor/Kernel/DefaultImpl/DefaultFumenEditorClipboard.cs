@@ -30,6 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 	internal class DefaultFumenEditorClipboard : IFumenEditorClipboard
 	{
 		private Dictionary<OngekiObjectBase, (XGrid? x, TGrid y)> currentCopiedSources = new();
+
 		private FumenVisualEditorViewModel sourceEditor;
 		private double prevScale;
 
@@ -63,8 +64,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 			// TODO WTF?
 			//this.sorceEditor = default;
 
-			Dictionary<ILaneDockable, ConnectableStartObject> sourceDockablesToCopiedLanes = new();
 			Dictionary<OngekiObjectBase, OngekiObjectBase> copiedObjectMap = new();
+			Dictionary<ILaneDockable, ConnectableStartObject> sourceDockablesToCopiedLanes = new();
 			List<OngekiObjectBase> generatedObjects = new();
 
 			// Process each lane that has connectables in the selection
@@ -77,28 +78,76 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 				var start = first.LaneType.CreateStartConnectable();
 				start.Copy(first);
+				start.RecordId = -1;
 				var skipNodes = 1;
 
+				ConnectableChildObjectBase? tail = null;
+
 				// Create new nodes for any dockables outside of the selected lane range
-				foreach (var dockable in objects.OfType<ILaneDockable>().Where(d => laneStart == d.ReferenceLaneStart)) {
-					sourceDockablesToCopiedLanes[dockable] = start;
+				var dockables = objects.OfType<ILaneDockable>().Where(d => laneStart == d.ReferenceLaneStart)
+					.OrderBy(o => o.TGrid).ToList();
 
-					if (dockable.TGrid < selectedNodes.First().TGrid) {
-						skipNodes = 0;
-						start.TGrid = dockable.TGrid;
-						start.XGrid = dockable.XGrid;
-					}
-
+				if (dockables.First().TGrid < selectedNodes.First().TGrid) {
+					skipNodes = 0;
+					start.TGrid = dockables.First().TGrid;
+					start.XGrid = dockables.First().XGrid;
 					generatedObjects.Add(start);
 				}
 
-				copiedObjectMap[first] = start;
+				if (dockables.Last().TGrid > selectedNodes.Last().TGrid || selectedNodes.Count == 1) {
+					tail = dockables.Last().ReferenceLaneStart.LaneType.CreateChildConnectable();
+					tail.TGrid = dockables.Last().TGrid;
+					tail.XGrid = dockables.Last().XGrid;
+					generatedObjects.Add(tail);
+				}
+
+				foreach (var dockable in dockables) {
+					sourceDockablesToCopiedLanes[dockable] = laneStart;
+				}
+
+				if (!generatedObjects.Contains(start))
+					copiedObjectMap[first] = start;
 
 				foreach (var selectedNode in selectedNodes.Skip(skipNodes)) {
 					var newNode = selectedNode.LaneType.CreateChildConnectable();
 					newNode.Copy(selectedNode);
 					copiedObjectMap[selectedNode] = newNode;
 					start.AddChildObject(newNode);
+				}
+
+				if (tail is not null) {
+					start.AddChildObject(tail);
+				}
+			}
+
+			foreach (var dockableGroup in objects.OfType<ILaneDockable>()
+				         .Where(d => d.ReferenceLaneStart is not null)
+				         .GroupBy(d => d.ReferenceLaneStart))
+			{
+				// Find any sets of multiple dockables on the same lane that are selected and have no lane nodes selected
+				if (!sourceDockablesToCopiedLanes.ContainsKey(dockableGroup.First())) {
+					var head = dockableGroup.Key.LaneType.CreateStartConnectable();
+					head.TGrid = dockableGroup.First().TGrid;
+					head.XGrid = dockableGroup.First().XGrid;
+
+					var tail = dockableGroup.Key.LaneType.CreateChildConnectable();
+					tail.TGrid = dockableGroup.Last().TGrid;
+					tail.XGrid = dockableGroup.Last().XGrid;
+
+					head.AddChildObject(tail);
+
+					generatedObjects.Add(head);
+					generatedObjects.Add(tail);
+
+					foreach (var sourceDockable in dockableGroup) {
+						sourceDockablesToCopiedLanes[sourceDockable] = head;
+					}
+				}
+
+				foreach (var sourceDockable in dockableGroup) {
+					var newDockable = ((OngekiObjectBase)sourceDockable).CopyNew();
+					((ILaneDockable)newDockable).ReferenceLaneStart = (LaneStartBase)sourceDockablesToCopiedLanes[sourceDockable];
+					copiedObjectMap[(OngekiObjectBase)sourceDockable] = newDockable;
 				}
 			}
 
@@ -109,10 +158,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				         LaneBlockArea.LaneBlockAreaEndIndicator => false,
 				         Soflan.SoflanEndIndicator => false,
 				         _ => true,
-			         })) {
+			         }))
+			{
 				if (obj is not OngekiObjectBase source)
 					continue;
-				var copied = source.CopyNew();
+
+				if (!copiedObjectMap.ContainsKey(source))
+					copiedObjectMap[source] = source.CopyNew();
+				var copied = copiedObjectMap[source];
 
 				var position = (
 					obj is IHorizonPositionObject xPosObject ? xPosObject.XGrid : null,
@@ -120,7 +173,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				);
 
 				switch (copied) {
-					case ILaneDockable dockable:
+					case ILaneDockable { ReferenceLaneStart: not null } dockable:
 						dockable.ReferenceLaneStart = (LaneStartBase)sourceDockablesToCopiedLanes[(ILaneDockable)source].ReferenceStartObject;
 						break;
 					//特殊处理LBK:连End物件一起复制了
@@ -179,7 +232,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				currentCopiedSources.Values.MinBy(pos => pos.y).y
 			);
 
+			var clipboardDockableLanes =
+				currentCopiedSources.Keys.OfType<ILaneDockable>().ToDictionary(d => d, d => d.ReferenceLaneStart);
 			var clipboardCopyMap = currentCopiedSources.Keys.ToDictionary(o => o, o => o.CopyNew());
+			// Correct reference lanes for dockables
+			foreach (var (dockableSource, dockableCopy) in clipboardCopyMap.Where(kv => kv.Key is ILaneDockable)) {
+				((ILaneDockable)dockableCopy).ReferenceLaneStart = clipboardDockableLanes[(ILaneDockable)dockableSource];
+			}
 
 			foreach (var (clipboardObject, (xGrid, tGrid)) in currentCopiedSources) {
 				var newObject = clipboardCopyMap[clipboardObject];
@@ -198,11 +257,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				((ISelectableObject)newObject).IsSelected = true;
 				redo += () =>
 				{
-					if (newObject is ILaneDockable { ReferenceLaneStart: not null } dockedObject) {
-						dockedObject.ReferenceLaneStart = (LaneStartBase)clipboardCopyMap[((ILaneDockable)clipboardObject).ReferenceLaneStart];
-					}
-
-					if (newObject is ConnectableChildObjectBase child) {
+						if (newObject is ConnectableChildObjectBase child) {
 						var clipboardChild = (ConnectableChildObjectBase)clipboardObject;
 						((LaneStartBase)clipboardCopyMap[clipboardChild.ReferenceStartObject]).AddChildObject(child);
 					}
