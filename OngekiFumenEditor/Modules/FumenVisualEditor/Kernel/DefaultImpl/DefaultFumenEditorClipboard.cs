@@ -70,7 +70,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 			// Process each lane that has connectables in the selection
 			foreach (var laneStart in objects.OfType<ConnectableObjectBase>().DistinctBy(c => c.RecordId)
-				         .Select(c => c.ReferenceStartObject)) {
+				         .Select(c => c.ReferenceStartObject))
+			{
+				// All selected nodes in the current lane
 				var selectedNodes = laneStart.Children.Prepend<ConnectableObjectBase>(laneStart)
 					.Intersect(objects.OfType<ConnectableObjectBase>())
 					.ToList();
@@ -79,15 +81,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				var start = first.LaneType.CreateStartConnectable();
 				start.Copy(first);
 				start.RecordId = -1;
+
+				// By default, make the first node of the lane a StartObject
+				// If we auto-generate a node on a dockable before the selected nodes, this gets set to 0
 				var skipNodes = 1;
 
+				// Gets set if we auto-generate a node after the selected nodes
 				ConnectableChildObjectBase? tail = null;
 
 				// Create new nodes for any dockables outside of the selected lane range
-				var dockables = objects.OfType<ILaneDockable>().Where(d => laneStart == d.ReferenceLaneStart)
+				var dockables = objects.OfType<ILaneDockable>()
+					.Where(d => laneStart == d.ReferenceLaneStart)
 					.OrderBy(o => o.TGrid).ToList();
 
 				if (dockables.First().TGrid < selectedNodes.First().TGrid) {
+					// There's a dockable before the selected lanes
 					skipNodes = 0;
 					start.TGrid = dockables.First().TGrid;
 					start.XGrid = dockables.First().XGrid;
@@ -95,6 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				}
 
 				if (dockables.Last().TGrid > selectedNodes.Last().TGrid || selectedNodes.Count == 1) {
+					// There's a dockable after the selected range
 					tail = dockables.Last().ReferenceLaneStart.LaneType.CreateChildConnectable();
 					tail.TGrid = dockables.Last().TGrid;
 					tail.XGrid = dockables.Last().XGrid;
@@ -108,6 +117,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				if (!generatedObjects.Contains(start))
 					copiedObjectMap[first] = start;
 
+				// Re-create the lane in the clipboard
 				foreach (var selectedNode in selectedNodes.Skip(skipNodes)) {
 					var newNode = selectedNode.LaneType.CreateChildConnectable();
 					newNode.Copy(selectedNode);
@@ -120,11 +130,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				}
 			}
 
+			// Process selected dockables that have no selected lane nodes
 			foreach (var dockableGroup in objects.OfType<ILaneDockable>()
 				         .Where(d => d.ReferenceLaneStart is not null)
-				         .GroupBy(d => d.ReferenceLaneStart))
+				         .GroupBy(d => d.ReferenceLaneStart)
+				         .Where(g => g.Any(d => d is not HoldEnd)))
 			{
-				// Find any sets of multiple dockables on the same lane that are selected and have no lane nodes selected
 				if (!sourceDockablesToCopiedLanes.ContainsKey(dockableGroup.First())) {
 					var head = dockableGroup.Key.LaneType.CreateStartConnectable();
 					head.TGrid = dockableGroup.First().TGrid;
@@ -140,6 +151,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					generatedObjects.Add(tail);
 
 					foreach (var sourceDockable in dockableGroup) {
+						if (sourceDockable is HoldEnd end && !dockableGroup.Contains(end.RefHold))
+							continue;
 						sourceDockablesToCopiedLanes[sourceDockable] = head;
 					}
 				}
@@ -151,8 +164,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				}
 			}
 
+			// Copy non-lane objects and undocked dockables
 			foreach (var obj in objects.Where(x => x switch
 			         {
+				         HoldEnd end when !objects.Contains(end.RefHold) => false,
 				         ConnectableObjectBase => false,
 				         LaneCurvePathControlObject => false,
 				         LaneBlockArea.LaneBlockAreaEndIndicator => false,
@@ -160,8 +175,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				         _ => true,
 			         }))
 			{
-				if (obj is not OngekiObjectBase source)
+				if (obj is not OngekiObjectBase source) {
+					Log.LogWarn($"Attempted to copy invalid object {obj}");
 					continue;
+				}
 
 				if (!copiedObjectMap.ContainsKey(source))
 					copiedObjectMap[source] = source.CopyNew();
@@ -175,6 +192,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				switch (copied) {
 					case ILaneDockable { ReferenceLaneStart: not null } dockable:
 						dockable.ReferenceLaneStart = (LaneStartBase)sourceDockablesToCopiedLanes[(ILaneDockable)source].ReferenceStartObject;
+
+						if (dockable is HoldEnd end) {
+							((Hold)copiedObjectMap[((HoldEnd)obj).RefHold]).SetHoldEnd(end);
+						}
 						break;
 					//特殊处理LBK:连End物件一起复制了
 					case LaneBlockArea laneBlock:
@@ -234,10 +255,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 			var clipboardDockableLanes =
 				currentCopiedSources.Keys.OfType<ILaneDockable>().ToDictionary(d => d, d => d.ReferenceLaneStart);
+
+			// Maps clipboard objects to the new copies that will be added to the fumen
 			var clipboardCopyMap = currentCopiedSources.Keys.ToDictionary(o => o, o => o.CopyNew());
-			// Correct reference lanes for dockables
+
+			// Set reference lanes for dockables
 			foreach (var (dockableSource, dockableCopy) in clipboardCopyMap.Where(kv => kv.Key is ILaneDockable)) {
 				((ILaneDockable)dockableCopy).ReferenceLaneStart = clipboardDockableLanes[(ILaneDockable)dockableSource];
+
+				// Set up HoldEnds
+				if (dockableSource is HoldEnd sourceHoldEnd) {
+					var copyHoldEnd = (HoldEnd)dockableCopy;
+					var copyHoldStart = (Hold)clipboardCopyMap[sourceHoldEnd.RefHold];
+					copyHoldStart.SetHoldEnd(copyHoldEnd);
+				}
 			}
 
 			foreach (var (clipboardObject, (xGrid, tGrid)) in currentCopiedSources) {
