@@ -94,24 +94,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					.Where(d => laneStart == d.ReferenceLaneStart)
 					.OrderBy(o => o.TGrid).ToList();
 
-				if (dockables.First().TGrid < selectedNodes.First().TGrid) {
-					// There's a dockable before the selected lanes
-					skipNodes = 0;
-					start.TGrid = dockables.First().TGrid;
-					start.XGrid = dockables.First().XGrid;
-					generatedObjects.Add(start);
-				}
+				if (dockables.Any()) {
+					if (dockables.First().TGrid < selectedNodes.First().TGrid) {
+						// There's a dockable before the selected lanes
+						skipNodes = 0;
+						start.TGrid = dockables.First().TGrid;
+						start.XGrid = dockables.First().XGrid;
+						generatedObjects.Add(start);
+					}
 
-				if (dockables.Last().TGrid > selectedNodes.Last().TGrid || selectedNodes.Count == 1) {
-					// There's a dockable after the selected range
-					tail = dockables.Last().ReferenceLaneStart.LaneType.CreateChildConnectable();
-					tail.TGrid = dockables.Last().TGrid;
-					tail.XGrid = dockables.Last().XGrid;
-					generatedObjects.Add(tail);
-				}
+					if (dockables.Last().TGrid > selectedNodes.Last().TGrid || selectedNodes.Count == 1) {
+						// There's a dockable after the selected range
+						tail = dockables.Last().ReferenceLaneStart.LaneType.CreateChildConnectable();
+						tail.TGrid = dockables.Last().TGrid;
+						tail.XGrid = dockables.Last().XGrid;
+						generatedObjects.Add(tail);
+					}
 
-				foreach (var dockable in dockables) {
-					sourceDockablesToCopiedLanes[dockable] = laneStart;
+					foreach (var dockable in dockables) {
+						sourceDockablesToCopiedLanes[dockable] = laneStart;
+					}
 				}
 
 				if (!generatedObjects.Contains(start))
