@@ -89,12 +89,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				// Gets set if we auto-generate a node after the selected nodes
 				ConnectableChildObjectBase? tail = null;
 
-				// Create new nodes for any dockables outside of the selected lane range
+				// Create new nodes for any dockables outside the selected lane range
 				var dockables = objects.OfType<ILaneDockable>()
 					.Where(d => laneStart == d.ReferenceLaneStart)
 					.OrderBy(o => o.TGrid).ToList();
 
-				if (dockables.Any()) {
+				if (dockables.Count > 0) {
 					if (dockables.First().TGrid < selectedNodes.First().TGrid) {
 						// There's a dockable before the selected lanes
 						skipNodes = 0;
