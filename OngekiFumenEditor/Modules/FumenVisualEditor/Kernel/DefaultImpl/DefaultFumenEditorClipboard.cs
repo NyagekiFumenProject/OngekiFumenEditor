@@ -288,18 +288,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					var destinationX = gridPlaceX + offsetX;
 					((IHorizonPositionObject)newObject).XGrid = destinationX;
 				}
-
-				((ISelectableObject)newObject).IsSelected = true;
 			}
+
+			var previousSelection = targetEditor.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>()
+				.Where(s => s.IsSelected);
 
 			var redo = () =>
 			{
+				previousSelection.ForEach(o => o.IsSelected = false);
+
 				foreach (var (clipboardObject, newObject) in clipboardCopyMap.Where(kv => kv.Key is ConnectableChildObjectBase)) {
 					((LaneStartBase)clipboardCopyMap[((ConnectableObjectBase)clipboardObject).ReferenceStartObject]).AddChildObject((ConnectableChildObjectBase)newObject);
 				}
 
 				foreach (var newObject in clipboardCopyMap.Values) {
 					targetEditor.Fumen.AddObject(newObject);
+					if (newObject is ISelectableObject selectable)
+						selectable.IsSelected = true;
 				}
 
 				foreach (var (clipboardObject, newObject) in clipboardCopyMap) {
@@ -311,9 +316,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 			var undo = () =>
 			{
+				targetEditor.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(o => o.IsSelected = false);
+
 				foreach (var newObject in clipboardCopyMap.Values) {
 					targetEditor.Fumen.RemoveObject(newObject);
 				}
+
+				previousSelection.ForEach(o => o.IsSelected = true);
 			};
 
 			targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CopyAndPaste, redo, undo));
