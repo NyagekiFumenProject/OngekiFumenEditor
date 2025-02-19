@@ -80,7 +80,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 				var start = first.LaneType.CreateStartConnectable();
 				start.Copy(first);
-				start.RecordId = -Math.Abs(start.RecordId);
+				start.RecordId = -Math.Abs(start.RecordId) - 1;
 
 				// By default, make the first node of the lane a StartObject
 				// If we auto-generate a node on a dockable before the selected nodes, this gets set to 0
@@ -140,12 +140,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				if (!sourceDockablesToCopiedLanes.ContainsKey(dockableGroup.First())) {
 					// Process selected dockables that have no selected lane nodes
 					var head = dockableGroup.Key.LaneType.CreateStartConnectable();
-					head.RecordId = -head.RecordId;
+					head.RecordId = -Math.Abs(head.RecordId) - 1;
 					head.TGrid = dockableGroup.First().TGrid;
 					head.XGrid = dockableGroup.First().XGrid;
 
 					var tail = dockableGroup.Key.LaneType.CreateChildConnectable();
-					tail.RecordId = -head.RecordId;
+					tail.RecordId = -Math.Abs(head.RecordId) - 1;
 					tail.TGrid = dockableGroup.Last().TGrid;
 					tail.XGrid = dockableGroup.Last().XGrid;
 
@@ -252,9 +252,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				: (XGrid.Zero,
 					TGridCalculator.ConvertYToTGrid_DesignMode(targetEditor.Setting.JudgeLineOffsetY, targetEditor));
 
-			var redo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
-			var undo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
-
 			var clipboardObjectsRootPosition = (
 				currentCopiedSources.Values.MinBy(pos => pos.x ?? XGrid.MaxValue).x,
 				currentCopiedSources.Values.MinBy(pos => pos.y).y
@@ -295,7 +292,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 				((ISelectableObject)newObject).IsSelected = true;
 			}
 
-			redo = () =>
+			var redo = () =>
 			{
 				foreach (var (clipboardObject, newObject) in clipboardCopyMap.Where(kv => kv.Key is ConnectableChildObjectBase)) {
 					((LaneStartBase)clipboardCopyMap[((ConnectableObjectBase)clipboardObject).ReferenceStartObject]).AddChildObject((ConnectableChildObjectBase)newObject);
@@ -311,7 +308,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					}
 				}
 			};
-			undo = () =>
+
+			var undo = () =>
 			{
 				foreach (var newObject in clipboardCopyMap.Values) {
 					targetEditor.Fumen.RemoveObject(newObject);
