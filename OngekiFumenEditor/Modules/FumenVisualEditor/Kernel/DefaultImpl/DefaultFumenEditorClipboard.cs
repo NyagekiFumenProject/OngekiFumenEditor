@@ -159,9 +159,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					}
 				}
 
-				foreach (var sourceDockable in dockableGroup.OrderBy(d => d is HoldEnd)) {
+				foreach (var sourceDockable in dockableGroup.Where(d => d is not HoldEnd || d is HoldEnd end && objects.Contains(end.RefHold)).OrderBy(d => d is HoldEnd)) {
 					var newDockable = ((OngekiMovableObjectBase)sourceDockable).CopyNew();
-//					((ILaneDockable)newDockable).ReferenceLaneStart = (LaneStartBase)sourceDockablesToCopiedLanes[sourceDockable];
+					((ILaneDockable)newDockable).ReferenceLaneStart = (LaneStartBase)sourceDockablesToCopiedLanes[sourceDockable];
 					copiedObjectMap[(OngekiObjectBase)sourceDockable] = newDockable;
 
 					if (sourceDockable is HoldEnd sourceHoldEnd) {
