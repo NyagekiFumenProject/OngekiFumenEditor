@@ -287,6 +287,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					var offsetX = xGrid - clipboardObjectsRootPosition.x;
 					var destinationX = gridPlaceX + offsetX;
 					((IHorizonPositionObject)newObject).XGrid = destinationX;
+
+					if (clipboardObject is ConnectableChildObjectBase clipboardConnectable) {
+						foreach (var cp in ((ConnectableChildObjectBase)newObject).PathControls) {
+							var cpOffsetX = cp.XGrid - clipboardConnectable.XGrid;
+							var cpOffsetY = cp.TGrid - clipboardConnectable.TGrid;
+							cp.XGrid = destinationX + cpOffsetX;
+							cp.TGrid = destinationY + cpOffsetY;
+						}
+					}
 				}
 			}
 
@@ -305,6 +314,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 					targetEditor.Fumen.AddObject(newObject);
 					if (newObject is ISelectableObject selectable)
 						selectable.IsSelected = true;
+
+					if (newObject is ConnectableChildObjectBase child) {
+						child.PathControls.ForEach(p => p.IsSelected = true);
+					}
 				}
 
 				foreach (var (clipboardObject, newObject) in clipboardCopyMap) {
