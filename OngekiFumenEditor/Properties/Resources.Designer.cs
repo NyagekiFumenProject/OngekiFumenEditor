@@ -196,6 +196,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似  的本地化字符串。
+        /// </summary>
+        public static string ApplyFilter {
+            get {
+                return ResourceManager.GetString("ApplyFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Apply delay by seconds 的本地化字符串。
         /// </summary>
         public static string ApplyOffsetBySecond {
@@ -3202,6 +3211,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Keywords filter: 的本地化字符串。
+        /// </summary>
+        public static string KeywordFilter {
+            get {
+                return ResourceManager.GetString("KeywordFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Keywords sorting: 的本地化字符串。
         /// </summary>
         public static string KeywordSortFilter {
@@ -4748,7 +4766,7 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("Save", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   查找类似 Save changes to &quot;{0}&quot; before closing? 的本地化字符串。
         /// </summary>
@@ -4757,7 +4775,7 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("SaveBeforeClosingPrompt", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   查找类似 Record up to  的本地化字符串。
         /// </summary>
