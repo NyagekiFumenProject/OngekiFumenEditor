@@ -82,5 +82,41 @@ namespace OngekiFumenEditor.Properties {
                 this["SoundVolume"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableSoundMultiPlay {
+            get {
+                return ((bool)(this["EnableSoundMultiPlay"]));
+            }
+            set {
+                this["EnableSoundMultiPlay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableVarspeed {
+            get {
+                return ((bool)(this["EnableVarspeed"]));
+            }
+            set {
+                this["EnableVarspeed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50")]
+        public int VarspeedReadDurationMs {
+            get {
+                return ((int)(this["VarspeedReadDurationMs"]));
+            }
+            set {
+                this["VarspeedReadDurationMs"] = value;
+            }
+        }
     }
 }

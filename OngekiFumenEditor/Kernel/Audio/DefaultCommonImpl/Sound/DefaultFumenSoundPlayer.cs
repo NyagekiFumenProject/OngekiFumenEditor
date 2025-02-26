@@ -11,6 +11,7 @@ using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
@@ -121,7 +122,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
             if (!noError)
             {
-                MessageBox.Show(Resources.WarnSomeSoundsNotLoad);
+                if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+                    MessageBox.Show(Resources.WarnSomeSoundsNotLoad);
                 source.SetResult(false);
                 return;
             }

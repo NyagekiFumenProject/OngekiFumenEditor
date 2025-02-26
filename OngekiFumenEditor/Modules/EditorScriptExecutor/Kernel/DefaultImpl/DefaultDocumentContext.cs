@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel.DefaultImpl
 			var result = await CompletionService.GetCompletionsAsync(document, cursorPos);
 			if (result is null)
 				yield break;
-			foreach (var item in result.Items)
+			foreach (var item in result.ItemsList)
 			{
 				var desc = await CompletionService.GetDescriptionAsync(document, item);
 				yield return new DefaultCompletionItem()
@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel.DefaultImpl
 			root.Sdk = "Microsoft.NET.Sdk";
 
 			var projCommonGroup = root.AddPropertyGroup();
-			projCommonGroup.AddProperty("TargetFramework", "net6.0-windows");
+			projCommonGroup.AddProperty("TargetFramework", "net8.0-windows");
 			projCommonGroup.AddProperty("OutputType", "Exe");
 
 

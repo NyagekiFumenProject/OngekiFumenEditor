@@ -57,7 +57,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 		public override ConnectableStartObject ReferenceStartObject => referenceStartObject;
 
 		private int recordId = int.MinValue;
-		internal int CacheRecoveryChildIndex { get; set; } = -1;
 		public override int RecordId { get => ReferenceStartObject?.RecordId ?? recordId; set => Set(ref recordId, value); }
 
 		private List<LaneCurvePathControlObject> pathControls = new();

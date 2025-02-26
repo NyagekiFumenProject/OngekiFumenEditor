@@ -13,118 +13,124 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
-	[Export(typeof(IDrawingManager))]
-	[PartCreationPolicy(CreationPolicy.Shared)]
-	public class DefaultDrawingManager : IDrawingManager
-	{
-		// Import the necessary Win32 functions
-		[DllImport("opengl32.dll")]
-		private static extern IntPtr wglGetCurrentDC();
+    [Export(typeof(IDrawingManager))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    public class DefaultDrawingManager : IDrawingManager
+    {
+        // Import the necessary Win32 functions
+        [DllImport("opengl32.dll")]
+        private static extern IntPtr wglGetCurrentDC();
 
-		[DllImport("opengl32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-		private static extern IntPtr wglGetProcAddress(string lpszProc);
+        [DllImport("opengl32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        private static extern IntPtr wglGetProcAddress(string lpszProc);
 
-		private static bool IsWGL_NV_DX_interopSupported()
-		{
-			var hdc = wglGetCurrentDC();
-			var functionPointer = wglGetProcAddress("wglDXSetResourceSharingNV");
-			return functionPointer != IntPtr.Zero;
-		}
+        private IGraphicsContext sharedContext;
 
-		TaskCompletionSource initTaskSource = new TaskCompletionSource();
-		bool startedInit = false;
+        private static bool IsWGL_NV_DX_interopSupported()
+        {
+            var hdc = wglGetCurrentDC();
+            var functionPointer = wglGetProcAddress("wglDXSetResourceSharingNV");
+            return functionPointer != IntPtr.Zero;
+        }
 
-		public Task CheckOrInitGraphics()
-		{
-			if (!startedInit)
-			{
-				startedInit = true;
-				Dispatcher.CurrentDispatcher.InvokeAsync(OnInitOpenGL);
-			}
+        TaskCompletionSource initTaskSource = new TaskCompletionSource();
+        bool startedInit = false;
 
-			return initTaskSource.Task;
-		}
+        public Task CheckOrInitGraphics()
+        {
+            if (!startedInit)
+            {
+                startedInit = true;
+                Dispatcher.CurrentDispatcher.InvokeAsync(OnInitOpenGL);
+            }
 
-		private void OnInitOpenGL()
-		{
-			if (Properties.ProgramSetting.Default.OutputGraphicsLog)
-			{
-				GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
-				GL.Enable(EnableCap.DebugOutput);
-				if (Properties.ProgramSetting.Default.GraphicsLogSynchronous)
-					GL.Enable(EnableCap.DebugOutputSynchronous);
-			}
+            return initTaskSource.Task;
+        }
 
-			GL.ClearColor(System.Drawing.Color.Black);
-			GL.Enable(EnableCap.Blend);
-			GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        private void OnInitOpenGL()
+        {
+            if (Properties.ProgramSetting.Default.OutputGraphicsLog)
+            {
+                GL.DebugMessageCallback(OnOpenGLDebugLog, IntPtr.Zero);
+                GL.Enable(EnableCap.DebugOutput);
+                if (Properties.ProgramSetting.Default.GraphicsLogSynchronous)
+                    GL.Enable(EnableCap.DebugOutputSynchronous);
+            }
 
-			Log.LogDebug($"Prepare OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
+            GL.ClearColor(System.Drawing.Color.Black);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-			try
-			{
-				var isSupport = IsWGL_NV_DX_interopSupported();
-				Log.LogDebug($"WGL_NV_DX_interop support: {isSupport}");
-			}
-			catch
-			{
-				Log.LogDebug($"WGL_NV_DX_interop support: EXCEPTION");
-			}
+            Log.LogDebug($"Prepare OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
 
-			if (Properties.ProgramSetting.Default.GraphicsCompatability)
-			{
-				var extNames = string.Join(", ", Enumerable.Range(0, GL.GetInteger(GetPName.NumExtensions)).Select(i => GL.GetString(StringNameIndexed.Extensions, i)));
-				Log.LogDebug($"(maybe support) OpenGL extensions: {extNames}");
-			}
+            try
+            {
+                var isSupport = IsWGL_NV_DX_interopSupported();
+                Log.LogDebug($"WGL_NV_DX_interop support: {isSupport}");
+            }
+            catch
+            {
+                Log.LogDebug($"WGL_NV_DX_interop support: EXCEPTION");
+            }
 
-			initTaskSource.SetResult();
-		}
+            if (Properties.ProgramSetting.Default.GraphicsCompatability)
+            {
+                var extNames = string.Join(", ", Enumerable.Range(0, GL.GetInteger(GetPName.NumExtensions)).Select(i => GL.GetString(StringNameIndexed.Extensions, i)));
+                Log.LogDebug($"(maybe support) OpenGL extensions: {extNames}");
+            }
 
-		private static void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
-		{
-			if (id == 131185)
-				return;
+            initTaskSource.SetResult();
+        }
 
-			var str = Marshal.PtrToStringAnsi(message, length);
-			Log.LogDebug($"[{source}.{type}]{id}:  {str}");
-		}
+        private static void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
+        {
+            if (id == 131185)
+                return;
 
-		public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)
-		{
-			return initTaskSource.Task;
-		}
+            var str = Marshal.PtrToStringAnsi(message, length);
+            Log.LogDebug($"[{source}.{type}]{id}:  {str}");
+        }
 
-		public Task CreateGraphicsContext(GLWpfControl glView, CancellationToken cancellation = default)
-		{
-			var isCompatability = Properties.ProgramSetting.Default.GraphicsCompatability;
-			var isOutputLog = Properties.ProgramSetting.Default.OutputGraphicsLog;
+        public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)
+        {
+            return initTaskSource.Task;
+        }
 
-			var flag = isOutputLog ? ContextFlags.Debug : ContextFlags.Default;
+        public Task CreateGraphicsContext(GLWpfControl glView, CancellationToken cancellation = default)
+        {
+            var isCompatability = Properties.ProgramSetting.Default.GraphicsCompatability;
+            var isOutputLog = Properties.ProgramSetting.Default.OutputGraphicsLog;
 
-			var setting = isCompatability ? new GLWpfControlSettings()
-			{
-				MajorVersion = 3,
-				MinorVersion = 3,
-				GraphicsContextFlags = flag | ContextFlags.ForwardCompatible,
-				GraphicsProfile = ContextProfile.Compatability
-			} : new GLWpfControlSettings()
-			{
-				MajorVersion = 4,
-				MinorVersion = 5,
-				GraphicsContextFlags = flag,
-				GraphicsProfile = ContextProfile.Core
-			};
+            var flag = isOutputLog ? ContextFlags.Debug : ContextFlags.Default;
 
-			Log.LogDebug($"GraphicsCompatability: {isCompatability}");
-			Log.LogDebug($"OutputGraphicsLog: {isOutputLog}");
+            GLWpfControlSettings setting = isCompatability ? new()
+            {
+                MajorVersion = 3,
+                MinorVersion = 3,
+                ContextFlags = flag | ContextFlags.ForwardCompatible,
+                Profile = ContextProfile.Compatability,
+            } : new()
+            {
+                MajorVersion = 4,
+                MinorVersion = 5,
+                ContextFlags = flag,
+                Profile = ContextProfile.Core
+            };
 
-			Log.LogDebug($"GLWpfControlSettings.Version: {setting.MajorVersion}.{setting.MinorVersion}");
-			Log.LogDebug($"GLWpfControlSettings.GraphicsContextFlags: {setting.GraphicsContextFlags}");
-			Log.LogDebug($"GLWpfControlSettings.GraphicsProfile: {setting.GraphicsProfile}");
+            setting.ContextToUse = sharedContext;
 
-			glView.Start(setting);
+            Log.LogDebug($"GraphicsCompatability: {isCompatability}");
+            Log.LogDebug($"OutputGraphicsLog: {isOutputLog}");
 
-			return Task.CompletedTask;
-		}
-	}
+            Log.LogDebug($"GLWpfControlSettings.Version: {setting.MajorVersion}.{setting.MinorVersion}");
+            Log.LogDebug($"GLWpfControlSettings.GraphicsContextFlags: {setting.ContextFlags}");
+            Log.LogDebug($"GLWpfControlSettings.GraphicsProfile: {setting.Profile}");
+
+            glView.Start(setting);
+
+            sharedContext = sharedContext ?? glView.Context;
+
+            return Task.CompletedTask;
+        }
+    }
 }

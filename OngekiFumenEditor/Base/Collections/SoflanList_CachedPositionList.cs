@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Base.Collections
         private IIntervalTree<double, SoflanSegment> cachePostionList_PreviewMode;
 
         [Flags]
-        public enum ChgEvt
+        private enum ChgEvt
         {
             None = 0,
             BpmChanged = 1,
@@ -69,8 +69,8 @@ namespace OngekiFumenEditor.Base.Collections
 
         public IEnumerable<(TGrid TGrid, double speed, BPMChange curBpm)> GetCalculatableEvents(BpmList bpmList, bool isDesignModel)
         {
-            var sortList = new SortableCollection<(ITimelineObject timeline, ChgEvt evt), TGrid>(x => x.timeline.TGrid);
-            foreach (var timelineObject in this.FilterNull().AsEnumerable<ITimelineObject>().Concat(bpmList))
+            var sortList = new List<(ITimelineObject timeline, ChgEvt evt)>();
+            foreach (var timelineObject in CollectionHelper.MergeTwoSortedCollections<ITimelineObject, TGrid>(x => x.TGrid, this, bpmList))
             {
                 switch (timelineObject)
                 {

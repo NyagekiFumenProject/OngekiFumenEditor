@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -145,6 +146,65 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
     }
 
+    public void LoadRenderOrderVisible()
+    {
+        var targets = drawTargets.Values.SelectMany(x => x).Distinct().ToArray();
+        var map = new Dictionary<string, RenderTargetOrderVisible>();
+
+        var json = EditorGlobalSetting.Default.RenderTargetOrderVisibleMap;
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            try
+            {
+                var loaded = JsonSerializer.Deserialize<Dictionary<string, RenderTargetOrderVisible>>(json);
+                map = loaded;
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"load json content failed:{e.Message}, drawing targets will use default configs.");
+                map = new();
+            }
+        }
+
+        foreach (var target in targets)
+        {
+            if (map.TryGetValue(target.GetType().Name, out var orderVisible))
+            {
+                target.CurrentRenderOrder = orderVisible.Order;
+                target.Visible = orderVisible.Visible;
+            }
+            else
+            {
+                target.CurrentRenderOrder = target.DefaultRenderOrder;
+                target.Visible = target.DefaultVisible;
+            }
+        }
+        Log.LogInfo($"loaded.");
+    }
+
+    public void SaveRenderOrderVisible()
+    {
+        var targets = drawTargets.Values.SelectMany(x => x).Distinct().ToArray();
+        var map = targets.ToDictionary(x => x.GetType().Name, x => new RenderTargetOrderVisible()
+        {
+            Order = x.CurrentRenderOrder,
+            Visible = x.Visible
+        });
+
+        try
+        {
+            var json = JsonSerializer.Serialize(map);
+            EditorGlobalSetting.Default.RenderTargetOrderVisibleMap = json;
+            EditorGlobalSetting.Default.Save();
+            Log.LogInfo($"saved.");
+        }
+        catch (Exception e)
+        {
+            Log.LogError($"save json content failed:{e.Message}");
+            map = new();
+        }
+    }
+
     public async void PrepareRenderLoop(GLWpfControl openGLView)
     {
         Log.LogDebug("ready.");
@@ -166,6 +226,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
             .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
 
+        LoadRenderOrderVisible();
         ResortRenderOrder();
 
         timeSignatureHelper = new DrawTimeSignatureHelper();
@@ -580,6 +641,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public void OnSizeChanged(ActionExecutionContext e)
     {
+        Log.LogInfo("resize");
         var scrollViewer = e.Source as AnimatedScrollViewer;
         scrollViewer?.InvalidateMeasure();
     }

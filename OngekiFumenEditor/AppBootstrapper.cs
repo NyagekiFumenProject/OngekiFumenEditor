@@ -186,6 +186,8 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     public async void OnStartupForCMD(object sender, StartupEventArgs e)
     {
         IsGUIMode = false;
+        Log.Instance.RemoveOutput<ConsoleLogOutput>();
+
         await IoC.Get<ISchedulerManager>().Init();
 
         var executor = IoC.Get<ICommandExecutor>();
@@ -204,6 +206,12 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     public async void OnStartupForGUI(object sender, StartupEventArgs e)
     {
         IsGUIMode = true;
+
+#if DEBUG
+        ConsoleWindowHelper.SetConsoleWindowVisible(true);
+#else
+        ConsoleWindowHelper.SetConsoleWindowVisible(ProgramSetting.Default.ShowConsoleWindowInGUIMode);
+#endif
 
         InitExceptionCatcher();
         LogBaseInfos();
@@ -249,12 +257,10 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         if (CheckIfAdminPermission())
         {
             Log.LogWarn("Program is within admin permission.");
-            IoC.Get<WindowTitleHelper>().TitleContent = "(以管理员权限运行)";
+            var prevSuffix = IoC.Get<WindowTitleHelper>().TitleSuffix;
+            IoC.Get<WindowTitleHelper>().TitleSuffix = prevSuffix + "(以管理员权限运行)";
         }
-        else
-        {
-            IoC.Get<WindowTitleHelper>().TitleContent = "";
-        }
+        IoC.Get<WindowTitleHelper>().UpdateWindowTitle();
 
         IoC.Get<IShell>().ToolBars.Visible = true;
 

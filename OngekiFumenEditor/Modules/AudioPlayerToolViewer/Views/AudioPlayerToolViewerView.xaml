@@ -253,25 +253,21 @@
                             Content="{markup:Translate [EnableVisualizerDisplay]}"
                             IsChecked="{Binding IsShowWaveform}">
                         </CheckBox>
-                        <StackPanel
+
+                        <Grid
                             Margin="5"
                             HorizontalAlignment="Stretch"
-                            Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Speed]}" />
-                            <Slider
-                                Width="150"
-                                Margin="5,0,0,0"
-                                VerticalAlignment="Stretch"
-                                VerticalContentAlignment="Center"
-                                IsEnabled="{Binding AudioPlayer.IsAvaliable}"
-                                IsSnapToTickEnabled="True"
-                                Maximum="1.25"
-                                Minimum="0.25"
-                                TickFrequency="0.25"
-                                TickPlacement="BottomRight"
-                                Value="{Binding AudioPlayer.Speed}">
-                            </Slider>
-                        </StackPanel>
+                            IsEnabled="{Binding AudioPlayer.IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
+                            <controls:RangeValue
+                                Grid.ColumnSpan="2"
+                                Padding="0,5,0,5"
+                                CurrentValue="{Binding MusicSpeed, Mode=TwoWay}"
+                                DisplayName="{markup:Translate [Speed]}"
+                                MaxValue="1.25"
+                                MinValue="0.75"
+                                Step="0.05">
+                            </controls:RangeValue>
+                        </Grid>
                         <StackPanel
                             Margin="5"
                             HorizontalAlignment="Stretch"

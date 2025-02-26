@@ -71,8 +71,8 @@
             HorizontalAlignment="Left"
             cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnBrushButtonClick()];"
             DecoratorBrush="Tomato"
-            Text="{markup:Translate [BrushCopied]}"
-            ToolTip="{markup:Translate [BrushCopiedTipText]}"
+            Text="{markup:Translate [BrushAlongLane]}"
+            ToolTip="{markup:Translate [BrushAlongLaneTipText]}"
             Visibility="{Binding IsStartObject, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <controls:CommonOperationButton
             Width="150"

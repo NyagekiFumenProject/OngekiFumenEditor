@@ -178,5 +178,29 @@ namespace OngekiFumenEditor.Properties {
                 this["EnableUpdateCheck"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowConsoleWindowInGUIMode {
+            get {
+                return ((bool)(this["ShowConsoleWindowInGUIMode"]));
+            }
+            set {
+                this["ShowConsoleWindowInGUIMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DisableStringRendererAntialiasing {
+            get {
+                return ((bool)(this["DisableStringRendererAntialiasing"]));
+            }
+            set {
+                this["DisableStringRendererAntialiasing"] = value;
+            }
+        }
     }
 }

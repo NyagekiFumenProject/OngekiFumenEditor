@@ -3,8 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
-    xmlns:common="clr-namespace:Gemini.Framework.Services;assembly=Gemini"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
     xmlns:controls1="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -14,10 +12,10 @@
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
     cal:Message.Attach="[Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];"
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel}"
     d:DesignHeight="450"
@@ -56,14 +54,17 @@
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_SelectAllObjects}" Message="KeyboardAction_SelectAllObjects($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_CancelSelectingObjects}" Message="KeyboardAction_CancelSelectingObjects($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_HideOrShow}" Message="KeyboardAction_HideOrShow($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ToggleBatchMode}" Message="KeyboardAction_ToggleBatchMode($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastAddConnectableChild}" Message="KeyboardAction_FastAddConnectableChild($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastSwitchFlickDirection}" Message="KeyboardAction_FastSwitchFlickDirection($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_CopySelectedObjects}" Message="MenuItemAction_CopySelectedObjects($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_PasteCopiesObjects}" Message="KeyboardAction_PasteCopiesObjects($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ScrollPageDown}" Message="ScrollPage(-1)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ScrollPageUp}" Message="ScrollPage(1)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ChangeDockableLaneType}" Message="KeyboardAction_ChangeDockableLaneType($executionContext)" />
         <!--#endregion-->
     </i:Interaction.Triggers>
+
 
     <Grid Focusable="False">
         <Grid.ColumnDefinitions>
@@ -74,6 +75,7 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
                 <MenuItem Header="{markup:Translate [MenuSelecting]}">
@@ -106,7 +108,7 @@
                 <MenuItem Header="{markup:Translate [ToCopiedObjects]}">
                     <MenuItem Header="{markup:Translate [ToPaste]}">
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsDirectly($executionContext)" Header="{markup:Translate [PasteDirectly]}" />
-                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteToMouse]}" />
+                        <!--<MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteToMouse]}" />-->
                         <Separator />
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="{markup:Translate [PasteForHorizonMirror]}" />
                         <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="{markup:Translate [PasteForVerticalMirror]}" />
@@ -120,11 +122,15 @@
                     IsChecked="{Binding IsDisplayFPS}" />
             </ContextMenu>
         </Grid.ContextMenu>
+
         <opentkcontrol:GLWpfControl
             x:Name="glView"
-            cal:Message.Attach="             [Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
+            cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
             Ready="glView_Ready"
             SizeChanged="glView_SizeChanged" />
+
+        <views:BatchModeOverlayView DataContext="{Binding BatchModeBehavior}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:FumenVisualEditorView}}, Path=DataContext.IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
+
         <TextBlock
             HorizontalAlignment="Left"
             VerticalAlignment="Top"

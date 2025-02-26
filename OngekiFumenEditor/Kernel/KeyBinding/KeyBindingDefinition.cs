@@ -3,7 +3,6 @@ using OngekiFumenEditor.Properties;
 using System.Text.RegularExpressions;
 using System;
 using System.Windows.Input;
-using Xceed.Wpf.Toolkit.Core.Input;
 
 namespace OngekiFumenEditor.Kernel.KeyBinding
 {
@@ -13,22 +12,24 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
 
         public Key DefaultKey { get; }
         public ModifierKeys DefaultModifiers { get; }
+        public KeyBindingLayer Layer { get; }
 
         public string ConfigKey => resourceName;
 
         public string Name => Resources.ResourceManager.GetString(resourceName);
 
-        public KeyBindingDefinition(string resourceName, Key defaultKey) : this(resourceName, ModifierKeys.None, defaultKey)
-        {
+        public string DisplayName => $"[{Resources.ResourceManager.GetString($"kbd_layer_{Layer}")}]{Name}";
 
-        }
+        public KeyBindingDefinition(string resourceName, Key defaultKey, KeyBindingLayer layer = KeyBindingLayer.Normal) : this(resourceName, ModifierKeys.None, defaultKey, layer)
+        { }
 
-        public KeyBindingDefinition(string resourceName, ModifierKeys defaultModifiers, Key defaultKey)
+        public KeyBindingDefinition(string resourceName, ModifierKeys defaultModifiers, Key defaultKey, KeyBindingLayer layer = KeyBindingLayer.Normal)
         {
             this.resourceName = resourceName;
 
             DefaultModifiers = defaultModifiers;
             DefaultKey = defaultKey;
+            Layer = layer;
         }
 
         private Key? key;
@@ -113,5 +114,12 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
             key = k;
             return key != Key.None;
         }
+    }
+
+    public enum KeyBindingLayer
+    {
+        Global,
+        Normal,
+        Batch
     }
 }

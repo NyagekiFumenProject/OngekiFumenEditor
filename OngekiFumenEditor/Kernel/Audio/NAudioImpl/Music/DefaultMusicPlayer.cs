@@ -1,7 +1,9 @@
 ﻿using Caliburn.Micro;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.SoundTouch;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Utils;
@@ -14,213 +16,220 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
 {
     internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
-	{
-		private FinishedListenerProvider finishProvider;
+    {
+        private FinishedListenerProvider finishProvider;
 
-		private VolumeSampleProvider currentVolumeProvider;
-		private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
-		private Stopwatch sw = new();
-		private TimeSpan pauseTime;
-		private float volume = 1;
-		private bool isAvaliable;
-		private byte[] samples;
-		private BufferWaveStream audioFileReader;
-		private MixingSampleProvider musicMixer;
+        private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
+        private Stopwatch sw = new();
+        private TimeSpan pauseTime;
+        private float volume = 1;
+        private bool isAvaliable;
+        private byte[] samples;
+        private BufferWaveStream audioFileReader;
 
-		public event IAudioPlayer.OnPlaybackFinishedFunc OnPlaybackFinished;
+        private readonly MixingSampleProvider musicMixer;
+        private readonly NAudioManager manager;
 
-		public TimeSpan Duration => duration;
+        public event IAudioPlayer.OnPlaybackFinishedFunc OnPlaybackFinished;
 
-		public TimeSpan CurrentTime { get => GetTime(); }
+        public TimeSpan Duration => duration;
 
-		public float Speed { get => 1; set { } }
+        public TimeSpan CurrentTime { get => GetTime(); }
 
-		private bool isPlaying;
-		private TimeSpan duration;
+        public float Speed { get => 1; set { } }
 
-		public bool IsPlaying
-		{
-			get => isPlaying;
-			set => Set(ref isPlaying, value);
-		}
+        private bool isPlaying;
+        private TimeSpan duration;
 
-		public float Volume
-		{
-			get => volume;
-			set
-			{
-				volume = value;
-				if (currentVolumeProvider is not null)
-					currentVolumeProvider.Volume = volume;
-			}
-		}
+        public bool IsPlaying
+        {
+            get => isPlaying;
+            set => Set(ref isPlaying, value);
+        }
 
-		public string SchedulerName => $"DefaultMusicPlayer Playing Updater";
+        public float Volume
+        {
+            get => manager.MusicVolume;
+            set
+            {
+                manager.MusicVolume = value;
+                NotifyOfPropertyChange(() => Volume);
+            }
+        }
 
-		public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromMilliseconds(1000.0 / 60);
+        public string SchedulerName => $"DefaultMusicPlayer Playing Updater";
 
-		public bool IsAvaliable
-		{
-			get => isAvaliable;
-			set
-			{
-				Set(ref isAvaliable, value);
-			}
-		}
+        public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromMilliseconds(1000.0 / 60);
 
-		public DefaultMusicPlayer(MixingSampleProvider soundMixer)
-		{
-			this.musicMixer = soundMixer;
-		}
+        public bool IsAvaliable
+        {
+            get => isAvaliable;
+            set
+            {
+                Set(ref isAvaliable, value);
+            }
+        }
 
-		private void Provider_OnReturnEmptySamples()
-		{
-			finishProvider.StopListen();
-			OnPlaybackFinished?.Invoke();
-		}
+        public DefaultMusicPlayer(MixingSampleProvider soundMixer, NAudioManager manager)
+        {
+            this.musicMixer = soundMixer;
+            this.manager = manager;
+        }
 
-		public async Task Load(string audio_file, int targetSampleRate)
-		{
-			//release resource before loading new one.
-			Dispose();
+        private void Provider_OnReturnEmptySamples()
+        {
+            finishProvider.StopListen();
+            OnPlaybackFinished?.Invoke();
+        }
 
-			try
-			{
-				Log.LogInfo($"Load audio file: {audio_file}");
-				var rawStream = new AudioFileReader(audio_file);
-				duration = rawStream.TotalTime;
-				var processedProvider = await AudioCompatibilizer.CheckCompatible(rawStream, targetSampleRate);
+        public async Task Load(string audio_file, int targetSampleRate)
+        {
+            //release resource before loading new one.
+            Dispose();
 
-				samples = processedProvider.ToWaveProvider().ToArray();
+            try
+            {
+                Log.LogInfo($"Load audio file: {audio_file}");
+                var rawStream = new AudioFileReader(audio_file);
+                duration = rawStream.TotalTime;
+                var processedProvider = await AudioCompatibilizer.CheckCompatible(rawStream, targetSampleRate);
 
-				audioFileReader = new BufferWaveStream(samples, processedProvider.WaveFormat);
-				audioFileReader.Seek(0, SeekOrigin.Begin);
-				currentVolumeProvider = new(audioFileReader);
-				finishProvider = new(currentVolumeProvider);
-				finishProvider.StartListen();
-				finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
+                samples = processedProvider.ToWaveProvider().ToArray();
 
-				NotifyOfPropertyChange(() => Duration);
-				IsAvaliable = true;
-			}
-			catch (Exception e)
-			{
-				Log.LogError($"Load audio file ({audio_file}) failed : {e.Message}");
-				Dispose();
-			}
-		}
+                audioFileReader = new BufferWaveStream(samples, processedProvider.WaveFormat);
+                audioFileReader.Seek(0, SeekOrigin.Begin);
 
-		public void Seek(TimeSpan time, bool pause)
-		{
-			time = MathUtils.Max(TimeSpan.FromMilliseconds(0), MathUtils.Min(time, Duration));
+                finishProvider = new(audioFileReader);
+                finishProvider.StartListen();
+                finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
 
-			audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * time.TotalSeconds), SeekOrigin.Begin);
-			baseOffset = time;
+                NotifyOfPropertyChange(() => Duration);
+                IsAvaliable = true;
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"Load audio file ({audio_file}) failed : {e.Message}");
+                Dispose();
+            }
+        }
 
-			finishProvider.StartListen();
+        public void Seek(TimeSpan seekTime, bool pause)
+        {
+            seekTime = MathUtils.Max(TimeSpan.FromMilliseconds(0), MathUtils.Min(seekTime, Duration));
 
-			UpdatePropsManually();
-			if (!pause)
-				Play();
-		}
+            audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds), SeekOrigin.Begin);
+            //more accurate
+            baseOffset = audioFileReader.CurrentTime;
 
-		public async void Play()
-		{
-			IsPlaying = true;
-			sw.Restart();
-			musicMixer.AddMixerInput(finishProvider);
-			await IoC.Get<ISchedulerManager>().AddScheduler(this);
-		}
+            finishProvider.StartListen();
 
-		private TimeSpan GetTime()
-		{
-			if (!IsPlaying)
-				return pauseTime;
-			var offset = TimeSpan.FromTicks(sw.ElapsedTicks);
-			var actualTime = offset + baseOffset;
-			return actualTime;
-		}
+            if (!pause)
+                Play();
+            UpdatePropsManually();
+        }
 
-		public async void Stop()
-		{
-			IsPlaying = false;
-			musicMixer.RemoveMixerInput(finishProvider);
-			await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
-			Seek(TimeSpan.FromMilliseconds(0), true);
-		}
+        public async void Play()
+        {
+            IsPlaying = true;
+            sw.Restart();
+            musicMixer.AddMixerInput(finishProvider);
+            UpdatePropsManually();
+            manager.Reposition();
 
-		public async void Pause()
-		{
-			pauseTime = GetTime();
-			IsPlaying = false;
-			musicMixer.RemoveMixerInput(finishProvider);
-			UpdatePropsManually();
-			await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
-		}
+            await IoC.Get<ISchedulerManager>().AddScheduler(this);
+        }
 
-		private void CleanCurrentOut()
-		{
-			musicMixer.RemoveMixerInput(finishProvider);
-			UpdatePropsManually();
-		}
+        private TimeSpan GetTime()
+        {
+            if (!IsPlaying)
+                return pauseTime;
+            var offset = TimeSpan.FromTicks(sw.ElapsedTicks) * manager.MusicSpeed;
+            var adjustedTime = offset + baseOffset - TimeSpan.FromMilliseconds(manager.SpeedCostDelayMs / 2);
+            var actualTime = MathUtils.Max(TimeSpan.Zero, adjustedTime);
+            return actualTime;
+        }
 
-		public async void Dispose()
-		{
-			CleanCurrentOut();
+        public async void Stop()
+        {
+            IsPlaying = false;
+            musicMixer.RemoveMixerInput(finishProvider);
+            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
+            Seek(TimeSpan.FromMilliseconds(0), true);
+            UpdatePropsManually();
+        }
 
-			audioFileReader?.Dispose();
-			audioFileReader = null;
-			IsAvaliable = false;
-			IsPlaying = false;
+        public async void Pause()
+        {
+            pauseTime = GetTime();
+            IsPlaying = false;
+            musicMixer.RemoveMixerInput(finishProvider);
+            UpdatePropsManually();
+            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
+        }
 
-			await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
-		}
+        private void CleanCurrentOut()
+        {
+            musicMixer.RemoveMixerInput(finishProvider);
+            UpdatePropsManually();
+        }
 
-		public void OnSchedulerTerm()
-		{
+        public async void Dispose()
+        {
+            CleanCurrentOut();
 
-		}
+            audioFileReader?.Dispose();
+            audioFileReader = null;
+            IsAvaliable = false;
+            IsPlaying = false;
 
-		public Task OnScheduleCall(CancellationToken cancellationToken)
-		{
-			if (!cancellationToken.IsCancellationRequested)
-			{
-				UpdatePropsManually();
-			}
-			return Task.CompletedTask;
-		}
+            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
+        }
 
-		private void UpdatePropsManually()
-		{
-			if (!IsAvaliable)
-				return;
+        public void OnSchedulerTerm()
+        {
 
-			NotifyOfPropertyChange(() => CurrentTime);
-			NotifyOfPropertyChange(() => Volume);
-			NotifyOfPropertyChange(() => Speed);
-			NotifyOfPropertyChange(() => IsPlaying);
-		}
+        }
 
-		public Task<SampleData> GetSamplesAsync()
-		{
-			if (!IsAvaliable)
-				return Task.FromResult<SampleData>(default);
+        public Task OnScheduleCall(CancellationToken cancellationToken)
+        {
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                UpdatePropsManually();
+            }
+            return Task.CompletedTask;
+        }
 
-			var subBuffer = samples.AsMemory();
-			var sampleData = new SampleData(subBuffer, ConvertToSampleInfo(audioFileReader.WaveFormat));
+        private void UpdatePropsManually()
+        {
+            if (!IsAvaliable)
+                return;
 
-			return Task.FromResult(sampleData);
-		}
+            NotifyOfPropertyChange(() => CurrentTime);
+            NotifyOfPropertyChange(() => Volume);
+            NotifyOfPropertyChange(() => Speed);
+            NotifyOfPropertyChange(() => IsPlaying);
+        }
 
-		public static SampleInfo ConvertToSampleInfo(WaveFormat waveFormat)
-		{
-			var sampleInfo = new SampleInfo();
+        public Task<SampleData> GetSamplesAsync()
+        {
+            if (!IsAvaliable)
+                return Task.FromResult<SampleData>(default);
 
-			sampleInfo.SampleRate = waveFormat.SampleRate;
-			sampleInfo.Channels = waveFormat.Channels;
-			sampleInfo.BitsPerSample = waveFormat.BitsPerSample;
+            var subBuffer = samples.AsMemory();
+            var sampleData = new SampleData(subBuffer, ConvertToSampleInfo(audioFileReader.WaveFormat));
 
-			return sampleInfo;
-		}
-	}
+            return Task.FromResult(sampleData);
+        }
+
+        public static SampleInfo ConvertToSampleInfo(WaveFormat waveFormat)
+        {
+            var sampleInfo = new SampleInfo();
+
+            sampleInfo.SampleRate = waveFormat.SampleRate;
+            sampleInfo.Channels = waveFormat.Channels;
+            sampleInfo.BitsPerSample = waveFormat.BitsPerSample;
+
+            return sampleInfo;
+        }
+    }
 }

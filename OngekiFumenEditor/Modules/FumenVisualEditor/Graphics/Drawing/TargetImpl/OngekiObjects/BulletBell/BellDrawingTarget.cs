@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -22,16 +23,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public BellDrawingTarget()
         {
-            Texture LoadTex(string rPath)
-            {
-                var info = System.Windows.Application.GetResourceStream(new Uri(@"Modules\FumenVisualEditor\Views\OngekiObjects\" + rPath, UriKind.Relative));
-                using var bitmap = Image.FromStream(info.Stream) as Bitmap;
-                return new Texture(bitmap);
-            }
+            texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\bell.png");
 
-            texture = LoadTex("bell.png");
-            sizeNormal = new Vector2(40, 40);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("bell", out var size, out _))
+                size = new Vector2(40, 40);
+            sizeNormal = size;
             sizeLarge = sizeNormal * 1.4f;
+
             normalDrawList[texture] = new();
             selectedDrawList[texture] = new();
         }

@@ -17,5 +17,14 @@
     <Setting Name="SoundVolume" Type="System.Single" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
+    <Setting Name="EnableSoundMultiPlay" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="EnableVarspeed" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="VarspeedReadDurationMs" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">50</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

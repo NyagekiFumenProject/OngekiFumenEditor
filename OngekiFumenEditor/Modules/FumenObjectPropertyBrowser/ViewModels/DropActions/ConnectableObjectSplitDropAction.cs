@@ -50,7 +50,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 				foreach (var item in splitOutChildren)
 				{
 					startObject.RemoveChildObject(item);
-					item.CacheRecoveryChildIndex = -1;//force add to end
 					nextStartObject.InsertChildObject(item.TGrid, item);
 				}
 
@@ -75,7 +74,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 				foreach (var item in splitOutChildren)
 				{
 					nextStartObject.RemoveChildObject(item);
-					item.CacheRecoveryChildIndex = -1;
 					startObject.InsertChildObject(item.TGrid, item);
 				}
 

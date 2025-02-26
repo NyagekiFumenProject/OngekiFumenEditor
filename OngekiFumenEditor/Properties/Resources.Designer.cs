@@ -115,15 +115,6 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Add objects by brush 的本地化字符串。
-        /// </summary>
-        public static string AddObjectsByBrush {
-            get {
-                return ResourceManager.GetString("AddObjectsByBrush", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Automatically snap objects when pasted 的本地化字符串。
         /// </summary>
         public static string AdjustPastedObjects {
@@ -201,6 +192,15 @@ namespace OngekiFumenEditor.Properties {
         public static string ApplyAudioAdjustSuccessButSuggest {
             get {
                 return ResourceManager.GetString("ApplyAudioAdjustSuccessButSuggest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似  的本地化字符串。
+        /// </summary>
+        public static string ApplyFilter {
+            get {
+                return ResourceManager.GetString("ApplyFilter", resourceCulture);
             }
         }
         
@@ -376,6 +376,78 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Add {0} 的本地化字符串。
+        /// </summary>
+        public static string BatchModeAddObject {
+            get {
+                return ResourceManager.GetString("BatchModeAddObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch delete {0} (x{1}) 的本地化字符串。
+        /// </summary>
+        public static string BatchModeDeleteRangeOfObjectType {
+            get {
+                return ResourceManager.GetString("BatchModeDeleteRangeOfObjectType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Filter {0} 的本地化字符串。
+        /// </summary>
+        public static string BatchModeFilterTooltipFormat {
+            get {
+                return ResourceManager.GetString("BatchModeFilterTooltipFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add to selection 的本地化字符串。
+        /// </summary>
+        public static string BatchModeModifierAddToSelection {
+            get {
+                return ResourceManager.GetString("BatchModeModifierAddToSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Set critical 的本地化字符串。
+        /// </summary>
+        public static string BatchModeModifierSetCritical {
+            get {
+                return ResourceManager.GetString("BatchModeModifierSetCritical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Switch direction 的本地化字符串。
+        /// </summary>
+        public static string BatchModeModifierSwitchDirection {
+            get {
+                return ResourceManager.GetString("BatchModeModifierSwitchDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Toggle batch mode 的本地化字符串。
+        /// </summary>
+        public static string BatchModeToggle {
+            get {
+                return ResourceManager.GetString("BatchModeToggle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable batch mode, which allows for placing objects with the mouse. 的本地化字符串。
+        /// </summary>
+        public static string BatchModeToggleTipText {
+            get {
+                return ResourceManager.GetString("BatchModeToggleTipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Batch toggle IsCritical 的本地化字符串。
         /// </summary>
         public static string BatchSetIsCritical {
@@ -399,6 +471,15 @@ namespace OngekiFumenEditor.Properties {
         public static string BeatSplit {
             get {
                 return ResourceManager.GetString("BeatSplit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bell 的本地化字符串。
+        /// </summary>
+        public static string Bell {
+            get {
+                return ResourceManager.GetString("Bell", resourceCulture);
             }
         }
         
@@ -495,45 +576,18 @@ namespace OngekiFumenEditor.Properties {
         /// <summary>
         ///   查找类似 Brush along lane with copied object 的本地化字符串。
         /// </summary>
-        public static string BrushCopied {
+        public static string BrushAlongLane {
             get {
-                return ResourceManager.GetString("BrushCopied", resourceCulture);
+                return ResourceManager.GetString("BrushAlongLane", resourceCulture);
             }
         }
         
         /// <summary>
         ///   查找类似 Brush along the lane, creating an instance of the brush object at each TGrid subdivision positioned upon the lane 的本地化字符串。
         /// </summary>
-        public static string BrushCopiedTipText {
+        public static string BrushAlongLaneTipText {
             get {
-                return ResourceManager.GetString("BrushCopiedTipText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Brush Mode: 的本地化字符串。
-        /// </summary>
-        public static string BrushMode {
-            get {
-                return ResourceManager.GetString("BrushMode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Toggle brush mode 的本地化字符串。
-        /// </summary>
-        public static string BrushModeSwitch {
-            get {
-                return ResourceManager.GetString("BrushModeSwitch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Brush mode is enabled. Most dragging operations are disabled. 的本地化字符串。
-        /// </summary>
-        public static string BrushModeSwitchTipText {
-            get {
-                return ResourceManager.GetString("BrushModeSwitchTipText", resourceCulture);
+                return ResourceManager.GetString("BrushAlongLaneTipText", resourceCulture);
             }
         }
         
@@ -642,6 +696,24 @@ namespace OngekiFumenEditor.Properties {
         public static string CancelSelected {
             get {
                 return ResourceManager.GetString("CancelSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The clipboard is empty 的本地化字符串。
+        /// </summary>
+        public static string CannotBatchInputClipboardEmpty {
+            get {
+                return ResourceManager.GetString("CannotBatchInputClipboardEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The clipboard contents are not brushable 的本地化字符串。
+        /// </summary>
+        public static string CannotBatchInputClipboardNotBrushable {
+            get {
+                return ResourceManager.GetString("CannotBatchInputClipboardNotBrushable", resourceCulture);
             }
         }
         
@@ -898,6 +970,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Clipboard 的本地化字符串。
+        /// </summary>
+        public static string Clipboard {
+            get {
+                return ResourceManager.GetString("Clipboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Clone 的本地化字符串。
         /// </summary>
         public static string ClonePallete {
@@ -1119,6 +1200,15 @@ namespace OngekiFumenEditor.Properties {
         public static string Confirm {
             get {
                 return ResourceManager.GetString("Confirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The key you bind to conflicts with {0}, if you continue to bind, the conflicting key will be cleared, do you want to continue? 的本地化字符串。
+        /// </summary>
+        public static string ConflictNotifyComfirm {
+            get {
+                return ResourceManager.GetString("ConflictNotifyComfirm", resourceCulture);
             }
         }
         
@@ -1353,6 +1443,15 @@ namespace OngekiFumenEditor.Properties {
         public static string DeleteSelectedPalletes {
             get {
                 return ResourceManager.GetString("DeleteSelectedPalletes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delete {0} 的本地化字符串。
+        /// </summary>
+        public static string DeleteSpecificObject {
+            get {
+                return ResourceManager.GetString("DeleteSpecificObject", resourceCulture);
             }
         }
         
@@ -1825,6 +1924,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Allow variable speed music playback (requires program restart) 的本地化字符串。
+        /// </summary>
+        public static string EnableVarspeed {
+            get {
+                return ResourceManager.GetString("EnableVarspeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Enable display visualizer 的本地化字符串。
         /// </summary>
         public static string EnableVisualizerDisplay {
@@ -2127,6 +2235,15 @@ namespace OngekiFumenEditor.Properties {
         public static string FirstBpm {
             get {
                 return ResourceManager.GetString("FirstBpm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Flick 的本地化字符串。
+        /// </summary>
+        public static string Flick {
+            get {
+                return ResourceManager.GetString("Flick", resourceCulture);
             }
         }
         
@@ -2554,6 +2671,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Hold 的本地化字符串。
+        /// </summary>
+        public static string Hold {
+            get {
+                return ResourceManager.GetString("Hold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Image file: 的本地化字符串。
         /// </summary>
         public static string ImageFile {
@@ -2734,11 +2860,155 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Batch: Clipboard 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeClipboard {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeClipboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Select Dockable 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeFilterDockableObjects {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeFilterDockableObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Select Floating 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeFilterFloatingObjects {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeFilterFloatingObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Select Lanes 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeFilterLanes {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeFilterLanes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Flick 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeFlick {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeFlick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Hold 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeHold {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeHold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Lane Block 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeLaneBlock {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeLaneBlock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Lane Center 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeLaneCenter {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeLaneCenter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Lane Colorful 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeLaneColorful {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeLaneColorful", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Lane Left 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeLaneLeft {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeLaneLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Lane Right 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeLaneRight {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeLaneRight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Bell 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeNormalBell {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeNormalBell", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Tap 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeTap {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeTap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Wall Left 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeWallLeft {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeWallLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Batch: Wall Right 的本地化字符串。
+        /// </summary>
+        public static string kbd_batch_ModeWallRight {
+            get {
+                return ResourceManager.GetString("kbd_batch_ModeWallRight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Clear selection 的本地化字符串。
         /// </summary>
         public static string kbd_editor_CancelSelectingObjects {
             get {
                 return ResourceManager.GetString("kbd_editor_CancelSelectingObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Change type of dockable lane 的本地化字符串。
+        /// </summary>
+        public static string kbd_editor_ChangeDockableLaneType {
+            get {
+                return ResourceManager.GetString("kbd_editor_ChangeDockableLaneType", resourceCulture);
             }
         }
         
@@ -2896,6 +3166,33 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Batch 的本地化字符串。
+        /// </summary>
+        public static string kbd_layer_Batch {
+            get {
+                return ResourceManager.GetString("kbd_layer_Batch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Global 的本地化字符串。
+        /// </summary>
+        public static string kbd_layer_Global {
+            get {
+                return ResourceManager.GetString("kbd_layer_Global", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Normal 的本地化字符串。
+        /// </summary>
+        public static string kbd_layer_Normal {
+            get {
+                return ResourceManager.GetString("kbd_layer_Normal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Conflicts with keybinding {0} 的本地化字符串。
         /// </summary>
         public static string KeyBindingConflictDetect {
@@ -2914,6 +3211,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Keywords filter: 的本地化字符串。
+        /// </summary>
+        public static string KeywordFilter {
+            get {
+                return ResourceManager.GetString("KeywordFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Keywords sorting: 的本地化字符串。
         /// </summary>
         public static string KeywordSortFilter {
@@ -2923,11 +3229,56 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Lane Block 的本地化字符串。
+        /// </summary>
+        public static string LaneBlock {
+            get {
+                return ResourceManager.GetString("LaneBlock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lane Center 的本地化字符串。
+        /// </summary>
+        public static string LaneCenter {
+            get {
+                return ResourceManager.GetString("LaneCenter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lane Colorful 的本地化字符串。
+        /// </summary>
+        public static string LaneColorful {
+            get {
+                return ResourceManager.GetString("LaneColorful", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 This lane contains an illegal segment 的本地化字符串。
         /// </summary>
         public static string LaneContainInvalidPath {
             get {
                 return ResourceManager.GetString("LaneContainInvalidPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lane Left 的本地化字符串。
+        /// </summary>
+        public static string LaneLeft {
+            get {
+                return ResourceManager.GetString("LaneLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lane Right 的本地化字符串。
+        /// </summary>
+        public static string LaneRight {
+            get {
+                return ResourceManager.GetString("LaneRight", resourceCulture);
             }
         }
         
@@ -3099,6 +3450,15 @@ namespace OngekiFumenEditor.Properties {
         public static string MenuSelecting {
             get {
                 return ResourceManager.GetString("MenuSelecting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ms 的本地化字符串。
+        /// </summary>
+        public static string Millisecond {
+            get {
+                return ResourceManager.GetString("Millisecond", resourceCulture);
             }
         }
         
@@ -3301,7 +3661,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 x 的本地化字符串。
+        ///   查找类似 (No Limit) 的本地化字符串。
         /// </summary>
         public static string NoLimit {
             get {
@@ -3346,20 +3706,47 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 {0} is not supported in brush mode. 的本地化字符串。
+        ///   查找类似 {0} is not supported in batch mode. 的本地化字符串。
         /// </summary>
-        public static string NotSupportInBrushMode {
+        public static string NotSupportInBatchMode {
             get {
-                return ResourceManager.GetString("NotSupportInBrushMode", resourceCulture);
+                return ResourceManager.GetString("NotSupportInBatchMode", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Batch paste brush 的本地化字符串。
+        ///   查找类似 Batch paste brush object 的本地化字符串。
         /// </summary>
         public static string ObjectBatchBrush {
             get {
                 return ResourceManager.GetString("ObjectBatchBrush", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Dockable Objects 的本地化字符串。
+        /// </summary>
+        public static string ObjectFilterDockables {
+            get {
+                return ResourceManager.GetString("ObjectFilterDockables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Floating Objects 的本地化字符串。
+        /// </summary>
+        public static string ObjectFilterFloating {
+            get {
+                return ResourceManager.GetString("ObjectFilterFloating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lanes 的本地化字符串。
+        /// </summary>
+        public static string ObjectFilterLanes {
+            get {
+                return ResourceManager.GetString("ObjectFilterLanes", resourceCulture);
             }
         }
         
@@ -3382,11 +3769,11 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 The copied object cannot be used within brush mode 的本地化字符串。
+        ///   查找类似 The copied object cannot be used within batch mode 的本地化字符串。
         /// </summary>
-        public static string ObjectNotSupportBrush {
+        public static string ObjectNotSupportedInBatchMode {
             get {
-                return ResourceManager.GetString("ObjectNotSupportBrush", resourceCulture);
+                return ResourceManager.GetString("ObjectNotSupportedInBatchMode", resourceCulture);
             }
         }
         
@@ -3432,6 +3819,15 @@ namespace OngekiFumenEditor.Properties {
         public static string ObjectPropertyChanged {
             get {
                 return ResourceManager.GetString("ObjectPropertyChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Objects 的本地化字符串。
+        /// </summary>
+        public static string Objects {
+            get {
+                return ResourceManager.GetString("Objects", resourceCulture);
             }
         }
         
@@ -4370,7 +4766,7 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("Save", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   查找类似 Save changes to &quot;{0}&quot; before closing? 的本地化字符串。
         /// </summary>
@@ -4379,7 +4775,7 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("SaveBeforeClosingPrompt", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   查找类似 Record up to  的本地化字符串。
         /// </summary>
@@ -4521,6 +4917,15 @@ namespace OngekiFumenEditor.Properties {
         public static string SelectMusicXmlFile {
             get {
                 return ResourceManager.GetString("SelectMusicXmlFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please select a dockable lane 的本地化字符串。
+        /// </summary>
+        public static string SelectOneDockableLaneOnly {
+            get {
+                return ResourceManager.GetString("SelectOneDockableLaneOnly", resourceCulture);
             }
         }
         
@@ -4912,6 +5317,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Tap 的本地化字符串。
+        /// </summary>
+        public static string Tap {
+            get {
+                return ResourceManager.GetString("Tap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Throw an error and see 的本地化字符串。
         /// </summary>
         public static string TestDump {
@@ -5155,6 +5569,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Sampling audio buffer window size 的本地化字符串。
+        /// </summary>
+        public static string VarspeedReadDurationMs {
+            get {
+                return ResourceManager.GetString("VarspeedReadDurationMs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Vertical scale 的本地化字符串。
         /// </summary>
         public static string VerticalDisplayScale {
@@ -5250,6 +5673,24 @@ namespace OngekiFumenEditor.Properties {
         public static string WallConflict3 {
             get {
                 return ResourceManager.GetString("WallConflict3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Wall Left 的本地化字符串。
+        /// </summary>
+        public static string WallLeft {
+            get {
+                return ResourceManager.GetString("WallLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Wall Right 的本地化字符串。
+        /// </summary>
+        public static string WallRight {
+            get {
+                return ResourceManager.GetString("WallRight", resourceCulture);
             }
         }
         
