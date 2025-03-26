@@ -72,9 +72,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 		{
 			get => speed;
 			set => Set(ref speed, value);
-		}
+        }
 
-		private bool applySpeedInDesignMode = false;
+        private int pattern = 0;
+        public int Pattern
+        {
+            get => pattern;
+            set => Set(ref pattern, value);
+        }
+
+        private bool applySpeedInDesignMode = false;
 		public bool ApplySpeedInDesignMode
 		{
 			get => applySpeedInDesignMode;
@@ -91,7 +98,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
 		public int GridLength => EndIndicator.TGrid.TotalGrid - TGrid.TotalGrid;
 
-		public override string ToString() => $"{base.ToString()} Speed[{speed}x]";
+        public override string ToString() => $"{base.ToString()} Speed[{speed}x]";
 
 		public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
 		{

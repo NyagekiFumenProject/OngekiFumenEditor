@@ -9,6 +9,8 @@ namespace OngekiFumenEditor.Base
 {
 	public interface ISoflan : ITimelineObject, INotifyPropertyChanged, IDisplayableObject
 	{
+		int Pattern { get; set; }
+
 		float Speed { get; set; }
 		bool ApplySpeedInDesignMode { get; set; }
 

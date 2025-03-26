@@ -33,9 +33,16 @@ namespace OngekiFumenEditor.Base.EditorObjects
 				TGrid = value;
 				NotifyOfPropertyChange(() => EndTGrid);
 			}
-		}
+        }
 
-		public override string ToString() => $"{base.ToString()} Speed[{speed}x]";
+        private int pattern = 0;
+        public int Pattern
+        {
+            get => pattern;
+            set => Set(ref pattern, value);
+        }
+
+        public override string ToString() => $"{base.ToString()} Speed[{speed}x]";
 
 		public override void Copy(OngekiObjectBase fromObj)
 		{
