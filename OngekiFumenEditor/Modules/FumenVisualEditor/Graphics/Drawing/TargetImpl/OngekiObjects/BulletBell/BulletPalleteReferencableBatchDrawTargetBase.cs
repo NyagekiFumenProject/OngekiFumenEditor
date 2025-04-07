@@ -59,7 +59,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private void DrawEditorMode(IFumenEditorDrawingContext target, T obj)
         {
             var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-            var toTime = target.ConvertToY(obj.TGrid);
+            var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+            var toTime = target.ConvertToY(obj.TGrid, target.Editor.Fumen.SoflansMap[soflanGroup]);
 
             var pos = new Vector2((float)toX, (float)toTime);
             DrawVisibleObject_DesignMode(target, obj, pos, 0);
@@ -92,7 +93,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var scale = target.Editor.Setting.VerticalDisplayScale;
             var bpmList = target.Editor.Fumen.BpmList;
             var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
-            var soflanCurrentTime = convertToY(currentTGrid);
+            //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
             var height = target.Rect.Height;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -112,9 +113,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            double convertToY(TGrid tgrid)
+            double convertToY(TGrid tgrid, SoflanList soflans)
             {
-                return target.ConvertToY(tgrid);
+                return target.ConvertToY(tgrid, soflans);
             }
 
             void _Draw(T obj)
@@ -147,8 +148,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 if (isEnableSoflan)
                 {
-                    toTime = convertToY(obj.TGrid);
-                    currentTime = soflanCurrentTime;
+                    var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+                    var soflanList = target.Editor.Fumen.SoflansMap[soflanGroup];
+                    toTime = convertToY(obj.TGrid, soflanList);
+                    currentTime = convertToY(currentTGrid, soflanList);
                 }
                 else
                 {
@@ -180,7 +183,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         case OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums.Target.Player:
                             var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(pallete.Speed, 1));
                             var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
-                            if (targetAudioTime < TimeSpan.Zero) 
+                            if (targetAudioTime < TimeSpan.Zero)
                                 targetAudioTime = TimeSpan.Zero;
 
                             toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);

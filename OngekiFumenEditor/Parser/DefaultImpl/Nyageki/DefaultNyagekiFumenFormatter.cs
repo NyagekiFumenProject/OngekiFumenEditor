@@ -222,20 +222,26 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             foreach (var bpm in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
                 sb.WriteLine($"BpmChange\t:\t{bpm.BPM}\t:\tT[{bpm.TGrid.Unit},{bpm.TGrid.Grid}]");
             sb.WriteLine();
-            foreach (var soflan in fumen.Soflans.OrderBy(x => x.TGrid))
+
+            foreach (var soflans in fumen.SoflansMap.Values)
             {
-                var name = soflan switch
+                foreach (var soflan in soflans.OrderBy(x => x.TGrid))
                 {
-                    KeyframeSoflan => "KeyframeSoflan",
-                    InterpolatableSoflan => "InterpolatableSoflan",
-                    Soflan => "Soflan"
-                };
-                sb.Write($"{name}\t:\t{soflan.Speed}\t:\t(T[{soflan.TGrid.Unit},{soflan.TGrid.Grid}])\t->\t(T[{soflan.EndTGrid.Unit},{soflan.EndTGrid.Grid}])");
-                if (soflan is InterpolatableSoflan isf)
-                    sb.Write($": EndSpeed[{(isf.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed}], Easing[{isf.Easing}]");
+                    var name = soflan switch
+                    {
+                        KeyframeSoflan => "KeyframeSoflan",
+                        InterpolatableSoflan => "InterpolatableSoflan",
+                        Soflan => "Soflan"
+                    };
+                    sb.Write($"{name}\t:\t{soflan.Speed}\t:\t(T[{soflan.TGrid.Unit},{soflan.TGrid.Grid}])\t->\t(T[{soflan.EndTGrid.Unit},{soflan.EndTGrid.Grid}])");
+                    if (soflan is InterpolatableSoflan isf)
+                        sb.Write($": EndSpeed[{(isf.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed}], Easing[{isf.Easing}]");
+                    sb.Write($": SoflanGroup[{soflan.SoflanGroup}]");
+                    sb.WriteLine();
+                    //todo add soflanGroup
+                }
                 sb.WriteLine();
             }
-            sb.WriteLine();
         }
 
         public void ProcessLANE(OngekiFumen fumen, StreamWriter sb)

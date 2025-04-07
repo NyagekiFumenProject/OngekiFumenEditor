@@ -74,11 +74,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			set => Set(ref speed, value);
         }
 
-        private int pattern = 0;
-        public int Pattern
+        private int soflanGroup = 0;
+        public int SoflanGroup
         {
-            get => pattern;
-            set => Set(ref pattern, value);
+            get => soflanGroup;
+            set => Set(ref soflanGroup, value);
         }
 
         private bool applySpeedInDesignMode = false;

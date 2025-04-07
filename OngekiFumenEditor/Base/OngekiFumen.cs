@@ -44,7 +44,8 @@ namespace OngekiFumenEditor.Base
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
         public List<SvgPrefabBase> SvgPrefabs { get; } = new();
-        public SoflanList Soflans { get; } = new();
+        public SoflanListMap SoflansMap { get; } = new();
+        public IndividualSoflanAreaListMap IndividualSoflanAreaMap { get; } = new();
         public LaneBlockAreaList LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
@@ -136,7 +137,7 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is ISoflan soflan)
             {
-                Soflans.Add(soflan);
+                SoflansMap.Add(soflan);
             }
             else if (obj is Bullet bullet)
             {
@@ -153,6 +154,10 @@ namespace OngekiFumenEditor.Base
             else if (obj is Hold hold)
             {
                 Holds.Add(hold);
+            }
+            else if (obj is IndividualSoflanArea isf)
+            {
+                IndividualSoflanAreaMap.Add(isf);
             }
             else if (obj is HoldEnd holdEnd)
             {
@@ -212,7 +217,11 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is ISoflan soflan)
             {
-                Soflans.Remove(soflan);
+                SoflansMap.Remove(soflan);
+            }
+            else if (obj is IndividualSoflanArea isf)
+            {
+                IndividualSoflanAreaMap.Remove(isf);
             }
             else if (obj is BulletPallete bpl)
             {
@@ -358,7 +367,8 @@ namespace OngekiFumenEditor.Base
                    .Concat(BpmList.Skip(1)) //not show first bpm
                    .Concat(ClickSEs.BinaryFindRange(min, max))
                    .Concat(LaneBlocks.GetVisibleStartObjects(min, max))
-                   .Concat(Soflans)
+                   .Concat(SoflansMap.Values.SelectMany(x => x))
+                   .Concat(IndividualSoflanAreaMap.Values.SelectMany(x => x))
                    .Concat(EnemySets.BinaryFindRange(min, max))
                    .Concat(Comments.BinaryFindRange(min, max))
                    .Concat(Bullets.BinaryFindRange(min, max))

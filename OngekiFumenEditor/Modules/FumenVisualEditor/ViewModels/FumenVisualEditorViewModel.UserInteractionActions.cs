@@ -1004,12 +1004,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var tGrid = GetCurrentTGrid();
             IsUserRequestHideEditorObject = isPreviewMode;
             convertToY = IsDesignMode ?
-                TGridCalculator.ConvertTGridUnitToY_DesignMode :
-                TGridCalculator.ConvertTGridUnitToY_PreviewMode;
+                ((tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor)) :
+                (tUnit, editor, soflans) => TGridCalculator.ConvertTGridUnitToY_PreviewMode(tUnit, soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale);
             RecalculateTotalDurationHeight();
             ScrollTo(tGrid);
             var mousePos = Mouse.GetPosition(GetView() as FrameworkElement);
             UpdateCurrentCursorPosition(mousePos);
+
+            _cacheSoflanGroupRecorder.Clear();
+            if (IsPreviewMode)
+            {
+                //recache all objects
+                Parallel.ForEach(Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>(), obj =>
+                {
+                    var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj.XGrid, obj.TGrid);
+                    _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanGroup);
+                });
+            }
         }
 
         #endregion
@@ -1610,9 +1621,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //消除精度误差~
                 var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
 
-                var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
+                var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
                 var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
-                var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.Soflans, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
+                var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
                 var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
 
                 var result = arg.Delta > 0 ? nextFirst : downFirst;

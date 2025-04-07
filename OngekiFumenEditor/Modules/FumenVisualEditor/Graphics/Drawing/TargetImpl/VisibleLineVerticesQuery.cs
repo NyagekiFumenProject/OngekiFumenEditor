@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -13,13 +14,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, SoflanList soflans, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
         {
             if (start is null)
                 return;
 
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
+            var refSoflanGroup = start.__cachedSoflanGroup;
 
             var tempVertices = ObjectPool<List<LineVertex>>.Get();
             tempVertices.Clear();
@@ -28,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
-                var y = (float)target.ConvertToY(tGridUnit);
+                var y = (float)target.ConvertToY(tGridUnit, soflans);
                 var vert = new LineVertex(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash);
 
                 tempVertices.Add(vert);
@@ -47,9 +49,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var prevInvaild = true;
             var prevObj = start as ConnectableObjectBase;
 
+            //todo 再判断设计模式怎么钦定
             var soflanPositionList = target.Editor.IsDesignMode ?
-                target.Editor.Fumen.Soflans.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
-                target.Editor.Fumen.Soflans.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+                target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
+                target.Editor.Fumen.SoflansMap[refSoflanGroup].GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
 
             var minIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MinTGrid, x => x.TGrid);
             var maxIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MaxTGrid, x => x.TGrid);
@@ -160,19 +163,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         }
 
         //BACKUP
-        public static void _QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
+        public static void _QueryVisibleLineVertices(IFumenEditorDrawingContext target, SoflanList soflans, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
         {
             if (start is null)
                 return;
 
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
+            var refSoflanGroup = start.__cachedSoflanGroup;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
-                var y = (float)target.ConvertToY(tGridUnit);
+                var y = (float)target.ConvertToY(tGridUnit, soflans);
 
                 outVertices.Add(new(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash));
             }
@@ -184,8 +188,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var affectedSoflanPoints = ObjectPool<List<SoflanPoint>>.Get();
 
             var soflanPositionList = target.Editor.IsDesignMode ?
-                target.Editor.Fumen.Soflans.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
-                target.Editor.Fumen.Soflans.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+                target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
+                target.Editor.Fumen.SoflansMap[refSoflanGroup].GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
 
             var cur = start.Children.FirstOrDefault();
             while (cur != null)

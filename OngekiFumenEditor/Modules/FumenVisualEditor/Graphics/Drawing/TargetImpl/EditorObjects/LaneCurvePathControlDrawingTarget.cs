@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		{
 			var isAlwaysShow = target.Editor.IsShowCurveControlAlways;
 			using var d = objs.Where(x => x.RefCurveObject.IsSelected || x.RefCurveObject.IsAnyControlSelecting || isAlwaysShow).Select(x => (
-				(float)target.ConvertToY(x.TGrid),
+				(float)target.ConvertToY_DefaultSoflanGroup(x.TGrid),
 				(float)XGridCalculator.ConvertXGridToX(x.XGrid, target.Editor),
 				x
 			)).ToListWithObjectPool<(float y, float x, LaneCurvePathControlObject obj)>(out var list);
@@ -74,14 +74,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 					var color = new Vector4((((hash >> 16) & 0xFF) ^ alpha) / 255f / 2 + 0.5f, (((hash >> 8) & 0xFF) ^ alpha) / 255f / 2 + 0.5f, ((hash & 0xFF) ^ alpha) / 255f / 2 + 0.5f, 1f);
 					//var color = new Vector4(1, 1, 1, 1f);
 
-					var ry = (float)target.ConvertToY(refConnectableObject.TGrid);
+					var ry = (float)target.ConvertToY_DefaultSoflanGroup(refConnectableObject.TGrid);
 					var rx = (float)XGridCalculator.ConvertXGridToX(refConnectableObject.XGrid, target.Editor);
 					yield return new LineVertex(new(rx, ry), Transparent, LineDash);
 					yield return new LineVertex(new(rx, ry), color, LineDash);
 					foreach (var curve in item.OrderBy(x => x.obj.Index).Reverse())
 						yield return new LineVertex(new(curve.x, curve.y), color, LineDash);
 					var parentConnectableObject = refConnectableObject.PrevObject;
-					var rpy = (float)target.ConvertToY(parentConnectableObject.TGrid);
+					var rpy = (float)target.ConvertToY_DefaultSoflanGroup(parentConnectableObject.TGrid);
 					var rpx = (float)XGridCalculator.ConvertXGridToX(parentConnectableObject.XGrid, target.Editor);
 					yield return new LineVertex(new(rpx, rpy), color, LineDash);
 					yield return new LineVertex(new(rpx, rpy), Transparent, LineDash);

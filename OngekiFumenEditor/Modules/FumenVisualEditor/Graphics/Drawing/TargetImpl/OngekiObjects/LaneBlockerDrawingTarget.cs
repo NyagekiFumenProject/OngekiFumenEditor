@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
@@ -67,10 +68,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             #region Generate LBK lines
 
-            void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, Vector4? specifyColor = default)
+            void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, SoflanList soflanList, Vector4? specifyColor = default)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, target.Editor);
-                var y = (float)target.ConvertToY(tGridTotalUnit);
+                var y = (float)target.ConvertToY(tGridTotalUnit, soflanList);
 
                 //lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
                 polygonDrawing.PostPoint(new(x, y), Vector4.One);
@@ -82,14 +83,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid grid, Vector4? specifyColor = default)
             {
                 var xGridTotalGridOpt = obj.CalulateXGridTotalGrid(grid.TotalGrid);
+                var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
                 if (xGridTotalGridOpt is double xGridTotalGrid)
-                    PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, grid.TotalUnit, specifyColor);
+                    PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, grid.TotalUnit, target.Editor.Fumen.SoflansMap[soflanGroup], specifyColor);
             }
 
             void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid)
             {
                 var minTotalGrid = minTGrid.TotalGrid;
                 var maxTotalGrid = maxTGrid.TotalGrid;
+                var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+                var soflanList = target.Editor.Fumen.SoflansMap[soflanGroup];
 
                 if (!obj.IsCurvePath)
                 {
@@ -106,14 +110,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     {
                         if (!isVaild)
                         {
-                            PostPointByXTGrid(obj.PrevObject.XGrid.TotalUnit, minTGrid.TotalUnit);
-                            PostPointByXTGrid(obj.XGrid.TotalUnit, maxTGrid.TotalUnit);
+                            PostPointByXTGrid(obj.PrevObject.XGrid.TotalUnit, minTGrid.TotalUnit, soflanList);
+                            PostPointByXTGrid(obj.XGrid.TotalUnit, maxTGrid.TotalUnit, soflanList);
                             return;
                         }
                         list.Add(new(gridVec2.X, gridVec2.Y));
                     }
                     foreach (var gridVec2 in list)
-                        PostPointByXTGrid(gridVec2.X / obj.XGrid.ResX, gridVec2.Y / obj.TGrid.ResT);
+                        PostPointByXTGrid(gridVec2.X / obj.XGrid.ResX, gridVec2.Y / obj.TGrid.ResT, soflanList);
                 }
             }
 

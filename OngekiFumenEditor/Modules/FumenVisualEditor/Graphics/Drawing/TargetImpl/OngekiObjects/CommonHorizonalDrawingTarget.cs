@@ -28,8 +28,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		{
 			lineDrawing = IoC.Get<ISimpleLineDrawing>();
 			stringDrawing = IoC.Get<IStringDrawing>();
-
-
 		}
 
 		public override IEnumerable<string> DrawTargetID { get; } =
@@ -55,7 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 		public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiTimelineObjectBase> objs)
 		{
-			using var d4 = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToY(x.TGrid))).ToListWithObjectPool(out var objects);
+			using var d4 = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToY_DefaultSoflanGroup(x.TGrid))).ToListWithObjectPool(out var objects);
 
 			foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
 			{

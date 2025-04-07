@@ -18,16 +18,16 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
         public OngekiFumen Fumen { get; init; }
         public SvgDocument Document { get; init; }
 
-        public float CalculateToY(TGrid grid)
-            => CalculateToY(grid.TotalUnit);
+        public float CalculateToY(TGrid grid, SoflanList soflans)
+            => CalculateToY(grid.TotalUnit, soflans);
 
-        public float CalculateToY(double totalUnit)
+        public float CalculateToY(double totalUnit, SoflanList soflans)
         {
             double y;
             switch (Option.SoflanMode)
             {
                 case SoflanMode.Soflan:
-                    y = TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, Fumen.Soflans, Fumen.BpmList, Option.VerticalScale);
+                    y = TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, soflans, Fumen.BpmList, Option.VerticalScale);
                     break;
                 case SoflanMode.WeightedSoflan:
                     y = TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, SpecifySoflans, Fumen.BpmList, Option.VerticalScale);
@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 case SoflanMode.NoSoflan:
                 case SoflanMode.AbsSoflan:
                 default:
-                    y = TGridCalculator.ConvertTGridUnitToY_DesignMode(totalUnit, Fumen.Soflans, Fumen.BpmList, Option.VerticalScale);
+                    y = TGridCalculator.ConvertTGridUnitToY_DesignMode(totalUnit, soflans, Fumen.BpmList, Option.VerticalScale);
                     break;
             }
 

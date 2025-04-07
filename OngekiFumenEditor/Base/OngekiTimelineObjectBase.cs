@@ -29,6 +29,8 @@ namespace OngekiFumenEditor.Base
             set => Set(ref isSelecting, value);
         }
 
+        internal int __cachedSoflanGroup;
+
         public virtual bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
         {
             return minVisibleTGrid <= TGrid && TGrid <= maxVisibleTGrid;

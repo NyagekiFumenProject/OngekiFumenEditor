@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 {
     public class IndividualSoflanArea : OngekiMovableObjectBase
     {
-        public class IndividualSoflanAreaEndIndicator : OngekiTimelineObjectBase
+        public class IndividualSoflanAreaEndIndicator : OngekiMovableObjectBase
         {
             public override string IDShortName => "[ISF_End]";
 
@@ -38,17 +38,40 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 }
             }
 
+            public int SoflanGroup
+            {
+                get => RefIndividualSoflanArea.SoflanGroup;
+                set
+                {
+                    RefIndividualSoflanArea.SoflanGroup = value;
+                    NotifyOfPropertyChange(() => SoflanGroup);
+                }
+            }
+
             public override string ToString() => $"{base.ToString()}";
+        }
+
+        public override TGrid TGrid
+        {
+            get => base.TGrid;
+            set
+            {
+                base.TGrid = value is not null ? MathUtils.Min(value, EndIndicator.TGrid) : value;
+            }
         }
 
         public override string IDShortName => "ISF";
 
-        private int areaWidth = 0;
-        public int AreaWidth
+        public float AreaWidth => (float)Math.Abs(XGrid.TotalUnit - EndIndicator.XGrid.TotalUnit);
+
+        private int soflanGroup = 0;
+        public int SoflanGroup
         {
-            get => areaWidth;
-            set => Set(ref areaWidth, value);
+            get => soflanGroup;
+            set => Set(ref soflanGroup, value);
         }
+
+        public int GridLength => EndIndicator.TGrid.TotalGrid - TGrid.TotalGrid;
 
         private IDisplayableObject[] displayables;
 

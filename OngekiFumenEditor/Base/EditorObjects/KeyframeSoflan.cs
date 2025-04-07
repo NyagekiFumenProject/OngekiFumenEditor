@@ -35,11 +35,11 @@ namespace OngekiFumenEditor.Base.EditorObjects
 			}
         }
 
-        private int pattern = 0;
-        public int Pattern
+        private int soflanGroup = 0;
+        public int SoflanGroup
         {
-            get => pattern;
-            set => Set(ref pattern, value);
+            get => soflanGroup;
+            set => Set(ref soflanGroup, value);
         }
 
         public override string ToString() => $"{base.ToString()} Speed[{speed}x]";

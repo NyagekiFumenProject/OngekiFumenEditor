@@ -14,6 +14,7 @@ using Caliburn.Micro;
 using ControlzEx.Standard;
 using Gemini.Framework;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Kernel.Graphics;
@@ -44,8 +45,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private readonly List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
 
-    private Func<double, FumenVisualEditorViewModel, double>
-        convertToY = TGridCalculator.ConvertTGridUnitToY_DesignMode;
+    private Func<double, FumenVisualEditorViewModel, SoflanList, double>
+        convertToY = (tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor);
 
     private string displayFPS = "";
     private readonly Dictionary<IFumenEditorDrawingTarget, IEnumerable<OngekiTimelineObjectBase>> drawMap = new();
@@ -55,7 +56,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private bool isDisplayFPS;
     private DrawJudgeLineHelper judgeLineHelper;
-    private DrawPlayableAreaHelper playableAreaHelper;
+    //todo SoflanGroup support
+    //private DrawPlayableAreaHelper playableAreaHelper;
+    internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
     private DrawPlayerLocationHelper playerLocationHelper;
     private Vector4 playFieldBackgroundColor;
     private int renderViewHeight;
@@ -233,7 +236,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         xGridHelper = new DrawXGridHelper();
         judgeLineHelper = new DrawJudgeLineHelper();
         selectingRangeHelper = new DrawSelectingRangeHelper();
-        playableAreaHelper = new DrawPlayableAreaHelper();
+        //todo SoflanGroup support
+        //playableAreaHelper = new DrawPlayableAreaHelper();
         playerLocationHelper = new DrawPlayerLocationHelper();
 
         actualPerformenceMonitor = IoC.Get<IPerfomenceMonitor>();
@@ -294,7 +298,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         var tGrid = GetCurrentTGrid();
 
-        var curY = ConvertToY(tGrid.TotalUnit);
+        var curY = ConvertToY(tGrid.TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
         var minY = (float)(curY - Setting.JudgeLineOffsetY);
         var maxY = minY + ViewHeight;
 
@@ -312,15 +316,18 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         else
         {
             var scale = Setting.VerticalDisplayScale;
-            var ranges =
-                Fumen.Soflans.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList,
-                    scale);
 
-            foreach (var x in ranges)
+            foreach (KeyValuePair<int, SoflanList> pair in Fumen.SoflansMap)
             {
-                if (x.maxTGrid is null || x.minTGrid is null)
-                    goto End;
-                visibleTGridRanges.Add((x.minTGrid, x.maxTGrid));
+                var ranges =
+                    pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList,
+                        scale);
+                foreach (var x in ranges)
+                {
+                    if (x.maxTGrid is null || x.minTGrid is null)
+                        goto End;
+                    visibleTGridRanges.Add((x.minTGrid, x.maxTGrid));
+                }
             }
         }
 
@@ -328,9 +335,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         RecalculateMagaticXGridLines();
 
-        foreach (var (minTGrid, maxTGrid) in visibleTGridRanges)
-            playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
-        playableAreaHelper.Draw(this);
+        //todo SoflanGroup support
+        //foreach (var (minTGrid, maxTGrid) in visibleTGridRanges)
+        //    playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
+        //playableAreaHelper.Draw(this);
         timeSignatureHelper.DrawLines(this);
 
         xGridHelper.DrawLines(this, CachedMagneticXGridLines);
@@ -417,9 +425,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             : DrawingVisible.Preview);
     }
 
-    public double ConvertToY(double tGridUnit)
+    public double ConvertToY(double tGridUnit, SoflanList soflanList)
     {
-        return convertToY(tGridUnit, this);
+        return convertToY(tGridUnit, this, soflanList);
     }
 
     public bool CheckVisible(TGrid tGrid)
@@ -484,7 +492,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     {
         var xOffset = 0;
 
-        var y = (float)convertToY(GetCurrentTGrid().TotalUnit, this);
+        var y = (float)convertToY(GetCurrentTGrid().TotalUnit, this, Editor.Fumen.SoflansMap.DefaultSoflanList);
 
         ProjectionMatrix =
             Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
@@ -520,7 +528,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 .Concat(fumen.ClickSEs.BinaryFindRange(min, max))
                 .Concat(fumen.LaneBlocks.GetVisibleStartObjects(min, max))
                 .Concat(fumen.Comments.BinaryFindRange(min, max))
-                .Concat(fumen.Soflans.GetVisibleStartObjects(min, max))
+                .Concat(fumen.SoflansMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
+                .Concat(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
                 .Concat(fumen.EnemySets.BinaryFindRange(min, max))
                 .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
                 .Concat(fumen.Taps.BinaryFindRange(min, max))

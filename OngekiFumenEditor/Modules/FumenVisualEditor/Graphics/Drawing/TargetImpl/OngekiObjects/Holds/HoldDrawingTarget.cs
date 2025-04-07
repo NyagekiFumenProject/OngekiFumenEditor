@@ -69,6 +69,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var start = hold.ReferenceLaneStart;
             var holdEnd = hold.HoldEnd;
             var laneType = start?.LaneType;
+            var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(hold);
+            var soflanList = target.Editor.Fumen.SoflansMap[soflanGroup];
 
             var color = laneType switch
             {
@@ -85,7 +87,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 Vector2 PostPoint2(double tGridUnit, double xGridUnit)
                 {
                     var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
-                    var y = (float)target.ConvertToY(tGridUnit);
+                    var y = (float)target.ConvertToY(tGridUnit, soflanList);
 
                     return new(x, y);
                 }
@@ -113,7 +115,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
                 list.Clear();
-                VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, VertexDash.Solider, color, list);
+                VisibleLineVerticesQuery.QueryVisibleLineVertices(target, soflanList, start, VertexDash.Solider, color, list);
                 if (list.Count > 0)
                 {
                     while (list.Count > 0 && holdPoint.Y > list[0].Point.Y)

@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
 		public void Draw(IFumenEditorDrawingContext target)
 		{
-			var y = (float)target.ConvertToY(target.Editor.GetCurrentTGrid().TotalUnit);
+			var y = (float)target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid().TotalUnit);
 
 			vertices[0] = new(new(0, y), color, VertexDash.Solider);
 			vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);
@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 			var t = target.Editor.GetCurrentTGrid();
 
 			var bpmList = target.Editor.Fumen.BpmList;
-			var soflanList = target.Editor.Fumen.Soflans;
+			var soflanList = target.Editor.Fumen.SoflansMap.DefaultSoflanList;
 
 			string str;
 			if (target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime)

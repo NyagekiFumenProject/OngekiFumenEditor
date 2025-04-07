@@ -52,7 +52,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                             continue;
 
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);
-                        var y = (float)target.ConvertToY(item.TGrid);
+                        var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(item);
+                        var y = (float)target.ConvertToY(item.TGrid, target.Editor.Fumen.SoflansMap[soflanGroup]);
 
                         var pos = new Vector2(x, y);
                         drawList.Add((size, pos, 0f));
