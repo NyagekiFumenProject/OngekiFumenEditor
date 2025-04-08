@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Base;
@@ -56,8 +57,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             foreach (var obj in objs)
             {
                 var x = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-                var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-                var y = target.ConvertToY(obj.TGrid, target.Editor.Fumen.SoflansMap[soflanGroup]) + 24;
+                var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+                var y = target.ConvertToY(obj.TGrid, soflanList) + 24;
                 var pos = new Vector2((float)x, (float)y);
                 var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
                 normalFlichList.Add((size, pos, 0f));

@@ -254,8 +254,10 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
             foreach (var isfList in fumen.IndividualSoflanAreaMap.Values)
             {
                 foreach (var o in isfList.OrderBy(x => x.TGrid))
-                    sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.XGrid.Unit}\t{o.GridLength}\t{o.AreaWidth}\t{o.SoflanGroup}");
-
+                {
+                    var centerXUnit = (o.XGrid.TotalUnit + o.EndIndicator.XGrid.TotalUnit) / 2;
+                    sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{centerXUnit}\t{o.GridLength}\t{o.AreaWidth}\t{o.SoflanGroup}");
+                }
                 sb.AppendLine();
             }
 

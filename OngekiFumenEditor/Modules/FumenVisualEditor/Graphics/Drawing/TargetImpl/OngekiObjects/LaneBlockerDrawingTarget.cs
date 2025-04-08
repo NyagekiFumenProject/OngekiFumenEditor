@@ -83,17 +83,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid grid, Vector4? specifyColor = default)
             {
                 var xGridTotalGridOpt = obj.CalulateXGridTotalGrid(grid.TotalGrid);
-                var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+                var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
                 if (xGridTotalGridOpt is double xGridTotalGrid)
-                    PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, grid.TotalUnit, target.Editor.Fumen.SoflansMap[soflanGroup], specifyColor);
+                    PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, grid.TotalUnit, soflanList, specifyColor);
             }
 
             void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid)
             {
                 var minTotalGrid = minTGrid.TotalGrid;
                 var maxTotalGrid = maxTGrid.TotalGrid;
-                var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-                var soflanList = target.Editor.Fumen.SoflansMap[soflanGroup];
+                var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
 
                 if (!obj.IsCurvePath)
                 {

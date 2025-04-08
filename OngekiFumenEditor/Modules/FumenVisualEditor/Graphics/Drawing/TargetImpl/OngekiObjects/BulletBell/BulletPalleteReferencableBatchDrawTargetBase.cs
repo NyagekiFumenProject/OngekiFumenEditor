@@ -59,8 +59,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private void DrawEditorMode(IFumenEditorDrawingContext target, T obj)
         {
             var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-            var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-            var toTime = target.ConvertToY(obj.TGrid, target.Editor.Fumen.SoflansMap[soflanGroup]);
+            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+            var toTime = target.ConvertToY(obj.TGrid, soflanList);
 
             var pos = new Vector2((float)toX, (float)toTime);
             DrawVisibleObject_DesignMode(target, obj, pos, 0);
@@ -148,8 +148,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 if (isEnableSoflan)
                 {
-                    var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-                    var soflanList = target.Editor.Fumen.SoflansMap[soflanGroup];
+                    var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
                     toTime = convertToY(obj.TGrid, soflanList);
                     currentTime = convertToY(currentTGrid, soflanList);
                 }

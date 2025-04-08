@@ -1012,14 +1012,38 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             UpdateCurrentCursorPosition(mousePos);
 
             _cacheSoflanGroupRecorder.Clear();
+
             if (IsPreviewMode)
             {
                 //recache all objects
                 Parallel.ForEach(Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>(), obj =>
                 {
-                    var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj.XGrid, obj.TGrid);
-                    _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanGroup);
+                    var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
+                    if (!Fumen.SoflansMap.TryGetValue(soflanGroup, out var soflanList))
+                    {
+#if DEBUG
+                        Log.LogWarn($"Can't find soflanList by soflanGroup: {soflanGroup} from object {obj}, use default soflanList.");
+#endif
+                        soflanList = Fumen.SoflansMap.DefaultSoflanList;
+                    }
+                    _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
                 });
+
+                _cacheSoflanGroupRecorder.Freeze();
+#if DEBUG
+                //print current selected objects' SoflanGroup
+                var objs = SelectObjects.OfType<OngekiObjectBase>().OrderBy(x => x.Id);
+                if (objs.Any())
+                {
+                    Log.LogDebug($"----Print Selected Objects' SoflanGroup----");
+                    foreach (var obj in SelectObjects.OfType<OngekiObjectBase>().OrderBy(x => x.Id))
+                    {
+                        _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
+                        Log.LogDebug($"{obj.Id}  {soflanGroup}  ->  {obj}");
+                    }
+                    Log.LogDebug($"-------------------------------------------");
+                }
+#endif
             }
         }
 

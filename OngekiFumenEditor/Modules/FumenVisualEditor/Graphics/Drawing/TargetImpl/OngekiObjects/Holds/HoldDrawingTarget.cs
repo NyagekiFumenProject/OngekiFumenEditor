@@ -69,8 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var start = hold.ReferenceLaneStart;
             var holdEnd = hold.HoldEnd;
             var laneType = start?.LaneType;
-            var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(hold);
-            var soflanList = target.Editor.Fumen.SoflansMap[soflanGroup];
+            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(hold);
 
             var color = laneType switch
             {

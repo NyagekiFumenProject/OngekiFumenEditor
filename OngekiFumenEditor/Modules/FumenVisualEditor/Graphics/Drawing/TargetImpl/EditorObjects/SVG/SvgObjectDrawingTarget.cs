@@ -43,8 +43,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override void Draw(IFumenEditorDrawingContext target, SvgPrefabBase obj)
         {
             var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-            var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-            var y = (float)target.ConvertToY(obj.TGrid, target.Editor.Fumen.SoflansMap[soflanGroup]);
+            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+            var y = (float)target.ConvertToY(obj.TGrid, soflanList);
             var pos = new Vector2(x, y);
 
             var vertics = cachedSvgRenderDataManager.GetRenderData(target, obj, out var isCached, out var bound);

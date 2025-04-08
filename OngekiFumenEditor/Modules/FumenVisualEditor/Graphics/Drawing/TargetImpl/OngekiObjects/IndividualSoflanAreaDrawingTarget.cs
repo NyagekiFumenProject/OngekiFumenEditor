@@ -15,6 +15,7 @@ using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
@@ -50,10 +51,39 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private static Vector4 CalculateColorBySoflanGroup(int soflanGroup)
         {
+            
             if (cacheColor.TryGetValue(soflanGroup, out var color))
                 return color;
 
-            color = new Vector4(1, 1, 1, 1);
+            (float r, float g, float b) HsvToRgb(float h, float s, float v)
+            {
+                h = Math.Clamp(h, 0, 360);
+                s = Math.Clamp(s, 0, 1);
+                v = Math.Clamp(v, 0, 1);
+
+                float c = v * s;
+                float x = c * (1 - Math.Abs((h / 60) % 2 - 1));
+                float m = v - c;
+
+                (float r, float g, float b) rgb;
+
+                if (h < 60) rgb = (c, x, 0);
+                else if (h < 120) rgb = (x, c, 0);
+                else if (h < 180) rgb = (0, c, x);
+                else if (h < 240) rgb = (0, x, c);
+                else if (h < 300) rgb = (x, 0, c);
+                else rgb = (c, 0, x);
+
+                return (rgb.r + m, rgb.g + m, rgb.b + m);
+            }
+
+            float hue = Math.Abs(HashCode.Combine(soflanGroup, soflanGroup) % 360);
+            float saturation = 1f;
+            float value = 1f;
+
+            var (r, g, b) = HsvToRgb(hue, saturation, value);
+
+            color = new Vector4(r, g, b, 1);
             return cacheColor[soflanGroup] = color;
         }
 

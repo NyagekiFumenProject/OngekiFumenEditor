@@ -1,7 +1,11 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,24 +13,48 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics
 {
     public class GlobalCacheSoflanGroupRecorder
     {
-        private Dictionary<int, int> cacheSoflanGroupMap = new Dictionary<int, int>();
+        private ConcurrentDictionary<int, (SoflanList, int)> cacheSoflanGroupMap = new();
+        private FrozenDictionary<int, (SoflanList, int)> freezedSoflanGroupMap;
+        private SoflanList defaultSoflanList;
 
-        public void SetCache(int objectId, int soflanGroup)
+        public void SetDefault(SoflanList soflanList)
         {
-            cacheSoflanGroupMap[objectId] = soflanGroup;
+            defaultSoflanList = soflanList;
         }
 
-        public int GetCache(OngekiObjectBase ongekiObject) => GetCache(ongekiObject.Id);
-        public int GetCache(int objectId)
+        public void SetCache(int objectId, SoflanList soflanList, int soflanGroup)
         {
-            if (cacheSoflanGroupMap.TryGetValue(objectId, out var soflanGroup))
-                return soflanGroup;
-            return 0;
+            cacheSoflanGroupMap[objectId] = (soflanList, soflanGroup);
+        }
+
+        public void Freeze()
+        {
+            freezedSoflanGroupMap = cacheSoflanGroupMap.ToFrozenDictionary();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SoflanList GetCache(OngekiObjectBase ongekiObject) => GetCache(ongekiObject.Id, out _);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SoflanList GetCache(int objectId) => GetCache(objectId, out _);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SoflanList GetCache(OngekiObjectBase ongekiObject, out int soflanGroup) => GetCache(ongekiObject.Id, out soflanGroup);
+        public SoflanList GetCache(int objectId, out int soflanGroup)
+        {
+            if (freezedSoflanGroupMap?.TryGetValue(objectId, out var pair) ?? false)
+            {
+                soflanGroup = pair.Item2;
+                return pair.Item1;
+            }
+
+            soflanGroup = 0;
+            return defaultSoflanList;
         }
 
         public void Clear()
         {
             cacheSoflanGroupMap.Clear();
+            freezedSoflanGroupMap = default;
+            defaultSoflanList = default;
         }
     }
 }
