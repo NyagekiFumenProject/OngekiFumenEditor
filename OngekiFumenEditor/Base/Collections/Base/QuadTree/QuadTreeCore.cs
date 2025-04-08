@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Base.Collections.Base.QuadTree
         private readonly Func<TData, TY> yStartValueMap;
         private readonly Func<TData, TX> xEndValueMap;
         private readonly Func<TData, TY> yEndValueMap;
-        private List<QuadTreeCore<TX, TY, TData>> nodes = new();
+        private QuadTreeCore<TX, TY, TData>[] nodes = new QuadTreeCore<TX, TY, TData>[4];
         private readonly List<BoundedObject> objects = new();
 
         public IEnumerable<TData> Values => nodes.SelectMany(n => n.Values).Concat(objects.Select(o => o.Data));

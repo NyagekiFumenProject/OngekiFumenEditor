@@ -50,12 +50,14 @@ namespace OngekiFumenEditor.Base.Collections
         {
             this[isf.SoflanGroup].Add(isf);
             cacheTree.Add(isf);
+            cacheTotalTree.Add(isf);
         }
 
         public void Remove(IndividualSoflanArea isf)
         {
             this[isf.SoflanGroup].Remove(isf);
             cacheTree.Remove(isf);
+            cacheTotalTree.Remove(isf);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => isfMap.GetEnumerator();

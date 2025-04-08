@@ -219,6 +219,10 @@ namespace OngekiFumenEditor.Base
             {
                 SoflansMap.Remove(soflan);
             }
+            else if (obj is IndividualSoflanArea.IndividualSoflanAreaEndIndicator isfEnd)
+            {
+                IndividualSoflanAreaMap.Remove(isfEnd.RefIndividualSoflanArea);
+            }
             else if (obj is IndividualSoflanArea isf)
             {
                 IndividualSoflanAreaMap.Remove(isf);

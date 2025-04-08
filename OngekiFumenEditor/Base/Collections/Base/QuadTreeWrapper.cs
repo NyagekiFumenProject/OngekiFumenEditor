@@ -24,6 +24,8 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
         private HashSet<TValue> registerObjects = new();
 
+        private object locker = new();
+
         public IEnumerator<TValue> GetEnumerator() => tree.Values.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         public int Count => tree.Count;
@@ -62,20 +64,30 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
         public IEnumerable<TValue> Query(TX x, TY y)
         {
+            if (registerObjects.Count == 0)
+                return Enumerable.Empty<TValue>();
+
             if (tree == null)
             {
-                //rebuild quadtree
+                lock (locker)
+                {
+                    if (tree == null)
+                    {
+                        //rebuild quadtree
+                        var minX = registerObjects.Min(xStartValueMap);
+                        var maxX = registerObjects.Max(xEndValueMap);
+                        var minY = registerObjects.Min(yStartValueMap);
+                        var maxY = registerObjects.Max(yEndValueMap);
 
-                var minX = registerObjects.Min(xStartValueMap);
-                var maxX = registerObjects.Max(xEndValueMap);
-                var minY = registerObjects.Min(yStartValueMap);
-                var maxY = registerObjects.Max(yEndValueMap);
+                        var rect = new QuadTreeCore<TX, TY, TValue>.Rectangle(minX, minY, maxX - minX, maxY - minY);
 
-                var rect = new QuadTreeCore<TX, TY, TValue>.Rectangle(minX, minY, maxX - minX, maxY - minY);
+                        var tree = new QuadTreeCore<TX, TY, TValue>(rect, xStartValueMap, yStartValueMap, xEndValueMap, yEndValueMap);
+                        foreach (var obj in registerObjects)
+                            tree.Insert(obj);
 
-                tree = new QuadTreeCore<TX, TY, TValue>(rect, xStartValueMap, yStartValueMap, xEndValueMap, yEndValueMap);
-                foreach (var obj in registerObjects)
-                    tree.Insert(obj);
+                        this.tree = tree;
+                    }
+                }
             }
 
             return tree.Query(x, y);

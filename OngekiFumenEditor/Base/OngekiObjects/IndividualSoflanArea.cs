@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,20 +49,24 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 }
             }
 
-            public override string ToString() => $"{base.ToString()}";
-        }
+            [ObjectPropertyBrowserShow]
+            public float AreaWidth => RefIndividualSoflanArea.AreaWidth;
 
-        public override TGrid TGrid
-        {
-            get => base.TGrid;
-            set
+            public override string ToString() => $"{base.ToString()}";
+            public override XGrid XGrid
             {
-                base.TGrid = value is not null ? MathUtils.Min(value, EndIndicator.TGrid) : value;
+                get => base.XGrid;
+                set
+                {
+                    base.XGrid = value;
+                    NotifyOfPropertyChange(() => AreaWidth);
+                }
             }
         }
 
         public override string IDShortName => "ISF";
 
+        [ObjectPropertyBrowserShow]
         public float AreaWidth => (float)Math.Abs(XGrid.TotalUnit - EndIndicator.XGrid.TotalUnit);
 
         private int soflanGroup = 0;
@@ -70,7 +75,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             get => soflanGroup;
             set => Set(ref soflanGroup, value);
         }
-
+        public override XGrid XGrid
+        {
+            get => base.XGrid;
+            set
+            {
+                base.XGrid = value;
+                NotifyOfPropertyChange(() => AreaWidth);
+            }
+        }
         public int GridLength => EndIndicator.TGrid.TotalGrid - TGrid.TotalGrid;
 
         private IDisplayableObject[] displayables;
