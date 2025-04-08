@@ -501,6 +501,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         ipcThread?.Abort();
         IoC.Get<IAudioManager>().Dispose();
         await IoC.Get<ISchedulerManager>().Term();
+        await Log.WaitForAllLogWriteDone();
         FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
         base.OnExit(sender, e);
     }

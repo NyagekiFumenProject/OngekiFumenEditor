@@ -25,7 +25,7 @@ public class Log
     private static Log cacheInstance;
     private readonly List<ILogOutput> outputs = new();
 
-    private static ConcurrentQueue<LogRecord> logRecordQueue = new();
+    private ConcurrentQueue<LogRecord> logRecordQueue = new();
 
     [ImportingConstructor]
     public Log([ImportMany] IEnumerable<ILogOutput> outputs)
@@ -48,7 +48,7 @@ public class Log
         outputs.Add(new T());
     }
 
-    internal void Output(Severity severity, string message)
+    private void Output(Severity severity, string message)
     {
         foreach (var output in LogOutputs)
             output.WriteLog(severity, message);
@@ -78,23 +78,28 @@ public class Log
         return sb.ToString();
     }
 
-    private static void EnqueueLogRecord(string message, Severity severity, bool new_line, bool time, string prefix, string filePath, int lineNumber)
+    private void EnqueueLogRecord(string message, Severity severity, bool new_line, bool time, string prefix, string filePath, int lineNumber)
     {
         logRecordQueue.Enqueue(new LogRecord(severity, message, new_line, time, prefix, filePath, lineNumber));
+    }
+
+    private static void BeginLogRecord(string message, Severity severity, bool new_line, bool time, string prefix, string filePath, int lineNumber)
+    {
+        var log = Instance;
+        log.EnqueueLogRecord(message, severity, new_line, time, prefix, filePath, lineNumber);
+        log.AwakeLogger();
     }
 
     [Conditional("DEBUG")]
     public static void LogDebug(string message, bool newLine = true, bool time = true,
         [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
-        var severity = Severity.Debug;
-        EnqueueLogRecord(message, severity, newLine, time, prefix, filePath, lineNumber);
-        AwakeLogger();
+        BeginLogRecord(message, Severity.Debug, newLine, time, prefix, filePath, lineNumber);
     }
 
-    private static volatile bool isRunning = false;
+    private volatile bool isRunning = false;
 
-    private static void AwakeLogger()
+    private void AwakeLogger()
     {
         if (isRunning)
             return;
@@ -110,11 +115,9 @@ public class Log
                     var msg = BuildLogMessage(logRecord);
                     Instance.Output(logRecord.Severity, msg);
                 }
-                catch (Exception e)
+                catch
                 {
-#if DEBUG
-                    throw;
-#endif
+                    //ignore
                 }
             }
 
@@ -125,32 +128,34 @@ public class Log
     public static void LogInfo(string message, bool newLine = true, bool time = true,
         [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
-        var severity = Severity.Info;
-        EnqueueLogRecord(message, severity, newLine, time, prefix, filePath, lineNumber);
-        AwakeLogger();
+        BeginLogRecord(message, Severity.Info, newLine, time, prefix, filePath, lineNumber);
     }
 
     public static void LogWarn(string message, bool newLine = true, bool time = true,
         [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
-        var severity = Severity.Warn;
-        EnqueueLogRecord(message, severity, newLine, time, prefix, filePath, lineNumber);
-        AwakeLogger();
+        BeginLogRecord(message, Severity.Warn, newLine, time, prefix, filePath, lineNumber);
     }
 
     public static void LogError(string message, bool newLine = true, bool time = true,
         [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
-        var severity = Severity.Error;
-        EnqueueLogRecord(message, severity, newLine, time, prefix, filePath, lineNumber);
-        AwakeLogger();
+        BeginLogRecord(message, Severity.Error, newLine, time, prefix, filePath, lineNumber);
     }
 
     public static void LogError(string message, Exception e, bool newLine = true, bool time = true,
         [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
-        var severity = Severity.Error;
-        EnqueueLogRecord(message, severity, newLine, time, prefix, filePath, lineNumber);
-        AwakeLogger();
+        var actualMessage = $"{message}\nContains exception:{e.Message}\n{e.StackTrace}";
+        BeginLogRecord(actualMessage, Severity.Error, newLine, time, prefix, filePath, lineNumber);
+    }
+
+    public static async Task WaitForAllLogWriteDone()
+    {
+        var instance = Instance;
+        while (instance.isRunning)
+        {
+            await Task.Delay(10);
+        }
     }
 }
