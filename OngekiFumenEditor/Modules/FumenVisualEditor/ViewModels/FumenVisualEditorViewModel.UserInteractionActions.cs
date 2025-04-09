@@ -36,6 +36,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using System.Threading;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle;
+using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -1247,7 +1248,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }
                     }
 
-                    Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject}");
+#if DEBUG
+                    var xGrid = XGridCalculator.ConvertXToXGrid(position.X, this);
+                    var tGrid2 = TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this);
+                    var querySoflanGroup = tGrid2 is null ? -1 : Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(xGrid, tGrid2);
+#endif
+
+                    Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject} , soflanGroup = {querySoflanGroup}");
                 }
 
                 if (arg.ChangedButton == MouseButton.Middle)

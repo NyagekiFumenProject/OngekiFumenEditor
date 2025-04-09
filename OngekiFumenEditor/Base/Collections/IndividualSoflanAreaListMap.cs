@@ -19,13 +19,15 @@ namespace OngekiFumenEditor.Base.Collections
             nameof(IndividualSoflanArea.EndIndicator.TGrid)
             );
 
-        private QuadTreeWrapper<float, float, IndividualSoflanArea> cacheTotalTree = new(
-            x => (float)x.XGrid.TotalUnit - x.AreaWidth / 2,
-            x => (float)x.XGrid.TotalUnit + x.AreaWidth / 2,
+        private NotQuadTreeWrapper<float, float, IndividualSoflanArea> cacheTotalTree = new(
+            x => (float)x.XGrid.TotalUnit,
             x => (float)x.TGrid.TotalUnit,
+            x => (float)x.EndIndicator.XGrid.TotalUnit,
             x => (float)x.EndIndicator.TGrid.TotalUnit,
             nameof(IndividualSoflanArea.TGrid),
-            nameof(IndividualSoflanArea.EndIndicator.TGrid)
+            nameof(IndividualSoflanArea.EndIndicator.TGrid),
+            nameof(IndividualSoflanArea.XGrid),
+            nameof(IndividualSoflanArea.EndIndicator.XGrid)
             );
 
         private Dictionary<int, IndividualSoflanAreaList> isfMap = new();

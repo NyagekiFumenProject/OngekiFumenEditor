@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.Collections.Base.QuadTree;
+﻿using OngekiFumenEditor.Base.Collections.Base.NotQuadTree;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections.Base
 {
-    public class QuadTreeWrapper<TX, TY, TValue> : IReadOnlyCollection<TValue> where TValue : INotifyPropertyChanged where TX : IDivisionOperators<TX, float, TX>, IAdditionOperators<TX, TX, TX>, ISubtractionOperators<TX, TX, TX>
-        where TY : IDivisionOperators<TY, float, TY>, IAdditionOperators<TY, TY, TY>, ISubtractionOperators<TY, TY, TY>
+    public class NotQuadTreeWrapper<TX, TY, TValue> : IReadOnlyCollection<TValue> where TValue : INotifyPropertyChanged where TX : IDivisionOperators<TX, float, TX>, IAdditionOperators<TX, TX, TX>, ISubtractionOperators<TX, TX, TX>, IComparable<TX>
+        where TY : IDivisionOperators<TY, float, TY>, IAdditionOperators<TY, TY, TY>, ISubtractionOperators<TY, TY, TY>, IComparable<TY>
     {
-        private QuadTreeCore<TX, TY, TValue> tree;
+        private NotQuadTree<TX, TY, TValue> tree;
         private readonly HashSet<string> rebuildProperties;
 
         private readonly Func<TValue, TX> xStartValueMap;
@@ -26,11 +26,11 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
         private object locker = new();
 
-        public IEnumerator<TValue> GetEnumerator() => tree.Values.GetEnumerator();
+        public IEnumerator<TValue> GetEnumerator() => tree.TotalValues.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        public int Count => tree.Count;
+        public int Count => tree.TotalCount;
 
-        public QuadTreeWrapper(Func<TValue, TX> xStartValueMap, Func<TValue, TY> yStartValueMap,
+        public NotQuadTreeWrapper(Func<TValue, TX> xStartValueMap, Func<TValue, TY> yStartValueMap,
             Func<TValue, TX> xEndValueMap, Func<TValue, TY> yEndValueMap, params string[] rebuildProperties)
         {
             this.rebuildProperties = rebuildProperties.ToHashSet();
@@ -79,11 +79,10 @@ namespace OngekiFumenEditor.Base.Collections.Base
                         var minY = registerObjects.Min(yStartValueMap);
                         var maxY = registerObjects.Max(yEndValueMap);
 
-                        var rect = new QuadTreeCore<TX, TY, TValue>.Rectangle(minX, minY, maxX - minX, maxY - minY);
+                        var rect = new NotQuadTree<TX, TY, TValue>.Rectangle(minX, minY, maxX - minX, maxY - minY);
 
-                        var tree = new QuadTreeCore<TX, TY, TValue>(rect, xStartValueMap, yStartValueMap, xEndValueMap, yEndValueMap);
-                        foreach (var obj in registerObjects)
-                            tree.Insert(obj);
+                        var tree = new NotQuadTree<TX, TY, TValue>(rect, xStartValueMap, yStartValueMap, xEndValueMap, yEndValueMap);
+                        tree.Build(registerObjects);
 
                         this.tree = tree;
                     }

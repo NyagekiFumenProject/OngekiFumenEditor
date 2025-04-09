@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.Collections.Base.QuadTree
+namespace OngekiFumenEditor.Base.Collections.Base.NotQuadTree
 {
     public interface IBounded<TX, TY, TData>
         where TX : IDivisionOperators<TX, float, TX>, IAdditionOperators<TX, TX, TX>

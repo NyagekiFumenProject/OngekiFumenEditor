@@ -1,6 +1,8 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base.Collections.Base.NotQuadTree;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.IO.MemoryMappedFiles;
