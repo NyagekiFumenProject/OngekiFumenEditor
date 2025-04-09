@@ -1015,8 +1015,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (IsPreviewMode)
             {
+                var objs = Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>();
+                objs = objs.Where(x => x switch
+                {
+                    IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
+                    or ConnectableObjectBase => false,
+                    _ => true
+                });
                 //recache all objects
-                Parallel.ForEach(Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>(), obj =>
+                Parallel.ForEach(objs, obj =>
                 {
                     var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
                     if (!Fumen.SoflansMap.TryGetValue(soflanGroup, out var soflanList))
@@ -1032,7 +1039,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 _cacheSoflanGroupRecorder.Freeze();
 #if DEBUG
                 //print current selected objects' SoflanGroup
-                var objs = SelectObjects.OfType<OngekiObjectBase>().OrderBy(x => x.Id);
                 if (objs.Any())
                 {
                     Log.LogDebug($"----Print Selected Objects' SoflanGroup----");
@@ -1125,29 +1131,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }
                     }
 
-                    if (isMiddleMouseDown)
-                    {
-                        if (isCanvasDragging)
-                        {
-                            var diffX = pos.X - mouseCanvasStartPosition.X;
-                            Setting.XOffset = startXOffset + diffX;
-
-                            var curY = pos.Y;
-                            var diffY = curY - mouseCanvasStartPosition.Y;
-
-                            var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(startScrollOffset + diffY, this);
-                            //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
-                            ScrollTo(audioTime);
-                        }
-                        else
-                        {
-                            Setting.XOffset = 0;
-                        }
-                    }
-
                     isSelectRangeDragging = false;
                     currentDraggingActionId = int.MaxValue;
                     SelectionArea.IsActive = false;
+                }
+                else if (isMiddleMouseDown)
+                {
+                    if (isCanvasDragging)
+                    {
+                        var diffX = pos.X - mouseCanvasStartPosition.X;
+                        Setting.XOffset = startXOffset + diffX;
+
+                        var curY = pos.Y;
+                        var diffY = curY - mouseCanvasStartPosition.Y;
+
+                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(startScrollOffset + diffY, this);
+                        //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
+                        ScrollTo(audioTime);
+                    }
+                    else
+                    {
+                        Setting.XOffset = 0;
+                    }
                 }
 
                 if (arg.ChangedButton == MouseButton.Middle)
