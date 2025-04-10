@@ -1,12 +1,20 @@
-﻿using System;
+﻿using FontStashSharp;
+using OngekiFumenEditor.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Base.Collections.Base.NotQuadTree
 {
-    public class NotQuadTree<TX, TY, TData> where TX : IDivisionOperators<TX, float, TX>, IAdditionOperators<TX, TX, TX>, ISubtractionOperators<TX, TX, TX>, IComparable<TX>
-        where TY : IDivisionOperators<TY, float, TY>, IAdditionOperators<TY, TY, TY>, ISubtractionOperators<TY, TY, TY>, IComparable<TY>
+    public class NotQuadTree<TX, TY, TData> where TX : IDivisionOperators<TX, float, TX>
+        , IAdditionOperators<TX, TX, TX>
+        , ISubtractionOperators<TX, TX, TX>
+        , IComparable<TX>
+        where TY : IDivisionOperators<TY, float, TY>
+        , IAdditionOperators<TY, TY, TY>
+        , ISubtractionOperators<TY, TY, TY>
+        , IComparable<TY>
     {
         public class Rectangle
         {
@@ -205,6 +213,19 @@ namespace OngekiFumenEditor.Base.Collections.Base.NotQuadTree
 
             LocalCount = objects.Count;
             TotalCount = LocalCount + childTrees.Sum(n => n?.TotalCount ?? 0);
+
+            //todo 优化一下，极端情况下会出现一条很长很长链条的树枝
+            //裁剪
+            for (int quadrant = 0; quadrant < 4; quadrant++)
+            {
+                if (childTrees[quadrant] is NotQuadTree<TX, TY, TData> childTree)
+                {
+                    if (childTree.childTrees.FilterNull().IsOnlyOne(out var onlyTree))
+                    {
+                        childTrees[quadrant] = onlyTree;
+                    }
+                }
+            }
         }
 
         private static bool CheckInBound(BoundedObject bounded, TX x, TY y)
@@ -218,6 +239,12 @@ namespace OngekiFumenEditor.Base.Collections.Base.NotQuadTree
 
         public IEnumerable<TData> Query(TX x, TY y)
         {
+            //如果不在当前树范围内，直接返回
+            if (x.CompareTo(bounds.X) < 0 || x.CompareTo(bounds.X + bounds.Width) > 0)
+                yield break;
+            if (y.CompareTo(bounds.Y) < 0 || y.CompareTo(bounds.Y + bounds.Height) > 0)
+                yield break;
+
             foreach (var bound in objects)
             {
                 if (CheckInBound(bound, x, y))

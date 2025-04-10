@@ -81,7 +81,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
                         var rect = new NotQuadTree<TX, TY, TValue>.Rectangle(minX, minY, maxX - minX, maxY - minY);
 
-                        var tree = new NotQuadTree<TX, TY, TValue>(rect, xStartValueMap, yStartValueMap, xEndValueMap, yEndValueMap);
+                        var tree = new NotQuadTree<TX, TY, TValue>(rect, xStartValueMap, yStartValueMap, xEndValueMap, yEndValueMap, 0);
                         tree.Build(registerObjects);
 
                         this.tree = tree;

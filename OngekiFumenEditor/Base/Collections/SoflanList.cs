@@ -49,6 +49,7 @@ namespace OngekiFumenEditor.Base.Collections
             soflans.Add(soflan);
             soflan.PropertyChanged += OnSoflanPropChanged;
             OnCollectionChangedEvent?.Invoke(soflan);
+            cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
         }
 
         private void OnSoflanPropChanged(object sender, PropertyChangedEventArgs e)
@@ -64,6 +65,7 @@ namespace OngekiFumenEditor.Base.Collections
                 case nameof(InterpolatableSoflan.InterpolateCountPerResT):
                 case nameof(Soflan.EndTGrid):
                 case nameof(Soflan.GridLength):
+                case nameof(Soflan.SoflanGroup):
                     OnPropertyChangedEvent?.Invoke(sender, e);
                     break;
                 default:
@@ -76,6 +78,7 @@ namespace OngekiFumenEditor.Base.Collections
             soflans.Remove(soflan);
             soflan.PropertyChanged -= OnSoflanPropChanged;
             OnCollectionChangedEvent?.Invoke(soflan);
+            cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
         }
     }
 }
