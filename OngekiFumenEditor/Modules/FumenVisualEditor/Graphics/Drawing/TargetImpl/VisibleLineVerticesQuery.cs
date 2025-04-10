@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             //todo 再判断设计模式怎么钦定
             var soflanPositionList = target.Editor.IsDesignMode ?
                 target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
-                target.Editor.Fumen.SoflansMap[refSoflanGroup].GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+                target.Editor._cacheSoflanGroupRecorder.GetCache(start).GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
 
             var minIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MinTGrid, x => x.TGrid);
             var maxIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MaxTGrid, x => x.TGrid);
@@ -189,7 +189,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var soflanPositionList = target.Editor.IsDesignMode ?
                 target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
-                target.Editor.Fumen.SoflansMap[refSoflanGroup].GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+                target.Editor._cacheSoflanGroupRecorder.GetCache(start).GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
 
             var cur = start.Children.FirstOrDefault();
             while (cur != null)

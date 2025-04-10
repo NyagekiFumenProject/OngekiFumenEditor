@@ -1020,10 +1020,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 objs = objs.Where(x => x switch
                 {
                     IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
-                    or ConnectableObjectBase => false,
+                    or ConnectableObjectBase => false, //轨道由依附的物件去决定
                     _ => true
                 });
                 //recache all objects
+
+                _cacheSoflanGroupRecorder.SetDefault(Fumen.SoflansMap.DefaultSoflanList);
                 Parallel.ForEach(objs, obj =>
                 {
                     var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
@@ -1032,9 +1034,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 #if DEBUG
                         Log.LogWarn($"Can't find soflanList by soflanGroup: {soflanGroup} from object {obj}, use default soflanList.");
 #endif
-                        soflanList = Fumen.SoflansMap.DefaultSoflanList;
+                        return;
+                    }
+                    if (soflanList.IsEmpty())
+                    {
+#if DEBUG
+                        Log.LogWarn($"soflanList is empty, use default soflanList, soflanGroup: {soflanGroup}");
+#endif
+                        return;
                     }
                     _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
+                    if (obj is ILaneDockable dockable && dockable.ReferenceLaneStart is ConnectableStartObject start)
+                        _cacheSoflanGroupRecorder.SetCache(start.Id, soflanList, soflanGroup);
                 });
 
                 _cacheSoflanGroupRecorder.Freeze();
