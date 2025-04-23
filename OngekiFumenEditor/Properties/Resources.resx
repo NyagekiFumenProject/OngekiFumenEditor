@@ -2022,4 +2022,7 @@
   <data name="ApplyFilter" xml:space="preserve">
     <value />
   </data>
+  <data name="LaneBlockOnMultipleWalls" xml:space="preserve">
+    <value>Lane block start wall ({0}) is different than end wall ({1})</value>
+  </data>
 </root>
