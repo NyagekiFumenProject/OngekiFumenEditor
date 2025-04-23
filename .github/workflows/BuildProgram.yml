@@ -41,7 +41,7 @@ jobs:
         ref: ${{ env.Branch }}
         submodules: recursive
     - name: Setup .NET7
-      uses: actions/setup-dotnet@v4.0.1
+      uses: actions/setup-dotnet@v4.3.1
       with:
         dotnet-version: 8.0.x
     - name: get-version-action
