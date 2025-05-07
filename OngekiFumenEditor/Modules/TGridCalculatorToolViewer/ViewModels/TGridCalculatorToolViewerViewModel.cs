@@ -144,7 +144,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
 				var sms = r.LastOrDefault();
 				var w = sms.Split(".");
 				var msec = w.Length == 2 ? int.Parse(w[1]) : 0;
-				var revArr = r.Reverse().Skip(1).Select(x => int.Parse(x)).ToArray();
+				var revArr = r.AsEnumerable().Reverse().Skip(1).Select(x => int.Parse(x)).ToArray();
 				var sec = int.Parse(w[0]);
 
 				//hh:mm:ss.msec

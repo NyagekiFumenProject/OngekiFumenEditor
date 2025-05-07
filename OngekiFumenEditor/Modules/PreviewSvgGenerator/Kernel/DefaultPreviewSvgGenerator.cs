@@ -907,7 +907,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                         outputPoints.Add(new SvgUnit(SvgUnitType.Pixel, point.Y));
                     }
 
-                    foreach (var point in points.Reverse())
+                    foreach (var point in points.AsEnumerable().Reverse())
                     {
                         outputPoints.Add(new SvgUnit(SvgUnitType.Pixel, point.X + offsetX));
                         outputPoints.Add(new SvgUnit(SvgUnitType.Pixel, point.Y));
