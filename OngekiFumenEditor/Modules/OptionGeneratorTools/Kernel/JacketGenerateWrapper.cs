@@ -281,7 +281,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                 //dump m_DataSize
                 //todo 这里还能塞水印~
                 var bytes = verticesDataField.children.Select(x => (byte)x.GetValue().AsInt()).ToArray();
-                var floatSpan = MemoryMarshal.Cast<byte, float>(bytes);
+                var floatSpan = MemoryMarshal.Cast<byte, float>(bytes.AsSpan());
                 //map byte[] to float[]
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
