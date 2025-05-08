@@ -57,6 +57,6 @@ jobs:
       run: Remove-Item -Path ".\bin\githubActions\*.xml" -Force
     - uses: actions/upload-artifact@v4
       with:
-        name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
+        name: OngekiFumenEditor_${{GitBuildVersion}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
         path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
