@@ -53,6 +53,8 @@ jobs:
       run: dotnet restore
     - name: Publish
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o ./bin/githubActions/
+    - name: Delete unused .xml files
+      run: del /s /q ".\bin\githubActions\*.xml"
     - uses: actions/upload-artifact@v4
       with:
         name: OngekiFumenEditor_${{steps.project-version.outputs.version}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
