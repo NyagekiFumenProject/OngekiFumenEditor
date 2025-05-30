@@ -58,8 +58,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private bool isDisplayFPS;
     private DrawJudgeLineHelper judgeLineHelper;
-    //todo SoflanGroup support
-    //private DrawPlayableAreaHelper playableAreaHelper;
+    private DrawPlayableAreaHelper playableAreaHelper;
     internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
     private DrawPlayerLocationHelper playerLocationHelper;
     private Vector4 playFieldBackgroundColor;
@@ -246,8 +245,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         xGridHelper = new DrawXGridHelper();
         judgeLineHelper = new DrawJudgeLineHelper();
         selectingRangeHelper = new DrawSelectingRangeHelper();
-        //todo SoflanGroup support
-        //playableAreaHelper = new DrawPlayableAreaHelper();
+        playableAreaHelper = new DrawPlayableAreaHelper();
         playerLocationHelper = new DrawPlayerLocationHelper();
 
         actualPerformenceMonitor = IoC.Get<IPerfomenceMonitor>();
@@ -393,9 +391,14 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
 
         //todo SoflanGroup support
-        //foreach (var (minTGrid, maxTGrid) in visibleTGridRanges)
-        //    playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
         //playableAreaHelper.Draw(this);
+        foreach (var drawingContext in drawingContexts)
+        {
+            CurrentDrawingTargetContext = defaultDrawingTargetContext;
+            foreach (var (minTGrid, maxTGrid) in defaultDrawingTargetContext.VisibleTGridRanges)
+                playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
+        }
+        playableAreaHelper.Draw(this);
         timeSignatureHelper.DrawLines(this);
 
         xGridHelper.DrawLines(this, CachedMagneticXGridLines);
@@ -609,7 +612,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 #if DEBUG
             stringBuilder.AppendLine();
             stringBuilder.AppendLine($"Viewport: {ViewWidth}x{ViewHeight}");
-            stringBuilder.AppendLine("VisibleRanges:");
+            stringBuilder.AppendLine($"VisibleRanges ({drawingContexts.Count} sfl groups):");
 
             foreach (var item in drawingContexts.OrderBy(x => x.Key))
             {

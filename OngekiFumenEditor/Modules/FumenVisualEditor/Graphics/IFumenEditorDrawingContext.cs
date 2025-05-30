@@ -24,7 +24,5 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics
         double ConvertToY_DefaultSoflanGroup(double tGridUnit) => ConvertToY(tGridUnit, Editor.Fumen.SoflansMap.DefaultSoflanList);
         double ConvertToY(TGrid tGrid, SoflanList soflans) => ConvertToY(tGrid.TotalUnit, soflans);
         double ConvertToY(double tGridUnit, SoflanList soflans);
-
-
     }
 }
