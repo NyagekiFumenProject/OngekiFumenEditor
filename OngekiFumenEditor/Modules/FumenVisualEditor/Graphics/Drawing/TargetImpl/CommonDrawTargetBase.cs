@@ -6,7 +6,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public abstract class CommonDrawTargetBase : IFumenEditorDrawingTarget
     {
         protected IFumenEditorDrawingContext target;
-        protected DrawingTargetContext context;
 
         public abstract IEnumerable<string> DrawTargetID { get; }
         public abstract int DefaultRenderOrder { get; }
@@ -34,7 +33,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             this.target = target;
-            this.context = context;
         }
 
         public abstract void Post(OngekiObjectBase ongekiObject);

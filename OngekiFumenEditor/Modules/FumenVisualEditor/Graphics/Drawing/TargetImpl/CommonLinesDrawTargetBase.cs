@@ -27,7 +27,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public void FillLine(IFumenEditorDrawingContext target, T start)
         {
             var color = GetLanePointColor(start);
-            var soflanList = context.CurrentSoflanList;
 
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();

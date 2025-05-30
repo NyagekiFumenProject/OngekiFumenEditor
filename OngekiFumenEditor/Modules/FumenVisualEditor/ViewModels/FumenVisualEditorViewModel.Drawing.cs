@@ -334,18 +334,28 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             var curY = ConvertToY(tGrid.TotalUnit, pair.Value);
             var minY = (float)(curY - Setting.JudgeLineOffsetY);
             var maxY = minY + ViewHeight;
-            var ranges =
-                pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList,
-                    Setting.VerticalDisplayScale);
 
             var visibleTGridRanges = new SortableCollection<(TGrid minTGrid, TGrid maxTGrid), TGrid>(x => x.minTGrid);
 
-            foreach (var x in ranges)
+            if (IsPreviewMode)
             {
-                if (x.maxTGrid is null || x.minTGrid is null)
-                    continue;
-                var p = (x.minTGrid, x.maxTGrid);
-                visibleTGridRanges.Add(p);
+                //Preview Mode
+                var ranges =
+                    pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList,
+                        Setting.VerticalDisplayScale);
+                foreach (var x in ranges)
+                {
+                    if (x.maxTGrid is null || x.minTGrid is null)
+                        continue;
+                    visibleTGridRanges.Add((x.minTGrid, x.maxTGrid));
+                }
+            }
+            else
+            {
+                //Design Mode
+                var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this);
+                var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(maxY, this);
+                visibleTGridRanges.Add((minTGrid, maxTGrid));
             }
 
             var rect = new VisibleRect(new Vector2(ViewWidth, minY), new Vector2(0, minY + ViewHeight));
@@ -375,7 +385,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             RectInDesignMode = defaultDrawingTargetContext.Rect;
 
         #endregion
-        
+
         //set current
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
@@ -605,7 +615,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             {
                 foreach (var tGridRange in item.Value.VisibleTGridRanges)
                     stringBuilder.AppendLine($"*[{item.Key}]  {tGridRange.minTGrid}  -  {tGridRange.maxTGrid} -> {item.Value.Rect.MinY:F2} -  {item.Value.Rect.MaxY:F2}");
-                stringBuilder.AppendLine();
             }
 #endif
 
