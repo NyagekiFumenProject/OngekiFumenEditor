@@ -388,7 +388,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         //playableAreaHelper.Draw(this);
         timeSignatureHelper.DrawLines(this);
 
-        xGridHelper.DrawLines(this, defaultDrawingTargetContext, CachedMagneticXGridLines);
+        xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
         // objType -> soflanGroup -> obj[]
         var map = ObjectPool<Dictionary<string, Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>>.Get();
