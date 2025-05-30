@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 {
                     foreach (var item in o)
                     {
-                        if (!target.CheckVisible(item.TGrid))
+                        if (!target.CheckVisible( item.TGrid))
                             continue;
 
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);

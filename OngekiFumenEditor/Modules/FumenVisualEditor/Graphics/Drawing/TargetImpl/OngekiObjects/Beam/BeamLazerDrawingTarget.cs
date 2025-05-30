@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
         {
             //todo 宽度目测的，需要精确计算
-            var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
+            var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.CurrentDrawingTargetContext.Rect.Width, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
             var width = xGridWidth * 3f * obj.WidthId;
 
             var beginTGrid = obj.MinTGrid;
@@ -115,7 +115,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 //beam not support SoflanGroup
                 var currentY = target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid());
                 var obliqueTopX = (float)XGridCalculator.ConvertXGridToX(curObliqueTopXGrid, target.Editor);
-                var obliqueTopY = currentY - judgeOffset + target.ViewHeight;
+                var obliqueTopY = currentY - judgeOffset + target.CurrentDrawingTargetContext.Rect.Height;
 
                 x = (obliqueTopX + currentX) / 2;
 

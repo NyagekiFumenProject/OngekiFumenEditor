@@ -166,7 +166,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 				var xOffset = (float)editor.Setting.XOffset;
 
 				var unitSize = (float)XGridCalculator.CalculateXUnitSize(editor);
-				var baseX = editor.ViewWidth / 2 + xOffset;
+				var baseX = editor.RectInDesignMode.Width / 2 + xOffset;
 
 				var rX = x - baseX;
 				var sign = Math.Sign(rX);

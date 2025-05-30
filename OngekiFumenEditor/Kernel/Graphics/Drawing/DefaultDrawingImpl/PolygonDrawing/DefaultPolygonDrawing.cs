@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.ComponentModel.Composition;
@@ -66,7 +67,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.PolygonDr
             this.primitive = primitive;
             shader.Begin();
             shader.PassUniform("Model", GetOverrideModelMatrix());
-            shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target));
+            shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
             GL.BindVertexArray(vao);
         }
 

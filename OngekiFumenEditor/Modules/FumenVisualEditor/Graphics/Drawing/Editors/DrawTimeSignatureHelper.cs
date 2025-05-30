@@ -46,8 +46,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 					fumen.SoflansMap.DefaultSoflanList,
 					fumen.BpmList,
 					fumen.MeterChanges,
-					Math.Max(0, target.Rect.MinY),
-					target.Rect.MaxY,
+					Math.Max(0, target.Editor.RectInDesignMode.MinY),
+					target.Editor.RectInDesignMode.MaxY,
 					target.Editor.Setting.JudgeLineOffsetY,
 					target.Editor.Setting.BeatSplit,
 					target.Editor.Setting.VerticalDisplayScale
@@ -62,14 +62,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 					fumen.BpmList,
 					fumen.MeterChanges,
 					currentY,
-					target.Rect.Height,
+					target.Editor.RectInDesignMode.Height,
 					target.Editor.Setting.JudgeLineOffsetY,
 					target.Editor.Setting.BeatSplit,
 					target.Editor.Setting.VerticalDisplayScale
 				);
 			}
 
-			var transDisp = target.Rect.Width * 0.4f;
+			var transDisp = target.Editor.RectInDesignMode.Width * 0.4f;
 			var maxDispAlpha = 0.3f;
 			var minDispAlpha = 0f;
 
@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 				timelines = timelines.Where(x => x.beatIndex == 0);
 			else
 				minDispAlpha = maxDispAlpha;
-			var eDisp = target.Rect.Width - transDisp;
+			var eDisp = target.Editor.RectInDesignMode.Width - transDisp;
 
 			using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
 			list.Clear();
@@ -119,8 +119,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 				list.Add(new(new(0, fy), new(1, 1, 1, maxAlpha), VertexDash.Solider));
 				list.Add(new(new(transDisp, fy), new(1, 1, 1, minAlpha), VertexDash.Solider));
 				list.Add(new(new(eDisp, fy), new(1, 1, 1, minAlpha), VertexDash.Solider));
-				list.Add(new(new(target.ViewWidth, fy), new(1, 1, 1, maxAlpha), VertexDash.Solider));
-				list.Add(new(new(target.ViewWidth, fy), new(1, 1, 1, 0), VertexDash.Solider));
+				list.Add(new(new(target.Editor.RectInDesignMode.Width, fy), new(1, 1, 1, maxAlpha), VertexDash.Solider));
+				list.Add(new(new(target.Editor.RectInDesignMode.Width, fy), new(1, 1, 1, 0), VertexDash.Solider));
 			}
 
 			lineDrawing.Draw(target, list, 1);
@@ -131,7 +131,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 			foreach (var pair in drawLines)
 				stringDrawing.Draw(
 					pair.Display,
-					new(target.ViewWidth,
+					new(target.Editor.RectInDesignMode.Width,
 					(float)pair.Y + 10),
 					Vector2.One,
 					12,

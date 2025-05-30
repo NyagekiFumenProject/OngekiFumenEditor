@@ -45,13 +45,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 					_ => 0.25f
 				};
 
-				list.Add(new(new(result.X, target.Rect.Height), new(1, 1, 1, 0), VertexDash.Solider));
+				list.Add(new(new(result.X, target.Editor.ViewHeight), new(1, 1, 1, 0), VertexDash.Solider));
 				list.Add(new(new(result.X, 0), new(1, 1, 1, a), VertexDash.Solider));
-				list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, a), VertexDash.Solider));
-				list.Add(new(new(result.X, 0 + target.Rect.Height), new(1, 1, 1, 0), VertexDash.Solider));
+				list.Add(new(new(result.X, 0 + target.Editor.ViewHeight), new(1, 1, 1, a), VertexDash.Solider));
+				list.Add(new(new(result.X, 0 + target.Editor.ViewHeight), new(1, 1, 1, 0), VertexDash.Solider));
 			}
 
-			lineDrawing.PushOverrideViewProjectMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.ViewWidth / 2, -target.ViewHeight / 2, 0) * target.ProjectionMatrix);
+			lineDrawing.PushOverrideViewProjectMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0) * target.CurrentDrawingTargetContext.ProjectionMatrix);
 			lineDrawing.Draw(target, list, 1);
 			lineDrawing.PopOverrideViewProjectMatrix(out _);
 		}
@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 				stringDrawing.Draw(
 					pair.XGridTotalUnitDisplay,
 					new(pair.X,
-					target.Rect.MaxY),
+					target.Editor.RectInDesignMode.MaxY),
 					Vector2.One,
 					12,
 					0,

@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
 				shader.Begin();
 				{
 					shader.PassUniform("Model", GetOverrideModelMatrix());
-					shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target));
+					shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
 					GL.BindVertexArray(vao);
 					{
 						GL.Enable(EnableCap.PolygonSmooth);

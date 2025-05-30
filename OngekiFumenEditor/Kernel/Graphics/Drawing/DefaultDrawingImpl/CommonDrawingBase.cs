@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
+using OpenTK.Mathematics;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -39,7 +40,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Matrix4 GetOverrideViewProjectMatrixOrDefault(IDrawingContext ctx)
+		public Matrix4 GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext ctx)
 		{
 			return viewProjectMatrices.Count == 0 ? ctx.ViewProjectionMatrix : viewProjectMatrices.Peek();
 		}

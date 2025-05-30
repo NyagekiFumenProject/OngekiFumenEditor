@@ -173,7 +173,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 			shader.Begin();
 
 			GL.BindVertexArray(vao);
-			var MVP = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target);
+			var MVP = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
 			shader.PassUniform("ViewProjection", MVP);
 			shader.PassUniform("diffuse", texture);
 		}

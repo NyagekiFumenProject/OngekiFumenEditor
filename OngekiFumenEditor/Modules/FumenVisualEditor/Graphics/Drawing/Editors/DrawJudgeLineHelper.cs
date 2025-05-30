@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 			var y = (float)target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid().TotalUnit);
 
 			vertices[0] = new(new(0, y), color, VertexDash.Solider);
-			vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);
+			vertices[1] = new(new(target.Editor.ViewWidth, y), color, VertexDash.Solider);
 
 			lineDrawing.Draw(target, vertices, 1);
 			var t = target.Editor.GetCurrentTGrid();
@@ -45,11 +45,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 			else
 				str = t.ToString();
 
+			//todo: show multi speed for every soflan groups
 			var speed = soflanList.CalculateSpeed(bpmList, t);
 
 			stringDrawing.Draw(
 					str,
-					new(target.ViewWidth - 50,
+					new(target.Editor.ViewWidth - 50,
 					y + 10f),
 					Vector2.One,
 					12,
@@ -68,7 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
 				stringDrawing.Draw(
 						speedStr,
-						new(target.ViewWidth - 50,
+						new(target.Editor.ViewWidth - 50,
 						y - 10f),
 						Vector2.One,
 						12,

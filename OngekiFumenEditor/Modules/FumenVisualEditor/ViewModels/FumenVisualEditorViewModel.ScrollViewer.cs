@@ -92,7 +92,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 			scrollViewerVerticalOffset = val;
 			NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
-			RecalcViewProjectionMatrix();
 		}
 
 		#endregion

@@ -233,9 +233,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
 
 			shader.Begin();
 			GL.BindVertexArray(vao);
-			var mvpMatrix = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target);
+			var mvpMatrix = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
 			shader.PassUniform(mvp_loc, mvpMatrix);
-			shader.PassUniform(viewport_size_loc, new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight));
+			shader.PassUniform(viewport_size_loc, new OpenTK.Mathematics.Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height));
 			shader.PassUniform(aa_radius_loc, aa_radius_val);
 		}
 

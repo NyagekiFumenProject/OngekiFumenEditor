@@ -37,6 +37,8 @@ using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using System.Threading;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 using System.Windows.Controls;
+using Gemini.Framework.Threading;
+using Microsoft.CodeAnalysis.Differencing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -203,7 +205,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void KeyboardAction_PasteCopiesObjects(ActionExecutionContext e)
         {
             var placePos = Mouse.GetPosition(GetView() as FrameworkElement);
-            placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
+            placePos.Y = RectInDesignMode.Height - placePos.Y + RectInDesignMode.MinY;
             PasteCopiesObjects(PasteOption.None, placePos);
         }
 
@@ -222,7 +224,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void PasteCopiesObjects(PasteOption mirrorOption, ActionExecutionContext ctx)
         {
             var placePos = contextMenuPosition;
-            placePos.Y = ViewHeight - placePos.Y + Rect.MinY;
+            placePos.Y = RectInDesignMode.Height - placePos.Y + RectInDesignMode.MinY;
             PasteCopiesObjects(mirrorOption, placePos);
         }
 
@@ -230,6 +232,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (IsLocked)
                 return;
+
+            if (!IsDesignMode)
+            {
+                Toast.ShowMessage(Resources.EditorMustBeDesignMode);
+                return;
+            }
 
             await IoC.Get<IFumenEditorClipboard>().PasteObjects(this, mirrorOption, placePoint);
         }
@@ -502,7 +510,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void KeyboardAction_FastPlaceNewTap(ActionExecutionContext e)
         {
             var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = ViewHeight - position.Y + Rect.MinY;
+            position.Y = RectInDesignMode.Height - position.Y + RectInDesignMode.MinY;
 
             KeyboardAction_FastPlaceNewObject<Tap>(position);
         }
@@ -510,7 +518,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void KeyboardAction_FastPlaceNewHold(ActionExecutionContext e)
         {
             var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = ViewHeight - position.Y + Rect.MinY;
+            position.Y = RectInDesignMode.Height - position.Y + RectInDesignMode.MinY;
 
             KeyboardAction_FastPlaceNewObject<Hold>(position);
         }
@@ -796,7 +804,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
 
             var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = ViewHeight - position.Y + Rect.MinY;
+            position.Y = RectInDesignMode.Height - position.Y + RectInDesignMode.MinY;
 
             if (propertyBrowser.SelectedObjects.IsOnlyOne())
             {
@@ -911,7 +919,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
 
             var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = ViewHeight - position.Y + Rect.MinY;
+            position.Y = RectInDesignMode.Height - position.Y + RectInDesignMode.MinY;
 
             if (propertyBrowser.SelectedObjects.IsOnlyOne() && propertyBrowser.SelectedObjects.FirstOrDefault() is Hold hold)
             {
@@ -1122,7 +1130,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         if (isSelectRangeDragging)
                         {
                             var cp = pos;
-                            cp.Y = ViewHeight - cp.Y + Rect.MinY;
+                            cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
                             UndoRedoManager.BeginCombineAction();
                             SelectObjects.ToArray().ForEach(x =>
                             {
@@ -1203,7 +1211,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 if (arg.ChangedButton == MouseButton.Left)
                 {
-                    position.Y = Math.Max(0, Rect.MaxY - position.Y);
+                    position.Y = Math.Max(0, RectInDesignMode.MaxY - position.Y);
 
                     isSelectRangeDragging = false;
 
@@ -1288,7 +1296,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var x = XGridCalculator.ConvertXGridToX(PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime), this);
 
                     var mouseX = position.X;
-                    var mouseY = -position.Y + Rect.MaxY;
+                    var mouseY = -position.Y + RectInDesignMode.MaxY;
 
                     Log.LogDebug($"playerLoc:({x:F2},{y:F2})  mouse:({mouseX:F2},{mouseY:F2})");
                     if (Math.Abs(mouseY - y) <= 48 && Math.Abs(mouseX - x) <= 48)
@@ -1362,7 +1370,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 if (SelectionArea.IsActive)
                 {
-                    var rp = 1 - pos.Y / ViewHeight;
+                    var rp = 1 - pos.Y / RectInDesignMode.Height;
                     var offsetY = 0d;
 
                     //const double dragDist = 0.7;
@@ -1377,7 +1385,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     else if (rp < 1 - trigPrecent && rp > trigPrecent)
                         dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
                     offsetY = offsetYAcc * autoScrollSpeed;
-                    var y = Rect.MinY + Setting.JudgeLineOffsetY + offsetY;
+                    var y = RectInDesignMode.MinY + Setting.JudgeLineOffsetY + offsetY;
 
                     if (offsetY != 0)
                     {
@@ -1392,7 +1400,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                     //拉框
                     var p = pos;
-                    p.Y = Math.Min(TotalDurationHeight, Math.Max(0, Rect.MaxY - p.Y + offsetY));
+                    p.Y = Math.Min(TotalDurationHeight, Math.Max(0, RectInDesignMode.MaxY - p.Y + offsetY));
                     SelectionArea.EndPoint = p;
                 }
 
@@ -1409,7 +1417,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             action.OnDragStart(vm, pos, this);
                     });
 
-                    var rp = 1 - pos.Y / ViewHeight;
+                    var rp = 1 - pos.Y / RectInDesignMode.Height;
                     var offsetY = 0d;
 
                     //const double dragDist = 0.7;
@@ -1426,7 +1434,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     offsetY = offsetYAcc * autoScrollSpeed;
 
                     var prev = CurrentPlayTime;
-                    var y = Rect.MinY + Setting.JudgeLineOffsetY + offsetY;
+                    var y = RectInDesignMode.MinY + Setting.JudgeLineOffsetY + offsetY;
 
                     //Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
 
@@ -1440,7 +1448,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     {
                         //拖动已选物件
                         var cp = pos;
-                        cp.Y = ViewHeight - cp.Y + Rect.MinY;
+                        cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
                         //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
                         SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
                     }
@@ -1562,7 +1570,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             var contentObject = IoC.Get<CommonStatusBar>().SubRightMainContentViewModel;
 
-            var canvasY = Rect.MaxY - pos.Y;
+            var canvasY = RectInDesignMode.MaxY - pos.Y;
             var canvasX = pos.X;
             CurrentCursorPosition = new(canvasX, canvasY);
 
@@ -1602,7 +1610,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             if (!IsDesignMode)
             {
-                Log.LogWarn($"请先将编辑器切换到编辑模式");
+                Toast.ShowMessage(Resources.EditorMustBeDesignMode);
                 return;
             }
 
@@ -1610,7 +1618,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
             {
                 var mousePosition = arg.GetPosition(e.View as FrameworkElement);
-                mousePosition.Y = ViewHeight - mousePosition.Y + Rect.MinY;
+                mousePosition.Y = RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY;
 
                 switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
                 {
@@ -1637,13 +1645,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             TGrid changeGrid;
 
-            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(ViewHeight, this).ToList() is [{ } single])
+            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(RectInDesignMode.Height, this).ToList() is [{ } single])
             {
                 changeGrid = single;
             }
             else
             {
-                changeGrid = TGridCalculator.ConvertYToTGrid_DesignMode(ViewHeight, this);
+                changeGrid = TGridCalculator.ConvertYToTGrid_DesignMode(RectInDesignMode.Height, this);
             }
 
             var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);

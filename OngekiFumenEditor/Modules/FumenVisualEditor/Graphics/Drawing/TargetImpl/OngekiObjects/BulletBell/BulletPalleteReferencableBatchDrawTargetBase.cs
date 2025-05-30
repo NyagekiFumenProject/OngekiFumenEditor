@@ -3,6 +3,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Base;
@@ -56,11 +57,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public abstract void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate);
         public abstract void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate);
 
-        private void DrawEditorMode(IFumenEditorDrawingContext target, T obj)
+        private void DrawDesignMode(IFumenEditorDrawingContext target, T obj)
         {
             var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-            var toTime = target.ConvertToY(obj.TGrid, soflanList);
+            var toTime = target.ConvertToY_DefaultSoflanGroup(obj.TGrid);
 
             var pos = new Vector2((float)toX, (float)toTime);
             DrawVisibleObject_DesignMode(target, obj, pos, 0);
@@ -85,16 +85,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             drawStrList.Clear();
         }
 
-        private void DrawPreviewMode(IEnumerable<T> objs)
+        private void DrawPreviewMode(IFumenEditorDrawingContext target, IEnumerable<T> objs)
         {
             var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
-            var baseY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + judgeOffset;
+            var baseY = Math.Min(target.CurrentDrawingTargetContext.Rect.MinY, target.CurrentDrawingTargetContext.Rect.MaxY) + judgeOffset;
             var scale = target.Editor.Setting.VerticalDisplayScale;
             var bpmList = target.Editor.Fumen.BpmList;
             var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
             //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
-            var height = target.Rect.Height;
+            var height = target.CurrentDrawingTargetContext.Rect.Height;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToYNonSoflan(TGrid tgrid)
@@ -162,10 +162,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var precent = (currentTime - fromTime) / appearOffsetTime;
                 var timeY = baseY + height * (1 - precent);
 
-                if (timeY > target.Rect.MaxY)
+                if (timeY > target.CurrentDrawingTargetContext.Rect.MaxY)
                     return;
                 //todo CheckVisible()这里是考虑到光焰那个Bell会残留，因为画轴速度太快（感觉是个bug但后面有精力再坐牢吧）
-                if (timeY < target.Rect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
+                if (timeY < target.CurrentDrawingTargetContext.Rect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
                     return;
 
                 var fromXUnit = 0d;
@@ -239,7 +239,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var toX = convertToX(toXUnit);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
-                if (!(target.Rect.MinX <= timeX && timeX <= target.Rect.MaxX))
+                if (!(target.CurrentDrawingTargetContext.Rect.MinX <= timeX && timeX <= target.CurrentDrawingTargetContext.Rect.MaxX))
                     return;
 
                 var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
@@ -269,11 +269,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (target.Editor.IsDesignMode)
             {
                 foreach (var obj in objs)
-                    DrawEditorMode(target, obj);
+                    DrawDesignMode(target, obj);
             }
             else
             {
-                DrawPreviewMode(objs);
+                DrawPreviewMode(target, objs);
             }
 
             foreach (var item in selectedDrawList)

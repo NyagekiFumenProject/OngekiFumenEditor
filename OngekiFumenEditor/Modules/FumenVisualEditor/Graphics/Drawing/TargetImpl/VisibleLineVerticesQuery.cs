@@ -14,14 +14,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, SoflanList soflans, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
         {
             if (start is null)
                 return;
 
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
-            var refSoflanGroup = start.__cachedSoflanGroup;
+
+            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
 
             var tempVertices = ObjectPool<List<LineVertex>>.Get();
             tempVertices.Clear();
@@ -30,7 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
-                var y = (float)target.ConvertToY(tGridUnit, soflans);
+                var y = (float)target.ConvertToY(tGridUnit, soflanList);
                 var vert = new LineVertex(new(x, y), color, isVailed ? VertexDash.Solider : invailedDash);
 
                 tempVertices.Add(vert);
@@ -170,7 +171,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
-            var refSoflanGroup = start.__cachedSoflanGroup;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)

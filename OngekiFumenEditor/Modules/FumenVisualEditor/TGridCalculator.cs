@@ -202,7 +202,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(FumenVisualEditorViewModel editor)
-			=> GetVisbleTimelines_PreviewMode(editor.Fumen.SoflansMap.DefaultSoflanList, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Rect.MinY, editor.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale);
+			=> GetVisbleTimelines_PreviewMode(editor.CurrentDrawingTargetContext.CurrentSoflanList, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.CurrentDrawingTargetContext.Rect.MinY, editor.CurrentDrawingTargetContext.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale);
 		public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double currentY, double viewHeight, double judgeLineOffsetY, int beatSplit, double scale)
 		{
 			var tGridRanges = soflans.GetVisibleRanges_PreviewMode(currentY, viewHeight, judgeLineOffsetY, bpmList, scale);
@@ -232,7 +232,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_DesignMode(FumenVisualEditorViewModel editor)
-			=> GetVisbleTimelines_DesignMode(editor.Fumen.SoflansMap.DefaultSoflanList, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.Rect.MinY, editor.Rect.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale);
+			=> GetVisbleTimelines_DesignMode(editor.Fumen.SoflansMap.DefaultSoflanList, editor.Fumen.BpmList, editor.Fumen.MeterChanges, editor.RectInDesignMode.MinY, editor.RectInDesignMode.MaxY, editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale);
 		public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_DesignMode(SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double minVisibleCanvasY, double maxVisibleCanvasY, double judgeLineOffsetY, int beatSplit, double scale)
 		{
 			minVisibleCanvasY = Math.Max(0, minVisibleCanvasY);

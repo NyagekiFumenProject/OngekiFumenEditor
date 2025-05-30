@@ -79,19 +79,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		{
 			target.PerfomenceMonitor.OnBeginDrawing(this);
 			{
-				var textureScaleY = target.ViewHeight / texture.Height;
+				var textureScaleY = target.CurrentDrawingTargetContext.Rect.Height / texture.Height;
 
 				var modelMatrix =
 					GetOverrideModelMatrix() *
 					(Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1))
-					* Matrix4.CreateScale(new Vector3(width * 1.0f / texture.Width, target.ViewHeight * 2.0f / texture.Height, 1))) *
+					* Matrix4.CreateScale(new Vector3(width * 1.0f / texture.Width, target.CurrentDrawingTargetContext.Rect.Height * 2.0f / texture.Height, 1))) *
 					Matrix4.CreateRotationZ(rotate) *
-					Matrix4.CreateTranslation(x, target.ViewHeight / 2 + target.Rect.MinY + judgeOffset / 2, 0);
+					Matrix4.CreateTranslation(x, target.CurrentDrawingTargetContext.Rect.Height / 2 + target.CurrentDrawingTargetContext.Rect.MinY + judgeOffset / 2, 0);
 
 				shader.Begin();
 				{
 					shader.PassUniform("Model", modelMatrix);
-					shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target));
+					shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
 					shader.PassUniform("textureScaleY", textureScaleY);
 					shader.PassUniform("diffuse", texture);
 					shader.PassUniform("color", color);

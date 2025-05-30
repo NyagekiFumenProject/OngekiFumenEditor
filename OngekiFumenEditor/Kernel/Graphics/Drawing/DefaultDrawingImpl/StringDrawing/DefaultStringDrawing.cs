@@ -137,7 +137,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
                         handle = sb;
                 }
 
-                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target), target.PerfomenceMonitor, this);
+                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext), target.PerfomenceMonitor, this);
                 var font = GetFontSystem(handle).GetFont(fontSize);
                 var size = font.MeasureString(text, scale);
                 origin.X = origin.X * 2;

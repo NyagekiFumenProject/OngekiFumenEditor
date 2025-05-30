@@ -6,6 +6,7 @@ using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
@@ -129,6 +130,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         }
 
         public FumenVisualEditorViewModel EditorViewModel => Editor;
+
+        public DrawingTargetContext CurrentDrawingTargetContext => throw new NotSupportedException();
 
         private void UpdateActualRenderInterval()
         {

@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
+using OpenTK.Mathematics;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
@@ -9,7 +10,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 		bool PopOverrideModelMatrix(out Matrix4 modelMatrix);
 
 		void PushOverrideViewProjectMatrix(Matrix4 viewProjectMatrix);
-		Matrix4 GetOverrideViewProjectMatrixOrDefault(IDrawingContext ctx);
+		Matrix4 GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext ctx);
 		bool PopOverrideViewProjectMatrix(out Matrix4 viewProjectMatrix);
 	}
 }

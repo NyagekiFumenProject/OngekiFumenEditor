@@ -57,8 +57,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
         public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData)
         {
-            var width = target.ViewWidth;
-            var height = target.ViewHeight;
+            var width = target.CurrentDrawingTargetContext.Rect.Width;
+            var height = target.CurrentDrawingTargetContext.Rect.Height;
 
             var curTime = target.CurrentTime;
             var fromTime = curTime - TimeSpan.FromMilliseconds(target.CurrentTimeXOffset * target.DurationMsPerPixel);

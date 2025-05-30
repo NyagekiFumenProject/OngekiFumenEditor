@@ -44,22 +44,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             RangeColors colors;
-            if (selectionArea.SelectionAreaKind == SelectionAreaKind.Select) {
-                if (selectionArea.FilterFunc is not null) {
+            if (selectionArea.SelectionAreaKind == SelectionAreaKind.Select)
+            {
+                if (selectionArea.FilterFunc is not null)
+                {
                     colors = SelectFiltered;
                 }
-                else {
+                else
+                {
                     colors = SelectAll;
                 }
-            } else if (selectionArea.SelectionAreaKind == SelectionAreaKind.Delete) {
-                if (selectionArea.FilterFunc is not null) {
+            }
+            else if (selectionArea.SelectionAreaKind == SelectionAreaKind.Delete)
+            {
+                if (selectionArea.FilterFunc is not null)
+                {
                     colors = DeleteFiltered;
                 }
-                else {
+                else
+                {
                     colors = DeleteAll;
                 }
             }
-            else {
+            else
+            {
                 colors = SelectAll;
             }
 

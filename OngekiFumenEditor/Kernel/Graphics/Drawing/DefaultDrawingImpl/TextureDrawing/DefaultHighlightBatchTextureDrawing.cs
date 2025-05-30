@@ -172,8 +172,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 			shader.Begin();
 
 			GL.BindVertexArray(vao);
-			var MVP = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target);
-			var iResolution = new OpenTK.Mathematics.Vector2(target.ViewWidth, target.ViewHeight);
+			var MVP = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
+			var iResolution = new OpenTK.Mathematics.Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
 			shader.PassUniform("ViewProjection", MVP);
 			shader.PassUniform("iResolution", iResolution);
 			shader.PassUniform("diffuse", texture);

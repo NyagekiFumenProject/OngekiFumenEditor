@@ -75,7 +75,7 @@
 
 //            var color = new Vector4(1, 0, 0, 1);
 //            vertices[0] = new(new(0, y), color, VertexDash.Solider);
-//            vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);
+//            vertices[1] = new(new(target.CurrentDrawingTargetContext.Rect.Width, y), color, VertexDash.Solider);
 
 //            lineDrawing.Draw(target, vertices, 3);
 //        }

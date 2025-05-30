@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			if (!(data.SvgPrefab?.ProcessingDrawingGroup?.GetHashCode() is int curHash && curHash == data.SvgGeometryHashCode))
 				return false;
 
-			if (new Vector2(target.ViewWidth, target.ViewHeight) != data.ViewSize)
+			if (new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height) != data.ViewSize)
 				return false;
 
 			return true;
@@ -121,7 +121,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 				var genData = GenerateLineVertexData(svgPrefab);
 				cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingDrawingGroup?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
 				cachedItem.GeneratedPoints = genData;
-				cachedItem.ViewSize = new Vector2(target.ViewWidth, target.ViewHeight);
+				cachedItem.ViewSize = new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
 				cachedItem.Bound = svgPrefab.ProcessingDrawingGroup?.Bounds ?? default;
 				isCached = false;
 			}

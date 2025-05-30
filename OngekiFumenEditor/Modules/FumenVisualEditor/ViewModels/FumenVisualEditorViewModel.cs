@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 case nameof(EditorGlobalSetting.JudgeLineOffsetY):
                 case nameof(EditorGlobalSetting.XOffset):
-                    RecalcViewProjectionMatrix();
+                    //RecalcViewProjectionMatrix();
                     break;
                 case nameof(EditorGlobalSetting.PlayFieldBackgroundColor):
                     playFieldBackgroundColor = EditorGlobalSetting.Default.PlayFieldBackgroundColor.AsARGBToColor().ToVector4();

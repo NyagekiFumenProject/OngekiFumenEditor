@@ -27,11 +27,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public void FillLine(IFumenEditorDrawingContext target, T start)
         {
             var color = GetLanePointColor(start);
-            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
+            var soflanList = context.CurrentSoflanList;
 
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();
-            VisibleLineVerticesQuery.QueryVisibleLineVertices(target, soflanList, start, invailedDash, color, list);
+            VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, invailedDash, color, list);
             lineDrawing.Draw(target, list, LineWidth);
         }
 
