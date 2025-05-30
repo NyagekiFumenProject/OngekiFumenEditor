@@ -388,16 +388,14 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
         RecalculateMagaticXGridLines();
-
-
-        //todo SoflanGroup support
-        //playableAreaHelper.Draw(this);
-        foreach (var drawingContext in drawingContexts)
+        foreach (var drawingContext in drawingContexts.Values)
         {
-            CurrentDrawingTargetContext = defaultDrawingTargetContext;
-            foreach (var (minTGrid, maxTGrid) in defaultDrawingTargetContext.VisibleTGridRanges)
+            CurrentDrawingTargetContext = drawingContext;
+            foreach (var (minTGrid, maxTGrid) in drawingContext.VisibleTGridRanges)
                 playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
         }
+        CurrentDrawingTargetContext = defaultDrawingTargetContext;
+
         playableAreaHelper.Draw(this);
         timeSignatureHelper.DrawLines(this);
 
@@ -407,34 +405,36 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var map = ObjectPool<Dictionary<string, Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>>.Get();
         map.Clear();
 
+        //using var _d5 = ObjectPool<HashSet<int>>.GetWithUsingDisposable(out var unusedDrawingContexts, out _);
+        //unusedDrawingContexts.Clear();
+
         //Prepare objects we will draw them.
-        foreach (var item in drawingContexts)
+        //get&register all visible objects for every drawingContext(soflanGroup)
+        var allVisibleTGridRanges = drawingContexts.Values.SelectMany(x => x.VisibleTGridRanges).Merge();
+        var visibleObjects = GetDisplayableObjects(fumen, allVisibleTGridRanges).OfType<OngekiTimelineObjectBase>();
+        foreach (var obj in visibleObjects)
         {
-            //get&register all visible objects for every drawingContext(soflanGroup)
-            foreach (var obj in GetDisplayableObjects(fumen, item.Value.VisibleTGridRanges).OfType<OngekiTimelineObjectBase>())
+            if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
             {
-                if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
+                soflanGroupObjectMap = map[obj.IDShortName] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>.Get();
+                soflanGroupObjectMap.Clear();
+            }
+
+            _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
+
+            if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
+            {
+                if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
                 {
-                    soflanGroupObjectMap = map[obj.IDShortName] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>.Get();
-                    soflanGroupObjectMap.Clear();
+                    list = soflanGroupObjectMap[drawingContext] = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
+                    list.Clear();
                 }
 
-                _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
-
-                if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
-                {
-                    if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
-                    {
-                        list = soflanGroupObjectMap[drawingContext] = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
-                        list.Clear();
-                    }
-
-                    list.Add(obj);
-                }
-                else
-                {
-                    //todo log it
-                }
+                list.Add(obj);
+            }
+            else
+            {
+                //todo log it
             }
         }
 
@@ -537,6 +537,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
             PerfomenceMonitor.OnAfterTargetDrawing(drawingTarget);
         }
+        CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
         timeSignatureHelper.DrawTimeSigntureText(this);
         xGridHelper.DrawXGridText(this, CachedMagneticXGridLines);
