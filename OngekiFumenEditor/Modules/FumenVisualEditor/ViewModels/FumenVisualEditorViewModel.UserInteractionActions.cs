@@ -1271,9 +1271,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var xGrid = XGridCalculator.ConvertXToXGrid(position.X, this);
                     var tGrid2 = TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this);
                     var querySoflanGroup = tGrid2 is null ? -1 : Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(xGrid, tGrid2);
-#endif
 
                     Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject} , soflanGroup = {querySoflanGroup}");
+#endif
                 }
 
                 if (arg.ChangedButton == MouseButton.Middle)
