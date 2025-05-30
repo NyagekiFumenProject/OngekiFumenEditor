@@ -353,8 +353,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             else
             {
                 //Design Mode
-                var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this);
-                var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(maxY, this);
+                var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this) ?? TGrid.Zero;
+                var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(maxY, this) ?? TGrid.Zero;
                 visibleTGridRanges.Add((minTGrid, maxTGrid));
             }
 
