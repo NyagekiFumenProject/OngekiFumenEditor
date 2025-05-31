@@ -384,29 +384,14 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         #endregion
 
-        //set current
-        CurrentDrawingTargetContext = defaultDrawingTargetContext;
-
-        RecalculateMagaticXGridLines();
-        foreach (var drawingContext in drawingContexts.Values)
-        {
-            CurrentDrawingTargetContext = drawingContext;
-            foreach (var (minTGrid, maxTGrid) in drawingContext.VisibleTGridRanges)
-                playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
-        }
-        CurrentDrawingTargetContext = defaultDrawingTargetContext;
-
-        playableAreaHelper.Draw(this);
-        timeSignatureHelper.DrawLines(this);
-
-        xGridHelper.DrawLines(this, CachedMagneticXGridLines);
-
         // objType -> soflanGroup -> obj[]
         var map = ObjectPool<Dictionary<string, Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>>.Get();
         map.Clear();
 
-        //using var _d5 = ObjectPool<HashSet<int>>.GetWithUsingDisposable(out var unusedDrawingContexts, out _);
-        //unusedDrawingContexts.Clear();
+        var usedDrawingContexts = ObjectPool<HashSet<int>>.Get();
+        usedDrawingContexts.Clear();
+        //always draw default soflan group
+        usedDrawingContexts.Add(0);
 
         //Prepare objects we will draw them.
         //get&register all visible objects for every drawingContext(soflanGroup)
@@ -431,6 +416,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 }
 
                 list.Add(obj);
+                usedDrawingContexts.Add(soflanGroup);
             }
             else
             {
@@ -472,6 +458,28 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 }
             }
         }
+
+        //remove unused drawingContexts
+        var unusedSoflanGroups = ObjectPool.Get<List<int>>();
+        unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
+        foreach (var soflanGroupId in unusedSoflanGroups)
+            drawingContexts.Remove(soflanGroupId);
+
+        CurrentDrawingTargetContext = defaultDrawingTargetContext;
+
+        RecalculateMagaticXGridLines();
+        foreach (var drawingContext in drawingContexts.Values)
+        {
+            CurrentDrawingTargetContext = drawingContext;
+            foreach (var (minTGrid, maxTGrid) in drawingContext.VisibleTGridRanges)
+                playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
+        }
+        CurrentDrawingTargetContext = defaultDrawingTargetContext;
+
+        playableAreaHelper.Draw(this);
+        timeSignatureHelper.DrawLines(this);
+
+        xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
         if (IsPreviewMode)
         {
@@ -549,10 +557,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         foreach (var list in map.Values)
         {
             foreach (var item in list)
-                ObjectPool<List<OngekiTimelineObjectBase>>.Return(item.Value);
-            ObjectPool<Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>.Return(list);
+                ObjectPool.Return(item.Value);
+            ObjectPool.Return(list);
         }
-        ObjectPool<Dictionary<string, Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>>.Return(map);
+        ObjectPool.Return(map);
+        ObjectPool.Return(usedDrawingContexts);
+        ObjectPool.Return(unusedSoflanGroups);
 
     End:
         drawMap.Clear();
