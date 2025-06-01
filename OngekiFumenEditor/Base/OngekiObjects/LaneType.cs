@@ -12,5 +12,6 @@
 		WallRight = -1,
 		//-------------
 		AutoPlayFader = 1000,
-	}
+        Undefined = 9999,
+    }
 }

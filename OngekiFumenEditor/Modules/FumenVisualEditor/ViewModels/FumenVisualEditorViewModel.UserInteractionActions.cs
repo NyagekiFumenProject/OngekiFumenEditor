@@ -1034,7 +1034,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //recache all objects
 
                 _cacheSoflanGroupRecorder.SetDefault(Fumen.SoflansMap.DefaultSoflanList);
-                Parallel.ForEach(objs, obj =>
+                Parallel.ForEach(objs, new ParallelOptions()
+                {
+                    MaxDegreeOfParallelism = 1
+                }, obj =>
                 {
                     var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
                     if (!Fumen.SoflansMap.TryGetValue(soflanGroup, out var soflanList))
@@ -1052,7 +1055,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         return;
                     }
                     _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
-                    if (obj is ILaneDockable dockable && dockable.ReferenceLaneStart is ConnectableStartObject start)
+                    //目前只有Hold物件能影响到所属轨道的SoflanGroup
+                    if (obj is Hold hold && hold.ReferenceLaneStart is ConnectableStartObject start)
                         _cacheSoflanGroupRecorder.SetCache(start.Id, soflanList, soflanGroup);
                 });
 

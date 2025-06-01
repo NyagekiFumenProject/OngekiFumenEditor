@@ -396,7 +396,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         //Prepare objects we will draw them.
         //get&register all visible objects for every drawingContext(soflanGroup)
         var allVisibleTGridRanges = drawingContexts.Values.SelectMany(x => x.VisibleTGridRanges).Merge();
-        var visibleObjects = GetDisplayableObjects(fumen, allVisibleTGridRanges).OfType<OngekiTimelineObjectBase>();
+        var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges).OfType<OngekiTimelineObjectBase>();
         foreach (var obj in visibleObjects)
         {
             if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
@@ -493,6 +493,15 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             */
 
             //特殊处理：子弹和Bell
+            var blts = Fumen.Bullets.AsEnumerable();
+            var bels = Fumen.Bells.AsEnumerable();
+            var curTGrid = GetCurrentTGrid();
+            if (IsPreviewMode)
+            {
+                blts = blts.Where(x => x.TGrid > curTGrid);
+                bels = bels.Where(x => x.TGrid > curTGrid);
+            }
+
             foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
             {
                 //todo 优化一下
@@ -500,7 +509,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 r.Clear();
                 var rr = r[defaultDrawingTargetContext] = ObjectPool<List<OngekiObjectBase>>.Get();
                 rr.Clear();
-                rr.AddRange(Fumen.Bullets);
+                rr.AddRange(blts);
             }
             foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
             {
@@ -509,7 +518,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 r.Clear();
                 var rr = r[defaultDrawingTargetContext] = ObjectPool<List<OngekiObjectBase>>.Get();
                 rr.Clear();
-                rr.AddRange(Fumen.Bells);
+                rr.AddRange(bels);
             }
         }
 
@@ -656,16 +665,29 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         return drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
     }
 
-    private IEnumerable<IDisplayableObject> GetDisplayableObjects(OngekiFumen fumen,
+    private IEnumerable<IDisplayableObject> EnumerateAllDisplayableObjects(OngekiFumen fumen,
         IEnumerable<(TGrid min, TGrid max)> visibleRanges)
     {
         var containBeams = fumen.Beams.Any();
+        var judgeTGrid = GetCurrentTGrid();
 
         var objects = visibleRanges.SelectMany(x =>
         {
             var (min, max) = x;
+
+            var playableObjects = Enumerable.Empty<OngekiMovableObjectBase>()
+            .Concat(fumen.Flicks.BinaryFindRange(min, max))
+            .Concat(fumen.Taps.BinaryFindRange(min, max));
+
+            var playableDurationObjects = fumen.Holds.GetVisibleStartObjects(min, max);
+
+            if (IsPreviewMode)
+            {
+                playableObjects = playableObjects.Where(x => x.TGrid > judgeTGrid);
+                playableDurationObjects = playableDurationObjects.Where(x => x.EndTGrid > judgeTGrid);
+            }
+
             var r = Enumerable.Empty<IDisplayableObject>()
-                .Concat(fumen.Flicks.BinaryFindRange(min, max))
                 .Concat(fumen.MeterChanges.Skip(1)) //not show first meter
                 .Concat(fumen.BpmList.Skip(1)) //not show first bpm
                 .Concat(fumen.ClickSEs.BinaryFindRange(min, max))
@@ -675,9 +697,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 .Concat(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
                 .Concat(fumen.EnemySets.BinaryFindRange(min, max))
                 .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
-                .Concat(fumen.Taps.BinaryFindRange(min, max))
-                .Concat(fumen.Holds.GetVisibleStartObjects(min, max))
-                .Concat(fumen.SvgPrefabs);
+                .Concat(fumen.SvgPrefabs)
+                .Concat(playableDurationObjects)
+                .Concat(playableObjects);
 
             if (containBeams)
             {

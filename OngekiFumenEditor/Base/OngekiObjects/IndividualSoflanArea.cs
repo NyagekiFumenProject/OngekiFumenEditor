@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             displayables = [this, EndIndicator];
         }
 
-        public override string ToString() => $"{base.ToString()} End[{EndIndicator}]";
+        public override string ToString() => $"[{IDShortName}] Id({Id}) Group({SoflanGroup}) XGrid({XGrid.TotalUnit}, {EndIndicator.XGrid.TotalUnit}) TGrid({TGrid.TotalUnit}, {EndIndicator.TGrid.TotalUnit})";
 
         private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {

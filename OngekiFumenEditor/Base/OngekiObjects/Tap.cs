@@ -3,69 +3,76 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-	public class Tap : OngekiMovableObjectBase, ILaneDockableChangable, ICriticalableObject
-	{
-		public bool IsWallTap => ReferenceLaneStart?.IsWallLane ?? false;
+    public class Tap : OngekiMovableObjectBase, ILaneDockableChangable, ICriticalableObject
+    {
+        public bool IsWallTap => ReferenceLaneStart?.IsWallLane ?? false;
 
-		private bool isCritical = false;
-		public bool IsCritical
-		{
-			get { return isCritical; }
-			set
-			{
-				isCritical = value;
-				NotifyOfPropertyChange(() => IDShortName);
-				NotifyOfPropertyChange(() => IsCritical);
-			}
-		}
+        public LaneType BelongLaneType => ReferenceLaneStart?.LaneType ?? LaneType.Undefined;
 
-		private LaneStartBase referenceLaneStart = default;
-		public LaneStartBase ReferenceLaneStart
-		{
-			get { return referenceLaneStart; }
-			set
-			{
-				referenceLaneStart = value;
+        private bool isCritical = false;
+        public bool IsCritical
+        {
+            get { return isCritical; }
+            set
+            {
+                isCritical = value;
+                NotifyOfPropertyChange(() => IDShortName);
+                NotifyOfPropertyChange(() => IsCritical);
+            }
+        }
 
-				NotifyOfPropertyChange(() => ReferenceLaneStart);
-				NotifyOfPropertyChange(() => ReferenceLaneStrId);
-			}
-		}
+        private LaneStartBase referenceLaneStart = default;
+        public LaneStartBase ReferenceLaneStart
+        {
+            get { return referenceLaneStart; }
+            set
+            {
+                referenceLaneStart = value;
 
-		[ObjectPropertyBrowserShow]
-		[ObjectPropertyBrowserAlias("RefLaneId")]
-		public int ReferenceLaneStrId => ReferenceLaneStart?.RecordId ?? -1;
+                NotifyOfPropertyChange(() => ReferenceLaneStart);
+                NotifyOfPropertyChange(() => ReferenceLaneStrId);
+            }
+        }
 
-		private int? referenceLaneStrIdManualSet = default;
-		[ObjectPropertyBrowserShow]
-		[ObjectPropertyBrowserTipText("ObjectLaneGroupId")]
-		[ObjectPropertyBrowserAlias("SetRefLaneId")]
-		public int? ReferenceLaneStrIdManualSet
-		{
-			get => referenceLaneStrIdManualSet;
-			set
-			{
-				referenceLaneStrIdManualSet = value;
-				NotifyOfPropertyChange(() => ReferenceLaneStrIdManualSet);
-				referenceLaneStrIdManualSet = default;
-			}
-		}
+        [ObjectPropertyBrowserShow]
+        [ObjectPropertyBrowserAlias("RefLaneId")]
+        public int ReferenceLaneStrId => ReferenceLaneStart?.RecordId ?? -1;
 
-		public override string IDShortName => this switch
-		{
-			{ IsCritical: true } => "CTP",
-			{ IsCritical: false } => "TAP",
-		};
+        private int? referenceLaneStrIdManualSet = default;
+        [ObjectPropertyBrowserShow]
+        [ObjectPropertyBrowserTipText("ObjectLaneGroupId")]
+        [ObjectPropertyBrowserAlias("SetRefLaneId")]
+        public int? ReferenceLaneStrIdManualSet
+        {
+            get => referenceLaneStrIdManualSet;
+            set
+            {
+                referenceLaneStrIdManualSet = value;
+                NotifyOfPropertyChange(() => ReferenceLaneStrIdManualSet);
+                referenceLaneStrIdManualSet = default;
+            }
+        }
 
-		public override void Copy(OngekiObjectBase fromObj)
-		{
-			base.Copy(fromObj);
+        public override string IDShortName => this switch
+        {
+            { IsCritical: true } => "CTP",
+            { IsCritical: false } => "TAP",
+        };
 
-			if (fromObj is not Tap from)
-				return;
+        public override void Copy(OngekiObjectBase fromObj)
+        {
+            base.Copy(fromObj);
 
-			IsCritical = from.IsCritical;
-			ReferenceLaneStart = from.ReferenceLaneStart;
-		}
-	}
+            if (fromObj is not Tap from)
+                return;
+
+            IsCritical = from.IsCritical;
+            ReferenceLaneStart = from.ReferenceLaneStart;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $" LaneType[{BelongLaneType}]";
+        }
+    }
 }
