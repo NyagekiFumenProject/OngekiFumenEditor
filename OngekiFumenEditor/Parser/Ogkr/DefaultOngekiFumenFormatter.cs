@@ -6,6 +6,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -274,7 +275,21 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
             void Serialize(ConnectableStartObject laneStart)
             {
                 void SerializeOutput(ConnectableObjectBase o)
-                    => sb.AppendLine($"{o.IDShortName}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}\t{(o is IColorfulLane colorfulLane ? $"{colorfulLane.ColorId.Id}\t{colorfulLane.Brightness}" : string.Empty)}");
+                {
+                    var colorId = 0;
+                    var brightness = 0;
+                    var isTransparent = 0;
+
+                    if (o is IColorfulLane colorful)
+                    {
+                        colorId = colorful.ColorId.Id;
+                        brightness = colorful.Brightness;
+                    }
+                    if (o is LaneStartBase start)
+                        isTransparent = start.IsTransparent ? 1 : 0;
+
+                    sb.AppendLine($"{o.IDShortName}\t{o.RecordId}\t{o.TGrid.Serialize()}\t{o.XGrid.Serialize()}\t{colorId}\t{brightness}\t{isTransparent}");
+                }
 
                 SerializeOutput(laneStart);
                 foreach (var child in laneStart.Children)
