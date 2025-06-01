@@ -107,6 +107,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 case nameof(EditorGlobalSetting.EnablePlayFieldDrawing):
                     enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
                     break;
+                case nameof(EditorGlobalSetting.HideWallLaneWhenEnablePlayField):
+                    hideWallLaneWhenEnablePlayField = EditorGlobalSetting.Default.HideWallLaneWhenEnablePlayField;
+                    break;
                 case nameof(EditorGlobalSetting.EnableShowPlayerLocation):
                     enableShowPlayerLocation = EditorGlobalSetting.Default.EnableShowPlayerLocation;
                     PlayerLocationRecorder.Clear();
@@ -159,6 +162,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private bool isShowCurveControlAlways = false;
         private bool enableShowPlayerLocation;
+        private bool hideWallLaneWhenEnablePlayField;
+
+        public bool HideWallLaneWhenEnablePlayField => hideWallLaneWhenEnablePlayField;
 
         public bool IsShowCurveControlAlways
         {

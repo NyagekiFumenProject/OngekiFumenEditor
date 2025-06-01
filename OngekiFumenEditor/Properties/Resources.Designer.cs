@@ -2671,6 +2671,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Hide all wall lanes when play field drawing is enable in preview mode 的本地化字符串。
+        /// </summary>
+        public static string HideWallLaneWhenEnablePlayField {
+            get {
+                return ResourceManager.GetString("HideWallLaneWhenEnablePlayField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Hold 的本地化字符串。
         /// </summary>
         public static string Hold {

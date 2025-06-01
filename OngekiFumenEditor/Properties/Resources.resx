@@ -2022,4 +2022,7 @@
   <data name="ApplyFilter" xml:space="preserve">
     <value />
   </data>
+  <data name="HideWallLaneWhenEnablePlayField" xml:space="preserve">
+    <value>Hide all wall lanes when play field drawing is enable in preview mode</value>
+  </data>
 </root>

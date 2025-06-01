@@ -233,6 +233,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         playFieldBackgroundColor = Color.FromArgb(EditorGlobalSetting.Default.PlayFieldBackgroundColor).ToVector4();
         enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
+        hideWallLaneWhenEnablePlayField = EditorGlobalSetting.Default.HideWallLaneWhenEnablePlayField;
 
         drawTargets = IoC.GetAll<IFumenEditorDrawingTarget>()
             .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))

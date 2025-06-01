@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
@@ -13,7 +14,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		public abstract Vector4 WallLaneColor { get; }
 		public override int LineWidth => 6;
 		public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => WallLaneColor;
-	}
+
+        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<LaneStartBase> starts)
+        {
+			if (target.Editor.HideWallLaneWhenEnablePlayField)
+				return;
+            base.DrawBatch(target, starts);
+        }
+    }
 
 	[Export(typeof(IFumenEditorDrawingTarget))]
 	internal class WallLeftLaneDrawTarget : WallLaneDrawTarget

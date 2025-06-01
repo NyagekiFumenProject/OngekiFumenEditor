@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.12.0.0")]
     public sealed partial class EditorGlobalSetting : global::System.Configuration.ApplicationSettingsBase {
         
         private static EditorGlobalSetting defaultInstance = ((EditorGlobalSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new EditorGlobalSetting())));
@@ -476,6 +476,18 @@ namespace OngekiFumenEditor.Properties {
             }
             set {
                 this["RenderTargetOrderVisibleMap"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HideWallLaneWhenEnablePlayField {
+            get {
+                return ((bool)(this["HideWallLaneWhenEnablePlayField"]));
+            }
+            set {
+                this["HideWallLaneWhenEnablePlayField"] = value;
             }
         }
     }
