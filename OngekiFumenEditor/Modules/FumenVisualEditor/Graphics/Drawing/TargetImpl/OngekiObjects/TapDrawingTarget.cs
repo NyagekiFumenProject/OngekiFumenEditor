@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Base;
@@ -80,7 +81,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
         }
 
-        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical)
+        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
         {
             var texture = laneType switch
             {
@@ -102,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             };
 
             var x = XGridCalculator.ConvertXGridToX(tap.XGrid, target.Editor);
-            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(tap);
+            var soflanList = specifySoflanList ?? target.Editor._cacheSoflanGroupRecorder.GetCache(tap);
             var y = target.ConvertToY(tap.TGrid, soflanList);
 
             var pos = new Vector2((float)x, (float)y);
