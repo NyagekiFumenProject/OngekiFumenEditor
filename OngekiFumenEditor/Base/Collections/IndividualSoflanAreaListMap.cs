@@ -88,5 +88,15 @@ namespace OngekiFumenEditor.Base.Collections
         {
             return QuerySoflanGroup(obj.XGrid, obj.TGrid);
         }
+
+        public string DebugFindDataQueryPath(IndividualSoflanArea isf)
+        {
+            return cacheTotalTree.DebugFindDataQueryPath(isf);
+        }
+
+        public void DebugDump()
+        {
+            cacheTotalTree.DebugDump();
+        }
     }
 }

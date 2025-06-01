@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 
@@ -222,7 +223,7 @@ namespace OngekiFumenEditor.Base.Collections.Base.NotQuadTree
                 {
                     if (childTree.childTrees.FilterNull().IsOnlyOne(out var onlyTree))
                     {
-                        childTrees[quadrant] = onlyTree;
+                        //childTrees[quadrant] = onlyTree;
                     }
                 }
             }
@@ -268,6 +269,68 @@ namespace OngekiFumenEditor.Base.Collections.Base.NotQuadTree
         public override string ToString()
         {
             return $"Bound:{bounds} Locals:{LocalCount} Children:{childTrees[0]?.TotalCount ?? 0}/{childTrees[1]?.TotalCount ?? 0}/{childTrees[2]?.TotalCount ?? 0}/{childTrees[3]?.TotalCount ?? 0}";
+        }
+
+        internal void DebugDump(int tabLength = 0)
+        {
+            var tabContent = new string(' ', tabLength * 2);
+            void output(string content)
+            {
+                Console.WriteLine($"{tabContent}{content}");
+            }
+            output($"Dumping NotQuadTree at level {level} with bounds {bounds}");
+            output($"Local Count: {LocalCount}, Total Count: {TotalCount}");
+            output("Local Objects:");
+            foreach (var obj in objects)
+            {
+                output($"* {obj} {obj.Data}");
+            }
+            for (int i = 0; i < childTrees.Length; i++)
+            {
+                if (childTrees[i] is NotQuadTree<TX, TY, TData> childTree)
+                {
+                    output($"Child Tree {i}:");
+                    childTree.DebugDump(tabLength + 1);
+                }
+            }
+        }
+
+        public string DebugFindDataQueryPath(TData value)
+        {
+            var queryList = new Stack<string>();
+            if (DebugFindDataQueryPathInternal(value, queryList))
+                return string.Concat(queryList.Reverse());
+            return null;
+        }
+
+        private bool DebugFindDataQueryPathInternal(TData value, Stack<string> pathStack)
+        {
+            if (objects.Select(x => x.Data).Contains(value))
+            {
+                pathStack.Push("X");
+                return true;
+            }
+
+            for (int i = 0; i < childTrees.Length; i++)
+            {
+                pathStack.Push(i switch
+                {
+                    0 => "↖",
+                    1 => "↗",
+                    2 => "↙",
+                    3 => "↘",
+                });
+
+                if (childTrees[i] != null)
+                {
+                    if (childTrees[i].DebugFindDataQueryPathInternal(value, pathStack))
+                        return true;
+                }
+
+                pathStack.Pop();
+            }
+
+            return false;
         }
     }
 }

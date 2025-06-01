@@ -67,6 +67,13 @@ namespace OngekiFumenEditor.Base.Collections.Base
             if (registerObjects.Count == 0)
                 return Enumerable.Empty<TValue>();
 
+            CheckAndBuild();
+
+            return tree.Query(x, y);
+        }
+
+        private void CheckAndBuild()
+        {
             if (tree == null)
             {
                 lock (locker)
@@ -88,8 +95,18 @@ namespace OngekiFumenEditor.Base.Collections.Base
                     }
                 }
             }
+        }
 
-            return tree.Query(x, y);
+        public string DebugFindDataQueryPath(TValue data)
+        {
+            CheckAndBuild();
+            return tree.DebugFindDataQueryPath(data);
+        }
+
+        public void DebugDump()
+        {
+            CheckAndBuild();
+            tree.DebugDump();
         }
     }
 }
