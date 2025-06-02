@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 			if (!File.Exists(option.InputAudioFilePath))
 				return new(false, Resources.ConvertAudioFileNotFound);
 
-			if (option.MusicId < 0 || option.MusicId > 9999)
+			if (option.MusicId < 0)
 				return new(false, Resources.MusicIDInvaild.Format(option.MusicId));
 
 			if (string.IsNullOrWhiteSpace(option.OutputFolderPath))
