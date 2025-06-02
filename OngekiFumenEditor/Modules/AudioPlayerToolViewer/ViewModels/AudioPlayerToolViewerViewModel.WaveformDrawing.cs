@@ -38,12 +38,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private PeakPointCollection rawPeakData;
         private PeakPointCollection usingPeakData;
 
-        public VisibleRect Rect { get; private set; }
-
-        public Matrix4 ProjectionMatrix { get; private set; }
-        public Matrix4 ViewMatrix { get; private set; }
-        public Matrix4 ViewProjectionMatrix { get; private set; }
-
         public IPerfomenceMonitor PerfomenceMonitor => performenceMonitor;
 
         public TimeSpan CurrentTime { get; private set; }
@@ -131,7 +125,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public FumenVisualEditorViewModel EditorViewModel => Editor;
 
-        public DrawingTargetContext CurrentDrawingTargetContext => throw new NotSupportedException();
+        public DrawingTargetContext CurrentDrawingTargetContext { get; private set; } = new();
 
         private void UpdateActualRenderInterval()
         {
@@ -140,16 +134,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 <= 0 => float.MaxValue,
                 _ => 1000.0F / LimitFPS
             };
-        }
-
-        private void RecalcViewProjectionMatrix()
-        {
-            ProjectionMatrix =
-                Matrix4.CreateOrthographic(viewWidth, viewHeight, -1, 1);
-            ViewMatrix =
-                Matrix4.CreateTranslation(new Vector3(0, 0, 0)); //todo
-
-            ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
         }
 
         public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
@@ -162,8 +146,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             viewHeight = (float)sizeArg.NewSize.Height;
             renderViewWidth = (int)(sizeArg.NewSize.Width * dpiX);
             renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
-
-            RecalcViewProjectionMatrix();
         }
 
         public async void PrepareRenderLoop(GLWpfControl glView)
@@ -179,8 +161,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             viewHeight = (float)glView.ActualHeight;
             renderViewWidth = (int)(glView.ActualWidth * dpiX);
             renderViewHeight = (int)(glView.ActualHeight * dpiY);
-
-            RecalcViewProjectionMatrix();
 
             //暂时没有需要显示检测的必要?
             //performenceMonitor = IoC.Get<IPerfomenceMonitor>();
@@ -285,7 +265,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void UpdateDrawingContext()
         {
-            Rect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
+            var projectionMatrix =
+                Matrix4.CreateOrthographic(viewWidth, viewHeight, -1, 1);
+            var viewMatrix =
+                Matrix4.CreateTranslation(new Vector3(0, 0, 0));
+            var vp = viewMatrix * projectionMatrix;
+
+            CurrentDrawingTargetContext.ViewMatrix = viewMatrix;
+            CurrentDrawingTargetContext.ProjectionMatrix = projectionMatrix;
+            CurrentDrawingTargetContext.ViewProjectionMatrix = vp;
+
+            CurrentDrawingTargetContext.Rect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
 
             if (AudioPlayer?.IsPlaying ?? false)
                 CurrentTime = AudioPlayer.CurrentTime;
