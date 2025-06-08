@@ -66,7 +66,21 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
             ProcessSVG(fumen, sb);
             sb.AppendLine();
 
+            ProcessSoflanGroupWrapItem(fumen, sb);
+            sb.AppendLine();
+
             return Task.FromResult(Encoding.UTF8.GetBytes(sb.ToString()));
+        }
+
+        private void ProcessSoflanGroupWrapItem(OngekiFumen fumen, StringBuilder sb)
+        {
+            sb.AppendLine("[SoflanGroupWrapItem]");
+
+            var maps = fumen.IndividualSoflanAreaMap.Keys.GroupBy(x => fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _).Parent?.DisplayName ?? "default");
+
+            foreach (var o in maps)
+                sb.AppendLine($"[SGWI]\t{o.Key}\t{string.Join("\t", o.Select(x => x.ToString()))}");
+            sb.AppendLine();
         }
 
         private void ProcessComment(OngekiFumen fumen, StringBuilder sb)

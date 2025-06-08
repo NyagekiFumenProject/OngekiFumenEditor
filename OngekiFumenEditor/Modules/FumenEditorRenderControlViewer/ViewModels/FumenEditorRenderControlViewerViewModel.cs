@@ -129,6 +129,9 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
 
         private void ListDragManager_ProcessDrop(object sender, ProcessDropEventArgs<ControlItem> e)
         {
+            if (e.ItemsSource is not ObservableCollection<ControlItem> list)
+                return;
+
             // This shows how to customize the behavior of a drop.
             // Here we perform a swap, instead of just moving the dropped item.
 
@@ -139,21 +142,21 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
             {
                 // The item came from the lower ListView
                 // so just insert it.
-                e.ItemsSource.Insert(higherIdx, e.DataItem);
+                list.Insert(higherIdx, e.DataItem);
             }
             else
             {
                 // null values will cause an error when calling Move.
                 // It looks like a bug in ObservableCollection to me.
-                if (e.ItemsSource[lowerIdx] == null ||
-                    e.ItemsSource[higherIdx] == null)
+                if (list[lowerIdx] == null ||
+                    list[higherIdx] == null)
                     return;
 
                 // The item came from the ListView into which
                 // it was dropped, so swap it with the item
                 // at the target index.
-                e.ItemsSource.Move(lowerIdx, higherIdx);
-                e.ItemsSource.Move(higherIdx - 1, lowerIdx);
+                list.Move(lowerIdx, higherIdx);
+                list.Move(higherIdx - 1, lowerIdx);
             }
 
             UpdateRenderOrder();

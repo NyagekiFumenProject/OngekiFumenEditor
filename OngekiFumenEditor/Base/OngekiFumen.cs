@@ -8,6 +8,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -103,6 +104,21 @@ namespace OngekiFumenEditor.Base
             if (unusedMeter is not null && MeterChanges.FirstMeter != unusedMeter)
                 MeterChanges.Remove(unusedMeter);
             MeterChanges.SetFirstMeter(firstMeter);
+
+            //setup SoflanGroupWrapItem
+            var groupName = "default";
+            var itemGroup = IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.OfType<SoflanGroupWrapItemGroup>().FirstOrDefault(x => x.DisplayName == groupName) ?? new SoflanGroupWrapItemGroup()
+            {
+                DisplayName = groupName
+            };
+            //enumerate soflan group which not asign by [SGWI]
+            foreach (var soflanGroupId in IndividualSoflanAreaMap.Keys.Concat([0]))
+            {
+                var item = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroupId, out var isCreated);
+                if (isCreated || item.Parent == null)
+                    itemGroup.Add(item);
+            }
+            IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Add(itemGroup);
         }
 
         public void AddObject(OngekiObjectBase obj)
