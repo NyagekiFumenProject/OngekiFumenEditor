@@ -1022,7 +1022,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             _cacheSoflanGroupRecorder.Clear();
 
-            if (IsPreviewMode)
+            //if (IsPreviewMode)
             {
                 var objs = Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>();
                 objs = objs.Where(x => x switch

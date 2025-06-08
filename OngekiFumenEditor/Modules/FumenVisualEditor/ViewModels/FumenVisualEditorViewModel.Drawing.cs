@@ -115,25 +115,21 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
     }
 
-    //todo: 将用DrawingTargetContext的Rect
     public float ViewWidth
     {
         get => viewWidth;
         set
         {
             Set(ref viewWidth, value);
-            //RecalcViewProjectionMatrix();
         }
     }
 
-    //todo: 将用DrawingTargetContext的Rect
     public float ViewHeight
     {
         get => viewHeight;
         set
         {
             Set(ref viewHeight, value);
-            //RecalcViewProjectionMatrix();
         }
     }
 
@@ -325,8 +321,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
 
         IEnumerable<KeyValuePair<int, SoflanList>> soflanMap = Fumen.SoflansMap;
-        if (IsDesignMode)
-            soflanMap = [new KeyValuePair<int, SoflanList>(0, Fumen.SoflansMap.DefaultSoflanList)];
+        //if (IsDesignMode)
+        //    soflanMap = [new KeyValuePair<int, SoflanList>(0, Fumen.SoflansMap.DefaultSoflanList)];
 
         foreach (KeyValuePair<int, SoflanList> pair in soflanMap)
         {
@@ -407,6 +403,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
 
             _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
+
+            if (!CheckSoflanGroupVisible(soflanGroup))
+                continue;
 
             if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
             {
@@ -502,6 +501,16 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 blts = blts.Where(x => x.TGrid > curTGrid);
                 bels = bels.Where(x => x.TGrid > curTGrid);
             }
+            bels = bels.Where(x =>
+            {
+                _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
+                return CheckSoflanGroupVisible(soflanGroup);
+            });
+            blts = blts.Where(x =>
+            {
+                _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
+                return CheckSoflanGroupVisible(soflanGroup);
+            });
 
             foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
             {
@@ -819,6 +828,19 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         Log.LogInfo("resize");
         var scrollViewer = e.Source as AnimatedScrollViewer;
         scrollViewer?.InvalidateMeasure();
+    }
+
+    public bool CheckSoflanGroupVisible(int soflanGroup)
+    {
+        var soflanGroupWrapItem = Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroup, out _);
+        if (IsDesignMode)
+        {
+            return soflanGroupWrapItem.IsDisplayInDesignMode;
+        }
+        else
+        {
+            return soflanGroupWrapItem.IsDisplayInPreviewMode;
+        }
     }
 
     public bool CheckVisible(DrawingTargetContext context, TGrid tGrid)

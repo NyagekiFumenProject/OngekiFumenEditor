@@ -40,10 +40,12 @@ namespace OngekiFumenEditor.Base.Collections
             IsSelected = false,
             DisplayName = "root"
         };
+
         private SoflanGroupWrapItemGroup defaultItemGroup = new()
         {
             DisplayName = "default"
         };
+
         private Dictionary<int, SoflanGroupWrapItem> cachedSoflanGroupWrapItemMap = new();
         public SoflanGroupWrapItemGroup SoflanGroupWrapItemGroupRoot => soflanGroupWrapItemGroupRoot;
 
