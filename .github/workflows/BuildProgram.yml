@@ -54,7 +54,7 @@ jobs:
     - name: Publish
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o C:\ogkrEditorBuild\
     - name: Delete unused .xml files
-      run: Remove-Item -Path ".\bin\githubActions\*.xml" -Force
+      run: Remove-Item -Path "C:\ogkrEditorBuild\*.xml" -Force
     - name: Delete unused runtime subfolders
       shell: pwsh
       run: |
