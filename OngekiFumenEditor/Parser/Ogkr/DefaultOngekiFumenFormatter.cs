@@ -164,7 +164,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 
             sb.AppendLine("[HEADER]");
             //sb.AppendLine($"VERSION\t{metaInfo.Version.Major}\t{metaInfo.Version.Minor}\t{metaInfo.Version.Build}");
-            sb.AppendLine($"VERSION\t{1}\t{6}\t{0}");
+			sb.AppendLine($"VERSION\t{1}\t{7}\t{0}");
             sb.AppendLine($"CREATOR\t{metaInfo.Creator}");
             sb.AppendLine($"BPM_DEF\t{metaInfo.BpmDefinition.First}\t{metaInfo.BpmDefinition.Common}\t{metaInfo.BpmDefinition.Maximum}\t{metaInfo.BpmDefinition.Minimum}");
             sb.AppendLine($"MET_DEF\t{metaInfo.MeterDefinition.Bunshi}\t{metaInfo.MeterDefinition.Bunbo}");

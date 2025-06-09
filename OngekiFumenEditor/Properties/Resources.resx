@@ -2025,4 +2025,7 @@
   <data name="HideWallLaneWhenEnablePlayField" xml:space="preserve">
     <value>Hide all wall lanes when play field drawing is enable in preview mode</value>
   </data>
+  <data name="LaneBlockOnMultipleWalls" xml:space="preserve">
+    <value>Lane block start wall ({0}) is different than end wall ({1})</value>
+  </data>
 </root>
