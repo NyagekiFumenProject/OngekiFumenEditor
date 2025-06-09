@@ -461,6 +461,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         //remove unused drawingContexts
         var unusedSoflanGroups = ObjectPool.Get<List<int>>();
+        unusedSoflanGroups.Clear();
         unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
         foreach (var soflanGroupId in unusedSoflanGroups)
             drawingContexts.Remove(soflanGroupId);
