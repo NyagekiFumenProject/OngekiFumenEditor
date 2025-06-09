@@ -146,10 +146,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             {
                 var defaultX = isRight ? defaultRightX : defaultLeftX;
                 var type = isRight ? LaneType.WallRight : LaneType.WallLeft;
-                var ranges = CombinableRange<int>.CombineRanges(fumen.Lanes.GetVisibleStartObjects(minTGrid, maxTGrid)
+                using var _d = CombinableRange<int>.CombineRanges(fumen.Lanes.GetVisibleStartObjects(minTGrid, maxTGrid)
                     .Where(x => x.LaneType == type)
                     .Select(x => new CombinableRange<int>(x.MinTGrid.TotalGrid, x.MaxTGrid.TotalGrid)))
-                    .OrderBy(x => isRight ? x.Max : x.Min).ToArray();
+                    .OrderBy(x => isRight ? x.Max : x.Min).ToListWithObjectPool(out var ranges);
 
                 var points = ObjectPool<HashSet<float>>.Get();
                 points.Clear();
@@ -184,15 +184,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     appendPoint2(list, xGrid.TotalGrid, y);
                 }
 
-                for (int i = 0; i < ranges.Length; i++)
+                for (int i = 0; i < ranges.Count; i++)
                 {
                     var curRange = ranges[i];
                     var nextRange = ranges.ElementAtOrDefault(i + 1);
 
-                    var lanes = fumen.Lanes
+                    using var _d2 = fumen.Lanes
                         .GetVisibleStartObjects(TGrid.FromTotalGrid(curRange.Min), TGrid.FromTotalGrid(curRange.Max))
                         .Where(x => x.LaneType == type)
-                        .ToArray();
+                        .ToListWithObjectPool(out var lanes);
 
                     var polylines = lanes
                         .SelectMany(x =>
@@ -232,14 +232,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         );
                 }
 
-                var sortedPoints = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToList();
+                using var _d3 = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToListWithObjectPool(out var sortedPoints);
 
                 sortedPoints.InsertBySortBy(minTGrid.TotalGrid, x => x);
                 sortedPoints.InsertBySortBy(maxTGrid.TotalGrid, x => x);
 
-                var segments = sortedPoints.SequenceConsecutivelyWrap(2).Select(x => (x.FirstOrDefault(), x.LastOrDefault())).ToArray();
-
-                foreach ((var fromY, var toY) in segments)
+                foreach ((var fromY, var toY) in sortedPoints.SequenceConsecutivelyWrap(2).Select(x => (x.FirstOrDefault(), x.LastOrDefault())))
                 {
                     var midY = (fromY + toY) / 2;
                     var midTGrid = TGrid.FromTotalGrid((int)midY);
@@ -250,7 +248,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             .Where(x => x.LaneType == type)
                             .Select(x => (x.CalulateXGrid(midTGrid), x))
                             .FilterNullBy(x => x.Item1)
-                            .ToArray();
+                            /*.ToArray()*/;
 
                     //选取轨道，如果存在多个轨道(即轨道交叉冲突了)，那么就按左右边规则选取一个
                     (_, var pickLane) = pickables.IsEmpty() ? default : (isRight ? pickables.MaxBy(x => x.Item1) : pickables.MinBy(x => x.Item1));
@@ -294,7 +292,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             })
                             .Select(x => (x.CalulateXGrid(tGrid), x))
                             .FilterNullBy(x => x.Item1)
-                            .ToArray();
+                            /*.ToArray()*/;
 
                     (_, var pickLane) = pickables.IsEmpty() ? default : (isRight ? pickables.MaxBy(x => x.Item1) : pickables.MinBy(x => x.Item1));
 
