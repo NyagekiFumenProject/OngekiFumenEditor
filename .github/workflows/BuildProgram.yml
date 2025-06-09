@@ -65,5 +65,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: OngekiFumenEditor_${{env.GitBuildVersion}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
-        path: D:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
+        path: C:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
     
