@@ -58,7 +58,7 @@ jobs:
     - name: Delete unused runtime subfolders
       shell: pwsh
       run: |
-        $runtimePath = ".\bin\githubActions\runtimes"
+        $runtimePath = "C:\ogkrEditorBuild\runtimes"
         Get-ChildItem -Path $runtimePath -Directory | 
           Where-Object { $_.Name -ne "win-x64" } | 
           Remove-Item -Recurse -Force
