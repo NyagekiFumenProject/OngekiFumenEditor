@@ -52,7 +52,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish
-      run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o ./bin/githubActions/
+      run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o C:\ogkrEditorBuild\
     - name: Delete unused .xml files
       run: Remove-Item -Path ".\bin\githubActions\*.xml" -Force
     - name: Delete unused runtime subfolders
@@ -65,5 +65,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: OngekiFumenEditor_${{env.GitBuildVersion}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
-        path: C:\a\OngekiFumenEditor\OngekiFumenEditor\bin\githubActions
+        path: C:\ogkrEditorBuild\
     
