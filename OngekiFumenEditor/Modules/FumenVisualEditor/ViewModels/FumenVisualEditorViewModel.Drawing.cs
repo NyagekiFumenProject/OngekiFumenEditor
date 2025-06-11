@@ -469,12 +469,16 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
         RecalculateMagaticXGridLines();
+        foreach (var (minTGrid, maxTGrid) in defaultDrawingTargetContext.VisibleTGridRanges)
+            playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
+        /*
         foreach (var drawingContext in drawingContexts.Values)
         {
             CurrentDrawingTargetContext = drawingContext;
             foreach (var (minTGrid, maxTGrid) in drawingContext.VisibleTGridRanges)
                 playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
         }
+        */
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
         playableAreaHelper.Draw(this);
