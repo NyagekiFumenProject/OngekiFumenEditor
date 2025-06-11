@@ -1575,7 +1575,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             string updateRight()
             {
-                var drwaingContext = drawingContexts[0];
+                if (!drawingContexts.TryGetValue(0, out var drwaingContext))
+                    return string.Empty;
                 var canvasX = pos.X;
                 var canvasY = drwaingContext.Rect.MaxY - pos.Y;
                 CurrentCursorPosition = new(canvasX, canvasY);

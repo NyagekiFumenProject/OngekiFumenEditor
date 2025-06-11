@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
 
-            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
+            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start,out var soflanGroup);
 
             var tempVertices = ObjectPool<List<LineVertex>>.Get();
             tempVertices.Clear();

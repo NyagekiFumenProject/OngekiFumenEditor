@@ -348,7 +348,7 @@ namespace OngekiFumenEditor.Utils
         }
 
         /// <summary>
-        /// 使用二分法实现LastOrDefault()的选值(假设集合已排序)
+        /// 使用二分法实现LastOrDefault()的选值(假设集合已从小到大排序)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="X"></typeparam>

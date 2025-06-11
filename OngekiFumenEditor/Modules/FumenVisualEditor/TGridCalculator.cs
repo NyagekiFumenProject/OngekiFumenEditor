@@ -183,8 +183,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 				return default;
 
 			var relativeBpmLenOffset = MathUtils.CalculateBPMLength(pos.TGrid.TotalUnit, tGridUnit, pos.Bpm.BPM);
+			var speed = pos.Speed;
 
-			var y = (pos.Y + relativeBpmLenOffset * pos.Speed) * scale;
+            var y = (pos.Y + relativeBpmLenOffset * speed) * scale;
 			return y;
 		}
 
