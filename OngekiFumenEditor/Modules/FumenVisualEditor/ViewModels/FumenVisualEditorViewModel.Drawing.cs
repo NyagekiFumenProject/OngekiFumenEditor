@@ -547,6 +547,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
             prevOrder = order;
 
+            CurrentDrawingTargetContext = defaultDrawingTargetContext;
+
             PerfomenceMonitor.OnBeginTargetDrawing(drawingTarget);
             {
                 if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))

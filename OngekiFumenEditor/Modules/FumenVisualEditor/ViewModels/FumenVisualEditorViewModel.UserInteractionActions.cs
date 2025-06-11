@@ -1318,7 +1318,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void InitializeSelectionArea(SelectionAreaKind kind, Point? position = null)
         {
-            var cursor = position ?? CurrentCursorPosition!.Value;
+            if ((position ?? CurrentCursorPosition) is not Point cursor)
+                return;
 
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
