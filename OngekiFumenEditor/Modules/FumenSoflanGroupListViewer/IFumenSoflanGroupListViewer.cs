@@ -10,5 +10,6 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer
 {
     public interface IFumenSoflanGroupListViewer : ITool
     {
+        SoflanGroupWrapItem CurrentSelectedSoflanGroupWrapItem { get; }
     }
 }

@@ -30,20 +30,6 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models
             }
         }
 
-        private bool isSelected = true;
-        public override bool IsSelected
-        {
-            get => isSelected;
-            set
-            {
-                Set(ref isSelected, value);
-                isUpdatingChildrenCount++;
-                foreach (var child in Children)
-                    child.IsSelected = IsSelected;
-                isUpdatingChildrenCount--;
-            }
-        }
-
         private bool isDisplayInDesignMode = true;
         public override bool IsDisplayInDesignMode
         {
@@ -187,25 +173,13 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models
 
         public override string ToString()
         {
-            return $"Group: {DisplayName}, Count:{Children.Count}, TotalCount:{DisplayableItemSource.Count}, IsSelected:{IsSelected}, IsExpanded:{IsExpanded}";
+            return $"Group: {DisplayName}, Count:{Children.Count}, TotalCount:{DisplayableItemSource.Count}, IsExpanded:{IsExpanded}";
         }
 
         private void OnChildPropertyChangedHandler(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
-                case nameof(SoflanGroupDisplayItemListViewBase.IsSelected):
-                    if (isUpdatingChildrenCount == 0)
-                    {
-                        var beforeValue = IsSelected;
-                        var newValue = Children.All(c => c.IsSelected);
-                        if (beforeValue != newValue)
-                        {
-                            isSelected = newValue;
-                            NotifyOfPropertyChange(() => IsSelected);
-                        }
-                    }
-                    break;
                 case nameof(SoflanGroupDisplayItemListViewBase.IsDisplayInPreviewMode):
                     if (isUpdatingChildrenCount == 0)
                     {

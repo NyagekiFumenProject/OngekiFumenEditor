@@ -22,8 +22,8 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models
             set { } //ignore
         }
 
-        private bool isSelected = true;
-        public override bool IsSelected
+        private bool isSelected = false;
+        public bool IsSelected
         {
             get => isSelected;
             set => Set(ref isSelected, value);

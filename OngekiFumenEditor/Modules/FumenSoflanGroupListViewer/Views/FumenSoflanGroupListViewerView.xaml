@@ -45,15 +45,13 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
-            <!--todo
             <ToolBar>
-                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{markup:Translate [ResetDefault]}" />
-                <Button
-                    Margin="5,0"
-                    cal:Message.Attach="[Event Click] = [Action Save()]"
-                    Content="{markup:Translate [Save]}" />
+                <TextBox
+                    Width="100"
+                    Margin="10,0,10,0"
+                    Text="{Binding CreateNewGroupName}" />
+                <Button cal:Message.Attach="[Event Click] = [Action CreateNewGroup()]" Content="新建组层" />
             </ToolBar>
-            -->
         </StackPanel>
         <ListView
             Grid.Row="1"
@@ -162,12 +160,21 @@
                                         </ToggleButton.Style>
                                     </ToggleButton>
 
-                                    <CheckBox Margin="5,0" IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}">
-                                        <CheckBox.Style>
-                                            <Style TargetType="{x:Type CheckBox}">
+                                    <RadioButton
+                                        Margin="5,0"
+                                        cal:Message.Attach="[Event Checked] = [Action OnItemChecked($dataContext)]"
+                                        GroupName="ILOVE2857"
+                                        IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}">
+                                        <RadioButton.Style>
+                                            <Style TargetType="{x:Type RadioButton}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
                                             </Style>
-                                        </CheckBox.Style>
-                                    </CheckBox>
+                                        </RadioButton.Style>
+                                    </RadioButton>
 
                                     <TextBlock Text="{Binding DisplayName}">
                                         <TextBlock.Style>

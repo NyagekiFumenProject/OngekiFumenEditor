@@ -37,7 +37,6 @@ namespace OngekiFumenEditor.Base.Collections
         {
             IsDisplayInDesignMode = false,
             IsDisplayInPreviewMode = false,
-            IsSelected = false,
             DisplayName = "root"
         };
 

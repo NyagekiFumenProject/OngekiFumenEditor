@@ -29,7 +29,6 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models
             set => Set(ref level, value);
         }
 
-        public abstract bool IsSelected { get; set; }
         /// <summary>
         /// 是否在制谱器设计模式绘制
         /// </summary>

@@ -51,6 +51,43 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
         private ListViewDragDropManager<SoflanGroupDisplayItemListViewBase> listDragManager;
 
         private SoflanGroupWrapItemGroup displaySoflanGroupItemGroupRoot;
+
+        private string createNewGroupName;
+        public string CreateNewGroupName
+        {
+            get => createNewGroupName;
+            set => Set(ref createNewGroupName, value);
+        }
+
+        public void CreateNewGroup()
+        {
+            if (string.IsNullOrWhiteSpace(CreateNewGroupName))
+            {
+                //todo messagebox
+                return;
+            }
+            if (DisplaySoflanGroupItemGroupRoot is null)
+            {
+                //todo messagebox
+                return;
+            }
+
+            var group = new SoflanGroupWrapItemGroup()
+            {
+                DisplayName = CreateNewGroupName
+            };
+            DisplaySoflanGroupItemGroupRoot.Add(group);
+
+            CreateNewGroupName = string.Empty;
+        }
+
+        private SoflanGroupWrapItem currentSelectedSoflanGroupWrapItem;
+        public SoflanGroupWrapItem CurrentSelectedSoflanGroupWrapItem
+        {
+            get => currentSelectedSoflanGroupWrapItem;
+            set => Set(ref currentSelectedSoflanGroupWrapItem, value);
+        }
+
         public SoflanGroupWrapItemGroup DisplaySoflanGroupItemGroupRoot
         {
             get => displaySoflanGroupItemGroupRoot;
@@ -81,14 +118,42 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             Log.LogDebug($"ListViewDragDropManager created.");
         }
 
+        public void OnItemChecked(object dataContext)
+        {
+            if (dataContext is not SoflanGroupWrapItem item)
+                return;
+            if (!item.IsSelected)
+                throw new Exception("IsSelected is false.");
+
+            CurrentSelectedSoflanGroupWrapItem = item;
+            Log.LogInfo($"CurrentSelectedSoflanGroupWrapItem changed: {CurrentSelectedSoflanGroupWrapItem}");
+        }
+
         private void RebuildItemGroupRoot()
         {
             DisplaySoflanGroupItemGroupRoot = default;
+            CurrentSelectedSoflanGroupWrapItem = default;
 
             if (Editor?.Fumen is not OngekiFumen fumen)
                 return;
 
             DisplaySoflanGroupItemGroupRoot = fumen.IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot;
+            IEnumerable<SoflanGroupDisplayItemListViewBase> visit(SoflanGroupDisplayItemListViewBase item)
+            {
+                yield return item;
+                if (item is SoflanGroupWrapItemGroup group)
+                {
+                    foreach (var child in group.Children)
+                    {
+                        foreach (var subItem in visit(child))
+                        {
+                            yield return subItem;
+                        }
+                    }
+                }
+            }
+
+            CurrentSelectedSoflanGroupWrapItem = visit(DisplaySoflanGroupItemGroupRoot).OfType<SoflanGroupWrapItem>().FirstOrDefault(x => x.IsSelected);
         }
 
         private void ListDragManager_ProcessDrop(object sender, ProcessDropEventArgs<SoflanGroupDisplayItemListViewBase> e)

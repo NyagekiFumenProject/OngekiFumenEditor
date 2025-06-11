@@ -39,6 +39,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 using System.Windows.Controls;
 using Gemini.Framework.Threading;
 using Microsoft.CodeAnalysis.Differencing;
+using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -1572,24 +1573,58 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void UpdateCurrentCursorPosition(Point pos)
         {
-            var contentObject = IoC.Get<CommonStatusBar>().SubRightMainContentViewModel;
-
-            var canvasY = RectInDesignMode.MaxY - pos.Y;
-            var canvasX = pos.X;
-            CurrentCursorPosition = new(canvasX, canvasY);
-
-            var tGrid = default(TGrid);
-            if (IsDesignMode)
-                tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this);
-            else
+            string updateRight()
             {
-                var result = TGridCalculator.ConvertYToTGrid_PreviewMode(canvasY, this);
-                if (result.IsOnlyOne())
-                    tGrid = result.FirstOrDefault();
+                var drwaingContext = drawingContexts[0];
+                var canvasX = pos.X;
+                var canvasY = drwaingContext.Rect.MaxY - pos.Y;
+                CurrentCursorPosition = new(canvasX, canvasY);
+
+                var tGrid = default(TGrid);
+                if (IsDesignMode)
+                    tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this);
+                else
+                {
+                    var result = TGridCalculator.ConvertYToTGrid_PreviewMode(canvasY, this);
+                    if (result.IsOnlyOne())
+                        tGrid = result.FirstOrDefault();
+                }
+                TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
+                var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
+                return $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff") ?? "N/A"}]";
             }
-            TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
-            var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
-            contentObject.Message = $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff") ?? "N/A"}]";
+
+            string updateLeft()
+            {
+                var soflanGroup = IoC.Get<IFumenSoflanGroupListViewer>().CurrentSelectedSoflanGroupWrapItem?.SoflanGroupId ?? 0;
+                if (soflanGroup == 0)
+                    return string.Empty;
+                var soflanList = Fumen.SoflansMap[soflanGroup];
+
+                if (!drawingContexts.TryGetValue(soflanGroup, out var drawingTargetContext))
+                    return string.Empty;
+
+                var canvasX = pos.X;
+                var persentY = pos.Y / ViewHeight;
+                var drwaingY = drawingTargetContext.Rect.MaxY - drawingTargetContext.Rect.Height * persentY;
+
+                var tGrid = default(TGrid);
+                if (IsDesignMode)
+                {
+                    tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(drwaingY, soflanList, Fumen.BpmList, Setting.VerticalDisplayScale);
+                }
+                else
+                {
+                    var result = TGridCalculator.ConvertYToTGrid_PreviewMode(drwaingY, soflanList, Fumen.BpmList, Setting.VerticalDisplayScale);
+                    if (result.IsOnlyOne())
+                        tGrid = result.FirstOrDefault();
+                }
+
+                return $"SG[{soflanGroup}] SG.C[{canvasX:F2},{drwaingY:F2}] {(tGrid is not null ? $"SG.T[{tGrid.Unit},{tGrid.Grid}]" : "SG.T[N/A]")}";
+            }
+
+            IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = updateRight();
+            IoC.Get<CommonStatusBar>().SubLeftContentViewModel.Message = updateLeft();
         }
 
         public void Grid_DragEnter(ActionExecutionContext e)

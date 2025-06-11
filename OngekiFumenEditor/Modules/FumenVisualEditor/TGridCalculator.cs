@@ -76,7 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static TGrid ConvertYToTGrid_DesignMode(double pickY, FumenVisualEditorViewModel editor)
 			=> ConvertYToTGrid_DesignMode(pickY, editor.Fumen.SoflansMap.DefaultSoflanList, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale);
-		private static TGrid ConvertYToTGrid_DesignMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale)
+        public static TGrid ConvertYToTGrid_DesignMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale)
 		{
 			pickY = pickY / scale;
 			var list = soflanList.GetCachedSoflanPositionList_DesignMode(bpmList);
@@ -153,7 +153,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, FumenVisualEditorViewModel editor)
 			=> ConvertYToTGrid_PreviewMode(pickY, editor.Fumen.SoflansMap.DefaultSoflanList, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale);
-		private static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale)
+		public static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale)
 		{
 			var r = soflanList.GetVisibleRanges_PreviewMode(pickY, 0, 0, bpmList, scale);
 			var result = r.OrderBy(x => x.minTGrid).Select(x => x.minTGrid);
