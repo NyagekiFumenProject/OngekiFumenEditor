@@ -17,6 +17,8 @@ using WPF.JoshSmith.ServiceProviders.UI;
 using System.Windows.Controls;
 using System.Collections.Specialized;
 using System.Linq;
+using static OngekiFumenEditor.Base.Collections.SoflanList;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 
 namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 {
@@ -47,10 +49,33 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
+        private bool isShowPreviewModeSoflanPositionList = true;
+        public bool IsShowPreviewModeSoflanPositionList
+        {
+            get => isShowPreviewModeSoflanPositionList;
+            set => Set(ref isShowPreviewModeSoflanPositionList, value);
+        }
+
         private FumenVisualEditorViewModel editor;
         private ListViewDragDropManager<SoflanGroupDisplayItemListViewBase> listDragManager;
 
         private SoflanGroupWrapItemGroup displaySoflanGroupItemGroupRoot;
+
+        public IEnumerable<SoflanPoint> DisplaySoflanPointList
+        {
+            get
+            {
+                if (CurrentSelectedSoflanGroupWrapItem is null)
+                    return Enumerable.Empty<SoflanPoint>();
+                if (Editor?.Fumen is not OngekiFumen fumen)
+                    return Enumerable.Empty<SoflanPoint>();
+
+                var soflanList = fumen.SoflansMap[CurrentSelectedSoflanGroupWrapItem.SoflanGroupId];
+                var points = IsShowPreviewModeSoflanPositionList ? soflanList.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList) : soflanList.GetCachedSoflanPositionList_DesignMode(fumen.BpmList);
+
+                return points;
+            }
+        }
 
         private string createNewGroupName;
         public string CreateNewGroupName
@@ -85,7 +110,11 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
         public SoflanGroupWrapItem CurrentSelectedSoflanGroupWrapItem
         {
             get => currentSelectedSoflanGroupWrapItem;
-            set => Set(ref currentSelectedSoflanGroupWrapItem, value);
+            set
+            {
+                Set(ref currentSelectedSoflanGroupWrapItem, value);
+                NotifyOfPropertyChange(() => DisplaySoflanPointList);
+            }
         }
 
         public SoflanGroupWrapItemGroup DisplaySoflanGroupItemGroupRoot
@@ -154,6 +183,14 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             }
 
             CurrentSelectedSoflanGroupWrapItem = visit(DisplaySoflanGroupItemGroupRoot).OfType<SoflanGroupWrapItem>().FirstOrDefault(x => x.IsSelected);
+        }
+
+        public void OnItemDoubleClick(SoflanPoint item)
+        {
+            if (Editor is null)
+                return;
+
+            Editor.ScrollTo(item.TGrid);
         }
 
         private void ListDragManager_ProcessDrop(object sender, ProcessDropEventArgs<SoflanGroupDisplayItemListViewBase> e)
