@@ -1,8 +1,6 @@
 ## 音击谱面编辑器
 ----
 
-### refresh Support : 正在实现 WIP
-
 ## 简介
 ![image](https://github.com/NyagekiFumenProject/OngekiFumenEditor/assets/7549173/a495c5a2-0d6b-4995-8730-e5ee4e10b56a)
 
@@ -49,8 +47,8 @@
 * 程序更新检测/下载安装
 * 更好的CLI支持
 * 自定义快捷键按键绑定
-* 实现分组变速功能 **<--- we are here! ---**
-* 提供更好的变速工具/界面
+* 实现分组变速功能
+* 提供更好的变速工具/界面 **<--- we are here! ---**
 * 塞小功能&修BUG.... 
 ....、
 
