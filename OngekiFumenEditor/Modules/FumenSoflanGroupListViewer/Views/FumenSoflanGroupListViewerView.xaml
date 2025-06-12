@@ -50,7 +50,7 @@
                     Width="100"
                     Margin="10,0,10,0"
                     Text="{Binding CreateNewGroupName}" />
-                <Button cal:Message.Attach="[Event Click] = [Action CreateNewGroup()]" Content="新建组层" />
+                <Button cal:Message.Attach="[Event Click] = [Action CreateNewGroup()]" Content="{markup:Translate [NewItemGroup]}" />
             </ToolBar>
         </StackPanel>
         <Grid Grid.Row="1">

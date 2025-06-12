@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
     {
         public FumenSoflanGroupListViewerViewModel()
         {
-            DisplayName = "变速分组查看器";
+            DisplayName = Resources.SoflanGroupListViewer;
 
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;

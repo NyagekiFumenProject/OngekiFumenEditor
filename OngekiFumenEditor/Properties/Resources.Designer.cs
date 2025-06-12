@@ -871,7 +871,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Change... 的本地化字符串。
+        ///   查找类似 Change color 的本地化字符串。
         /// </summary>
         public static string ChangeColor {
             get {
@@ -3643,6 +3643,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 New item group 的本地化字符串。
+        /// </summary>
+        public static string NewItemGroup {
+            get {
+                return ResourceManager.GetString("NewItemGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 New Version 的本地化字符串。
         /// </summary>
         public static string NewVersion {
@@ -5115,6 +5124,15 @@ namespace OngekiFumenEditor.Properties {
         public static string SoflanConflict {
             get {
                 return ResourceManager.GetString("SoflanConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Soflan Group 的本地化字符串。
+        /// </summary>
+        public static string SoflanGroupListViewer {
+            get {
+                return ResourceManager.GetString("SoflanGroupListViewer", resourceCulture);
             }
         }
         
