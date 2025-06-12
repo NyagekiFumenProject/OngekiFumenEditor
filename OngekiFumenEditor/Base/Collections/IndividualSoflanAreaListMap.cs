@@ -121,7 +121,8 @@ namespace OngekiFumenEditor.Base.Collections
 
         public int QuerySoflanGroup(XGrid xGrid, TGrid tGrid)
         {
-            return cacheTotalTree.Query((float)xGrid.TotalUnit, (float)tGrid.TotalUnit).FirstOrDefault()?.SoflanGroup ?? 0;
+            var result = cacheTotalTree.Query((float)xGrid.TotalUnit, (float)tGrid.TotalUnit);
+            return result.OrderByDescending(x => x.TGrid).FirstOrDefault()?.SoflanGroup ?? 0;
         }
 
         public int QuerySoflanGroup<T>(T obj) where T : IHorizonPositionObject, ITimelineObject

@@ -14,7 +14,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<LaneStartBase> starts)
         {
-            base.DrawBatch(target, starts.Where(x => !x.IsTransparent));
+            if (target.Editor.IsPreviewMode)
+                starts = starts.Where(x => !x.IsTransparent);
+            base.DrawBatch(target, starts);
         }
     }
 }
