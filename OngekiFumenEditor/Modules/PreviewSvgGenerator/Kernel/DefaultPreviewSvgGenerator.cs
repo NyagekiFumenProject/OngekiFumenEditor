@@ -1002,6 +1002,14 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
                 var itor = lbk
                 .GetAffactableWallLanes(fumen)
+                /*
+                .Where(x =>
+                {
+                    //todo Only apply for wall lanes which belongs default soflan group 
+                    target.Editor._cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
+                    return soflanGroup == 0;
+                })
+                */
                 .OrderBy(x => x.TGrid)
                 .GetEnumerator();
 
