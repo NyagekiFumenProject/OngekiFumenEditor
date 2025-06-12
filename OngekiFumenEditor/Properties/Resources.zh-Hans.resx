@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
+    <!-- 
     Microsoft ResX Schema 
     
     Version 2.0
@@ -59,1971 +59,1974 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+        <xsd:element name="root" msdata:IsDataSet="true">
             <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string" />
+                            <xsd:attribute name="type" type="xsd:string" />
+                            <xsd:attribute name="mimetype" type="xsd:string" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string" />
+                            <xsd:attribute name="name" type="xsd:string" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
             </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="AcbGenerator" xml:space="preserve">
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="AcbGenerator" xml:space="preserve">
     <value>音频文件生成器</value>
   </data>
-  <data name="Action" xml:space="preserve">
+    <data name="Action" xml:space="preserve">
     <value>操作</value>
   </data>
-  <data name="AddConnectableNextObject" xml:space="preserve">
+    <data name="AddConnectableNextObject" xml:space="preserve">
     <value>添加Next物件</value>
   </data>
-  <data name="AddCurveControlPoint" xml:space="preserve">
+    <data name="AddCurveControlPoint" xml:space="preserve">
     <value>添加曲线控制点</value>
   </data>
-  <data name="AddObject" xml:space="preserve">
+    <data name="AddObject" xml:space="preserve">
     <value>添加物件</value>
   </data>
-  <data name="AdjustPastedObjects" xml:space="preserve">
+    <data name="AdjustPastedObjects" xml:space="preserve">
     <value>粘贴物件时自动停靠</value>
   </data>
-  <data name="Advice" xml:space="preserve">
+    <data name="Advice" xml:space="preserve">
     <value>建议</value>
   </data>
-  <data name="AllObjectApplyNewDelayAfterCalculated" xml:space="preserve">
+    <data name="AllObjectApplyNewDelayAfterCalculated" xml:space="preserve">
     <value>对所有物件重新计算延迟后的新TGrid</value>
   </data>
-  <data name="AllSupportFileFormat" xml:space="preserve">
+    <data name="AllSupportFileFormat" xml:space="preserve">
     <value>全支持文件</value>
   </data>
-  <data name="ApplicationVersion" xml:space="preserve">
+    <data name="ApplicationVersion" xml:space="preserve">
     <value>应用版本:</value>
   </data>
-  <data name="ApplyAudioAdjust" xml:space="preserve">
+    <data name="ApplyAudioAdjust" xml:space="preserve">
     <value>应用音频延迟</value>
   </data>
-  <data name="ApplyAudioAdjustFail" xml:space="preserve">
+    <data name="ApplyAudioAdjustFail" xml:space="preserve">
     <value>处理失败：</value>
   </data>
-  <data name="ApplyAudioAdjustSuccess" xml:space="preserve">
+    <data name="ApplyAudioAdjustSuccess" xml:space="preserve">
     <value>处理完成。</value>
   </data>
-  <data name="ApplyAudioAdjustSuccessButSuggest" xml:space="preserve">
+    <data name="ApplyAudioAdjustSuccessButSuggest" xml:space="preserve">
     <value>处理完成，但推荐您保存并重新打开当前项目，以查看最新的音频变更，或者物件位置变动。</value>
   </data>
-  <data name="ApplyOffsetBySecond" xml:space="preserve">
+    <data name="ApplyOffsetBySecond" xml:space="preserve">
     <value>按照秒进行调整:</value>
   </data>
-  <data name="ApplyOffsetByTGrid" xml:space="preserve">
+    <data name="ApplyOffsetByTGrid" xml:space="preserve">
     <value>按照TGrid进行调整:</value>
   </data>
-  <data name="Artist" xml:space="preserve">
+    <data name="Artist" xml:space="preserve">
     <value>艺术家:</value>
   </data>
-  <data name="AudioDuration" xml:space="preserve">
+    <data name="AudioDuration" xml:space="preserve">
     <value>音频时长:</value>
   </data>
-  <data name="AudioFile" xml:space="preserve">
+    <data name="AudioFile" xml:space="preserve">
     <value>音频文件:</value>
   </data>
-  <data name="AudioFileNotFound" xml:space="preserve">
+    <data name="AudioFileNotFound" xml:space="preserve">
     <value>音频文件未填写或者不存在</value>
   </data>
-  <data name="AudioFilePath" xml:space="preserve">
+    <data name="AudioFilePath" xml:space="preserve">
     <value>音频文件路径:</value>
   </data>
-  <data name="AudioFileSource" xml:space="preserve">
+    <data name="AudioFileSource" xml:space="preserve">
     <value>音频文件来源</value>
   </data>
-  <data name="AudioOption" xml:space="preserve">
+    <data name="AudioOption" xml:space="preserve">
     <value>音频设置</value>
   </data>
-  <data name="AudioPlayerToolViewer" xml:space="preserve">
+    <data name="AudioPlayerToolViewer" xml:space="preserve">
     <value>音频播放</value>
   </data>
-  <data name="AudioTGrid" xml:space="preserve">
+    <data name="AudioTGrid" xml:space="preserve">
     <value>音频时间</value>
   </data>
-  <data name="AudioTime" xml:space="preserve">
+    <data name="AudioTime" xml:space="preserve">
     <value>音频时间</value>
   </data>
-  <data name="AutoSave" xml:space="preserve">
+    <data name="AutoSave" xml:space="preserve">
     <value>自动保存</value>
   </data>
-  <data name="AutoSaveInterval" xml:space="preserve">
+    <data name="AutoSaveInterval" xml:space="preserve">
     <value>自动保存频率:</value>
   </data>
-  <data name="AutoUpdateCurrentObjectTime" xml:space="preserve">
+    <data name="AutoUpdateCurrentObjectTime" xml:space="preserve">
     <value>自动显示当前物件时间</value>
   </data>
-  <data name="BackgroundColor" xml:space="preserve">
+    <data name="BackgroundColor" xml:space="preserve">
     <value>背景颜色:</value>
   </data>
-  <data name="BatchSetIsCritical" xml:space="preserve">
+    <data name="BatchSetIsCritical" xml:space="preserve">
     <value>快速批量设置IsCritical</value>
   </data>
-  <data name="BatchSwitchFlickDirection" xml:space="preserve">
+    <data name="BatchSwitchFlickDirection" xml:space="preserve">
     <value>批量改变Flick物件方向</value>
   </data>
-  <data name="BeatSplit" xml:space="preserve">
+    <data name="BeatSplit" xml:space="preserve">
     <value>节奏线细分倍率:</value>
   </data>
-  <data name="BellBulletCountOverLimit_Part1" xml:space="preserve">
+    <data name="BellBulletCountOverLimit_Part1" xml:space="preserve">
     <value>当预览时，Bell/Bullet总数超过</value>
   </data>
-  <data name="BellBulletCountOverLimit_Part2" xml:space="preserve">
+    <data name="BellBulletCountOverLimit_Part2" xml:space="preserve">
     <value>会使用多线程进行并行计算</value>
   </data>
-  <data name="BigJacketSize" xml:space="preserve">
+    <data name="BigJacketSize" xml:space="preserve">
     <value>大图尺寸(通常520x520):</value>
   </data>
-  <data name="BossHp" xml:space="preserve">
+    <data name="BossHp" xml:space="preserve">
     <value>血量:</value>
   </data>
-  <data name="BossLevel" xml:space="preserve">
+    <data name="BossLevel" xml:space="preserve">
     <value>等级:</value>
   </data>
-  <data name="BossVoiceIdx" xml:space="preserve">
+    <data name="BossVoiceIdx" xml:space="preserve">
     <value>语音序号:</value>
   </data>
-  <data name="Browser" xml:space="preserve">
+    <data name="Browser" xml:space="preserve">
     <value>浏览</value>
   </data>
-  <data name="BrushAlongLane" xml:space="preserve">
+    <data name="BrushAlongLane" xml:space="preserve">
     <value>按轨道刷已复制物件</value>
   </data>
-  <data name="BrushAlongLaneTipText" xml:space="preserve">
+    <data name="BrushAlongLaneTipText" xml:space="preserve">
     <value>根据当前节奏线，在轨道上批量生成已经复制的单个物件，非法线段无法使用</value>
   </data>
-  <data name="BatchModeToggle" xml:space="preserve">
+    <data name="BatchModeToggle" xml:space="preserve">
     <value>切换批量模式</value>
   </data>
-  <data name="BatchModeToggleTipText" xml:space="preserve">
+    <data name="BatchModeToggleTipText" xml:space="preserve">
     <value>如果开启批量模式,避免大部分物件拖拉操作</value>
   </data>
-  <data name="BulletSize" xml:space="preserve">
+    <data name="BulletSize" xml:space="preserve">
     <value>子弹大小</value>
   </data>
-  <data name="BulletSpeed" xml:space="preserve">
+    <data name="BulletSpeed" xml:space="preserve">
     <value>子弹速度</value>
   </data>
-  <data name="BulletType" xml:space="preserve">
+    <data name="BulletType" xml:space="preserve">
     <value>子弹形状</value>
   </data>
-  <data name="BatchModeDeleteRangeOfObjectType" xml:space="preserve">
+    <data name="BatchModeDeleteRangeOfObjectType" xml:space="preserve">
     <value>批量删除 {0} (x{1})</value>
   </data>
-  <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
+    <data name="CallAcbGeneratorFuckFail" xml:space="preserve">
     <value>调用AcbGeneratorFuck.Generator.Generate()失败</value>
   </data>
-  <data name="CallGenerateSvgAsyncFail" xml:space="preserve">
+    <data name="CallGenerateSvgAsyncFail" xml:space="preserve">
     <value>执行GenerateSvgAsync()出错</value>
   </data>
-  <data name="Cancel" xml:space="preserve">
+    <data name="Cancel" xml:space="preserve">
     <value>取消</value>
   </data>
-  <data name="CancelProjectSaveByFumenSaveFail" xml:space="preserve">
+    <data name="CancelProjectSaveByFumenSaveFail" xml:space="preserve">
     <value>无法保存谱面,项目保存取消</value>
   </data>
-  <data name="CancelSelected" xml:space="preserve">
+    <data name="CancelSelected" xml:space="preserve">
     <value>取消选择列表已选的</value>
   </data>
-  <data name="CantCreateProject" xml:space="preserve">
+    <data name="CantCreateProject" xml:space="preserve">
     <value>无法新建项目:</value>
   </data>
-  <data name="CantFastOpenFumen" xml:space="preserve">
+    <data name="CantFastOpenFumen" xml:space="preserve">
     <value>无法快速打开谱面:</value>
   </data>
-  <data name="CantLoadFumen" xml:space="preserve">
+    <data name="CantLoadFumen" xml:space="preserve">
     <value>无法加载谱面 :</value>
   </data>
-  <data name="CantLoadProject" xml:space="preserve">
+    <data name="CantLoadProject" xml:space="preserve">
     <value>无法加载项目:</value>
   </data>
-  <data name="CantOpenByAudioFileNotFound" xml:space="preserve">
+    <data name="CantOpenByAudioFileNotFound" xml:space="preserve">
     <value>无法打开{0},找不到音频文件</value>
   </data>
-  <data name="CantPasteMoreObjectByScaleDifferent" xml:space="preserve">
+    <data name="CantPasteMoreObjectByScaleDifferent" xml:space="preserve">
     <value>原编辑器垂直缩放({0:F2}x)和目标缩放({1:F2}x)不同，无法粘贴多个物件</value>
   </data>
-  <data name="CantPlaceObjectsByNoSuiteLanes" xml:space="preserve">
+    <data name="CantPlaceObjectsByNoSuiteLanes" xml:space="preserve">
     <value>无合适的{0}轨道放置物件</value>
   </data>
-  <data name="CantRememberObjectByNotSupport" xml:space="preserve">
+    <data name="CantRememberObjectByNotSupport" xml:space="preserve">
     <value>无法记忆此物件，因为此物件没有实现ITimelineObject : {0}</value>
   </data>
-  <data name="CantSaveFumenProject" xml:space="preserve">
+    <data name="CantSaveFumenProject" xml:space="preserve">
     <value>无法保存谱面项目:</value>
   </data>
-  <data name="CantSaveProjectFile" xml:space="preserve">
+    <data name="CantSaveProjectFile" xml:space="preserve">
     <value>无法保存项目文件:</value>
   </data>
-  <data name="CantSaveProjectTotally" xml:space="preserve">
+    <data name="CantSaveProjectTotally" xml:space="preserve">
     <value>无法完全保存项目:</value>
   </data>
-  <data name="CantSaveScriptFile" xml:space="preserve">
+    <data name="CantSaveScriptFile" xml:space="preserve">
     <value>无法保存脚本,原因:</value>
   </data>
-  <data name="CantWriteFumenFileByIoError" xml:space="preserve">
+    <data name="CantWriteFumenFileByIoError" xml:space="preserve">
     <value>谱面文件被占用或无权限,无法写入数据</value>
   </data>
-  <data name="CantWriteProjectFileByIoError" xml:space="preserve">
+    <data name="CantWriteProjectFileByIoError" xml:space="preserve">
     <value>项目文件被占用或无权限,无法写入数据</value>
   </data>
-  <data name="Card" xml:space="preserve">
+    <data name="Card" xml:space="preserve">
     <value>卡片:</value>
   </data>
-  <data name="ChangeAxuiliaryLineColor" xml:space="preserve">
+    <data name="ChangeAxuiliaryLineColor" xml:space="preserve">
     <value>变更 {0} 辅助线颜色</value>
   </data>
-  <data name="CheckRuleSoflanProblem" xml:space="preserve">
+    <data name="CheckRuleSoflanProblem" xml:space="preserve">
     <value>最后一个Soflan变速后应该变回正常的1速,但现在是{0}速</value>
   </data>
-  <data name="CheckScript" xml:space="preserve">
+    <data name="CheckScript" xml:space="preserve">
     <value>检查脚本</value>
   </data>
-  <data name="CleanRecentFilesRecords" xml:space="preserve">
+    <data name="CleanRecentFilesRecords" xml:space="preserve">
     <value>清除最近打开文件历史记录</value>
   </data>
-  <data name="ClearCopyList" xml:space="preserve">
+    <data name="ClearCopyList" xml:space="preserve">
     <value>清空复制列表</value>
   </data>
-  <data name="ClearHistory" xml:space="preserve">
+    <data name="ClearHistory" xml:space="preserve">
     <value>清除历史记录</value>
   </data>
-  <data name="ClonePallete" xml:space="preserve">
+    <data name="ClonePallete" xml:space="preserve">
     <value>克隆到新的子弹类型</value>
   </data>
-  <data name="CloseEditorByProjectSetupFail" xml:space="preserve">
+    <data name="CloseEditorByProjectSetupFail" xml:space="preserve">
     <value>用户无法完成新建项目向导，关闭此编辑器</value>
   </data>
-  <data name="CloseProgram" xml:space="preserve">
+    <data name="CloseProgram" xml:space="preserve">
     <value>关闭程序</value>
   </data>
-  <data name="CombineLane" xml:space="preserve">
+    <data name="CombineLane" xml:space="preserve">
     <value>合并轨道</value>
   </data>
-  <data name="CombineLanes" xml:space="preserve">
+    <data name="CombineLanes" xml:space="preserve">
     <value>合并轨道</value>
   </data>
-  <data name="Comfirm" xml:space="preserve">
+    <data name="Comfirm" xml:space="preserve">
     <value>确认</value>
   </data>
-  <data name="ComfirmClose" xml:space="preserve">
+    <data name="ComfirmClose" xml:space="preserve">
     <value>我已确认,可以关闭</value>
   </data>
-  <data name="ComfirmExecuteScript" xml:space="preserve">
+    <data name="ComfirmExecuteScript" xml:space="preserve">
     <value>编译成功，是否执行?</value>
   </data>
-  <data name="ComfirmInterpolateMessage" xml:space="preserve">
+    <data name="ComfirmInterpolateMessage" xml:space="preserve">
     <value>是否插值所有包含曲线的轨道物件?\n可能将会删除并重新生成已经插值好的,不含曲线的轨道物件\n部分高度重叠的Tap/Hold物件可能会因此改变它依赖的轨道物件</value>
   </data>
-  <data name="CommandAbout" xml:space="preserve">
+    <data name="CommandAbout" xml:space="preserve">
     <value>关于</value>
   </data>
-  <data name="CommandAdjustDockablesHorizonPosition" xml:space="preserve">
+    <data name="CommandAdjustDockablesHorizonPosition" xml:space="preserve">
     <value>自动调整所有可靠物件的水平位置</value>
   </data>
-  <data name="CommandAudioAdjustWindow" xml:space="preserve">
+    <data name="CommandAudioAdjustWindow" xml:space="preserve">
     <value>音频调整</value>
   </data>
-  <data name="CommandCallFullGC" xml:space="preserve">
+    <data name="CommandCallFullGC" xml:space="preserve">
     <value>垃圾回收</value>
   </data>
-  <data name="CommandInterpolateAll" xml:space="preserve">
+    <data name="CommandInterpolateAll" xml:space="preserve">
     <value>插值所有曲线轨道</value>
   </data>
-  <data name="CommandInterpolateAllWithXGridLimit" xml:space="preserve">
+    <data name="CommandInterpolateAllWithXGridLimit" xml:space="preserve">
     <value>插值所有曲线轨道(XGrid限制)</value>
   </data>
-  <data name="CommandOpenProjectUrl" xml:space="preserve">
+    <data name="CommandOpenProjectUrl" xml:space="preserve">
     <value>项目网址</value>
   </data>
-  <data name="CommandPostSuggest" xml:space="preserve">
+    <data name="CommandPostSuggest" xml:space="preserve">
     <value>提交建议</value>
   </data>
-  <data name="CommandRecentFiles" xml:space="preserve">
+    <data name="CommandRecentFiles" xml:space="preserve">
     <value>最近打开的文件...</value>
   </data>
-  <data name="CommandRequestIssueHelp" xml:space="preserve">
+    <data name="CommandRequestIssueHelp" xml:space="preserve">
     <value>遇到问题?</value>
   </data>
-  <data name="CommandShowCurveControlAlways" xml:space="preserve">
+    <data name="CommandShowCurveControlAlways" xml:space="preserve">
     <value>一直显示曲线控制物件</value>
   </data>
-  <data name="CommandShowCurveControlAlwaysTipText" xml:space="preserve">
+    <data name="CommandShowCurveControlAlwaysTipText" xml:space="preserve">
     <value>如果开启，将一直显示所有曲线控制物件</value>
   </data>
-  <data name="CompileError" xml:space="preserve">
+    <data name="CompileError" xml:space="preserve">
     <value>编译失败:</value>
   </data>
-  <data name="CompileSuccess" xml:space="preserve">
+    <data name="CompileSuccess" xml:space="preserve">
     <value>编译成功</value>
   </data>
-  <data name="Confirm" xml:space="preserve">
+    <data name="Confirm" xml:space="preserve">
     <value>确认</value>
   </data>
-  <data name="ControlTimeline" xml:space="preserve">
+    <data name="ControlTimeline" xml:space="preserve">
     <value>操作时间...</value>
   </data>
-  <data name="ConvertAudioFileNotFound" xml:space="preserve">
+    <data name="ConvertAudioFileNotFound" xml:space="preserve">
     <value>需要转换的音频文件不存在</value>
   </data>
-  <data name="ConvertFail" xml:space="preserve">
+    <data name="ConvertFail" xml:space="preserve">
     <value>转换失败 :</value>
   </data>
-  <data name="ConvertSuccess" xml:space="preserve">
+    <data name="ConvertSuccess" xml:space="preserve">
     <value>转换成功</value>
   </data>
-  <data name="CopiedObjects" xml:space="preserve">
+    <data name="CopiedObjects" xml:space="preserve">
     <value>钦定 {0} 个物件作为复制源</value>
   </data>
-  <data name="Copy" xml:space="preserve">
+    <data name="Copy" xml:space="preserve">
     <value>副本</value>
   </data>
-  <data name="CopyAndPaste" xml:space="preserve">
+    <data name="CopyAndPaste" xml:space="preserve">
     <value>复制粘贴</value>
   </data>
-  <data name="CopyCopiable" xml:space="preserve">
+    <data name="CopyCopiable" xml:space="preserve">
     <value>复制 (可复制的物件)</value>
   </data>
-  <data name="CopyOneObjectOnceBeforeUsingBrush" xml:space="preserve">
+    <data name="CopyOneObjectOnceBeforeUsingBrush" xml:space="preserve">
     <value>需要先复制一个可以复制的物件，才能使用刷子功能</value>
   </data>
-  <data name="CopyRight" xml:space="preserve">
+    <data name="CopyRight" xml:space="preserve">
     <value>版权:</value>
   </data>
-  <data name="CostToUnlock" xml:space="preserve">
+    <data name="CostToUnlock" xml:space="preserve">
     <value>解锁消耗:</value>
   </data>
-  <data name="CrashDumpFile" xml:space="preserve">
+    <data name="CrashDumpFile" xml:space="preserve">
     <value>崩溃调试文件</value>
   </data>
-  <data name="CrashDumpFileOutput" xml:space="preserve">
+    <data name="CrashDumpFileOutput" xml:space="preserve">
     <value>崩溃调试文件输出</value>
   </data>
-  <data name="Create" xml:space="preserve">
+    <data name="Create" xml:space="preserve">
     <value>新建</value>
   </data>
-  <data name="CreateProject" xml:space="preserve">
+    <data name="CreateProject" xml:space="preserve">
     <value>新建项目</value>
   </data>
-  <data name="CreateProjectTipText" xml:space="preserve">
+    <data name="CreateProjectTipText" xml:space="preserve">
     <value>新建一个项目</value>
   </data>
-  <data name="CurrentTimeOffset" xml:space="preserve">
+    <data name="CurrentTimeOffset" xml:space="preserve">
     <value>当前时间线偏移</value>
   </data>
-  <data name="CurveInterpolaterFactoryDefaultImpl" xml:space="preserve">
+    <data name="CurveInterpolaterFactoryDefaultImpl" xml:space="preserve">
     <value>默认实现</value>
   </data>
-  <data name="CurveInterpolaterFactoryXGridLimited" xml:space="preserve">
+    <data name="CurveInterpolaterFactoryXGridLimited" xml:space="preserve">
     <value>XGrid.Unit限制(音击钦定)</value>
   </data>
-  <data name="Delete" xml:space="preserve">
+    <data name="Delete" xml:space="preserve">
     <value>删除</value>
   </data>
-  <data name="DeleteObjects" xml:space="preserve">
+    <data name="DeleteObjects" xml:space="preserve">
     <value>删除物件</value>
   </data>
-  <data name="DeleteSpecificObject" xml:space="preserve">
+    <data name="DeleteSpecificObject" xml:space="preserve">
     <value>删除 {0}</value>
   </data>
-  <data name="DeleteSelectedPalletes" xml:space="preserve">
+    <data name="DeleteSelectedPalletes" xml:space="preserve">
     <value>删除已选的子弹类型</value>
   </data>
-  <data name="Description" xml:space="preserve">
+    <data name="Description" xml:space="preserve">
     <value>描述</value>
   </data>
-  <data name="DeserializeFumenFileFail" xml:space="preserve">
+    <data name="DeserializeFumenFileFail" xml:space="preserve">
     <value>不支持此谱面文件的解析:</value>
   </data>
-  <data name="DeserializeFumenFileNotSupport" xml:space="preserve">
+    <data name="DeserializeFumenFileNotSupport" xml:space="preserve">
     <value>不支持此谱面文件的解析:</value>
   </data>
-  <data name="DesignMode" xml:space="preserve">
+    <data name="DesignMode" xml:space="preserve">
     <value>编辑模式</value>
   </data>
-  <data name="DiffLevel" xml:space="preserve">
+    <data name="DiffLevel" xml:space="preserve">
     <value>难度定数:</value>
   </data>
-  <data name="Disable" xml:space="preserve">
+    <data name="Disable" xml:space="preserve">
     <value>关闭</value>
   </data>
-  <data name="DisableAddObjectBeyondAudioDuration" xml:space="preserve">
+    <data name="DisableAddObjectBeyondAudioDuration" xml:space="preserve">
     <value>无法添加物件到音频范围之外</value>
   </data>
-  <data name="DisableInterpolateByNoConnectableChildren" xml:space="preserve">
+    <data name="DisableInterpolateByNoConnectableChildren" xml:space="preserve">
     <value>无子节点,无法插值</value>
   </data>
-  <data name="DisableInterpolatePartByInvaild" xml:space="preserve">
+    <data name="DisableInterpolatePartByInvaild" xml:space="preserve">
     <value>无法对非法的线段进行局部插值</value>
   </data>
-  <data name="DisableTGridMagneticDock" xml:space="preserve">
+    <data name="DisableTGridMagneticDock" xml:space="preserve">
     <value>禁止时间轴自动停靠</value>
   </data>
-  <data name="DisableUseBrushByMoreObjects" xml:space="preserve">
+    <data name="DisableUseBrushByMoreObjects" xml:space="preserve">
     <value>因为已复制的物件超过一个，无法使用刷子功能</value>
   </data>
-  <data name="DisableXGridMagneticDock" xml:space="preserve">
+    <data name="DisableXGridMagneticDock" xml:space="preserve">
     <value>禁止水平位置轴自动停靠</value>
   </data>
-  <data name="DisplayTimeFormat" xml:space="preserve">
+    <data name="DisplayTimeFormat" xml:space="preserve">
     <value>显示时间格式</value>
   </data>
-  <data name="DragObjects" xml:space="preserve">
+    <data name="DragObjects" xml:space="preserve">
     <value>物件拖动</value>
   </data>
-  <data name="DragToCreateBeamNext" xml:space="preserve">
+    <data name="DragToCreateBeamNext" xml:space="preserve">
     <value>拖动生成新的Beam物件</value>
   </data>
-  <data name="DragToCreateBell" xml:space="preserve">
+    <data name="DragToCreateBell" xml:space="preserve">
     <value>拖动生成钟(Bell)</value>
   </data>
-  <data name="DragToCreateBullet" xml:space="preserve">
+    <data name="DragToCreateBullet" xml:space="preserve">
     <value>拖动生成子弹</value>
   </data>
-  <data name="DragToCreateCurveControlPoint" xml:space="preserve">
+    <data name="DragToCreateCurveControlPoint" xml:space="preserve">
     <value>拖动添加曲线控制</value>
   </data>
-  <data name="DragToCreateCurveControlPointTipText" xml:space="preserve">
+    <data name="DragToCreateCurveControlPointTipText" xml:space="preserve">
     <value>添加一条曲线控制点</value>
   </data>
-  <data name="DragToCreateHoldEnd" xml:space="preserve">
+    <data name="DragToCreateHoldEnd" xml:space="preserve">
     <value>拖动生成HoldEnd物件</value>
   </data>
-  <data name="DragToCreateNext" xml:space="preserve">
+    <data name="DragToCreateNext" xml:space="preserve">
     <value>拖动添加中间点</value>
   </data>
-  <data name="DragToCreateWallEnd" xml:space="preserve">
+    <data name="DragToCreateWallEnd" xml:space="preserve">
     <value>拖动生成WallEnd物件</value>
   </data>
-  <data name="DragToCreateWallNext" xml:space="preserve">
+    <data name="DragToCreateWallNext" xml:space="preserve">
     <value>拖动生成WallNext物件</value>
   </data>
-  <data name="DragToSplit" xml:space="preserve">
+    <data name="DragToSplit" xml:space="preserve">
     <value>拖动分割</value>
   </data>
-  <data name="DragToSplitTipText" xml:space="preserve">
+    <data name="DragToSplitTipText" xml:space="preserve">
     <value>按照某个时间点分割出新旧两个轨道</value>
   </data>
-  <data name="DumpFileSaveTo" xml:space="preserve">
+    <data name="DumpFileSaveTo" xml:space="preserve">
     <value>当前.dmp文件存放在:</value>
   </data>
-  <data name="Earlier" xml:space="preserve">
+    <data name="Earlier" xml:space="preserve">
     <value>更早</value>
   </data>
-  <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
+    <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
     <value>编辑器跳转到指定的TGrid</value>
   </data>
-  <data name="EditorLock" xml:space="preserve">
+    <data name="EditorLock" xml:space="preserve">
     <value>编辑器已锁住</value>
   </data>
-  <data name="EditorModeSwitch" xml:space="preserve">
+    <data name="EditorModeSwitch" xml:space="preserve">
     <value>编辑器预览模式</value>
   </data>
-  <data name="EditorMouseWheelSpeed" xml:space="preserve">
+    <data name="EditorMouseWheelSpeed" xml:space="preserve">
     <value>鼠标滚轮滚动谱面速度</value>
   </data>
-  <data name="EditorMouseWheelSpeed_Unit" xml:space="preserve">
+    <data name="EditorMouseWheelSpeed_Unit" xml:space="preserve">
     <value>(值越大,滚动跨度越大)</value>
   </data>
-  <data name="EditorMustBeDesignMode" xml:space="preserve">
+    <data name="EditorMustBeDesignMode" xml:space="preserve">
     <value>请先将编辑器切换到编辑模式</value>
   </data>
-  <data name="EditorTarget" xml:space="preserve">
+    <data name="EditorTarget" xml:space="preserve">
     <value>编辑器目标</value>
   </data>
-  <data name="EditorUnlock" xml:space="preserve">
+    <data name="EditorUnlock" xml:space="preserve">
     <value>编辑器已解锁</value>
   </data>
-  <data name="EditScriptByVisualStudio" xml:space="preserve">
+    <data name="EditScriptByVisualStudio" xml:space="preserve">
     <value>使用VS编辑脚本</value>
   </data>
-  <data name="Enable" xml:space="preserve">
+    <data name="Enable" xml:space="preserve">
     <value>开启</value>
   </data>
-  <data name="EnableAutoSave" xml:space="preserve">
+    <data name="EnableAutoSave" xml:space="preserve">
     <value>是否开启自动保存功能</value>
   </data>
-  <data name="EnableDumpFullMemory" xml:space="preserve">
+    <data name="EnableDumpFullMemory" xml:space="preserve">
     <value>是否截取完整内存</value>
   </data>
-  <data name="EnableHorizonScroll" xml:space="preserve">
+    <data name="EnableHorizonScroll" xml:space="preserve">
     <value>允许水平滚动</value>
   </data>
-  <data name="EnableHorizonScrollBarDisplay" xml:space="preserve">
+    <data name="EnableHorizonScrollBarDisplay" xml:space="preserve">
     <value>显示水平滚动轴</value>
   </data>
-  <data name="EnableLoopPlayTiming" xml:space="preserve">
+    <data name="EnableLoopPlayTiming" xml:space="preserve">
     <value>打开节拍器(仅编辑模式)</value>
   </data>
-  <data name="EnableMultiInstances" xml:space="preserve">
+    <data name="EnableMultiInstances" xml:space="preserve">
     <value>允许同时运行多个程序实例</value>
   </data>
-  <data name="EnableNotifyUserByDialog" xml:space="preserve">
+    <data name="EnableNotifyUserByDialog" xml:space="preserve">
     <value>是否显示对话框通知用户</value>
   </data>
-  <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
+    <data name="EnablePlaceObjectBeyondAudioDuration" xml:space="preserve">
     <value>允许在音频时长(末尾红线)外放置物件</value>
   </data>
-  <data name="EnablePlayFieldDrawing" xml:space="preserve">
+    <data name="EnablePlayFieldDrawing" xml:space="preserve">
     <value>渲染可击打区域 (实验性功能)</value>
   </data>
-  <data name="EnableVisualizerDisplay" xml:space="preserve">
+    <data name="EnableVisualizerDisplay" xml:space="preserve">
     <value>允许显示频谱</value>
   </data>
-  <data name="Error" xml:space="preserve">
+    <data name="Error" xml:space="preserve">
     <value>错误</value>
   </data>
-  <data name="ErrorCantApplyNewAdjust" xml:space="preserve">
+    <data name="ErrorCantApplyNewAdjust" xml:space="preserve">
     <value>存在某个物件无法应用新的延迟：</value>
   </data>
-  <data name="ErrorEditorNotSupport" xml:space="preserve">
+    <data name="ErrorEditorNotSupport" xml:space="preserve">
     <value>提供的文件编辑器无法打开处理</value>
   </data>
-  <data name="ErrorFileByParamNotFound" xml:space="preserve">
+    <data name="ErrorFileByParamNotFound" xml:space="preserve">
     <value>通过参数提供的文件不存在</value>
   </data>
-  <data name="ErrorFolderIsEmpty" xml:space="preserve">
+    <data name="ErrorFolderIsEmpty" xml:space="preserve">
     <value>选择的文件夹为空,请重新选择</value>
   </data>
-  <data name="ErrorOpenRecentFile" xml:space="preserve">
+    <data name="ErrorOpenRecentFile" xml:space="preserve">
     <value>无法打开此文件，因为抛出错误:</value>
   </data>
-  <data name="ErrorProcessAudioNotFound" xml:space="preserve">
+    <data name="ErrorProcessAudioNotFound" xml:space="preserve">
     <value>请先选择要处理的音频文件</value>
   </data>
-  <data name="ErrorProcessFumenFileNotSelect" xml:space="preserve">
+    <data name="ErrorProcessFumenFileNotSelect" xml:space="preserve">
     <value>请先选择要处理的谱面文件</value>
   </data>
-  <data name="ErrorSaveAudioFileNotSelect" xml:space="preserve">
+    <data name="ErrorSaveAudioFileNotSelect" xml:space="preserve">
     <value>没钦定新的音频文件保存位置</value>
   </data>
-  <data name="ErrorSoundFolderIsEmptyFile" xml:space="preserve">
+    <data name="ErrorSoundFolderIsEmptyFile" xml:space="preserve">
     <value>选择的文件夹为空,请重新选择</value>
   </data>
-  <data name="ErrorSoundFolderNotFound" xml:space="preserve">
+    <data name="ErrorSoundFolderNotFound" xml:space="preserve">
     <value>因为音效文件夹不存在,无法加载音效</value>
   </data>
-  <data name="ExceptionTermWindowTitle" xml:space="preserve">
+    <data name="ExceptionTermWindowTitle" xml:space="preserve">
     <value>江江已经吃了你的制谱器</value>
   </data>
-  <data name="Execute" xml:space="preserve">
+    <data name="Execute" xml:space="preserve">
     <value>执行</value>
   </data>
-  <data name="Fail" xml:space="preserve">
+    <data name="Fail" xml:space="preserve">
     <value>失败</value>
   </data>
-  <data name="FailedAndReason" xml:space="preserve">
+    <data name="FailedAndReason" xml:space="preserve">
     <value>失败,原因:</value>
   </data>
-  <data name="FastAddObjectsToLanes" xml:space="preserve">
+    <data name="FastAddObjectsToLanes" xml:space="preserve">
     <value>快速(批量)添加轨道子节点</value>
   </data>
-  <data name="FastOpen" xml:space="preserve">
+    <data name="FastOpen" xml:space="preserve">
     <value>快速打开</value>
   </data>
-  <data name="FastOpen2" xml:space="preserve">
+    <data name="FastOpen2" xml:space="preserve">
     <value>快速打开</value>
   </data>
-  <data name="FastOpen2TipText" xml:space="preserve">
+    <data name="FastOpen2TipText" xml:space="preserve">
     <value>打开现有的谱面文件</value>
   </data>
-  <data name="FastOpenFumen" xml:space="preserve">
+    <data name="FastOpenFumen" xml:space="preserve">
     <value>快速打开谱面</value>
   </data>
-  <data name="FastOpenOgkrFumen" xml:space="preserve">
+    <data name="FastOpenOgkrFumen" xml:space="preserve">
     <value>快速打开音击谱面</value>
   </data>
-  <data name="FastPickLane" xml:space="preserve">
+    <data name="FastPickLane" xml:space="preserve">
     <value>编辑器快速选择轨道</value>
   </data>
-  <data name="FastPlaceObjectToLane" xml:space="preserve">
+    <data name="FastPlaceObjectToLane" xml:space="preserve">
     <value>快速放置{0}到{1}轨道</value>
   </data>
-  <data name="FastPlayPause" xml:space="preserve">
+    <data name="FastPlayPause" xml:space="preserve">
     <value>编辑器快速播放暂停</value>
   </data>
-  <data name="FileAssociation" xml:space="preserve">
+    <data name="FileAssociation" xml:space="preserve">
     <value>文件关联</value>
   </data>
-  <data name="FileAssociationRegister" xml:space="preserve">
+    <data name="FileAssociationRegister" xml:space="preserve">
     <value>关联以上格式文件到此程序</value>
   </data>
-  <data name="FileAssociationRequestAdmin" xml:space="preserve">
+    <data name="FileAssociationRequestAdmin" xml:space="preserve">
     <value>文件关联 (需要管理员权限)</value>
   </data>
-  <data name="FileAssociationUnregister" xml:space="preserve">
+    <data name="FileAssociationUnregister" xml:space="preserve">
     <value>取消所有关联</value>
   </data>
-  <data name="Filter" xml:space="preserve">
+    <data name="Filter" xml:space="preserve">
     <value>过滤</value>
   </data>
-  <data name="FinishBouns" xml:space="preserve">
+    <data name="FinishBouns" xml:space="preserve">
     <value>结算奖励:</value>
   </data>
-  <data name="FirstBpm" xml:space="preserve">
+    <data name="FirstBpm" xml:space="preserve">
     <value>初始Bpm:</value>
   </data>
-  <data name="ForceMagneticDock" xml:space="preserve">
+    <data name="ForceMagneticDock" xml:space="preserve">
     <value>强制自动停靠</value>
   </data>
-  <data name="ForceTapHoldMagneticDockToLane" xml:space="preserve">
+    <data name="ForceTapHoldMagneticDockToLane" xml:space="preserve">
     <value>强制Tap或Hold物件停靠到轨道上</value>
   </data>
-  <data name="ForceXGridMagneticDock" xml:space="preserve">
+    <data name="ForceXGridMagneticDock" xml:space="preserve">
     <value>强制水平位置轴自动停靠</value>
   </data>
-  <data name="FumenBulletPalleteListViewer" xml:space="preserve">
+    <data name="FumenBulletPalleteListViewer" xml:space="preserve">
     <value>子弹管理</value>
   </data>
-  <data name="FumenCheckerListViewer" xml:space="preserve">
+    <data name="FumenCheckerListViewer" xml:space="preserve">
     <value>谱面检查器</value>
   </data>
-  <data name="FumenContainUngenerateError" xml:space="preserve">
+    <data name="FumenContainUngenerateError" xml:space="preserve">
     <value>谱面存在无法忽略的格式或内容错误,无法继续生成。请使用谱面检查工具检查谱面并修改正确。</value>
   </data>
-  <data name="FumenConverter" xml:space="preserve">
+    <data name="FumenConverter" xml:space="preserve">
     <value>谱面文件转换</value>
   </data>
-  <data name="FumenEditorRenderControlViewer" xml:space="preserve">
+    <data name="FumenEditorRenderControlViewer" xml:space="preserve">
     <value>谱面编辑器渲染控制</value>
   </data>
-  <data name="FumenEditorSelectingObjectViewer" xml:space="preserve">
+    <data name="FumenEditorSelectingObjectViewer" xml:space="preserve">
     <value>当前选择物件查看器</value>
   </data>
-  <data name="FumenFileDeserializeNotSupport" xml:space="preserve">
+    <data name="FumenFileDeserializeNotSupport" xml:space="preserve">
     <value>不支持解析此谱面文件</value>
   </data>
-  <data name="FumenFileName" xml:space="preserve">
+    <data name="FumenFileName" xml:space="preserve">
     <value>谱面文件名(选填):</value>
   </data>
-  <data name="FumenFileNotSelect" xml:space="preserve">
+    <data name="FumenFileNotSelect" xml:space="preserve">
     <value>请先选择输入的谱面文件路径</value>
   </data>
-  <data name="FumenInfo" xml:space="preserve">
+    <data name="FumenInfo" xml:space="preserve">
     <value>谱面信息</value>
   </data>
-  <data name="FumenInitOption" xml:space="preserve">
+    <data name="FumenInitOption" xml:space="preserve">
     <value>谱面初始设置</value>
   </data>
-  <data name="FumenLoadFailed" xml:space="preserve">
+    <data name="FumenLoadFailed" xml:space="preserve">
     <value>加载谱面文件失败 :</value>
   </data>
-  <data name="FumenMetaInfoBrowser" xml:space="preserve">
+    <data name="FumenMetaInfoBrowser" xml:space="preserve">
     <value>谱面文件信息</value>
   </data>
-  <data name="FumenObjectPropertyBrowser" xml:space="preserve">
+    <data name="FumenObjectPropertyBrowser" xml:space="preserve">
     <value>物件属性</value>
   </data>
-  <data name="FumenProjectFile" xml:space="preserve">
+    <data name="FumenProjectFile" xml:space="preserve">
     <value>谱面项目文件</value>
   </data>
-  <data name="FumenSource" xml:space="preserve">
+    <data name="FumenSource" xml:space="preserve">
     <value>谱面来源</value>
   </data>
-  <data name="FumenTimeSignatureListViewer" xml:space="preserve">
+    <data name="FumenTimeSignatureListViewer" xml:space="preserve">
     <value>节拍查看器</value>
   </data>
-  <data name="FumenVisualEditorSettings" xml:space="preserve">
+    <data name="FumenVisualEditorSettings" xml:space="preserve">
     <value>编辑器设置</value>
   </data>
-  <data name="GameVersion" xml:space="preserve">
+    <data name="GameVersion" xml:space="preserve">
     <value>游戏版本:</value>
   </data>
-  <data name="Generate" xml:space="preserve">
+    <data name="Generate" xml:space="preserve">
     <value>生成</value>
   </data>
-  <data name="GenerateABFileFail" xml:space="preserve">
+    <data name="GenerateABFileFail" xml:space="preserve">
     <value>生成ab文件失败</value>
   </data>
-  <data name="GenerateAssemblyFileFail" xml:space="preserve">
+    <data name="GenerateAssemblyFileFail" xml:space="preserve">
     <value>无法生成.dll文件:</value>
   </data>
-  <data name="GenerateAudioFileFail" xml:space="preserve">
+    <data name="GenerateAudioFileFail" xml:space="preserve">
     <value>生成音频文件失败:</value>
   </data>
-  <data name="GenerateAudioSuccess" xml:space="preserve">
+    <data name="GenerateAudioSuccess" xml:space="preserve">
     <value>生成音频文件成功,是否打开输出文件夹?</value>
   </data>
-  <data name="GenerateJacketFileFail" xml:space="preserve">
+    <data name="GenerateJacketFileFail" xml:space="preserve">
     <value>生成封面文件失败:</value>
   </data>
-  <data name="GenerateJacketFileSuccess" xml:space="preserve">
+    <data name="GenerateJacketFileSuccess" xml:space="preserve">
     <value>生成封面文件成功,是否打开输出文件夹?</value>
   </data>
-  <data name="GenerateLaneObjects" xml:space="preserve">
+    <data name="GenerateLaneObjects" xml:space="preserve">
     <value>原地生成轨道物件</value>
   </data>
-  <data name="GenerateMusicXmlFile" xml:space="preserve">
+    <data name="GenerateMusicXmlFile" xml:space="preserve">
     <value>生成Music.xml文件</value>
   </data>
-  <data name="GenerateScriptProjectFileFail" xml:space="preserve">
+    <data name="GenerateScriptProjectFileFail" xml:space="preserve">
     <value>生成脚本项目文件失败.</value>
   </data>
-  <data name="GenerateSvg" xml:space="preserve">
+    <data name="GenerateSvg" xml:space="preserve">
     <value>生成铺面预览.svg文件</value>
   </data>
-  <data name="GenerateSvgSuccess" xml:space="preserve">
+    <data name="GenerateSvgSuccess" xml:space="preserve">
     <value>生成谱面预览.svg文件成功</value>
   </data>
-  <data name="GenerateSvgSuccessAndAskIfOpen" xml:space="preserve">
+    <data name="GenerateSvgSuccessAndAskIfOpen" xml:space="preserve">
     <value>生成svg文件成功,是否立即打开文件?</value>
   </data>
-  <data name="Genre" xml:space="preserve">
+    <data name="Genre" xml:space="preserve">
     <value>音乐分类:</value>
   </data>
-  <data name="GiveTGridToSelectedObject" xml:space="preserve">
+    <data name="GiveTGridToSelectedObject" xml:space="preserve">
     <value>将此TGrid赋值给当前已选物件</value>
   </data>
-  <data name="GraphicsCompatability" xml:space="preserve">
+    <data name="GraphicsCompatability" xml:space="preserve">
     <value>兼容模式 (使用OpenGL3.3全兼容,程序显示项目或者音频画面崩溃时可尝试)</value>
   </data>
-  <data name="GraphicsLogSynchronous" xml:space="preserve">
+    <data name="GraphicsLogSynchronous" xml:space="preserve">
     <value>在主线程输出OpenGL日志 (更影响性能,但抛出异常会有精准栈信息)</value>
   </data>
-  <data name="GraphicsRender" xml:space="preserve">
+    <data name="GraphicsRender" xml:space="preserve">
     <value>图形渲染</value>
   </data>
-  <data name="HalfHourAgo" xml:space="preserve">
+    <data name="HalfHourAgo" xml:space="preserve">
     <value>半小时前</value>
   </data>
-  <data name="HeaderConstMismatch" xml:space="preserve">
+    <data name="HeaderConstMismatch" xml:space="preserve">
     <value>谱面Header信息</value>
   </data>
-  <data name="HeaderConstMismatch2" xml:space="preserve">
+    <data name="HeaderConstMismatch2" xml:space="preserve">
     <value>谱面XRESOLUTION({0})参数和XGrid.ResX({1})不匹配</value>
   </data>
-  <data name="HeaderConstMismatch3" xml:space="preserve">
+    <data name="HeaderConstMismatch3" xml:space="preserve">
     <value>谱面TRESOLUTION({0})参数和TGrid.ResT({1})不匹配</value>
   </data>
-  <data name="HeaderConstMismatch4" xml:space="preserve">
+    <data name="HeaderConstMismatch4" xml:space="preserve">
     <value>无谱师信息</value>
   </data>
-  <data name="ImageFile" xml:space="preserve">
+    <data name="ImageFile" xml:space="preserve">
     <value>图片文件:</value>
   </data>
-  <data name="InnerExceptionMessage" xml:space="preserve">
+    <data name="InnerExceptionMessage" xml:space="preserve">
     <value>内部异常原因:</value>
   </data>
-  <data name="InputPictureFileNotFound" xml:space="preserve">
+    <data name="InputPictureFileNotFound" xml:space="preserve">
     <value>需要生成的图片文件不存在</value>
   </data>
-  <data name="InterpolateComplete" xml:space="preserve">
+    <data name="InterpolateComplete" xml:space="preserve">
     <value>插值计算完成,一共对 {0} 条符合条件的轨道进行插值,生成了 {1} 条新的轨道,对应 {2} 个受到影响的Tap/Hold等物件进行重新计算。</value>
   </data>
-  <data name="InterpolateCurve" xml:space="preserve">
+    <data name="InterpolateCurve" xml:space="preserve">
     <value>插值曲线</value>
   </data>
-  <data name="InterpolateDurationSoflan" xml:space="preserve">
+    <data name="InterpolateDurationSoflan" xml:space="preserve">
     <value>插值生成Soflan物件</value>
   </data>
-  <data name="InterpolateLane" xml:space="preserve">
+    <data name="InterpolateLane" xml:space="preserve">
     <value>插值整个轨道曲线</value>
   </data>
-  <data name="InterpolateLaneTipText" xml:space="preserve">
+    <data name="InterpolateLaneTipText" xml:space="preserve">
     <value>对此轨道所有曲线进行插值成一条条直线,然后删除本轨道并生成新的</value>
   </data>
-  <data name="InterpolatePart" xml:space="preserve">
+    <data name="InterpolatePart" xml:space="preserve">
     <value>插值这段曲线</value>
   </data>
-  <data name="InterpolatePartCurve" xml:space="preserve">
+    <data name="InterpolatePartCurve" xml:space="preserve">
     <value>部分曲线插值</value>
   </data>
-  <data name="InterpolatePartTipText" xml:space="preserve">
+    <data name="InterpolatePartTipText" xml:space="preserve">
     <value>对此段曲线进行插值，非法线段无法使用</value>
   </data>
-  <data name="InterpolateToCreateKeyframeSoflans" xml:space="preserve">
+    <data name="InterpolateToCreateKeyframeSoflans" xml:space="preserve">
     <value>插值生成KeyframeSoflan物件</value>
   </data>
-  <data name="InterpolateToCreateKeyframeSoflansTipText" xml:space="preserve">
+    <data name="InterpolateToCreateKeyframeSoflansTipText" xml:space="preserve">
     <value>生成已经插值好的一堆KeyframeSoflan物件</value>
   </data>
-  <data name="InvalidConnectablePath" xml:space="preserve">
+    <data name="InvalidConnectablePath" xml:space="preserve">
     <value>轨道物件路径非法</value>
   </data>
-  <data name="JacketGenerator" xml:space="preserve">
+    <data name="JacketGenerator" xml:space="preserve">
     <value>封面文件生成器</value>
   </data>
-  <data name="JudgeLineAlignBeat" xml:space="preserve">
+    <data name="JudgeLineAlignBeat" xml:space="preserve">
     <value>滑轮滚动判定线对齐节奏线</value>
   </data>
-  <data name="JudgeLineOffsetY" xml:space="preserve">
+    <data name="JudgeLineOffsetY" xml:space="preserve">
     <value>判定线偏移位置:</value>
   </data>
-  <data name="JustBefore" xml:space="preserve">
+    <data name="JustBefore" xml:space="preserve">
     <value>刚刚</value>
   </data>
-  <data name="KeywordSortFilter" xml:space="preserve">
+    <data name="KeywordSortFilter" xml:space="preserve">
     <value>关键词排序:</value>
   </data>
-  <data name="LaneContainInvalidPath" xml:space="preserve">
+    <data name="LaneContainInvalidPath" xml:space="preserve">
     <value>此轨道包含非法路径</value>
   </data>
-  <data name="Languages" xml:space="preserve">
+    <data name="Languages" xml:space="preserve">
     <value>语言</value>
   </data>
-  <data name="LimitUndoCount" xml:space="preserve">
+    <data name="LimitUndoCount" xml:space="preserve">
     <value>限制编辑器撤回操作保存数量</value>
   </data>
-  <data name="LoadFromCurrentEditor" xml:space="preserve">
+    <data name="LoadFromCurrentEditor" xml:space="preserve">
     <value>从当前谱面编辑器加载:</value>
   </data>
-  <data name="LoadFromFile" xml:space="preserve">
+    <data name="LoadFromFile" xml:space="preserve">
     <value>从文件加载:</value>
   </data>
-  <data name="LoadFumen" xml:space="preserve">
+    <data name="LoadFumen" xml:space="preserve">
     <value>加载谱面</value>
   </data>
-  <data name="LoadMusicXmlFile" xml:space="preserve">
+    <data name="LoadMusicXmlFile" xml:space="preserve">
     <value>加载已有Music.xml数据</value>
   </data>
-  <data name="LoadProjectFileAndFumenFile" xml:space="preserve">
+    <data name="LoadProjectFileAndFumenFile" xml:space="preserve">
     <value>谱面项目和文件加载成功</value>
   </data>
-  <data name="LogFileSaveTo" xml:space="preserve">
+    <data name="LogFileSaveTo" xml:space="preserve">
     <value>当前日志文件存档放在:</value>
   </data>
-  <data name="Logger" xml:space="preserve">
+    <data name="Logger" xml:space="preserve">
     <value>日志</value>
   </data>
-  <data name="LoggerFolder" xml:space="preserve">
+    <data name="LoggerFolder" xml:space="preserve">
     <value>日志文件夹</value>
   </data>
-  <data name="MenuAssist" xml:space="preserve">
+    <data name="MenuAssist" xml:space="preserve">
     <value>辅助 (_A)</value>
   </data>
-  <data name="MenuHelp" xml:space="preserve">
+    <data name="MenuHelp" xml:space="preserve">
     <value>帮助 (_H)</value>
   </data>
-  <data name="MenuOngeki" xml:space="preserve">
+    <data name="MenuOngeki" xml:space="preserve">
     <value>音击谱面 (_O)</value>
   </data>
-  <data name="MenuOptionGenerateTool" xml:space="preserve">
+    <data name="MenuOptionGenerateTool" xml:space="preserve">
     <value>option生成工具</value>
   </data>
-  <data name="MenuSelecting" xml:space="preserve">
+    <data name="MenuSelecting" xml:space="preserve">
     <value>选取...</value>
   </data>
-  <data name="MenuMirrorSelectionXGrid" xml:space="preserve">
+    <data name="MenuMirrorSelectionXGrid" xml:space="preserve">
     <value>按整体全体范围水平镜像移动</value>
   </data>
-  <data name="MenuMirrorSelectionXGridZero" xml:space="preserve">
+    <data name="MenuMirrorSelectionXGridZero" xml:space="preserve">
     <value>按X[0,0]为基准水平镜像移动</value>
   </data>
-  <data name="MenuMirrorSelectionLaneColors" xml:space="preserve">
+    <data name="MenuMirrorSelectionLaneColors" xml:space="preserve">
     <value>镜像击打轨道颜色</value>
   </data>
-  <data name="MissingBossEnemySet" xml:space="preserve">
+    <data name="MissingBossEnemySet" xml:space="preserve">
     <value>缺少Boss的EnemySet物件,建议放置一个来钦定boss出现的时机</value>
   </data>
-  <data name="MissingEndObject" xml:space="preserve">
+    <data name="MissingEndObject" xml:space="preserve">
     <value>Hold(Oid:{0})物件缺少HoldEnd中止物件</value>
   </data>
-  <data name="MissingRefObject" xml:space="preserve">
+    <data name="MissingRefObject" xml:space="preserve">
     <value>{0}物件缺少引用Lane物件</value>
   </data>
-  <data name="MissingRefObject2" xml:space="preserve">
+    <data name="MissingRefObject2" xml:space="preserve">
     <value>{0}物件引用的Lane物件(laneId:{1}),不存在于谱面文件内</value>
   </data>
-  <data name="Music" xml:space="preserve">
+    <data name="Music" xml:space="preserve">
     <value>音乐</value>
   </data>
-  <data name="MusicIDInvaild" xml:space="preserve">
+    <data name="MusicIDInvaild" xml:space="preserve">
     <value>MusicId({0})不合法</value>
   </data>
-  <data name="MusicXmlFileFormat" xml:space="preserve">
+    <data name="MusicXmlFileFormat" xml:space="preserve">
     <value>Music.xml文件</value>
   </data>
-  <data name="MusicXmlWindow" xml:space="preserve">
+    <data name="MusicXmlWindow" xml:space="preserve">
     <value>Music.xml生成器</value>
   </data>
-  <data name="MustMakeEditorActive" xml:space="preserve">
+    <data name="MustMakeEditorActive" xml:space="preserve">
     <value>请先切换到当前编辑器</value>
   </data>
-  <data name="MustSelectOneTapOrHold" xml:space="preserve">
+    <data name="MustSelectOneTapOrHold" xml:space="preserve">
     <value>需要单选一个Tap/Hold物件</value>
   </data>
-  <data name="Name" xml:space="preserve">
+    <data name="Name" xml:space="preserve">
     <value>名字</value>
   </data>
-  <data name="NewBulletPallete" xml:space="preserve">
+    <data name="NewBulletPallete" xml:space="preserve">
     <value>新增子弹类型</value>
   </data>
-  <data name="NewFumenFileSaveDone" xml:space="preserve">
+    <data name="NewFumenFileSaveDone" xml:space="preserve">
     <value>音击谱面标准化输出,处理完成\n是否立即打开输出文件夹</value>
   </data>
-  <data name="NewFumenFileSavePath" xml:space="preserve">
+    <data name="NewFumenFileSavePath" xml:space="preserve">
     <value>新的谱面文件输出保存路径</value>
   </data>
-  <data name="NoEditorTarget" xml:space="preserve">
+    <data name="NoEditorTarget" xml:space="preserve">
     <value>&lt;无编辑器目标&gt;</value>
   </data>
-  <data name="NoFumenInput" xml:space="preserve">
+    <data name="NoFumenInput" xml:space="preserve">
     <value>无谱面输入</value>
   </data>
-  <data name="NoObjectCouldBeSetIsCritical" xml:space="preserve">
+    <data name="NoObjectCouldBeSetIsCritical" xml:space="preserve">
     <value>无合适物件批量设置IsCritical属性</value>
   </data>
-  <data name="NoFlickCouldBeSwitched" xml:space="preserve">
+    <data name="NoFlickCouldBeSwitched" xml:space="preserve">
     <value>请先选择Flick物件再更改方向</value>
   </data>
-  <data name="NotInterpolatedCurve" xml:space="preserve">
+    <data name="NotInterpolatedCurve" xml:space="preserve">
     <value>轨道物件曲线还没被插值</value>
   </data>
-  <data name="NotShow" xml:space="preserve">
+    <data name="NotShow" xml:space="preserve">
     <value>(不显示)</value>
   </data>
-  <data name="NotShowAnymore" xml:space="preserve">
+    <data name="NotShowAnymore" xml:space="preserve">
     <value>不再显示此窗口</value>
   </data>
-  <data name="NotSupportInBatchMode" xml:space="preserve">
+    <data name="NotSupportInBatchMode" xml:space="preserve">
     <value>批量模式下不支持{0}</value>
   </data>
-  <data name="ObjectBatchBrush" xml:space="preserve">
+    <data name="ObjectBatchBrush" xml:space="preserve">
     <value>批量粘贴刷子</value>
   </data>
-  <data name="ObjectLaneGroupId" xml:space="preserve">
+    <data name="ObjectLaneGroupId" xml:space="preserve">
     <value>改变此值可以改变此物件对应的轨道所属</value>
   </data>
-  <data name="ObjectNotSupportedInBatchMode" xml:space="preserve">
+    <data name="ObjectNotSupportedInBatchMode" xml:space="preserve">
     <value>此复制的物件无法使用刷子功能</value>
   </data>
-  <data name="ObjectOverlap" xml:space="preserve">
+    <data name="ObjectOverlap" xml:space="preserve">
     <value>多个ITimelineObject同类({0})物件重叠</value>
   </data>
-  <data name="ObjectOverlap2" xml:space="preserve">
+    <data name="ObjectOverlap2" xml:space="preserve">
     <value>多个同类{0}物件重叠</value>
   </data>
-  <data name="ObjectPalleteStrId" xml:space="preserve">
+    <data name="ObjectPalleteStrId" xml:space="preserve">
     <value>改变此值可以改变此物件对应的子弹模板</value>
   </data>
-  <data name="ObjectProperty" xml:space="preserve">
+    <data name="ObjectProperty" xml:space="preserve">
     <value>物件属性</value>
   </data>
-  <data name="ObjectPropertyChanged" xml:space="preserve">
+    <data name="ObjectPropertyChanged" xml:space="preserve">
     <value>物件属性({0})变更</value>
   </data>
-  <data name="ObjectTag" xml:space="preserve">
+    <data name="ObjectTag" xml:space="preserve">
     <value>表示用户自己自定义的标签，一般用于脚本区分</value>
   </data>
-  <data name="ObjectTGrid" xml:space="preserve">
+    <data name="ObjectTGrid" xml:space="preserve">
     <value>物件时间轴坐标</value>
   </data>
-  <data name="ObjectTime" xml:space="preserve">
+    <data name="ObjectTime" xml:space="preserve">
     <value>物件时间</value>
   </data>
-  <data name="ObjectTimelineNotAligned" xml:space="preserve">
+    <data name="ObjectTimelineNotAligned" xml:space="preserve">
     <value>物件{0}没对上节奏</value>
   </data>
-  <data name="ObjectXGrid" xml:space="preserve">
+    <data name="ObjectXGrid" xml:space="preserve">
     <value>物件横坐标</value>
   </data>
-  <data name="OffsetOption" xml:space="preserve">
+    <data name="OffsetOption" xml:space="preserve">
     <value>延迟选项</value>
   </data>
-  <data name="OgkiFumenListBrowser" xml:space="preserve">
+    <data name="OgkiFumenListBrowser" xml:space="preserve">
     <value>音击谱面库浏览器</value>
   </data>
-  <data name="OngekiFumen" xml:space="preserve">
+    <data name="OngekiFumen" xml:space="preserve">
     <value>音击谱面</value>
   </data>
-  <data name="OngekiFumenStandardized" xml:space="preserve">
+    <data name="OngekiFumenStandardized" xml:space="preserve">
     <value>已标准化的音击谱面</value>
   </data>
-  <data name="OpenEditorBeforeUsing" xml:space="preserve">
+    <data name="OpenEditorBeforeUsing" xml:space="preserve">
     <value>请先打开编辑器</value>
   </data>
-  <data name="OpenProject" xml:space="preserve">
+    <data name="OpenProject" xml:space="preserve">
     <value>打开项目</value>
   </data>
-  <data name="OpenProjectTipText" xml:space="preserve">
+    <data name="OpenProjectTipText" xml:space="preserve">
     <value>打开现有的项目</value>
   </data>
-  <data name="Option" xml:space="preserve">
+    <data name="Option" xml:space="preserve">
     <value>选项</value>
   </data>
-  <data name="OptionalFumenFile" xml:space="preserve">
+    <data name="OptionalFumenFile" xml:space="preserve">
     <value>谱面文件(可选):</value>
   </data>
-  <data name="Other" xml:space="preserve">
+    <data name="Other" xml:space="preserve">
     <value>其他</value>
   </data>
-  <data name="Output" xml:space="preserve">
+    <data name="Output" xml:space="preserve">
     <value>输出</value>
   </data>
-  <data name="OutputFolder" xml:space="preserve">
+    <data name="OutputFolder" xml:space="preserve">
     <value>输出目录:</value>
   </data>
-  <data name="OutputFolderIsEmpty" xml:space="preserve">
+    <data name="OutputFolderIsEmpty" xml:space="preserve">
     <value>输出文件夹为空</value>
   </data>
-  <data name="OutputFumenFileNotSelect" xml:space="preserve">
+    <data name="OutputFumenFileNotSelect" xml:space="preserve">
     <value>没钦定谱面输出路径</value>
   </data>
-  <data name="OutputFumenNotSupport" xml:space="preserve">
+    <data name="OutputFumenNotSupport" xml:space="preserve">
     <value>不支持谱面输出路径</value>
   </data>
-  <data name="OutputGraphicsLog" xml:space="preserve">
+    <data name="OutputGraphicsLog" xml:space="preserve">
     <value>输出OpenGL日志 (会影响性能且出错会抛出异常)</value>
   </data>
-  <data name="OutputMethod" xml:space="preserve">
+    <data name="OutputMethod" xml:space="preserve">
     <value>使用输出方式：</value>
   </data>
-  <data name="PasteDirectly" xml:space="preserve">
+    <data name="PasteDirectly" xml:space="preserve">
     <value>直接粘贴</value>
   </data>
-  <data name="PasteForHorizonMirror" xml:space="preserve">
+    <data name="PasteForHorizonMirror" xml:space="preserve">
     <value>按整体全体范围水平镜像粘贴</value>
   </data>
-  <data name="PasteForVerticalMirror" xml:space="preserve">
+    <data name="PasteForVerticalMirror" xml:space="preserve">
     <value>按整体全体范围垂直镜像粘贴</value>
   </data>
-  <data name="PasteForZeroXGridMirror" xml:space="preserve">
+    <data name="PasteForZeroXGridMirror" xml:space="preserve">
     <value>按X[0,0]为基准水平镜像粘贴</value>
   </data>
-  <data name="PasteToMouse" xml:space="preserve">
+    <data name="PasteToMouse" xml:space="preserve">
     <value>复制到鼠标位置</value>
   </data>
-  <data name="PauseAudioAndFumen" xml:space="preserve">
+    <data name="PauseAudioAndFumen" xml:space="preserve">
     <value>请先暂停音频/谱面播放</value>
   </data>
-  <data name="PlayFieldForegroundColor" xml:space="preserve">
+    <data name="PlayFieldForegroundColor" xml:space="preserve">
     <value>可击打区域颜色:</value>
   </data>
-  <data name="PreventUsingInternalEditor" xml:space="preserve">
+    <data name="PreventUsingInternalEditor" xml:space="preserve">
     <value>为了避免代码混乱,您暂时无法同时操作本编辑器</value>
   </data>
-  <data name="PreviewMode" xml:space="preserve">
+    <data name="PreviewMode" xml:space="preserve">
     <value>预览模式</value>
   </data>
-  <data name="PreviewTime" xml:space="preserve">
+    <data name="PreviewTime" xml:space="preserve">
     <value>预览时间(毫秒):</value>
   </data>
-  <data name="Problem" xml:space="preserve">
+    <data name="Problem" xml:space="preserve">
     <value>问题</value>
   </data>
-  <data name="Process" xml:space="preserve">
+    <data name="Process" xml:space="preserve">
     <value>处理</value>
   </data>
-  <data name="ProcessProriotyUpgrade" xml:space="preserve">
+    <data name="ProcessProriotyUpgrade" xml:space="preserve">
     <value>提升本应用进程优先度</value>
   </data>
-  <data name="ProgramError" xml:space="preserve">
+    <data name="ProgramError" xml:space="preserve">
     <value>程序错误</value>
   </data>
-  <data name="ProgramThrowAndDump" xml:space="preserve">
+    <data name="ProgramThrowAndDump" xml:space="preserve">
     <value>程序捕获到未处理的异常,日志(Logs)和转储文件(Dumps)已存放到程序目录对应文件夹中,可发给开发者处理</value>
   </data>
-  <data name="PropertyBatchSet" xml:space="preserve">
+    <data name="PropertyBatchSet" xml:space="preserve">
     <value>批量赋值:</value>
   </data>
-  <data name="RandomOffsetRange" xml:space="preserve">
+    <data name="RandomOffsetRange" xml:space="preserve">
     <value>随机偏移范围</value>
   </data>
-  <data name="RecaculatedSuccess" xml:space="preserve">
+    <data name="RecaculatedSuccess" xml:space="preserve">
     <value>重新计算成功</value>
   </data>
-  <data name="RecalculateTotalHeight" xml:space="preserve">
+    <data name="RecalculateTotalHeight" xml:space="preserve">
     <value>重新计算编辑器画幅总长度</value>
   </data>
-  <data name="RecentFiles" xml:space="preserve">
+    <data name="RecentFiles" xml:space="preserve">
     <value>打开最近的使用的文件</value>
   </data>
-  <data name="RecoveryAudioTime" xml:space="preserve">
+    <data name="RecoveryAudioTime" xml:space="preserve">
     <value>恢复到音频时间</value>
   </data>
-  <data name="RecoveryObjectsSuccess" xml:space="preserve">
+    <data name="RecoveryObjectsSuccess" xml:space="preserve">
     <value>已恢复 {0} 个物件到音频时间...</value>
   </data>
-  <data name="RecoveryObjectToAudioTime" xml:space="preserve">
+    <data name="RecoveryObjectToAudioTime" xml:space="preserve">
     <value>恢复物件到音频时间</value>
   </data>
-  <data name="Refresh" xml:space="preserve">
+    <data name="Refresh" xml:space="preserve">
     <value>刷新</value>
   </data>
-  <data name="RegisterFail" xml:space="preserve">
+    <data name="RegisterFail" xml:space="preserve">
     <value>注册失败</value>
   </data>
-  <data name="RegisterOneFileTypeAtLeast" xml:space="preserve">
+    <data name="RegisterOneFileTypeAtLeast" xml:space="preserve">
     <value>至少注册一个文件类型</value>
   </data>
-  <data name="RegisterSuccess" xml:space="preserve">
+    <data name="RegisterSuccess" xml:space="preserve">
     <value>注册成功</value>
   </data>
-  <data name="ReloadSoundFile" xml:space="preserve">
+    <data name="ReloadSoundFile" xml:space="preserve">
     <value>重新加载音效文件</value>
   </data>
-  <data name="RememberAudioTime" xml:space="preserve">
+    <data name="RememberAudioTime" xml:space="preserve">
     <value>记忆音频时间</value>
   </data>
-  <data name="RememberObjects" xml:space="preserve">
+    <data name="RememberObjects" xml:space="preserve">
     <value>已记忆 {0} 个物件的音频时间</value>
   </data>
-  <data name="RememberRecoveryEditorTime" xml:space="preserve">
+    <data name="RememberRecoveryEditorTime" xml:space="preserve">
     <value>记忆/恢复编辑器时间</value>
   </data>
-  <data name="RememberUndoPlace" xml:space="preserve">
+    <data name="RememberUndoPlace" xml:space="preserve">
     <value>记录操作位置，编辑模式中撤回时如果不在位置内则跳转此位置</value>
   </data>
-  <data name="Render" xml:space="preserve">
+    <data name="Render" xml:space="preserve">
     <value>渲染器</value>
   </data>
-  <data name="RenderOrder" xml:space="preserve">
+    <data name="RenderOrder" xml:space="preserve">
     <value>渲染顺序</value>
   </data>
-  <data name="RequestAdminPermission" xml:space="preserve">
+    <data name="RequestAdminPermission" xml:space="preserve">
     <value>权限不够,请以管理员身份运行</value>
   </data>
-  <data name="RequestRestartProgram" xml:space="preserve">
+    <data name="RequestRestartProgram" xml:space="preserve">
     <value>* 需要重启程序</value>
   </data>
-  <data name="Resample" xml:space="preserve">
+    <data name="Resample" xml:space="preserve">
     <value>重采样</value>
   </data>
-  <data name="RescueFolderPathSaveTo" xml:space="preserve">
+    <data name="RescueFolderPathSaveTo" xml:space="preserve">
     <value>你的谱面和项目文件临时放在:</value>
   </data>
-  <data name="ResetDefault" xml:space="preserve">
+    <data name="ResetDefault" xml:space="preserve">
     <value>恢复默认</value>
   </data>
-  <data name="ReverseSelectAllObjects" xml:space="preserve">
+    <data name="ReverseSelectAllObjects" xml:space="preserve">
     <value>反向选取所有物件</value>
   </data>
-  <data name="RuleName" xml:space="preserve">
+    <data name="RuleName" xml:space="preserve">
     <value>检查规则</value>
   </data>
-  <data name="RunScript" xml:space="preserve">
+    <data name="RunScript" xml:space="preserve">
     <value>运行脚本</value>
   </data>
-  <data name="SampleRates" xml:space="preserve">
+    <data name="SampleRates" xml:space="preserve">
     <value>钦定采样率</value>
   </data>
-  <data name="SaveMaxCount_Part1" xml:space="preserve">
+    <data name="SaveMaxCount_Part1" xml:space="preserve">
     <value>最大保存</value>
   </data>
-  <data name="SaveMaxCount_Part2" xml:space="preserve">
+    <data name="SaveMaxCount_Part2" xml:space="preserve">
     <value>个撤回操作</value>
   </data>
-  <data name="SaveMusicXmlFile" xml:space="preserve">
+    <data name="SaveMusicXmlFile" xml:space="preserve">
     <value>保存Music.xml文件</value>
   </data>
-  <data name="SaveNewAudioFile" xml:space="preserve">
+    <data name="SaveNewAudioFile" xml:space="preserve">
     <value>保存新音频文件路径</value>
   </data>
-  <data name="SaveNewProjectFile" xml:space="preserve">
+    <data name="SaveNewProjectFile" xml:space="preserve">
     <value>保存新的项目文件</value>
   </data>
-  <data name="SaveProjectFileAndFumenFile" xml:space="preserve">
+    <data name="SaveProjectFileAndFumenFile" xml:space="preserve">
     <value>谱面项目和文件保存成功</value>
   </data>
-  <data name="SaveToFile" xml:space="preserve">
+    <data name="SaveToFile" xml:space="preserve">
     <value>保存到文件:</value>
   </data>
-  <data name="Second" xml:space="preserve">
+    <data name="Second" xml:space="preserve">
     <value>秒</value>
   </data>
-  <data name="SelectAllObjects" xml:space="preserve">
+    <data name="SelectAllObjects" xml:space="preserve">
     <value>选所有物件</value>
   </data>
-  <data name="SelectAudioFile" xml:space="preserve">
+    <data name="SelectAudioFile" xml:space="preserve">
     <value>选择音频文件</value>
   </data>
-  <data name="SelectAudioFileManually" xml:space="preserve">
+    <data name="SelectAudioFileManually" xml:space="preserve">
     <value>手动选择音频文件</value>
   </data>
-  <data name="SelectDiff" xml:space="preserve">
+    <data name="SelectDiff" xml:space="preserve">
     <value>选择难度:</value>
   </data>
-  <data name="SelectGameRootFolder" xml:space="preserve">
+    <data name="SelectGameRootFolder" xml:space="preserve">
     <value>选择游戏根目录</value>
   </data>
-  <data name="SelectImage" xml:space="preserve">
+    <data name="SelectImage" xml:space="preserve">
     <value>选择图片</value>
   </data>
-  <data name="SelectMusicXmlFile" xml:space="preserve">
+    <data name="SelectMusicXmlFile" xml:space="preserve">
     <value>选择Music.xml文件</value>
   </data>
-  <data name="SelectOutputFolder" xml:space="preserve">
+    <data name="SelectOutputFolder" xml:space="preserve">
     <value>选择输出文件夹</value>
   </data>
-  <data name="SelectPackageFolder" xml:space="preserve">
+    <data name="SelectPackageFolder" xml:space="preserve">
     <value>选择游戏根目录(package目录)</value>
   </data>
-  <data name="SelectSvgFile" xml:space="preserve">
+    <data name="SelectSvgFile" xml:space="preserve">
     <value>选择svg文件</value>
   </data>
-  <data name="SerializeFileNotSupport" xml:space="preserve">
+    <data name="SerializeFileNotSupport" xml:space="preserve">
     <value>不支持保存此文件格式:</value>
   </data>
-  <data name="Setup" xml:space="preserve">
+    <data name="Setup" xml:space="preserve">
     <value>启动</value>
   </data>
-  <data name="Severity" xml:space="preserve">
+    <data name="Severity" xml:space="preserve">
     <value>严重程度</value>
   </data>
-  <data name="ShootOffset" xml:space="preserve">
+    <data name="ShootOffset" xml:space="preserve">
     <value>发射位置偏移</value>
   </data>
-  <data name="ShootSource" xml:space="preserve">
+    <data name="ShootSource" xml:space="preserve">
     <value>发射来源</value>
   </data>
-  <data name="ShootTarget" xml:space="preserve">
+    <data name="ShootTarget" xml:space="preserve">
     <value>发射目标</value>
   </data>
-  <data name="ShowCurveControlAlways" xml:space="preserve">
+    <data name="ShowCurveControlAlways" xml:space="preserve">
     <value>一直显示曲线控制点：</value>
   </data>
-  <data name="ShowFPS" xml:space="preserve">
+    <data name="ShowFPS" xml:space="preserve">
     <value>显示FPS</value>
   </data>
-  <data name="ShowObjectPlaceLine" xml:space="preserve">
+    <data name="ShowObjectPlaceLine" xml:space="preserve">
     <value>显示物品放置的位置</value>
   </data>
-  <data name="ShowTimingLine" xml:space="preserve">
+    <data name="ShowTimingLine" xml:space="preserve">
     <value>显示节奏线</value>
   </data>
-  <data name="SmallJacketSize" xml:space="preserve">
+    <data name="SmallJacketSize" xml:space="preserve">
     <value>小图尺寸(通常220x220):</value>
   </data>
-  <data name="SoflanConflict" xml:space="preserve">
+    <data name="SoflanConflict" xml:space="preserve">
     <value>发现Soflan作用时效冲突:{0}和{1}</value>
   </data>
-  <data name="SortOrder" xml:space="preserve">
+    <data name="SortOrder" xml:space="preserve">
     <value>列表排序:</value>
   </data>
-  <data name="Sound" xml:space="preserve">
+    <data name="Sound" xml:space="preserve">
     <value>音效</value>
   </data>
-  <data name="SoundFolderPath" xml:space="preserve">
+    <data name="SoundFolderPath" xml:space="preserve">
     <value>音效文件夹路径:</value>
   </data>
-  <data name="SoundLoaded" xml:space="preserve">
+    <data name="SoundLoaded" xml:space="preserve">
     <value>音效重新加载成功</value>
   </data>
-  <data name="SoundSwitchControl" xml:space="preserve">
+    <data name="SoundSwitchControl" xml:space="preserve">
     <value>音效开关控制</value>
   </data>
-  <data name="Speed" xml:space="preserve">
+    <data name="Speed" xml:space="preserve">
     <value>速度</value>
   </data>
-  <data name="SplitLane" xml:space="preserve">
+    <data name="SplitLane" xml:space="preserve">
     <value>划分轨道</value>
   </data>
-  <data name="Stage" xml:space="preserve">
+    <data name="Stage" xml:space="preserve">
     <value>场景:</value>
   </data>
-  <data name="StandardizeFormat" xml:space="preserve">
+    <data name="StandardizeFormat" xml:space="preserve">
     <value>生成标准音击谱面</value>
   </data>
-  <data name="Start" xml:space="preserve">
+    <data name="Start" xml:space="preserve">
     <value>开始使用</value>
   </data>
-  <data name="StopUsingExtendEditor" xml:space="preserve">
+    <data name="StopUsingExtendEditor" xml:space="preserve">
     <value>中止外部编辑</value>
   </data>
-  <data name="Success" xml:space="preserve">
+    <data name="Success" xml:space="preserve">
     <value>成功</value>
   </data>
-  <data name="Suggest" xml:space="preserve">
+    <data name="Suggest" xml:space="preserve">
     <value>提醒</value>
   </data>
-  <data name="SvgContentNotSupport" xml:space="preserve">
+    <data name="SvgContentNotSupport" xml:space="preserve">
     <value>无效的SVG内容</value>
   </data>
-  <data name="SvgGenerateLane" xml:space="preserve">
+    <data name="SvgGenerateLane" xml:space="preserve">
     <value>Svg原地生成轨道物件</value>
   </data>
-  <data name="SwitchControl" xml:space="preserve">
+    <data name="SwitchControl" xml:space="preserve">
     <value>开关控制</value>
   </data>
-  <data name="SyncScriptContentManually" xml:space="preserve">
+    <data name="SyncScriptContentManually" xml:space="preserve">
     <value>手动同步内容</value>
   </data>
-  <data name="TabAudio" xml:space="preserve">
+    <data name="TabAudio" xml:space="preserve">
     <value>音频</value>
   </data>
-  <data name="TabDocument" xml:space="preserve">
+    <data name="TabDocument" xml:space="preserve">
     <value>文档</value>
   </data>
-  <data name="TabEditor" xml:space="preserve">
+    <data name="TabEditor" xml:space="preserve">
     <value>可视编辑器</value>
   </data>
-  <data name="TabEnviorment" xml:space="preserve">
+    <data name="TabEnviorment" xml:space="preserve">
     <value>环境</value>
   </data>
-  <data name="TabLogger" xml:space="preserve">
+    <data name="TabLogger" xml:space="preserve">
     <value>日志</value>
   </data>
-  <data name="TabProgram" xml:space="preserve">
+    <data name="TabProgram" xml:space="preserve">
     <value>程序</value>
   </data>
-  <data name="TabSound" xml:space="preserve">
+    <data name="TabSound" xml:space="preserve">
     <value>音效</value>
   </data>
-  <data name="TestDump" xml:space="preserve">
+    <data name="TestDump" xml:space="preserve">
     <value>抛个错误看看?</value>
   </data>
-  <data name="TGridCalculatorToolViewer" xml:space="preserve">
+    <data name="TGridCalculatorToolViewer" xml:space="preserve">
     <value>时间计算器</value>
   </data>
-  <data name="ThrowExceptionWhenConvert" xml:space="preserve">
+    <data name="ThrowExceptionWhenConvert" xml:space="preserve">
     <value>执行时抛出异常:</value>
   </data>
-  <data name="TimeSignature" xml:space="preserve">
+    <data name="TimeSignature" xml:space="preserve">
     <value>拍号</value>
   </data>
-  <data name="TimesPerMin" xml:space="preserve">
+    <data name="TimesPerMin" xml:space="preserve">
     <value>分钟/次</value>
   </data>
-  <data name="Title" xml:space="preserve">
+    <data name="Title" xml:space="preserve">
     <value>标题:</value>
   </data>
-  <data name="ToCopiedObjects" xml:space="preserve">
+    <data name="ToCopiedObjects" xml:space="preserve">
     <value>对已复制物件...</value>
   </data>
-  <data name="Today" xml:space="preserve">
+    <data name="Today" xml:space="preserve">
     <value>今天</value>
   </data>
-  <data name="ToPaste" xml:space="preserve">
+    <data name="ToPaste" xml:space="preserve">
     <value>粘贴...</value>
   </data>
-  <data name="ToSelectedObjects" xml:space="preserve">
+    <data name="ToSelectedObjects" xml:space="preserve">
     <value>对选取物件...</value>
   </data>
-  <data name="Tutorial" xml:space="preserve">
+    <data name="Tutorial" xml:space="preserve">
     <value>入门教程</value>
   </data>
-  <data name="TutorialAndDocument" xml:space="preserve">
+    <data name="TutorialAndDocument" xml:space="preserve">
     <value>教程和文档</value>
   </data>
-  <data name="TutorialTipText" xml:space="preserve">
+    <data name="TutorialTipText" xml:space="preserve">
     <value>学习如何使用编辑器和做谱</value>
   </data>
-  <data name="UncheckShowOriginColor" xml:space="preserve">
+    <data name="UncheckShowOriginColor" xml:space="preserve">
     <value>请先取消勾选ShowOriginColor进行将要输出轨道的预览</value>
   </data>
-  <data name="UndoRecoveryObjectsSuccess" xml:space="preserve">
+    <data name="UndoRecoveryObjectsSuccess" xml:space="preserve">
     <value>已撤回恢复 {0} 个物件到音频时间...</value>
   </data>
-  <data name="UndoRedo" xml:space="preserve">
+    <data name="UndoRedo" xml:space="preserve">
     <value>撤回/重做 (需要重启生效)</value>
   </data>
-  <data name="UnregisterFail" xml:space="preserve">
+    <data name="UnregisterFail" xml:space="preserve">
     <value>注销失败</value>
   </data>
-  <data name="UnregisterSuccess" xml:space="preserve">
+    <data name="UnregisterSuccess" xml:space="preserve">
     <value>注销成功</value>
   </data>
-  <data name="UpdateAssetBytesFile" xml:space="preserve">
+    <data name="UpdateAssetBytesFile" xml:space="preserve">
     <value>更新assets.bytes文件(如果存在的话):</value>
   </data>
-  <data name="UpdateHoldEndPosition" xml:space="preserve">
+    <data name="UpdateHoldEndPosition" xml:space="preserve">
     <value>更新HoldEnd位置</value>
   </data>
-  <data name="UpdateXGridForDockedObjects" xml:space="preserve">
+    <data name="UpdateXGridForDockedObjects" xml:space="preserve">
     <value>附着物件自动更新水平位置</value>
   </data>
-  <data name="UserInteraction" xml:space="preserve">
+    <data name="UserInteraction" xml:space="preserve">
     <value>用户交互</value>
   </data>
-  <data name="UseTemplateScriptFileFail" xml:space="preserve">
+    <data name="UseTemplateScriptFileFail" xml:space="preserve">
     <value>无法应用脚本模板,原因:</value>
   </data>
-  <data name="UsingExtendScriptEditor" xml:space="preserve">
+    <data name="UsingExtendScriptEditor" xml:space="preserve">
     <value>当前正在使用外部编辑器中....</value>
   </data>
-  <data name="VerticalDisplayScale" xml:space="preserve">
+    <data name="VerticalDisplayScale" xml:space="preserve">
     <value>水平显示缩放:</value>
   </data>
-  <data name="Visualizer" xml:space="preserve">
+    <data name="Visualizer" xml:space="preserve">
     <value>频谱</value>
   </data>
-  <data name="VisualizerHorizonScale" xml:space="preserve">
+    <data name="VisualizerHorizonScale" xml:space="preserve">
     <value>频谱水平缩放</value>
   </data>
-  <data name="VisualizerRenderOption" xml:space="preserve">
+    <data name="VisualizerRenderOption" xml:space="preserve">
     <value>频谱渲染选项</value>
   </data>
-  <data name="VisualizerSpecialOption" xml:space="preserve">
+    <data name="VisualizerSpecialOption" xml:space="preserve">
     <value>渲染特有选项</value>
   </data>
-  <data name="VisualizerVerticalScale" xml:space="preserve">
+    <data name="VisualizerVerticalScale" xml:space="preserve">
     <value>频谱垂直缩放</value>
   </data>
-  <data name="WaitForAudioAndFumenLoaded" xml:space="preserve">
+    <data name="WaitForAudioAndFumenLoaded" xml:space="preserve">
     <value>请先等待音频/音效初始化完成</value>
   </data>
-  <data name="WallConflict" xml:space="preserve">
+    <data name="WallConflict" xml:space="preserve">
     <value>不同边的墙(id:{0})和(id:{1})水平交叉碰撞或重合</value>
   </data>
-  <data name="WallConflict2" xml:space="preserve">
+    <data name="WallConflict2" xml:space="preserve">
     <value>墙(id:{0})与另一个同方向的墙(id:{1})发生时间冲突</value>
   </data>
-  <data name="WallConflict3" xml:space="preserve">
+    <data name="WallConflict3" xml:space="preserve">
     <value>墙(id:{0})Next/End物件的TGrid({1})不能低于前者({2})</value>
   </data>
-  <data name="WarnSomeSoundsNotLoad" xml:space="preserve">
+    <data name="WarnSomeSoundsNotLoad" xml:space="preserve">
     <value>部分音效并未加载成功,详情可查看日志</value>
   </data>
-  <data name="WithinOneMonth" xml:space="preserve">
+    <data name="WithinOneMonth" xml:space="preserve">
     <value>一个月内</value>
   </data>
-  <data name="WithinOneWeek" xml:space="preserve">
+    <data name="WithinOneWeek" xml:space="preserve">
     <value>一个星期内</value>
   </data>
-  <data name="WrongLocation" xml:space="preserve">
+    <data name="WrongLocation" xml:space="preserve">
     <value>{0}物件貌似没有放置在正确的轨道(id:{1})线上</value>
   </data>
-  <data name="WrongLocation2" xml:space="preserve">
+    <data name="WrongLocation2" xml:space="preserve">
     <value>错误位置</value>
   </data>
-  <data name="XGridDisplayMaxUnit" xml:space="preserve">
+    <data name="XGridDisplayMaxUnit" xml:space="preserve">
     <value>水平轴最大显示范围:</value>
   </data>
-  <data name="XGridUnitSpace" xml:space="preserve">
+    <data name="XGridUnitSpace" xml:space="preserve">
     <value>水平辅助线间距</value>
   </data>
-  <data name="XOffset" xml:space="preserve">
+    <data name="XOffset" xml:space="preserve">
     <value>水平轴偏移:</value>
   </data>
-  <data name="EnableShowPlayerLocation" xml:space="preserve">
+    <data name="EnableShowPlayerLocation" xml:space="preserve">
     <value>显示玩家当前位置 (若没AutoPlayFaderLane轨道则默认在中心)</value>
   </data>
-  <data name="DisableShowSplashScreenAfterBoot" xml:space="preserve">
+    <data name="DisableShowSplashScreenAfterBoot" xml:space="preserve">
     <value>程序启动后不显示启动窗口</value>
   </data>
-  <data name="ShouldLoadSuggestLayout" xml:space="preserve">
+    <data name="ShouldLoadSuggestLayout" xml:space="preserve">
     <value>第一次打开编辑器，是否加载推荐的做谱工具布局?</value>
   </data>
-  <data name="LoadLayoutFailed" xml:space="preserve">
+    <data name="LoadLayoutFailed" xml:space="preserve">
     <value>加载布局文件失败</value>
   </data>
-  <data name="ResetAllSettings" xml:space="preserve">
+    <data name="ResetAllSettings" xml:space="preserve">
     <value>重置所有选项</value>
   </data>
-  <data name="ResetCompleted" xml:space="preserve">
+    <data name="ResetCompleted" xml:space="preserve">
     <value>重置已完成</value>
   </data>
-  <data name="Warning" xml:space="preserve">
+    <data name="Warning" xml:space="preserve">
     <value>警告</value>
   </data>
-  <data name="ResetAllSettingComfirm" xml:space="preserve">
+    <data name="ResetAllSettingComfirm" xml:space="preserve">
     <value>是否重置本应用所有配置选项?</value>
   </data>
-  <data name="MirrorSelectionXGrid" xml:space="preserve">
+    <data name="MirrorSelectionXGrid" xml:space="preserve">
     <value>按整体全体范围水平镜像移动</value>
   </data>
-  <data name="MirrorSelectionXGridZero" xml:space="preserve">
+    <data name="MirrorSelectionXGridZero" xml:space="preserve">
     <value>按X[0,0]为基准水平镜像移动</value>
   </data>
-  <data name="MirrorSelectionLaneColors" xml:space="preserve">
+    <data name="MirrorSelectionLaneColors" xml:space="preserve">
     <value>镜像击打轨道颜色</value>
   </data>
-  <data name="NoLimit" xml:space="preserve">
+    <data name="NoLimit" xml:space="preserve">
     <value>(无限制)</value>
   </data>
-  <data name="ProgramCommandDescriptionSvg" xml:space="preserve">
+    <data name="ProgramCommandDescriptionSvg" xml:space="preserve">
     <value>生成预览谱面.svg文件</value>
   </data>
-  <data name="ProgramCommandConvert" xml:space="preserve">
+    <data name="ProgramCommandConvert" xml:space="preserve">
     <value>将某谱面转换成另一个格式的谱面</value>
   </data>
-  <data name="ProgramOptionDescriptionVerbose" xml:space="preserve">
+    <data name="ProgramOptionDescriptionVerbose" xml:space="preserve">
     <value>显示程序日志</value>
   </data>
-  <data name="CliArgumentNotAbsolutePath" xml:space="preserve">
+    <data name="CliArgumentNotAbsolutePath" xml:space="preserve">
     <value>不允许使用相对路径</value>
   </data>
-  <data name="CliInputErrorHeader" xml:space="preserve">
+    <data name="CliInputErrorHeader" xml:space="preserve">
     <value>程序执行命令行出错</value>
   </data>
-  <data name="ProgramCommandJacket" xml:space="preserve">
+    <data name="ProgramCommandJacket" xml:space="preserve">
     <value>生成和更新封面图片文件</value>
   </data>
-  <data name="ProgramCommandAcb" xml:space="preserve">
+    <data name="ProgramCommandAcb" xml:space="preserve">
     <value>生成.acb音频文件</value>
   </data>
-  <data name="ProgramOptionInputFile" xml:space="preserve">
+    <data name="ProgramOptionInputFile" xml:space="preserve">
     <value>要生成的谱面文件路径</value>
   </data>
-  <data name="ProgramOptionOutputFile" xml:space="preserve">
+    <data name="ProgramOptionOutputFile" xml:space="preserve">
     <value>生成文件保存路径</value>
   </data>
-  <data name="ProgramOptionMusicId" xml:space="preserve">
+    <data name="ProgramOptionMusicId" xml:space="preserve">
     <value>用于生成指定的MusicId (范围0000~9999)</value>
   </data>
-  <data name="ProgramOptionInputFileAudio" xml:space="preserve">
+    <data name="ProgramOptionInputFileAudio" xml:space="preserve">
     <value>音频文件,用来获取谱面总长度</value>
   </data>
-  <data name="ProgramOptionOutputFolder" xml:space="preserve">
+    <data name="ProgramOptionOutputFolder" xml:space="preserve">
     <value>保存生成文件的文件夹绝对路径</value>
   </data>
-  <data name="ProgramOptionPreviewBegin" xml:space="preserve">
+    <data name="ProgramOptionPreviewBegin" xml:space="preserve">
     <value>音频预览起始时间 (毫秒单位)</value>
   </data>
-  <data name="ProgramOptionPreviewEnd" xml:space="preserve">
+    <data name="ProgramOptionPreviewEnd" xml:space="preserve">
     <value>音频预览中止时间 (毫秒单位)</value>
   </data>
-  <data name="ProgramOptionOutputFolderAsset" xml:space="preserve">
+    <data name="ProgramOptionOutputFolderAsset" xml:space="preserve">
     <value>保存生成文件的文件夹绝对路径（可能包含assets.bytes文件）</value>
   </data>
-  <data name="ProgramOptionInputFileJacket" xml:space="preserve">
+    <data name="ProgramOptionInputFileJacket" xml:space="preserve">
     <value>要生成封面的.png图片文件绝对路径</value>
   </data>
-  <data name="ProgramOptionJacketOutputHeight" xml:space="preserve">
+    <data name="ProgramOptionJacketOutputHeight" xml:space="preserve">
     <value>正常尺寸封面高度 (像素单位)</value>
   </data>
-  <data name="ProgramOptionJacketOutputWidth" xml:space="preserve">
+    <data name="ProgramOptionJacketOutputWidth" xml:space="preserve">
     <value>正常尺寸封面宽度 (像素单位)</value>
   </data>
-  <data name="ProgramOptionJacketOutputWidthSmall" xml:space="preserve">
+    <data name="ProgramOptionJacketOutputWidthSmall" xml:space="preserve">
     <value>小尺寸封面宽度 (像素单位)</value>
   </data>
-  <data name="ProgramOptionJacketOutputHeightSmall" xml:space="preserve">
+    <data name="ProgramOptionJacketOutputHeightSmall" xml:space="preserve">
     <value>小尺寸封面高度 (像素单位)</value>
   </data>
-  <data name="ProgramOptionSvgMaxXGrid" xml:space="preserve">
+    <data name="ProgramOptionSvgMaxXGrid" xml:space="preserve">
     <value>最大显示XGrid范围</value>
   </data>
-  <data name="ProgramOptionSvgViewWidth" xml:space="preserve">
+    <data name="ProgramOptionSvgViewWidth" xml:space="preserve">
     <value>画面宽度</value>
   </data>
-  <data name="ProgramOptionSvgVerticalScale" xml:space="preserve">
+    <data name="ProgramOptionSvgVerticalScale" xml:space="preserve">
     <value>垂直缩放</value>
   </data>
-  <data name="ProgramOptionSvgSoflanMode" xml:space="preserve">
+    <data name="ProgramOptionSvgSoflanMode" xml:space="preserve">
     <value>变速模式,不同选项有不同的物件表现</value>
   </data>
-  <data name="ProgramOptionSvgWeightedSoflanOffset" xml:space="preserve">
+    <data name="ProgramOptionSvgWeightedSoflanOffset" xml:space="preserve">
     <value>WeightedSoflan模式下,soflan超过(或在附近)这个值会被加权计算</value>
   </data>
-  <data name="ProgramOptionSvgWeightedSoflanStress" xml:space="preserve">
+    <data name="ProgramOptionSvgWeightedSoflanStress" xml:space="preserve">
     <value>WeightedSoflan模式下,soflan最低能压到原来的(1-stress)倍</value>
   </data>
-  <data name="ProgramOptionSvgWeightedSoflanSlope" xml:space="preserve">
+    <data name="ProgramOptionSvgWeightedSoflanSlope" xml:space="preserve">
     <value>WeightedSoflan模式下,加权变化速率</value>
   </data>
-  <data name="ProgramOptionSvgRenderAsPng" xml:space="preserve">
+    <data name="ProgramOptionSvgRenderAsPng" xml:space="preserve">
     <value>是否生成png图片</value>
   </data>
-  <data name="ProgramOptionInputFileNyageki" xml:space="preserve">
+    <data name="ProgramOptionInputFileNyageki" xml:space="preserve">
     <value>要生成的谱面文件路径</value>
   </data>
-  <data name="Save" xml:space="preserve">
+    <data name="Save" xml:space="preserve">
     <value>保存</value>
   </data>
-  <data name="BulletPaletteCreateBullet" xml:space="preserve">
+    <data name="BulletPaletteCreateBullet" xml:space="preserve">
     <value>Bullet</value>
   </data>
-  <data name="ClickToClonePalette" xml:space="preserve">
+    <data name="ClickToClonePalette" xml:space="preserve">
     <value>点击克隆新模板</value>
   </data>
-  <data name="BulletPaletteCreateBell" xml:space="preserve">
+    <data name="BulletPaletteCreateBell" xml:space="preserve">
     <value>Bell</value>
   </data>
-  <data name="CopiedObjectsBrushAllowed" xml:space="preserve">
+    <data name="CopiedObjectsBrushAllowed" xml:space="preserve">
     <value>已复制 {0} 个物件(并可用在刷子模式)</value>
   </data>
-  <data name="DragToCreateHoldEndTipText" xml:space="preserve">
+    <data name="DragToCreateHoldEndTipText" xml:space="preserve">
     <value>拖动生成HoldEnd物件</value>
   </data>
-  <data name="DragToCreateNextToolTip" xml:space="preserve">
+    <data name="DragToCreateNextToolTip" xml:space="preserve">
     <value>可拖动到编辑器界面生成新的物件</value>
   </data>
-  <data name="ObjectId" xml:space="preserve">
+    <data name="ObjectId" xml:space="preserve">
     <value>Id</value>
   </data>
-  <data name="BulletPaletteId" xml:space="preserve">
+    <data name="BulletPaletteId" xml:space="preserve">
     <value>StrID</value>
   </data>
-  <data name="SelectFile" xml:space="preserve">
+    <data name="SelectFile" xml:space="preserve">
     <value>选择文件</value>
   </data>
-  <data name="VisualEditorLaneColorSettings" xml:space="preserve">
+    <data name="VisualEditorLaneColorSettings" xml:space="preserve">
     <value>轨道颜色</value>
   </data>
-  <data name="BellBulletCountOverLimit_Sep" xml:space="preserve">
+    <data name="BellBulletCountOverLimit_Sep" xml:space="preserve">
     <value>时，</value>
   </data>
-  <data name="ChangeColor" xml:space="preserve">
+    <data name="ChangeColor" xml:space="preserve">
     <value>选择</value>
   </data>
-  <data name="NamedColorChangeTitle" xml:space="preserve">
+    <data name="NamedColorChangeTitle" xml:space="preserve">
     <value>设置新的 {0} 颜色</value>
   </data>
-  <data name="ApplySuggestedEditorLayout" xml:space="preserve">
+    <data name="ApplySuggestedEditorLayout" xml:space="preserve">
     <value>使用推荐的布局</value>
   </data>
-  <data name="RecordId" xml:space="preserve">
+    <data name="RecordId" xml:space="preserve">
     <value>RecordId</value>
   </data>
-  <data name="CurveInterpolatorFactoryLabel" xml:space="preserve">
+    <data name="CurveInterpolatorFactoryLabel" xml:space="preserve">
     <value>CurveInterpolatorFactory</value>
   </data>
-  <data name="CurvePrecisionLabel" xml:space="preserve">
+    <data name="CurvePrecisionLabel" xml:space="preserve">
     <value>CurvePrecision</value>
   </data>
-  <data name="ProgramOptionStandardizeFumen" xml:space="preserve">
+    <data name="ProgramOptionStandardizeFumen" xml:space="preserve">
     <value>生成标准音击谱面</value>
   </data>
-  <data name="OutputFumenStandardizeFormatNotSupported" xml:space="preserve">
+    <data name="OutputFumenStandardizeFormatNotSupported" xml:space="preserve">
     <value>无法标准化音击谱面</value>
   </data>
-  <data name="BossCardSelectorWindow" xml:space="preserve">
+    <data name="BossCardSelectorWindow" xml:space="preserve">
     <value>选择...</value>
   </data>
-  <data name="EnumStructsSelectorWindow" xml:space="preserve">
+    <data name="EnumStructsSelectorWindow" xml:space="preserve">
     <value>选择...</value>
   </data>
-  <data name="FumenConverterWindow" xml:space="preserve">
+    <data name="FumenConverterWindow" xml:space="preserve">
     <value>谱面转换</value>
   </data>
-  <data name="BrushTGridRangeDialog" xml:space="preserve">
+    <data name="BrushTGridRangeDialog" xml:space="preserve">
     <value>刷子时间钦定</value>
   </data>
-  <data name="EditorProjectSetupDialog" xml:space="preserve">
+    <data name="EditorProjectSetupDialog" xml:space="preserve">
     <value>项目新建向导</value>
   </data>
-  <data name="AboutWindow" xml:space="preserve">
+    <data name="AboutWindow" xml:space="preserve">
     <value>关于</value>
   </data>
-  <data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
+    <data name="kbd_editor_FastSetObjectIsCritical" xml:space="preserve">
     <value>快速调整已选的物件Critical属性</value>
   </data>
-  <data name="kbd_editor_FastPlaceDockableObjectToWallLeft" xml:space="preserve">
+    <data name="kbd_editor_FastPlaceDockableObjectToWallLeft" xml:space="preserve">
     <value>快速放置依附物件到WallLeft轨道上</value>
   </data>
-  <data name="kbd_editor_FastPlaceDockableObjectToWallRight" xml:space="preserve">
+    <data name="kbd_editor_FastPlaceDockableObjectToWallRight" xml:space="preserve">
     <value>快速放置依附物件到WallRight轨道上</value>
   </data>
-  <data name="kbd_editor_FastPlaceDockableObjectToRight" xml:space="preserve">
+    <data name="kbd_editor_FastPlaceDockableObjectToRight" xml:space="preserve">
     <value>快速放置依附物件到Right轨道上</value>
   </data>
-  <data name="kbd_editor_FastPlaceNewHold" xml:space="preserve">
+    <data name="kbd_editor_FastPlaceNewHold" xml:space="preserve">
     <value>快速放置新的Hold物件</value>
   </data>
-  <data name="kbd_editor_FastPlaceNewTap" xml:space="preserve">
+    <data name="kbd_editor_FastPlaceNewTap" xml:space="preserve">
     <value>快速放置新的Tap物件</value>
   </data>
-  <data name="kbd_editor_FastPlaceDockableObjectToCenter" xml:space="preserve">
+    <data name="kbd_editor_FastPlaceDockableObjectToCenter" xml:space="preserve">
     <value>快速放置依附物件到Center轨道上</value>
   </data>
-  <data name="kbd_editor_FastPlaceDockableObjectToLeft" xml:space="preserve">
+    <data name="kbd_editor_FastPlaceDockableObjectToLeft" xml:space="preserve">
     <value>快速放置依附物件到Left轨道上</value>
   </data>
-  <data name="kbd_editor_DeleteSelectingObjects" xml:space="preserve">
+    <data name="kbd_editor_DeleteSelectingObjects" xml:space="preserve">
     <value>删除已选物件</value>
   </data>
-  <data name="kbd_editor_SelectAllObjects" xml:space="preserve">
+    <data name="kbd_editor_SelectAllObjects" xml:space="preserve">
     <value>选取所有物件</value>
   </data>
-  <data name="kbd_editor_CancelSelectingObjects" xml:space="preserve">
+    <data name="kbd_editor_CancelSelectingObjects" xml:space="preserve">
     <value>取消选择已选物件</value>
   </data>
-  <data name="kbd_editor_HideOrShow" xml:space="preserve">
+    <data name="kbd_editor_HideOrShow" xml:space="preserve">
     <value>切换到预览模式或编辑模式</value>
   </data>
-  <data name="kbd_editor_FastAddConnectableChild" xml:space="preserve">
+    <data name="kbd_editor_FastAddConnectableChild" xml:space="preserve">
     <value>快速放置轨道子节点</value>
   </data>
-  <data name="kbd_editor_FastSwitchFlickDirection" xml:space="preserve">
+    <data name="kbd_editor_FastSwitchFlickDirection" xml:space="preserve">
     <value>快速变更Flick物件的方向</value>
   </data>
-  <data name="kbd_editor_CopySelectedObjects" xml:space="preserve">
+    <data name="kbd_editor_CopySelectedObjects" xml:space="preserve">
     <value>复制(可复制的)已选物件</value>
   </data>
-  <data name="kbd_editor_PasteCopiesObjects" xml:space="preserve">
+    <data name="kbd_editor_PasteCopiesObjects" xml:space="preserve">
     <value>粘贴已被复制的物件</value>
   </data>
-  <data name="kbd_editor_ScrollPageDown" xml:space="preserve">
+    <data name="kbd_editor_ScrollPageDown" xml:space="preserve">
     <value>编辑器向下翻页</value>
   </data>
-  <data name="kbd_editor_ScrollPageUp" xml:space="preserve">
+    <data name="kbd_editor_ScrollPageUp" xml:space="preserve">
     <value>编辑器向上翻页</value>
   </data>
-  <data name="ComfirmResetAllKeybindingDefinitions" xml:space="preserve">
+    <data name="ComfirmResetAllKeybindingDefinitions" xml:space="preserve">
     <value>是否将所有按键绑定都重置到默认值?</value>
   </data>
-  <data name="Change" xml:space="preserve">
+    <data name="Change" xml:space="preserve">
     <value>变更</value>
   </data>
-  <data name="KeyBindingConflictDetect" xml:space="preserve">
+    <data name="KeyBindingConflictDetect" xml:space="preserve">
     <value>与 {0} 的绑定键位起冲突</value>
   </data>
-  <data name="AssignKeyBinding" xml:space="preserve">
+    <data name="AssignKeyBinding" xml:space="preserve">
     <value>请为 {0} 输入合适的快捷键组合</value>
   </data>
-  <data name="Reset" xml:space="preserve">
+    <data name="Reset" xml:space="preserve">
     <value>重置</value>
   </data>
-  <data name="Clear" xml:space="preserve">
+    <data name="Clear" xml:space="preserve">
     <value>清除</value>
   </data>
-  <data name="AssignKeybind" xml:space="preserve">
+    <data name="AssignKeybind" xml:space="preserve">
     <value>设置键位</value>
   </data>
-  <data name="ShowNotAssignKeybindingOnly" xml:space="preserve">
+    <data name="ShowNotAssignKeybindingOnly" xml:space="preserve">
     <value>只显示未绑定的键位</value>
   </data>
-  <data name="ResetAllKeybindings" xml:space="preserve">
+    <data name="ResetAllKeybindings" xml:space="preserve">
     <value>重置所有键位</value>
   </data>
-  <data name="KeyMap" xml:space="preserve">
+    <data name="KeyMap" xml:space="preserve">
     <value>快捷键</value>
   </data>
-  <data name="SettingHasNewVersion" xml:space="preserve">
+    <data name="SettingHasNewVersion" xml:space="preserve">
     <value>有新的更新! 新版本号: {0}({1})</value>
   </data>
-  <data name="UpdateProgramReady" xml:space="preserve">
+    <data name="UpdateProgramReady" xml:space="preserve">
     <value>我已保存好项目和数据, 准备好了</value>
   </data>
-  <data name="UpdateStart" xml:space="preserve">
+    <data name="UpdateStart" xml:space="preserve">
     <value>开始更新</value>
   </data>
-  <data name="ShowNewVersionTitle" xml:space="preserve">
+    <data name="ShowNewVersionTitle" xml:space="preserve">
     <value>检查新版本</value>
   </data>
-  <data name="CurrentVersion" xml:space="preserve">
+    <data name="CurrentVersion" xml:space="preserve">
     <value>当前版本</value>
   </data>
-  <data name="NewVersion" xml:space="preserve">
+    <data name="NewVersion" xml:space="preserve">
     <value>最新版本</value>
   </data>
-  <data name="Branch" xml:space="preserve">
+    <data name="Branch" xml:space="preserve">
     <value>代码分支</value>
   </data>
-  <data name="FileSize" xml:space="preserve">
+    <data name="FileSize" xml:space="preserve">
     <value>文件大小</value>
   </data>
-  <data name="ReleaseTime" xml:space="preserve">
+    <data name="ReleaseTime" xml:space="preserve">
     <value>发布时间</value>
   </data>
-  <data name="HasNewVersion" xml:space="preserve">
+    <data name="HasNewVersion" xml:space="preserve">
     <value>有新版本！</value>
   </data>
-  <data name="ProgramReadyToUpdate" xml:space="preserve">
+    <data name="ProgramReadyToUpdate" xml:space="preserve">
     <value>程序更新文件准备完成, 是否关闭程序, 开始更新?</value>
   </data>
-  <data name="EnableUpdateCheck" xml:space="preserve">
+    <data name="EnableUpdateCheck" xml:space="preserve">
     <value>允许程序检查是否有更新</value>
   </data>
-  <data name="UpdaterCheckMasterBranchOnly" xml:space="preserve">
+    <data name="UpdaterCheckMasterBranchOnly" xml:space="preserve">
     <value>只检查master分支(稳定版)的更新</value>
   </data>
-  <data name="CheckUpdates" xml:space="preserve">
+    <data name="CheckUpdates" xml:space="preserve">
     <value>检查更新</value>
   </data>
-  <data name="ProgramUpdates" xml:space="preserve">
+    <data name="ProgramUpdates" xml:space="preserve">
     <value>程序更新</value>
   </data>
-  <data name="InvalidBrightness" xml:space="preserve">
+    <data name="InvalidBrightness" xml:space="preserve">
     <value>亮度(Brightness)值 {0} 不在范围[-3,3]内</value>
   </data>
-  <data name="InvalidColorId" xml:space="preserve">
+    <data name="InvalidColorId" xml:space="preserve">
     <value>颜色Id(ColorId)值无效: {0}</value>
   </data>
-  <data name="kbd_batch_ModeWallLeft" xml:space="preserve">
+    <data name="kbd_batch_ModeWallLeft" xml:space="preserve">
     <value>[批量模式] WallLeft轨道</value>
   </data>
-  <data name="kbd_batch_ModeLaneLeft" xml:space="preserve">
+    <data name="kbd_batch_ModeLaneLeft" xml:space="preserve">
     <value>[批量模式] Left轨道</value>
   </data>
-  <data name="kbd_batch_ModeLaneCenter" xml:space="preserve">
+    <data name="kbd_batch_ModeLaneCenter" xml:space="preserve">
     <value>[批量模式] Center轨道</value>
   </data>
-  <data name="kbd_batch_ModeLaneRight" xml:space="preserve">
+    <data name="kbd_batch_ModeLaneRight" xml:space="preserve">
     <value>[批量模式] Right轨道</value>
   </data>
-  <data name="kbd_batch_ModeWallRight" xml:space="preserve">
+    <data name="kbd_batch_ModeWallRight" xml:space="preserve">
     <value>[批量模式] WallRight轨道</value>
   </data>
-  <data name="kbd_batch_ModeLaneColorful" xml:space="preserve">
+    <data name="kbd_batch_ModeLaneColorful" xml:space="preserve">
     <value>[批量模式] Coloful轨道</value>
   </data>
-  <data name="kbd_batch_ModeTap" xml:space="preserve">
+    <data name="kbd_batch_ModeTap" xml:space="preserve">
     <value>[批量模式] Tap物件</value>
   </data>
-  <data name="kbd_batch_ModeHold" xml:space="preserve">
+    <data name="kbd_batch_ModeHold" xml:space="preserve">
     <value>[批量模式] Hold物件</value>
   </data>
-  <data name="kbd_batch_ModeFlick" xml:space="preserve">
+    <data name="kbd_batch_ModeFlick" xml:space="preserve">
     <value>[批量模式] Flick物件</value>
   </data>
-  <data name="kbd_batch_ModeLaneBlock" xml:space="preserve">
+    <data name="kbd_batch_ModeLaneBlock" xml:space="preserve">
     <value>[批量模式] LaneBlock物件</value>
   </data>
-  <data name="kbd_batch_ModeNormalBell" xml:space="preserve">
+    <data name="kbd_batch_ModeNormalBell" xml:space="preserve">
     <value>[批量模式] Bell物件</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="BatchModeAddObject" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
-  <data name="kbd_batch_ModeClipboard" xml:space="preserve">
+    <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <data name="BatchModeAddObject" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>添加 {0}</value>
+    </data>
+    <data name="kbd_batch_ModeClipboard" xml:space="preserve">
     <value>[批量模式] 已复制物件</value>
   </data>
-  <data name="kbd_batch_ModeFilterLanes" xml:space="preserve">
+    <data name="kbd_batch_ModeFilterLanes" xml:space="preserve">
     <value>[批量模式] 过滤只选取轨道</value>
   </data>
-  <data name="kbd_batch_ModeFilterDockableObjects" xml:space="preserve">
+    <data name="kbd_batch_ModeFilterDockableObjects" xml:space="preserve">
     <value>[批量模式] 过滤只选取可附物件</value>
   </data>
-  <data name="kbd_batch_ModeFilterFloatingObjects" xml:space="preserve">
+    <data name="kbd_batch_ModeFilterFloatingObjects" xml:space="preserve">
     <value>[批量模式] 过滤只选取悬浮物件</value>
   </data>
-  <data name="BatchModeModifierAddToSelection" xml:space="preserve">
+    <data name="BatchModeModifierAddToSelection" xml:space="preserve">
     <value>添加并选中</value>
   </data>
-  <data name="LaneLeft" xml:space="preserve">
+    <data name="LaneLeft" xml:space="preserve">
     <value>红线</value>
   </data>
-  <data name="LaneCenter" xml:space="preserve">
+    <data name="LaneCenter" xml:space="preserve">
     <value>绿线</value>
   </data>
-  <data name="LaneRight" xml:space="preserve">
+    <data name="LaneRight" xml:space="preserve">
     <value>蓝钱</value>
   </data>
-  <data name="WallLeft" xml:space="preserve">
+    <data name="WallLeft" xml:space="preserve">
     <value>左墙</value>
   </data>
-  <data name="WallRight" xml:space="preserve">
+    <data name="WallRight" xml:space="preserve">
     <value>右墙</value>
   </data>
-  <data name="Tap" xml:space="preserve">
+    <data name="Tap" xml:space="preserve">
     <value>Tap</value>
   </data>
-  <data name="Hold" xml:space="preserve">
+    <data name="Hold" xml:space="preserve">
     <value>Hold</value>
   </data>
-  <data name="Flick" xml:space="preserve">
+    <data name="Flick" xml:space="preserve">
     <value>Flick</value>
   </data>
-  <data name="LaneBlock" xml:space="preserve">
+    <data name="LaneBlock" xml:space="preserve">
     <value>锁边</value>
   </data>
-  <data name="LaneColorful" xml:space="preserve">
+    <data name="LaneColorful" xml:space="preserve">
     <value>彩色装饰轨道</value>
   </data>
-  <data name="BatchModeModifierSetCritical" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
-  <data name="BatchModeModifierSwitchDirection" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
-  <data name="ObjectFilterLanes" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
-  <data name="ObjectFilterDockables" xml:space="preserve">
+    <data name="BatchModeModifierSetCritical" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>设置Critical属性</value>
+    </data>
+    <data name="BatchModeModifierSwitchDirection" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>切换Flick物件方向</value>
+    </data>
+    <data name="ObjectFilterLanes" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>轨道</value>
+    </data>
+    <data name="ObjectFilterDockables" xml:space="preserve">
     <value>可附物件</value>
   </data>
-  <data name="ObjectFilterFloating" xml:space="preserve">
+    <data name="ObjectFilterFloating" xml:space="preserve">
     <value>悬浮物件</value>
   </data>
-  <data name="Bell" xml:space="preserve">
+    <data name="Bell" xml:space="preserve">
     <value>Bell</value>
   </data>
-  <data name="Clipboard" xml:space="preserve">
+    <data name="Clipboard" xml:space="preserve">
     <value>剪贴板</value>
   </data>
-  <data name="Objects" xml:space="preserve">
+    <data name="Objects" xml:space="preserve">
     <value>物件</value>
   </data>
-  <data name="CannotBatchInputClipboardEmpty" xml:space="preserve">
+    <data name="CannotBatchInputClipboardEmpty" xml:space="preserve">
     <value>剪贴板为空</value>
   </data>
-  <data name="CannotBatchInputClipboardNotBrushable" xml:space="preserve">
+    <data name="CannotBatchInputClipboardNotBrushable" xml:space="preserve">
     <value>剪贴板里的内容并不支持批量操作</value>
   </data>
-  <data name="kbd_layer_Normal" xml:space="preserve">
+    <data name="kbd_layer_Normal" xml:space="preserve">
     <value>通常模式</value>
   </data>
-  <data name="kbd_layer_Global" xml:space="preserve">
+    <data name="kbd_layer_Global" xml:space="preserve">
     <value>全局</value>
   </data>
-  <data name="kbd_layer_Batch" xml:space="preserve">
+    <data name="kbd_layer_Batch" xml:space="preserve">
     <value>批量模式</value>
   </data>
-  <data name="kbd_editor_ChangeDockableLaneType" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
-  <data name="SelectOneDockableLaneOnly" xml:space="preserve">
+    <data name="kbd_editor_ChangeDockableLaneType" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>更改轨道类型</value>
+    </data>
+    <data name="SelectOneDockableLaneOnly" xml:space="preserve">
     <value>请选择单独选择一个可击打轨道节点</value>
   </data>
-  <data name="EnableVarspeed" xml:space="preserve">
+    <data name="EnableVarspeed" xml:space="preserve">
     <value>允许变速播放音乐 (需要重启程序)</value>
   </data>
-  <data name="VarspeedReadDurationMs" xml:space="preserve">
+    <data name="VarspeedReadDurationMs" xml:space="preserve">
     <value>变速采样缓存时间窗口</value>
   </data>
-  <data name="Millisecond" xml:space="preserve">
+    <data name="Millisecond" xml:space="preserve">
     <value>毫秒</value>
   </data>
-  <data name="ConflictNotifyComfirm" xml:space="preserve">
+    <data name="ConflictNotifyComfirm" xml:space="preserve">
     <value>你绑定的键位和 {0} 冲突, 如果继续绑定则清空对方冲突的键位, 是否继续?</value>
   </data>
-  <data name="SaveBeforeClosingPrompt" xml:space="preserve">
+    <data name="SaveBeforeClosingPrompt" xml:space="preserve">
     <value>关闭文档前是否要保存文件 {0} ?</value>
   </data>
-  <data name="BatchModeFilterTooltipFormat" xml:space="preserve">
+    <data name="BatchModeFilterTooltipFormat" xml:space="preserve">
     <value>过滤选取 {0}</value>
   </data>
-  <data name="KeywordFilter" xml:space="preserve">
+    <data name="KeywordFilter" xml:space="preserve">
     <value>关键词过滤:</value>
   </data>
-  <data name="ApplyFilter" xml:space="preserve">
+    <data name="ApplyFilter" xml:space="preserve">
     <value>应用过滤</value>
   </data>
-  <data name="HideWallLaneWhenEnablePlayField" xml:space="preserve">
+    <data name="HideWallLaneWhenEnablePlayField" xml:space="preserve">
     <value>当预览模式且渲染可击打区域时，隐藏所有墙壁轨道</value>
+  </data>
+    <data name="LaneBlockOnMultipleWalls" xml:space="preserve">
+    <value>LaneBlockArea作用的墙壁轨道({0})和另一个墙壁轨道({1})错开</value>
   </data>
 </root>
