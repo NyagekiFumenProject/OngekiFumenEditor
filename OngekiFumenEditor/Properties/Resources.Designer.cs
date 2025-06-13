@@ -1366,6 +1366,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Current {0} soflan point list: 的本地化字符串。
+        /// </summary>
+        public static string CurrentDisplaySelectedSoflanPointList {
+            get {
+                return ResourceManager.GetString("CurrentDisplaySelectedSoflanPointList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Offset current time display 的本地化字符串。
         /// </summary>
         public static string CurrentTimeOffset {
@@ -1785,6 +1794,15 @@ namespace OngekiFumenEditor.Properties {
         public static string EditorProjectSetupDialog {
             get {
                 return ResourceManager.GetString("EditorProjectSetupDialog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Editor show soflan point list 的本地化字符串。
+        /// </summary>
+        public static string EditorShowSoflanPointList {
+            get {
+                return ResourceManager.GetString("EditorShowSoflanPointList", resourceCulture);
             }
         }
         

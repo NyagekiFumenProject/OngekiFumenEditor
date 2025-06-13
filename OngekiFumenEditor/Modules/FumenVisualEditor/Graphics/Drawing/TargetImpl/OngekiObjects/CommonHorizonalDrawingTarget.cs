@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override IEnumerable<string> DrawTargetID { get; } =
         [
-            "MET","SFL","BPM","EST","CLK","LBK","[LBK_End]","[SFL_End]","[CMT]","[INTP_SFL]","[INTP_SFL_End]","[KEY_SFL]"
+            "MET","BPM","EST","CLK","LBK","[LBK_End]","[CMT]"
         ];
 
         private Dictionary<string, FSColor> colors = new()

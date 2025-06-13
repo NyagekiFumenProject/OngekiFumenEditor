@@ -43,9 +43,16 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models
             set => Set(ref isDisplayInPreviewMode, value);
         }
 
+        private bool isDisplaySoflanDesignMode = false;
+        public bool IsDisplaySoflanDesignMode
+        {
+            get => isDisplaySoflanDesignMode;
+            set => Set(ref isDisplaySoflanDesignMode, value);
+        }
+
         public override string ToString()
         {
-            return $"SoflanGroupId:{SoflanGroupId}, IsSelected:{IsSelected}, IsDisplayInDesignMode:{IsDisplayInPreviewMode}, IsDisplayInDesignMode:{IsDisplayInPreviewMode}";
+            return $"SoflanGroupId:{SoflanGroupId}, IsSelected:{IsSelected}, IsDisplayInDesignMode:{IsDisplayInPreviewMode}, IsDisplayInDesignMode:{IsDisplayInPreviewMode}, IsDisplaySoflanDesignMode:{IsDisplaySoflanDesignMode}";
         }
     }
 }

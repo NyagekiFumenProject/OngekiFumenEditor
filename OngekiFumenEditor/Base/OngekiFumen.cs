@@ -79,6 +79,8 @@ namespace OngekiFumenEditor.Base
         {
             MetaInfo = MetaInfo;
 
+            #region BpmList
+
             //setup firstBPM from fumen metainfo
             var firstBpm = new BPMChange()
             {
@@ -88,6 +90,10 @@ namespace OngekiFumenEditor.Base
             if (unusedBpm is not null && unusedBpm != BpmList.FirstBpm)
                 BpmList.Remove(unusedBpm);
             BpmList.SetFirstBpm(firstBpm);
+
+            #endregion
+
+            #region MeterChanges
 
             //setup firstMeter from fumen metainfo
             var firstMeter = new MeterChange()
@@ -105,6 +111,16 @@ namespace OngekiFumenEditor.Base
                 MeterChanges.Remove(unusedMeter);
             MeterChanges.SetFirstMeter(firstMeter);
 
+            #endregion
+
+            #region IndividualSoflanAreaMap
+
+            foreach (var soflanGroup in SoflansMap.Keys)
+            {
+                //make sure soflanGroup in IndividualSoflanAreaMap had been create
+                _ = IndividualSoflanAreaMap[soflanGroup];
+            }
+
             //setup SoflanGroupWrapItem
             var groupName = "default";
             var itemGroup = IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.OfType<SoflanGroupWrapItemGroup>().FirstOrDefault(x => x.DisplayName == groupName) ?? new SoflanGroupWrapItemGroup()
@@ -119,6 +135,13 @@ namespace OngekiFumenEditor.Base
                     itemGroup.Add(item);
             }
             IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Add(itemGroup);
+
+            //setup default soflan group item
+            var defaultSoflanGroupItem = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(0, out _);
+            defaultSoflanGroupItem.IsSelected = true;
+            defaultSoflanGroupItem.IsDisplaySoflanDesignMode = true;
+
+            #endregion
         }
 
         public void AddObject(OngekiObjectBase obj)

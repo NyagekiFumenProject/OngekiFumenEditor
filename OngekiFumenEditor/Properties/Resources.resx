@@ -2034,4 +2034,10 @@
   <data name="SoflanGroupListViewer" xml:space="preserve">
     <value>Soflan Group</value>
   </data>
+  <data name="CurrentDisplaySelectedSoflanPointList" xml:space="preserve">
+    <value>Current {0} soflan point list:</value>
+  </data>
+  <data name="EditorShowSoflanPointList" xml:space="preserve">
+    <value>Editor show soflan point list</value>
+  </data>
 </root>

@@ -117,6 +117,13 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             }
         }
 
+        private SoflanGroupWrapItem currentSoflansDisplaySoflanGroupWrapItem;
+        public SoflanGroupWrapItem CurrentSoflansDisplaySoflanGroupWrapItem
+        {
+            get => currentSoflansDisplaySoflanGroupWrapItem;
+            set => Set(ref currentSoflansDisplaySoflanGroupWrapItem, value);
+        }
+
         public SoflanGroupWrapItemGroup DisplaySoflanGroupItemGroupRoot
         {
             get => displaySoflanGroupItemGroupRoot;
@@ -146,6 +153,18 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 
             Log.LogDebug($"ListViewDragDropManager created.");
         }
+        
+
+        public void OnItemChecked_IsDisplaySoflanDesignMode(object dataContext)
+        {
+            if (dataContext is not SoflanGroupWrapItem item)
+                return;
+            if (!item.IsDisplaySoflanDesignMode)
+                throw new Exception("IsDisplaySoflanDesignMode is false.");
+
+            CurrentSoflansDisplaySoflanGroupWrapItem = item;
+            Log.LogInfo($"CurrentSoflansDisplaySoflanGroupWrapItem changed: {CurrentSoflansDisplaySoflanGroupWrapItem}");
+        }
 
         public void OnItemChecked(object dataContext)
         {
@@ -162,6 +181,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
         {
             DisplaySoflanGroupItemGroupRoot = default;
             CurrentSelectedSoflanGroupWrapItem = default;
+            CurrentSoflansDisplaySoflanGroupWrapItem = default;
 
             if (Editor?.Fumen is not OngekiFumen fumen)
                 return;
@@ -182,7 +202,13 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
                 }
             }
 
-            CurrentSelectedSoflanGroupWrapItem = visit(DisplaySoflanGroupItemGroupRoot).OfType<SoflanGroupWrapItem>().FirstOrDefault(x => x.IsSelected);
+            foreach (var item in visit(DisplaySoflanGroupItemGroupRoot).OfType<SoflanGroupWrapItem>())
+            {
+                if (item.IsSelected)
+                    CurrentSelectedSoflanGroupWrapItem = item;
+                if (item.IsDisplaySoflanDesignMode)
+                    CurrentSoflansDisplaySoflanGroupWrapItem = item;
+            }
         }
 
         public void OnItemDoubleClick(SoflanPoint item)

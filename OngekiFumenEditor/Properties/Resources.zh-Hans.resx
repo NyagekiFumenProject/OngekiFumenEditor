@@ -2035,4 +2035,10 @@
   <data name="SoflanGroupListViewer" xml:space="preserve">
     <value>变速分组查看器</value>
   </data>
+  <data name="CurrentDisplaySelectedSoflanPointList" xml:space="preserve">
+    <value>当前 {0} 变化列表:</value>
+  </data>
+  <data name="EditorShowSoflanPointList" xml:space="preserve">
+    <value>EditorShowSoflanPointList</value>
+  </data>
 </root>

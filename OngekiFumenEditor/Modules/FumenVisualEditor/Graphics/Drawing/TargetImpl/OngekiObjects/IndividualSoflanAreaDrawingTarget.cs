@@ -29,6 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private readonly IPolygonDrawing polygonDrawing;
         private readonly IHighlightBatchTextureDrawing highlightDrawing;
         private readonly Texture texture;
+        private static readonly int colorSeed = RandomHepler.Random(int.MinValue, int.MaxValue);
 
         public override IEnumerable<string> DrawTargetID { get; } = ["ISF"];
 
@@ -49,9 +50,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private static Dictionary<int, Vector4> cacheColor = new();
 
-        private static Vector4 CalculateColorBySoflanGroup(int soflanGroup)
+        public static Vector4 CalculateColorBySoflanGroup(int soflanGroup)
         {
-            
             if (cacheColor.TryGetValue(soflanGroup, out var color))
                 return color;
 
@@ -77,7 +77,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 return (rgb.r + m, rgb.g + m, rgb.b + m);
             }
 
-            float hue = Math.Abs(HashCode.Combine(soflanGroup, soflanGroup) % 360);
+            float hue = Math.Abs((HashCode.Combine(soflanGroup, soflanGroup) ^ colorSeed) % 360);
             float saturation = 1f;
             float value = 1f;
 

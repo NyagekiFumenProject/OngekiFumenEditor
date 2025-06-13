@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         private SoflanGroupWrapItemGroup defaultItemGroup = new()
         {
-            DisplayName = "default"
+            DisplayName = "default",
         };
 
         private Dictionary<int, SoflanGroupWrapItem> cachedSoflanGroupWrapItemMap = new();

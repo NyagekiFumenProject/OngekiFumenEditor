@@ -40,11 +40,19 @@
         <SolidColorBrush x:Key="GrayBrush1" Color="Gray" />
     </UserControl.Resources>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal">
+
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            Orientation="Horizontal">
             <ToolBar>
                 <TextBox
                     Width="100"
@@ -53,64 +61,62 @@
                 <Button cal:Message.Attach="[Event Click] = [Action CreateNewGroup()]" Content="{markup:Translate [NewItemGroup]}" />
             </ToolBar>
         </StackPanel>
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <ListView
-                cal:Message.Attach="[Event Loaded] = [Action OnListLoaded($source)];"
-                Background="Transparent"
-                ItemContainerStyle="{StaticResource ItemContStyle}"
-                ItemsSource="{Binding DisplaySoflanGroupItemGroupRoot.DisplayableItemSource}"
-                SelectionMode="Single">
-                <ListView.View>
-                    <GridView>
-                        <GridView.ColumnHeaderContainerStyle>
-                            <Style TargetType="GridViewColumnHeader">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="BorderBrush" Value="Transparent" />
-                                <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-                            </Style>
-                        </GridView.ColumnHeaderContainerStyle>
-                        <GridViewColumn Width="220" Header="Name">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" Orientation="Horizontal">
-                                        <ToggleButton
-                                            x:Name="Expander"
-                                            ClickMode="Press"
-                                            IsChecked="{Binding Path=IsExpanded, UpdateSourceTrigger=PropertyChanged}">
-                                            <ToggleButton.Style>
-                                                <Style TargetType="{x:Type ToggleButton}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding HasChildren}" Value="False">
-                                                            <Setter Property="Visibility" Value="Hidden" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding HasChildren}" Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Hidden" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                    <Setter Property="Focusable" Value="False" />
-                                                    <Setter Property="Width" Value="19" />
-                                                    <Setter Property="Height" Value="13" />
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="{x:Type ToggleButton}">
+
+        <ListView
+            Grid.Row="1"
+            Grid.Column="0"
+            cal:Message.Attach="[Event Loaded] = [Action OnListLoaded($source)];"
+            Background="Transparent"
+            ItemContainerStyle="{StaticResource ItemContStyle}"
+            ItemsSource="{Binding DisplaySoflanGroupItemGroupRoot.DisplayableItemSource}"
+            SelectionMode="Single">
+            <ListView.View>
+                <GridView>
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                    <GridViewColumn Width="220" Header="Name">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" Orientation="Horizontal">
+                                    <ToggleButton
+                                        x:Name="Expander"
+                                        ClickMode="Press"
+                                        IsChecked="{Binding Path=IsExpanded, UpdateSourceTrigger=PropertyChanged}">
+                                        <ToggleButton.Style>
+                                            <Style TargetType="{x:Type ToggleButton}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasChildren}" Value="False">
+                                                        <Setter Property="Visibility" Value="Hidden" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding HasChildren}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Hidden" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                                <Setter Property="Focusable" Value="False" />
+                                                <Setter Property="Width" Value="19" />
+                                                <Setter Property="Height" Value="13" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                            <Border
+                                                                Width="19"
+                                                                Height="13"
+                                                                Background="Transparent">
                                                                 <Border
-                                                                    Width="19"
-                                                                    Height="13"
-                                                                    Background="Transparent">
-                                                                    <Border
-                                                                        Width="9"
-                                                                        Height="9"
-                                                                        BorderBrush="#FF7898B5"
-                                                                        BorderThickness="0"
-                                                                        CornerRadius="1"
-                                                                        SnapsToDevicePixels="true">
-                                                                        <Border.Background>
-                                                                            <SolidColorBrush Color="Transparent" />
-                                                                            <!--
+                                                                    Width="9"
+                                                                    Height="9"
+                                                                    BorderBrush="#FF7898B5"
+                                                                    BorderThickness="0"
+                                                                    CornerRadius="1"
+                                                                    SnapsToDevicePixels="true">
+                                                                    <Border.Background>
+                                                                        <SolidColorBrush Color="Transparent" />
+                                                                        <!--
                                                                                     <LinearGradientBrush StartPoint="0,0"
                                                                                         EndPoint="1,1">
                                                                                         <LinearGradientBrush.GradientStops>
@@ -120,146 +126,188 @@
                                                                                     Offset="1"/>
                                                                                         </LinearGradientBrush.GradientStops>
                                                                                     </LinearGradientBrush>
-                                                                            -->
-                                                                        </Border.Background>
-                                                                        <Path
-                                                                            x:Name="ExpandPath"
-                                                                            Margin="1,2,1,1"
-                                                                            Data="M0,0 L0,6 L6,0 z"
-                                                                            Fill="Transparent"
-                                                                            Stroke="{DynamicResource BlackBrush}">
-                                                                            <Path.RenderTransform>
-                                                                                <RotateTransform Angle="135" CenterX="3" CenterY="3" />
-                                                                            </Path.RenderTransform>
-                                                                        </Path>
-                                                                        <!--
+                                                                        -->
+                                                                    </Border.Background>
+                                                                    <Path
+                                                                        x:Name="ExpandPath"
+                                                                        Margin="1,2,1,1"
+                                                                        Data="M0,0 L0,6 L6,0 z"
+                                                                        Fill="Transparent"
+                                                                        Stroke="{DynamicResource BlackBrush}">
+                                                                        <Path.RenderTransform>
+                                                                            <RotateTransform Angle="135" CenterX="3" CenterY="3" />
+                                                                        </Path.RenderTransform>
+                                                                    </Path>
+                                                                    <!--
                                                                             <Path x:Name="ExpandPath"
                                                                             Margin="1,1,1,1"
                                                                             Fill="Black"
                                                                             Data="M 0 2 L 0 3 L 2 3 L 2 5 L 3 5 L 3 3 L 5 3 L 5 2 L 3 2 L 3 0 L 2 0 L 2 2 Z"/>
-                                                                        -->
-                                                                    </Border>
+                                                                    -->
                                                                 </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="IsChecked" Value="True">
-                                                                        <Setter TargetName="ExpandPath" Property="RenderTransform">
-                                                                            <Setter.Value>
-                                                                                <RotateTransform Angle="180" CenterX="3" CenterY="3" />
-                                                                            </Setter.Value>
-                                                                        </Setter>
-                                                                        <Setter TargetName="ExpandPath" Property="Fill" Value="{DynamicResource GrayBrush1}" />
-                                                                        <Setter TargetName="ExpandPath" Property="Stroke" Value="{DynamicResource BlackBrush}" />
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsChecked" Value="True">
+                                                                    <Setter TargetName="ExpandPath" Property="RenderTransform">
+                                                                        <Setter.Value>
+                                                                            <RotateTransform Angle="180" CenterX="3" CenterY="3" />
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                    <Setter TargetName="ExpandPath" Property="Fill" Value="{DynamicResource GrayBrush1}" />
+                                                                    <Setter TargetName="ExpandPath" Property="Stroke" Value="{DynamicResource BlackBrush}" />
 
-                                                                        <!--
+                                                                    <!--
                                                                                     <Setter Property="Data"
                                                                             TargetName="ExpandPath"
                                                                             Value="M 0 2 L 0 3 L 5 3 L 5 2 Z"/>
-                                                                        -->
-                                                                    </Trigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </ToggleButton.Style>
-                                        </ToggleButton>
+                                                                    -->
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ToggleButton.Style>
+                                    </ToggleButton>
 
-                                        <RadioButton
-                                            Margin="5,0"
-                                            cal:Message.Attach="[Event Checked] = [Action OnItemChecked($dataContext)]"
-                                            GroupName="ILOVE2857"
-                                            IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}">
-                                            <RadioButton.Style>
-                                                <Style TargetType="{x:Type RadioButton}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsSelected}" Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </RadioButton.Style>
-                                        </RadioButton>
+                                    <RadioButton
+                                        Margin="5,0"
+                                        cal:Message.Attach="[Event Checked] = [Action OnItemChecked($dataContext)]"
+                                        GroupName="ILOVE2857IsSelected"
+                                        IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}">
+                                        <RadioButton.Style>
+                                            <Style TargetType="{x:Type RadioButton}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </RadioButton.Style>
+                                    </RadioButton>
 
-                                        <TextBlock Text="{Binding DisplayName}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="{x:Type TextBlock}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding HasChildren}" Value="False">
-                                                            <Setter Property="FontWeight" Value="Normal" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding HasChildren}" Value="True">
-                                                            <Setter Property="FontWeight" Value="Bold" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Design">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox
-                                        Margin="2,5,2,5"
-                                        HorizontalAlignment="Center"
-                                        IsChecked="{Binding IsDisplayInDesignMode}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Preview">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox
-                                        Margin="2,5,2,5"
-                                        HorizontalAlignment="Center"
-                                        IsChecked="{Binding IsDisplayInPreviewMode}" />
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-            <ListView
+                                    <TextBlock Text="{Binding DisplayName}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasChildren}" Value="False">
+                                                        <Setter Property="FontWeight" Value="Normal" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding HasChildren}" Value="True">
+                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Design">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    Margin="2,5,2,5"
+                                    HorizontalAlignment="Center"
+                                    IsChecked="{Binding IsDisplayInDesignMode}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Preview">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    Margin="2,5,2,5"
+                                    HorizontalAlignment="Center"
+                                    IsChecked="{Binding IsDisplayInPreviewMode}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Soflans">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <RadioButton
+                                    Margin="2,5,2,5"
+                                    cal:Message.Attach="[Event Checked] = [Action OnItemChecked_IsDisplaySoflanDesignMode($dataContext)]"
+                                    GroupName="ILOVE2857IsDisplaySoflanDesignMode"
+                                    IsChecked="{Binding IsDisplaySoflanDesignMode, UpdateSourceTrigger=PropertyChanged}">
+                                    <RadioButton.Style>
+                                        <Style TargetType="{x:Type RadioButton}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDisplaySoflanDesignMode}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </RadioButton.Style>
+                                </RadioButton>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                        <markup:Translate Path="[CurrentDisplaySelectedSoflanPointList]" />
+                        <Binding Path="CurrentSelectedSoflanGroupWrapItem.DisplayName" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+            <CheckBox
                 Grid.Column="1"
-                Background="Transparent"
-                ItemsSource="{Binding DisplaySoflanPointList}"
-                SelectionMode="Single">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListViewItem}">
-                        <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.View>
-                    <GridView>
-                        <GridView.ColumnHeaderContainerStyle>
-                            <Style TargetType="GridViewColumnHeader">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="BorderBrush" Value="Transparent" />
-                                <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-                            </Style>
-                        </GridView.ColumnHeaderContainerStyle>
-
-                        <GridViewColumn
-                            Width="150"
-                            DisplayMemberBinding="{Binding Y}"
-                            Header="Y" />
-                        <GridViewColumn
-                            Width="90"
-                            DisplayMemberBinding="{Binding TGrid}"
-                            Header="TGrid" />
-                        <GridViewColumn
-                            Width="90"
-                            DisplayMemberBinding="{Binding Bpm.BPM}"
-                            Header="Bpm" />
-                        <GridViewColumn
-                            Width="150"
-                            DisplayMemberBinding="{Binding Speed}"
-                            Header="Speed" />
-                    </GridView>
-                </ListView.View>
-            </ListView>
+                Margin="10,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center">
+                <TextBlock Text="{markup:Translate [EditorShowSoflanPointList]}" />
+            </CheckBox>
         </Grid>
+        <ListView
+            Grid.Row="1"
+            Grid.Column="1"
+            Background="Transparent"
+            ItemsSource="{Binding DisplaySoflanPointList}"
+            SelectionMode="Single">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+
+                    <GridViewColumn
+                        Width="150"
+                        DisplayMemberBinding="{Binding Y}"
+                        Header="Y" />
+                    <GridViewColumn
+                        Width="90"
+                        DisplayMemberBinding="{Binding TGrid}"
+                        Header="TGrid" />
+                    <GridViewColumn
+                        Width="90"
+                        DisplayMemberBinding="{Binding Bpm.BPM}"
+                        Header="Bpm" />
+                    <GridViewColumn
+                        Width="150"
+                        DisplayMemberBinding="{Binding Speed}"
+                        Header="Speed" />
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 </UserControl>
