@@ -125,7 +125,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 FontWeight = FontWeights.Bold,
                 VerticalAlignment = VerticalAlignment.Center,
             };
-            textblock.SetBinding(TextBlock.TextProperty, new TranslateExtension("HasNewVersion"));
+            textblock.Text = Resources.HasNewVersion;
             updatableButton = new Button()
             {
                 BorderThickness = new Thickness(0),
