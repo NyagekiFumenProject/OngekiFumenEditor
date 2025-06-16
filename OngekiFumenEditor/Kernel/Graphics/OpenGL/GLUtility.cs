@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
 	internal static class GLUtility
 	{

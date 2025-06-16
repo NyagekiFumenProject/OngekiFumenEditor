@@ -209,13 +209,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public void BeforeRender(IDrawingContext context)
         {
-            var dpiX = currentDPI.DpiScaleX;
-            var dpiY = currentDPI.DpiScaleY;
+#if DEBUG
+            GLUtility.CheckError();
+#endif
 
-            var viewWidth = (float)(context.CurrentDrawingTargetContext?.ViewWidth ?? 0);
-            var viewHeight = (float)(context.CurrentDrawingTargetContext?.ViewHeight ?? 0);
-            var renderViewWidth = (int)(viewWidth * dpiX);
-            var renderViewHeight = (int)(viewHeight * dpiY);
+            var renderViewWidth = (int)((context.CurrentDrawingTargetContext?.ViewWidth ?? 0) * currentDPI.DpiScaleX);
+            var renderViewHeight = (int)((context.CurrentDrawingTargetContext?.ViewHeight ?? 0) * currentDPI.DpiScaleY);
 
             GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
         }
