@@ -6,7 +6,6 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
@@ -14,14 +13,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 public class DrawPlayerLocationHelper
 {
     private readonly (Vector2 size, Vector2 position, float rotation)[] arr = { default };
-    private readonly Texture texture;
+    private readonly IImage texture;
     private readonly ITextureDrawing textureDrawing;
     private bool enableShowPlayerLocation;
     private readonly Vector2 size;
 
     public DrawPlayerLocationHelper()
     {
-        textureDrawing = IoC.Get<ITextureDrawing>();
+        textureDrawing = IoC.Get<IDrawingManager>().TextureDrawing;
         arr[0].rotation = 0f;
 
         texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\playerLoc.png");

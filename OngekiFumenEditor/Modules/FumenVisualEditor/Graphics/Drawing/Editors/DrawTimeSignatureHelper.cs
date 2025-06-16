@@ -29,8 +29,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public DrawTimeSignatureHelper()
         {
-            stringDrawing = IoC.Get<IStringDrawing>();
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
+            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
+            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
         }
 
         public void DrawLines(IFumenEditorDrawingContext target)

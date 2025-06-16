@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing

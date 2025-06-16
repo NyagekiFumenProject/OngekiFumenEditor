@@ -1,7 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +16,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IBatchTextureDrawing textureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
 
-        public abstract Texture StartEditorTexture { get; }
-        public abstract Texture NextEditorTexture { get; }
-        public abstract Texture EndEditorTexture { get; }
+        public abstract IImage StartEditorTexture { get; }
+        public abstract IImage NextEditorTexture { get; }
+        public abstract IImage EndEditorTexture { get; }
 
         private Vector2 startSize = new(16, 16);
         private Vector2 nextSize = new(16, 16);
@@ -29,8 +28,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public CommonLaneEditorObjectDrawingTarget()
         {
-            textureDrawing = IoC.Get<IBatchTextureDrawing>();
-            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+            textureDrawing = IoC.Get<IDrawingManager>().BatchTextureDrawing;
+            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
                 startSize = new Vector2(16, 16);
@@ -44,7 +43,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             {
-                void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
+                void drawEditorTap(IImage texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {
                     foreach (var item in o)
                     {

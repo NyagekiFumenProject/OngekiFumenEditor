@@ -1,6 +1,5 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
-using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -34,8 +33,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public DrawSelectingRangeHelper()
         {
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
+            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target)
@@ -78,7 +77,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var centerX = (leftX + rightX) / 2;
             var centerY = (topY + buttomY) / 2;
 
-            polygonDrawing.Begin(target, PrimitiveType.TriangleStrip);
+            polygonDrawing.Begin(target, Primitive.TriangleStrip);
             {
                 polygonDrawing.PostPoint(new(leftX, buttomY), colors.RectColor);
                 polygonDrawing.PostPoint(new(centerX, centerY), colors.RectColor);

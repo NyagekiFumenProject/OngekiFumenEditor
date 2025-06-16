@@ -1,7 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
-using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -20,25 +20,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     public class BulletDrawingTarget : BulletPalleteReferencableBatchDrawTargetBase<Bullet>
     {
-        private IDictionary<Texture, Vector2> spritesSize;
-        private IDictionary<Texture, Vector2> spritesOriginOffset;
-        private IDictionary<Texture, Vector2> spritesSizeLarge;
-        private IDictionary<Texture, Vector2> spritesOriginOffsetLarge;
-        private IDictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap;
+        private IDictionary<IImage, Vector2> spritesSize;
+        private IDictionary<IImage, Vector2> spritesOriginOffset;
+        private IDictionary<IImage, Vector2> spritesSizeLarge;
+        private IDictionary<IImage, Vector2> spritesOriginOffsetLarge;
+        private IDictionary<BulletDamageType, Dictionary<BulletType, IImage>> spritesMap;
 
         public BulletDrawingTarget()
         {
-            var _spritesOriginOffset = new Dictionary<Texture, Vector2>();
-            var _spritesSize = new Dictionary<Texture, Vector2>();
-            var _spritesOriginOffsetLarge = new Dictionary<Texture, Vector2>();
-            var _spritesSizeLarge = new Dictionary<Texture, Vector2>();
-            var _spritesMap = new Dictionary<BulletDamageType, Dictionary<BulletType, Texture>>();
+            var _spritesOriginOffset = new Dictionary<IImage, Vector2>();
+            var _spritesSize = new Dictionary<IImage, Vector2>();
+            var _spritesOriginOffsetLarge = new Dictionary<IImage, Vector2>();
+            var _spritesSizeLarge = new Dictionary<IImage, Vector2>();
+            var _spritesMap = new Dictionary<BulletDamageType, Dictionary<BulletType, IImage>>();
 
             void SetTexture(BulletDamageType k1, BulletType k2, string rPath, string key, Vector2 size, Vector2 origOffset, Vector2 sizeLarge, Vector2 origOffsetLarge)
             {
                 if (!_spritesMap.TryGetValue(k1, out var dic))
                 {
-                    dic = new Dictionary<BulletType, Texture>();
+                    dic = new Dictionary<BulletType, IImage>();
                     _spritesMap[k1] = dic;
                 }
 

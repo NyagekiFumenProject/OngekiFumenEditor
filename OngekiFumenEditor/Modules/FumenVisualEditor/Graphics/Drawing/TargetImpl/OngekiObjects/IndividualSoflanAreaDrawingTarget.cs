@@ -3,10 +3,8 @@ using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
-using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -28,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private readonly ITextureDrawing textureDrawing;
         private readonly IPolygonDrawing polygonDrawing;
         private readonly IHighlightBatchTextureDrawing highlightDrawing;
-        private readonly Texture texture;
+        private readonly IImage texture;
         private static readonly int colorSeed = RandomHepler.Random(int.MinValue, int.MaxValue);
 
         public override IEnumerable<string> DrawTargetID { get; } = ["ISF"];
@@ -39,11 +37,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public IndividualSoflanAreaDrawingTarget()
         {
-            stringDrawing = IoC.Get<IStringDrawing>();
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            textureDrawing = IoC.Get<ITextureDrawing>();
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
-            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
+            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            textureDrawing = IoC.Get<IDrawingManager>().TextureDrawing;
+            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
+            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
 
             texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\tri.png");
         }
@@ -147,7 +145,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     var rectColor = color;
                     rectColor.W = 0.35f;
 
-                    polygonDrawing.Begin(target, PrimitiveType.TriangleStrip);
+                    polygonDrawing.Begin(target, Primitive.TriangleStrip);
                     {
                         polygonDrawing.PostPoint(new(leftX, bottomY), rectColor);
                         polygonDrawing.PostPoint(new(centerX, centerY), rectColor);

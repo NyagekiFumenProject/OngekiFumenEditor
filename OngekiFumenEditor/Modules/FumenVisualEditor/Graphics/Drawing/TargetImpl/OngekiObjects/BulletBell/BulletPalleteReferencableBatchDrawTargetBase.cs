@@ -6,7 +6,6 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Concurrent;
@@ -22,8 +21,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public abstract class BulletPalleteReferencableBatchDrawTargetBase<T> : CommonBatchDrawTargetBase<T>, IDisposable where T : OngekiMovableObjectBase, IBulletPalleteReferencable
     {
-        protected Dictionary<Texture, ConcurrentBag<(Vector2, Vector2, float)>> normalDrawList = new();
-        protected Dictionary<Texture, ConcurrentBag<(Vector2, Vector2, float)>> selectedDrawList = new();
+        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float)>> normalDrawList = new();
+        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float)>> selectedDrawList = new();
         protected List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
@@ -35,9 +34,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public BulletPalleteReferencableBatchDrawTargetBase()
         {
-            stringDrawing = IoC.Get<IStringDrawing>();
-            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
-            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
+            batchTextureDrawing = IoC.Get<IDrawingManager>().BatchTextureDrawing;
+            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
 
             parallelOptions = new ParallelOptions()
             {

@@ -8,7 +8,6 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
-using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -31,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public LaneBlockerDrawingTarget()
         {
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
+            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
         }
 
         public override void Begin(IFumenEditorDrawingContext target)
@@ -122,7 +121,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
             {
-                polygonDrawing.Begin(target, PrimitiveType.TriangleStrip);
+                polygonDrawing.Begin(target, Primitive.TriangleStrip);
                 foreach (var child in wallStartLane.Children)
                 {
                     if (child.TGrid < minTGrid)

@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.Base;
+﻿using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Drawing;
@@ -8,16 +8,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public abstract class TextureLaneEditorObjectDrawingTarget : CommonLaneEditorObjectDrawingTarget
     {
-        public static Texture LoadTextrueFromDefaultResource(string rPath)
+        public static IImage LoadTextrueFromDefaultResource(string rPath)
         {
             return ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
         }
 
-        public override Texture StartEditorTexture { get; }
-        public override Texture NextEditorTexture { get; }
-        public override Texture EndEditorTexture { get; }
+        public override IImage StartEditorTexture { get; }
+        public override IImage NextEditorTexture { get; }
+        public override IImage EndEditorTexture { get; }
 
-        public TextureLaneEditorObjectDrawingTarget(Texture startEditorTexture, Texture nextEditorTexture, Texture endEditorTexture)
+        public TextureLaneEditorObjectDrawingTarget(IImage startEditorTexture, IImage nextEditorTexture, IImage endEditorTexture)
         {
             StartEditorTexture = startEditorTexture;
             NextEditorTexture = nextEditorTexture;

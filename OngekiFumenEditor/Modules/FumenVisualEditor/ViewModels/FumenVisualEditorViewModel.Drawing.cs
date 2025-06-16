@@ -31,7 +31,6 @@ using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Wpf;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawXGridHelper;
@@ -299,8 +298,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         PerfomenceMonitor.PostUIRenderTime(ts);
         PerfomenceMonitor.OnBeforeRender();
 
-        CleanRender();
-        GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
+        var drawingManager = IoC.Get<IDrawingManager>();
+
         hits.Clear();
 
         drawingContexts.Clear();
@@ -368,7 +367,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 Rect = rect,
                 ViewProjectionMatrix = mvp,
                 ViewMatrix = viewMatrix,
-                ProjectionMatrix = projectionMatrix
+                ProjectionMatrix = projectionMatrix,
+                ViewWidth = ViewWidth,
+                ViewHeight = ViewHeight
             };
 
             drawingContexts[pair.Key] = drawingContext;
@@ -466,25 +467,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         foreach (var soflanGroupId in unusedSoflanGroups)
             drawingContexts.Remove(soflanGroupId);
 
-        CurrentDrawingTargetContext = defaultDrawingTargetContext;
-
         RecalculateMagaticXGridLines();
-        foreach (var (minTGrid, maxTGrid) in defaultDrawingTargetContext.VisibleTGridRanges)
-            playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
-        /*
-        foreach (var drawingContext in drawingContexts.Values)
-        {
-            CurrentDrawingTargetContext = drawingContext;
-            foreach (var (minTGrid, maxTGrid) in drawingContext.VisibleTGridRanges)
-                playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
-        }
-        */
-        CurrentDrawingTargetContext = defaultDrawingTargetContext;
-
-        playableAreaHelper.Draw(this);
-        timeSignatureHelper.DrawLines(this);
-
-        xGridHelper.DrawLines(this, CachedMagneticXGridLines);
 
         if (IsPreviewMode)
         {
@@ -537,6 +520,21 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
         }
 
+        #region Rendering
+
+        CurrentDrawingTargetContext = defaultDrawingTargetContext;
+
+        CleanRender(drawingManager);
+        drawingManager.BeforeRender(this);
+
+        foreach (var (minTGrid, maxTGrid) in CurrentDrawingTargetContext.VisibleTGridRanges)
+            playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
+
+        playableAreaHelper.Draw(this);
+        timeSignatureHelper.DrawLines(this);
+
+        xGridHelper.DrawLines(this, CachedMagneticXGridLines);
+
         var prevOrder = int.MinValue;
         foreach (var drawingTarget in drawTargetOrder.Where(x => CheckDrawingVisible(x.Visible)))
         {
@@ -545,7 +543,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             if (prevOrder > order)
             {
                 ResortRenderOrder();
-                CleanRender();
                 break;
             }
 
@@ -571,6 +568,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
             PerfomenceMonitor.OnAfterTargetDrawing(drawingTarget);
         }
+
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
         timeSignatureHelper.DrawTimeSigntureText(this);
@@ -578,6 +576,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         judgeLineHelper.Draw(this);
         playerLocationHelper.Draw(this);
         selectingRangeHelper.Draw(this);
+
+        drawingManager.AfterRender(this);
 
         //clean up
         foreach (var list in map.Values)
@@ -590,6 +590,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         ObjectPool.Return(usedDrawingContexts);
         ObjectPool.Return(unusedSoflanGroups);
 
+    #endregion
     End:
         drawMap.Clear();
         PerfomenceMonitor.OnAfterRender();
@@ -763,14 +764,15 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         return objects.Concat(objs).SelectMany(x => x.GetDisplayableObjects());
     }
 
-    private void CleanRender()
+    private void CleanRender(IDrawingManager drawingManager)
     {
+        var cleanColor = Vector4.Zero;
         if (IsDesignMode || !enablePlayFieldDrawing)
-            GL.ClearColor(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
+            cleanColor = new(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
         else
-            GL.ClearColor(playFieldBackgroundColor.X, playFieldBackgroundColor.Y, playFieldBackgroundColor.Z,
+            cleanColor = new(playFieldBackgroundColor.X, playFieldBackgroundColor.Y, playFieldBackgroundColor.Z,
                 playFieldBackgroundColor.W);
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        drawingManager.CleanRender(cleanColor);
     }
 
     public void OnLoaded(ActionExecutionContext e)

@@ -40,9 +40,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public DurationSoflanDrawingTarget()
         {
-            stringDrawing = IoC.Get<IStringDrawing>();
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
+            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
+            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
             placeholdQuery = new SoflanPlaceholdQuery();
         }
 
@@ -260,7 +260,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             lineDrawing.Draw(target, lines, 2.5f);
             lineDrawing.Draw(target, lines2, 4f);
 
-            polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+            polygonDrawing.Begin(target, Primitive.Triangles);
             {
                 foreach (var (pos, color) in polygonPoints)
                     polygonDrawing.PostPoint(pos, color);

@@ -12,7 +12,6 @@ using System.Numerics;
 using OngekiFumenEditor.Utils.ObjectPool;
 using EarcutNet;
 using System.Drawing;
-using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -33,10 +32,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public DrawPlayableAreaHelper()
         {
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
-            circleDrawing = IoC.Get<ICircleDrawing>();
-            stringDrawing = IoC.Get<IStringDrawing>();
+            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
+            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            circleDrawing = IoC.Get<IDrawingManager>().CircleDrawing;
+            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
 
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -433,7 +432,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             tessellateList.Clear();
             Earcut.Tessellate(tessellatePoints, idxList, tessellateList);
 
-            polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+            polygonDrawing.Begin(target, Primitive.Triangles);
             foreach (var seq in tessellateList.SequenceWrap(3))
             {
                 foreach (var idx in seq)

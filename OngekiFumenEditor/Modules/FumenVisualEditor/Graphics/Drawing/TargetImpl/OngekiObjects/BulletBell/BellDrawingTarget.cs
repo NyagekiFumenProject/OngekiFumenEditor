@@ -1,7 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
-using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     public class BellDrawingTarget : BulletPalleteReferencableBatchDrawTargetBase<Bell>
     {
-        private readonly Texture texture;
+        private readonly IImage texture;
         private readonly Vector2 sizeNormal;
         private readonly Vector2 sizeLarge;
 

@@ -2,7 +2,6 @@
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -16,8 +15,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public override int DefaultRenderOrder => 1000;
 
-        private Texture texture;
-        private Texture exFlickEffTexture;
+        private IImage texture;
+        private IImage exFlickEffTexture;
 
         private Vector2 leftSize;
         private Vector2 rightSize;
@@ -48,8 +47,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             exTapEffSize = size;
             selectedEffSize = size * 1.05f;
 
-            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
-            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+            batchTextureDrawing = IoC.Get<IDrawingManager>().BatchTextureDrawing;
+            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)

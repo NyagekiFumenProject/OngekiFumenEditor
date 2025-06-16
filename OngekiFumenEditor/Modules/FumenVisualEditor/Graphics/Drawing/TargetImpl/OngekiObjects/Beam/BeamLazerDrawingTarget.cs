@@ -1,6 +1,7 @@
-﻿using OngekiFumenEditor.Base;
+﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     internal class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
-        private DefaultBeamLazerTextureDrawing lazerDrawing;
-        private Texture textureBody;
-        private Texture textureWarn;
+        private IBeamDrawing lazerDrawing;
+        private IImage textureBody;
+        private IImage textureWarn;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS", "OBS" };
         public override DrawingVisible DefaultVisible => DrawingVisible.Preview;
@@ -24,19 +25,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public BeamLazerDrawingTarget()
         {
-            lazerDrawing = new();
+            lazerDrawing = IoC.Get<IDrawingManager>().BeamDrawing;
 
-            void load(ref Texture t, string name)
+            void load(ref IImage t, string name)
             {
                 t = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + name);
             }
 
             load(ref textureBody, "beamBody.png");
-            textureBody.TextureWrapT = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
+            textureBody.TextureWrapT = TextureWrapMode.Repeat;
 
             load(ref textureWarn, "beamWarn.png");
-            textureWarn.TextureWrapS = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
-            textureWarn.TextureWrapT = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
+            textureWarn.TextureWrapS = TextureWrapMode.Repeat;
+            textureWarn.TextureWrapT = TextureWrapMode.Repeat;
         }
 
         public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
@@ -139,9 +140,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public void Dispose()
         {
-            lazerDrawing?.Dispose();
-            lazerDrawing = default;
-
             textureBody?.Dispose();
             textureBody = default;
 

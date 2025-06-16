@@ -1,7 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,10 +11,10 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects
 {
-	[Export(typeof(IFumenEditorDrawingTarget))]
+    [Export(typeof(IFumenEditorDrawingTarget))]
 	public class LaneCurvePathControlDrawingTarget : CommonBatchDrawTargetBase<LaneCurvePathControlObject>, IDisposable
 	{
-		private Texture texture;
+		private IImage texture;
 		private ITextureDrawing textureDrawing;
 		private IHighlightBatchTextureDrawing highlightDrawing;
 		private IStringDrawing stringDrawing;
@@ -39,10 +38,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
 
-            textureDrawing = IoC.Get<IBatchTextureDrawing>();
-			stringDrawing = IoC.Get<IStringDrawing>();
-			highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
-			lineDrawing = IoC.Get<ISimpleLineDrawing>();
+            textureDrawing = IoC.Get<IDrawingManager>().TextureDrawing;
+			stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
+			highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
+			lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
 		}
 
 		public void Dispose()

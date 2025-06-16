@@ -1,7 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached;
 using OngekiFumenEditor.Utils;
 using System;
@@ -15,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     public class SvgObjectDrawingTarget : CommonDrawTargetBase<SvgPrefabBase>, IDisposable
     {
-        private Texture texture;
+        private IImage texture;
         private ICachedSvgRenderDataManager cachedSvgRenderDataManager;
         private ISimpleLineDrawing lineDrawing;
         private ITextureDrawing textureDrawing;
@@ -35,9 +34,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 size = new Vector2(16, 16);
 
             cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            textureDrawing = IoC.Get<ITextureDrawing>();
-            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            textureDrawing = IoC.Get<IDrawingManager>().TextureDrawing;
+            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
         }
 
         public override void Draw(IFumenEditorDrawingContext target, SvgPrefabBase obj)

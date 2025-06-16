@@ -1,12 +1,11 @@
 ﻿using Caliburn.Micro;
-using FontStashSharp;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
-using System.Linq;
 using System.Numerics;
+using System.Windows.Media;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
@@ -16,14 +15,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private IStringDrawing stringDrawing;
         private ILineDrawing lineDrawing;
         private Vector4 color = new(1, 1, 0, 1);
-        private Vector4 spdColor = new(FSColor.LightCyan.R / 255.0f, FSColor.LightCyan.G / 255.0f, FSColor.LightCyan.B / 255.0f, FSColor.LightCyan.A / 255.0f);
+        private Vector4 spdColor = new(Colors.LightCyan.R / 255.0f, Colors.LightCyan.G / 255.0f, Colors.LightCyan.B / 255.0f, Colors.LightCyan.A / 255.0f);
 
         LineVertex[] vertices = new LineVertex[2];
 
         public DrawJudgeLineHelper()
         {
-            stringDrawing = IoC.Get<IStringDrawing>();
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
+            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
+            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target)

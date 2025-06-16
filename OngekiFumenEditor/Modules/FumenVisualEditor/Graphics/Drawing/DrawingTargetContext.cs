@@ -19,7 +19,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
         public int SoflanGroupId { get; set; }
         public VisibleRect Rect { get; set; }
         public Matrix4 ViewProjectionMatrix { get; set; }
-        public Matrix4 ViewMatrix { get; internal set; }
-        public Matrix4 ProjectionMatrix { get; internal set; }
+        public Matrix4 ViewMatrix { get; set; }
+        public Matrix4 ProjectionMatrix { get; set; }
+        public float ViewWidth { get; set; }
+        public float ViewHeight { get; set; }
     }
 }

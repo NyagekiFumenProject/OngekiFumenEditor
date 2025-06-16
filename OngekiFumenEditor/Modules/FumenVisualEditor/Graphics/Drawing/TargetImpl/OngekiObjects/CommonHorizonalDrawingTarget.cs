@@ -26,8 +26,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public CommonHorizonalDrawingTarget()
         {
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            stringDrawing = IoC.Get<IStringDrawing>();
+            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
         }
 
         public override IEnumerable<string> DrawTargetID { get; } =
