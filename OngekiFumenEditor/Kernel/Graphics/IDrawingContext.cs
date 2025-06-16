@@ -1,7 +1,7 @@
 ﻿using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
-using OpenTK.Wpf;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
@@ -11,8 +11,8 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         IPerfomenceMonitor PerfomenceMonitor { get; }
 
-        void PrepareRenderLoop(GLWpfControl glView);
-        void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs e);
+        void PrepareRenderLoop(FrameworkElement renderControl);
+        void OnRenderSizeChanged(FrameworkElement renderControl, SizeChangedEventArgs e);
 
         void Render(TimeSpan ts);
     }

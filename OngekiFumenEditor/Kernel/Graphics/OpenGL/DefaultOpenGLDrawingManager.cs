@@ -15,6 +15,7 @@ using OpenTK.Wpf;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         [DllImport("opengl32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
         private static extern nint wglGetProcAddress(string lpszProc);
 
-        private IGraphicsContext sharedContext;
+        private static IGraphicsContext sharedContext;
 
         private static bool IsWGL_NV_DX_interopSupported()
         {
@@ -48,8 +49,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return functionPointer != nint.Zero;
         }
 
-        TaskCompletionSource initTaskSource = new TaskCompletionSource();
-        bool startedInit = false;
+        private TaskCompletionSource initTaskSource = new TaskCompletionSource();
+        private bool initialized = false;
         private DpiScale currentDPI;
 
         public ICircleDrawing CircleDrawing { get; private set; }
@@ -74,18 +75,49 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public IBeamDrawing BeamDrawing { get; private set; }
 
-        public Task CheckOrInitGraphics()
+        private void Initialize()
         {
-            if (!startedInit)
+            Log.LogInfo("OpenGL Drawing Manager initializing...");
+            InitializeOpenGL();
+
+            #region Create Drawings
+
+            CircleDrawing = new DefaultInstancedCircleDrawing(this);
+            LineDrawing = new DefaultLineDrawing(this);
+            PolygonDrawing = new DefaultPolygonDrawing(this);
+            StaticVBODrawing = SimpleLineDrawing = new DefaultInstancedLineDrawing(this);
+            StringDrawing = new DefaultStringDrawing(this);
+            SvgDrawing = new DefaultSvgDrawing(this);
+            TextureDrawing = BatchTextureDrawing = new DefaultBatchTextureDrawing(this);
+            HighlightBatchTextureDrawing = new DefaultHighlightBatchTextureDrawing(this);
+            BeamDrawing = new DefaultBeamDrawing(this);
+
+            Log.LogInfo("Drawing objects were created.");
+
+            #endregion
+
+            #region DPI watcher
+
+            var mainWindow = Application.Current.MainWindow;
+            var source = PresentationSource.FromVisual(mainWindow);
+            if (source != null)
             {
-                startedInit = true;
-                Dispatcher.CurrentDispatcher.InvokeAsync(OnInitOpenGL);
+                currentDPI = VisualTreeHelper.GetDpi(mainWindow);
+                mainWindow.DpiChanged += MainWindow_DpiChanged;
+                Log.LogInfo($"currentDPI: {currentDPI.DpiScaleX},{currentDPI.DpiScaleY}");
+            }
+            else
+            {
+                Log.LogError("Listening DPI Changing failed, PresentationSource.FromVisual(mainWindow) return null.");
             }
 
-            return initTaskSource.Task;
+            #endregion
+
+            Log.LogInfo("OpenGL Drawing Manager initialized successfully.");
+            initTaskSource.SetResult();
         }
 
-        private void OnInitOpenGL()
+        private void InitializeOpenGL()
         {
             if (Properties.ProgramSetting.Default.OutputGraphicsLog)
             {
@@ -116,40 +148,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 var extNames = string.Join(", ", Enumerable.Range(0, GL.GetInteger(GetPName.NumExtensions)).Select(i => GL.GetString(StringNameIndexed.Extensions, i)));
                 Log.LogDebug($"(maybe support) OpenGL extensions: {extNames}");
             }
-
-            #region Create Drawings
-
-            CircleDrawing = new DefaultInstancedCircleDrawing(this);
-            LineDrawing = new DefaultLineDrawing(this);
-            PolygonDrawing = new DefaultPolygonDrawing(this);
-            StaticVBODrawing = SimpleLineDrawing = new DefaultInstancedLineDrawing(this);
-            StringDrawing = new DefaultStringDrawing(this);
-            SvgDrawing = new DefaultSvgDrawing(this);
-            TextureDrawing = BatchTextureDrawing = new DefaultBatchTextureDrawing(this);
-            HighlightBatchTextureDrawing = new DefaultHighlightBatchTextureDrawing(this);
-            BeamDrawing = new DefaultBeamDrawing(this);
-
-            #endregion
-
-            #region DPI watcher
-
-            var mainWindow = Application.Current.MainWindow;
-            var source = PresentationSource.FromVisual(mainWindow);
-            if (source != null)
-            {
-                currentDPI = VisualTreeHelper.GetDpi(mainWindow);
-                mainWindow.DpiChanged += MainWindow_DpiChanged;
-                Log.LogInfo($"currentDPI: {currentDPI.DpiScaleX},{currentDPI.DpiScaleY}");
-            }
-
-            #endregion
-
-            initTaskSource.SetResult();
         }
 
         private void MainWindow_DpiChanged(object sender, DpiChangedEventArgs e)
         {
-            Log.LogInfo($"currentDPI: {currentDPI.DpiScaleX},{currentDPI.DpiScaleY} -> {e.NewDpi.DpiScaleX},{e.NewDpi.DpiScaleY}");
+            if (currentDPI.DpiScaleX != e.NewDpi.DpiScaleX || currentDPI.DpiScaleY != e.NewDpi.DpiScaleY)
+                Log.LogInfo($"currentDPI changed: {currentDPI.DpiScaleX},{currentDPI.DpiScaleY} -> {e.NewDpi.DpiScaleX},{e.NewDpi.DpiScaleY}");
             currentDPI = e.NewDpi;
         }
 
@@ -159,13 +163,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             Log.LogDebug($"[{source}.{type}]{id}:  {str}");
         }
 
-        public Task WaitForGraphicsInitializationDone(CancellationToken cancellation)
+        public Task WaitForInitializationIsDone(CancellationToken cancellation)
         {
             return initTaskSource.Task;
         }
 
-        public Task CreateGraphicsContext(GLWpfControl glView, CancellationToken cancellation = default)
+        public Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
+            if (renderControl is not GLWpfControl glView)
+                throw new Exception("renderControl must be GLWpfControl object.");
+
             var isCompatability = Properties.ProgramSetting.Default.GraphicsCompatability;
             var isOutputLog = Properties.ProgramSetting.Default.OutputGraphicsLog;
 
@@ -187,6 +194,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
             setting.ContextToUse = sharedContext;
 
+            Log.LogDebug($"ContextToUse: {setting.ContextToUse != default}");
+
             Log.LogDebug($"GraphicsCompatability: {isCompatability}");
             Log.LogDebug($"OutputGraphicsLog: {isOutputLog}");
 
@@ -198,17 +207,36 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
             sharedContext = sharedContext ?? glView.Context;
 
-            return Task.CompletedTask;
+            if (!initialized)
+            {
+                initialized = true;
+
+                Log.LogDebug($"Start to invoke DefaultOpenGLDrawingManager::Initialize()");
+                Dispatcher.CurrentDispatcher.InvokeAsync(Initialize);
+            }
+
+            return WaitForInitializationIsDone(cancellation);
+        }
+
+        [Conditional("DEBUG")]
+        private void CheckInitialization()
+        {
+            if (!initialized)
+                throw new Exception("Only able to call after InitializeRenderControl() called.");
         }
 
         public IImage LoadImageFromStream(Stream stream)
         {
+            CheckInitialization();
+
             using var bitmap = Image.FromStream(stream) as Bitmap;
             return new Texture(bitmap);
         }
 
         public void BeforeRender(IDrawingContext context)
         {
+            CheckInitialization();
+
             var renderViewWidth = (int)((context.CurrentDrawingTargetContext?.ViewWidth ?? 0) * currentDPI.DpiScaleX);
             var renderViewHeight = (int)((context.CurrentDrawingTargetContext?.ViewHeight ?? 0) * currentDPI.DpiScaleY);
 
@@ -217,11 +245,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public void AfterRender(IDrawingContext context)
         {
-
+            CheckInitialization();
         }
 
         public void CleanRender(Vector4 cleanColor)
         {
+            CheckInitialization();
+
             GL.ClearColor(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }

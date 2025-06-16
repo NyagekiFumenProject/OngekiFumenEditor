@@ -136,7 +136,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             };
         }
 
-        public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
+        public void OnRenderSizeChanged(FrameworkElement glView, SizeChangedEventArgs sizeArg)
         {
             Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
             var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
@@ -148,19 +148,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
         }
 
-        public async void PrepareRenderLoop(GLWpfControl glView)
+        public async void PrepareRenderLoop(FrameworkElement renderControl)
         {
             Log.LogDebug($"ready.");
-            await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
+            await IoC.Get<IDrawingManager>().WaitForInitializationIsDone();
 
             InitRender();
             var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
             var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
 
-            viewWidth = (float)glView.ActualWidth;
-            viewHeight = (float)glView.ActualHeight;
-            renderViewWidth = (int)(glView.ActualWidth * dpiX);
-            renderViewHeight = (int)(glView.ActualHeight * dpiY);
+            viewWidth = (float)renderControl.ActualWidth;
+            viewHeight = (float)renderControl.ActualHeight;
+            renderViewWidth = (int)(renderControl.ActualWidth * dpiX);
+            renderViewHeight = (int)(renderControl.ActualHeight * dpiY);
 
             //暂时没有需要显示检测的必要?
             //performenceMonitor = IoC.Get<IPerfomenceMonitor>();
@@ -168,7 +168,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             sw = new Stopwatch();
             sw.Start();
-            glView.Render += Render;
         }
 
         private void InitRender()
@@ -233,9 +232,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(TimeSpan ts)
         {
-#if DEBUG
-            GLUtility.CheckError();
-#endif
             //limit
             if (LimitFPS > 0)
             {

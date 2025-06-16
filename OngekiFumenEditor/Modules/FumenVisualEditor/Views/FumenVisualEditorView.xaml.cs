@@ -6,44 +6,36 @@ using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 {
-	/// <summary>
-	/// FumenVisualEditorView.xaml 的交互逻辑
-	/// </summary>
-	public partial class FumenVisualEditorView : UserControl
-	{
-		public FumenVisualEditorView()
-		{
-			InitializeComponent();
-			IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
-		}
+    /// <summary>
+    /// FumenVisualEditorView.xaml 的交互逻辑
+    /// </summary>
+    public partial class FumenVisualEditorView : UserControl
+    {
+        public FumenVisualEditorView()
+        {
+            InitializeComponent();
+            IoC.Get<IDrawingManager>().InitializeRenderControl(glView);
+        }
 
-		private void glView_Ready()
-		{
-			Dispatcher.InvokeAsync(() =>
-			{
-				if (DataContext is IDrawingContext fumenPreviewer)
-				{
-					fumenPreviewer.PrepareRenderLoop(glView);
-				}
-			});
-		}
+        private void glView_Ready()
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (DataContext is IDrawingContext drawingContext)
+                {
+                    drawingContext.PrepareRenderLoop(glView);
+                    //start render loop
+                    glView.Render += (ts) => drawingContext.Render(ts);
+                }
+            });
+        }
 
-		private void glView_SizeChanged(object sender, SizeChangedEventArgs e)
-		{
-			if (DataContext is IDrawingContext fumenPreviewer)
-			{
-				fumenPreviewer.OnRenderSizeChanged(glView, e);
-			}
-		}
-
-		private void Grid_SizeChanged(object sender, SizeChangedEventArgs e)
-		{
-			(DataContext as FumenVisualEditorViewModel)?.OnLoaded(new ActionExecutionContext() { View = this, EventArgs = e });
-		}
-
-		private void Grid_Loaded(object sender, RoutedEventArgs e)
-		{
-			(DataContext as FumenVisualEditorViewModel)?.OnLoaded(new ActionExecutionContext() { View = this });
-		}
-	}
+        private void glView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (DataContext is IDrawingContext fumenPreviewer)
+            {
+                fumenPreviewer.OnRenderSizeChanged(glView, e);
+            }
+        }
+    }
 }

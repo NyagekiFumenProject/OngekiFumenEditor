@@ -747,6 +747,10 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Kernel\Graphics\Skia\" />
+	</ItemGroup>
+
 	<!--删除.xml文件-->
 	<Target Name="DeleteXmlFiles" AfterTargets="AfterBuild">
 		<Delete Files="$(OutputPath)/*.xml" />

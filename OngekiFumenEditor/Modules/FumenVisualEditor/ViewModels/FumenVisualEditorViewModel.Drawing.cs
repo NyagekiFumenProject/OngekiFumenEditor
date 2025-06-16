@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Caliburn.Micro;
 using ControlzEx.Standard;
@@ -19,7 +20,6 @@ using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Scheduler;
@@ -61,9 +61,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
     private DrawPlayerLocationHelper playerLocationHelper;
     private Vector4 playFieldBackgroundColor;
-    private int renderViewHeight;
 
-    private int renderViewWidth;
     private DrawSelectingRangeHelper selectingRangeHelper;
 
     private readonly StringBuilder stringBuilder = new(2048);
@@ -140,7 +138,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public IPerfomenceMonitor PerfomenceMonitor { get; private set; } = new DummyPerformenceMonitor();
 
-    public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
+    public void OnRenderSizeChanged(FrameworkElement glView, SizeChangedEventArgs sizeArg)
     {
         Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
 
@@ -149,8 +147,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         ViewWidth = (float)sizeArg.NewSize.Width;
         ViewHeight = (float)sizeArg.NewSize.Height;
-        renderViewWidth = (int)(sizeArg.NewSize.Width * dpiX);
-        renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
     }
 
     public void LoadRenderOrderVisible()
@@ -212,19 +208,16 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
     }
 
-    public async void PrepareRenderLoop(GLWpfControl openGLView)
+    public async void PrepareRenderLoop(FrameworkElement renderControl)
     {
         Log.LogDebug("ready.");
-        await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
+        await IoC.Get<IDrawingManager>().WaitForInitializationIsDone();
 
         var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
         var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
 
-        ViewWidth = (float)openGLView.ActualWidth;
-        ViewHeight = (float)openGLView.ActualHeight;
-
-        renderViewWidth = (int)(openGLView.ActualWidth * dpiX);
-        renderViewHeight = (int)(openGLView.ActualHeight * dpiY);
+        ViewWidth = (float)renderControl.ActualWidth;
+        ViewHeight = (float)renderControl.ActualHeight;
 
         playFieldBackgroundColor = Color.FromArgb(EditorGlobalSetting.Default.PlayFieldBackgroundColor).ToVector4();
         enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
@@ -250,19 +243,19 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         UpdateActualRenderInterval();
         sw = new Stopwatch();
         sw.Start();
-
-        openGLView.Render += OnEditorLoop;
     }
 
     private void OnEditorLoop(TimeSpan ts)
     {
+        //todo update() not should be in render loop
         OnEditorUpdate(ts);
+
         OnEditorRender(ts);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Render(TimeSpan ts)
-        => OnEditorRender(ts);
+        => OnEditorLoop(ts);
 
     Dictionary<int, DrawingTargetContext> drawingContexts = new();
 
@@ -277,9 +270,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private void OnEditorRender(TimeSpan ts)
     {
-#if DEBUG
-        GLUtility.CheckError();
-#endif
         #region limit fps
 
         if (actualRenderInterval > 0)

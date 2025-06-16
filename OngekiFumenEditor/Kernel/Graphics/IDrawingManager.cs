@@ -1,8 +1,8 @@
-﻿using OpenTK.Wpf;
-using System.IO;
+﻿using System.IO;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
@@ -13,20 +13,14 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// </summary>
         /// <param name="cancellation"></param>
         /// <returns></returns>
-        Task WaitForGraphicsInitializationDone(CancellationToken cancellation = default);
+        Task WaitForInitializationIsDone(CancellationToken cancellation = default);
 
         /// <summary>
-        /// 等待渲染环境初始化完成
+        /// 初始化渲染控件和环境
         /// </summary>
         /// <param name="cancellation"></param>
         /// <returns></returns>
-        Task CreateGraphicsContext(GLWpfControl glView, CancellationToken cancellation = default);
-
-        /// <summary>
-        /// 检查并试图初始化渲染环境
-        /// </summary>
-        /// <returns></returns>
-        Task CheckOrInitGraphics();
+        Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default);
 
         IImage LoadImageFromStream(Stream stream);
 
