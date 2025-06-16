@@ -209,10 +209,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public void BeforeRender(IDrawingContext context)
         {
-#if DEBUG
-            GLUtility.CheckError();
-#endif
-
             var renderViewWidth = (int)((context.CurrentDrawingTargetContext?.ViewWidth ?? 0) * currentDPI.DpiScaleX);
             var renderViewHeight = (int)((context.CurrentDrawingTargetContext?.ViewHeight ?? 0) * currentDPI.DpiScaleY);
 

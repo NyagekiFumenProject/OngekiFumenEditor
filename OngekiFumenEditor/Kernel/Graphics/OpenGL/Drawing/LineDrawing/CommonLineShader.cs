@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
+﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing

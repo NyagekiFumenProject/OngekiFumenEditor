@@ -1,3 +1,4 @@
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL4;
 using System;
