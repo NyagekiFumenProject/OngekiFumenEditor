@@ -261,11 +261,14 @@
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
+
+            <!--  not support yet  -->
             <CheckBox
                 Grid.Column="1"
                 Margin="10,0"
                 HorizontalAlignment="Right"
-                VerticalAlignment="Center">
+                VerticalAlignment="Center"
+                IsEnabled="False">
                 <TextBlock Text="{markup:Translate [EditorShowSoflanPointList]}" />
             </CheckBox>
         </Grid>
