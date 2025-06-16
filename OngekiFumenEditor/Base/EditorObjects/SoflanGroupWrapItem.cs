@@ -14,11 +14,16 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models
         public SoflanGroupWrapItem(int soflanGroupId)
         {
             SoflanGroupId = soflanGroupId;
+            displayName = $"SoflanGroup #{SoflanGroupId}";
+
+            if (soflanGroupId == 0)
+                displayName = "Default " + displayName;
         }
 
+        private string displayName;
         public override string DisplayName
         {
-            get => $"SoflanGroup #{SoflanGroupId}";
+            get => displayName;
             set { } //ignore
         }
 

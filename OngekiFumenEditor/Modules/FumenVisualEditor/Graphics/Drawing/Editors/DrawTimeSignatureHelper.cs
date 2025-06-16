@@ -140,9 +140,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             {
                 var mouseXPercent = p.X / target.Editor.ViewWidth;
 
-                if (mouseXPercent >= 0.6)
+                if (mouseXPercent >= 0.7)
                 {
-                    var alpha = OpenTK.Mathematics.MathHelper.MapRange(mouseXPercent, 0.6, 0.8, 1, 0);
+                    var alpha = OpenTK.Mathematics.MathHelper.MapRange(mouseXPercent, 0.7, 0.9, 1, 0);
                     rightColor = new(1, 1, 1, (float)alpha);
                     leftColor = new(1, 1, 1, 1 - (float)alpha);
                 }
