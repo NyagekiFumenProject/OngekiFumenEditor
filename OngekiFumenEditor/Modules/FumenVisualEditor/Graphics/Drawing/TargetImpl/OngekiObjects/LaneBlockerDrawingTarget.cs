@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public LaneBlockerDrawingTarget()
         {
-            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
+            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
         }
 
         public override void Begin(IFumenEditorDrawingContext target)

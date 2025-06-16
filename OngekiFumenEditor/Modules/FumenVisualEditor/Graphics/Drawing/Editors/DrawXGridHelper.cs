@@ -24,8 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
 		public DrawXGridHelper()
 		{
-			stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
-			lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+			stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+			lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
 		}
 
 		public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)

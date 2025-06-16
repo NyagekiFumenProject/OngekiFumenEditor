@@ -34,9 +34,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public BulletPalleteReferencableBatchDrawTargetBase()
         {
-            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
-            batchTextureDrawing = IoC.Get<IDrawingManager>().BatchTextureDrawing;
-            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
+            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+            batchTextureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
+            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
 
             parallelOptions = new ParallelOptions()
             {

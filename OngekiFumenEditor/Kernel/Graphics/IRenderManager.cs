@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
-    public interface IDrawingManager
+    public interface IRenderManager
     {
         /// <summary>
         /// 等待渲染环境初始化完成
@@ -22,12 +22,9 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// <returns></returns>
         Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default);
 
+        Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default);
+
         IImage LoadImageFromStream(Stream stream);
-
-        void BeforeRender(IDrawingContext context);
-        void AfterRender(IDrawingContext context);
-
-        void CleanRender(Vector4 cleanColor);
 
         #region Drawings
 

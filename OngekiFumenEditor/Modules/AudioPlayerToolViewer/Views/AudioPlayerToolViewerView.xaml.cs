@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Views
 		public AudioPlayerToolViewerView()
 		{
 			InitializeComponent();
-			IoC.Get<IDrawingManager>().InitializeRenderControl(glView);
+			IoC.Get<IRenderManager>().InitializeRenderControl(glView);
 		}
 
 		private void GLWpfControl_Ready()

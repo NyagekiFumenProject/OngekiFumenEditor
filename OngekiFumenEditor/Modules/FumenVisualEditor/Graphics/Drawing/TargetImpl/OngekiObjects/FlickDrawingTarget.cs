@@ -47,8 +47,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             exTapEffSize = size;
             selectedEffSize = size * 1.05f;
 
-            batchTextureDrawing = IoC.Get<IDrawingManager>().BatchTextureDrawing;
-            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
+            batchTextureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
+            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)

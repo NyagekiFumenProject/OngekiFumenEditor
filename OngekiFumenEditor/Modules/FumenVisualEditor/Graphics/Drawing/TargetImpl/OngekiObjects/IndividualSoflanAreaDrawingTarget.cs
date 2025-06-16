@@ -37,11 +37,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public IndividualSoflanAreaDrawingTarget()
         {
-            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
-            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
-            textureDrawing = IoC.Get<IDrawingManager>().TextureDrawing;
-            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
-            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
+            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
+            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
+            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
 
             texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\tri.png");
         }

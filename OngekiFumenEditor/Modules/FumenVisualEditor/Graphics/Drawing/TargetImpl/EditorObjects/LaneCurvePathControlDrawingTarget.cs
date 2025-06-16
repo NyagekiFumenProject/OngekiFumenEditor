@@ -38,10 +38,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
 
-            textureDrawing = IoC.Get<IDrawingManager>().TextureDrawing;
-			stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
-			highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
-			lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
+			stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+			highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
+			lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
 		}
 
 		public void Dispose()

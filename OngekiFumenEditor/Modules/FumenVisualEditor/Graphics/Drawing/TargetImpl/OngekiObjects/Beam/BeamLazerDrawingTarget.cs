@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public BeamLazerDrawingTarget()
         {
-            lazerDrawing = IoC.Get<IDrawingManager>().BeamDrawing;
+            lazerDrawing = IoC.Get<IRenderManager>().BeamDrawing;
 
             void load(ref IImage t, string name)
             {

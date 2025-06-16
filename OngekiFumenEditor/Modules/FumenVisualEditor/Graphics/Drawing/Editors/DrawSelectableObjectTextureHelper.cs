@@ -15,8 +15,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
 		public DrawSelectableObjectTextureHelper()
 		{
-			textureDrawing = IoC.Get<IDrawingManager>().BatchTextureDrawing;
-			highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
+			textureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
+			highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
 		}
 
 		List<(Vector2 pos, Vector2 size, float)> getList(Dictionary<IImage, List<(Vector2, Vector2, float)>> m, IImage t)

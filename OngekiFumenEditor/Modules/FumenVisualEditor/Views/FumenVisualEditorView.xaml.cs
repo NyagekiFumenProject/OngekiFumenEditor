@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public FumenVisualEditorView()
         {
             InitializeComponent();
-            IoC.Get<IDrawingManager>().InitializeRenderControl(glView);
+            IoC.Get<IRenderManager>().InitializeRenderControl(glView);
         }
 
         private void glView_Ready()

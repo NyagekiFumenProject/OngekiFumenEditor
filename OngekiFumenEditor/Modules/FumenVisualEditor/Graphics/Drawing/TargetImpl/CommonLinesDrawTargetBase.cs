@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public CommonLinesDrawTargetBase()
         {
-            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
         }
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);

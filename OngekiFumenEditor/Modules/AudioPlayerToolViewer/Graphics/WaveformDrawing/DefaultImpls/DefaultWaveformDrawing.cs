@@ -49,9 +49,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
         public DefaultWaveformDrawing()
         {
-            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
-            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
-            circleDrawing = IoC.Get<IDrawingManager>().CircleDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+            circleDrawing = IoC.Get<IRenderManager>().CircleDrawing;
 
             dummySoflanList = new SoflanList();
         }

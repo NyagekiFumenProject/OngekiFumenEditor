@@ -21,8 +21,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public DrawJudgeLineHelper()
         {
-            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
-            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
+            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target)

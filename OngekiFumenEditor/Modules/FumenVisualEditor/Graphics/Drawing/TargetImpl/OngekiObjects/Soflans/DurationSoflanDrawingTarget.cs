@@ -40,9 +40,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public DurationSoflanDrawingTarget()
         {
-            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
-            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
-            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
+            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
             placeholdQuery = new SoflanPlaceholdQuery();
         }
 

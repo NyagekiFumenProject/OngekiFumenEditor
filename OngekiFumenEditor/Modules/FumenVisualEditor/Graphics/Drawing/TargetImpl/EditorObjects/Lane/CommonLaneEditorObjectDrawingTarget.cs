@@ -28,8 +28,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public CommonLaneEditorObjectDrawingTarget()
         {
-            textureDrawing = IoC.Get<IDrawingManager>().BatchTextureDrawing;
-            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
+            textureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
+            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
                 startSize = new Vector2(16, 16);

@@ -88,7 +88,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
         {
             ControlItems.Clear();
 
-            await IoC.Get<IDrawingManager>().WaitForInitializationIsDone();
+            await IoC.Get<IRenderManager>().WaitForInitializationIsDone();
             var targets = IoC.GetAll<IFumenEditorDrawingTarget>().OrderBy(x => sortByDefault ? x.DefaultRenderOrder : x.CurrentRenderOrder).ToArray();
             ControlItems.AddRange(targets.Select(x => new ControlItem(x)));
 

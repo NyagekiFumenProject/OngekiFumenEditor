@@ -34,9 +34,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 size = new Vector2(16, 16);
 
             cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();
-            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
-            textureDrawing = IoC.Get<IDrawingManager>().TextureDrawing;
-            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
+            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
         }
 
         public override void Draw(IFumenEditorDrawingContext target, SvgPrefabBase obj)

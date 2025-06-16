@@ -209,6 +209,8 @@
 		<PackageReference Include="SharpVectors" Version="1.8.4.2" />
 		<PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
 		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
+		<PackageReference Include="SkiaSharp" Version="3.119.0" />
+		<PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.0" />
 		<PackageReference Include="Svg" Version="3.4.7" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
@@ -745,10 +747,6 @@
 			<Generator>PublicResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Kernel\Graphics\Skia\" />
 	</ItemGroup>
 
 	<!--删除.xml文件-->

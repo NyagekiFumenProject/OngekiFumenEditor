@@ -32,10 +32,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public DrawPlayableAreaHelper()
         {
-            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
-            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
-            circleDrawing = IoC.Get<IDrawingManager>().CircleDrawing;
-            stringDrawing = IoC.Get<IDrawingManager>().StringDrawing;
+            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            circleDrawing = IoC.Get<IRenderManager>().CircleDrawing;
+            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
 
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;

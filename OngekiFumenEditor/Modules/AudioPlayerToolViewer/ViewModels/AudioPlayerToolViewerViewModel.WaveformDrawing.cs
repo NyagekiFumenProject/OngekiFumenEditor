@@ -1,5 +1,4 @@
 ﻿using Caliburn.Micro;
-using ControlzEx.Standard;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
@@ -9,9 +8,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
-using OpenTK.Wpf;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -111,6 +108,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private float actualRenderInterval = float.MaxValue;
         private int limitFPS = Properties.AudioPlayerToolViewerSetting.Default.LimitFPS;
+        private IRenderContext renderContext;
+
         public int LimitFPS
         {
             get => limitFPS;
@@ -151,7 +150,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public async void PrepareRenderLoop(FrameworkElement renderControl)
         {
             Log.LogDebug($"ready.");
-            await IoC.Get<IDrawingManager>().WaitForInitializationIsDone();
+            await IoC.Get<IRenderManager>().WaitForInitializationIsDone();
+            renderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
 
             InitRender();
             var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
@@ -240,8 +240,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 sw.Restart();
             }
 
-            GL.ClearColor(16 / 255f, 16 / 255f, 16 / 255f, 1f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            renderContext.CleanRender(this, new(16 / 255f, 16 / 255f, 16 / 255f, 1f));
 
             if (Editor is null || !IsShowWaveform)
                 return;
@@ -249,7 +248,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             PerfomenceMonitor.PostUIRenderTime(ts);
             PerfomenceMonitor.OnBeforeRender();
 
-            GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
+            renderContext.BeforeRender(this);
 
             UpdateDrawingContext();
 
@@ -257,6 +256,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 WaveformDrawing.Draw(this, usingPeakData);
 
             PerfomenceMonitor.OnAfterRender();
+            renderContext.AfterRender(this);
         }
 
         private void UpdateDrawingContext()
@@ -272,6 +272,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             CurrentDrawingTargetContext.ViewProjectionMatrix = vp;
 
             CurrentDrawingTargetContext.Rect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
+            CurrentDrawingTargetContext.ViewWidth = viewWidth;
+            CurrentDrawingTargetContext.ViewHeight = viewHeight;
 
             if (AudioPlayer?.IsPlaying ?? false)
                 CurrentTime = AudioPlayer.CurrentTime;

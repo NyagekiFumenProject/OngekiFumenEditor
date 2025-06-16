@@ -20,7 +20,7 @@ public class DrawPlayerLocationHelper
 
     public DrawPlayerLocationHelper()
     {
-        textureDrawing = IoC.Get<IDrawingManager>().TextureDrawing;
+        textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
         arr[0].rotation = 0f;
 
         texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\playerLoc.png");

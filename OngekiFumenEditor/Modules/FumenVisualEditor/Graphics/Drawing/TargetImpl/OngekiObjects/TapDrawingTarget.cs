@@ -76,8 +76,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             exList[tapExTexture] = new();
             exList[wallExTexture] = new();
 
-            batchTextureDrawing = IoC.Get<IDrawingManager>().BatchTextureDrawing;
-            highlightDrawing = IoC.Get<IDrawingManager>().HighlightBatchTextureDrawing;
+            batchTextureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
+            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)

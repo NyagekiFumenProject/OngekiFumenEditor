@@ -211,7 +211,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     public async void PrepareRenderLoop(FrameworkElement renderControl)
     {
         Log.LogDebug("ready.");
-        await IoC.Get<IDrawingManager>().WaitForInitializationIsDone();
+        await IoC.Get<IRenderManager>().WaitForInitializationIsDone();
+        renderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
 
         var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
         var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
@@ -258,6 +259,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         => OnEditorLoop(ts);
 
     Dictionary<int, DrawingTargetContext> drawingContexts = new();
+    private IRenderContext renderContext;
 
     private void UpdateActualRenderInterval()
     {
@@ -288,7 +290,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         PerfomenceMonitor.PostUIRenderTime(ts);
         PerfomenceMonitor.OnBeforeRender();
 
-        var drawingManager = IoC.Get<IDrawingManager>();
+        var drawingManager = IoC.Get<IRenderManager>();
 
         hits.Clear();
 
@@ -515,7 +517,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
         CleanRender(drawingManager);
-        drawingManager.BeforeRender(this);
+        renderContext.BeforeRender(this);
 
         foreach (var (minTGrid, maxTGrid) in CurrentDrawingTargetContext.VisibleTGridRanges)
             playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
@@ -567,7 +569,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         playerLocationHelper.Draw(this);
         selectingRangeHelper.Draw(this);
 
-        drawingManager.AfterRender(this);
+        renderContext.AfterRender(this);
 
         //clean up
         foreach (var list in map.Values)
@@ -754,7 +756,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         return objects.Concat(objs).SelectMany(x => x.GetDisplayableObjects());
     }
 
-    private void CleanRender(IDrawingManager drawingManager)
+    private void CleanRender(IRenderManager drawingManager)
     {
         var cleanColor = Vector4.Zero;
         if (IsDesignMode || !enablePlayFieldDrawing)
@@ -762,7 +764,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         else
             cleanColor = new(playFieldBackgroundColor.X, playFieldBackgroundColor.Y, playFieldBackgroundColor.Z,
                 playFieldBackgroundColor.W);
-        drawingManager.CleanRender(cleanColor);
+        renderContext.CleanRender(this, cleanColor);
     }
 
     public void OnLoaded(ActionExecutionContext e)

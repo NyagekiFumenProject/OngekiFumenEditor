@@ -29,10 +29,12 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
-    [Export(typeof(IDrawingManager))]
+    [Export(typeof(IRenderManager))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DefaultOpenGLDrawingManager : IDrawingManager
+    public class DefaultOpenGLDrawingManager : IRenderManager
     {
+        private IRenderContext commonRenderContext;
+
         // Import the necessary Win32 functions
         [DllImport("opengl32.dll")]
         private static extern nint wglGetCurrentDC();
@@ -51,7 +53,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         private TaskCompletionSource initTaskSource = new TaskCompletionSource();
         private bool initialized = false;
-        private DpiScale currentDPI;
+
+        public DpiScale CurrentDPI { get; private set; }
 
         public ICircleDrawing CircleDrawing { get; private set; }
 
@@ -74,6 +77,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         public IPolygonDrawing PolygonDrawing { get; private set; }
 
         public IBeamDrawing BeamDrawing { get; private set; }
+
+        public DefaultOpenGLDrawingManager()
+        {
+            commonRenderContext = new DefaultOpenGLRenderContext(this);
+        }
 
         private void Initialize()
         {
@@ -102,9 +110,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             var source = PresentationSource.FromVisual(mainWindow);
             if (source != null)
             {
-                currentDPI = VisualTreeHelper.GetDpi(mainWindow);
+                CurrentDPI = VisualTreeHelper.GetDpi(mainWindow);
                 mainWindow.DpiChanged += MainWindow_DpiChanged;
-                Log.LogInfo($"currentDPI: {currentDPI.DpiScaleX},{currentDPI.DpiScaleY}");
+                Log.LogInfo($"currentDPI: {CurrentDPI.DpiScaleX},{CurrentDPI.DpiScaleY}");
             }
             else
             {
@@ -152,9 +160,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         private void MainWindow_DpiChanged(object sender, DpiChangedEventArgs e)
         {
-            if (currentDPI.DpiScaleX != e.NewDpi.DpiScaleX || currentDPI.DpiScaleY != e.NewDpi.DpiScaleY)
-                Log.LogInfo($"currentDPI changed: {currentDPI.DpiScaleX},{currentDPI.DpiScaleY} -> {e.NewDpi.DpiScaleX},{e.NewDpi.DpiScaleY}");
-            currentDPI = e.NewDpi;
+            if (CurrentDPI.DpiScaleX != e.NewDpi.DpiScaleX || CurrentDPI.DpiScaleY != e.NewDpi.DpiScaleY)
+                Log.LogInfo($"currentDPI changed: {CurrentDPI.DpiScaleX},{CurrentDPI.DpiScaleY} -> {e.NewDpi.DpiScaleX},{e.NewDpi.DpiScaleY}");
+            CurrentDPI = e.NewDpi;
         }
 
         private static void OnOpenGLDebugLog(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, nint message, nint userParam)
@@ -233,27 +241,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return new Texture(bitmap);
         }
 
-        public void BeforeRender(IDrawingContext context)
+        public Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
-            CheckInitialization();
-
-            var renderViewWidth = (int)((context.CurrentDrawingTargetContext?.ViewWidth ?? 0) * currentDPI.DpiScaleX);
-            var renderViewHeight = (int)((context.CurrentDrawingTargetContext?.ViewHeight ?? 0) * currentDPI.DpiScaleY);
-
-            GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
-        }
-
-        public void AfterRender(IDrawingContext context)
-        {
-            CheckInitialization();
-        }
-
-        public void CleanRender(Vector4 cleanColor)
-        {
-            CheckInitialization();
-
-            GL.ClearColor(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            return Task.FromResult(commonRenderContext);
         }
     }
 }

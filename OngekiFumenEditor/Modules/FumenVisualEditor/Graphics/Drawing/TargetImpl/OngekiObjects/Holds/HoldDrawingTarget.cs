@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public HoldDrawingTarget() : base()
         {
-            lineDrawing = IoC.Get<IDrawingManager>().LineDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().LineDrawing;
 
             Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
             RebuildColors();

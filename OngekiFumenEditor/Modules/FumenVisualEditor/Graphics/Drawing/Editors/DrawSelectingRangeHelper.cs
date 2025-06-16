@@ -33,8 +33,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public DrawSelectingRangeHelper()
         {
-            lineDrawing = IoC.Get<IDrawingManager>().SimpleLineDrawing;
-            polygonDrawing = IoC.Get<IDrawingManager>().PolygonDrawing;
+            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target)
