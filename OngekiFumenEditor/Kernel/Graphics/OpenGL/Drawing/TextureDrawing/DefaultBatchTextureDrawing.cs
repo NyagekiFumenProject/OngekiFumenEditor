@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
                  0,1
         };
         private IDrawingContext target;
-        private Texture texture;
+        private DefaultOpenGLTexture texture;
         private DefaultOpenGLRenderManager defaultDrawingManager;
 
         /*-----------------CURRENT VERSION------------------ -
@@ -168,10 +168,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
             target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
 #if DEBUG
-            if (texture is not Texture texture1)
+            if (texture is not DefaultOpenGLTexture texture1)
                 throw new Exception("IImage object is not Textrue object");
 #endif
-            this.texture = (Texture)texture;
+            this.texture = (DefaultOpenGLTexture)texture;
 
             shader.Begin();
 

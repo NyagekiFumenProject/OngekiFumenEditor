@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 {
     internal class DefaultTextureDrawing : CommonOpenGLDrawingBase, ITextureDrawing, IDisposable
     {
-        private readonly Shader shader;
+        private readonly DefaultOpenGLShader shader;
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
@@ -87,10 +87,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
         private void Draw(IDrawingContext target, IImage tex, Vector2 size, Vector2 position, float rotation)
         {
 #if DEBUG
-            if (tex is not Texture texture1)
+            if (tex is not DefaultOpenGLTexture texture1)
                 throw new Exception("IImage object is not Textrue object");
 #endif
-            var texture = (Texture)tex;
+            var texture = (DefaultOpenGLTexture)tex;
 
             target.PerfomenceMonitor.OnBeginDrawing(this);
             {

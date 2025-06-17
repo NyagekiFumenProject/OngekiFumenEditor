@@ -1,4 +1,6 @@
-﻿using SkiaSharp;
+﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Controls;
+using SkiaSharp;
+using SkiaSharp.Views.WPF;
 using System;
 using System.Numerics;
 
@@ -7,14 +9,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
     internal class DefaultSkiaRenderContext : IRenderContext
     {
         private DefaultSkiaDrawingManager manager;
-        private readonly SKCanvas canvas;
+        private readonly SkiaRenderControl renderControl;
 
         public event Action<TimeSpan> OnRender;
 
-        public DefaultSkiaRenderContext(DefaultSkiaDrawingManager manager, SKCanvas canvas)
+        public DefaultSkiaRenderContext(DefaultSkiaDrawingManager manager, SkiaRenderControl renderControl)
         {
             this.manager = manager;
-            this.canvas = canvas;
+            this.renderControl = renderControl;
         }
 
         public void AfterRender(IDrawingContext context)
@@ -29,7 +31,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public void CleanRender(IDrawingContext context, Vector4 cleanColor)
         {
-            canvas.Clear(new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W));
+
         }
 
         public void StartRendering()

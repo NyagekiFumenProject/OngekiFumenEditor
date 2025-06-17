@@ -237,7 +237,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             CheckInitialization();
 
             using var bitmap = Image.FromStream(stream) as Bitmap;
-            return new Texture(bitmap);
+            return new DefaultOpenGLTexture(bitmap);
         }
 
         Dictionary<FrameworkElement, IRenderContext> cachedRenderControlMap = new();

@@ -7,7 +7,7 @@ using System.Numerics;
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
 {
     [Serializable]
-    public class Texture : IImage, IDisposable
+    public class DefaultOpenGLTexture : IImage, IDisposable
     {
         protected int? _id;
         private Vector2 _textureSize;
@@ -69,12 +69,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
             }
         }
 
-        public Texture(string name = "Texture")
+        public DefaultOpenGLTexture(string name = "Texture")
         {
             Name = name;
         }
 
-        public Texture(Bitmap bmp, string name = "Texture") : this(name)
+        public DefaultOpenGLTexture(Bitmap bmp, string name = "Texture") : this(name)
         {
             GL.GenTextures(1, out int id);
             _id = id;

@@ -7,9 +7,9 @@ using System;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 {
-    public class DefaultBeamDrawing : CommonOpenGLDrawingBase, IBeamDrawing
+    internal class DefaultBeamDrawing : CommonOpenGLDrawingBase, IBeamDrawing
     {
-        private readonly Shader shader;
+        private readonly DefaultOpenGLShader shader;
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
@@ -78,10 +78,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
         public void Draw(IDrawingContext target, IImage tex, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset)
         {
 #if DEBUG
-            if (tex is not Texture)
+            if (tex is not DefaultOpenGLTexture)
                 throw new Exception("IImage object is not Textrue object");
 #endif
-            var texture = (Texture)tex;
+            var texture = (DefaultOpenGLTexture)tex;
 
             target.PerfomenceMonitor.OnBeginDrawing(this);
             {

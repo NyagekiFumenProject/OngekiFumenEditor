@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
 {
     internal class DefaultInstancedCircleDrawing : CommonOpenGLDrawingBase, ICircleDrawing
     {
-        private Shader shader;
+        private DefaultOpenGLShader shader;
         private float[] postData;
         private int currentPostBaseIndex = 0;
         private int currentPostCount = 0;

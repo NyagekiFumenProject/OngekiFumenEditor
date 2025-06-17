@@ -4,7 +4,7 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
-    public class CommonLineShader : Shader
+    public class CommonLineShader : DefaultOpenGLShader
 	{
 		private static CommonLineShader _shared;
 

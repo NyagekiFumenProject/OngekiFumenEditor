@@ -2,7 +2,7 @@
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
-    internal class BatchShader : Shader
+    internal class BatchShader : DefaultOpenGLShader
 	{
 		public BatchShader()
 		{

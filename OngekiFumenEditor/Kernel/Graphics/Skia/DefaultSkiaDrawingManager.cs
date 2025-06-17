@@ -1,10 +1,13 @@
 ﻿//#define OGL_LOG
 using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Controls;
 using OngekiFumenEditor.Utils;
 using OpenTK.Windowing.Common;
+using OpenTK.Wpf;
 using SkiaSharp;
 using SkiaSharp.Views.WPF;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Drawing;
@@ -69,11 +72,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             initTaskSource.SetResult();
         }
 
-        private void InitializeOpenGL()
-        {
-
-        }
-
         private void MainWindow_DpiChanged(object sender, DpiChangedEventArgs e)
         {
             if (currentDPI.DpiScaleX != e.NewDpi.DpiScaleX || currentDPI.DpiScaleY != e.NewDpi.DpiScaleY)
@@ -86,10 +84,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return initTaskSource.Task;
         }
 
-        public Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default)
+        public Task InitializeRenderControl(FrameworkElement rc, CancellationToken cancellation = default)
         {
-            if (renderControl is not SKElement skElement)
-                throw new Exception($"renderControl must be {nameof(SKElement)} object.");
+            var renderControl = CheckRenderControl(rc);
 
             if (!initialized)
             {
@@ -109,6 +106,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 throw new Exception("Only able to call after InitializeRenderControl() called.");
         }
 
+        Dictionary<FrameworkElement, IRenderContext> cachedRenderControlMap = new();
+
         public IImage LoadImageFromStream(Stream stream)
         {
             CheckInitialization();
@@ -116,14 +115,29 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return new SkiaImage(SKImage.FromEncodedData(stream));
         }
 
-        public Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
+        public Task<IRenderContext> GetRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
         {
-            throw new NotImplementedException();
+            var renderControl = CheckRenderControl(rc);
+
+            if (!cachedRenderControlMap.TryGetValue(renderControl, out var renderContext))
+                renderContext = cachedRenderControlMap[renderControl] = new DefaultSkiaRenderContext(this, renderControl);
+
+            return Task.FromResult(renderContext);
+        }
+
+        private SkiaRenderControl CheckRenderControl(FrameworkElement rc)
+        {
+            if (rc is not SkiaRenderControl renderControl)
+                throw new Exception("renderControl must be SkiaRenderControl object.");
+            return renderControl;
         }
 
         public FrameworkElement CreateRenderControl()
         {
-            throw new NotImplementedException();
+            return new SkiaRenderControl()
+            {
+
+            };
         }
     }
 }

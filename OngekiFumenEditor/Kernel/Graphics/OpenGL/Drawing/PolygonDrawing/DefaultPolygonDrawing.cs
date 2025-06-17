@@ -8,9 +8,9 @@ using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.PolygonDrawing
 {
-    public class DefaultPolygonDrawing : CommonOpenGLDrawingBase, IPolygonDrawing, IDisposable
+    internal class DefaultPolygonDrawing : CommonOpenGLDrawingBase, IPolygonDrawing, IDisposable
     {
-        private readonly Shader shader;
+        private readonly DefaultOpenGLShader shader;
         private readonly int vbo;
         private readonly int vao;
 

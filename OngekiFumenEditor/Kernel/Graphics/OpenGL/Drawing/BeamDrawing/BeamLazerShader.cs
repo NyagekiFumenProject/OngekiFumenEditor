@@ -3,7 +3,7 @@ using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
 {
-    internal class BeamLazerShader : Shader
+    internal class BeamLazerShader : DefaultOpenGLShader
 	{
 		public BeamLazerShader()
 		{

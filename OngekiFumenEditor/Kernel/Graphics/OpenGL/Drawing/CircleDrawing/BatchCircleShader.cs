@@ -4,7 +4,7 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDrawing
 {
-    internal class BatchCircleShader : Shader
+    internal class BatchCircleShader : DefaultOpenGLShader
 	{
 		private static BatchCircleShader _shared;
 

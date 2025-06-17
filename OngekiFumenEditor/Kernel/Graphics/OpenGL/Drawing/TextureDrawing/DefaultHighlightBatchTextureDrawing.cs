@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 {
     internal class DefaultHighlightBatchTextureDrawing : CommonOpenGLDrawingBase, IHighlightBatchTextureDrawing, IDisposable
 	{
-		private Shader shader;
+		private DefaultOpenGLShader shader;
 		private byte[] postData;
 		private int vboVertexBase, vboTexPosBase;
 		private int currentPostBaseIndex = 0;
@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 				 0,1
 		};
 		private IDrawingContext target;
-		private Texture texture;
+		private DefaultOpenGLTexture texture;
 
 		/*-----------------CURRENT VERSION------------------ -
                                         modelMatrix(float)
@@ -168,10 +168,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 			this.target = target;
 
 #if DEBUG
-            if (texture is not Texture texture1)
+            if (texture is not DefaultOpenGLTexture texture1)
                 throw new Exception("IImage object is not Textrue object");
 #endif
-            this.texture = (Texture)texture;
+            this.texture = (DefaultOpenGLTexture)texture;
 
 			shader.Begin();
 

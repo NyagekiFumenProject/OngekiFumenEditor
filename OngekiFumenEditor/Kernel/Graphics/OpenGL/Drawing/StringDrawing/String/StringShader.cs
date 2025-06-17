@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String
 {
-    public class StringShader : Shader
+    public class StringShader : DefaultOpenGLShader
     {
         public StringShader(string vertexContent, string fragmentContent)
         {

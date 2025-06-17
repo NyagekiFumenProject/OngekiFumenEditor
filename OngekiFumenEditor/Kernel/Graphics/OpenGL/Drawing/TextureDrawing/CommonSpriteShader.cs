@@ -4,7 +4,7 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
 {
-    public class CommonSpriteShader : Shader
+    public class CommonSpriteShader : DefaultOpenGLShader
 	{
 		private static CommonSpriteShader _shared;
 

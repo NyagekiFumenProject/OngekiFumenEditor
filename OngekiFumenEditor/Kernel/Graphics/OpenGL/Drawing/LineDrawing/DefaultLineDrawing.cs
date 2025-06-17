@@ -12,9 +12,9 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
-    public class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
+    internal class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
 	{
-		private readonly Shader shader;
+		private readonly DefaultOpenGLShader shader;
 		private readonly int vbo;
 		private readonly int vao;
         private DefaultOpenGLRenderManager defaultDrawingManager;

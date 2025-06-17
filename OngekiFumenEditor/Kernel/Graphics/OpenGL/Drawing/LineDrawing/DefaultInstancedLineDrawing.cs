@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
 		private int quad_vbo;
 		private int quad_ebo;
 
-		private Shader shader;
+		private DefaultOpenGLShader shader;
 
 		private int quad_pos;
 		private int line_pos_width_a;

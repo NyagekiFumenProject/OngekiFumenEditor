@@ -2,7 +2,7 @@
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
 {
-    internal class InstancedLineShader : Shader
+    internal class InstancedLineShader : DefaultOpenGLShader
 	{
 		public InstancedLineShader()
 		{

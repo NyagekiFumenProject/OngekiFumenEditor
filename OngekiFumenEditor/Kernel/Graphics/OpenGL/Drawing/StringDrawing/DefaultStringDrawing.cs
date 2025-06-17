@@ -12,7 +12,7 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing
 {
-    public class DefaultStringDrawing : CommonOpenGLDrawingBase, IStringDrawing, IDisposable
+    internal class DefaultStringDrawing : CommonOpenGLDrawingBase, IStringDrawing, IDisposable
     {
         private Renderer renderer;
 

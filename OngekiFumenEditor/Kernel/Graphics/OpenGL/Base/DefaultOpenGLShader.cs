@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
 {
-    public class Shader : IDisposable
+    public class DefaultOpenGLShader : IDisposable
     {
         private int vertexShader, fragmentShader, program = -1;
 
@@ -124,7 +124,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PassUniform(string name, Texture tex)
+        public void PassUniform(string name, DefaultOpenGLTexture tex)
         {
             if (tex == null)
             {
