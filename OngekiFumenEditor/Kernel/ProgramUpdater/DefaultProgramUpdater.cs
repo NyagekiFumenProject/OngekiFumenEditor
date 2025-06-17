@@ -47,10 +47,6 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                     return false;
                 var localVersion = Version.Parse(ThisAssembly.AssemblyFileVersion);
 
-                //ignore Revision before compare
-                localVersion = new Version(localVersion.Major, localVersion.Minor, localVersion.Build);
-                remoteVersion = new Version(remoteVersion.Major, remoteVersion.Minor, remoteVersion.Build);
-
                 return remoteVersion > localVersion;
             }
         }
