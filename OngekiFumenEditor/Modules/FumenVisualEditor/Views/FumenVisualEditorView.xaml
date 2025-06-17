@@ -123,11 +123,13 @@
             </ContextMenu>
         </Grid.ContextMenu>
 
-        <opentkcontrol:GLWpfControl
+        <ContentControl x:Name="renderControlHost" cal:Message.Attach="[Event Loaded]=[Action OnRenderControlHostLoaded($executionContext)];" />
+
+        <!--<opentkcontrol:GLWpfControl
             x:Name="glView"
             cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
             Ready="glView_Ready"
-            SizeChanged="glView_SizeChanged" />
+            SizeChanged="glView_SizeChanged" />-->
 
         <views:BatchModeOverlayView DataContext="{Binding BatchModeBehavior}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:FumenVisualEditorView}}, Path=DataContext.IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
 

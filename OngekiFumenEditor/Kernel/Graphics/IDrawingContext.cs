@@ -11,9 +11,6 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         IPerfomenceMonitor PerfomenceMonitor { get; }
 
-        void PrepareRenderLoop(FrameworkElement renderControl);
-        void OnRenderSizeChanged(FrameworkElement renderControl, SizeChangedEventArgs e);
-
         void Render(TimeSpan ts);
     }
 }

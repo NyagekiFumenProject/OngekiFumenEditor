@@ -13,6 +13,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
 using OpenTK.Wpf;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -31,10 +32,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
     [Export(typeof(IRenderManager))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DefaultOpenGLDrawingManager : IRenderManager
+    public class DefaultOpenGLRenderManager : IRenderManager
     {
-        private IRenderContext commonRenderContext;
-
         // Import the necessary Win32 functions
         [DllImport("opengl32.dll")]
         private static extern nint wglGetCurrentDC();
@@ -77,11 +76,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         public IPolygonDrawing PolygonDrawing { get; private set; }
 
         public IBeamDrawing BeamDrawing { get; private set; }
-
-        public DefaultOpenGLDrawingManager()
-        {
-            commonRenderContext = new DefaultOpenGLRenderContext(this);
-        }
 
         private void Initialize()
         {
@@ -176,10 +170,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return initTaskSource.Task;
         }
 
-        public Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default)
+        public async Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
-            if (renderControl is not GLWpfControl glView)
-                throw new Exception("renderControl must be GLWpfControl object.");
+            var glView = CheckRenderControl(renderControl);
+            var renderCtx = (await GetRenderContext(glView, cancellation)) as DefaultOpenGLRenderContext;
+
+            if (renderCtx.IsInitialized)
+                return;
 
             var isCompatability = Properties.ProgramSetting.Default.GraphicsCompatability;
             var isOutputLog = Properties.ProgramSetting.Default.OutputGraphicsLog;
@@ -220,10 +217,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 initialized = true;
 
                 Log.LogDebug($"Start to invoke DefaultOpenGLDrawingManager::Initialize()");
-                Dispatcher.CurrentDispatcher.InvokeAsync(Initialize);
+                Dispatcher.CurrentDispatcher.InvokeAsync(Initialize).Task.NoWait();
             }
 
-            return WaitForInitializationIsDone(cancellation);
+            renderCtx.IsInitialized = true;
+
+            await WaitForInitializationIsDone(cancellation);
         }
 
         [Conditional("DEBUG")]
@@ -241,9 +240,33 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return new Texture(bitmap);
         }
 
+        Dictionary<FrameworkElement, IRenderContext> cachedRenderControlMap = new();
+
         public Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
-            return Task.FromResult(commonRenderContext);
+            var glView = CheckRenderControl(renderControl);
+
+            if (!cachedRenderControlMap.TryGetValue(renderControl, out var renderContext))
+                renderContext = cachedRenderControlMap[renderControl] = new DefaultOpenGLRenderContext(this, glView);
+
+            return Task.FromResult(renderContext);
+        }
+
+        private GLWpfControl CheckRenderControl(FrameworkElement renderControl)
+        {
+            if (renderControl is not GLWpfControl glView)
+                throw new Exception("renderControl must be GLWpfControl object.");
+            return glView;
+        }
+
+        public FrameworkElement CreateRenderControl()
+        {
+            var glControl = new GLWpfControl()
+            {
+
+            };
+
+            return glControl;
         }
     }
 }

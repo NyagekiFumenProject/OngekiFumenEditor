@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
@@ -25,6 +26,8 @@ namespace OngekiFumenEditor.Kernel.Graphics
         Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default);
 
         IImage LoadImageFromStream(Stream stream);
+
+        FrameworkElement CreateRenderControl();
 
         #region Drawings
 

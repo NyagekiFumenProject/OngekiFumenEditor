@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
         private readonly int textureVBO;
         private readonly int vao;
 
-        public DefaultTextureDrawing(DefaultOpenGLDrawingManager manager) : base(manager)
+        public DefaultTextureDrawing(DefaultOpenGLRenderManager manager) : base(manager)
         {
             shader = CommonSpriteShader.Shared;
 

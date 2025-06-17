@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 		private const int MAX_DRAW_COUNT = 3000;
 		private const int BUFFER_COUNT = 1;
 
-		public DefaultHighlightBatchTextureDrawing(DefaultOpenGLDrawingManager manager) : base(manager)
+		public DefaultHighlightBatchTextureDrawing(DefaultOpenGLRenderManager manager) : base(manager)
         {
 			shader = new HighlightBatchShader();
 			shader.Compile();

@@ -21,11 +21,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.PolygonDr
         private int postVertexCount = 0;
         private IDrawingContext target;
         private Primitive primitive;
-        private DefaultOpenGLDrawingManager defaultDrawingManager;
+        private DefaultOpenGLRenderManager defaultDrawingManager;
 
         public int AvailablePostableVertexCount => VertexCount - postVertexCount;
 
-        public DefaultPolygonDrawing(DefaultOpenGLDrawingManager manager) : base(manager)
+        public DefaultPolygonDrawing(DefaultOpenGLRenderManager manager) : base(manager)
         {
             shader = CommonLineShader.Shared;
 

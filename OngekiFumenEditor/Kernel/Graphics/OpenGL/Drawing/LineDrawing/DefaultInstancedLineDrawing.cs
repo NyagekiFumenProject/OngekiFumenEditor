@@ -83,7 +83,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
 
 		private OpenTK.Mathematics.Vector2 aa_radius_val = new OpenTK.Mathematics.Vector2(2, 2);
 
-		public DefaultInstancedLineDrawing(DefaultOpenGLDrawingManager manager) : base(manager)
+		public DefaultInstancedLineDrawing(DefaultOpenGLRenderManager manager) : base(manager)
         {
 			shader = new InstancedLineShader();
 			shader.Compile();
@@ -200,7 +200,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
 		Vector2 prevPoint = default;
 		Vector4 prevColor = default;
 		VertexDash prevDash = default;
-        private DefaultOpenGLDrawingManager defaultDrawingManager;
+        private DefaultOpenGLRenderManager defaultDrawingManager;
 
         public void PostPoint(Vector2 Point, Vector4 Color, VertexDash dash)
 		{

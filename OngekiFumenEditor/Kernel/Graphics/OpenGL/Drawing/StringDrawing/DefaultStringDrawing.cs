@@ -36,13 +36,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
             }).Where(x => Path.GetExtension(x.FilePath).ToLower() == ".ttf").ToArray();
         }
 
-        public DefaultStringDrawing(DefaultOpenGLDrawingManager manager) : base(manager)
+        public DefaultStringDrawing(DefaultOpenGLRenderManager manager) : base(manager)
         {
             renderer = new Renderer();
         }
 
         Dictionary<IStringDrawing.FontHandle, FontSystem> cacheFonts = new Dictionary<IStringDrawing.FontHandle, FontSystem>();
-        private DefaultOpenGLDrawingManager defaultDrawingManager;
+        private DefaultOpenGLRenderManager defaultDrawingManager;
 
         public FontSystem GetFontSystem(IStringDrawing.FontHandle fontHandle)
         {

@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
 
@@ -135,18 +136,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             };
         }
 
-        public void OnRenderSizeChanged(FrameworkElement glView, SizeChangedEventArgs sizeArg)
-        {
-            Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
-            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
-
-            viewWidth = (float)sizeArg.NewSize.Width;
-            viewHeight = (float)sizeArg.NewSize.Height;
-            renderViewWidth = (int)(sizeArg.NewSize.Width * dpiX);
-            renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
-        }
-
         public async void PrepareRenderLoop(FrameworkElement renderControl)
         {
             Log.LogDebug($"ready.");
@@ -232,6 +221,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(TimeSpan ts)
         {
+            if (renderContext is null)
+                return;
             //limit
             if (LimitFPS > 0)
             {
@@ -285,6 +276,62 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var editorAudioTime = TGridCalculator.ConvertTGridToAudioTime(tGrid, Editor);
                 CurrentTime = editorAudioTime;
             }
+        }
+
+        public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
+        {
+            if (executionContext.Source is not ContentControl contentControl)
+                return; //todo throw exception
+            //check render control is created and shown.
+            if (contentControl.Content != null)
+                return;
+
+            var renderControl = IoC.Get<IRenderManager>().CreateRenderControl();
+            await IoC.Get<IRenderManager>().InitializeRenderControl(renderControl);
+
+            Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is created");
+
+            renderControl.Loaded += RenderControl_Loaded;
+            renderControl.Unloaded += RenderControl_UnLoaded;
+            renderControl.SizeChanged += RenderControl_SizeChanged;
+
+            contentControl.Content = renderControl;
+
+            PrepareRenderLoop(renderControl);
+        }
+
+        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var renderControl = sender as FrameworkElement;
+            Log.LogDebug($"renderControl new size: {e.NewSize} , renderControl.RenderSize = {renderControl.RenderSize}");
+
+            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
+            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+
+            viewWidth = (float)e.NewSize.Width;
+            viewHeight = (float)e.NewSize.Height;
+            renderViewWidth = (int)(e.NewSize.Width * dpiX);
+            renderViewHeight = (int)(e.NewSize.Height * dpiY);
+        }
+
+        private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
+        {
+            var renderControl = sender as FrameworkElement;
+            Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
+
+            renderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
+            renderContext.OnRender -= Render;
+            renderContext.StopRendering();
+        }
+
+        private async void RenderControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            var renderControl = sender as FrameworkElement;
+            Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
+
+            renderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
+            renderContext.OnRender += Render;
+            renderContext.StartRendering();
         }
     }
 }

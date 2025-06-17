@@ -120,5 +120,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         {
             throw new NotImplementedException();
         }
+
+        public FrameworkElement CreateRenderControl()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

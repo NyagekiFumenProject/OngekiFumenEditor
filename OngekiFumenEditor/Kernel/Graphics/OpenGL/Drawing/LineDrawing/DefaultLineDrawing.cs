@@ -17,9 +17,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawi
 		private readonly Shader shader;
 		private readonly int vbo;
 		private readonly int vao;
-        private DefaultOpenGLDrawingManager defaultDrawingManager;
+        private DefaultOpenGLRenderManager defaultDrawingManager;
 
-        public DefaultLineDrawing(DefaultOpenGLDrawingManager manager) : base(manager)
+        public DefaultLineDrawing(DefaultOpenGLRenderManager manager) : base(manager)
         {
 			shader = CommonLineShader.Shared;
 

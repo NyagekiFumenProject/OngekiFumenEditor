@@ -138,17 +138,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public IPerfomenceMonitor PerfomenceMonitor { get; private set; } = new DummyPerformenceMonitor();
 
-    public void OnRenderSizeChanged(FrameworkElement glView, SizeChangedEventArgs sizeArg)
-    {
-        Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
-
-        var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-        var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
-
-        ViewWidth = (float)sizeArg.NewSize.Width;
-        ViewHeight = (float)sizeArg.NewSize.Height;
-    }
-
     public void LoadRenderOrderVisible()
     {
         var targets = drawTargets.Values.SelectMany(x => x).Distinct().ToArray();
@@ -210,10 +199,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public async void PrepareRenderLoop(FrameworkElement renderControl)
     {
-        Log.LogDebug("ready.");
-        await IoC.Get<IRenderManager>().WaitForInitializationIsDone();
-        renderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
-
         var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
         var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
 
@@ -517,7 +502,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
         CleanRender(drawingManager);
-        renderContext.BeforeRender(this);
+        renderContext?.BeforeRender(this);
 
         foreach (var (minTGrid, maxTGrid) in CurrentDrawingTargetContext.VisibleTGridRanges)
             playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
@@ -569,7 +554,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         playerLocationHelper.Draw(this);
         selectingRangeHelper.Draw(this);
 
-        renderContext.AfterRender(this);
+        renderContext?.AfterRender(this);
 
         //clean up
         foreach (var list in map.Values)
@@ -764,7 +749,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         else
             cleanColor = new(playFieldBackgroundColor.X, playFieldBackgroundColor.Y, playFieldBackgroundColor.Z,
                 playFieldBackgroundColor.W);
-        renderContext.CleanRender(this, cleanColor);
+        renderContext?.CleanRender(this, cleanColor);
     }
 
     public void OnLoaded(ActionExecutionContext e)
@@ -862,5 +847,59 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
 
         return false;
+    }
+
+    public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
+    {
+        if (executionContext.Source is not ContentControl contentControl)
+            return; //todo throw exception
+        if (contentControl.Content != null)
+            return;
+
+        var renderControl = IoC.Get<IRenderManager>().CreateRenderControl();
+        await IoC.Get<IRenderManager>().InitializeRenderControl(renderControl);
+        Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is created");
+
+        renderControl.Loaded += RenderControl_Loaded;
+        renderControl.Unloaded += RenderControl_UnLoaded;
+        renderControl.SizeChanged += RenderControl_SizeChanged;
+
+        Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
+
+        contentControl.Content = renderControl;
+
+        PrepareRenderLoop(renderControl);
+    }
+
+    private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var renderControl = sender as FrameworkElement;
+        Log.LogDebug($"renderControl new size: {e.NewSize} , renderControl.RenderSize = {renderControl.RenderSize}");
+
+        var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
+        var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+
+        ViewWidth = (float)e.NewSize.Width;
+        ViewHeight = (float)e.NewSize.Height;
+    }
+
+    private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
+    {
+        var renderControl = sender as FrameworkElement;
+        Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
+
+        renderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
+        renderContext.OnRender -= Render;
+        renderContext.StopRendering();
+    }
+
+    private async void RenderControl_Loaded(object sender, RoutedEventArgs e)
+    {
+        var renderControl = sender as FrameworkElement;
+        Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
+
+        renderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
+        renderContext.OnRender += Render;
+        renderContext.StartRendering();
     }
 }

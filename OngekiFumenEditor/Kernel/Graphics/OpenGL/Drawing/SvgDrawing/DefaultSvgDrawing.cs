@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.SvgDrawin
 {
     internal class DefaultSvgDrawing : CommonOpenGLDrawingBase, ISvgDrawing
 	{
-        public DefaultSvgDrawing(DefaultOpenGLDrawingManager manager) : base(manager)
+        public DefaultSvgDrawing(DefaultOpenGLRenderManager manager) : base(manager)
         {
 
         }

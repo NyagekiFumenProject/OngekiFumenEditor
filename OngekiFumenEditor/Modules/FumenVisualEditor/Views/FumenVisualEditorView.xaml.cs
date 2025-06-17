@@ -14,28 +14,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public FumenVisualEditorView()
         {
             InitializeComponent();
-            IoC.Get<IRenderManager>().InitializeRenderControl(glView);
-        }
-
-        private void glView_Ready()
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                if (DataContext is IDrawingContext drawingContext)
-                {
-                    drawingContext.PrepareRenderLoop(glView);
-                    //start render loop
-                    glView.Render += (ts) => drawingContext.Render(ts);
-                }
-            });
-        }
-
-        private void glView_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (DataContext is IDrawingContext fumenPreviewer)
-            {
-                fumenPreviewer.OnRenderSizeChanged(glView, e);
-            }
         }
     }
 }

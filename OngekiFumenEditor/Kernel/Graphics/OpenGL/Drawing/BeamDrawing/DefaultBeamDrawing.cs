@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
         private readonly int textureVBO;
         private readonly int vao;
 
-        public DefaultBeamDrawing(DefaultOpenGLDrawingManager manager) : base(manager)
+        public DefaultBeamDrawing(DefaultOpenGLRenderManager manager) : base(manager)
         {
             shader = new BeamLazerShader();
             shader.Compile();
