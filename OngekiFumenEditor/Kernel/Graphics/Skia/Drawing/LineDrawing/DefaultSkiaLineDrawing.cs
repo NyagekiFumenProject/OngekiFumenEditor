@@ -1,15 +1,19 @@
-﻿using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+using OngekiFumenEditor.Utils;
 using SkiaSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
 {
-    internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing
+    internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing
     {
         private SKCanvas canvas;
+        private List<LineVertex> postedPoints = new();
+        private IDrawingContext target;
 
         public DefaultSkiaLineDrawing(DefaultSkiaDrawingManager manager) : base(manager)
         {
@@ -20,21 +24,27 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
         {
             OnBegin(target);
 
+            this.target = target;
             canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             prevPaintParam = default;
+            postedPoints.Clear();
         }
 
         public void End()
         {
+            PostDraw();
             OnEnd();
 
+            lineWidth = default;
             canvas = default;
             prevPaintParam = default;
             prevPaint?.Dispose();
+            postedPoints.Clear();
         }
 
         private (Vector4 color, VertexDash dash) prevPaintParam = default;
         private SKPaint prevPaint = default;
+        private float lineWidth;
 
         private SKPaint GetPaint(Vector4 color, VertexDash dash, float lineWidth)
         {
@@ -65,12 +75,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
             return paint;
         }
 
-        public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
+        private void PostDraw()
         {
-            Begin(target);
-
             var path = new SKPath();
-            var itor = points.GetEnumerator();
+            var itor = postedPoints.GetEnumerator();
 
             if (itor.MoveNext())
             {
@@ -114,8 +122,44 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
                 }
                 path?.Dispose();
             }
+        }
+
+        public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
+        {
+            Begin(target, lineWidth);
+
+            foreach (var point in points)
+                PostPoint(point.Point, point.Color, point.Dash);
 
             End();
+        }
+
+        public void Begin(IDrawingContext target, float lineWidth)
+        {
+            Begin(target);
+            this.lineWidth = lineWidth;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PostPoint(LineVertex vertex)
+        {
+            postedPoints.Add(vertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PostPoint(Vector2 point, Vector4 color, VertexDash dash)
+        {
+            PostPoint(new LineVertex(point, color, dash));
+        }
+
+        public IStaticVBODrawing.IVBOHandle GenerateVBOWithPresetPoints(IEnumerable<LineVertex> points, float lineWidth)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void DrawVBO(IDrawingContext target, IStaticVBODrawing.IVBOHandle vbo)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

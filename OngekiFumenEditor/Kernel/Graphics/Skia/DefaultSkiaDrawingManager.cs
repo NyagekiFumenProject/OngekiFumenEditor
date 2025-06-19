@@ -48,8 +48,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
             CircleDrawing = new DefaultSkiaCircleDrawing(this);
             LineDrawing = new DefaultSkiaLineDrawing(this);
-            SimpleLineDrawing = new DefaultSkiaSimpleLineDrawing(this);
-            StaticVBODrawing = new DefaultSkiaSimpleLineDrawing(this);
+            SimpleLineDrawing = new DefaultSkiaLineDrawing(this);
+            StaticVBODrawing = new DefaultSkiaLineDrawing(this);
             StringDrawing = new DefaultSkiaStringDrawing(this);
             TextureDrawing = new DefaultSkiaTextureDrawing(this);
             PolygonDrawing = new DefaultSkiaPolygonDrawing(this);
