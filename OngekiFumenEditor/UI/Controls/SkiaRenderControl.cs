@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
+using OngekiFumenEditor.Kernel.Graphics.Skia;
+using SkiaSharp.Tests;
+using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.UI.Controls
 {
@@ -19,11 +22,10 @@ namespace OngekiFumenEditor.UI.Controls
         private const double BitmapDpi = 96.0;
 
         private readonly bool designMode;
-
         private WriteableBitmap bitmap;
         private bool ignorePixelScaling;
 
-        public SkiaRenderControl()
+        public SkiaRenderControl(RenderBackendType renderBackendType)
         {
             designMode = DesignerProperties.GetIsInDesignMode(this);
 
@@ -38,6 +40,52 @@ namespace OngekiFumenEditor.UI.Controls
                     CompositionTarget.Rendering -= OnCompTargetRender;
                 }
             };
+
+            this.renderBackendType = renderBackendType;
+            switch (renderBackendType)
+            {
+                case RenderBackendType.OpenGL:
+                    {
+                        if (grContext is null)
+                        {
+                            oglContext = GlContext.Create();
+                            oglContext.MakeCurrent();
+                            grContext = GRContext.CreateGl();
+                        }
+
+                        var colorType = SKColorType.Rgba8888;
+
+                        onSizeChanged = (info) =>
+                        {
+                            if (texture is GRGlTextureInfo oldTextureInfo)
+                            {
+                                oglContext.DestroyTexture(oldTextureInfo.Id);
+                                Log.LogDebug($"deleted old backend texture: id:{oldTextureInfo.Id}");
+                            }
+                            backendTexture?.Dispose();
+                            var newTextureInfo = oglContext.CreateTexture(info.Size);
+                            backendTexture = new GRBackendTexture(info.Size.Width, info.Size.Height, false, newTextureInfo);
+                            texture = newTextureInfo;
+                            Log.LogDebug($"created new backend texture: id:{newTextureInfo.Id}, size:{info.Size}, target:{newTextureInfo.Target}, format:{newTextureInfo.Format}, isProtected:{newTextureInfo.Protected}");
+                        };
+                        surfaceCreateFunc = (info) =>
+                        {
+                            return SKSurface.Create(grContext, backendTexture, colorType);
+                        };
+                    }
+                    break;
+                case RenderBackendType.CPU:
+                    {
+                        onSizeChanged = default;
+                        surfaceCreateFunc = (info) =>
+                        {
+                            return SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
+                        };
+                        break;
+                    }
+                default:
+                    break;
+            }
         }
 
         private void OnCompTargetRender(object sender, EventArgs e)
@@ -58,6 +106,15 @@ namespace OngekiFumenEditor.UI.Controls
         }
 
         private SKSurface currentRenderSurface;
+        private Func<SKImageInfo, SKSurface> surfaceCreateFunc;
+        private static GRContext grContext;
+        private static GlContext oglContext;
+        private Action<SKImageInfo> onSizeChanged;
+        private RenderBackendType renderBackendType;
+        private GRBackendTexture backendTexture;
+        private GRGlTextureInfo? texture;
+        private SKSurface bitmapSurface;
+
         public SKSurface CurrentRenderSurface
         {
             get => currentRenderSurface;
@@ -95,28 +152,35 @@ namespace OngekiFumenEditor.UI.Controls
             // reset the bitmap if the size has changed
             if (bitmap == null || info.Width != bitmap.PixelWidth || info.Height != bitmap.PixelHeight)
             {
-                bitmap = new WriteableBitmap(info.Width, size.Height, BitmapDpi * scaleX, BitmapDpi * scaleY, PixelFormats.Pbgra32, null);
+                bitmap = new WriteableBitmap(info.Width, info.Height, BitmapDpi * scaleX, BitmapDpi * scaleY, PixelFormats.Pbgra32, null);
+                onSizeChanged?.Invoke(info);
+                bitmapSurface?.Dispose();
+                bitmapSurface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
             }
 
             // draw on the bitmap
             bitmap.Lock();
-            using (var surface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride))
-            {
-                if (IgnorePixelScaling)
-                {
-                    var canvas = surface.Canvas;
-                    canvas.Scale(scaleX, scaleY);
-                    canvas.Save();
-                }
 
-                CurrentRenderSurface = surface;
-                OnPaintSurface(new SKPaintSurfaceEventArgs(surface, info.WithSize(userVisibleSize), info));
-                CurrentRenderSurface = default;
+            using var surface = surfaceCreateFunc(info);
+
+            if (IgnorePixelScaling)
+            {
+                var canvas = surface.Canvas;
+                canvas.Scale(scaleX, scaleY);
+                canvas.Save();
             }
+
+            CurrentRenderSurface = surface;
+            OnPaintSurface(new SKPaintSurfaceEventArgs(surface, info.WithSize(userVisibleSize), info));
+            CurrentRenderSurface = default;
+
+            if (renderBackendType != RenderBackendType.CPU)
+                bitmapSurface.Canvas.DrawSurface(surface, 0, 0);
 
             // draw the bitmap to the screen
             bitmap.AddDirtyRect(new Int32Rect(0, 0, info.Width, size.Height));
             bitmap.Unlock();
+
             drawingContext.DrawImage(bitmap, new Rect(0, 0, ActualWidth, ActualHeight));
         }
 

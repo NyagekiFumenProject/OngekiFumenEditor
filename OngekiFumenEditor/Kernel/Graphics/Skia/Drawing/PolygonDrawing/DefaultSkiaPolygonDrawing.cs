@@ -3,9 +3,8 @@ using SkiaSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
 {
     internal class DefaultSkiaPolygonDrawing : CommonSkiaDrawingBase, IPolygonDrawing
     {

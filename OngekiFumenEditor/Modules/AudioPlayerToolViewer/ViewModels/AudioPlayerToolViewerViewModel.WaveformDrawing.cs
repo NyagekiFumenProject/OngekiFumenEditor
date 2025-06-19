@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
@@ -235,8 +234,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             RenderContext.CleanRender(this, new(16 / 255f, 16 / 255f, 16 / 255f, 1f));
 
-            if (Editor is null || !IsShowWaveform)
-                return;
+            //if (Editor is null || !IsShowWaveform)
+            //    return;
 
             PerfomenceMonitor.PostUIRenderTime(ts);
             PerfomenceMonitor.OnBeforeRender();
@@ -245,18 +244,18 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             UpdateDrawingContext();
 
-            //var lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            var lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
 
-            //void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
-            //{
-            //    lineDrawing.Draw(this, [new(new(p.X - crossWidth, p.Y), color, VertexDash.Solider), new(new(p.X + crossWidth, p.Y), color, VertexDash.Solider)], 2);
-            //    lineDrawing.Draw(this, [new(new(p.X, p.Y - crossWidth), color, VertexDash.Solider), new(new(p.X, p.Y + crossWidth), color, VertexDash.Solider)], 2);
-            //}
+            void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
+            {
+                lineDrawing.Draw(this, [new(new(p.X - crossWidth, p.Y), color, VertexDash.Solider), new(new(p.X + crossWidth, p.Y), color, VertexDash.Solider)], 2);
+                lineDrawing.Draw(this, [new(new(p.X, p.Y - crossWidth), color, VertexDash.Solider), new(new(p.X, p.Y + crossWidth), color, VertexDash.Solider)], 2);
+            }
 
-            //printCross(new(0, 0), new(1, 0, 0, 1));
-            //printCross(new(viewWidth / 2, viewHeight / 2), new(0, 1, 0, 1));
-            //printCross(new(viewWidth, viewHeight), new(0, 0, 1, 1));
-            //printCross(new(0, viewHeight), new(1, 0, 1, 1));
+            printCross(new(0, 0), new(1, 0, 0, 1));
+            printCross(new(viewWidth / 2, viewHeight / 2), new(0, 1, 0, 1));
+            printCross(new(viewWidth, viewHeight), new(0, 0, 1, 1));
+            printCross(new(0, viewHeight), new(1, 0, 1, 1));
 
             if (usingPeakData is not null)
                 WaveformDrawing.Draw(this, usingPeakData);

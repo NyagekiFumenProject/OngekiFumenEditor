@@ -2,6 +2,8 @@
 using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing;
 using OngekiFumenEditor.UI.Controls;
@@ -146,7 +148,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         public FrameworkElement CreateRenderControl()
         {
-            return new SkiaRenderControl()
+            return new SkiaRenderControl(RenderBackendType.OpenGL)
             {
 
             };

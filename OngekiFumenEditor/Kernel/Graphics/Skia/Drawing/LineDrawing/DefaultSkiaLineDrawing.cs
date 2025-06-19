@@ -7,7 +7,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 {
     internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing
     {
