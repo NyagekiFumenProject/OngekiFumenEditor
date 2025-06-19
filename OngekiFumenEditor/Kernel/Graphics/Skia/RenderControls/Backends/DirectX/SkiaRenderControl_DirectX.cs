@@ -35,16 +35,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
 
         private void RecreateResources(SKImageInfo info, float scaleX, float scaleY)
         {
-            //todo step2: 删除旧的资源, 比如dx纹理
-            if (texture is GRGlTextureInfo oldTextureInfo)
-            {
-                oglContext.DestroyTexture(oldTextureInfo.Id);
-                Log.LogDebug($"deleted old backend texture: id:{oldTextureInfo.Id}");
-            }
-            //todo step3: 创建新的资源, 比如dx纹理, 以及d3dImage
-
-            d3dImage = new D3DImage();
-            ...
         }
 
         protected override void OnRender(DrawingContext drawingContext)

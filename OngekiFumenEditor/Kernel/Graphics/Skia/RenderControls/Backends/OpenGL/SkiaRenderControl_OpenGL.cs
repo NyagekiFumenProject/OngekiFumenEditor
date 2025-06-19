@@ -93,6 +93,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
             OnPaintSurface(new SKPaintSurfaceEventArgs(renderSurface, info.WithSize(userVisibleSize), info));
             CurrentRenderSurface = default;
 
+            //todo 这里可以优化
             using var presentSurface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
             presentSurface.Canvas.DrawSurface(renderSurface, 0, 0);
 
