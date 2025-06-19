@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels
 
         public VersionInfo NewVersionInfo => programUpdater.RemoteVersionInfo;
 
-        public string CurrentVersion => Version.Parse(ThisAssembly.AssemblyFileVersion).ToString(3);
+        public string CurrentVersion => Version.Parse(ThisAssembly.AssemblyFileVersion).ToString(4);
 
         private bool isReady;
         public bool IsReady
