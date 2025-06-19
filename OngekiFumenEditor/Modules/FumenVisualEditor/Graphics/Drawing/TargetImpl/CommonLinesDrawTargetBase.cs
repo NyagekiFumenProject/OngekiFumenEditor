@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public virtual int LineWidth { get; } = 2;
         private ISimpleLineDrawing lineDrawing;
-        private static VertexDash invailedDash = new VertexDash() { DashSize = 6, GapSize = 3 };
+        private static VertexDash invailedDash = new VertexDash(6,3);
 
         public CommonLinesDrawTargetBase()
         {
@@ -38,9 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             foreach (var laneStart in starts)
             {
-                lineDrawing.Begin(target, LineWidth);
                 FillLine(target, laneStart);
-                lineDrawing.End();
             }
         }
     }

@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 60;
             var color = lbk.Direction == LaneBlockArea.BlockDirection.Left ? WallLaneDrawTarget.LeftWallColor : WallLaneDrawTarget.RightWallColor;
             var colorF = color;
-            colorF.W = -0.25f;
+            colorF.W = 0f;
             (double, double) lastP = default;
 
             #region Generate LBK lines

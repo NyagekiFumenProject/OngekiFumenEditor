@@ -16,22 +16,22 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
     {
         private Renderer renderer;
 
-        private class FontHandle : IStringDrawing.FontHandle
+        private class FontHandle : IStringDrawing.IFontHandle
         {
-            public string Name { get; set; }
+            public string FamilyName { get; set; }
             public string FilePath { get; set; }
         }
 
-        public static IEnumerable<IStringDrawing.FontHandle> DefaultSupportFonts { get; } = GetSupportFonts();
-        public static IStringDrawing.FontHandle DefaultFont { get; } = GetSupportFonts().FirstOrDefault(x => x.Name.ToLower() == "consola");
+        public static IEnumerable<IStringDrawing.IFontHandle> DefaultSupportFonts { get; } = GetSupportFonts();
+        public static IStringDrawing.IFontHandle DefaultFont { get; } = GetSupportFonts().FirstOrDefault(x => x.FamilyName.ToLower() == "consola");
 
-        public IEnumerable<IStringDrawing.FontHandle> SupportFonts { get; } = DefaultSupportFonts;
+        public IEnumerable<IStringDrawing.IFontHandle> SupportFonts { get; } = DefaultSupportFonts;
 
-        private static IEnumerable<IStringDrawing.FontHandle> GetSupportFonts()
+        private static IEnumerable<IStringDrawing.IFontHandle> GetSupportFonts()
         {
             return Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.Fonts)).Select(x => new FontHandle
             {
-                Name = Path.GetFileNameWithoutExtension(x),
+                FamilyName = Path.GetFileNameWithoutExtension(x),
                 FilePath = x
             }).Where(x => Path.GetExtension(x.FilePath).ToLower() == ".ttf").ToArray();
         }
@@ -41,10 +41,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
             renderer = new Renderer();
         }
 
-        Dictionary<IStringDrawing.FontHandle, FontSystem> cacheFonts = new Dictionary<IStringDrawing.FontHandle, FontSystem>();
+        Dictionary<IStringDrawing.IFontHandle, FontSystem> cacheFonts = new Dictionary<IStringDrawing.IFontHandle, FontSystem>();
         private DefaultOpenGLRenderManager defaultDrawingManager;
 
-        public FontSystem GetFontSystem(IStringDrawing.FontHandle fontHandle)
+        public FontSystem GetFontSystem(IStringDrawing.IFontHandle fontHandle)
         {
             if (!cacheFonts.TryGetValue(fontHandle, out var fontSystem))
             {
@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
                 fontSystem.AddFont(File.ReadAllBytes(handle.FilePath));
                 cacheFonts[fontHandle] = fontSystem;
 
-                Log.LogDebug($"Created new FontSystem: {handle.Name}, FilePath: {handle.FilePath}");
+                Log.LogDebug($"Created new FontSystem: {handle.FamilyName}, FilePath: {handle.FilePath}");
             }
 
             return fontSystem;
@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
             }
         }
 
-        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IDrawingContext target, IStringDrawing.FontHandle handle, out Vector2? measureTextSize)
+        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IDrawingContext target, IStringDrawing.IFontHandle handle, out Vector2? measureTextSize)
         {
             target.PerfomenceMonitor.OnBeginDrawing(this);
             {
@@ -111,10 +111,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
 
                 var fontStyle = TextStyle.None;
 
-                IStringDrawing.FontHandle GetSubFont(IStringDrawing.FontHandle handle, string sub)
+                IStringDrawing.IFontHandle GetSubFont(IStringDrawing.IFontHandle handle, string sub)
                 {
-                    var boldFontName = handle.Name + "b";
-                    return SupportFonts.FirstOrDefault(x => x.Name == boldFontName);
+                    var boldFontName = handle.FamilyName + "b";
+                    return SupportFonts.FirstOrDefault(x => x.FamilyName == boldFontName);
                 }
 
                 if (style.HasFlag(IStringDrawing.StringStyle.Underline))
@@ -123,17 +123,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
                     fontStyle = TextStyle.Strikethrough;
                 if (style.HasFlag(IStringDrawing.StringStyle.Bold))
                 {
-                    if (GetSubFont(handle, "b") is IStringDrawing.FontHandle sb)
+                    if (GetSubFont(handle, "b") is IStringDrawing.IFontHandle sb)
                         handle = sb;
                 }
                 if (style.HasFlag(IStringDrawing.StringStyle.Italic))
                 {
-                    if (GetSubFont(handle, "i") is IStringDrawing.FontHandle sb)
+                    if (GetSubFont(handle, "i") is IStringDrawing.IFontHandle sb)
                         handle = sb;
                 }
                 if (style.HasFlag(IStringDrawing.StringStyle.Italic) && style.HasFlag(IStringDrawing.StringStyle.Bold))
                 {
-                    if (GetSubFont(handle, "z") is IStringDrawing.FontHandle sb)
+                    if (GetSubFont(handle, "z") is IStringDrawing.IFontHandle sb)
                         handle = sb;
                 }
 

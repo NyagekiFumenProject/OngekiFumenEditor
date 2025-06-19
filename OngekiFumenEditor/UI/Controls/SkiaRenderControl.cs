@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Skia.Controls
+namespace OngekiFumenEditor.UI.Controls
 {
     [DefaultEvent("PaintSurface")]
     [DefaultProperty("Name")]
@@ -26,6 +26,23 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Controls
         public SkiaRenderControl()
         {
             designMode = DesignerProperties.GetIsInDesignMode(this);
+
+            IsVisibleChanged += delegate (object _, DependencyPropertyChangedEventArgs args)
+            {
+                if ((bool)args.NewValue)
+                {
+                    CompositionTarget.Rendering += OnCompTargetRender;
+                }
+                else
+                {
+                    CompositionTarget.Rendering -= OnCompTargetRender;
+                }
+            };
+        }
+
+        private void OnCompTargetRender(object sender, EventArgs e)
+        {
+            InvalidateVisual();
         }
 
         public SKSize CanvasSize { get; private set; }

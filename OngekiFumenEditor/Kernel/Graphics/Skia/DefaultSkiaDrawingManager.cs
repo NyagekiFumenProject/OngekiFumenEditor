@@ -1,27 +1,24 @@
 ﻿//#define OGL_LOG
+using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Controls;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing;
+using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
-using OpenTK.Windowing.Common;
-using OpenTK.Wpf;
 using SkiaSharp;
-using SkiaSharp.Views.WPF;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
+namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
     [Export(typeof(IRenderManager))]
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -48,6 +45,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             #region Create Drawings
 
             Log.LogInfo("Drawing objects were created.");
+
+            CircleDrawing = new DefaultSkiaCircleDrawing(this);
+            LineDrawing = new DefaultSkiaLineDrawing(this);
+            SimpleLineDrawing = new DefaultSkiaSimpleLineDrawing(this);
+            StaticVBODrawing = new DefaultSkiaSimpleLineDrawing(this);
+            StringDrawing = new DefaultSkiaStringDrawing(this);
+            TextureDrawing = new DefaultSkiaTextureDrawing(this);
+            PolygonDrawing = new DefaultSkiaPolygonDrawing(this);
+            HighlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(this);
+            BatchTextureDrawing = new DefaultSkiaBatchTextureDrawing(this);
 
             #endregion
 
@@ -106,7 +113,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 throw new Exception("Only able to call after InitializeRenderControl() called.");
         }
 
-        Dictionary<FrameworkElement, IRenderContext> cachedRenderControlMap = new();
+        Dictionary<FrameworkElement, DefaultSkiaRenderContext> cachedRenderControlMap = new();
 
         public IImage LoadImageFromStream(Stream stream)
         {
@@ -115,7 +122,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return new SkiaImage(SKImage.FromEncodedData(stream));
         }
 
-        public Task<IRenderContext> GetRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
+        public async Task<IRenderContext> GetRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
+        {
+            return await GetSkiaRenderContext(rc, cancellation);
+        }
+
+        public Task<DefaultSkiaRenderContext> GetSkiaRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
         {
             var renderControl = CheckRenderControl(rc);
 

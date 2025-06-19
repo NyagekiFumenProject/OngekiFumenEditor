@@ -18,7 +18,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
         public SortableCollection<(TGrid minTGrid, TGrid maxTGrid), TGrid> VisibleTGridRanges { get; set; }
         public int SoflanGroupId { get; set; }
         public VisibleRect Rect { get; set; }
-        public Matrix4 ViewProjectionMatrix { get; set; }
         public Matrix4 ViewMatrix { get; set; }
         public Matrix4 ProjectionMatrix { get; set; }
         public float ViewWidth { get; set; }

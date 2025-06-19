@@ -15,13 +15,13 @@ namespace OngekiFumenEditor.Kernel.Graphics
 			Underline = 16,
 		}
 
-		public interface FontHandle
+		public interface IFontHandle
 		{
-			string Name { get; }
+			string FamilyName { get; }
 		}
 
-		IEnumerable<FontHandle> SupportFonts { get; }
+		IEnumerable<IFontHandle> SupportFonts { get; }
 
-		void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, StringStyle style, IDrawingContext target, FontHandle handle, out Vector2? measureTextSize);
+		void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, StringStyle style, IDrawingContext target, IFontHandle handle, out Vector2? measureTextSize);
 	}
 }

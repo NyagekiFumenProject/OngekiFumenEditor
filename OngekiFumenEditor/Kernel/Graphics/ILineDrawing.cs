@@ -5,23 +5,9 @@ namespace OngekiFumenEditor.Kernel.Graphics
 {
     public interface ILineDrawing : IDrawing
     {
-        public struct VertexDash
+        public record VertexDash(int DashSize, int GapSize)
         {
-            public int DashSize { get; set; }
-            public int GapSize { get; set; }
-
-            public VertexDash() { }
-            public VertexDash(int dashSize, int gapSize)
-            {
-                DashSize = dashSize;
-                GapSize = gapSize;
-            }
-
-            public static VertexDash Solider { get; } = new VertexDash()
-            {
-                GapSize = 0,
-                DashSize = 100
-            };
+            public static VertexDash Solider { get; } = new VertexDash(100, 0);
         }
 
         public record LineVertex(Vector2 Point, Vector4 Color, VertexDash Dash);

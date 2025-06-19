@@ -9,8 +9,14 @@ namespace OngekiFumenEditor.Kernel.Graphics
 		Matrix4 GetOverrideModelMatrix();
 		bool PopOverrideModelMatrix(out Matrix4 modelMatrix);
 
-		void PushOverrideViewProjectMatrix(Matrix4 viewProjectMatrix);
-		Matrix4 GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext ctx);
-		bool PopOverrideViewProjectMatrix(out Matrix4 viewProjectMatrix);
+        void PushOverrideViewMatrix(Matrix4 viewMatrix);
+        Matrix4 GetOverrideViewMatrixOrDefault(DrawingTargetContext ctx);
+        bool PopOverrideViewMatrix(out Matrix4 viewMatrix);
+
+        void PushOverrideProjectionMatrix(Matrix4 projectionMatrix);
+        Matrix4 GetOverrideProjectionMatrixOrDefault(DrawingTargetContext ctx);
+        bool PopOverrideProjectionMatrix(out Matrix4 modelMatrix);
+
+        Matrix4 GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext ctx);
 	}
 }

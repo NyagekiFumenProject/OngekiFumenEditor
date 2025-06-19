@@ -25,11 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private ISimpleLineDrawing lineDrawing;
         private IPolygonDrawing polygonDrawing;
 
-        private VertexDash dash = new()
-        {
-            DashSize = 8,
-            GapSize = 4
-        };
+        private VertexDash dash = new(8,4);
 
         public DrawSelectingRangeHelper()
         {

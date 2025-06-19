@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         private readonly IStringDrawing stringDrawing;
         private readonly ICircleDrawing circleDrawing;
         private readonly SoflanList dummySoflanList;
-        private static readonly VertexDash InvailedLineDash = new VertexDash() { DashSize = 2, GapSize = 2 };
+        private static readonly VertexDash InvailedLineDash = new VertexDash(2, 2);
 
         private static readonly System.Numerics.Vector4 TransparentColor = new(1, 1, 1, 0);
         private static readonly System.Numerics.Vector4 WhiteColor = new(1, 1, 1, 1);
