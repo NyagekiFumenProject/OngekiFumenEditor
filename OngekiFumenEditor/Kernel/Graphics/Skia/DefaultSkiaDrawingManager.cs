@@ -6,7 +6,8 @@ using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing;
-using OngekiFumenEditor.UI.Controls;
+using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
+using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU;
 using OngekiFumenEditor.Utils;
 using SkiaSharp;
 using System;
@@ -139,19 +140,25 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             return Task.FromResult(renderContext);
         }
 
-        private SkiaRenderControl CheckRenderControl(FrameworkElement rc)
+        private SkiaRenderControlBase CheckRenderControl(FrameworkElement rc)
         {
-            if (rc is not SkiaRenderControl renderControl)
+            if (rc is not SkiaRenderControlBase renderControl)
                 throw new Exception("renderControl must be SkiaRenderControl object.");
             return renderControl;
         }
 
         public FrameworkElement CreateRenderControl()
         {
-            return new SkiaRenderControl(RenderBackendType.OpenGL)
-            {
+            var backend = RenderBackendType.OpenGL;
 
-            };
+            switch (backend)
+            {
+                case RenderBackendType.OpenGL:
+                    return new SkiaRenderControl_OpenGL();
+                case RenderBackendType.CPU:
+                default:
+                    return new SkiaRenderControl_CPU();
+            }
         }
     }
 }

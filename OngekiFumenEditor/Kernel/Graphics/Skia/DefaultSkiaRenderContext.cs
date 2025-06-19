@@ -1,5 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Skia;
-using OngekiFumenEditor.UI.Controls;
+using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
 using SkiaSharp;
 using System;
 using System.Numerics;
@@ -13,13 +13,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         private DefaultSkiaDrawingManager manager;
         private bool isStart;
         private DateTime prevRenderTime;
-        private readonly SkiaRenderControl renderControl;
+        private readonly SkiaRenderControlBase renderControl;
 
         public event Action<TimeSpan> OnRender;
 
         public SKCanvas Canvas => renderControl.CurrentRenderSurface?.Canvas;
 
-        public DefaultSkiaRenderContext(DefaultSkiaDrawingManager manager, SkiaRenderControl renderControl)
+        public DefaultSkiaRenderContext(DefaultSkiaDrawingManager manager, SkiaRenderControlBase renderControl)
         {
             this.manager = manager;
             this.renderControl = renderControl;
