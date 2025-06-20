@@ -196,6 +196,7 @@
 		<PackageReference Include="Microsoft.Build" Version="17.7.2" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.11.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" ExcludeAssets="contentfiles;runtime;" />
+		<PackageReference Include="Microsoft.Wpf.Interop.DirectX-x64" Version="0.9.0-beta-22856" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
 		<PackageReference Include="NAudio" Version="2.2.1" />
 		<PackageReference Include="Nerdbank.GitVersioning" Version="3.6.146">

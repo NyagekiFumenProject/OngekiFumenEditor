@@ -10,18 +10,28 @@ using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
+using OngekiFumenEditor.Kernel.Graphics.Skia.D3dContexts;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
 {
-    internal class SkiaRenderControl_CPU : SkiaRenderControlBase
+    internal class SkiaRenderControl_DirectX : SkiaRenderControlBase
     {
+        private static VorticeDirect3DContext d3dContext;
+        private static GRD3DBackendContext d3dBackendContext;
+        private static GRContext grContext;
+
         private const double BitmapDpi = 96.0;
 
         protected WriteableBitmap bitmap;
 
-        public SkiaRenderControl_CPU()
+        public SkiaRenderControl_DirectX()
         {
-
+            if (grContext is null)
+            {
+                d3dContext = new VorticeDirect3DContext();
+                d3dBackendContext = d3dContext.CreateBackendContext();
+                grContext = GRContext.CreateDirect3D(d3dBackendContext);
+            }
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -51,18 +61,23 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
             // draw on the bitmap
             bitmap.Lock();
 
-            using var surface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
+            // 新建一个DX渲染的Surface
+            using var renderSurface = SKSurface.Create(grContext, true, info);
 
             if (IgnorePixelScaling)
             {
-                var canvas = surface.Canvas;
+                var canvas = renderSurface.Canvas;
                 canvas.Scale(scaleX, scaleY);
                 canvas.Save();
             }
 
-            CurrentRenderSurface = surface;
-            OnPaintSurface(new SKPaintSurfaceEventArgs(surface, info.WithSize(userVisibleSize), info));
+            CurrentRenderSurface = renderSurface;
+            OnPaintSurface(new SKPaintSurfaceEventArgs(renderSurface, info.WithSize(userVisibleSize), info));
             CurrentRenderSurface = default;
+
+            //渲染结果复制到bitmap上
+            using var presentSurface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
+            presentSurface.Canvas.DrawSurface(renderSurface, 0, 0);
 
             // draw the bitmap to the screen
             bitmap.AddDirtyRect(new Int32Rect(0, 0, info.Width, size.Height));

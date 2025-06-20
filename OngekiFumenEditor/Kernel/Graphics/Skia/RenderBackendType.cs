@@ -9,6 +9,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
     public enum RenderBackendType
     {
         OpenGL,
+        DirectX,
         CPU,
     }
 }

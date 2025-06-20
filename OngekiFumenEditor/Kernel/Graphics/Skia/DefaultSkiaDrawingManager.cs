@@ -149,12 +149,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         public FrameworkElement CreateRenderControl()
         {
-            var backend = RenderBackendType.OpenGL;
+            var backend = RenderBackendType.DirectX;
 
             switch (backend)
             {
                 case RenderBackendType.OpenGL:
                     return new SkiaRenderControl_OpenGL();
+                case RenderBackendType.DirectX:
+                    return new SkiaRenderControl_DirectX();
                 case RenderBackendType.CPU:
                 default:
                     return new SkiaRenderControl_CPU();
