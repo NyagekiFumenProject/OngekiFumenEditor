@@ -1,6 +1,4 @@
-﻿//#define OGL_LOG
-using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
+﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing;
@@ -23,7 +21,7 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
-    //[Export(typeof(IRenderManager))]
+    [Export(typeof(IRenderManager))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultSkiaDrawingManager : IRenderManager
     {

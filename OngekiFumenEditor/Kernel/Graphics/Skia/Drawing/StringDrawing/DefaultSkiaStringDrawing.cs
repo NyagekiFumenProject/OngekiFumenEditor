@@ -85,7 +85,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             measureTextSize = new Vector2(bounds.Width, bounds.Height);
             //adjust pos thought origin and size
 
-            var offsetPos = new SKPoint(origin.X * bounds.Width, origin.Y * bounds.Height);
+            var offsetPos = new SKPoint(origin.X * bounds.Width, bounds.Height - origin.Y * bounds.Height);
 
             var adjustPos = pos.ToSkiaSharpPoint() - offsetPos;
             adjustPos.Y = -adjustPos.Y;
