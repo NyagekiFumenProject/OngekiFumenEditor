@@ -1,40 +1,37 @@
 ﻿using SkiaSharp;
+using SkiaSharp.Tests;
 using SkiaSharp.Views.Desktop;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
-using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Kernel.Graphics.Skia.D3dContexts;
-using System.Windows.Interop;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
 {
     internal class SkiaRenderControl_DirectX : SkiaRenderControlBase
     {
+        private static VorticeDirect3DContext d3dContext;
+        private static GRD3DBackendContext d3dBackendContext;
+        private static GRContext grContext;
+
         private const double BitmapDpi = 96.0;
 
-        protected D3DImage d3dImage;
-        private GRBackendTexture backendTexture;
-
-        private SKColorType colorType = SKColorType.Rgba8888;
-        private VorticeDirect3DContext d3dContext;
-        private GRD3DBackendContext d3dBackendContext;
-        private static GRContext grContext;
-        private SKImageInfo prevInfo;
+        protected WriteableBitmap bitmap;
 
         public SkiaRenderControl_DirectX()
         {
             if (grContext is null)
             {
-                //todo step1: 新建DX设备和初始化skia backend
                 d3dContext = new VorticeDirect3DContext();
                 d3dBackendContext = d3dContext.CreateBackendContext();
                 grContext = GRContext.CreateDirect3D(d3dBackendContext);
             }
-        }
-
-        private void RecreateResources(SKImageInfo info, float scaleX, float scaleY)
-        {
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -57,11 +54,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
 
             var info = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
 
-            if (d3dImage == null || info.Width != prevInfo.Width || info.Height != prevInfo.Height)
-                RecreateResources(info, scaleX, scaleY);
-            prevInfo = info;
+            // reset the bitmap if the size has changed
+            if (bitmap == null || info.Width != bitmap.PixelWidth || info.Height != bitmap.PixelHeight)
+                bitmap = new WriteableBitmap(info.Width, info.Height, BitmapDpi * scaleX, BitmapDpi * scaleY, PixelFormats.Pbgra32, null);
 
-            using var renderSurface = SKSurface.Create(grContext, backendTexture, colorType);
+            // draw on the bitmap
+            bitmap.Lock();
+
+            // 新建一个DX渲染的Surface
+            using var renderSurface = SKSurface.Create(grContext, true, info);
 
             if (IgnorePixelScaling)
             {
@@ -74,8 +75,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
             OnPaintSurface(new SKPaintSurfaceEventArgs(renderSurface, info.WithSize(userVisibleSize), info));
             CurrentRenderSurface = default;
 
-            // 绘制d3dimage到WPF界面上
-            drawingContext.DrawImage(d3dImage, new Rect(0, 0, ActualWidth, ActualHeight));
+            //渲染结果复制到bitmap上
+            using var presentSurface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
+            presentSurface.Canvas.DrawSurface(renderSurface, 0, 0);
+
+            // draw the bitmap to the screen
+            bitmap.AddDirtyRect(new Int32Rect(0, 0, info.Width, size.Height));
+            bitmap.Unlock();
+
+            drawingContext.DrawImage(bitmap, new Rect(0, 0, ActualWidth, ActualHeight));
         }
     }
 }

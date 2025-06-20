@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     var prevX = 0f;
 
                     lineDrawing.PostPoint(new(-width / 2, 0), WhiteColor, InvailedLineDash);
-                    for (int i = minIndex; i < maxIndex; i++)
+                    for (int i = minIndex; i < maxIndex; i+=1)
                     {
                         var peakPoint = peakData[i];
 
@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                         var yTop = height / 2 * peakPoint.Amplitudes[0];
                         var yButtom = -height / 2 * peakPoint.Amplitudes[1];
 
-                        lineDrawing.PostPoint(new(x, 0), WaveformFillColor, VertexDash.Solider);
+                        //lineDrawing.PostPoint(new(x, 0), WaveformFillColor, VertexDash.Solider);
                         lineDrawing.PostPoint(new(x, yTop), WaveformFillColor, VertexDash.Solider);
                         lineDrawing.PostPoint(new(x, yButtom), WaveformFillColor, VertexDash.Solider);
                         prevX = x;

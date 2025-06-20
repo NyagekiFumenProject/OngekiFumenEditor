@@ -14,6 +14,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         private SKCanvas canvas;
         private List<LineVertex> postedPoints = new();
         private IDrawingContext target;
+        private int drawcallCount = 0;
 
         public DefaultSkiaLineDrawing(DefaultSkiaDrawingManager manager) : base(manager)
         {
@@ -28,6 +29,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             prevPaintParam = default;
             postedPoints.Clear();
+            drawcallCount = 0;
         }
 
         public void End()
@@ -100,8 +102,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     {
                         //draw current path
                         var paint = GetPaint(prev.Color, prev.Dash, lineWidth);
-                        canvas.DrawPath(path, paint);
-                        target.PerfomenceMonitor.CountDrawCall(this);
+                        DrawPath(path, paint);
 
                         //new path
                         path?.Dispose();
@@ -117,11 +118,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 if (path != null && path.PointCount > 0)
                 {
                     var paint = GetPaint(prev.Color, prev.Dash, lineWidth);
-                    canvas.DrawPath(path, paint);
-                    target.PerfomenceMonitor.CountDrawCall(this);
+                    DrawPath(path, paint);
                 }
                 path?.Dispose();
             }
+        }
+
+        private void DrawPath(SKPath path, SKPaint paint)
+        {
+            var actualPath = /*path.PointCount > 100 ? path.Simplify() : */path;
+
+            canvas.DrawPath(actualPath, paint);
+            target.PerfomenceMonitor.CountDrawCall(this);
+            drawcallCount++;
         }
 
         public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)

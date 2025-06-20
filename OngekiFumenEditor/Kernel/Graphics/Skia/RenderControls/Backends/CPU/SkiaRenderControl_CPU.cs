@@ -17,7 +17,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
     {
         private const double BitmapDpi = 96.0;
 
-        private readonly bool designMode;
         protected WriteableBitmap bitmap;
 
         public SkiaRenderControl_CPU()
