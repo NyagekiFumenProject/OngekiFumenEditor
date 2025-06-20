@@ -51,9 +51,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 list.Add(new(new(result.X, 0 + target.Editor.ViewHeight), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
-            lineDrawing.PushOverrideModelMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0));
+            lineDrawing.PushOverrideViewMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0));
             lineDrawing.Draw(target, list, 1);
-            lineDrawing.PopOverrideModelMatrix(out _);
+            lineDrawing.PopOverrideViewMatrix(out _);
         }
 
         public void DrawXGridText(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)

@@ -23,7 +23,7 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
-    [Export(typeof(IRenderManager))]
+    //[Export(typeof(IRenderManager))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultSkiaDrawingManager : IRenderManager
     {

@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
         public bool PopOverrideModelMatrix(out Matrix4 modelMatrix)
         {
             modelMatrix = Matrix4.Identity;
-            if (modelMatrices.Count <= 1)
+            if (modelMatrices.Count == 0)
                 return false;
 
             modelMatrix = modelMatrices.Pop();
@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
         public bool PopOverrideViewMatrix(out Matrix4 viewMatrix)
         {
             viewMatrix = Matrix4.Identity;
-            if (viewMatrices.Count <= 1)
+            if (viewMatrices.Count == 0)
                 return false;
 
             viewMatrix = viewMatrices.Pop();
@@ -74,19 +74,19 @@ namespace OngekiFumenEditor.Kernel.Graphics
         #region Projection Matrix
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PushOverrideProjectionMatrix(Matrix4 viewMatrix)
+        public void PushOverrideProjectionMatrix(Matrix4 projectionMatrix)
         {
-            projectionMatrices.Push(viewMatrix);
+            projectionMatrices.Push(projectionMatrix);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool PopOverrideProjectionMatrix(out Matrix4 viewMatrix)
+        public bool PopOverrideProjectionMatrix(out Matrix4 projectionMatrix)
         {
-            viewMatrix = Matrix4.Identity;
+            projectionMatrix = Matrix4.Identity;
             if (projectionMatrices.Count <= 1)
                 return false;
 
-            viewMatrix = projectionMatrices.Pop();
+            projectionMatrix = projectionMatrices.Pop();
             return true;
         }
 
@@ -101,7 +101,9 @@ namespace OngekiFumenEditor.Kernel.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Matrix4 GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext ctx)
         {
-            var vp = GetOverrideViewMatrixOrDefault(ctx) * GetOverrideProjectionMatrixOrDefault(ctx);
+            var v = GetOverrideViewMatrixOrDefault(ctx);
+            var p = GetOverrideProjectionMatrixOrDefault(ctx);
+            var vp = v * p;
             return vp;
         }
     }
