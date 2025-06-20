@@ -1,10 +1,12 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using SkiaSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
@@ -79,14 +81,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         private void PostDraw()
         {
-            var path = new SKPath();
+            //var path = new SKPath();
             var itor = postedPoints.GetEnumerator();
+            var points = ObjectPool.Get<List<SKPoint>>();
+            points.Clear();
 
             if (itor.MoveNext())
             {
                 var prev = itor.Current;
                 (Vector4, VertexDash)? prevParam = default;
-                path.MoveTo(prev.Point.ToSkiaSharpPoint());
+                points.Add(prev.Point.ToSkiaSharpPoint());
 
                 while (itor.MoveNext())
                 {
@@ -96,32 +100,63 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     if (curParam == prevParam || prevParam is null)
                     {
                         //just add to path if same color and dash
-                        path.LineTo(cur.Point.ToSkiaSharpPoint());
+                        points.Add(cur.Point.ToSkiaSharpPoint());
                     }
                     else
                     {
                         //draw current path
                         var paint = GetPaint(prev.Color, prev.Dash, lineWidth);
-                        DrawPath(path, paint);
+                        DrawPath(points, paint);
 
                         //new path
-                        path?.Dispose();
-                        path = new SKPath();
-                        path.MoveTo(prev.Point.ToSkiaSharpPoint());
-                        path.LineTo(cur.Point.ToSkiaSharpPoint());
+                        points.Clear();
+                        points.Add(prev.Point.ToSkiaSharpPoint());
+                        points.Add(cur.Point.ToSkiaSharpPoint());
                     }
 
                     prevParam = curParam;
                     prev = cur;
                 }
 
-                if (path != null && path.PointCount > 0)
+                if (points.Count > 0)
                 {
                     var paint = GetPaint(prev.Color, prev.Dash, lineWidth);
-                    DrawPath(path, paint);
+                    DrawPath(points, paint);
                 }
-                path?.Dispose();
             }
+
+            ObjectPool.Return(points);
+        }
+
+        private void _DrawPath(List<SKPoint> points, SKPaint paint)
+        {
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                var cur = points[i];
+                var next = points[i + 1];
+                if (cur == next)
+                    continue;
+                canvas.DrawLine(cur, next, paint);
+            }
+            target.PerfomenceMonitor.CountDrawCall(this);
+            drawcallCount++;
+        }
+
+        private void DrawPath(List<SKPoint> points, SKPaint paint)
+        {
+            using var path = new SKPath();
+            path.MoveTo(points[0]);
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                var cur = points[i];
+                var next = points[i + 1];
+                if (cur == next)
+                    continue;
+                path.LineTo(next);
+            }
+            canvas.DrawPath(path, paint);
+            target.PerfomenceMonitor.CountDrawCall(this);
+            drawcallCount++;
         }
 
         private void DrawPath(SKPath path, SKPaint paint)
