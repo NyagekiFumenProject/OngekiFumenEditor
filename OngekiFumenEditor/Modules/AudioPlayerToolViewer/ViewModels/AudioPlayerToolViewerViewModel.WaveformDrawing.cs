@@ -24,8 +24,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
     {
         private float viewWidth;
         private float viewHeight;
-        private int renderViewWidth;
-        private int renderViewHeight;
         private IPerfomenceMonitor performenceMonitor;
         private Stopwatch sw;
         private ISamplePeak samplePeak;
@@ -144,13 +142,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             RenderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
 
             InitRender();
-            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
 
             viewWidth = (float)renderControl.ActualWidth;
             viewHeight = (float)renderControl.ActualHeight;
-            renderViewWidth = (int)(renderControl.ActualWidth * dpiX);
-            renderViewHeight = (int)(renderControl.ActualHeight * dpiY);
 
             //暂时没有需要显示检测的必要?
             //performenceMonitor = IoC.Get<IPerfomenceMonitor>();
@@ -244,18 +238,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             UpdateDrawingContext();
 
-            var lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            //var lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
 
-            void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
-            {
-                lineDrawing.Draw(this, [new(new(p.X - crossWidth, p.Y), color, VertexDash.Solider), new(new(p.X + crossWidth, p.Y), color, VertexDash.Solider)], 2);
-                lineDrawing.Draw(this, [new(new(p.X, p.Y - crossWidth), color, VertexDash.Solider), new(new(p.X, p.Y + crossWidth), color, VertexDash.Solider)], 2);
-            }
+            //void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
+            //{
+            //    lineDrawing.Draw(this, [new(new(p.X - crossWidth, p.Y), color, VertexDash.Solider), new(new(p.X + crossWidth, p.Y), color, VertexDash.Solider)], 2);
+            //    lineDrawing.Draw(this, [new(new(p.X, p.Y - crossWidth), color, VertexDash.Solider), new(new(p.X, p.Y + crossWidth), color, VertexDash.Solider)], 2);
+            //}
 
-            printCross(new(0, 0), new(1, 0, 0, 1));
-            printCross(new(viewWidth / 2, viewHeight / 2), new(0, 1, 0, 1));
-            printCross(new(viewWidth, viewHeight), new(0, 0, 1, 1));
-            printCross(new(0, viewHeight), new(1, 0, 1, 1));
+            //printCross(new(0, 0), new(1, 1, 1, 1), 1000);
+
+            //var beamDrawing = IoC.Get<IRenderManager>().BeamDrawing;
+            //using var img = ResourceUtils.OpenReadTextureFromFile(@"C:\Users\mikir\Desktop\OngekiFumenEditor\Resources\editor\beamBody.png");
+            //beamDrawing.Draw(this, img, 26, viewWidth / 2, 1, Vector4.One, 0, 0);
 
             if (usingPeakData is not null)
                 WaveformDrawing.Draw(this, usingPeakData);
@@ -316,13 +311,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"renderControl new size: {e.NewSize} , renderControl.RenderSize = {renderControl.RenderSize}");
 
-            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
-
             viewWidth = (float)e.NewSize.Width;
             viewHeight = (float)e.NewSize.Height;
-            renderViewWidth = (int)(e.NewSize.Width * dpiX);
-            renderViewHeight = (int)(e.NewSize.Height * dpiY);
         }
 
         private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)

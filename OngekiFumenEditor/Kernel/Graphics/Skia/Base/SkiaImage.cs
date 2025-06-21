@@ -16,6 +16,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Base
 
         public SKImage Image { get; private set; }
 
+        public int Width => Image.Width;
+        public int Height => Image.Height;
+
         public TextureWrapMode TextureWrapT { get; set; } = TextureWrapMode.Clamp;
         public TextureWrapMode TextureWrapS { get; set; } = TextureWrapMode.Clamp;
 

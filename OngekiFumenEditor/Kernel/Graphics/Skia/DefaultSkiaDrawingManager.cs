@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing;
@@ -21,7 +22,7 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
-    [Export(typeof(IRenderManager))]
+    //[Export(typeof(IRenderManager))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultSkiaDrawingManager : IRenderManager
     {
@@ -56,6 +57,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             PolygonDrawing = new DefaultSkiaPolygonDrawing(this);
             HighlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(this);
             BatchTextureDrawing = new DefaultSkiaBatchTextureDrawing(this);
+            BeamDrawing = new DefaultSkiaBeamDrawing(this);
 
             #endregion
 

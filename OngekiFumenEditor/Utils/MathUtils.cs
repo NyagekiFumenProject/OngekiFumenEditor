@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using IntervalTree;
+﻿using IntervalTree;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Utils;
 
@@ -351,6 +352,16 @@ public static class MathUtils
 
         if (list.Count > 0)
             yield return list;
+    }
+
+    public static T SmoothStep<T>(T edge0, T edge1, T x) where T : INumber<T>
+    {
+        // 计算标准化值
+        T t = (x - edge0) / (edge1 - edge0);
+        t = T.Clamp(t, T.Zero, T.One);
+
+        // 三次多项式
+        return t * t * (T.CreateChecked(3) - T.CreateChecked(2) * t);
     }
 
     public record CombinableRange<T>(T Min, T Max) where T : IComparable<T>
