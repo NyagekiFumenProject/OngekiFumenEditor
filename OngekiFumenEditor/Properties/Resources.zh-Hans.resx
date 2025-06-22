@@ -2044,4 +2044,7 @@
   <data name="SelectRenderManagerImpl" xml:space="preserve">
     <value>图形渲染实现:</value>
   </data>
+  <data name="SkiaRenderBackend" xml:space="preserve">
+    <value>Skia渲染后端:</value>
+  </data>
 </root>

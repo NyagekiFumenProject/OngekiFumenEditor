@@ -5137,6 +5137,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Skia render backend:  的本地化字符串。
+        /// </summary>
+        public static string SkiaRenderBackend {
+            get {
+                return ResourceManager.GetString("SkiaRenderBackend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Thumbnail image dimensions (default 220x220): 的本地化字符串。
         /// </summary>
         public static string SmallJacketSize {

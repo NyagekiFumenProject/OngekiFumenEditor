@@ -110,6 +110,16 @@
                     IsEnabled="{Binding Setting.OutputGraphicsLog}">
                     <TextBlock Text="{markup:Translate [GraphicsLogSynchronous]}" TextWrapping="Wrap" />
                 </CheckBox>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Margin="10,10,5,10"
+                        VerticalAlignment="Center"
+                        Text="{markup:Translate [SkiaRenderBackend]}" />
+                    <ComboBox
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding AvaliableSkiaBackends}"
+                        SelectedValue="{Binding Setting.SkiaRenderBackend}" />
+                </StackPanel>
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">

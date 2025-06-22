@@ -80,7 +80,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
             #endregion
 
-            Log.LogInfo("OpenGL Drawing Manager initialized successfully.");
+            backendType = Enum.TryParse<RenderBackendType>(Properties.ProgramSetting.Default.SkiaRenderBackend, out var bt) ? bt : RenderBackendType.CPU;
+
+            Log.LogInfo($"Skia Drawing Manager initialized successfully, backendType:{backendType}.");
             initTaskSource.SetResult();
         }
 
@@ -119,6 +121,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         }
 
         Dictionary<FrameworkElement, DefaultSkiaRenderContext> cachedRenderControlMap = new();
+        private RenderBackendType backendType;
 
         public IImage LoadImageFromStream(Stream stream)
         {
@@ -151,9 +154,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         public FrameworkElement CreateRenderControl()
         {
-            var backend = RenderBackendType.DirectX;
-
-            switch (backend)
+            switch (backendType)
             {
                 case RenderBackendType.OpenGL:
                     return new SkiaRenderControl_OpenGL();

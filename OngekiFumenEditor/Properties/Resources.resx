@@ -2043,4 +2043,7 @@
   <data name="SelectRenderManagerImpl" xml:space="preserve">
     <value>Select render manager implement: </value>
   </data>
+  <data name="SkiaRenderBackend" xml:space="preserve">
+    <value>Skia render backend: </value>
+  </data>
 </root>

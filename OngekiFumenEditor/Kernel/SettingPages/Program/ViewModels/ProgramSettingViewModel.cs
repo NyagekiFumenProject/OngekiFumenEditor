@@ -3,6 +3,7 @@ using AssocSupport.Models;
 using Caliburn.Micro;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Skia;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -30,6 +31,8 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
         public bool EnableAssociate => !AssociationUtility.IsRegistered("OngekiFumenEditor", "NyagekiFumenProject");
 
         public IEnumerable<string> AvaliableRenderManagerImplNames => IoC.Get<IRenderManager>().GetAvaliableRenderManagerImplNames();
+
+        public IEnumerable<string> AvaliableSkiaBackends => Enum.GetNames<RenderBackendType>();
 
         private bool enableAssociateNyagekiProj = true;
         public bool EnableAssociateNyagekiProj

@@ -214,5 +214,17 @@ namespace OngekiFumenEditor.Properties {
                 this["DefaultRenderManagerImplementName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CPU")]
+        public string SkiaRenderBackend {
+            get {
+                return ((string)(this["SkiaRenderBackend"]));
+            }
+            set {
+                this["SkiaRenderBackend"] = value;
+            }
+        }
     }
 }
