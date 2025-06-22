@@ -234,19 +234,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             RenderContext.BeforeRender(this);
 
-            UpdateDrawingContext();
+            //UpdateDrawingContext();
 
-            var lineDrawing = renderImpl.SimpleLineDrawing;
+            //var lineDrawing = renderImpl.SimpleLineDrawing;
 
-            void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
-            {
-                lineDrawing.Draw(this, [new(new(p.X - crossWidth, p.Y), color, VertexDash.Solider), new(new(p.X + crossWidth, p.Y), color, VertexDash.Solider)], 4);
-                lineDrawing.Draw(this, [new(new(p.X, p.Y - crossWidth), color, VertexDash.Solider), new(new(p.X, p.Y + crossWidth), color, VertexDash.Solider)], 4);
-            }
+            //void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
+            //{
+            //    lineDrawing.Draw(this, [new(new(p.X - crossWidth, p.Y), color, VertexDash.Solider), new(new(p.X + crossWidth, p.Y), color, VertexDash.Solider)], 4);
+            //    lineDrawing.Draw(this, [new(new(p.X, p.Y - crossWidth), color, VertexDash.Solider), new(new(p.X, p.Y + crossWidth), color, VertexDash.Solider)], 4);
+            //}
 
-            printCross(new(-viewWidth / 2, -viewHeight / 2), new(1, 0, 0, 1), 20);
-            printCross(new(0, 0), new(0, 1, 0, 1), 20);
-            printCross(new(viewWidth / 2, viewHeight / 2), new(0, 0, 1, 1), 20);
+            //printCross(new(-viewWidth / 2, -viewHeight / 2), new(1, 0, 0, 1), 20);
+            //printCross(new(0, 0), new(0, 1, 0, 1), 20);
+            //printCross(new(viewWidth / 2, viewHeight / 2), new(0, 0, 1, 1), 20);
 
             //var beamDrawing = IoC.Get<IRenderManager>().BeamDrawing;
             //using var img = ResourceUtils.OpenReadTextureFromFile(@"C:\Users\mikir\Desktop\OngekiFumenEditor\Resources\editor\beamBody.png");
