@@ -20,7 +20,7 @@ layout(location=1) in vec2 in_pos;
 
 void main(){
     float w =  smoothstep(-1, 0, progress) * (1 - smoothstep(1, 2, progress));
-	gl_Position = ViewProjection * Model * vec4(in_pos * vec2(w,1.0f),0.0,1.0);
+	gl_Position = ViewProjection * Model * vec4(in_pos /* * vec2(w,1.0f)*/,0.0,1.0);
 	varying_texPos=in_texPos;
 }
                 ";

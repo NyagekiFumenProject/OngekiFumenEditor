@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
             var adjustPosition = position.ToSkiaSharpPoint();
 
             canvas.Translate(adjustPosition.X, adjustPosition.Y);
-            canvas.RotateDegrees(rotation);
+            canvas.RotateRadians(rotation);
             canvas.Scale(Math.Sign(size.X), -1 * Math.Sign(size.Y));
             var rect = SKRect.Create(-adjustSize.X / 2,
                 -adjustSize.Y / 2,
@@ -52,6 +52,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
                 adjustSize.Y);
 
             using var paint = new SKPaint();
+            paint.Color = color.ToSKColor();
 
             canvas.DrawImage(tex.Image, rect, paint);
             target.PerfomenceMonitor.CountDrawCall(this);

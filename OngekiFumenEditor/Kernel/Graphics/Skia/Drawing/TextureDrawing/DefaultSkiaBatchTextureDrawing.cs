@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
                 var adjustSize = new Vector2(Math.Abs(size.X), Math.Abs(size.Y));
 
                 canvas.Translate(adjustPosition.X, adjustPosition.Y);
-                canvas.RotateDegrees(rotation);
+                canvas.RotateRadians(rotation);
                 canvas.Scale(Math.Sign(size.X), -1 * Math.Sign(size.Y));
                 var rect = SKRect.Create(-adjustSize.X / 2,
                     -adjustSize.Y / 2,

@@ -128,6 +128,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 rotate = (float)Math.Atan((currentX - obliqueTopX) / (obliqueTopY - currentY));
             }
 
+            var warnProgress = 0f;
+
             if (prepareWarn)
             {
                 var audioTime = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor);
@@ -135,27 +137,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(leadAudioTime, target.Editor);
                 if (leadInTGrid is null)
                     leadInTGrid = TGrid.Zero;
-                var warnProgress = (float)MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
-                if (warnProgress > 0)
-                {
-                    var a = MathUtils.SmoothStep(0.0f, 0.25f, warnProgress);
-                    var warnColor = new Vector4(1, 215 / 255.0f, 0, 0.5f * a);
-                    /*
-                    polygonDrawing.Begin(target, Primitive.TriangleStrip);
 
-                    polygonDrawing.PostPoint(new((float)(x - width / 2), target.CurrentDrawingTargetContext.Rect.TopLeft.Y), warnColor);
-                    polygonDrawing.PostPoint(new((float)(x + width / 2), target.CurrentDrawingTargetContext.Rect.TopLeft.Y), warnColor);
-                    polygonDrawing.PostPoint(new((float)(x - width / 2), target.CurrentDrawingTargetContext.Rect.ButtomRight.Y), warnColor);
-                    polygonDrawing.PostPoint(new((float)(x + width / 2), target.CurrentDrawingTargetContext.Rect.ButtomRight.Y), warnColor);
+                warnProgress = (float)MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
+                var a = MathUtils.SmoothStep(0.0f, 0.25f, warnProgress);
+                var warnColor = new OpenTK.Mathematics.Vector4(1, 215 / 255.0f, 0, 0.5f * a);
 
-                    polygonDrawing.End();
-                    */
-
-                    textureDrawing.Draw(target, pixelImg, [new(new((float)width, target.CurrentDrawingTargetContext.Rect.Height), new(x, target.CurrentDrawingTargetContext.Rect.CenterY), 0, warnColor)]);
-                }
+                lazerDrawing.Draw(target, pixelImg, (int)width, x, (float)warnProgress, warnColor, rotate, judgeOffset);
             }
 
             lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One, rotate, judgeOffset);
+            //Log.LogDebug($"a\nx:{x:F2}, progress:{progress:F2}, warnProgress:{warnProgress:F2}, rotate:{rotate:F2}");
         }
 
         public void Dispose()
