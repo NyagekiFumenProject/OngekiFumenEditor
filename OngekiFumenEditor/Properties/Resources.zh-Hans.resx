@@ -2041,4 +2041,7 @@
   <data name="EditorShowSoflanPointList" xml:space="preserve">
     <value>EditorShowSoflanPointList</value>
   </data>
+  <data name="SelectRenderManagerImpl" xml:space="preserve">
+    <value>图形渲染实现:</value>
+  </data>
 </root>

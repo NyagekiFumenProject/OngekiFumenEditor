@@ -205,7 +205,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("OpenGL")]
         public string DefaultRenderManagerImplementName {
             get {
                 return ((string)(this["DefaultRenderManagerImplementName"]));

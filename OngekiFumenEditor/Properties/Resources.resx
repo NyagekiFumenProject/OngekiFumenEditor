@@ -2040,4 +2040,7 @@
   <data name="EditorShowSoflanPointList" xml:space="preserve">
     <value>Editor show soflan point list</value>
   </data>
+  <data name="SelectRenderManagerImpl" xml:space="preserve">
+    <value>Select render manager implement: </value>
+  </data>
 </root>

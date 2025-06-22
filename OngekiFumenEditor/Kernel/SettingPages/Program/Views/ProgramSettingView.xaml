@@ -81,6 +81,16 @@
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [GraphicsRender]}">
             <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Margin="10,10,5,10"
+                        VerticalAlignment="Center"
+                        Text="{markup:Translate [SelectRenderManagerImpl]}" />
+                    <ComboBox
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding AvaliableRenderManagerImplNames}"
+                        SelectedValue="{Binding Setting.DefaultRenderManagerImplementName}" />
+                </StackPanel>
                 <CheckBox
                     Margin="10,10,10,10"
                     VerticalContentAlignment="Center"

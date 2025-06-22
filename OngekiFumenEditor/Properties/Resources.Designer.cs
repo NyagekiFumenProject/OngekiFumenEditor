@@ -4993,6 +4993,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Select render manager implement:  的本地化字符串。
+        /// </summary>
+        public static string SelectRenderManagerImpl {
+            get {
+                return ResourceManager.GetString("SelectRenderManagerImpl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Select .svg file 的本地化字符串。
         /// </summary>
         public static string SelectSvgFile {

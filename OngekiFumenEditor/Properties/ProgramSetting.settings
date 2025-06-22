@@ -48,7 +48,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="DefaultRenderManagerImplementName" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">OpenGL</Value>
     </Setting>
   </Settings>
 </SettingsFile>
