@@ -107,6 +107,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private float actualRenderInterval = float.MaxValue;
         private int limitFPS = Properties.AudioPlayerToolViewerSetting.Default.LimitFPS;
+        private IRenderManagerImpl renderImpl;
 
         public int LimitFPS
         {
@@ -135,13 +136,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             };
         }
 
-        public async void PrepareRenderLoop(FrameworkElement renderControl)
+        public async void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl impl)
         {
             Log.LogDebug($"ready.");
-            await IoC.Get<IRenderManager>().WaitForInitializationIsDone();
-            RenderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
 
-            InitRender();
+            await impl.WaitForInitializationIsDone();
+            RenderContext = await impl.GetRenderContext(renderControl);
+
+            samplePeak = IoC.Get<ISamplePeak>();
+            WaveformDrawing = IoC.Get<IWaveformDrawing>();
+            WaveformDrawing.Initialize(renderImpl);
+            initTask.SetResult();
 
             viewWidth = (float)renderControl.ActualWidth;
             viewHeight = (float)renderControl.ActualHeight;
@@ -152,13 +157,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             sw = new Stopwatch();
             sw.Start();
-        }
-
-        private void InitRender()
-        {
-            samplePeak = IoC.Get<ISamplePeak>();
-            WaveformDrawing = IoC.Get<IWaveformDrawing>();
-            initTask.SetResult();
         }
 
         private void PrepareWaveform(IAudioPlayer player)
@@ -238,7 +236,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             UpdateDrawingContext();
 
-            var lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            var lineDrawing = renderImpl.SimpleLineDrawing;
 
             void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
             {
@@ -291,11 +289,12 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (executionContext.Source is not ContentControl contentControl)
                 return; //todo throw exception
             //check render control is created and shown.
-            if (contentControl.Content != null)
+            if (renderImpl != null)
                 return;
 
-            var renderControl = IoC.Get<IRenderManager>().CreateRenderControl();
-            await IoC.Get<IRenderManager>().InitializeRenderControl(renderControl);
+            renderImpl = IoC.Get<IRenderManager>().GetCurrentRenderManagerImpl();
+            var renderControl = renderImpl.CreateRenderControl();
+            await renderImpl.InitializeRenderControl(renderControl);
 
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is created");
 
@@ -305,7 +304,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             contentControl.Content = renderControl;
 
-            PrepareRenderLoop(renderControl);
+            PrepareRenderLoop(renderControl, renderImpl);
         }
 
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -322,7 +321,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
-            RenderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
+            RenderContext = await renderImpl.GetRenderContext(renderControl);
             RenderContext.OnRender -= Render;
             RenderContext.StopRendering();
         }
@@ -332,7 +331,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
-            RenderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
+            RenderContext = await renderImpl.GetRenderContext(renderControl);
             RenderContext.OnRender += Render;
             RenderContext.StartRendering();
         }

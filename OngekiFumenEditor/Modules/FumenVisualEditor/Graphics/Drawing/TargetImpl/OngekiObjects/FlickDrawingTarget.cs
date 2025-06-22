@@ -32,10 +32,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "FLK", "CFK" };
 
-        public FlickDrawingTarget() : base()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\flick.png");
-            exFlickEffTexture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\exflickEffect.png");
+            texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\flick.png");
+            exFlickEffTexture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\exflickEffect.png");
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("flick", out var size, out _))
                 size = new Vector2(104, 69.333f);
@@ -47,8 +47,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             exTapEffSize = size;
             selectedEffSize = size * 1.05f;
 
-            batchTextureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
-            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
+            batchTextureDrawing = impl.BatchTextureDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)

@@ -27,6 +27,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Gemini.Framework.Commands;
 using Microsoft.Xaml.Behaviors;
+using System.Collections.Generic;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {

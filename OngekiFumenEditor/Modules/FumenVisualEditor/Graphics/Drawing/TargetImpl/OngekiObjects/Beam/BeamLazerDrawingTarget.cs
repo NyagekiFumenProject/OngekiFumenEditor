@@ -16,8 +16,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     internal class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
         private IBeamDrawing lazerDrawing;
-        private IPolygonDrawing polygonDrawing;
-        private ITextureDrawing textureDrawing;
         private IImage textureBody;
         private IImage pixelImg;
         private IImage textureWarn;
@@ -26,24 +24,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override DrawingVisible DefaultVisible => DrawingVisible.Preview;
 
         public override int DefaultRenderOrder => 300;
-
-        public BeamLazerDrawingTarget()
-        {
-            lazerDrawing = IoC.Get<IRenderManager>().BeamDrawing;
-            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
-            textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
-
-            IImage load(string name) => ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + name);
-
-            textureBody = load("beamBody.png");
-            textureBody.TextureWrapT = TextureWrapMode.Repeat;
-
-            pixelImg = load("pixel.png");
-
-            textureWarn = load("beamWarn.png");
-            textureWarn.TextureWrapS = TextureWrapMode.Repeat;
-            textureWarn.TextureWrapT = TextureWrapMode.Repeat;
-        }
 
         public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
         {
@@ -159,6 +139,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             pixelImg?.Dispose();
             pixelImg = default;
+        }
+
+        public override void Initialize(IRenderManagerImpl impl)
+        {
+            lazerDrawing = impl.BeamDrawing;
+
+            IImage load(string name) => ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + name);
+
+            textureBody = load("beamBody.png");
+            textureBody.TextureWrapT = TextureWrapMode.Repeat;
+
+            pixelImg = load("pixel.png");
+
+            textureWarn = load("beamWarn.png");
+            textureWarn.TextureWrapS = TextureWrapMode.Repeat;
+            textureWarn.TextureWrapT = TextureWrapMode.Repeat;
         }
     }
 }

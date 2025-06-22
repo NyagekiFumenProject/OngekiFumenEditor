@@ -1,49 +1,16 @@
-﻿using System.IO;
-using System.Numerics;
-using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
     public interface IRenderManager
     {
-        /// <summary>
-        /// 等待渲染环境初始化完成
-        /// </summary>
-        /// <param name="cancellation"></param>
-        /// <returns></returns>
-        Task WaitForInitializationIsDone(CancellationToken cancellation = default);
+        IRenderManagerImpl GetCurrentRenderManagerImpl();
 
-        /// <summary>
-        /// 初始化渲染控件和环境
-        /// </summary>
-        /// <param name="cancellation"></param>
-        /// <returns></returns>
-        Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default);
-
-        Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default);
-
-        IImage LoadImageFromStream(Stream stream);
-
-        FrameworkElement CreateRenderControl();
-
-        #region Drawings
-
-        ICircleDrawing CircleDrawing { get; }
-        ILineDrawing LineDrawing { get; }
-        ISimpleLineDrawing SimpleLineDrawing { get; }
-        IStaticVBODrawing StaticVBODrawing { get; }
-        IStringDrawing StringDrawing { get; }
-        ISvgDrawing SvgDrawing { get; }
-        ITextureDrawing TextureDrawing { get; }
-        IBatchTextureDrawing BatchTextureDrawing { get; }
-        IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; }
-        IPolygonDrawing PolygonDrawing { get; }
-
-        IBeamDrawing BeamDrawing { get; }
-
-        #endregion
+        IEnumerable<string> GetAvaliableRenderManagerImplNames();
+        void SetRenderManagerImpl(string implName);
     }
 }

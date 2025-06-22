@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
         };
         private IDrawingContext target;
         private DefaultOpenGLTexture texture;
-        private DefaultOpenGLRenderManager defaultDrawingManager;
+        private DefaultOpenGLRenderManagerImpl defaultDrawingManager;
 
         /*-----------------CURRENT VERSION------------------ -
                                         modelMatrix(float)  color(float)
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
         private const int MAX_DRAW_COUNT = 3000;
         private const int BUFFER_COUNT = 1;
 
-        public DefaultBatchTextureDrawing(DefaultOpenGLRenderManager manager) : base(manager)
+        public DefaultBatchTextureDrawing(DefaultOpenGLRenderManagerImpl manager) : base(manager)
         {
             shader = new BatchShader();
             shader.Compile();

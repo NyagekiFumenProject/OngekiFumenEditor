@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulable, IFumenEditorDrawingContext
 {
-    private static Dictionary<string, IFumenEditorDrawingTarget[]> drawTargets = new();
+    private static Dictionary<string, IFumenEditorDrawingTarget[]> drawTargetMap = new();
     private IPerfomenceMonitor actualPerformenceMonitor;
 
     private readonly List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
@@ -73,6 +73,11 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private DrawXGridHelper xGridHelper;
     private int cacheMagaticXGridLinesHash;
+
+    private IEnumerable<IFumenEditorDrawingTarget> drawingTargets;
+    public IEnumerable<IFumenEditorDrawingTarget> CurrentDrawingTargets => drawingTargets;
+
+    private TaskCompletionSource renderInitializationTaskSource = new();
 
     private VisibleRect rectInDesignMode;
     public VisibleRect RectInDesignMode
@@ -140,7 +145,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public void LoadRenderOrderVisible()
     {
-        var targets = drawTargets.Values.SelectMany(x => x).Distinct().ToArray();
+        var targets = drawTargetMap.Values.SelectMany(x => x).Distinct().ToArray();
         var map = new Dictionary<string, RenderTargetOrderVisible>();
 
         var json = EditorGlobalSetting.Default.RenderTargetOrderVisibleMap;
@@ -176,7 +181,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public void SaveRenderOrderVisible()
     {
-        var targets = drawTargets.Values.SelectMany(x => x).Distinct().ToArray();
+        var targets = drawTargetMap.Values.SelectMany(x => x).Distinct().ToArray();
         var map = targets.ToDictionary(x => x.GetType().Name, x => new RenderTargetOrderVisible()
         {
             Order = x.CurrentRenderOrder,
@@ -197,7 +202,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
     }
 
-    public async void PrepareRenderLoop(FrameworkElement renderControl)
+    public void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl renderImpl)
     {
         var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
         var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
@@ -209,7 +214,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
         hideWallLaneWhenEnablePlayField = EditorGlobalSetting.Default.HideWallLaneWhenEnablePlayField;
 
-        drawTargets = IoC.GetAll<IFumenEditorDrawingTarget>()
+        //get and initialize drawing targets.
+        drawingTargets = IoC.GetAll<IFumenEditorDrawingTarget>();
+        foreach (var drawTarget in drawingTargets)
+            drawTarget.Initialize(renderImpl);
+        //build map for ongeki objects
+        drawTargetMap = drawingTargets
             .SelectMany(target => target.DrawTargetID.Select(supportId => (supportId, target)))
             .GroupBy(x => x.supportId).ToDictionary(x => x.Key, x => x.Select(x => x.target).ToArray());
 
@@ -217,11 +227,22 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         ResortRenderOrder();
 
         timeSignatureHelper = new DrawTimeSignatureHelper();
+        timeSignatureHelper.Initalize(renderImpl);
+
         xGridHelper = new DrawXGridHelper();
+        xGridHelper.Initalize(renderImpl);
+
         judgeLineHelper = new DrawJudgeLineHelper();
+        judgeLineHelper.Initalize(renderImpl);
+
         selectingRangeHelper = new DrawSelectingRangeHelper();
+        selectingRangeHelper.Initalize(renderImpl);
+
         playableAreaHelper = new DrawPlayableAreaHelper();
+        playableAreaHelper.Initalize(renderImpl);
+
         playerLocationHelper = new DrawPlayerLocationHelper();
+        playerLocationHelper.Initalize(renderImpl);
 
         actualPerformenceMonitor = IoC.Get<IPerfomenceMonitor>();
         IsDisplayFPS = IsDisplayFPS;
@@ -229,6 +250,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         UpdateActualRenderInterval();
         sw = new Stopwatch();
         sw.Start();
+
+        renderInitializationTaskSource.SetResult();
     }
 
     private void OnEditorLoop(TimeSpan ts)
@@ -244,6 +267,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         => OnEditorLoop(ts);
 
     Dictionary<int, DrawingTargetContext> drawingContexts = new();
+    private IRenderManagerImpl renderImpl;
 
     private void UpdateActualRenderInterval()
     {
@@ -273,8 +297,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         PerfomenceMonitor.PostUIRenderTime(ts);
         PerfomenceMonitor.OnBeforeRender();
-
-        var drawingManager = IoC.Get<IRenderManager>();
 
         hits.Clear();
 
@@ -498,7 +520,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
 
-        CleanRender(drawingManager);
+        CleanRender();
         RenderContext?.BeforeRender(this);
 
         foreach (var (minTGrid, maxTGrid) in CurrentDrawingTargetContext.VisibleTGridRanges)
@@ -656,12 +678,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private void ResortRenderOrder()
     {
-        drawTargetOrder = drawTargets.Values.SelectMany(x => x).OrderBy(x => x.CurrentRenderOrder).Distinct().ToArray();
+        drawTargetOrder = drawTargetMap.Values.SelectMany(x => x).OrderBy(x => x.CurrentRenderOrder).Distinct().ToArray();
     }
 
     public IFumenEditorDrawingTarget[] GetDrawingTarget(string name)
     {
-        return drawTargets.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
+        return drawTargetMap.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
     }
 
     private IEnumerable<IDisplayableObject> EnumerateAllDisplayableObjects(OngekiFumen fumen,
@@ -745,7 +767,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         return objects.Concat(objs).SelectMany(x => x.GetDisplayableObjects());
     }
 
-    private void CleanRender(IRenderManager drawingManager)
+    private void CleanRender()
     {
         var cleanColor = Vector4.Zero;
         if (IsDesignMode || !enablePlayFieldDrawing)
@@ -857,11 +879,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     {
         if (executionContext.Source is not ContentControl contentControl)
             return; //todo throw exception
-        if (contentControl.Content != null)
+        if (renderImpl != null)
             return;
 
-        var renderControl = IoC.Get<IRenderManager>().CreateRenderControl();
-        await IoC.Get<IRenderManager>().InitializeRenderControl(renderControl);
+        renderImpl = IoC.Get<IRenderManager>().GetCurrentRenderManagerImpl();
+        var renderControl = renderImpl.CreateRenderControl();
+        await renderImpl.InitializeRenderControl(renderControl);
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is created");
 
         renderControl.Loaded += RenderControl_Loaded;
@@ -872,7 +895,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         contentControl.Content = renderControl;
 
-        PrepareRenderLoop(renderControl);
+        PrepareRenderLoop(renderControl, renderImpl);
     }
 
     private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -892,7 +915,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var renderControl = sender as FrameworkElement;
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
-        RenderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
+        RenderContext = await renderImpl.GetRenderContext(renderControl);
         RenderContext.OnRender -= Render;
         RenderContext.StopRendering();
     }
@@ -902,8 +925,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var renderControl = sender as FrameworkElement;
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
-        RenderContext = await IoC.Get<IRenderManager>().GetRenderContext(renderControl);
+        RenderContext = await renderImpl.GetRenderContext(renderControl);
         RenderContext.OnRender += Render;
         RenderContext.StartRendering();
+    }
+
+    public Task WaitForRenderInitializationIsDone()
+    {
+        return renderInitializationTaskSource.Task;
     }
 }

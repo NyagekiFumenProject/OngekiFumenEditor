@@ -24,16 +24,16 @@ namespace OngekiFumenEditor.Utils
             return info.Stream;
         }
 
-        public static IImage OpenReadTextureFromResource(string relativeUrl)
+        public static IImage OpenReadTextureFromResource(IRenderManagerImpl impl, string relativeUrl)
         {
             using var stream = OpenReadResourceStream(relativeUrl);
-            return IoC.Get<IRenderManager>().LoadImageFromStream(stream);
+            return impl.LoadImageFromStream(stream);
         }
 
-        public static IImage OpenReadTextureFromFile(string path)
+        public static IImage OpenReadTextureFromFile(IRenderManagerImpl impl, string path)
         {
             using var stream = File.OpenRead(path);
-            return IoC.Get<IRenderManager>().LoadImageFromStream(stream);
+            return impl.LoadImageFromStream(stream);
         }
 
         static ResourceUtils()

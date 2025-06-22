@@ -27,16 +27,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override int DefaultRenderOrder => 1000 + 0;
 
-        public SvgObjectDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\commonCircle.png");
+            texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\commonCircle.png");
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
 
             cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
-            textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
-            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
+            textureDrawing = impl.TextureDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
         public override void Draw(IFumenEditorDrawingContext target, SvgPrefabBase obj)

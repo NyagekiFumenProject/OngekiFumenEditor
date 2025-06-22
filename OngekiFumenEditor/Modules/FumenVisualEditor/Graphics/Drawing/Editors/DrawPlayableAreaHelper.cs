@@ -30,12 +30,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         LineVertex[] vertices = new LineVertex[2];
 
-        public DrawPlayableAreaHelper()
+        public void Initalize(IRenderManagerImpl impl)
         {
-            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
-            circleDrawing = IoC.Get<IRenderManager>().CircleDrawing;
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+            polygonDrawing = impl.PolygonDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
+            circleDrawing = impl.CircleDrawing;
+            stringDrawing = impl.StringDrawing;
 
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;

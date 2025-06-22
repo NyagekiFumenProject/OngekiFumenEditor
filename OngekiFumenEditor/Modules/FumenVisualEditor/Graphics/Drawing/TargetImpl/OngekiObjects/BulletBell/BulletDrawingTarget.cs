@@ -26,8 +26,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IDictionary<IImage, Vector2> spritesOriginOffsetLarge;
         private IDictionary<BulletDamageType, Dictionary<BulletType, IImage>> spritesMap;
 
-        public BulletDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
+            base.Initialize(impl);
+
             var _spritesOriginOffset = new Dictionary<IImage, Vector2>();
             var _spritesSize = new Dictionary<IImage, Vector2>();
             var _spritesOriginOffsetLarge = new Dictionary<IImage, Vector2>();
@@ -42,7 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     _spritesMap[k1] = dic;
                 }
 
-                var tex = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
+                var tex = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + rPath);
                 dic[k2] = tex;
                 normalDrawList[tex] = new();
                 selectedDrawList[tex] = new();
@@ -100,7 +102,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bullet obj, Vector2 pos, float rotate)
         {
-            if (obj.ReferenceBulletPallete is null) {
+            if (obj.ReferenceBulletPallete is null)
+            {
                 Log.LogWarn($"Bullet {obj.Id} has null reference bullet pallete");
                 return;
             }

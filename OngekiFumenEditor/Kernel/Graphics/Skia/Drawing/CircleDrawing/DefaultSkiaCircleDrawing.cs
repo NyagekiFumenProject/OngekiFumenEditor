@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
         private SKCanvas canvas;
         private IDrawingContext target;
 
-        public DefaultSkiaCircleDrawing(DefaultSkiaDrawingManager manager) : base(manager)
+        public DefaultSkiaCircleDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
 
         }

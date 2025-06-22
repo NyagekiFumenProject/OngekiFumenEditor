@@ -6,6 +6,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.UI.Controls.ObjectInspector;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Concurrent;
@@ -26,17 +27,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         protected List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
-        private readonly IStringDrawing stringDrawing;
-        private readonly IHighlightBatchTextureDrawing highlightDrawing;
-        private readonly IBatchTextureDrawing batchTextureDrawing;
-        private readonly ParallelOptions parallelOptions;
-        private readonly int parallelCountLimit;
+        private IStringDrawing stringDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
+        private IBatchTextureDrawing batchTextureDrawing;
+        private ParallelOptions parallelOptions;
+        private int parallelCountLimit;
 
-        public BulletPalleteReferencableBatchDrawTargetBase()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
-            batchTextureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
-            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
+            stringDrawing = impl.StringDrawing;
+            batchTextureDrawing = impl.BatchTextureDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
 
             parallelOptions = new ParallelOptions()
             {

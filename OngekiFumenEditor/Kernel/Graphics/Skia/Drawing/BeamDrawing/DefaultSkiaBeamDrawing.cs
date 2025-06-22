@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing
         private SKCanvas canvas;
         private IDrawingContext target;
 
-        public DefaultSkiaBeamDrawing(DefaultSkiaDrawingManager manager) : base(manager)
+        public DefaultSkiaBeamDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
 
         }

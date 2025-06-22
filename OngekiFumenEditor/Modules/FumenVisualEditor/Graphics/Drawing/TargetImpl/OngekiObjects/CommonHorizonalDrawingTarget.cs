@@ -24,10 +24,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IStringDrawing stringDrawing;
         private ISimpleLineDrawing lineDrawing;
 
-        public CommonHorizonalDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
+            stringDrawing = impl.StringDrawing;
         }
 
         public override IEnumerable<string> DrawTargetID { get; } =

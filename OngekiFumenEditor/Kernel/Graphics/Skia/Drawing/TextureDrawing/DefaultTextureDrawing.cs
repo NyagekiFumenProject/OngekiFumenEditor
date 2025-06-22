@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
 {
     internal class DefaultSkiaTextureDrawing : CommonSkiaDrawingBase, ITextureDrawing, IDisposable
     {
-        public DefaultSkiaTextureDrawing(DefaultSkiaDrawingManager manager) : base(manager)
+        public DefaultSkiaTextureDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
 
         }

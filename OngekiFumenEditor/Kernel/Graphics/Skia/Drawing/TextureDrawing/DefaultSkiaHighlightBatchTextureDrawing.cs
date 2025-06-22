@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
         private SKCanvas canvas;
         private IDrawingContext target;
 
-        public DefaultSkiaHighlightBatchTextureDrawing(DefaultSkiaDrawingManager manager) : base(manager)
+        public DefaultSkiaHighlightBatchTextureDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
 
         }

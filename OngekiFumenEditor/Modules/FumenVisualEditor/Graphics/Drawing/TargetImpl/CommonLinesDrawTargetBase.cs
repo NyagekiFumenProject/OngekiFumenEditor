@@ -17,9 +17,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private ISimpleLineDrawing lineDrawing;
         private static VertexDash invailedDash = new VertexDash(6,3);
 
-        public CommonLinesDrawTargetBase()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);

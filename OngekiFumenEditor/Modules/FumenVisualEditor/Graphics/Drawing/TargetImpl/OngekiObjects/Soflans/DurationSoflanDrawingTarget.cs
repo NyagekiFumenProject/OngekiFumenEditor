@@ -23,10 +23,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     public class DurationSoflanDrawingTarget : CommonBatchDrawTargetBase<OngekiObjectBase>
     {
-        private readonly IStringDrawing stringDrawing;
-        private readonly ILineDrawing lineDrawing;
-        private readonly IPolygonDrawing polygonDrawing;
-        private readonly SoflanPlaceholdQuery placeholdQuery;
+        private IStringDrawing stringDrawing;
+        private ILineDrawing lineDrawing;
+        private IPolygonDrawing polygonDrawing;
+        private SoflanPlaceholdQuery placeholdQuery;
 
         public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
@@ -38,11 +38,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override int DefaultRenderOrder { get; } = 1500;
 
-        public DurationSoflanDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
-            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
+            stringDrawing = impl.StringDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
+            polygonDrawing = impl.PolygonDrawing;
             placeholdQuery = new SoflanPlaceholdQuery();
         }
 

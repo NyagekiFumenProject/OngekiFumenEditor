@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         private IDrawingContext target;
         private int drawcallCount = 0;
 
-        public DefaultSkiaLineDrawing(DefaultSkiaDrawingManager manager) : base(manager)
+        public DefaultSkiaLineDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
 
         }

@@ -22,9 +22,9 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
-    [Export(typeof(IRenderManager))]
+    [Export(typeof(IRenderManagerImpl))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DefaultSkiaDrawingManager : IRenderManager
+    public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     {
         private TaskCompletionSource initTaskSource = new TaskCompletionSource();
         private bool initialized = false;
@@ -41,6 +41,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; private set; }
         public IPolygonDrawing PolygonDrawing { get; private set; }
         public IBeamDrawing BeamDrawing { get; private set; }
+
+        public string Name { get; } = "Skia";
 
         private void Initialize()
         {
@@ -102,7 +104,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             {
                 initialized = true;
 
-                Log.LogDebug($"Start to invoke {nameof(DefaultSkiaDrawingManager)}::Initialize()");
+                Log.LogDebug($"Start to invoke {nameof(DefaultSkiaDrawingManagerImpl)}::Initialize()");
                 Dispatcher.CurrentDispatcher.InvokeAsync(Initialize);
             }
 

@@ -26,10 +26,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             Flick = 8,
         }
 
-        private readonly ISimpleLineDrawing lineDrawing;
-        private readonly IStringDrawing stringDrawing;
-        private readonly ICircleDrawing circleDrawing;
-        private readonly SoflanList dummySoflanList;
+        private ISimpleLineDrawing lineDrawing;
+        private IStringDrawing stringDrawing;
+        private ICircleDrawing circleDrawing;
+        private SoflanList dummySoflanList;
         private static readonly VertexDash InvailedLineDash = new VertexDash(2, 2);
 
         private static readonly System.Numerics.Vector4 TransparentColor = new(1, 1, 1, 0);
@@ -47,11 +47,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         private DefaultWaveformOption option = new();
         public override IWaveformDrawingOption Options => option;
 
-        public DefaultWaveformDrawing()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
-            circleDrawing = IoC.Get<IRenderManager>().CircleDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
+            stringDrawing = impl.StringDrawing;
+            circleDrawing = impl.CircleDrawing;
 
             dummySoflanList = new SoflanList();
         }
@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     var prevX = 0f;
 
                     lineDrawing.PostPoint(new(-width / 2, 0), WhiteColor, InvailedLineDash);
-                    for (int i = minIndex; i < maxIndex; i+=1)
+                    for (int i = minIndex; i < maxIndex; i += 1)
                     {
                         var peakPoint = peakData[i];
 

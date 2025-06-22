@@ -21,23 +21,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private ILineDrawing lineDrawing;
         private Vector2 size;
         private static readonly Vector4 Transparent = new Vector4(0, 0, 0, 0);
-        private static readonly VertexDash LineDash = new (6, 3);
+        private static readonly VertexDash LineDash = new(6, 3);
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { LaneCurvePathControlObject.CommandName };
         public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
         public override int DefaultRenderOrder => 2000;
 
-        public LaneCurvePathControlDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\commonCircle.png");
+            texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\commonCircle.png");
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
 
-            textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
-            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            textureDrawing = impl.TextureDrawing;
+            stringDrawing = impl.StringDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public void Dispose()

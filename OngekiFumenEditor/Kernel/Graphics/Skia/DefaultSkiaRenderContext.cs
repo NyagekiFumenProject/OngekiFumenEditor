@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
     public class DefaultSkiaRenderContext : IRenderContext
     {
-        private DefaultSkiaDrawingManager manager;
+        private DefaultSkiaDrawingManagerImpl manager;
         private bool isStart;
         private DateTime prevRenderTime;
         private readonly SkiaRenderControlBase renderControl;
@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         public SKCanvas Canvas => renderControl.CurrentRenderSurface?.Canvas;
 
-        public DefaultSkiaRenderContext(DefaultSkiaDrawingManager manager, SkiaRenderControlBase renderControl)
+        public DefaultSkiaRenderContext(DefaultSkiaDrawingManagerImpl manager, SkiaRenderControlBase renderControl)
         {
             this.manager = manager;
             this.renderControl = renderControl;

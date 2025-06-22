@@ -30,9 +30,9 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
-    [Export(typeof(IRenderManager))]
+    [Export(typeof(IRenderManagerImpl))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DefaultOpenGLRenderManager : IRenderManager
+    public class DefaultOpenGLRenderManagerImpl : IRenderManagerImpl
     {
         // Import the necessary Win32 functions
         [DllImport("opengl32.dll")]
@@ -76,6 +76,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         public IPolygonDrawing PolygonDrawing { get; private set; }
 
         public IBeamDrawing BeamDrawing { get; private set; }
+
+        public string Name { get; } = "OpenGL";
 
         private void Initialize()
         {

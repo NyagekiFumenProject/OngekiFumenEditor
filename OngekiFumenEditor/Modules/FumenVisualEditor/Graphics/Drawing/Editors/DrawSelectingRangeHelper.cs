@@ -27,10 +27,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         private VertexDash dash = new(8,4);
 
-        public DrawSelectingRangeHelper()
+        public void Initalize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
-            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
+            polygonDrawing = impl.PolygonDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target)

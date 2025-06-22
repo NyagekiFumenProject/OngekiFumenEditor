@@ -21,12 +21,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     internal class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
     {
-        private readonly IStringDrawing stringDrawing;
-        private readonly ILineDrawing lineDrawing;
-        private readonly ITextureDrawing textureDrawing;
-        private readonly IPolygonDrawing polygonDrawing;
-        private readonly IHighlightBatchTextureDrawing highlightDrawing;
-        private readonly IImage texture;
+        private IStringDrawing stringDrawing;
+        private ILineDrawing lineDrawing;
+        private ITextureDrawing textureDrawing;
+        private IPolygonDrawing polygonDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
+        private IImage texture;
         private static readonly int colorSeed = RandomHepler.Random(int.MinValue, int.MaxValue);
 
         public override IEnumerable<string> DrawTargetID { get; } = ["ISF"];
@@ -35,15 +35,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
-        public IndividualSoflanAreaDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
-            textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
-            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
-            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
+            stringDrawing = impl.StringDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
+            textureDrawing = impl.TextureDrawing;
+            polygonDrawing = impl.PolygonDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
 
-            texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\tri.png");
+            texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\tri.png");
         }
 
         private static Dictionary<int, Vector4> cacheColor = new();

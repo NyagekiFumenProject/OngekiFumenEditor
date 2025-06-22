@@ -30,9 +30,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector4 colorHoldWallLeft;
         private Vector4 colorHoldWallRight;
 
-        public HoldDrawingTarget() : base()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<IRenderManager>().LineDrawing;
+            lineDrawing = impl.LineDrawing;
 
             Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
             RebuildColors();

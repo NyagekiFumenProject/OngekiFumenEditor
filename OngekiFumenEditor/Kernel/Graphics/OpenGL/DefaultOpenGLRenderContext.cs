@@ -13,11 +13,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
     internal class DefaultOpenGLRenderContext : IRenderContext
     {
-        private readonly DefaultOpenGLRenderManager manager;
+        private readonly DefaultOpenGLRenderManagerImpl manager;
         private readonly GLWpfControl glView;
         private bool isStart = false;
 
-        public DefaultOpenGLRenderContext(DefaultOpenGLRenderManager manager, GLWpfControl glView)
+        public DefaultOpenGLRenderContext(DefaultOpenGLRenderManagerImpl manager, GLWpfControl glView)
         {
             this.manager = manager;
             this.glView = glView;

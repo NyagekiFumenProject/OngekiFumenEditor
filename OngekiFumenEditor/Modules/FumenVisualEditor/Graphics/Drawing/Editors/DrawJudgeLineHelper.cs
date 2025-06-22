@@ -19,10 +19,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         LineVertex[] vertices = new LineVertex[2];
 
-        public DrawJudgeLineHelper()
+        public void Initalize(IRenderManagerImpl impl)
         {
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            stringDrawing = impl.StringDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target)

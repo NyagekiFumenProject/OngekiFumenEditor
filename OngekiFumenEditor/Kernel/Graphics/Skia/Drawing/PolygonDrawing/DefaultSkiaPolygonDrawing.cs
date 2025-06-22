@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
         private List<SKColor> colors = new();
 
 
-        public DefaultSkiaPolygonDrawing(DefaultSkiaDrawingManager manager) : base(manager)
+        public DefaultSkiaPolygonDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
 
         }

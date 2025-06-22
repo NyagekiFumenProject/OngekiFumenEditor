@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Kernel.Graphics;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
@@ -14,9 +15,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private TapDrawingTarget tapDraw;
 
-        public HoldTapDrawingTarget() : base()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            tapDraw = IoC.Get<TapDrawingTarget>();
+            tapDraw = new TapDrawingTarget();
+            tapDraw.Initialize(impl);
         }
 
         public override void Draw(IFumenEditorDrawingContext target, Hold hold)

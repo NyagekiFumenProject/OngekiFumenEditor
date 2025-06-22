@@ -26,10 +26,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private List<(Vector2, Vector2, float, Vector4)> selectList = new();
         private List<(Vector2, Vector2, float, Vector4)> drawList = new();
 
-        public CommonLaneEditorObjectDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            textureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
-            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
+            textureDrawing = impl.BatchTextureDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
                 startSize = new Vector2(16, 16);

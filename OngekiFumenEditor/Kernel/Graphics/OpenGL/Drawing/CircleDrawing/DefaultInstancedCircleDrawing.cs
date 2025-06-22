@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
         private const int MAX_DRAW_COUNT = 3000;
         private const float MAX_CIRCILE_SIZE = 50f;
 
-        public DefaultInstancedCircleDrawing(DefaultOpenGLRenderManager manager) : base(manager)
+        public DefaultInstancedCircleDrawing(DefaultOpenGLRenderManagerImpl manager) : base(manager)
         {
             shader = BatchCircleShader.Shared;
 

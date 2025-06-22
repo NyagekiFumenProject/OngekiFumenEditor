@@ -13,7 +13,6 @@ using System.Runtime.CompilerServices;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    [Export(typeof(TapDrawingTarget))]
     public class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };
@@ -42,11 +41,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IBatchTextureDrawing batchTextureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
 
-        public TapDrawingTarget() : base()
+        public override void Initialize(IRenderManagerImpl impl)
         {
             void init(ref IImage texture, string resourceName)
             {
-                texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + resourceName);
+                texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + resourceName);
 
                 normalList[texture] = new();
                 selectTapList[texture] = new();
@@ -76,8 +75,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             exList[tapExTexture] = new();
             exList[wallExTexture] = new();
 
-            batchTextureDrawing = IoC.Get<IRenderManager>().BatchTextureDrawing;
-            highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
+            batchTextureDrawing = impl.BatchTextureDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)

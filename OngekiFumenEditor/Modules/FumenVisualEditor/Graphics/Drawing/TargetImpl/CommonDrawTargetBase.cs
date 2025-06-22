@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Kernel.Graphics;
 using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl
@@ -42,6 +43,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             target.PerfomenceMonitor.OnAfterTargetDrawing(this);
             target = default;
         }
+
+        public abstract void Initialize(IRenderManagerImpl impl);
     }
 
     public abstract class CommonDrawTargetBase<T> : CommonDrawTargetBase where T : OngekiObjectBase

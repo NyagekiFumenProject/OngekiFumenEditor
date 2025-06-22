@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
         public IEnumerable<IFontHandle> SupportFonts => DefaultSupportFonts;
         public static IFontHandle DefaultFont { get; } = GetSupportFonts().FirstOrDefault(x => x.FamilyName.ToLower() == "consola");
 
-        public DefaultSkiaStringDrawing(DefaultSkiaDrawingManager manager) : base(manager)
+        public DefaultSkiaStringDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
 
         }

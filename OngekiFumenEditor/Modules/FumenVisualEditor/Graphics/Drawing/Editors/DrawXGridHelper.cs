@@ -22,10 +22,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private IStringDrawing stringDrawing;
         private ILineDrawing lineDrawing;
 
-        public DrawXGridHelper()
+        public void Initalize(IRenderManagerImpl renderImpl)
         {
-            stringDrawing = IoC.Get<IRenderManager>().StringDrawing;
-            lineDrawing = IoC.Get<IRenderManager>().SimpleLineDrawing;
+            stringDrawing = renderImpl.StringDrawing;
+            lineDrawing = renderImpl.SimpleLineDrawing;
         }
 
         public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)

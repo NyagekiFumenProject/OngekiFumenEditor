@@ -7,11 +7,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing
 {
     public class CommonSkiaDrawingBase : CommonDrawingBase
     {
-        protected DefaultSkiaDrawingManager manager;
+        protected DefaultSkiaDrawingManagerImpl manager;
         private IDrawingContext target;
         private SKCanvas canvas;
 
-        public CommonSkiaDrawingBase(DefaultSkiaDrawingManager manager)
+        public CommonSkiaDrawingBase(DefaultSkiaDrawingManagerImpl manager)
         {
             this.manager = manager;
         }

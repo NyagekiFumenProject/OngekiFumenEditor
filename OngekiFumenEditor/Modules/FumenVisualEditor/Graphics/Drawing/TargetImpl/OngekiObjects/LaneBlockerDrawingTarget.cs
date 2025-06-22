@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     internal class LaneBlockerDrawingTarget : CommonDrawTargetBase<OngekiTimelineObjectBase>
     {
-        private readonly IPolygonDrawing polygonDrawing;
+        private IPolygonDrawing polygonDrawing;
         private readonly HashSet<int> overdrawingDefferSet = new();
 
         public override IEnumerable<string> DrawTargetID { get; } = new[]
@@ -28,9 +28,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override int DefaultRenderOrder => 80;
 
-        public LaneBlockerDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
+            polygonDrawing = impl.PolygonDrawing;
         }
 
         public override void Begin(IFumenEditorDrawingContext target)

@@ -8,9 +8,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl
 {
     public class CommonOpenGLDrawingBase : CommonDrawingBase
     {
-        protected DefaultOpenGLRenderManager manager;
+        protected DefaultOpenGLRenderManagerImpl manager;
 
-        public CommonOpenGLDrawingBase(DefaultOpenGLRenderManager manager)
+        public CommonOpenGLDrawingBase(DefaultOpenGLRenderManagerImpl manager)
         {
             this.manager = manager;
         }
