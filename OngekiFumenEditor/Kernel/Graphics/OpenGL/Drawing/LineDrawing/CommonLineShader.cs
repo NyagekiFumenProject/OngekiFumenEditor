@@ -44,7 +44,6 @@ void main(){
 		{
 			var shader = new CommonLineShader();
 			shader.Compile();
-			GLUtility.CheckError("Create shared CommonSpriteShader object failed");
 			return shader;
 		}
 	}

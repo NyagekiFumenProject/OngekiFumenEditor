@@ -23,9 +23,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector2 exTapEffSize;
         private Vector2 selectedEffSize;
 
-        private List<(Vector2, Vector2, float)> exFlickList = new();
-        private List<(Vector2, Vector2, float)> selectedFlickList = new();
-        private List<(Vector2, Vector2, float)> normalFlichList = new();
+        private List<(Vector2, Vector2, float, Vector4)> exFlickList = new();
+        private List<(Vector2, Vector2, float, Vector4)> selectedFlickList = new();
+        private List<(Vector2, Vector2, float, Vector4)> normalFlichList = new();
 
         private IBatchTextureDrawing batchTextureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var y = target.ConvertToY(obj.TGrid, soflanList) + 24;
                 var pos = new Vector2((float)x, (float)y);
                 var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
-                normalFlichList.Add((size, pos, 0f));
+                normalFlichList.Add((size, pos, 0f, Vector4.One));
 
                 if (obj.IsCritical)
                 {
@@ -68,7 +68,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     exTapSize.X = Math.Sign(size.X) * exTapSize.X;
                     pos.Y -= 1;
 
-                    exFlickList.Add((exTapSize, pos, 0));
+                    exFlickList.Add((exTapSize, pos, 0, Vector4.One));
                 }
 
                 if (obj.IsSelected)
@@ -77,7 +77,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     selectTapSize.X = Math.Sign(size.X) * selectTapSize.X;
                     pos.Y -= 1;
 
-                    selectedFlickList.Add((selectTapSize, pos, 0));
+                    selectedFlickList.Add((selectTapSize, pos, 0, Vector4.One));
                 }
 
                 size.X = Math.Abs(size.X);

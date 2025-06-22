@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 
 public class DrawPlayerLocationHelper
 {
-    private readonly (Vector2 size, Vector2 position, float rotation)[] arr = { default };
+    private readonly (Vector2 size, Vector2 position, float rotation, Vector4 color)[] arr = { default };
     private readonly IImage texture;
     private readonly ITextureDrawing textureDrawing;
     private bool enableShowPlayerLocation;

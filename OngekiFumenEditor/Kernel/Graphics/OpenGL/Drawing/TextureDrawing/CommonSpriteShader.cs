@@ -28,11 +28,12 @@ void main(){
 			FragmentProgram = @"
                 #version 330
 uniform sampler2D diffuse;
+uniform vec4 color;
 in vec2 varying_texPos;
 out vec4 out_color;
 
 void main(){
-	out_color = texture(diffuse,varying_texPos);
+	out_color = texture(diffuse,varying_texPos) * color;
 }
                 ";
 		}
@@ -43,7 +44,6 @@ void main(){
 		{
 			var shader = new CommonSpriteShader();
 			shader.Compile();
-			GLUtility.CheckError("Create shared CommonSpriteShader object failed");
 			return shader;
 		}
 	}

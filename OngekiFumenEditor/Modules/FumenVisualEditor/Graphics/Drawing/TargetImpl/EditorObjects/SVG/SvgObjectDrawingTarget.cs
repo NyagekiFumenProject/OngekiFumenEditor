@@ -73,8 +73,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             if (obj.IsSelected)
-                highlightDrawing.Draw(target, texture, new[] { (size * 1.25f, pos, 0f) });
-            textureDrawing.Draw(target, texture, new[] { (size, pos, 0f) });
+                highlightDrawing.Draw(target, texture, new[] { (size * 1.25f, pos, 0f, Vector4.One) });
+            textureDrawing.Draw(target, texture, new[] { (size, pos, 0f, Vector4.One) });
             target.RegisterSelectableObject(obj, pos, size);
         }
 

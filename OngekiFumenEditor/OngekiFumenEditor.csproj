@@ -469,6 +469,9 @@
 		<None Update="Resources\editor\flick.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="Resources\editor\pixel.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Resources\editor\textureSizeAnchor.ini">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

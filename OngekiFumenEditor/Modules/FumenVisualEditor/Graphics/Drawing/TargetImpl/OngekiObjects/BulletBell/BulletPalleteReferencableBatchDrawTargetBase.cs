@@ -21,8 +21,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public abstract class BulletPalleteReferencableBatchDrawTargetBase<T> : CommonBatchDrawTargetBase<T>, IDisposable where T : OngekiMovableObjectBase, IBulletPalleteReferencable
     {
-        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float)>> normalDrawList = new();
-        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float)>> selectedDrawList = new();
+        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
+        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
         protected List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);

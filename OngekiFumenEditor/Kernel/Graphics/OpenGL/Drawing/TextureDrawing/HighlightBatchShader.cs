@@ -9,6 +9,7 @@
                 uniform sampler2D diffuse;
                 uniform vec2 iResolution;
                 in vec2 varying_texPos;
+                in vec4 varying_color;
                 out vec4 out_color;
 void main(){
     float Pi = 6.28318530718; // Pi*2

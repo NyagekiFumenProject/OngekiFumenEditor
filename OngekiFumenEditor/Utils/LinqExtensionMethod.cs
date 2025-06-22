@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -593,9 +594,15 @@ namespace OngekiFumenEditor.Utils
         /// <param name="a"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsEmpty<T>(this IEnumerable<T> a)
+        public static bool IsEmpty<T>(this IEnumerable<T> source)
         {
-            return !a.Any();
+            if (source is ICollection<T> collectionoft)
+                return collectionoft.Count == 0;
+
+            if (source is ICollection collection)
+                return collection.Count == 0;
+
+            return !source.Any();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

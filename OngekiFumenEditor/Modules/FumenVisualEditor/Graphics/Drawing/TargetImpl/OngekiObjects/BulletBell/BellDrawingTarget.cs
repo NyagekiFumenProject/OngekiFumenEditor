@@ -42,9 +42,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var size = obj.ReferenceBulletPallete?.SizeValue is BulletSize.Large ? sizeLarge : sizeNormal;
             var offsetPos = pos;
 
-            normalDrawList[texture].Add((size, offsetPos, 0));
+            normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
             if (obj.IsSelected)
-                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0));
+                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
             drawStrList.Add((offsetPos, obj));
             target.RegisterSelectableObject(obj, offsetPos, size);
         }
@@ -54,9 +54,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var size = obj.ReferenceBulletPallete?.SizeValue is BulletSize.Large ? sizeLarge : sizeNormal;
             var offsetPos = pos;
 
-            normalDrawList[texture].Add((size, offsetPos, 0));
+            normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
             if (obj.IsSelected)
-                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0));
+                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
         }
     }
 }

@@ -93,10 +93,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
                 for (int i = 0; i < total; i++)
                     GL.GetActiveUniform(program, i, 16, out _, out _, out _, out var _);
 
+                GLUtility.CheckError($"Create shader {this.GetType().Name} failed");
                 compiled = true;
             }
         }
-
+#if DEBUG
+        private static string _currentUsingShaderName = null;
+#endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Begin()
         {
@@ -107,12 +110,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
              */
             GL.GetInteger(GetPName.CurrentProgram, out int curProgram);
             if (curProgram != currentUsingProgram && currentUsingProgram != int.MinValue)
-                throw new Exception("There are other places where shaders are bound.");
+                throw new Exception($"There are another shader {_currentUsingShaderName} is using.");
 #endif
             if (currentUsingProgram != program)
             {
                 GL.UseProgram(program);
                 currentUsingProgram = program;
+#if DEBUG
+                _currentUsingShaderName = GetType().Name;
+#endif
             }
         }
 
@@ -121,6 +127,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         {
             //不需要解绑
             //GL.UseProgram(0);
+            currentUsingProgram = int.MinValue;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

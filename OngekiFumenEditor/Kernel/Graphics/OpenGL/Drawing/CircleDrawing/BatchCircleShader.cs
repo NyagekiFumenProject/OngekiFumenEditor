@@ -65,7 +65,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
 		{
 			var shader = new BatchCircleShader();
 			shader.Compile();
-			GLUtility.CheckError("Create shared BatchCircleShader object failed");
 			return shader;
 		}
 	}

@@ -1,11 +1,13 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
+using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Numerics;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = OpenTK.Mathematics.Vector3;
 
@@ -78,13 +80,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
             GL.DeleteBuffer(textureVBO);
         }
 
-        public void Draw(IDrawingContext target, IImage texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
+        public void Draw(IDrawingContext target, IImage texture, IEnumerable<(Vector2 size, Vector2 position, float rotation, System.Numerics.Vector4 color)> instances)
         {
-            foreach ((var size, var position, var rotation) in instances)
-                Draw(target, texture, size, position, rotation);
+            foreach ((var size, var position, var rotation, var color) in instances)
+                Draw(target, texture, size, position, rotation, color);
         }
 
-        private void Draw(IDrawingContext target, IImage tex, Vector2 size, Vector2 position, float rotation)
+        private void Draw(IDrawingContext target, IImage tex, Vector2 size, Vector2 position, float rotation, System.Numerics.Vector4 color)
         {
 #if DEBUG
             if (tex is not DefaultOpenGLTexture texture1)
@@ -105,6 +107,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
                 {
                     shader.PassUniform("Model", modelMatrix);
                     shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
+                    shader.PassUniform("color", color.ToOpenTKVector4());
                     shader.PassUniform("diffuse", texture);
 
                     GL.BindVertexArray(vao);

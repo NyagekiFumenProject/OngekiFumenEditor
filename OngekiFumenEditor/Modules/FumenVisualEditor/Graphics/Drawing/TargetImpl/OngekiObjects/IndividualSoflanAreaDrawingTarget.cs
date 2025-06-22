@@ -89,9 +89,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             var lineVertex = ObjectPool<List<LineVertex>>.Get();
             lineVertex.Clear();
-            var texList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation)>>.Get();
+            var texList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation, Vector4 color)>>.Get();
             texList.Clear();
-            var hightTexList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation)>>.Get();
+            var hightTexList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation, Vector4 color)>>.Get();
             hightTexList.Clear();
 
             var dash = new VertexDash(8, 2);
@@ -129,8 +129,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var topRightTriPos = new Vector2(rightX - texSize / 2 - bias, topY - texSize / 2 - bias);
                 var bottomLeftTriPos = new Vector2(leftX + texSize / 2 + bias, bottomY + texSize / 2 + bias);
 
-                texList.Add((new(texSize, texSize), bottomLeftTriPos, 0));
-                texList.Add((new(texSize, texSize), topRightTriPos, MathF.PI));
+                texList.Add((new(texSize, texSize), bottomLeftTriPos, 0, Vector4.One));
+                texList.Add((new(texSize, texSize), topRightTriPos, MathF.PI, Vector4.One));
 
                 target.RegisterSelectableObject(isf, bottomLeftTriPos, new(texSize, texSize));
                 target.RegisterSelectableObject(isf.EndIndicator, topRightTriPos, new(texSize, texSize));
@@ -160,9 +160,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     polygonDrawing.End();
 
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
-                        bottomLeftTriPos + new Vector2(highlightScale, highlightScale), 0));
+                        bottomLeftTriPos + new Vector2(highlightScale, highlightScale), 0, Vector4.One));
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
-                        topRightTriPos - new Vector2(highlightScale, highlightScale), MathF.PI));
+                        topRightTriPos - new Vector2(highlightScale, highlightScale), MathF.PI, Vector4.One));
 
                     //画一个方框
                     lineVertex.Add(new LineVertex(new(leftX, topY), highlightLineColor, VertexDash.Solider));

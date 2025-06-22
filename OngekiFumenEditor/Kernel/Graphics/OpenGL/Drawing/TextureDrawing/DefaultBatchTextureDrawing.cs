@@ -34,10 +34,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
         private DefaultOpenGLRenderManager defaultDrawingManager;
 
         /*-----------------CURRENT VERSION------------------ -
-                                        modelMatrix(float)
-                                        Matrix4*4(16)
+                                        modelMatrix(float)  color(float)
+                                        Matrix4*4(16)       vec(4)
         */
-        private const int VertexSize = 4 * 4 * sizeof(float);
+        private const int VertexSize = (4 * 4 + 4 * 1) * sizeof(float);
         private const int MAX_DRAW_COUNT = 3000;
         private const int BUFFER_COUNT = 1;
 
@@ -117,6 +117,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
                     strip += 4 * sizeof(float);
                     GL.VertexAttribPointer(5, 4, VertexAttribPointerType.Float, false, VertexSize, strip);
                     GL.VertexAttribDivisor(5, 1);
+
+                    //Color
+                    GL.EnableVertexAttribArray(6);
+                    strip += 4 * sizeof(float);
+                    GL.VertexAttribPointer(6, 4, VertexAttribPointerType.Float, false, VertexSize, strip);
+                    GL.VertexAttribDivisor(6, 1);
                 }
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             }
@@ -154,11 +160,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
             GL.DeleteVertexArray(vao);
         }
 
-        public void Draw(IDrawingContext target, IImage texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
+        public void Draw(IDrawingContext target, IImage texture, IEnumerable<(Vector2 size, Vector2 position, float rotation, Vector4 color)> instances)
         {
             Begin(target, texture);
-            foreach ((Vector2 size, Vector2 position, float rotation) in instances)
-                PostSprite(size, position, rotation);
+            foreach ((Vector2 size, Vector2 position, float rotation, Vector4 color) in instances)
+                PostSprite(size, position, rotation, color);
             FlushDraw();
             End();
         }
@@ -181,7 +187,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
             shader.PassUniform("diffuse", this.texture);
         }
 
-        public void PostSprite(Vector2 size, Vector2 position, float rotation)
+        public void PostSprite(Vector2 size, Vector2 position, float rotation, Vector4 color)
         {
             /*-----------------CURRENT VERSION------------------ -
 			*     modelMatrix
@@ -196,13 +202,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDr
 
             unsafe
             {
-                //copy matrix4 to buffer
                 fixed (byte* ptr = &postData[currentPostBaseIndex])
                 {
+                    //copy matrix4 to buffer
                     var copyLen = 4 * 4 * sizeof(float);
                     var basePtr = (byte*)&modelMatrix.Row0.X;
                     for (int i = 0; i < copyLen; i++)
                         ptr[i] = *(basePtr + i);
+
+                    //copy vec4 to buffer
+                    var colorBasePtr = ptr + (16 * sizeof(float));
+                    var span = new Span<float>(colorBasePtr, 4);
+                    color.TryCopyTo(span);
                 }
             }
 

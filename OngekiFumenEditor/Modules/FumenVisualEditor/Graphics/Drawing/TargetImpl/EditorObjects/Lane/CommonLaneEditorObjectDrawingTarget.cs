@@ -23,8 +23,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector2 startSize = new(16, 16);
         private Vector2 nextSize = new(16, 16);
         private Vector2 endSize = new(16, 16);
-        private List<(Vector2, Vector2, float)> selectList = new();
-        private List<(Vector2, Vector2, float)> drawList = new();
+        private List<(Vector2, Vector2, float, Vector4)> selectList = new();
+        private List<(Vector2, Vector2, float, Vector4)> drawList = new();
 
         public CommonLaneEditorObjectDrawingTarget()
         {
@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 {
                     foreach (var item in o)
                     {
-                        if (!target.CheckVisible( item.TGrid))
+                        if (!target.CheckVisible(item.TGrid))
                             continue;
 
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);
@@ -55,14 +55,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         var y = (float)target.ConvertToY(item.TGrid, soflanList);
 
                         var pos = new Vector2(x, y);
-                        drawList.Add((size, pos, 0f));
+                        drawList.Add((size, pos, 0f, Vector4.One));
                         target.RegisterSelectableObject(item, pos, size);
                         if (item.IsSelected)
-                            selectList.Add((size * 1.5f, pos, 0f));
+                            selectList.Add((size * 1.5f, pos, 0f, Vector4.One));
                     }
 
-                    highlightDrawing.Draw(target, texture, selectList);
-                    textureDrawing.Draw(target, texture, drawList);
+                    if (selectList.Count > 0)
+                        highlightDrawing.Draw(target, texture, selectList);
+                    if (drawList.Count > 0)
+                        textureDrawing.Draw(target, texture, drawList);
 
                     selectList.Clear();
                     drawList.Clear();

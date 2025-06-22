@@ -10,8 +10,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 		private IBatchTextureDrawing textureDrawing;
 		private IHighlightBatchTextureDrawing highlightDrawing;
 
-		private Dictionary<IImage, List<(Vector2 pos, Vector2 size, float)>> normalMap = new();
-		private Dictionary<IImage, List<(Vector2 pos, Vector2 size, float)>> highlightMap = new();
+		private Dictionary<IImage, List<(Vector2 pos, Vector2 size, float, Vector4)>> normalMap = new();
+		private Dictionary<IImage, List<(Vector2 pos, Vector2 size, float, Vector4)>> highlightMap = new();
 
 		public DrawSelectableObjectTextureHelper()
 		{
@@ -19,13 +19,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 			highlightDrawing = IoC.Get<IRenderManager>().HighlightBatchTextureDrawing;
 		}
 
-		List<(Vector2 pos, Vector2 size, float)> getList(Dictionary<IImage, List<(Vector2, Vector2, float)>> m, IImage t)
+		List<(Vector2 pos, Vector2 size, float, Vector4)> getList(Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> m, IImage t)
 			=> m.TryGetValue(t, out var list) ? list : (m[t] = new());
 
 		public void PostData(Vector2 pos, Vector2 size, IImage texture, Vector2? highlightPos = default, Vector2? highligtSize = default)
 		{
-			getList(normalMap, texture).Add((pos, size, 0));
-			getList(highlightMap, texture).Add((highlightPos ?? pos, highligtSize ?? size, 0));
+			getList(normalMap, texture).Add((pos, size, 0, Vector4.One));
+			getList(highlightMap, texture).Add((highlightPos ?? pos, highligtSize ?? size, 0, Vector4.One));
 		}
 
 		public void Draw(IFumenEditorDrawingContext target)

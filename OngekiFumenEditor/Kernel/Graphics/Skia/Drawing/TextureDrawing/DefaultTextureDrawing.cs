@@ -4,11 +4,11 @@ using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Numerics;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = OpenTK.Mathematics.Vector3;
 
@@ -26,13 +26,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
 
         }
 
-        public void Draw(IDrawingContext target, IImage texture, IEnumerable<(Vector2 size, Vector2 position, float rotation)> instances)
+        public void Draw(IDrawingContext target, IImage texture, IEnumerable<(Vector2 size, Vector2 position, float rotation, Vector4 color)> instances)
         {
-            foreach ((var size, var position, var rotation) in instances)
-                Draw(target, texture as SkiaImage, size, position, rotation);
+            foreach ((var size, var position, var rotation, var color) in instances)
+                Draw(target, texture as SkiaImage, size, position, rotation, color);
         }
 
-        private void Draw(IDrawingContext target, SkiaImage tex, Vector2 size, Vector2 position, float rotation)
+        private void Draw(IDrawingContext target, SkiaImage tex, Vector2 size, Vector2 position, float rotation, Vector4 color)
         {
             OnBegin(target);
             var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;

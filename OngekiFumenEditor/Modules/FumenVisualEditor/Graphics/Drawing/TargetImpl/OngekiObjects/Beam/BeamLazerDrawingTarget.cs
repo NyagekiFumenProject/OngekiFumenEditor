@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
 {
@@ -15,7 +16,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     internal class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
         private IBeamDrawing lazerDrawing;
+        private IPolygonDrawing polygonDrawing;
+        private ITextureDrawing textureDrawing;
         private IImage textureBody;
+        private IImage pixelImg;
         private IImage textureWarn;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS", "OBS" };
@@ -26,16 +30,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public BeamLazerDrawingTarget()
         {
             lazerDrawing = IoC.Get<IRenderManager>().BeamDrawing;
+            polygonDrawing = IoC.Get<IRenderManager>().PolygonDrawing;
+            textureDrawing = IoC.Get<IRenderManager>().TextureDrawing;
 
-            void load(ref IImage t, string name)
-            {
-                t = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + name);
-            }
+            IImage load(string name) => ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + name);
 
-            load(ref textureBody, "beamBody.png");
+            textureBody = load("beamBody.png");
             textureBody.TextureWrapT = TextureWrapMode.Repeat;
 
-            load(ref textureWarn, "beamWarn.png");
+            pixelImg = load("pixel.png");
+
+            textureWarn = load("beamWarn.png");
             textureWarn.TextureWrapS = TextureWrapMode.Repeat;
             textureWarn.TextureWrapT = TextureWrapMode.Repeat;
         }
@@ -130,9 +135,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(leadAudioTime, target.Editor);
                 if (leadInTGrid is null)
                     leadInTGrid = TGrid.Zero;
-                var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
-                if (warnProgress < 0) warnProgress = -1;
-                lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f), rotate, judgeOffset);
+                var warnProgress = (float)MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
+                if (warnProgress > 0)
+                {
+                    var a = MathUtils.SmoothStep(0.0f, 0.25f, warnProgress);
+                    var warnColor = new Vector4(1, 215 / 255.0f, 0, 0.5f * a);
+                    /*
+                    polygonDrawing.Begin(target, Primitive.TriangleStrip);
+
+                    polygonDrawing.PostPoint(new((float)(x - width / 2), target.CurrentDrawingTargetContext.Rect.TopLeft.Y), warnColor);
+                    polygonDrawing.PostPoint(new((float)(x + width / 2), target.CurrentDrawingTargetContext.Rect.TopLeft.Y), warnColor);
+                    polygonDrawing.PostPoint(new((float)(x - width / 2), target.CurrentDrawingTargetContext.Rect.ButtomRight.Y), warnColor);
+                    polygonDrawing.PostPoint(new((float)(x + width / 2), target.CurrentDrawingTargetContext.Rect.ButtomRight.Y), warnColor);
+
+                    polygonDrawing.End();
+                    */
+
+                    textureDrawing.Draw(target, pixelImg, [new(new((float)width, target.CurrentDrawingTargetContext.Rect.Height), new(x, target.CurrentDrawingTargetContext.Rect.CenterY), 0, warnColor)]);
+                }
             }
 
             lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One, rotate, judgeOffset);
@@ -145,6 +165,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             textureWarn?.Dispose();
             textureWarn = default;
+
+            pixelImg?.Dispose();
+            pixelImg = default;
         }
     }
 }

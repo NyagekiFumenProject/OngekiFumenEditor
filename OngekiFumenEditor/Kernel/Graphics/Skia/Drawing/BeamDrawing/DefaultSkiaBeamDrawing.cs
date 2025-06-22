@@ -41,7 +41,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing
 
             canvas.ResetMatrix();
             canvas.Translate(x - width / 2, 0);
-            canvas.RotateDegrees(rotate);
+            var angle = rotate * 180 / MathF.PI - 360;
+            angle = angle < 0 ? (360 - angle) : angle;
+            canvas.RotateDegrees(angle);
             canvas.Scale(width * 1.0f / texture.Width, (target.CurrentDrawingTargetContext.Rect.Height + 40) * 2f / texture.Height);
 
             using var paint = new SKPaint();

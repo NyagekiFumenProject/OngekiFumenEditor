@@ -35,9 +35,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector2 selectTapEffSize = new Vector2(39, 39);
         private Vector2 exWallTapEffSize = new Vector2(42, 42);
 
-        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate)>> normalList = new();
-        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate)>> exList = new();
-        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate)>> selectTapList = new();
+        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> normalList = new();
+        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> exList = new();
+        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> selectTapList = new();
 
         private IBatchTextureDrawing batchTextureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
@@ -106,7 +106,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var y = target.ConvertToY(tap.TGrid, soflanList);
 
             var pos = new Vector2((float)x, (float)y);
-            normalList[texture].Add((size, pos, 0f));
+            normalList[texture].Add((size, pos, 0f, Vector4.One));
 
             if (tap.IsSelected)
             {
@@ -119,7 +119,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     size = selectTapEffSize;
                 }
 
-                selectTapList[texture].Add((size, pos, 0f));
+                selectTapList[texture].Add((size, pos, 0f, Vector4.One));
             }
 
             if (isCritical)
@@ -135,7 +135,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     texture = tapExTexture;
                 }
 
-                exList[texture].Add((size, pos, 0f));
+                exList[texture].Add((size, pos, 0f, Vector4.One));
             }
 
             size.X = Math.Abs(size.X);
@@ -145,7 +145,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private void ClearList()
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void clear(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate)>> map)
+            void clear(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> map)
             {
                 foreach (var list in map.Values)
                     list.Clear();
@@ -170,7 +170,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void draw(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate)>> map)
+            void draw(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> map)
             {
                 foreach (var item in map)
                     batchTextureDrawing.Draw(target, item.Key, item.Value);
