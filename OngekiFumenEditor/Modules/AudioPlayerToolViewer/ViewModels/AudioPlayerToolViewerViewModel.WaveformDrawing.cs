@@ -226,8 +226,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             RenderContext.CleanRender(this, new(16 / 255f, 16 / 255f, 16 / 255f, 1f));
 
-            //if (Editor is null || !IsShowWaveform)
-            //    return;
+            if (Editor is null || !IsShowWaveform)
+                return;
 
             PerfomenceMonitor.PostUIRenderTime(ts);
             PerfomenceMonitor.OnBeforeRender();
