@@ -2047,4 +2047,7 @@
   <data name="SkiaRenderBackend" xml:space="preserve">
     <value>Skia渲染后端:</value>
   </data>
+  <data name="ReturnStartTimeAfterPause" xml:space="preserve">
+    <value>当播放暂停后, 编辑器时间跳转回播放前</value>
+  </data>
 </root>

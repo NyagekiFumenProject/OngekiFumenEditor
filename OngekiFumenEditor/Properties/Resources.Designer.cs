@@ -4768,6 +4768,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Restore the current time to before playback time when editor paused 的本地化字符串。
+        /// </summary>
+        public static string ReturnStartTimeAfterPause {
+            get {
+                return ResourceManager.GetString("ReturnStartTimeAfterPause", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Invert selection of all objects 的本地化字符串。
         /// </summary>
         public static string ReverseSelectAllObjects {

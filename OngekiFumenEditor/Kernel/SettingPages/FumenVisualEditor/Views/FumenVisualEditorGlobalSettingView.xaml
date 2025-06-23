@@ -98,6 +98,12 @@
                     IsChecked="{Binding Setting.EnablePlaceObjectBeyondAudioDuration}">
                     <TextBlock Text="{markup:Translate [EnablePlaceObjectBeyondAudioDuration]}" TextWrapping="Wrap" />
                 </CheckBox>
+                <CheckBox
+                    Margin="0,10,0,0"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{Binding Setting.ReturnStartTimeAfterPause}">
+                    <TextBlock Text="{markup:Translate [ReturnStartTimeAfterPause]}" TextWrapping="Wrap" />
+                </CheckBox>
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Render]}">

@@ -2046,4 +2046,7 @@
   <data name="SkiaRenderBackend" xml:space="preserve">
     <value>Skia render backend: </value>
   </data>
+  <data name="ReturnStartTimeAfterPause" xml:space="preserve">
+    <value>Restore the current time to before playback time when editor paused</value>
+  </data>
 </root>
