@@ -110,9 +110,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
                 var bpmList = editor.Fumen.BpmList;
 
-                var beginX = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, bpmList).TotalMilliseconds;
-                var endX = TGridCalculator.ConvertTGridToAudioTime(endTGrid, bpmList).TotalMilliseconds;
-                var curX = TGridCalculator.ConvertTGridToAudioTime(curTGrid, bpmList).TotalMilliseconds;
+                //var beginX = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, bpmList).TotalMilliseconds;
+                //var endX = TGridCalculator.ConvertTGridToAudioTime(endTGrid, bpmList).TotalMilliseconds;
+                //var curX = TGridCalculator.ConvertTGridToAudioTime(curTGrid, bpmList).TotalMilliseconds;
+
+                var beginX = beginTime.TotalMilliseconds;
+                var endX = endTime.TotalMilliseconds;
+                var curX = curTime.TotalMilliseconds;
 
                 var aWidth = (endTime - beginTime).TotalMilliseconds / target.DurationMsPerPixel;
                 var prefixOffsetX = -Math.Min(0, fromTime.TotalMilliseconds) / target.DurationMsPerPixel;

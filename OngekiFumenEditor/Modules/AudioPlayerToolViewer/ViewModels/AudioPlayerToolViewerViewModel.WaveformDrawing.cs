@@ -234,7 +234,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             RenderContext.BeforeRender(this);
 
-            //UpdateDrawingContext();
+            UpdateDrawingContext();
 
             //var lineDrawing = renderImpl.SimpleLineDrawing;
 
