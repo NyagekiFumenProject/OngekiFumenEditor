@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -348,7 +349,7 @@ namespace OngekiFumenEditor.Utils
         }
 
         /// <summary>
-        /// 使用二分法实现LastOrDefault()的选值(假设集合已排序)
+        /// 使用二分法实现LastOrDefault()的选值(假设集合已从小到大排序)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="X"></typeparam>
@@ -593,9 +594,15 @@ namespace OngekiFumenEditor.Utils
         /// <param name="a"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsEmpty<T>(this IEnumerable<T> a)
+        public static bool IsEmpty<T>(this IEnumerable<T> source)
         {
-            return !a.Any();
+            if (source is ICollection<T> collectionoft)
+                return collectionoft.Count == 0;
+
+            if (source is ICollection collection)
+                return collection.Count == 0;
+
+            return !source.Any();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

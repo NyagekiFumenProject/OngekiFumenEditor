@@ -27,6 +27,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Gemini.Framework.Commands;
 using Microsoft.Xaml.Behaviors;
+using System.Collections.Generic;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
@@ -99,13 +101,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 case nameof(EditorGlobalSetting.JudgeLineOffsetY):
                 case nameof(EditorGlobalSetting.XOffset):
-                    RecalcViewProjectionMatrix();
+                    //RecalcViewProjectionMatrix();
                     break;
                 case nameof(EditorGlobalSetting.PlayFieldBackgroundColor):
                     playFieldBackgroundColor = EditorGlobalSetting.Default.PlayFieldBackgroundColor.AsARGBToColor().ToVector4();
                     break;
                 case nameof(EditorGlobalSetting.EnablePlayFieldDrawing):
                     enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
+                    break;
+                case nameof(EditorGlobalSetting.HideWallLaneWhenEnablePlayField):
+                    hideWallLaneWhenEnablePlayField = EditorGlobalSetting.Default.HideWallLaneWhenEnablePlayField;
                     break;
                 case nameof(EditorGlobalSetting.EnableShowPlayerLocation):
                     enableShowPlayerLocation = EditorGlobalSetting.Default.EnableShowPlayerLocation;
@@ -143,12 +148,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (EditorProjectData?.AudioDuration is TimeSpan timeSpan && timeSpan > TimeSpan.Zero)
             {
-                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit);
+                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
             else
             {
                 timeSpan = AudioPlayer?.Duration ?? TimeSpan.Zero;
-                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit);
+                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
         }
 
@@ -159,6 +164,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private bool isShowCurveControlAlways = false;
         private bool enableShowPlayerLocation;
+        private bool hideWallLaneWhenEnablePlayField;
+
+        public bool HideWallLaneWhenEnablePlayField => hideWallLaneWhenEnablePlayField;
 
         public bool IsShowCurveControlAlways
         {

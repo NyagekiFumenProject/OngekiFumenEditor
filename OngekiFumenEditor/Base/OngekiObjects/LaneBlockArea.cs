@@ -89,8 +89,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			var blockStartTGrid = TGrid;
 			var blockEndTGrid = EndIndicator.TGrid;
 
-			var startWallLane = fumen.Lanes.Where(x => x.LaneType == wallType).LastOrDefault(x => x.TGrid <= blockStartTGrid);
-			var endWallLane = fumen.Lanes.Where(x => x.LaneType == wallType).LastOrDefault(x => x.TGrid <= blockEndTGrid);
+			var lanes = fumen.Lanes.Where(x => x.LaneType == wallType).OrderBy(x => x.TGrid).ToList();
+
+			var startWallLane = lanes.LastOrDefault(x => x.TGrid <= blockStartTGrid);
+			var endWallLane = startWallLane != null && startWallLane.GetTGridRange().Max >= blockEndTGrid
+				? startWallLane
+				: lanes.LastOrDefault(x => x.TGrid <= blockEndTGrid);
 
 			return (startWallLane, endWallLane);
 		}

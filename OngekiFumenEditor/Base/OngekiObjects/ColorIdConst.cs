@@ -165,7 +165,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			Haruna,
 			Black,
 			Akane,
-			Aoi,
+            LaneG,
+            Aoi,
 		};
 	}
 }

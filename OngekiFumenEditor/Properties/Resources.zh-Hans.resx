@@ -1695,9 +1695,6 @@
   <data name="BellBulletCountOverLimit_Sep" xml:space="preserve">
     <value>时，</value>
   </data>
-  <data name="ChangeColor" xml:space="preserve">
-    <value>选择</value>
-  </data>
   <data name="NamedColorChangeTitle" xml:space="preserve">
     <value>设置新的 {0} 颜色</value>
   </data>
@@ -2022,5 +2019,35 @@
   </data>
   <data name="ApplyFilter" xml:space="preserve">
     <value>应用过滤</value>
+  </data>
+  <data name="HideWallLaneWhenEnablePlayField" xml:space="preserve">
+    <value>当预览模式且渲染可击打区域时，隐藏所有墙壁轨道</value>
+  </data>
+  <data name="LaneBlockOnMultipleWalls" xml:space="preserve">
+    <value>LaneBlockArea作用的墙壁轨道({0})和另一个墙壁轨道({1})错开</value>
+  </data>
+  <data name="NewItemGroup" xml:space="preserve">
+    <value>新建组层</value>
+  </data>
+  <data name="ChangeColor" xml:space="preserve">
+    <value>更改颜色</value>
+  </data>
+  <data name="SoflanGroupListViewer" xml:space="preserve">
+    <value>变速分组查看器</value>
+  </data>
+  <data name="CurrentDisplaySelectedSoflanPointList" xml:space="preserve">
+    <value>当前 {0} 变化列表:</value>
+  </data>
+  <data name="EditorShowSoflanPointList" xml:space="preserve">
+    <value>EditorShowSoflanPointList</value>
+  </data>
+  <data name="SelectRenderManagerImpl" xml:space="preserve">
+    <value>图形渲染实现:</value>
+  </data>
+  <data name="SkiaRenderBackend" xml:space="preserve">
+    <value>Skia渲染后端:</value>
+  </data>
+  <data name="ReturnStartTimeAfterPause" xml:space="preserve">
+    <value>当播放暂停后, 编辑器时间跳转回播放前</value>
   </data>
 </root>

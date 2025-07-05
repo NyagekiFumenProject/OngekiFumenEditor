@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;
+using System.Linq;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 {
@@ -29,7 +30,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 			sfl.EndTGrid = sfl.TGrid + new GridOffset(0, length);
 
 			sfl.Speed = dataArr[4];
-		}
+            sfl.SoflanGroup = (int)dataArr.ElementAtOrDefault(5);
+        }
 	}
 
 	[Export(typeof(ICommandParser))]
@@ -44,7 +46,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 			sfl.TGrid.Unit = dataArr[1];
 			sfl.TGrid.Grid = (int)dataArr[2];
 			sfl.Speed = dataArr[3];
-			return sfl;
+            sfl.SoflanGroup = (int)dataArr.ElementAtOrDefault(4);
+            return sfl;
 		}
 	}
 
@@ -61,8 +64,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 			var dataArr = args.GetDataArray<float>();
 			sfl.Easing = Enum.Parse<EasingTypes>(args.GetData<string>(5));
 			((InterpolatableSoflan.InterpolatableSoflanIndicator)sfl.EndIndicator).Speed = dataArr[6];
+            sfl.SoflanGroup = (int)dataArr.ElementAtOrDefault(7);
 
-			return sfl;
+            return sfl;
 		}
 	}
 }

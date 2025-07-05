@@ -1,7 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
-using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -20,29 +20,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     public class BulletDrawingTarget : BulletPalleteReferencableBatchDrawTargetBase<Bullet>
     {
-        private IDictionary<Texture, Vector2> spritesSize;
-        private IDictionary<Texture, Vector2> spritesOriginOffset;
-        private IDictionary<Texture, Vector2> spritesSizeLarge;
-        private IDictionary<Texture, Vector2> spritesOriginOffsetLarge;
-        private IDictionary<BulletDamageType, Dictionary<BulletType, Texture>> spritesMap;
+        private IDictionary<IImage, Vector2> spritesSize;
+        private IDictionary<IImage, Vector2> spritesOriginOffset;
+        private IDictionary<IImage, Vector2> spritesSizeLarge;
+        private IDictionary<IImage, Vector2> spritesOriginOffsetLarge;
+        private IDictionary<BulletDamageType, Dictionary<BulletType, IImage>> spritesMap;
 
-        public BulletDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            var _spritesOriginOffset = new Dictionary<Texture, Vector2>();
-            var _spritesSize = new Dictionary<Texture, Vector2>();
-            var _spritesOriginOffsetLarge = new Dictionary<Texture, Vector2>();
-            var _spritesSizeLarge = new Dictionary<Texture, Vector2>();
-            var _spritesMap = new Dictionary<BulletDamageType, Dictionary<BulletType, Texture>>();
+            base.Initialize(impl);
+
+            var _spritesOriginOffset = new Dictionary<IImage, Vector2>();
+            var _spritesSize = new Dictionary<IImage, Vector2>();
+            var _spritesOriginOffsetLarge = new Dictionary<IImage, Vector2>();
+            var _spritesSizeLarge = new Dictionary<IImage, Vector2>();
+            var _spritesMap = new Dictionary<BulletDamageType, Dictionary<BulletType, IImage>>();
 
             void SetTexture(BulletDamageType k1, BulletType k2, string rPath, string key, Vector2 size, Vector2 origOffset, Vector2 sizeLarge, Vector2 origOffsetLarge)
             {
                 if (!_spritesMap.TryGetValue(k1, out var dic))
                 {
-                    dic = new Dictionary<BulletType, Texture>();
+                    dic = new Dictionary<BulletType, IImage>();
                     _spritesMap[k1] = dic;
                 }
 
-                var tex = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + rPath);
+                var tex = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + rPath);
                 dic[k2] = tex;
                 normalDrawList[tex] = new();
                 selectedDrawList[tex] = new();
@@ -100,7 +102,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bullet obj, Vector2 pos, float rotate)
         {
-            if (obj.ReferenceBulletPallete is null) {
+            if (obj.ReferenceBulletPallete is null)
+            {
                 Log.LogWarn($"Bullet {obj.Id} has null reference bullet pallete");
                 return;
             }
@@ -114,9 +117,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var origOffset = (isLarge ? spritesOriginOffsetLarge : spritesOriginOffset)[texture];
 
             var offsetPos = pos + origOffset;
-            normalDrawList[texture].Add((size, offsetPos, 0));
+            normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
             if (obj.IsSelected)
-                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0));
+                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
             drawStrList.Add((offsetPos, obj));
             target.RegisterSelectableObject(obj, offsetPos, size);
         }
@@ -133,9 +136,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var origOffset = (isLarge ? spritesOriginOffsetLarge : spritesOriginOffset)[texture];
 
             var offsetPos = pos + origOffset;
-            normalDrawList[texture].Add((size, offsetPos, rotate));
+            normalDrawList[texture].Add((size, offsetPos, rotate, Vector4.One));
             if (obj.IsSelected)
-                selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate));
+                selectedDrawList[texture].Add((size * 1.3f, offsetPos, rotate, Vector4.One));
         }
     }
 }

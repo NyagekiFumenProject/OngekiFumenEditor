@@ -26,11 +26,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             Flick = 8,
         }
 
-        private readonly ISimpleLineDrawing lineDrawing;
-        private readonly IStringDrawing stringDrawing;
-        private readonly ICircleDrawing circleDrawing;
-        private readonly SoflanList dummySoflanList;
-        private static readonly VertexDash InvailedLineDash = new VertexDash() { DashSize = 2, GapSize = 2 };
+        private ISimpleLineDrawing lineDrawing;
+        private IStringDrawing stringDrawing;
+        private ICircleDrawing circleDrawing;
+        private SoflanList dummySoflanList;
+        private static readonly VertexDash InvailedLineDash = new VertexDash(2, 2);
 
         private static readonly System.Numerics.Vector4 TransparentColor = new(1, 1, 1, 0);
         private static readonly System.Numerics.Vector4 WhiteColor = new(1, 1, 1, 1);
@@ -47,18 +47,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         private DefaultWaveformOption option = new();
         public override IWaveformDrawingOption Options => option;
 
-        public DefaultWaveformDrawing()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            stringDrawing = IoC.Get<IStringDrawing>();
-            circleDrawing = IoC.Get<ICircleDrawing>();
+            lineDrawing = impl.SimpleLineDrawing;
+            stringDrawing = impl.StringDrawing;
+            circleDrawing = impl.CircleDrawing;
+
             dummySoflanList = new SoflanList();
         }
 
         public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData)
         {
-            var width = target.ViewWidth;
-            var height = target.ViewHeight;
+            var width = target.CurrentDrawingTargetContext.Rect.Width;
+            var height = target.CurrentDrawingTargetContext.Rect.Height;
 
             var curTime = target.CurrentTime;
             var fromTime = curTime - TimeSpan.FromMilliseconds(target.CurrentTimeXOffset * target.DurationMsPerPixel);
@@ -77,7 +78,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     var prevX = 0f;
 
                     lineDrawing.PostPoint(new(-width / 2, 0), WhiteColor, InvailedLineDash);
-                    for (int i = minIndex; i < maxIndex; i++)
+                    for (int i = minIndex; i < maxIndex; i += 1)
                     {
                         var peakPoint = peakData[i];
 
@@ -85,7 +86,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                         var yTop = height / 2 * peakPoint.Amplitudes[0];
                         var yButtom = -height / 2 * peakPoint.Amplitudes[1];
 
-                        lineDrawing.PostPoint(new(x, 0), WaveformFillColor, VertexDash.Solider);
+                        //lineDrawing.PostPoint(new(x, 0), WaveformFillColor, VertexDash.Solider);
                         lineDrawing.PostPoint(new(x, yTop), WaveformFillColor, VertexDash.Solider);
                         lineDrawing.PostPoint(new(x, yButtom), WaveformFillColor, VertexDash.Solider);
                         prevX = x;
@@ -109,9 +110,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
                 var bpmList = editor.Fumen.BpmList;
 
-                var beginX = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, bpmList).TotalMilliseconds;
-                var endX = TGridCalculator.ConvertTGridToAudioTime(endTGrid, bpmList).TotalMilliseconds;
-                var curX = TGridCalculator.ConvertTGridToAudioTime(curTGrid, bpmList).TotalMilliseconds;
+                //var beginX = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, bpmList).TotalMilliseconds;
+                //var endX = TGridCalculator.ConvertTGridToAudioTime(endTGrid, bpmList).TotalMilliseconds;
+                //var curX = TGridCalculator.ConvertTGridToAudioTime(curTGrid, bpmList).TotalMilliseconds;
+
+                var beginX = beginTime.TotalMilliseconds;
+                var endX = endTime.TotalMilliseconds;
+                var curX = curTime.TotalMilliseconds;
 
                 var aWidth = (endTime - beginTime).TotalMilliseconds / target.DurationMsPerPixel;
                 var prefixOffsetX = -Math.Min(0, fromTime.TotalMilliseconds) / target.DurationMsPerPixel;

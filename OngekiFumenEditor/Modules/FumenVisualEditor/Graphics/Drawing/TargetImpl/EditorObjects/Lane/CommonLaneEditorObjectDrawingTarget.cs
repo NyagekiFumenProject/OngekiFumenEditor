@@ -1,7 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,20 +16,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IBatchTextureDrawing textureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
 
-        public abstract Texture StartEditorTexture { get; }
-        public abstract Texture NextEditorTexture { get; }
-        public abstract Texture EndEditorTexture { get; }
+        public abstract IImage StartEditorTexture { get; }
+        public abstract IImage NextEditorTexture { get; }
+        public abstract IImage EndEditorTexture { get; }
 
         private Vector2 startSize = new(16, 16);
         private Vector2 nextSize = new(16, 16);
         private Vector2 endSize = new(16, 16);
-        private List<(Vector2, Vector2, float)> selectList = new();
-        private List<(Vector2, Vector2, float)> drawList = new();
+        private List<(Vector2, Vector2, float, Vector4)> selectList = new();
+        private List<(Vector2, Vector2, float, Vector4)> drawList = new();
 
-        public CommonLaneEditorObjectDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            textureDrawing = IoC.Get<IBatchTextureDrawing>();
-            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+            textureDrawing = impl.BatchTextureDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
                 startSize = new Vector2(16, 16);
@@ -44,7 +43,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             {
-                void drawEditorTap(Texture texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
+                void drawEditorTap(IImage texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {
                     foreach (var item in o)
                     {
@@ -52,17 +51,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                             continue;
 
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);
-                        var y = (float)target.ConvertToY(item.TGrid);
+                        var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(item);
+                        var y = (float)target.ConvertToY(item.TGrid, soflanList);
 
                         var pos = new Vector2(x, y);
-                        drawList.Add((size, pos, 0f));
+                        drawList.Add((size, pos, 0f, Vector4.One));
                         target.RegisterSelectableObject(item, pos, size);
                         if (item.IsSelected)
-                            selectList.Add((size * 1.5f, pos, 0f));
+                            selectList.Add((size * 1.5f, pos, 0f, Vector4.One));
                     }
 
-                    highlightDrawing.Draw(target, texture, selectList);
-                    textureDrawing.Draw(target, texture, drawList);
+                    if (selectList.Count > 0)
+                        highlightDrawing.Draw(target, texture, selectList);
+                    if (drawList.Count > 0)
+                        textureDrawing.Draw(target, texture, drawList);
 
                     selectList.Clear();
                     drawList.Clear();

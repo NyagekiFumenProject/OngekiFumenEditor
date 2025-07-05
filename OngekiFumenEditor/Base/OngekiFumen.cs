@@ -8,6 +8,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -44,7 +45,8 @@ namespace OngekiFumenEditor.Base
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
         public List<SvgPrefabBase> SvgPrefabs { get; } = new();
-        public SoflanList Soflans { get; } = new();
+        public SoflanListMap SoflansMap { get; } = new();
+        public IndividualSoflanAreaListMap IndividualSoflanAreaMap { get; } = new();
         public LaneBlockAreaList LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
@@ -77,6 +79,8 @@ namespace OngekiFumenEditor.Base
         {
             MetaInfo = MetaInfo;
 
+            #region BpmList
+
             //setup firstBPM from fumen metainfo
             var firstBpm = new BPMChange()
             {
@@ -86,6 +90,10 @@ namespace OngekiFumenEditor.Base
             if (unusedBpm is not null && unusedBpm != BpmList.FirstBpm)
                 BpmList.Remove(unusedBpm);
             BpmList.SetFirstBpm(firstBpm);
+
+            #endregion
+
+            #region MeterChanges
 
             //setup firstMeter from fumen metainfo
             var firstMeter = new MeterChange()
@@ -102,6 +110,38 @@ namespace OngekiFumenEditor.Base
             if (unusedMeter is not null && MeterChanges.FirstMeter != unusedMeter)
                 MeterChanges.Remove(unusedMeter);
             MeterChanges.SetFirstMeter(firstMeter);
+
+            #endregion
+
+            #region IndividualSoflanAreaMap
+
+            foreach (var soflanGroup in SoflansMap.Keys)
+            {
+                //make sure soflanGroup in IndividualSoflanAreaMap had been create
+                _ = IndividualSoflanAreaMap[soflanGroup];
+            }
+
+            //setup SoflanGroupWrapItem
+            var groupName = "default";
+            var itemGroup = IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.OfType<SoflanGroupWrapItemGroup>().FirstOrDefault(x => x.DisplayName == groupName) ?? new SoflanGroupWrapItemGroup()
+            {
+                DisplayName = groupName
+            };
+            //enumerate soflan group which not asign by [SGWI]
+            foreach (var soflanGroupId in IndividualSoflanAreaMap.Keys.Concat([0]))
+            {
+                var item = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroupId, out var isCreated);
+                if (isCreated || item.Parent == null)
+                    itemGroup.Add(item);
+            }
+            IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Add(itemGroup);
+
+            //setup default soflan group item
+            var defaultSoflanGroupItem = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(0, out _);
+            defaultSoflanGroupItem.IsSelected = true;
+            defaultSoflanGroupItem.IsDisplaySoflanDesignMode = true;
+
+            #endregion
         }
 
         public void AddObject(OngekiObjectBase obj)
@@ -136,7 +176,7 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is ISoflan soflan)
             {
-                Soflans.Add(soflan);
+                SoflansMap.Add(soflan);
             }
             else if (obj is Bullet bullet)
             {
@@ -153,6 +193,10 @@ namespace OngekiFumenEditor.Base
             else if (obj is Hold hold)
             {
                 Holds.Add(hold);
+            }
+            else if (obj is IndividualSoflanArea isf)
+            {
+                IndividualSoflanAreaMap.Add(isf);
             }
             else if (obj is HoldEnd holdEnd)
             {
@@ -212,7 +256,15 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is ISoflan soflan)
             {
-                Soflans.Remove(soflan);
+                SoflansMap.Remove(soflan);
+            }
+            else if (obj is IndividualSoflanArea.IndividualSoflanAreaEndIndicator isfEnd)
+            {
+                IndividualSoflanAreaMap.Remove(isfEnd.RefIndividualSoflanArea);
+            }
+            else if (obj is IndividualSoflanArea isf)
+            {
+                IndividualSoflanAreaMap.Remove(isf);
             }
             else if (obj is BulletPallete bpl)
             {
@@ -358,7 +410,8 @@ namespace OngekiFumenEditor.Base
                    .Concat(BpmList.Skip(1)) //not show first bpm
                    .Concat(ClickSEs.BinaryFindRange(min, max))
                    .Concat(LaneBlocks.GetVisibleStartObjects(min, max))
-                   .Concat(Soflans)
+                   .Concat(SoflansMap.Values.SelectMany(x => x))
+                   .Concat(IndividualSoflanAreaMap.Values.SelectMany(x => x))
                    .Concat(EnemySets.BinaryFindRange(min, max))
                    .Concat(Comments.BinaryFindRange(min, max))
                    .Concat(Bullets.BinaryFindRange(min, max))

@@ -210,7 +210,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 			var undoAction = new System.Action(() => { });
 
 			foreach ((var tGrid, _, _, _, _) in TGridCalculator.GetVisbleTimelines_DesignMode(
-				fumen.Soflans,
+				fumen.SoflansMap.DefaultSoflanList, //todo check this
 				fumen.BpmList,
 				fumen.MeterChanges,
 				TGridCalculator.ConvertTGridToY_DesignMode(beginTGrid, editor),

@@ -3,9 +3,10 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.UI.Controls.ObjectInspector;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Concurrent;
@@ -21,22 +22,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public abstract class BulletPalleteReferencableBatchDrawTargetBase<T> : CommonBatchDrawTargetBase<T>, IDisposable where T : OngekiMovableObjectBase, IBulletPalleteReferencable
     {
-        protected Dictionary<Texture, ConcurrentBag<(Vector2, Vector2, float)>> normalDrawList = new();
-        protected Dictionary<Texture, ConcurrentBag<(Vector2, Vector2, float)>> selectedDrawList = new();
+        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
+        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
         protected List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
-        private readonly IStringDrawing stringDrawing;
-        private readonly IHighlightBatchTextureDrawing highlightDrawing;
-        private readonly IBatchTextureDrawing batchTextureDrawing;
-        private readonly ParallelOptions parallelOptions;
-        private readonly int parallelCountLimit;
+        private IStringDrawing stringDrawing;
+        private IHighlightBatchTextureDrawing highlightDrawing;
+        private IBatchTextureDrawing batchTextureDrawing;
+        private ParallelOptions parallelOptions;
+        private int parallelCountLimit;
 
-        public BulletPalleteReferencableBatchDrawTargetBase()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = IoC.Get<IStringDrawing>();
-            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
-            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+            stringDrawing = impl.StringDrawing;
+            batchTextureDrawing = impl.BatchTextureDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
 
             parallelOptions = new ParallelOptions()
             {
@@ -56,10 +57,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public abstract void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate);
         public abstract void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate);
 
-        private void DrawEditorMode(IFumenEditorDrawingContext target, T obj)
+        private void DrawDesignMode(IFumenEditorDrawingContext target, T obj)
         {
             var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-            var toTime = target.ConvertToY(obj.TGrid);
+            var toTime = target.ConvertToY_DefaultSoflanGroup(obj.TGrid);
 
             var pos = new Vector2((float)toX, (float)toTime);
             DrawVisibleObject_DesignMode(target, obj, pos, 0);
@@ -84,16 +85,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             drawStrList.Clear();
         }
 
-        private void DrawPreviewMode(IEnumerable<T> objs)
+        private void DrawPreviewMode(IFumenEditorDrawingContext target, IEnumerable<T> objs)
         {
             var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
-            var baseY = Math.Min(target.Rect.MinY, target.Rect.MaxY) + judgeOffset;
+            var baseY = Math.Min(target.CurrentDrawingTargetContext.Rect.MinY, target.CurrentDrawingTargetContext.Rect.MaxY) + judgeOffset;
             var scale = target.Editor.Setting.VerticalDisplayScale;
             var bpmList = target.Editor.Fumen.BpmList;
             var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
-            var soflanCurrentTime = convertToY(currentTGrid);
-            var height = target.Rect.Height;
+            //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
+            var height = target.CurrentDrawingTargetContext.Rect.Height;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToYNonSoflan(TGrid tgrid)
@@ -112,9 +113,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            double convertToY(TGrid tgrid)
+            double convertToY(TGrid tgrid, SoflanList soflans)
             {
-                return target.ConvertToY(tgrid);
+                return target.ConvertToY(tgrid, soflans);
             }
 
             void _Draw(T obj)
@@ -147,8 +148,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 if (isEnableSoflan)
                 {
-                    toTime = convertToY(obj.TGrid);
-                    currentTime = soflanCurrentTime;
+                    var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+                    toTime = convertToY(obj.TGrid, soflanList);
+                    currentTime = convertToY(currentTGrid, soflanList);
                 }
                 else
                 {
@@ -160,10 +162,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var precent = (currentTime - fromTime) / appearOffsetTime;
                 var timeY = baseY + height * (1 - precent);
 
-                if (timeY > target.Rect.MaxY)
+                if (timeY > target.CurrentDrawingTargetContext.Rect.MaxY)
                     return;
                 //todo CheckVisible()这里是考虑到光焰那个Bell会残留，因为画轴速度太快（感觉是个bug但后面有精力再坐牢吧）
-                if (timeY < target.Rect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
+                if (timeY < target.CurrentDrawingTargetContext.Rect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
                     return;
 
                 var fromXUnit = 0d;
@@ -180,7 +182,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         case OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums.Target.Player:
                             var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(pallete.Speed, 1));
                             var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
-                            if (targetAudioTime < TimeSpan.Zero) 
+                            if (targetAudioTime < TimeSpan.Zero)
                                 targetAudioTime = TimeSpan.Zero;
 
                             toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);
@@ -237,7 +239,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var toX = convertToX(toXUnit);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
-                if (!(target.Rect.MinX <= timeX && timeX <= target.Rect.MaxX))
+                if (!(target.CurrentDrawingTargetContext.Rect.MinX <= timeX && timeX <= target.CurrentDrawingTargetContext.Rect.MaxX))
                     return;
 
                 var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
@@ -267,11 +269,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (target.Editor.IsDesignMode)
             {
                 foreach (var obj in objs)
-                    DrawEditorMode(target, obj);
+                    DrawDesignMode(target, obj);
             }
             else
             {
-                DrawPreviewMode(objs);
+                DrawPreviewMode(target, objs);
             }
 
             foreach (var item in selectedDrawList)

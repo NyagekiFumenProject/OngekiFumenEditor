@@ -12,7 +12,6 @@ using System.Numerics;
 using OngekiFumenEditor.Utils.ObjectPool;
 using EarcutNet;
 using System.Drawing;
-using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -31,12 +30,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         LineVertex[] vertices = new LineVertex[2];
 
-        public DrawPlayableAreaHelper()
+        public void Initalize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
-            circleDrawing = IoC.Get<ICircleDrawing>();
-            stringDrawing = IoC.Get<IStringDrawing>();
+            polygonDrawing = impl.PolygonDrawing;
+            lineDrawing = impl.SimpleLineDrawing;
+            circleDrawing = impl.CircleDrawing;
+            stringDrawing = impl.StringDrawing;
 
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -73,7 +72,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             var color = new Vector4(1, 0, 0, 1);
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
-            vertices[1] = new(new(target.ViewWidth, y), color, VertexDash.Solider);
+            vertices[1] = new(new(target.CurrentDrawingTargetContext.Rect.Width, y), color, VertexDash.Solider);
 
             lineDrawing.Draw(target, vertices, 3);
         }
@@ -84,7 +83,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             var fumen = target.Editor.Fumen;
-            var soflanList = fumen.Soflans.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList);
+            //todo 暂时显示默认的变速组
+            var soflanList = fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList);
 
             var minIdx = soflanList.LastOrDefaultIndexByBinarySearch(minTGrid, x => x.TGrid);
             var maxIdx = soflanList.LastOrDefaultIndexByBinarySearch(maxTGrid, x => x.TGrid);
@@ -139,15 +139,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             var fumen = target.Editor.Fumen;
             var currentTGrid = target.Editor.GetCurrentTGrid();
+            var soflanGroup = target.CurrentDrawingTargetContext.CurrentSoflanList;
 
             void EnumeratePoints(bool isRight, List<Vector2> result)
             {
                 var defaultX = isRight ? defaultRightX : defaultLeftX;
                 var type = isRight ? LaneType.WallRight : LaneType.WallLeft;
-                var ranges = CombinableRange<int>.CombineRanges(fumen.Lanes.GetVisibleStartObjects(minTGrid, maxTGrid)
+                using var _d = CombinableRange<int>.CombineRanges(fumen.Lanes.GetVisibleStartObjects(minTGrid, maxTGrid)
                     .Where(x => x.LaneType == type)
                     .Select(x => new CombinableRange<int>(x.MinTGrid.TotalGrid, x.MaxTGrid.TotalGrid)))
-                    .OrderBy(x => isRight ? x.Max : x.Min).ToArray();
+                    .OrderBy(x => isRight ? x.Max : x.Min).ToListWithObjectPool(out var ranges);
 
                 var points = ObjectPool<HashSet<float>>.Get();
                 points.Clear();
@@ -158,7 +159,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 void appendPoint2(List<Vector2> list, float totalXGrid, float totalTGrid)
                 {
                     var px = (float)XGridCalculator.ConvertXGridToX(totalXGrid / XGrid.DEFAULT_RES_X, target.Editor);
-                    var py = (float)target.ConvertToY(totalTGrid / TGrid.DEFAULT_RES_T);
+                    var py = (float)target.ConvertToY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
 
                     appendPoint3(list, px, py, list.Count);
                 }
@@ -182,15 +183,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     appendPoint2(list, xGrid.TotalGrid, y);
                 }
 
-                for (int i = 0; i < ranges.Length; i++)
+                for (int i = 0; i < ranges.Count; i++)
                 {
                     var curRange = ranges[i];
                     var nextRange = ranges.ElementAtOrDefault(i + 1);
 
-                    var lanes = fumen.Lanes
+                    using var _d2 = fumen.Lanes
                         .GetVisibleStartObjects(TGrid.FromTotalGrid(curRange.Min), TGrid.FromTotalGrid(curRange.Max))
                         .Where(x => x.LaneType == type)
-                        .ToArray();
+                        .ToListWithObjectPool(out var lanes);
 
                     var polylines = lanes
                         .SelectMany(x =>
@@ -230,14 +231,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         );
                 }
 
-                var sortedPoints = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToList();
+                using var _d3 = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToListWithObjectPool(out var sortedPoints);
 
                 sortedPoints.InsertBySortBy(minTGrid.TotalGrid, x => x);
                 sortedPoints.InsertBySortBy(maxTGrid.TotalGrid, x => x);
 
-                var segments = sortedPoints.SequenceConsecutivelyWrap(2).Select(x => (x.FirstOrDefault(), x.LastOrDefault())).ToArray();
-
-                foreach ((var fromY, var toY) in segments)
+                foreach ((var fromY, var toY) in sortedPoints.SequenceConsecutivelyWrap(2).Select(x => (x.FirstOrDefault(), x.LastOrDefault())))
                 {
                     var midY = (fromY + toY) / 2;
                     var midTGrid = TGrid.FromTotalGrid((int)midY);
@@ -248,7 +247,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             .Where(x => x.LaneType == type)
                             .Select(x => (x.CalulateXGrid(midTGrid), x))
                             .FilterNullBy(x => x.Item1)
-                            .ToArray();
+                            /*.ToArray()*/;
 
                     //选取轨道，如果存在多个轨道(即轨道交叉冲突了)，那么就按左右边规则选取一个
                     (_, var pickLane) = pickables.IsEmpty() ? default : (isRight ? pickables.MaxBy(x => x.Item1) : pickables.MinBy(x => x.Item1));
@@ -285,14 +284,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             .Where(x => x.LaneType == type)
                             .Where(x =>
                             {
-                                var laneMinY = target.ConvertToY(x.MinTGrid);
-                                var laneMaxY = target.ConvertToY(x.MaxTGrid);
+                                var laneMinY = target.ConvertToY(x.MinTGrid, soflanGroup);
+                                var laneMaxY = target.ConvertToY(x.MaxTGrid, soflanGroup);
 
                                 return laneMinY <= actualY && actualY <= laneMaxY;
                             })
                             .Select(x => (x.CalulateXGrid(tGrid), x))
                             .FilterNullBy(x => x.Item1)
-                            .ToArray();
+                            /*.ToArray()*/;
 
                     (_, var pickLane) = pickables.IsEmpty() ? default : (isRight ? pickables.MaxBy(x => x.Item1) : pickables.MinBy(x => x.Item1));
 
@@ -314,9 +313,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 if (prevOpt is OpenTK.Mathematics.Vector2 prev)
                                 {
                                     var curPx = (float)XGridCalculator.ConvertXGridToX(cur.X / XGrid.DEFAULT_RES_X, target.Editor);
-                                    var curPy = (float)target.ConvertToY(cur.Y / TGrid.DEFAULT_RES_T);
+                                    var curPy = (float)target.ConvertToY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
                                     var prevPx = (float)XGridCalculator.ConvertXGridToX(prev.X / XGrid.DEFAULT_RES_X, target.Editor);
-                                    var prevPy = (float)target.ConvertToY(prev.Y / TGrid.DEFAULT_RES_T);
+                                    var prevPy = (float)target.ConvertToY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                                     var nowPy = actualY;
                                     var nowPx = (float)MathUtils.CalculateXFromTwoPointFormFormula(nowPy, prevPx, prevPy, curPx, curPy);
@@ -339,8 +338,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (minTGrid <= currentTGrid && currentTGrid <= maxTGrid)
                 {
-                    var maxY = target.ConvertToY(maxTGrid);
-                    var actualMaxY = target.Rect.TopLeft.Y;
+                    var maxY = target.ConvertToY(maxTGrid, soflanGroup);
+                    var actualMaxY = target.CurrentDrawingTargetContext.Rect.TopLeft.Y;
 
                     var maxDiff = maxY - actualMaxY;
                     if (Math.Abs(maxDiff) >= 1)
@@ -353,8 +352,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         }
                     }
 
-                    var minY = target.ConvertToY(minTGrid);
-                    var actualMinY = target.Rect.ButtomRight.Y;
+                    var minY = target.ConvertToY(minTGrid, soflanGroup);
+                    var actualMinY = target.CurrentDrawingTargetContext.Rect.ButtomRight.Y;
 
                     var minDiff = minY - actualMinY;
                     if (Math.Abs(minDiff) >= 1)
@@ -433,7 +432,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             tessellateList.Clear();
             Earcut.Tessellate(tessellatePoints, idxList, tessellateList);
 
-            polygonDrawing.Begin(target, OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+            polygonDrawing.Begin(target, Primitive.Triangles);
             foreach (var seq in tessellateList.SequenceWrap(3))
             {
                 foreach (var idx in seq)

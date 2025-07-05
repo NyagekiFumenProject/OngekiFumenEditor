@@ -12,9 +12,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         };
 
         public AutoPlayFaderLaneEditorObjectDrawingTarget() : base(
-            LoadTextrueFromDefaultResource("laneStart.png"),
-            LoadTextrueFromDefaultResource("laneNext.png"),
-            LoadTextrueFromDefaultResource("laneEnd.png")
+            "laneStart.png",
+            "laneNext.png",
+            "laneEnd.png"
             )
         {
         }

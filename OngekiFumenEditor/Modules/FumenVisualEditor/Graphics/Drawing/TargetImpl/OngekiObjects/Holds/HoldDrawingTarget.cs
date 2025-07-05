@@ -30,9 +30,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector4 colorHoldWallLeft;
         private Vector4 colorHoldWallRight;
 
-        public HoldDrawingTarget() : base()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<ILineDrawing>();
+            lineDrawing = impl.LineDrawing;
 
             Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
             RebuildColors();
@@ -69,6 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var start = hold.ReferenceLaneStart;
             var holdEnd = hold.HoldEnd;
             var laneType = start?.LaneType;
+            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(hold);
 
             var color = laneType switch
             {
@@ -85,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 Vector2 PostPoint2(double tGridUnit, double xGridUnit)
                 {
                     var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
-                    var y = (float)target.ConvertToY(tGridUnit);
+                    var y = (float)target.ConvertToY(tGridUnit, soflanList);
 
                     return new(x, y);
                 }

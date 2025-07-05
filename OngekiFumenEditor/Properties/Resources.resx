@@ -1695,9 +1695,6 @@
   <data name="BellBulletCountOverLimit_Sep" xml:space="preserve">
     <value>, </value>
   </data>
-  <data name="ChangeColor" xml:space="preserve">
-    <value>Change...</value>
-  </data>
   <data name="NamedColorChangeTitle" xml:space="preserve">
     <value>Changing {0}</value>
   </data>
@@ -2020,6 +2017,36 @@
     <value>Keywords filter:</value>
   </data>
   <data name="ApplyFilter" xml:space="preserve">
-    <value />
+    <value>Apply filter</value>
+  </data>
+  <data name="HideWallLaneWhenEnablePlayField" xml:space="preserve">
+    <value>Hide all wall lanes when play field drawing is enable in preview mode</value>
+  </data>
+  <data name="LaneBlockOnMultipleWalls" xml:space="preserve">
+    <value>Lane block start wall ({0}) is different than end wall ({1})</value>
+  </data>
+  <data name="NewItemGroup" xml:space="preserve">
+    <value>New item group</value>
+  </data>
+  <data name="ChangeColor" xml:space="preserve">
+    <value>Change color</value>
+  </data>
+  <data name="SoflanGroupListViewer" xml:space="preserve">
+    <value>Soflan Group</value>
+  </data>
+  <data name="CurrentDisplaySelectedSoflanPointList" xml:space="preserve">
+    <value>Current {0} soflan point list:</value>
+  </data>
+  <data name="EditorShowSoflanPointList" xml:space="preserve">
+    <value>Editor show soflan point list</value>
+  </data>
+  <data name="SelectRenderManagerImpl" xml:space="preserve">
+    <value>Select render manager implement: </value>
+  </data>
+  <data name="SkiaRenderBackend" xml:space="preserve">
+    <value>Skia render backend: </value>
+  </data>
+  <data name="ReturnStartTimeAfterPause" xml:space="preserve">
+    <value>Restore the current time to before playback time when editor paused</value>
   </data>
 </root>

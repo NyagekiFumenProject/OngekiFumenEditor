@@ -1,23 +1,22 @@
 ﻿using Caliburn.Micro;
-using ControlzEx.Standard;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
-using OpenTK.Wpf;
 using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
-using static OngekiFumenEditor.Kernel.Graphics.IDrawingContext;
+using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 {
@@ -25,8 +24,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
     {
         private float viewWidth;
         private float viewHeight;
-        private int renderViewWidth;
-        private int renderViewHeight;
         private IPerfomenceMonitor performenceMonitor;
         private Stopwatch sw;
         private ISamplePeak samplePeak;
@@ -36,12 +33,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private PeakPointCollection rawPeakData;
         private PeakPointCollection usingPeakData;
-
-        public VisibleRect Rect { get; private set; }
-
-        public Matrix4 ProjectionMatrix { get; private set; }
-        public Matrix4 ViewMatrix { get; private set; }
-        public Matrix4 ViewProjectionMatrix { get; private set; }
 
         public IPerfomenceMonitor PerfomenceMonitor => performenceMonitor;
 
@@ -116,6 +107,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private float actualRenderInterval = float.MaxValue;
         private int limitFPS = Properties.AudioPlayerToolViewerSetting.Default.LimitFPS;
+        private IRenderManagerImpl renderImpl;
+
         public int LimitFPS
         {
             get => limitFPS;
@@ -130,6 +123,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public FumenVisualEditorViewModel EditorViewModel => Editor;
 
+        public DrawingTargetContext CurrentDrawingTargetContext { get; private set; } = new();
+
+        public IRenderContext RenderContext { get; private set; }
+
         private void UpdateActualRenderInterval()
         {
             actualRenderInterval = LimitFPS switch
@@ -139,45 +136,20 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             };
         }
 
-        private void RecalcViewProjectionMatrix()
-        {
-            ProjectionMatrix =
-                Matrix4.CreateOrthographic(viewWidth, viewHeight, -1, 1);
-            ViewMatrix =
-                Matrix4.CreateTranslation(new Vector3(0, 0, 0)); //todo
-
-            ViewProjectionMatrix = ViewMatrix * ProjectionMatrix;
-        }
-
-        public void OnRenderSizeChanged(GLWpfControl glView, SizeChangedEventArgs sizeArg)
-        {
-            Log.LogDebug($"new size: {sizeArg.NewSize} , glView.RenderSize = {glView.RenderSize}");
-            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
-
-            viewWidth = (float)sizeArg.NewSize.Width;
-            viewHeight = (float)sizeArg.NewSize.Height;
-            renderViewWidth = (int)(sizeArg.NewSize.Width * dpiX);
-            renderViewHeight = (int)(sizeArg.NewSize.Height * dpiY);
-
-            RecalcViewProjectionMatrix();
-        }
-
-        public async void PrepareRenderLoop(GLWpfControl glView)
+        public async void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl impl)
         {
             Log.LogDebug($"ready.");
-            await IoC.Get<IDrawingManager>().CheckOrInitGraphics();
 
-            InitRender();
-            var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-            var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+            await impl.WaitForInitializationIsDone();
+            RenderContext = await impl.GetRenderContext(renderControl);
 
-            viewWidth = (float)glView.ActualWidth;
-            viewHeight = (float)glView.ActualHeight;
-            renderViewWidth = (int)(glView.ActualWidth * dpiX);
-            renderViewHeight = (int)(glView.ActualHeight * dpiY);
+            samplePeak = IoC.Get<ISamplePeak>();
+            WaveformDrawing = IoC.Get<IWaveformDrawing>();
+            WaveformDrawing.Initialize(renderImpl);
+            initTask.SetResult();
 
-            RecalcViewProjectionMatrix();
+            viewWidth = (float)renderControl.ActualWidth;
+            viewHeight = (float)renderControl.ActualHeight;
 
             //暂时没有需要显示检测的必要?
             //performenceMonitor = IoC.Get<IPerfomenceMonitor>();
@@ -185,14 +157,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             sw = new Stopwatch();
             sw.Start();
-            glView.Render += Render;
-        }
-
-        private void InitRender()
-        {
-            samplePeak = IoC.Get<ISamplePeak>();
-            WaveformDrawing = IoC.Get<IWaveformDrawing>();
-            initTask.SetResult();
         }
 
         private void PrepareWaveform(IAudioPlayer player)
@@ -250,9 +214,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(TimeSpan ts)
         {
-#if DEBUG
-            GLUtility.CheckError();
-#endif
+            if (RenderContext is null)
+                return;
             //limit
             if (LimitFPS > 0)
             {
@@ -261,8 +224,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 sw.Restart();
             }
 
-            GL.ClearColor(16 / 255f, 16 / 255f, 16 / 255f, 1f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            RenderContext.CleanRender(this, new(16 / 255f, 16 / 255f, 16 / 255f, 1f));
 
             if (Editor is null || !IsShowWaveform)
                 return;
@@ -270,19 +232,45 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             PerfomenceMonitor.PostUIRenderTime(ts);
             PerfomenceMonitor.OnBeforeRender();
 
-            GL.Viewport(0, 0, renderViewWidth, renderViewHeight);
+            RenderContext.BeforeRender(this);
 
             UpdateDrawingContext();
+
+            //var lineDrawing = renderImpl.SimpleLineDrawing;
+
+            //void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
+            //{
+            //    lineDrawing.Draw(this, [new(new(p.X - crossWidth, p.Y), color, VertexDash.Solider), new(new(p.X + crossWidth, p.Y), color, VertexDash.Solider)], 4);
+            //    lineDrawing.Draw(this, [new(new(p.X, p.Y - crossWidth), color, VertexDash.Solider), new(new(p.X, p.Y + crossWidth), color, VertexDash.Solider)], 4);
+            //}
+
+            //printCross(new(-viewWidth / 2, -viewHeight / 2), new(1, 0, 0, 1), 20);
+            //printCross(new(0, 0), new(0, 1, 0, 1), 20);
+            //printCross(new(viewWidth / 2, viewHeight / 2), new(0, 0, 1, 1), 20);
+
+            //var beamDrawing = IoC.Get<IRenderManager>().BeamDrawing;
+            //using var img = ResourceUtils.OpenReadTextureFromFile(@"C:\Users\mikir\Desktop\OngekiFumenEditor\Resources\editor\beamBody.png");
+            //beamDrawing.Draw(this, img, 26, viewWidth / 2, 1, Vector4.One, 0, 0);
 
             if (usingPeakData is not null)
                 WaveformDrawing.Draw(this, usingPeakData);
 
             PerfomenceMonitor.OnAfterRender();
+            RenderContext.AfterRender(this);
         }
 
         private void UpdateDrawingContext()
         {
-            Rect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
+            var projectionMatrix =
+                Matrix4.CreateOrthographic(viewWidth, viewHeight, -1, 1);
+            var viewMatrix = Matrix4.CreateTranslation(new Vector3(0, 0, 0));
+
+            CurrentDrawingTargetContext.ViewMatrix = viewMatrix;
+            CurrentDrawingTargetContext.ProjectionMatrix = projectionMatrix;
+
+            CurrentDrawingTargetContext.Rect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
+            CurrentDrawingTargetContext.ViewWidth = viewWidth;
+            CurrentDrawingTargetContext.ViewHeight = viewHeight;
 
             if (AudioPlayer?.IsPlaying ?? false)
                 CurrentTime = AudioPlayer.CurrentTime;
@@ -294,6 +282,58 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var editorAudioTime = TGridCalculator.ConvertTGridToAudioTime(tGrid, Editor);
                 CurrentTime = editorAudioTime;
             }
+        }
+
+        public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
+        {
+            if (executionContext.Source is not ContentControl contentControl)
+                return; //todo throw exception
+            //check render control is created and shown.
+            if (renderImpl != null)
+                return;
+
+            renderImpl = IoC.Get<IRenderManager>().GetCurrentRenderManagerImpl();
+            var renderControl = renderImpl.CreateRenderControl();
+            await renderImpl.InitializeRenderControl(renderControl);
+
+            Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is created");
+
+            renderControl.Loaded += RenderControl_Loaded;
+            renderControl.Unloaded += RenderControl_UnLoaded;
+            renderControl.SizeChanged += RenderControl_SizeChanged;
+
+            contentControl.Content = renderControl;
+
+            PrepareRenderLoop(renderControl, renderImpl);
+        }
+
+        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var renderControl = sender as FrameworkElement;
+            Log.LogDebug($"renderControl new size: {e.NewSize} , renderControl.RenderSize = {renderControl.RenderSize}");
+
+            viewWidth = (float)e.NewSize.Width;
+            viewHeight = (float)e.NewSize.Height;
+        }
+
+        private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
+        {
+            var renderControl = sender as FrameworkElement;
+            Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
+
+            RenderContext = await renderImpl.GetRenderContext(renderControl);
+            RenderContext.OnRender -= Render;
+            RenderContext.StopRendering();
+        }
+
+        private async void RenderControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            var renderControl = sender as FrameworkElement;
+            Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
+
+            RenderContext = await renderImpl.GetRenderContext(renderControl);
+            RenderContext.OnRender += Render;
+            RenderContext.StartRendering();
         }
     }
 }

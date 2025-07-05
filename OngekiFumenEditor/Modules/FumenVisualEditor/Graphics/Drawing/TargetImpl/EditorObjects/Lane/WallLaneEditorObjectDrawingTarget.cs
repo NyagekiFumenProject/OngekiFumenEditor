@@ -12,9 +12,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         };
 
         public WallLaneEditorObjectDrawingTarget() : base(
-            LoadTextrueFromDefaultResource("wallStart.png"),
-            LoadTextrueFromDefaultResource("wallNext.png"),
-            LoadTextrueFromDefaultResource("wallEnd.png")
+            "wallStart.png",
+            "wallNext.png",
+            "wallEnd.png"
             )
         {
         }

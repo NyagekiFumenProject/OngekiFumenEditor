@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
@@ -18,6 +19,7 @@ using System.Windows.Media.Imaging;
 using Caliburn.Micro;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
+using MahApps.Metro.Controls;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor;
@@ -27,25 +29,20 @@ using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.SplashScreen;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.DeadHandler;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
-using SevenZip.Compression.LZ;
-#if !DEBUG
-using System.Runtime.InteropServices;
-using System.Threading;
-using MahApps.Metro.Controls;
-using OngekiFumenEditor.UI.Dialogs;
-#endif
 
 namespace OngekiFumenEditor;
 
 public class AppBootstrapper : Gemini.AppBootstrapper
 {
 #if !DEBUG
-		public override bool IsPublishSingleFileHandled => true;
+    public override bool IsPublishSingleFileHandled => true;
 #endif
 
     public AppBootstrapper() : this(true)
@@ -311,6 +308,12 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         }
 
         IoC.Get<IProgramUpdater>().CheckUpdatable().NoWait();
+
+        //var fumen = await IoC.Get<IFumenParserManager>().Deserialize("F:\\refresh\\package\\option\\A016\\music\\music8185\\8185_10.ogkr");
+        //fumen.IndividualSoflanAreaMap.DebugDump();
+        //var isf = fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x).FirstOrDefault(x => x.Id == 2375);
+        //var queryPath = fumen.IndividualSoflanAreaMap.DebugFindDataQueryPath(isf);
+        //var soflanGroup = fumen.IndividualSoflanAreaMap.QuerySoflanGroup(new(-12, 0), new(10, 1440));
     }
 
     private void MainWindow_Closed(object sender, EventArgs e)
@@ -444,37 +447,37 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             sb.AppendLine("----------------------------");
             await FileLogOutput.WriteLog(sb.ToString());
 #if !DEBUG
-                var exceptionHandle = Marshal.GetExceptionPointers();
-                var dumpFile = string.Empty;
-                if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
-                {
-                    dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
-                    recHandle.Add(exceptionHandle);
-                }
-                await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin\n");
-                var resuceFolders = await FumenRescue.Rescue();
-                await FileLogOutput.WriteLog("FumenRescue.Rescue() End\n");
+            var exceptionHandle = Marshal.GetExceptionPointers();
+            var dumpFile = string.Empty;
+            if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
+            {
+                dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
+                recHandle.Add(exceptionHandle);
+            }
+            await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin\n");
+            var resuceFolders = await FumenRescue.Rescue();
+            await FileLogOutput.WriteLog("FumenRescue.Rescue() End\n");
 
-                var logFile = FileLogOutput.GetCurrentLogFile();
+            var logFile = FileLogOutput.GetCurrentLogFile();
 
-                var apartmentState = Thread.CurrentThread.GetApartmentState();
-                await FileLogOutput.WriteLog($"current apartmentState: {apartmentState}\n");
-                if (apartmentState == ApartmentState.STA)
+            var apartmentState = Thread.CurrentThread.GetApartmentState();
+            await FileLogOutput.WriteLog($"current apartmentState: {apartmentState}\n");
+            if (apartmentState == ApartmentState.STA)
+            {
+                var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
+                exceptionWindow.ShowDialog();
+            }
+            else
+            {
+                var result = Application.Current.Invoke(() =>
                 {
                     var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
-                    exceptionWindow.ShowDialog();
-                }
-                else
-                {
-                    var result = Application.Current.Invoke(() =>
-                    {
-                        var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
-                        return exceptionWindow.ShowDialog();
-                    });
-                }
+                    return exceptionWindow.ShowDialog();
+                });
+            }
 
-                exceptionHandling = true;
-                Environment.Exit(-1);
+            exceptionHandling = true;
+            Environment.Exit(-1);
 #else
             throw exception;
 #endif
@@ -501,6 +504,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         ipcThread?.Abort();
         IoC.Get<IAudioManager>().Dispose();
         await IoC.Get<ISchedulerManager>().Term();
+        await Log.WaitForAllLogWriteDone();
         FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
         base.OnExit(sender, e);
     }

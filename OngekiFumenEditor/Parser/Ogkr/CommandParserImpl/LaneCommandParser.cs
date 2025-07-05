@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 			connectObject.TGrid = new TGrid(dataArr[2], (int)dataArr[3]);
 			connectObject.XGrid = new XGrid(dataArr[4]);
 
-			if (connectObject is IColorfulLane colorfulLane)
+            if (connectObject is IColorfulLane colorfulLane)
 			{
 				var colorId = (int)dataArr[5];
 				colorfulLane.ColorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Id == colorId);
@@ -35,8 +35,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 			var laneRecordId = args.GetData<int>(1);
 			var laneObject = new T()
 			{
-				RecordId = laneRecordId
-			};
+				RecordId = laneRecordId,
+				IsTransparent = args.GetData<int>(7) > 0,
+            };
 
 			CommonParse(laneObject, args, fumen);
 			return laneObject;

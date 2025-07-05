@@ -1,4 +1,6 @@
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Kernel.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -6,7 +8,6 @@ using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
-using Texture = OngekiFumenEditor.Kernel.Graphics.Base.Texture;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -23,18 +24,16 @@ namespace OngekiFumenEditor.Utils
             return info.Stream;
         }
 
-        public static Texture OpenReadTextureFromResource(string relativeUrl)
+        public static IImage OpenReadTextureFromResource(IRenderManagerImpl impl, string relativeUrl)
         {
             using var stream = OpenReadResourceStream(relativeUrl);
-            using var bitmap = Image.FromStream(stream) as Bitmap;
-            return new Texture(bitmap);
+            return impl.LoadImageFromStream(stream);
         }
 
-        public static Texture OpenReadTextureFromFile(string path)
+        public static IImage OpenReadTextureFromFile(IRenderManagerImpl impl, string path)
         {
             using var stream = File.OpenRead(path);
-            using var bitmap = Image.FromStream(stream) as Bitmap;
-            return new Texture(bitmap);
+            return impl.LoadImageFromStream(stream);
         }
 
         static ResourceUtils()

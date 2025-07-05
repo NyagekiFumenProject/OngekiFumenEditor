@@ -13,26 +13,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Views
 		public AudioPlayerToolViewerView()
 		{
 			InitializeComponent();
-			IoC.Get<IDrawingManager>().CreateGraphicsContext(glView);
-		}
-
-		private void GLWpfControl_Ready()
-		{
-			Dispatcher.InvokeAsync(() =>
-			{
-				if (DataContext is IDrawingContext fumenPreviewer)
-				{
-					fumenPreviewer.PrepareRenderLoop(glView);
-				}
-			});
-		}
-
-		private void GLWpfControl_SizeChanged(object sender, SizeChangedEventArgs e)
-		{
-			if (DataContext is IDrawingContext fumenPreviewer)
-			{
-				fumenPreviewer.OnRenderSizeChanged(glView, e);
-			}
 		}
 	}
 }

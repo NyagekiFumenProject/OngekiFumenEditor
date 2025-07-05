@@ -90,7 +90,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         }
 
         // Add mouse click events directly on the GlView.
-        var glTriggers = Interaction.GetTriggers(AssociatedObject.glView);
+        var glTriggers = Interaction.GetTriggers(AssociatedObject.renderControlHost);
         foreach (var (eventName, actionGenerator) in ClickTriggers) {
             var glTrigger = glTriggers.FirstOrDefault(t => t is EventTrigger et && et.EventName == eventName);
 
@@ -123,7 +123,7 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         NewKeyTriggers.Clear();
         OldKeyTriggers.Clear();
 
-        var glTriggers = Interaction.GetTriggers(AssociatedObject.glView);
+        var glTriggers = Interaction.GetTriggers(AssociatedObject.renderControlHost);
         foreach (var (eventName, action) in GeneratedClickTriggerActions) {
             var glTrigger = glTriggers.First(t => t is EventTrigger et && et.EventName == eventName);
             glTrigger.Actions.Remove(action);

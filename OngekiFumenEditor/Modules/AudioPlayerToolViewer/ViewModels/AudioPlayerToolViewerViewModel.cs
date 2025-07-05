@@ -90,6 +90,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         }
 
         private IFumenSoundPlayer fumenSoundPlayer = default;
+        private TimeSpan playStartTime;
+
         public IFumenSoundPlayer FumenSoundPlayer
         {
             get => fumenSoundPlayer;
@@ -202,6 +204,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             //Editor.UnlockAllUserInteraction();
             FumenSoundPlayer?.Stop();
             AudioPlayer?.Stop();
+            if (EditorGlobalSetting.Default.ReturnStartTimeAfterPause)
+            {
+                //recovery editor current time
+                Process(playStartTime);
+            }
         }
 
         public void OnSliderValueStartChanged()
@@ -235,6 +242,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 Log.LogDebug($"seek to {tgrid}({seekTo})");
                 AudioPlayer.Seek(seekTo, false);
                 FumenSoundPlayer.Seek(seekTo, false);
+                playStartTime = seekTo;
             }
         }
 

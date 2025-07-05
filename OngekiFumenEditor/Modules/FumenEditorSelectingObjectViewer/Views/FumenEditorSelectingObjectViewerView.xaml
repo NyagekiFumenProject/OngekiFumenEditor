@@ -7,9 +7,11 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
     cal:Message.Attach="[Key Delete]=[Action OnCancelItemSelectedObjects($dataContext)];"
     d:Background="White"
@@ -18,12 +20,16 @@
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:GetObjectSoflanGroupConverter x:Key="GetObjectSoflanGroupConverter" />
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <ListView
+            x:Name="listView"
             Grid.Row="1"
             Background="Transparent"
             BorderBrush="Transparent"
@@ -63,6 +69,24 @@
                     <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=TGrid}">
                         <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate [ObjectTime]}">
                         </GridViewColumnHeader>
+                    </GridViewColumn>
+
+
+                    <GridViewColumn Width="100">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="SoflanGroup">
+                        </GridViewColumnHeader>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label>
+                                    <Label.Content>
+                                        <MultiBinding Converter="{StaticResource GetObjectSoflanGroupConverter}">
+                                            <Binding Path="." />
+                                            <Binding ElementName="listView" Path="DataContext.Editor" />
+                                        </MultiBinding>
+                                    </Label.Content>
+                                </Label>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
                     <GridViewColumn

@@ -34,7 +34,16 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 
 			soflan.TGrid = tgridRange[0];
 			soflan.EndTGrid = tgridRange[1];
-		}
+
+            using var d = data.LastOrDefault().GetValuesMapWithDisposable(out var map);
+			if (map.TryGetValue("SoflanGroup",out var soflanGroupStr))
+			{
+				if (int.TryParse(soflanGroupStr,out var soflanGroup))
+				{
+					soflan.SoflanGroup = soflanGroup;
+                }
+			}
+        }
 	}
 
 	[Export(typeof(INyagekiCommandParser))]

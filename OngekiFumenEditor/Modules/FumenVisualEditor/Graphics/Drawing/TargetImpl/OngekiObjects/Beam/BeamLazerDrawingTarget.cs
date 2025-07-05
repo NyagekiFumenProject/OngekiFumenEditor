@@ -1,48 +1,34 @@
-﻿using OngekiFumenEditor.Base;
+﻿using Caliburn.Micro;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Kernel.Graphics.Base;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
     internal class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
-        private DefaultBeamLazerTextureDrawing lazerDrawing;
-        private Texture textureBody;
-        private Texture textureWarn;
+        private IBeamDrawing lazerDrawing;
+        private IImage textureBody;
+        private IImage pixelImg;
+        private IImage textureWarn;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "BMS", "OBS" };
         public override DrawingVisible DefaultVisible => DrawingVisible.Preview;
 
         public override int DefaultRenderOrder => 300;
 
-        public BeamLazerDrawingTarget()
-        {
-            lazerDrawing = new();
-
-            void load(ref Texture t, string name)
-            {
-                t = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + name);
-            }
-
-            load(ref textureBody, "beamBody.png");
-            textureBody.TextureWrapT = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
-
-            load(ref textureWarn, "beamWarn.png");
-            textureWarn.TextureWrapS = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
-            textureWarn.TextureWrapT = OpenTK.Graphics.OpenGL.TextureWrapMode.Repeat;
-        }
-
         public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
         {
             //todo 宽度目测的，需要精确计算
-            var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.ViewWidth, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
+            var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.CurrentDrawingTargetContext.Rect.Width, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
             var width = xGridWidth * 3f * obj.WidthId;
 
             var beginTGrid = obj.MinTGrid;
@@ -112,14 +98,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 IBeamObject curBeamObj = obj.Children.LastOrDefault(x => curTGrid > x.TGrid) as IBeamObject ?? obj;
                 var curObliqueTopXGrid = obj.XGrid.TotalUnit + curBeamObj.ObliqueSourceXGridOffset.TotalUnit;
 
-                var currentY = target.ConvertToY(target.Editor.GetCurrentTGrid());
+                //beam not support SoflanGroup
+                var currentY = target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid());
                 var obliqueTopX = (float)XGridCalculator.ConvertXGridToX(curObliqueTopXGrid, target.Editor);
-                var obliqueTopY = currentY - judgeOffset + target.ViewHeight;
+                var obliqueTopY = currentY - judgeOffset + target.CurrentDrawingTargetContext.Rect.Height;
 
                 x = (obliqueTopX + currentX) / 2;
 
                 rotate = (float)Math.Atan((currentX - obliqueTopX) / (obliqueTopY - currentY));
             }
+
+            var warnProgress = 0f;
 
             if (prepareWarn)
             {
@@ -128,24 +117,44 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(leadAudioTime, target.Editor);
                 if (leadInTGrid is null)
                     leadInTGrid = TGrid.Zero;
-                var warnProgress = MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
-                if (warnProgress < 0) warnProgress = -1;
-                lazerDrawing.Draw(target, textureWarn, (int)width, x, (float)warnProgress, new(1, 215 / 255.0f, 0, 0.5f), rotate, judgeOffset);
+
+                warnProgress = (float)MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
+                var a = MathUtils.SmoothStep(0.0f, 0.25f, warnProgress);
+                var warnColor = new OpenTK.Mathematics.Vector4(1, 215 / 255.0f, 0, 0.5f * a);
+
+                lazerDrawing.Draw(target, pixelImg, (int)width, x, (float)warnProgress, warnColor, rotate, judgeOffset);
             }
 
             lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One, rotate, judgeOffset);
+            //Log.LogDebug($"a\nx:{x:F2}, progress:{progress:F2}, warnProgress:{warnProgress:F2}, rotate:{rotate:F2}");
         }
 
         public void Dispose()
         {
-            lazerDrawing?.Dispose();
-            lazerDrawing = default;
-
             textureBody?.Dispose();
             textureBody = default;
 
             textureWarn?.Dispose();
             textureWarn = default;
+
+            pixelImg?.Dispose();
+            pixelImg = default;
+        }
+
+        public override void Initialize(IRenderManagerImpl impl)
+        {
+            lazerDrawing = impl.BeamDrawing;
+
+            IImage load(string name) => ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + name);
+
+            textureBody = load("beamBody.png");
+            textureBody.TextureWrapT = TextureWrapMode.Repeat;
+
+            pixelImg = load("pixel.png");
+
+            textureWarn = load("beamWarn.png");
+            textureWarn.TextureWrapS = TextureWrapMode.Repeat;
+            textureWarn.TextureWrapT = TextureWrapMode.Repeat;
         }
     }
 }

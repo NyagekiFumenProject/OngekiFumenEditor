@@ -1,6 +1,5 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
-using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -26,16 +25,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private ISimpleLineDrawing lineDrawing;
         private IPolygonDrawing polygonDrawing;
 
-        private VertexDash dash = new()
-        {
-            DashSize = 8,
-            GapSize = 4
-        };
+        private VertexDash dash = new(8,4);
 
-        public DrawSelectingRangeHelper()
+        public void Initalize(IRenderManagerImpl impl)
         {
-            lineDrawing = IoC.Get<ISimpleLineDrawing>();
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
+            lineDrawing = impl.SimpleLineDrawing;
+            polygonDrawing = impl.PolygonDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target)
@@ -44,22 +39,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             RangeColors colors;
-            if (selectionArea.SelectionAreaKind == SelectionAreaKind.Select) {
-                if (selectionArea.FilterFunc is not null) {
+            if (selectionArea.SelectionAreaKind == SelectionAreaKind.Select)
+            {
+                if (selectionArea.FilterFunc is not null)
+                {
                     colors = SelectFiltered;
                 }
-                else {
+                else
+                {
                     colors = SelectAll;
                 }
-            } else if (selectionArea.SelectionAreaKind == SelectionAreaKind.Delete) {
-                if (selectionArea.FilterFunc is not null) {
+            }
+            else if (selectionArea.SelectionAreaKind == SelectionAreaKind.Delete)
+            {
+                if (selectionArea.FilterFunc is not null)
+                {
                     colors = DeleteFiltered;
                 }
-                else {
+                else
+                {
                     colors = DeleteAll;
                 }
             }
-            else {
+            else
+            {
                 colors = SelectAll;
             }
 
@@ -70,7 +73,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var centerX = (leftX + rightX) / 2;
             var centerY = (topY + buttomY) / 2;
 
-            polygonDrawing.Begin(target, PrimitiveType.TriangleStrip);
+            polygonDrawing.Begin(target, Primitive.TriangleStrip);
             {
                 polygonDrawing.PostPoint(new(leftX, buttomY), colors.RectColor);
                 polygonDrawing.PostPoint(new(centerX, centerY), colors.RectColor);

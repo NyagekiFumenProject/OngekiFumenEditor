@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing
@@ -7,5 +8,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 	{
 		public abstract IWaveformDrawingOption Options { get; }
 		public abstract void Draw(IWaveformDrawingContext target, PeakPointCollection samplePeak);
-	}
+        public abstract void Initialize(IRenderManagerImpl impl);
+    }
 }

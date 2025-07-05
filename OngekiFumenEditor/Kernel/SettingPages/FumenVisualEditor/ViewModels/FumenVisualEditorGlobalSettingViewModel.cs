@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Gemini.Framework.Languages;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Properties;
@@ -47,7 +48,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
             }, color =>
             {
                 Setting.PlayFieldForegroundColor = color.ToDrawingColor().ToArgb();
-            }, "设置颜色");
+            }, Resources.ChangeColor);
             dialog.Show();
         }
 
@@ -59,7 +60,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
             }, color =>
             {
                 Setting.PlayFieldBackgroundColor = color.ToDrawingColor().ToArgb();
-            }, "设置颜色");
+            }, Resources.ChangeColor);
             dialog.Show();
         }
     }

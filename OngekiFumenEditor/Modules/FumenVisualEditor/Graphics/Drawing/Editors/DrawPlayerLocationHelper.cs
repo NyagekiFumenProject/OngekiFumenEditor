@@ -6,25 +6,24 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 
 public class DrawPlayerLocationHelper
 {
-    private readonly (Vector2 size, Vector2 position, float rotation)[] arr = { default };
-    private readonly Texture texture;
-    private readonly ITextureDrawing textureDrawing;
+    private (Vector2 size, Vector2 position, float rotation, Vector4 color)[] arr = { default };
+    private IImage texture;
+    private ITextureDrawing textureDrawing;
     private bool enableShowPlayerLocation;
-    private readonly Vector2 size;
+    private Vector2 size;
 
-    public DrawPlayerLocationHelper()
+    public void Initalize(IRenderManagerImpl impl)
     {
-        textureDrawing = IoC.Get<ITextureDrawing>();
+        textureDrawing = impl.TextureDrawing;
         arr[0].rotation = 0f;
 
-        texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\playerLoc.png");
+        texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\playerLoc.png");
         if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("playerLoc", out size, out _))
             size = new Vector2(48, 48);
 
@@ -60,7 +59,7 @@ public class DrawPlayerLocationHelper
         var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
 
         var x = XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-        var y = target.ConvertToY(tGrid);
+        var y = target.ConvertToY(tGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
 
         arr[0].position = new Vector2((float)x, (float)y);
         arr[0].size = size;

@@ -47,5 +47,11 @@
     <Setting Name="DisableStringRendererAntialiasing" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="DefaultRenderManagerImplementName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OpenGL</Value>
+    </Setting>
+    <Setting Name="SkiaRenderBackend" Type="System.String" Scope="User">
+      <Value Profile="(Default)">CPU</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -196,7 +196,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似  的本地化字符串。
+        ///   查找类似 Apply filter 的本地化字符串。
         /// </summary>
         public static string ApplyFilter {
             get {
@@ -871,7 +871,7 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Change... 的本地化字符串。
+        ///   查找类似 Change color 的本地化字符串。
         /// </summary>
         public static string ChangeColor {
             get {
@@ -1366,6 +1366,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Current {0} soflan point list: 的本地化字符串。
+        /// </summary>
+        public static string CurrentDisplaySelectedSoflanPointList {
+            get {
+                return ResourceManager.GetString("CurrentDisplaySelectedSoflanPointList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Offset current time display 的本地化字符串。
         /// </summary>
         public static string CurrentTimeOffset {
@@ -1785,6 +1794,15 @@ namespace OngekiFumenEditor.Properties {
         public static string EditorProjectSetupDialog {
             get {
                 return ResourceManager.GetString("EditorProjectSetupDialog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Editor show soflan point list 的本地化字符串。
+        /// </summary>
+        public static string EditorShowSoflanPointList {
+            get {
+                return ResourceManager.GetString("EditorShowSoflanPointList", resourceCulture);
             }
         }
         
@@ -2671,6 +2689,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Hide all wall lanes when play field drawing is enable in preview mode 的本地化字符串。
+        /// </summary>
+        public static string HideWallLaneWhenEnablePlayField {
+            get {
+                return ResourceManager.GetString("HideWallLaneWhenEnablePlayField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Hold 的本地化字符串。
         /// </summary>
         public static string Hold {
@@ -3238,6 +3265,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Lane block start wall ({0}) is different than end wall ({1}) 的本地化字符串。
+        /// </summary>
+        public static string LaneBlockOnMultipleWalls {
+            get {
+                return ResourceManager.GetString("LaneBlockOnMultipleWalls", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Lane Center 的本地化字符串。
         /// </summary>
         public static string LaneCenter {
@@ -3621,6 +3657,15 @@ namespace OngekiFumenEditor.Properties {
         public static string NewFumenFileSavePath {
             get {
                 return ResourceManager.GetString("NewFumenFileSavePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 New item group 的本地化字符串。
+        /// </summary>
+        public static string NewItemGroup {
+            get {
+                return ResourceManager.GetString("NewItemGroup", resourceCulture);
             }
         }
         
@@ -4723,6 +4768,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Restore the current time to before playback time when editor paused 的本地化字符串。
+        /// </summary>
+        public static string ReturnStartTimeAfterPause {
+            get {
+                return ResourceManager.GetString("ReturnStartTimeAfterPause", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Invert selection of all objects 的本地化字符串。
         /// </summary>
         public static string ReverseSelectAllObjects {
@@ -4948,6 +5002,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Select render manager implement:  的本地化字符串。
+        /// </summary>
+        public static string SelectRenderManagerImpl {
+            get {
+                return ResourceManager.GetString("SelectRenderManagerImpl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Select .svg file 的本地化字符串。
         /// </summary>
         public static string SelectSvgFile {
@@ -5083,6 +5146,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Skia render backend:  的本地化字符串。
+        /// </summary>
+        public static string SkiaRenderBackend {
+            get {
+                return ResourceManager.GetString("SkiaRenderBackend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Thumbnail image dimensions (default 220x220): 的本地化字符串。
         /// </summary>
         public static string SmallJacketSize {
@@ -5097,6 +5169,15 @@ namespace OngekiFumenEditor.Properties {
         public static string SoflanConflict {
             get {
                 return ResourceManager.GetString("SoflanConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Soflan Group 的本地化字符串。
+        /// </summary>
+        public static string SoflanGroupListViewer {
+            get {
+                return ResourceManager.GetString("SoflanGroupListViewer", resourceCulture);
             }
         }
         

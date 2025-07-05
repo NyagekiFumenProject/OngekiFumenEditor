@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
     public sealed partial class ProgramSetting : global::System.Configuration.ApplicationSettingsBase {
         
         private static ProgramSetting defaultInstance = ((ProgramSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new ProgramSetting())));
@@ -200,6 +200,30 @@ namespace OngekiFumenEditor.Properties {
             }
             set {
                 this["DisableStringRendererAntialiasing"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("OpenGL")]
+        public string DefaultRenderManagerImplementName {
+            get {
+                return ((string)(this["DefaultRenderManagerImplementName"]));
+            }
+            set {
+                this["DefaultRenderManagerImplementName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CPU")]
+        public string SkiaRenderBackend {
+            get {
+                return ((string)(this["SkiaRenderBackend"]));
+            }
+            set {
+                this["SkiaRenderBackend"] = value;
             }
         }
     }

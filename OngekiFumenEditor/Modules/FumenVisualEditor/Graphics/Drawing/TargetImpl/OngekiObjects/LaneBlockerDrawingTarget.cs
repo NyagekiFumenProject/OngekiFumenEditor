@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
@@ -7,7 +8,6 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
-using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     internal class LaneBlockerDrawingTarget : CommonDrawTargetBase<OngekiTimelineObjectBase>
     {
-        private readonly IPolygonDrawing polygonDrawing;
+        private IPolygonDrawing polygonDrawing;
         private readonly HashSet<int> overdrawingDefferSet = new();
 
         public override IEnumerable<string> DrawTargetID { get; } = new[]
@@ -28,9 +28,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override int DefaultRenderOrder => 80;
 
-        public LaneBlockerDrawingTarget()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            polygonDrawing = IoC.Get<IPolygonDrawing>();
+            polygonDrawing = impl.PolygonDrawing;
         }
 
         public override void Begin(IFumenEditorDrawingContext target)
@@ -62,15 +62,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var offsetX = (lbk.Direction == LaneBlockArea.BlockDirection.Left ? -1 : 1) * 60;
             var color = lbk.Direction == LaneBlockArea.BlockDirection.Left ? WallLaneDrawTarget.LeftWallColor : WallLaneDrawTarget.RightWallColor;
             var colorF = color;
-            colorF.W = -0.25f;
+            colorF.W = 0f;
             (double, double) lastP = default;
 
             #region Generate LBK lines
 
-            void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, Vector4? specifyColor = default)
+            void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, SoflanList soflanList, Vector4? specifyColor = default)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, target.Editor);
-                var y = (float)target.ConvertToY(tGridTotalUnit);
+                var y = (float)target.ConvertToY(tGridTotalUnit, soflanList);
 
                 //lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
                 polygonDrawing.PostPoint(new(x, y), Vector4.One);
@@ -82,14 +82,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid grid, Vector4? specifyColor = default)
             {
                 var xGridTotalGridOpt = obj.CalulateXGridTotalGrid(grid.TotalGrid);
+                var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
                 if (xGridTotalGridOpt is double xGridTotalGrid)
-                    PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, grid.TotalUnit, specifyColor);
+                    PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, grid.TotalUnit, soflanList, specifyColor);
             }
 
             void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid)
             {
                 var minTotalGrid = minTGrid.TotalGrid;
                 var maxTotalGrid = maxTGrid.TotalGrid;
+                var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
 
                 if (!obj.IsCurvePath)
                 {
@@ -106,20 +108,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     {
                         if (!isVaild)
                         {
-                            PostPointByXTGrid(obj.PrevObject.XGrid.TotalUnit, minTGrid.TotalUnit);
-                            PostPointByXTGrid(obj.XGrid.TotalUnit, maxTGrid.TotalUnit);
+                            PostPointByXTGrid(obj.PrevObject.XGrid.TotalUnit, minTGrid.TotalUnit, soflanList);
+                            PostPointByXTGrid(obj.XGrid.TotalUnit, maxTGrid.TotalUnit, soflanList);
                             return;
                         }
                         list.Add(new(gridVec2.X, gridVec2.Y));
                     }
                     foreach (var gridVec2 in list)
-                        PostPointByXTGrid(gridVec2.X / obj.XGrid.ResX, gridVec2.Y / obj.TGrid.ResT);
+                        PostPointByXTGrid(gridVec2.X / obj.XGrid.ResX, gridVec2.Y / obj.TGrid.ResT, soflanList);
                 }
             }
 
             void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
             {
-                polygonDrawing.Begin(target, PrimitiveType.TriangleStrip);
+                polygonDrawing.Begin(target, Primitive.TriangleStrip);
                 foreach (var child in wallStartLane.Children)
                 {
                     if (child.TGrid < minTGrid)
@@ -140,6 +142,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var itor = lbk
                 .GetAffactableWallLanes(fumen)
                 .Where(x => target.CheckRangeVisible(x.MinTGrid, x.MaxTGrid))
+                .Where(x =>
+                {
+                    //Only apply for wall lanes which belongs default soflan group 
+                    target.Editor._cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
+                    return soflanGroup == 0;
+                })
                 .OrderBy(x => x.TGrid)
                 .GetEnumerator();
 

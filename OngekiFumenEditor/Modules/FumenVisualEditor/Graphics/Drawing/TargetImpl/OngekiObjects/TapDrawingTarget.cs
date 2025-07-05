@@ -1,8 +1,8 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Kernel.Graphics.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -13,20 +13,19 @@ using System.Runtime.CompilerServices;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    [Export(typeof(TapDrawingTarget))]
     public class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };
 
         public override int DefaultRenderOrder => 1200;
 
-        private Texture redTexture;
-        private Texture greenTexture;
-        private Texture blueTexture;
-        private Texture wallTexture;
-        private Texture tapExTexture;
-        private Texture wallExTexture;
-        private Texture untagExTexture;
+        private IImage redTexture;
+        private IImage greenTexture;
+        private IImage blueTexture;
+        private IImage wallTexture;
+        private IImage tapExTexture;
+        private IImage wallExTexture;
+        private IImage untagExTexture;
 
         private Vector2 tapSize = new Vector2(40, 16);
         private Vector2 exTapEffSize = new Vector2(40, 16);
@@ -35,18 +34,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector2 selectTapEffSize = new Vector2(39, 39);
         private Vector2 exWallTapEffSize = new Vector2(42, 42);
 
-        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> normalList = new();
-        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> exList = new();
-        private Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> selectTapList = new();
+        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> normalList = new();
+        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> exList = new();
+        private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> selectTapList = new();
 
         private IBatchTextureDrawing batchTextureDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
 
-        public TapDrawingTarget() : base()
+        public override void Initialize(IRenderManagerImpl impl)
         {
-            void init(ref Texture texture, string resourceName)
+            void init(ref IImage texture, string resourceName)
             {
-                texture = ResourceUtils.OpenReadTextureFromFile(@".\Resources\editor\" + resourceName);
+                texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + resourceName);
 
                 normalList[texture] = new();
                 selectTapList[texture] = new();
@@ -76,11 +75,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             exList[tapExTexture] = new();
             exList[wallExTexture] = new();
 
-            batchTextureDrawing = IoC.Get<IBatchTextureDrawing>();
-            highlightDrawing = IoC.Get<IHighlightBatchTextureDrawing>();
+            batchTextureDrawing = impl.BatchTextureDrawing;
+            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
-        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical)
+        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
         {
             var texture = laneType switch
             {
@@ -102,10 +101,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             };
 
             var x = XGridCalculator.ConvertXGridToX(tap.XGrid, target.Editor);
-            var y = target.ConvertToY(tap.TGrid);
+            var soflanList = specifySoflanList ?? target.Editor._cacheSoflanGroupRecorder.GetCache(tap);
+            var y = target.ConvertToY(tap.TGrid, soflanList);
 
             var pos = new Vector2((float)x, (float)y);
-            normalList[texture].Add((size, pos, 0f));
+            normalList[texture].Add((size, pos, 0f, Vector4.One));
 
             if (tap.IsSelected)
             {
@@ -118,7 +118,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     size = selectTapEffSize;
                 }
 
-                selectTapList[texture].Add((size, pos, 0f));
+                selectTapList[texture].Add((size, pos, 0f, Vector4.One));
             }
 
             if (isCritical)
@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     texture = tapExTexture;
                 }
 
-                exList[texture].Add((size, pos, 0f));
+                exList[texture].Add((size, pos, 0f, Vector4.One));
             }
 
             size.X = Math.Abs(size.X);
@@ -144,7 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private void ClearList()
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void clear(Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> map)
+            void clear(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> map)
             {
                 foreach (var list in map.Values)
                     list.Clear();
@@ -169,7 +169,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void draw(Dictionary<Texture, List<(Vector2 size, Vector2 pos, float rotate)>> map)
+            void draw(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> map)
             {
                 foreach (var item in map)
                     batchTextureDrawing.Draw(target, item.Key, item.Value);

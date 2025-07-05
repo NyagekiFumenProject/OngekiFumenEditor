@@ -27,6 +27,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 using static OngekiFumenEditor.Utils.MathUtils;
 using Rectangle = System.Drawing.Rectangle;
@@ -77,10 +78,10 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             var fumen = await StandardizeFormat.CopyFumenObject(rawFumen);
             if (option.SoflanMode == SoflanMode.AbsSoflan)
             {
-                foreach (var sfl in fumen.Soflans)
+                foreach (var sfl in fumen.SoflansMap.Values.SelectMany(x => x))
                     sfl.ApplySpeedInDesignMode = true;
             }
-            var specifySoflans = option.SoflanMode != SoflanMode.WeightedSoflan ? fumen.Soflans : GenerateWeightedSoflan(fumen.Soflans, option);
+            var specifySoflans = option.SoflanMode != SoflanMode.WeightedSoflan ? fumen.SoflansMap.DefaultSoflanList : GenerateWeightedSoflan(fumen.SoflansMap.DefaultSoflanList, option);
 
             var totalWidth = option.ViewWidth;
             var maxTGrid = TGridCalculator.ConvertAudioTimeToTGrid(option.Duration, fumen.BpmList);
@@ -89,7 +90,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             if (option.SoflanMode == SoflanMode.Soflan || option.SoflanMode == SoflanMode.WeightedSoflan)
                 totalHeight = TGridCalculator.ConvertTGridToY_PreviewMode(maxTGrid, specifySoflans, fumen.BpmList, option.VerticalScale);
             else
-                totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(maxTGrid, fumen.Soflans, fumen.BpmList, option.VerticalScale);
+                totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(maxTGrid, fumen.SoflansMap.DefaultSoflanList, fumen.BpmList, option.VerticalScale);
 
             svgDocument.Width = new SvgUnit(SvgUnitType.Pixel, (float)totalWidth);
             svgDocument.Height = new SvgUnit(SvgUnitType.Pixel, (float)totalHeight);
@@ -191,7 +192,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
         private async Task SerializeFumenToSvg(GenerateContext ctx)
         {
-            await SerializePlayField(ctx);
+            //await SerializePlayField(ctx); //todo SoflanGroup support
             await SerializeEvents(ctx);
             await SerializeLanes(ctx);
             await SerializeTap(ctx);
@@ -239,7 +240,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 foreach (var pos in start.GenAllPath().Select(x => x.pos).Select(point =>
                 {
                     var x = (float)ctx.CalculateToX(point.X * 1.0 / XGrid.DEFAULT_RES_X);
-                    var y = (float)ctx.CalculateToY(point.Y * 1.0 / TGrid.DEFAULT_RES_T);
+                    var y = (float)ctx.CalculateToY(point.Y * 1.0 / TGrid.DEFAULT_RES_T, ctx.Fumen.SoflansMap.DefaultSoflanList);
 
                     return new PointF(x, y);
                 }))
@@ -316,7 +317,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             RegisterSprite("flick", cmnPoint, cmnSize, await LoadPngAsBase64ImageFromResourceLocal("flick.png"));
             RegisterSprite("flick1", cmnPoint, cmnSize, await LoadPngAsBase64ImageFromResourceLocal("flick1.png"));
 
-            void AppendTap(LaneType? laneType, XGrid xGrid, TGrid tGrid, bool isCritical)
+            void AppendTap(LaneType? laneType, XGrid xGrid, TGrid tGrid, bool isCritical, int soflanGroup)
             {
                 var svgTap = new SvgUse();
                 var id = laneType switch
@@ -335,14 +336,14 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 (var anchor, var size) = map[id];
 
                 svgTap.X = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToX(xGrid) - anchor.X);
-                svgTap.Y = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(tGrid) - anchor.Y);
+                svgTap.Y = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(tGrid, ctx.Fumen.SoflansMap[soflanGroup]) - anchor.Y);
 
                 svgTap.ReferencedElement = new Uri("#" + id, UriKind.Relative);
 
                 (isCritical ? exTapGroup : tapGroup).Children.Add(svgTap);
             }
 
-            void AppendFlick(XGrid xGrid, TGrid tGrid, bool isCritical, bool isRight)
+            void AppendFlick(XGrid xGrid, TGrid tGrid, bool isCritical, bool isRight, int soflanGroup)
             {
                 var svgBell = new SvgUse();
                 svgBell.AddCustomClass($"flickImage_{(isRight ? "Right" : "Left")}");
@@ -354,7 +355,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 (var anchor, var size) = map[id];
 
                 svgBell.X = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToX(xGrid) - anchor.X);
-                svgBell.Y = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(tGrid) - anchor.Y);
+                svgBell.Y = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(tGrid, ctx.Fumen.SoflansMap[soflanGroup]) - anchor.Y);
 
                 svgBell.ReferencedElement = new Uri("#" + id, UriKind.Relative);
 
@@ -369,7 +370,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     flickExEff.X = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToX(xGrid) - flickExEff.Width / 2);
                     if (!isRight)
                         flickExEff.X += +2;
-                    flickExEff.Y = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(tGrid) - flickExEff.Height / 2);
+                    flickExEff.Y = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(tGrid, ctx.Fumen.SoflansMap[soflanGroup]) - flickExEff.Height / 2);
                     flickExEff.Stroke = new SvgColourServer(Color.Gold);
                     flickExEff.Fill = new SvgColourServer(Color.Transparent);
                     flickExEff.StrokeWidth = new SvgUnit(SvgUnitType.Pixel, 4);
@@ -402,16 +403,18 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 path.StrokeLineJoin = SvgStrokeLineJoin.Round;
                 path.StrokeLineCap = SvgStrokeLineCap.Butt;
 
-                PointF PostPoint2(double tGridUnit, double xGridUnit)
+                PointF PostPoint2(double tGridUnit, double xGridUnit, int soflanGroup)
                 {
                     var x = ctx.CalculateToX(xGridUnit);
-                    var y = ctx.CalculateToY(tGridUnit);
+                    var y = ctx.CalculateToY(tGridUnit, ctx.Fumen.SoflansMap[soflanGroup]);
 
                     return new(x, y);
                 }
 
-                var holdPoint = PostPoint2(hold.TGrid.TotalUnit, hold.XGrid.TotalUnit);
-                var holdEndPoint = PostPoint2(holdEnd.TGrid.TotalUnit, holdEnd.XGrid.TotalUnit);
+                var soflanGroup = ctx.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(hold);
+
+                var holdPoint = PostPoint2(hold.TGrid.TotalUnit, hold.XGrid.TotalUnit, soflanGroup);
+                var holdEndPoint = PostPoint2(holdEnd.TGrid.TotalUnit, holdEnd.XGrid.TotalUnit, soflanGroup);
 
                 bool checkDiscardByHorizon(PointF prev, PointF end, PointF cur)
                 {
@@ -469,15 +472,16 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             }
 
             foreach (var tap in ctx.Fumen.Taps.OfType<Tap>())
-                AppendTap(tap.ReferenceLaneStart?.LaneType, tap.XGrid, tap.TGrid, tap.IsCritical);
+                AppendTap(tap.ReferenceLaneStart?.LaneType, tap.XGrid, tap.TGrid, tap.IsCritical, ctx.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(tap));
             foreach (var hold in ctx.Fumen.Holds.Where(x => x.HoldEnd is not null))
             {
+                var soflanGroup = ctx.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(hold);
                 AppendHoldBody(hold);
-                AppendTap(hold.ReferenceLaneStart?.LaneType, hold.XGrid, hold.TGrid, hold.IsCritical);
-                AppendTap(hold.ReferenceLaneStart?.LaneType, hold.HoldEnd.XGrid, hold.HoldEnd.TGrid, false);
+                AppendTap(hold.ReferenceLaneStart?.LaneType, hold.XGrid, hold.TGrid, hold.IsCritical, soflanGroup);
+                AppendTap(hold.ReferenceLaneStart?.LaneType, hold.HoldEnd.XGrid, hold.HoldEnd.TGrid, false, soflanGroup);
             }
             foreach (var flick in ctx.Fumen.Flicks)
-                AppendFlick(flick.XGrid, flick.TGrid, flick.IsCritical, flick.Direction == Flick.FlickDirection.Right);
+                AppendFlick(flick.XGrid, flick.TGrid, flick.IsCritical, flick.Direction == Flick.FlickDirection.Right, ctx.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(flick));
 
             ctx.Document.Children.Add(def);
             ctx.Document.Children.Add(holdBodyGroup);
@@ -495,11 +499,16 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
 
+            var affactObj = ctx.Fumen.Taps.FirstOrDefault(x => x.ReferenceLaneStart == start) as ILaneDockable ?? ctx.Fumen.Holds.FirstOrDefault(x => x.ReferenceLaneStart == start);
+            var soflanList = affactObj is null ?
+                ctx.Fumen.SoflansMap.DefaultSoflanList :
+                ctx.Fumen.SoflansMap[ctx.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(affactObj)];
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint2(double tGridUnit, double xGridUnit)
             {
                 var x = (float)ctx.CalculateToX(xGridUnit);
-                var y = (float)ctx.CalculateToY(tGridUnit);
+                var y = (float)ctx.CalculateToY(tGridUnit, soflanList);
 
                 outVertices.Add(new(x, y));
             }
@@ -608,8 +617,10 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
                 (var anchor, var size) = map[id];
 
+                var soflanList = ctx.Fumen.SoflansMap[ctx.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(referencable)];
+
                 svgBell.X = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToX(referencable.XGrid) - anchor.X);
-                svgBell.Y = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(referencable.TGrid) - anchor.Y);
+                svgBell.Y = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(referencable.TGrid, soflanList) - anchor.Y);
 
                 svgBell.ReferencedElement = new Uri("#" + id, UriKind.Relative);
 
@@ -699,7 +710,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             }
 
             var timelines = TGridCalculator.GetVisbleTimelines_DesignMode(
-                    ctx.Fumen.Soflans,
+                    ctx.Fumen.SoflansMap.DefaultSoflanList,
                     ctx.Fumen.BpmList,
                     ctx.Fumen.MeterChanges,
                     0,
@@ -716,7 +727,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 .Concat(ctx.Fumen.MeterChanges)
                 .Concat(ctx.Fumen.BpmList)
                 .Concat(ctx.Fumen.EnemySets)
-                .Concat(ctx.Fumen.Soflans.GenerateKeyframeSoflans(ctx.Fumen.BpmList))
+                .Concat(ctx.Fumen.SoflansMap.Values.SelectMany(x => x.GenerateKeyframeSoflans(ctx.Fumen.BpmList)))
                 .GroupBy(x => x.TGrid)
                 .OrderBy(x => x.Key);
 
@@ -741,13 +752,13 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 var apGroup = new SvgGroup();
                 apGroup.AddCustomClass("eventGroup");
                 var offsetX = 0f;
-                var y = ctx.CalculateToY(groupItems.Key);
+                var y = ctx.CalculateToY(groupItems.Key, ctx.Fumen.SoflansMap.DefaultSoflanList);
 
                 foreach (var obj in items)
                 {
                     (var content, var color) = obj switch
                     {
-                        IKeyframeSoflan sfl => ($"{sfl.Speed:F2}x", Color.Cyan),
+                        IKeyframeSoflan sfl => ($"[{sfl.SoflanGroup}]{sfl.Speed:F2}x", Color.Cyan),
                         EnemySet set => ($"{set.TagTblValue}", Color.Yellow),
                         BPMChange bpm => ($"♫ {bpm.BPM:f2}", Color.LightPink),
                         MeterChange met => ($"{met.BunShi} / {met.Bunbo}", Color.LightGreen),
@@ -834,10 +845,15 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 polyline.AddCustomClass($"lanePolyline_{start.LaneType}");
                 var collection = new SvgPointCollection();
 
+                var affactObj = ctx.Fumen.Taps.FirstOrDefault(x => x.ReferenceLaneStart == start) as ILaneDockable ?? ctx.Fumen.Holds.FirstOrDefault(x => x.ReferenceLaneStart == start);
+                var soflanList = affactObj is null ?
+                    ctx.Fumen.SoflansMap.DefaultSoflanList :
+                    ctx.Fumen.SoflansMap[ctx.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(affactObj)];
+
                 var pathPointItor = start.GenAllPath().Select(x => x.pos).Select(point =>
                 {
                     var x = (float)ctx.CalculateToX(point.X * 1.0 / XGrid.DEFAULT_RES_X);
-                    var y = (float)ctx.CalculateToY(point.Y * 1.0 / TGrid.DEFAULT_RES_T);
+                    var y = (float)ctx.CalculateToY(point.Y * 1.0 / TGrid.DEFAULT_RES_T, soflanList);
 
                     return new PointF(x, y);
                 }).GetEnumerator();
@@ -889,14 +905,14 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 var color = Color.WhiteSmoke;
                 #region Generate LBK lines
 
-                void BuildLBK(IEnumerable<Vector2> gridPoints)
+                void BuildLBK(IEnumerable<Vector2> gridPoints, SoflanList soflanList)
                 {
                     var points = gridPoints.Select(x =>
                     {
                         var xUnit = x.X / XGrid.DEFAULT_RES_X;
                         var tUnit = x.Y / TGrid.DEFAULT_RES_T;
 
-                        return new PointF(ctx.CalculateToX(xUnit), ctx.CalculateToY(tUnit));
+                        return new PointF(ctx.CalculateToX(xUnit), ctx.CalculateToY(tUnit, soflanList));
                     }).ToArray();
 
                     var outputPoints = new SvgPointCollection();
@@ -907,7 +923,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                         outputPoints.Add(new SvgUnit(SvgUnitType.Pixel, point.Y));
                     }
 
-                    foreach (var point in points.Reverse())
+                    foreach (var point in points.AsEnumerable().Reverse())
                     {
                         outputPoints.Add(new SvgUnit(SvgUnitType.Pixel, point.X + offsetX));
                         outputPoints.Add(new SvgUnit(SvgUnitType.Pixel, point.Y));
@@ -956,12 +972,12 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     }
                 }
 
-                void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
+                void ProcessWallLane(LaneStartBase start, TGrid minTGrid, TGrid maxTGrid)
                 {
                     using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var list, out _);
                     list.Clear();
 
-                    foreach (var child in wallStartLane.Children)
+                    foreach (var child in start.Children)
                     {
                         if (child.TGrid < minTGrid)
                             continue;
@@ -974,13 +990,26 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                         ProcessConnectable(child, childMinTGrid, childMaxTGrid, list);
                     }
 
-                    BuildLBK(list);
+                    var affactObj = ctx.Fumen.Taps.FirstOrDefault(x => x.ReferenceLaneStart == start) as ILaneDockable ?? ctx.Fumen.Holds.FirstOrDefault(x => x.ReferenceLaneStart == start);
+                    var soflanList = affactObj is null ?
+                        ctx.Fumen.SoflansMap.DefaultSoflanList :
+                        ctx.Fumen.SoflansMap[ctx.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(affactObj)];
+
+                    BuildLBK(list, soflanList);
                 }
 
                 #endregion
 
                 var itor = lbk
                 .GetAffactableWallLanes(fumen)
+                /*
+                .Where(x =>
+                {
+                    //todo Only apply for wall lanes which belongs default soflan group 
+                    target.Editor._cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
+                    return soflanGroup == 0;
+                })
+                */
                 .OrderBy(x => x.TGrid)
                 .GetEnumerator();
 
@@ -1151,10 +1180,11 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             foreach (var point in leftPoints.Concat(rightPoints.AsEnumerable().Reverse()))
             {
                 var uX = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToX(point.X / XGrid.DEFAULT_RES_X));
-                var uY = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(point.Y / TGrid.DEFAULT_RES_T));
-
                 collection.Add(uX);
-                collection.Add(uY);
+
+                //todo SoflanGroup support
+                //var uY = new SvgUnit(SvgUnitType.Pixel, ctx.CalculateToY(point.Y / TGrid.DEFAULT_RES_T));
+                //collection.Add(uY);
             }
 
             var line = new SvgPolygon

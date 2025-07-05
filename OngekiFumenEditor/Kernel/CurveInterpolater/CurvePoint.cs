@@ -2,7 +2,7 @@
 
 namespace OngekiFumenEditor.Kernel.CurveInterpolater
 {
-	public struct CurvePoint : ITimelineObject, IHorizonPositionObject
+	public struct CurvePoint
 	{
 		public CurvePoint(TGrid t, XGrid x)
 		{
