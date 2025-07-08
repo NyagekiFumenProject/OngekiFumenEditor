@@ -24,15 +24,14 @@
 	<!--当Release编译时, SoundTouch.dll就交给Costura.Fody处理-->
 	<ItemGroup Condition="'$(Configuration)' != 'Debug'">
 		<None Remove="Costura64\SoundTouch_x64.dll" />
-		<EmbeddedResource Include="Costura64\SoundTouch.dll">
-		</EmbeddedResource>
+		<EmbeddedResource Include="Costura64\SoundTouch.dll"/>
 	</ItemGroup>
 
 	<!--使用nvpatch工具让程序默认使用独显运行(核显给爷爬)-->
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="$(ProjectDir)Dependencies\Topten.nvpatch.exe --enable $(TargetDir)$(TargetName).exe" />
 	</Target>
-	
+
 	<!--记录编译时间-->
 	<PropertyGroup>
 		<BuildDateTime>$([System.DateTime]::UtcNow.AddHours(8).ToString("yyyy/M/dd H:mm:ss.fff"))</BuildDateTime>
@@ -470,13 +469,13 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Resources\editor\pixel.png">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Resources\editor\textureSizeAnchor.ini">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Resources\editor\tri.png">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Resources\editor\unsetTap.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -762,5 +761,5 @@
 	<Target Name="DeleteXmlFiles" AfterTargets="AfterBuild">
 		<Delete Files="$(OutputPath)/*.xml" />
 	</Target>
-	
+
 </Project>

@@ -19,12 +19,15 @@ using System.Collections.Specialized;
 using System.Linq;
 using static OngekiFumenEditor.Base.Collections.SoflanList;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
+using OngekiFumenEditor.Base.Collections;
 
 namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 {
     [Export(typeof(IFumenSoflanGroupListViewer))]
     public class FumenSoflanGroupListViewerViewModel : Tool, IFumenSoflanGroupListViewer
     {
+        private OngekiFumen prevFumen = default;
+
         public FumenSoflanGroupListViewerViewModel()
         {
             DisplayName = Resources.SoflanGroupListViewer;
@@ -42,6 +45,30 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
         private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+            {
+                RebuildItemGroupRoot();
+                RegisterFumenSoflanListMapEvent();
+            }
+        }
+
+        private void RegisterFumenSoflanListMapEvent()
+        {
+            if (prevFumen != null)
+            {
+                prevFumen.IndividualSoflanAreaMap.PropertyChanged -= IndividualSoflanAreaMap_PropertyChanged;
+                prevFumen = default;
+            }
+
+            if (Editor?.Fumen is OngekiFumen curFumen)
+            {
+                curFumen.IndividualSoflanAreaMap.PropertyChanged += IndividualSoflanAreaMap_PropertyChanged; ;
+                prevFumen = curFumen;
+            }
+        }
+
+        private void IndividualSoflanAreaMap_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (nameof(IndividualSoflanAreaListMap.SoflanGroupWrapItemGroupRoot) == e.PropertyName)
             {
                 RebuildItemGroupRoot();
             }
@@ -140,6 +167,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             {
                 Set(ref editor, value);
                 RebuildItemGroupRoot();
+                RegisterFumenSoflanListMapEvent();
             }
         }
 
@@ -153,7 +181,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 
             Log.LogDebug($"ListViewDragDropManager created.");
         }
-        
+
 
         public void OnItemChecked_IsDisplaySoflanDesignMode(object dataContext)
         {

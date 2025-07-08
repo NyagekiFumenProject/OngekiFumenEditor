@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Microsoft.CodeAnalysis.Differencing;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
@@ -54,6 +55,24 @@ namespace OngekiFumenEditor.Base
         public OngekiFumen()
         {
             Setup();
+            SoflansMap.OnSoflanPropertyChangedEvent += SoflansMap_OnSoflanPropertyChangedEvent;
+        }
+
+        private void SoflansMap_OnSoflanPropertyChangedEvent(ISoflan arg1, PropertyChangedEventArgs arg2)
+        {
+            if (arg2.PropertyName == nameof(ISoflan.SoflanGroup))
+            {
+                var item = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(arg1.SoflanGroup, out var isCreated);
+                if (isCreated)
+                {
+                    Log.LogDebug($"OngekiFumen noticed a new soflanGroupId has been specified, update default groups");
+                    if (IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.FirstOrDefault(x => x.DisplayName == "default") is SoflanGroupWrapItemGroup defaultGroup)
+                    {
+                        defaultGroup.Add(item);
+                        IndividualSoflanAreaMap.NotifyOfPropertyChange(nameof(IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot));
+                    }
+                }
+            }
         }
 
         #region Overload Methods

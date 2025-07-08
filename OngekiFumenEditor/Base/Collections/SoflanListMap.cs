@@ -3,6 +3,7 @@ using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,9 @@ namespace OngekiFumenEditor.Base.Collections
     {
         private Dictionary<ISoflan, int> registeredSoflanId = new();
         private Dictionary<int, SoflanList> soflanListMap = new();
+
+        public event Action<ISoflan, PropertyChangedEventArgs> OnSoflanPropertyChangedEvent;
+        public event Action<CollectionChangeEventArgs> OnCollectionChangedEvent;
 
         public const int DefaultSoflanGroup = 0;
 
@@ -29,7 +33,11 @@ namespace OngekiFumenEditor.Base.Collections
             get
             {
                 if (!soflanListMap.TryGetValue(pattern, out var list))
+                {
                     soflanListMap[pattern] = list = new();
+                    OnCollectionChangedEvent?.Invoke(new CollectionChangeEventArgs(CollectionChangeAction.Add, list));
+                    list.OnSoflanPropertyChangedEvent += OnSoflanPropertyChangedEvent;
+                }
                 return list;
             }
         }
