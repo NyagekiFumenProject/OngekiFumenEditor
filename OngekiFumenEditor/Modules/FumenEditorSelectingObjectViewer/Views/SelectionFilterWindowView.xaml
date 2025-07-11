@@ -1,0 +1,79 @@
+<Window x:Class="OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views.SelectionFilterWindowView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:cal="http://caliburnmicro.com"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:viewModels="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
+        mc:Ignorable="d"
+        ShowInTaskbar="False"
+        ShowActivated="True"
+        SizeToContent="WidthAndHeight"
+        d:DesignHeight="300" d:DesignWidth="300"
+        d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=viewModels:SelectionFilterViewModel}">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type viewModels:FilterObjectTypesItem}">
+            <TextBlock Text="{Binding Text}" />
+        </DataTemplate>
+
+        <Style TargetType="{x:Type ListBoxItem}">
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+        </Style>
+
+        <viewModels:SelectedObjectsToLabelConverter x:Key="SelectedObjectsToLabelConverter" />
+        <viewModels:FilterSelectionChangeModeToBoolConverter x:Key="FilterSelectionChangeModeToBoolConverter" />
+    </Window.Resources>
+
+    <Window.DataContext>
+        <viewModels:SelectionFilterViewModel />
+    </Window.DataContext>
+
+    <StackPanel Orientation="Vertical" Height="Auto">
+        <StackPanel Orientation="Horizontal">
+            <ListBox ItemsSource="{Binding FilterItemsLanes}"
+                     SelectionMode="Multiple"
+                     HorizontalContentAlignment="Stretch"
+                     Height="Auto"
+                     cal:Message.Attach="[Event SelectionChanged] = [Action SelectionChanged($source, $eventArgs)]"
+                     />
+            <ListBox ItemsSource="{Binding FilterItemsDockables}"
+                     SelectionMode="Multiple"
+                     HorizontalContentAlignment="Stretch"
+                     Height="Auto"
+                     cal:Message.Attach="[Event SelectionChanged] = [Action SelectionChanged($source, $eventArgs)]"
+                     SelectedValuePath=""/>
+            <ListBox ItemsSource="{Binding FilterItemsFloatings}"
+                     SelectionMode="Multiple"
+                     HorizontalContentAlignment="Stretch"
+                     Height="Auto"
+                     cal:Message.Attach="[Event SelectionChanged] = [Action SelectionChanged($source, $eventArgs)]"/>
+        </StackPanel>
+
+        <Separator />
+
+        <Label>Filter mode</Label>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <RadioButton GroupName="FilterMode" IsChecked="{Binding FilterSelectionChangeMode, Converter={StaticResource FilterSelectionChangeModeToBoolConverter}, ConverterParameter={x:Static viewModels:FilterMode.Remove}, UpdateSourceTrigger=PropertyChanged}">Remove</RadioButton>
+
+            <RadioButton GroupName="FilterMode" IsChecked="{Binding FilterSelectionChangeMode, Converter={StaticResource FilterSelectionChangeModeToBoolConverter}, ConverterParameter={x:Static viewModels:FilterMode.Replace}, UpdateSourceTrigger=PropertyChanged, BindsDirectlyToSource=True}">Replace</RadioButton>
+        </StackPanel>
+
+        <TextBlock>
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource SelectedObjectsToLabelConverter}">
+                    <Binding Path="ObjectsToDeselect" />
+                    <Binding Path="FilterSelectionChangeMode" />
+                    <Binding Path="Editor.SelectObjects" />
+                    <Binding Path="ObjectsToDeselect.Count" />
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
+
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Apply" Click="ApplyButton_Click" />
+            <Button Content="Cancel" Click="CancelButton_Click" />
+        </StackPanel>
+    </StackPanel>
+</Window>

@@ -16,6 +16,7 @@ using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views;
 using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
@@ -46,6 +47,8 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 					break;
 			}
 		}
+
+		private SelectionFilterWindowView FilterWindow;
 
 		public ObservableCollection<ISelectableObject> SelectedItems { get; } = new();
 
@@ -157,6 +160,21 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 					_lastDirection = direction;
 				}
 			}
+		}
+
+		public void ShowFilterWindow()
+		{
+			FilterWindow = new();
+			FilterWindow.Owner = Application.Current.MainWindow;
+			FilterWindow.ShowDialog();
+
+			if (FilterWindow.DialogResult == true) {
+				var results = ((SelectionFilterViewModel)FilterWindow.DataContext).ObjectsToDeselect;
+				results.ForEach(x => x.IsSelected = false);
+				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+			}
+
+			FilterWindow = null;
 		}
 	}
 }
