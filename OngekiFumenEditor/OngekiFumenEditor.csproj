@@ -5,7 +5,7 @@
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<LangVersion>preview</LangVersion>
+		<LangVersion>13</LangVersion>
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 		<StartupObject>OngekiFumenEditor.Startup</StartupObject>
 		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
@@ -100,6 +100,11 @@
 		<Resource Include="Resources\Icons\Batch\LaneBlock.png" />
 		<None Remove="Resources\Icons\Batch\Clipboard.png" />
 		<Resource Include="Resources\Icons\Batch\Clipboard.png" />
+		<Page Update="Modules\FumenEditorSelectingObjectViewer\Views\SelectionFilterWindowView.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		  <XamlRuntime>Wpf</XamlRuntime>
+		  <SubType>Designer</SubType>
+		</Page>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -756,6 +761,11 @@
 			<Generator>PublicResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Modules\FumenEditorSelectingObjectViewer\Views\SelectionFilterWindow\" />
+	  <Folder Include="Modules\FumenEditorSelectionFilter\" />
 	</ItemGroup>
 
 	<!--删除.xml文件-->

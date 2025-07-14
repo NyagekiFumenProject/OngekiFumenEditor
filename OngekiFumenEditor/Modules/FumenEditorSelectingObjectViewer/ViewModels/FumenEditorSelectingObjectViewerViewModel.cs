@@ -169,8 +169,8 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 			FilterWindow.ShowDialog();
 
 			if (FilterWindow.DialogResult == true) {
-				var results = ((SelectionFilterViewModel)FilterWindow.DataContext).ObjectsToDeselect;
-				results.ForEach(x => x.IsSelected = false);
+//				var results = ((SelectionFilterViewModel)FilterWindow.DataContext).;
+//				results.ForEach(x => x.IsSelected = false);
 				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
 			}
 
