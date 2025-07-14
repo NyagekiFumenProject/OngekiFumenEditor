@@ -148,6 +148,46 @@ public class SelectionFilterViewModel : ViewAware
         var matches = GetAllFilterMatches();
         FilterOutcomeText = $"{matches.Count()} objects will be remaining in the selection";
     }
+
+    public void FilterObjectTypesSelectAll()
+    {
+        bool allSelected = true;
+        foreach (var category in FilterCategories) {
+            foreach (var item in category.Items) {
+                if (!item.IsSelected) {
+                    allSelected = false;
+                    item.IsSelected = true;
+                }
+            }
+        }
+
+        if (allSelected) {
+            foreach (var category in FilterCategories) {
+                foreach (var item in category.Items) {
+                    item.IsSelected = false;
+                }
+            }
+        }
+    }
+
+    public void FilterObjectTypesReset()
+    {
+        foreach (var category in FilterCategories) {
+            foreach (var item in category.Items) {
+                item.IsSelected = false;
+            }
+        }
+
+        if (Editor is not null) {
+            foreach (var category in FilterCategories) {
+                foreach (var item in category.Items) {
+                    if (item.MatchingObjects.Count > 0) {
+                        item.IsSelected = true;
+                    }
+                }
+            }
+        }
+    }
 }
 
 public enum FilterMode

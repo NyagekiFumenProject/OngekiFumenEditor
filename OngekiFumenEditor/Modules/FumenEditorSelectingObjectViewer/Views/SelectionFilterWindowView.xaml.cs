@@ -1,13 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Caliburn.Micro;
 using MahApps.Metro.Controls;
 using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels;
+using OngekiFumenEditor.Utils;
+using Xceed.Wpf.AvalonDock.Controls;
 using Xceed.Wpf.Toolkit;
-using Xceed.Wpf.Toolkit.Primitives;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views;
 

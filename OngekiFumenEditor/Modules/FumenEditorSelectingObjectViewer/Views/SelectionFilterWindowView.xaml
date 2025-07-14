@@ -45,6 +45,18 @@
     </Window.DataContext>
 
     <StackPanel Orientation="Vertical" Height="Auto">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0">Object type</Label>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <Button cal:Message.Attach="FilterObjectTypesSelectAll()">Select all</Button>
+                <Button cal:Message.Attach="FilterObjectTypesReset()">Reset</Button>
+            </StackPanel>
+        </Grid>
         <ItemsControl ItemsSource="{Binding FilterCategories}" x:Name="ObjectTypesCheckListBoxes">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -65,7 +77,7 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Separator />
+        <Label>Options</Label>
 
         <TabControl>
             <TabItem Header="General">
@@ -159,11 +171,12 @@
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <Label Content="Bullet palette" />
                         <xctk:CheckComboBox ItemsSource="{Binding FilterOptions.FilterBulletPalettesItems}"
-                                           SelectedMemberPath="IsSelected"
-                                           IsSelectAllActive="True"
-                                           Width="100"
-                                           MaxWidth="100"
-                                           Loaded="BulletPaletteCheckList_SetText" Closed="BulletPaletteCheckList_SetText" >
+                                            SelectedMemberPath="IsSelected"
+                                            IsSelectAllActive="True"
+                                            Width="100"
+                                            MaxWidth="100"
+                                            Loaded="BulletPaletteCheckList_SetText"
+                                            Closed="BulletPaletteCheckList_SetText">
                             <xctk:CheckComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Display}" />
