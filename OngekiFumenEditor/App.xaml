@@ -34,6 +34,7 @@
             </valueconverters:DisplayFileSizeConverter>
             <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />
             <valueconverters:SelectionFullLaneCheckConverter x:Key="SelectionFullLaneCheckConverter" />
+            <valueconverters:SelectionLaneObjectsCheckConverter x:Key="SelectionLaneObjectsCheckConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <local:AppBootstrapper x:Key="bootstrapper" />

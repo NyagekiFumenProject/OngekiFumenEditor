@@ -7,23 +7,37 @@
         xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:viewModels="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
+        xmlns:ongekiObjects="clr-namespace:OngekiFumenEditor.Base.OngekiObjects"
         mc:Ignorable="d"
         ShowInTaskbar="False"
         ShowActivated="True"
         SizeToContent="WidthAndHeight"
-        d:DesignHeight="300" d:DesignWidth="300"
+        Padding="3"
         d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=viewModels:SelectionFilterViewModel}">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModels:FilterObjectTypesItem}">
             <TextBlock Text="{Binding Text}" />
         </DataTemplate>
 
-        <Style TargetType="{x:Type ListBoxItem}">
-            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+        <Style TargetType="CheckBox">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="4 0"></Setter>
         </Style>
 
-        <viewModels:SelectedObjectsToLabelConverter x:Key="SelectedObjectsToLabelConverter" />
-        <viewModels:FilterSelectionChangeModeToBoolConverter x:Key="FilterSelectionChangeModeToBoolConverter" />
+
+        <viewModels:ParamValueToBoolConverter x:Key="ParamValueToBoolConverter" />
+
+        <DataTemplate x:Key="ItemCheckListBoxTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Display}" />
+            </StackPanel>
+        </DataTemplate>
+
     </Window.Resources>
 
     <Window.DataContext>
@@ -31,44 +45,145 @@
     </Window.DataContext>
 
     <StackPanel Orientation="Vertical" Height="Auto">
-        <StackPanel Orientation="Horizontal">
-            <ListBox ItemsSource="{Binding FilterItemsLanes}"
-                     SelectionMode="Multiple"
-                     HorizontalContentAlignment="Stretch"
-                     Height="Auto"
-                     cal:Message.Attach="[Event SelectionChanged] = [Action SelectionChanged($source, $eventArgs)]"
-                     />
-            <ListBox ItemsSource="{Binding FilterItemsDockables}"
-                     SelectionMode="Multiple"
-                     HorizontalContentAlignment="Stretch"
-                     Height="Auto"
-                     cal:Message.Attach="[Event SelectionChanged] = [Action SelectionChanged($source, $eventArgs)]"
-                     SelectedValuePath=""/>
-            <ListBox ItemsSource="{Binding FilterItemsFloatings}"
-                     SelectionMode="Multiple"
-                     HorizontalContentAlignment="Stretch"
-                     Height="Auto"
-                     cal:Message.Attach="[Event SelectionChanged] = [Action SelectionChanged($source, $eventArgs)]"/>
-        </StackPanel>
+        <ItemsControl ItemsSource="{Binding FilterCategories}" x:Name="ObjectTypesCheckListBoxes">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <xctk:CheckListBox ItemsSource="{Binding Items}"
+                                       HorizontalContentAlignment="Stretch"
+                                       Height="Auto"
+                                       IsSelectAllActive="True"
+                                       ItemTemplate="{StaticResource ItemCheckListBoxTemplate}"
+                                       SelectedMemberPath="IsSelected"
+                                       SelectAllContent="{Binding CategoryNameDisplay}"
+                                       Loaded="FixFilterTypesAllSelect" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
         <Separator />
 
-        <Label>Filter mode</Label>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <RadioButton GroupName="FilterMode" IsChecked="{Binding FilterSelectionChangeMode, Converter={StaticResource FilterSelectionChangeModeToBoolConverter}, ConverterParameter={x:Static viewModels:FilterMode.Remove}, UpdateSourceTrigger=PropertyChanged}">Remove</RadioButton>
+        <TabControl>
+            <TabItem Header="General">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="5 5">
+                        <Label>Tag</Label>
+                        <xctk:WatermarkTextBox Width="100" Watermark="&lt;Any&gt;"
+                                               Text="{Binding FilterOptions.TagFilter, Mode=TwoWay}" />
+                        <CheckBox Content="Regex" IsChecked="{Binding FilterOptions.IsTagFilterRegex, Mode=TwoWay}" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
 
-            <RadioButton GroupName="FilterMode" IsChecked="{Binding FilterSelectionChangeMode, Converter={StaticResource FilterSelectionChangeModeToBoolConverter}, ConverterParameter={x:Static viewModels:FilterMode.Replace}, UpdateSourceTrigger=PropertyChanged, BindsDirectlyToSource=True}">Replace</RadioButton>
+            <TabItem Header="Lanes">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <Label Content="Node type" />
+                        <RadioButton GroupName="LaneNodeTypeOptions"
+                                     Content="Any"
+                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Any}, Mode=TwoWay}" />
+                        <RadioButton GroupName="LaneNodeTypeOptions"
+                                     Content="Start"
+                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Head}, Mode=TwoWay}" />
+                        <RadioButton GroupName="LaneNodeTypeOptions"
+                                     Content="Next"
+                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Tail}, Mode=TwoWay}" />
+                    </StackPanel>
+                    <CheckBox Margin="5" Content="Only match next nodes with a selected start node"
+                              IsChecked="{Binding FilterOptions.OnlyMatchLanesWithSelectedStartNodes, Mode=TwoWay}" />
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Hit">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="5 5">
+                        <Label>Is Critical</Label>
+                        <RadioButton GroupName="IsCriticalOptions"
+                                     Content="Any"
+                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:YesNoFilteringMode.Any}, Mode=TwoWay}" />
+                        <RadioButton GroupName="IsCriticalOptions"
+                                     Content="Yes"
+                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:YesNoFilteringMode.Yes}, Mode=TwoWay}" />
+                        <RadioButton GroupName="IsCriticalOptions"
+                                     Content="No"
+                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:YesNoFilteringMode.No}, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="5 5">
+                        <Label>Flick Direction</Label>
+                        <RadioButton GroupName="FlickDirectionRadio"
+                                     Content="Any"
+                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LeftRightFilteringMode.Any}, Mode=TwoWay}" />
+                        <RadioButton GroupName="FlickDirectionRadio"
+                                     Content="Left"
+                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LeftRightFilteringMode.Left}, Mode=TwoWay}" />
+                        <RadioButton GroupName="FlickDirectionRadio"
+                                     Content="Right"
+                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LeftRightFilteringMode.Right}, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <Label Content="Hold object type" />
+                        <RadioButton GroupName="HoldPartOptions"
+                                     Content="Any"
+                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Any}, Mode=TwoWay}" />
+                        <RadioButton GroupName="HoldPartOptions"
+                                     Content="Start"
+                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Head}, Mode=TwoWay}" />
+                        <RadioButton GroupName="HoldPartOptions"
+                                     Content="End"
+                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Tail}, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <Label Content="Dock lanes" />
+                        <xctk:CheckComboBox x:Name="FilterDockableTypeCheckComboBox" Width="100"
+                                            IsSelectAllActive="True"
+                                            ItemsSource="{Binding FilterOptions.FilterDockableLaneOptions}"
+                                            DisplayMemberPath="Name" SelectedMemberPath="IsSelected"
+                                            Text="" />
+                    </StackPanel>
+
+                    <CheckBox Content="Only match hold ends with a selected hold start" Margin="5"
+                              IsChecked="{Binding FilterOptions.OnlyMatchHoldsEndsWithSelectedStartNodes, Mode=TwoWay}" />
+
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Bullets">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <Label Content="Bullet palette" />
+                        <xctk:CheckComboBox ItemsSource="{Binding FilterOptions.FilterBulletPalettesItems}"
+                                           SelectedMemberPath="IsSelected"
+                                           IsSelectAllActive="True"
+                                           Width="100"
+                                           MaxWidth="100"
+                                           Loaded="BulletPaletteCheckList_SetText" Closed="BulletPaletteCheckList_SetText" >
+                            <xctk:CheckComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Display}" />
+                                </DataTemplate>
+                            </xctk:CheckComboBox.ItemTemplate>
+                        </xctk:CheckComboBox>
+                    </StackPanel>
+
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+        <Separator />
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
+            <CheckBox Content="Invert filter"
+                      IsChecked="{Binding FilterOptions.FilterSelectionChangeMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:FilterMode.Remove}, Mode=TwoWay}" />
         </StackPanel>
 
-        <TextBlock>
-            <TextBlock.Text>
-                <MultiBinding Converter="{StaticResource SelectedObjectsToLabelConverter}">
-                    <Binding Path="ObjectsToDeselect" />
-                    <Binding Path="FilterSelectionChangeMode" />
-                    <Binding Path="Editor.SelectObjects" />
-                    <Binding Path="ObjectsToDeselect.Count" />
-                </MultiBinding>
-            </TextBlock.Text>
+        <TextBlock Text="{Binding FilterOutcomeText}">
         </TextBlock>
 
         <StackPanel Orientation="Horizontal">

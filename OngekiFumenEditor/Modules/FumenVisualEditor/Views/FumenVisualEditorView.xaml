@@ -79,6 +79,13 @@
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
                 <MenuItem Header="{markup:Translate [MenuSelecting]}">
+                    <MenuItem Header="Entire lane"
+                              cal:Message.Attach="MenuItemAction_SelectEntireLane($executionContext)"
+                              IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
+                    <MenuItem Header="Attached curve points"
+                        cal:Message.Attach="MenuItemAction_SelectAttachedCurves($executionContext)"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
+                    <Separator />
                     <MenuItem cal:Message.Attach="MenuItemAction_SelectAll($executionContext)" Header="{markup:Translate [SelectAllObjects]}" />
                     <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect($executionContext)" Header="{markup:Translate [ReverseSelectAllObjects]}" />
                 </MenuItem>

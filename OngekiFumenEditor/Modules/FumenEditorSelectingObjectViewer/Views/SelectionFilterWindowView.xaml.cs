@@ -4,16 +4,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Caliburn.Micro;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using MahApps.Metro.Controls;
+using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels;
+using Xceed.Wpf.Toolkit;
+using Xceed.Wpf.Toolkit.Primitives;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views;
 
@@ -22,6 +16,10 @@ public partial class SelectionFilterWindowView : Window
     public SelectionFilterWindowView()
     {
         InitializeComponent();
+
+        FilterDockableTypeCheckComboBox.Opened += CheckComboBox_FixAllSelect;
+        FilterDockableTypeCheckComboBox.Closed += CheckComboBox_SetText;
+        FilterDockableTypeCheckComboBox.Loaded += CheckComboBox_SetText;
     }
 
     private void ApplyButton_Click(object sender, RoutedEventArgs e)
@@ -31,6 +29,50 @@ public partial class SelectionFilterWindowView : Window
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
-        DialogResult = true;
+        DialogResult = false;
+    }
+
+    private void CheckComboBox_SetText(object sender, EventArgs e)
+    {
+        var items = ((CheckComboBox)sender).Items.Cast<FilterDockableLaneOption>().ToArray();
+        if (items.All(o => o.IsSelected) || items.All(o => !o.IsSelected)) {
+            FilterDockableTypeCheckComboBox.Text = "<Any>";
+        }
+    }
+
+    private void CheckComboBox_FixAllSelect(object sender, EventArgs e)
+    {
+        var items = ((CheckComboBox)sender).Items.Cast<FilterDockableLaneOption>().ToArray();
+        if (items.All(o => o.IsSelected)) {
+            FilterDockableTypeCheckComboBox.SelectAll();
+        }
+    }
+
+    private void FixFilterTypesAllSelect(object sender, EventArgs e)
+    {
+        var listBox = (CheckListBox)sender;
+        var items = listBox.Items.Cast<FilterObjectTypesItem>().ToArray();
+
+        // Stupid hack to refresh the "select all" button for partial selections.
+        items[0].IsSelected = !items[0].IsSelected;
+        items[0].IsSelected = !items[0].IsSelected;
+
+        // Properly check the "Select All" option when all types exist in the selection
+        if (items.All(o => o.IsSelected)) {
+            listBox.UnSelectAll();
+            listBox.SelectAll();
+        }
+    }
+
+    private void BulletPaletteCheckList_SetText(object sender, EventArgs e)
+    {
+        var comboBox = (CheckComboBox)sender;
+        var selectedItems = comboBox.Items.Cast<FilterBulletPalettesItem>().Where(i => i.IsSelected).ToArray();
+        if (selectedItems.Length == 0 || selectedItems.Length == comboBox.Items.Count) {
+            comboBox.Text = "<Any>";
+        }
+        else {
+            comboBox.Text = $"{selectedItems.Length} palettes";
+        }
     }
 }
