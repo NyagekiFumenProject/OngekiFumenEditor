@@ -66,8 +66,8 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-        <Label Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
 
+        <Label Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
         <TabControl>
             <TabItem Header="{markup:Translate [SelectionFilter_OptionTabGeneral]}">
                 <StackPanel Orientation="Vertical">
@@ -166,19 +166,34 @@
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <Label Content="{markup:Translate [SelectionFilter_OptionLabelBulletPalette]}" />
                         <xctk:CheckComboBox ItemsSource="{Binding FilterOptions.FilterBulletPalettesItems}"
-                                            SelectedMemberPath="IsSelected"
+                                            DisplayMemberPath="Display" SelectedMemberPath="IsSelected"
                                             IsSelectAllActive="True"
                                             Width="100" MaxWidth="100"
                                             Text="" Loaded="BulletPaletteCheckList_SetText"
-                                            Closed="BulletPaletteCheckList_SetText">
-                            <xctk:CheckComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Display}" />
-                                </DataTemplate>
-                            </xctk:CheckComboBox.ItemTemplate>
-                        </xctk:CheckComboBox>
+                                            Closed="BulletPaletteCheckList_SetText" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="{markup:Translate [SelectionFilter_OptionTabOther]}">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <Label Content="{markup:Translate [SelectionFilter_OptionLabelLaneBlockDirection]}" />
+                        <RadioButton GroupName="LaneBlockSideRadio"
+                                     Content="{markup:Translate [SelectionFilter_AnyChoice]}"
+                                     IsChecked="{Binding FilterOptions.LaneBlockDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LeftRightFilteringMode.Any}, Mode=TwoWay}" />
+                        <RadioButton GroupName="LaneBlockSideRadio"
+                                     Content="{markup:Translate [DirectionLeft]}"
+                                     IsChecked="{Binding FilterOptions.LaneBlockDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LeftRightFilteringMode.Left}, Mode=TwoWay}" />
+                        <RadioButton GroupName="LaneBlockSideRadio"
+                                     Content="{markup:Translate [DirectionRight]}"
+                                     IsChecked="{Binding FilterOptions.LaneBlockDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LeftRightFilteringMode.Right}, Mode=TwoWay}" />
                     </StackPanel>
 
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Content="{markup:Translate [SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart]}"
+                                  IsChecked="{Binding FilterOptions.OnlyMatchLaneBlockEndsWithSelectedStarts, Mode=TwoWay}"/>
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
         </TabControl>

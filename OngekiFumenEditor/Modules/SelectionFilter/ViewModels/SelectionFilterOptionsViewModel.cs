@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -27,6 +28,7 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
     private bool _onlyMatchLanesWithSelectedStartNodes = false;
     private bool _onlyMatchCurvesWithSelectedLaneNodes = false;
     private bool _onlyMatchHoldsEndsWithSelectedStartNodes = false;
+    private bool _onlyMatchLaneBlockEndsWithSelectedStarts = false;
     private LeftRightFilteringMode _flickDirectionFilteringMode = LeftRightFilteringMode.Any;
     private LeftRightFilteringMode _laneBlockDirectionFilteringMode = LeftRightFilteringMode.Any;
 
@@ -103,6 +105,12 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
         set => Set(ref _onlyMatchCurvesWithSelectedLaneNodes, value);
     }
 
+    public bool OnlyMatchLaneBlockEndsWithSelectedStarts
+    {
+        get => _onlyMatchLaneBlockEndsWithSelectedStarts;
+        set => Set(ref _onlyMatchLaneBlockEndsWithSelectedStarts, value);
+    }
+
     public LeftRightFilteringMode LaneBlockDirectionFilteringMode
     {
         get => _laneBlockDirectionFilteringMode;
@@ -117,23 +125,18 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
 
         // Set up OptionChanged events
 
-        PropertyChanged += (_, args) =>
-        {
-            OptionChanged?.Invoke();
-        };
+        PropertyChanged += (_, _) => OptionChanged?.Invoke();
 
-        foreach (var opt in FilterDockableLaneOptions) {
-            opt.PropertyChanged += (_, args) =>
-            {
-                if (args.PropertyName == nameof(FilterDockableLaneOption.IsSelected)) {
-                    OptionChanged?.Invoke();
-                }
-            };
-        }
-
-        FilterBulletPalettesItems.ForEach(i => i.PropertyChanged += (sender, args) =>
+        FilterDockableLaneOptions.ForEach(opt => opt.PropertyChanged += (_, args) =>
         {
-            OptionChanged?.Invoke();
+            if (args.PropertyName == nameof(FilterDockableLaneOption.IsSelected))
+                OptionChanged?.Invoke();
+        });
+
+        FilterBulletPalettesItems.ForEach(i => i.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(FilterBulletPalettesItem.IsSelected))
+                OptionChanged?.Invoke();
         });
 
         // Initialize bullet palletes list
@@ -202,20 +205,35 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
             return false;
         }
 
+        if (LaneBlockDirectionFilteringMode != LeftRightFilteringMode.Any) {
+            LaneBlockArea.BlockDirection? direction = obj is LaneBlockArea laneBlock ? laneBlock.Direction
+                : obj is LaneBlockArea.LaneBlockAreaEndIndicator laneBlockEnd ? laneBlockEnd.RefLaneBlockArea.Direction
+                : null;
+
+            if (direction.HasValue && LaneBlockDirectionFilteringMode.ToLaneBlockDirection() != direction.Value) {
+                return false;
+            }
+        }
+
+        if (OnlyMatchLaneBlockEndsWithSelectedStarts && obj is LaneBlockArea.LaneBlockAreaEndIndicator lbkEnd) {
+            if (!lbkEnd.RefLaneBlockArea.IsSelected)
+                return false;
+        }
+
         if (OnlyMatchLanesWithSelectedStartNodes && obj is ConnectableChildObjectBase laneNext) {
-            if (!SelectionFilter.Editor.SelectObjects.Contains(laneNext.ReferenceStartObject)) {
+            if (!laneNext.ReferenceStartObject.IsSelected) {
                 return false;
             }
         }
 
         if (OnlyMatchLanesWithSelectedStartNodes && obj is HoldEnd holdEnd) {
-            if (!SelectionFilter.Editor.SelectObjects.Contains(holdEnd.ReferenceLaneStart)) {
+            if (!holdEnd.RefHold.IsSelected) {
                 return false;
             }
         }
 
         if (OnlyMatchCurvesWithSelectedLaneNodes && obj is LaneCurvePathControlObject curve) {
-            if (!SelectionFilter.Editor.SelectObjects.Contains(curve.RefCurveObject))
+            if (!curve.RefCurveObject.IsSelected)
                 return false;
         }
 

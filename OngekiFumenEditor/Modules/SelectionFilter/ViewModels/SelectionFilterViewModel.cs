@@ -86,7 +86,7 @@ public class SelectionFilterViewModel : ViewAware
         FilterCategories.Add(new(this, Resources.SelectionFilterObjectCategoryTimeline, [
             new(this) { Text = Resources.LaneBlock, Types = [typeof(LaneBlockArea), typeof(LaneBlockArea.LaneBlockAreaEndIndicator)] },
             new(this) { Text = Resources.ClickSE, Types = [typeof(ClickSE)] },
-            new(this) { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan)] },
+            new(this) { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)] },
             new(this) { Text = Resources.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
             new(this) { Text = Resources.DurationSoflan, Types = [typeof(IDurationSoflan)] },
             new(this) { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
