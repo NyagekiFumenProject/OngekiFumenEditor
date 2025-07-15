@@ -5317,6 +5317,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   查找类似 Lane block direction 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelLaneBlockDirection {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelLaneBlockDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Lane node type 的本地化字符串。
         /// </summary>
         public static string SelectionFilter_OptionLabelLaneNodeType {
@@ -5343,6 +5352,15 @@ namespace OngekiFumenEditor.Properties {
             }
         }
 
+        /// <summary>
+        ///   查找类似 Only match lane block ends with a selected lane block start 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   查找类似 Only match next nodes with a selected start node 的本地化字符串。
         /// </summary>
@@ -5406,6 +5424,15 @@ namespace OngekiFumenEditor.Properties {
             }
         }
 
+        /// <summary>
+        ///   查找类似 Other 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionTabOther {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionTabOther", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   查找类似 {0} objects will be removed from the selection 的本地化字符串。
         /// </summary>

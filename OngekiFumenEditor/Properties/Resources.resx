@@ -2211,4 +2211,13 @@
   <data name="SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart" xml:space="preserve">
     <value>Only match hold ends with a selected hold start</value>
   </data>
+  <data name="SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart" xml:space="preserve">
+    <value>Only match lane block ends with a selected lane block start</value>
+  </data>
+  <data name="SelectionFilter_OptionTabOther" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelLaneBlockDirection" xml:space="preserve">
+    <value>Lane block direction</value>
+  </data>
 </root>
