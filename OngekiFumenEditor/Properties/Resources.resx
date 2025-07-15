@@ -2118,9 +2118,6 @@
   <data name="SelectionFilter_Any" xml:space="preserve">
     <value>&lt;Any&gt;</value>
   </data>
-  <data name="SelectionFilter_None" xml:space="preserve">
-    <value>&lt;None&gt;</value>
-  </data>
   <data name="SelectionFilter_AnyChoice" xml:space="preserve">
     <value>Any</value>
   </data>
@@ -2213,68 +2210,5 @@
   </data>
   <data name="SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart" xml:space="preserve">
     <value>Only match hold ends with a selected hold start</value>
-  </data>
-  <data name="SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart" xml:space="preserve">
-    <value>Only match lane block ends with a selected lane block start</value>
-  </data>
-  <data name="SelectionFilter_OptionTabOther" xml:space="preserve">
-    <value>Other</value>
-  </data>
-  <data name="SelectionFilter_OptionLabelLaneBlockDirection" xml:space="preserve">
-    <value>Lane block direction</value>
-  </data>
-  <data name="SelectionFilter_WindowTitle" xml:space="preserve">
-    <value>Selection Filter</value>
-  </data>
-  <data name="SelectionFilter_HeadTailHoldObject_Head" xml:space="preserve">
-    <value>Start</value>
-  </data>
-  <data name="SelectionFilter_HeadTailHoldObject_Tail" xml:space="preserve">
-    <value>End</value>
-  </data>
-  <data name="SelectionFilter_HeadTailHoldObject_HeadNoChild" xml:space="preserve">
-    <value>Start (unselected end)</value>
-  </data>
-  <data name="SelectionFilter_HeadTailHoldObject_HeadWithChild" xml:space="preserve">
-    <value>Start (selected end)</value>
-  </data>
-  <data name="SelectionFilter_HeadTailHoldObject_TailNoParent" xml:space="preserve">
-    <value>End (unselected start)</value>
-  </data>
-  <data name="SelectionFilter_HeadTailHoldObject_TailWithParent" xml:space="preserve">
-    <value>End (selected start)</value>
-  </data>
-  <data name="SelectionFilter_HeadTailLaneNode_Head" xml:space="preserve">
-    <value>Start</value>
-  </data>
-  <data name="SelectionFilter_HeadTailLaneNode_Tail" xml:space="preserve">
-    <value>Next</value>
-  </data>
-  <data name="SelectionFilter_HeadTailLaneNode_HeadNoChild" xml:space="preserve">
-    <value>Start (unselected next node)</value>
-  </data>
-  <data name="SelectionFilter_HeadTailLaneNode_HeadWithChild" xml:space="preserve">
-    <value>Start (with selected next node)</value>
-  </data>
-  <data name="SelectionFilter_HeadTailLaneNode_TailNoParent" xml:space="preserve">
-    <value>Next (unselected start node)</value>
-  </data>
-  <data name="SelectionFilter_HeadTailLaneNode_TailWithParent" xml:space="preserve">
-    <value>Next (selected start node)</value>
-  </data>
-  <data name="BulletPalleteSelectDialogTitle" xml:space="preserve">
-    <value>Select a bullet pallete</value>
-  </data>
-  <data name="BulletNullPalleteDescription" xml:space="preserve">
-    <value>bullet(id:{0}) pallete is NULL</value>
-  </data>
-  <data name="CantDeleteReferencedBulletPallete" xml:space="preserve">
-    <value>bullet pallete(strID:{0}) which will be deleted has bell/bullet object references, so it cannot delete directly</value>
-  </data>
-  <data name="ShowHitObjectEffectInPreviewMode" xml:space="preserve">
-    <value>Display hit effect when objects arrived judge line.</value>
-  </data>
-  <data name="BulletPalleteDisplayName" xml:space="preserve">
-    <value>BulletPallete</value>
   </data>
 </root>

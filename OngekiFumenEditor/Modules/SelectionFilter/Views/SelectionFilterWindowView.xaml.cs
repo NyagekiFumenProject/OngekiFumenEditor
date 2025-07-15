@@ -9,7 +9,7 @@ using OngekiFumenEditor.Utils;
 using Xceed.Wpf.AvalonDock.Controls;
 using Xceed.Wpf.Toolkit;
 
-namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views;
+namespace OngekiFumenEditor.Modules.SelectionFilter.Views;
 
 public partial class SelectionFilterWindowView : Window
 {
@@ -36,7 +36,7 @@ public partial class SelectionFilterWindowView : Window
     {
         var items = ((CheckComboBox)sender).Items.Cast<FilterDockableLaneOption>().ToArray();
         if (items.All(o => o.IsSelected) || items.All(o => !o.IsSelected)) {
-            FilterDockableTypeCheckComboBox.Text = "<Any>";
+            FilterDockableTypeCheckComboBox.Text = Properties.Resources.SelectionFilter_Any;
         }
     }
 
@@ -69,10 +69,11 @@ public partial class SelectionFilterWindowView : Window
         var comboBox = (CheckComboBox)sender;
         var selectedItems = comboBox.Items.Cast<FilterBulletPalettesItem>().Where(i => i.IsSelected).ToArray();
         if (selectedItems.Length == 0 || selectedItems.Length == comboBox.Items.Count) {
-            comboBox.Text = "<Any>";
+            comboBox.Text = Properties.Resources.SelectionFilter_Any;
         }
         else {
-            comboBox.Text = $"{selectedItems.Length} palettes";
+            comboBox.Text =
+                Properties.Resources.SelectionFilter_ComboLabelBulletPaletteSelectCount.Format(selectedItems.Length);
         }
     }
 }
