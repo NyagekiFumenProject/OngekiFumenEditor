@@ -16,6 +16,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using Binding = System.Windows.Data.Binding;
 
@@ -30,11 +31,11 @@ public class SelectionFilterViewModel : ViewAware
     public ObservableCollection<ISelectableObject> ObjectTypeFilterMatches { get; } = new();
     public ObservableCollection<ISelectableObject> OptionFilterRemovals { get; } = new();
 
-    private string _fitlerOutcomeText;
+    private string _filterOutcomeText;
     public string FilterOutcomeText
     {
-        get => _fitlerOutcomeText;
-        private set => Set(ref _fitlerOutcomeText, value);
+        get => _filterOutcomeText;
+        private set => Set(ref _filterOutcomeText, value);
     }
 
     // Filter categories
@@ -44,10 +45,10 @@ public class SelectionFilterViewModel : ViewAware
     public SelectionFilterViewModel()
     {
         Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
+        FilterOptions = new(this);
 
         InitObjectTypeFilter();
 
-        FilterOptions = new(this);
         FilterOptions.OptionChanged += () =>
         {
             // Update filter option matches
@@ -61,45 +62,44 @@ public class SelectionFilterViewModel : ViewAware
 
     private void InitObjectTypeFilter()
     {
-        FilterCategories.Add(new(this, "Lanes", [
-            new(this) { Text = "Wall Left", Types = [typeof(WallLeftNext), typeof(WallLeftStart)] },
-            new(this) { Text = "Lane Left", Types = [typeof(LaneLeftNext), typeof(LaneLeftStart)] },
-            new(this) { Text = "Lane Center", Types = [typeof(LaneCenterNext), typeof(LaneCenterStart)] },
-            new(this) { Text = "Lane Right", Types = [typeof(LaneRightNext), typeof(LaneRightStart)] },
-            new(this) { Text = "Wall Right", Types = [typeof(WallRightNext), typeof(WallRightStart)] },
-            new(this) { Text = "Lane Colorful", Types = [typeof(ColorfulLaneNext), typeof(ColorfulLaneStart)] },
-            new(this) { Text = "AutoPlayFaderLane", Types = [typeof(AutoplayFaderLaneNext), typeof(AutoplayFaderLaneStart)] },
-            new(this) { Text = "Beam", Types = [typeof(BeamNext), typeof(BeamStart)] },
-            new(this) { Text = "Curve Controls", Types = [typeof(LaneCurvePathControlObject)] }
+        FilterCategories.Add(new(this, Resources.SelectionFilterObjectCategoryLane, [
+            new(this) { Text = Resources.WallLeft, Types = [typeof(WallLeftNext), typeof(WallLeftStart)] },
+            new(this) { Text = Resources.LaneLeft, Types = [typeof(LaneLeftNext), typeof(LaneLeftStart)] },
+            new(this) { Text = Resources.LaneCenter, Types = [typeof(LaneCenterNext), typeof(LaneCenterStart)] },
+            new(this) { Text = Resources.LaneRight, Types = [typeof(LaneRightNext), typeof(LaneRightStart)] },
+            new(this) { Text = Resources.WallRight, Types = [typeof(WallRightNext), typeof(WallRightStart)] },
+            new(this) { Text = Resources.LaneColorful, Types = [typeof(ColorfulLaneNext), typeof(ColorfulLaneStart)] },
+            new(this) { Text = Resources.EnemyLane, Types = [typeof(EnemyLaneNext), typeof(EnemyLaneStart)] },
+            new(this) { Text = Resources.AutoPlayFaderLane, Types = [typeof(AutoplayFaderLaneNext), typeof(AutoplayFaderLaneStart)] },
+            new(this) { Text = Resources.Beam, Types = [typeof(BeamNext), typeof(BeamStart)] },
+            new(this) { Text = Resources.CurveControlPoint, Types = [typeof(LaneCurvePathControlObject)] }
         ]));
 
-        FilterCategories.Add(new(this, "Dockable", [
-            new(this) { Text = "Tap", Types = [typeof(Tap)] },
-            new(this) { Text = "Hold", Types = [typeof(Hold), typeof(HoldEnd)] }
+        FilterCategories.Add(new(this, Resources.SelectionFilterObjectCategoryDockable, [
+            new(this) { Text = Resources.Tap, Types = [typeof(Tap)] },
+            new(this) { Text = Resources.Hold, Types = [typeof(Hold), typeof(HoldEnd)] }
         ]));
 
-        FilterCategories.Add(new(this, "Floating", [
-
-            new(this) { Text = "Bell", Types = [typeof(Bell)] },
-            new(this) { Text = "Bullet", Types = [typeof(Bullet)] },
-            new(this) { Text = "Flick", Types = [typeof(Flick)] }
+        FilterCategories.Add(new(this, Resources.SelectionFilterObjectCategoryFloating, [
+            new(this) { Text = Resources.Bell, Types = [typeof(Bell)] },
+            new(this) { Text = Resources.Bullet, Types = [typeof(Bullet)] },
+            new(this) { Text = Resources.Flick, Types = [typeof(Flick)] }
         ]));
 
-        FilterCategories.Add(new(this, "Timeline", [
-            new(this) { Text = "Lane Block", Types = [typeof(LaneBlockArea), typeof(LaneBlockArea.LaneBlockAreaEndIndicator)] },
-            new(this) { Text = "Click SE", Types = [typeof(ClickSE)] },
-            new(this) { Text = "Interpolatable Soflan", Types = [typeof(InterpolatableSoflan)] },
-            new(this) { Text = "Keyframe Soflan", Types = [typeof(KeyframeSoflan)] },
-            new(this) { Text = "Duration Soflan", Types = [typeof(IDurationSoflan)] },
-            new(this) { Text = "Meter Change", Types = [typeof(MeterChange)] },
-            new(this) { Text = "Individual Soflan Area", Types = [typeof(IndividualSoflanArea)] },
+        FilterCategories.Add(new(this, Resources.SelectionFilterObjectCategoryTimeline, [
+            new(this) { Text = Resources.LaneBlock, Types = [typeof(LaneBlockArea), typeof(LaneBlockArea.LaneBlockAreaEndIndicator)] },
+            new(this) { Text = Resources.ClickSE, Types = [typeof(ClickSE)] },
+            new(this) { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan)] },
+            new(this) { Text = Resources.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
+            new(this) { Text = Resources.DurationSoflan, Types = [typeof(IDurationSoflan)] },
+            new(this) { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
+            new(this) { Text = Resources.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] },
         ]));
 
-        FilterCategories.Add(new(this, "Misc.", [
-
-            new(this) { Text = "SVG Prefab (File)", Types = [typeof(SvgImageFilePrefab)] },
-            new(this) { Text = "SVG Prefab (Text)", Types = [typeof(SvgStringPrefab)] },
-            new(this) { Text = "Comment", Types = [typeof(Comment)] }
+        FilterCategories.Add(new(this, Resources.SelectionFilterObjectCategoryMisc, [
+            new(this) { Text = Resources.SvgPrefabFile, Types = [typeof(SvgImageFilePrefab)] },
+            new(this) { Text = Resources.SvgPrefabText, Types = [typeof(SvgStringPrefab)] },
+            new(this) { Text = Resources.Comment, Types = [typeof(Comment)] }
         ]));
 
         // Add selected objects to each category
@@ -140,19 +140,24 @@ public class SelectionFilterViewModel : ViewAware
     private void UpdateFilterOutcomeText()
     {
         var matches = GetAllFilterMatches();
-        FilterOutcomeText = $"{matches.Count()} objects will be remaining in the selection";
+        if (FilterOptions.IsInvertFilterEnabled) {
+            FilterOutcomeText = Resources.SelectionFilter_ResultsLabelRemoveMode.Format(matches.Count());
+        }
+        else {
+            FilterOutcomeText = Resources.SelectionFilter_ResultsLabelReplaceMode.Format(matches.Count());
+        }
     }
 
     public void ApplyFilterToSelection()
     {
-        if (FilterOptions.FilterSelectionChangeMode == FilterMode.Replace) {
-            foreach (var selectedObject in Editor.SelectObjects.Except(GetAllFilterMatches())) {
-                selectedObject.IsSelected = false;
+        if (FilterOptions.IsInvertFilterEnabled) {
+            foreach (var selectableObject in GetAllFilterMatches()) {
+                selectableObject.IsSelected = false;
             }
         }
         else {
-            foreach (var selectableObject in GetAllFilterMatches()) {
-                selectableObject.IsSelected = false;
+            foreach (var selectedObject in Editor.SelectObjects.Except(GetAllFilterMatches())) {
+                selectedObject.IsSelected = false;
             }
         }
 
@@ -290,7 +295,7 @@ public class FilterBulletPalettesItem : PropertyChangedBase
 
     public string Display =>
         (BulletPalette is null
-            ? "No palette"
+            ? Resources.NoBulletPalette
             : $"{BulletPalette.StrID}{(string.IsNullOrWhiteSpace(BulletPalette.EditorName) ? "" : $" {BulletPalette.EditorName}")}")
         + $" ({MatchingBullets.Count} | {MatchingBells.Count})";
 

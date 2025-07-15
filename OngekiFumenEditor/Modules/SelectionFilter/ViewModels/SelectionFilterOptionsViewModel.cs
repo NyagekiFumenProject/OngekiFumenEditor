@@ -18,7 +18,7 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
     public delegate void OptionChangedEventHandler();
     public event OptionChangedEventHandler OptionChanged;
 
-    private FilterMode _filterSelectionChangeMode = FilterMode.Replace;
+    private bool _isInvertFilterEnabled;
     private YesNoFilteringMode _isCriticalFilterMode = YesNoFilteringMode.Any;
     private LinePointTypeFilteringMode _nodeTypeFilteringMode = LinePointTypeFilteringMode.Any;
     private LinePointTypeFilteringMode _holdPartFilteringMode = LinePointTypeFilteringMode.Any;
@@ -42,10 +42,10 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
         new() { Name = "Undocked", Filter = d => d.ReferenceLaneStart == null},
     };
 
-    public FilterMode FilterSelectionChangeMode
+    public bool IsInvertFilterEnabled
     {
-        get => _filterSelectionChangeMode;
-        set => Set(ref _filterSelectionChangeMode, value);
+        get => _isInvertFilterEnabled;
+        set => Set(ref _isInvertFilterEnabled, value);
     }
 
     public YesNoFilteringMode IsCriticalFilterMode
@@ -122,15 +122,14 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
             OptionChanged?.Invoke();
         };
 
-        FilterDockableLaneOptions.ForEach(x =>
-        {
-            x.PropertyChanged += (_, args) =>
+        foreach (var opt in FilterDockableLaneOptions) {
+            opt.PropertyChanged += (_, args) =>
             {
                 if (args.PropertyName == nameof(FilterDockableLaneOption.IsSelected)) {
                     OptionChanged?.Invoke();
                 }
             };
-        });
+        }
 
         FilterBulletPalettesItems.ForEach(i => i.PropertyChanged += (sender, args) =>
         {

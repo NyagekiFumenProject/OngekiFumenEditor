@@ -14,8 +14,8 @@ using System.Windows;
 using System.Windows.Data;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
-using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views;
 using OngekiFumenEditor.Modules.SelectionFilter.ViewModels;
+using OngekiFumenEditor.Modules.SelectionFilter.Views;
 using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
