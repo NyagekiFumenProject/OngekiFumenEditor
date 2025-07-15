@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Utils;
@@ -14,7 +15,8 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
 {
     private readonly SelectionFilterViewModel SelectionFilter;
 
-    public event PropertyChangedEventHandler OptionChanged;
+    public delegate void OptionChangedEventHandler();
+    public event OptionChangedEventHandler OptionChanged;
 
     private FilterMode _filterSelectionChangeMode = FilterMode.Replace;
     private YesNoFilteringMode _isCriticalFilterMode = YesNoFilteringMode.Any;
@@ -26,6 +28,7 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
     private bool _onlyMatchCurvesWithSelectedLaneNodes = false;
     private bool _onlyMatchHoldsEndsWithSelectedStartNodes = false;
     private LeftRightFilteringMode _flickDirectionFilteringMode = LeftRightFilteringMode.Any;
+    private LeftRightFilteringMode _laneBlockDirectionFilteringMode = LeftRightFilteringMode.Any;
 
     public ObservableCollection<FilterBulletPalettesItem> FilterBulletPalettesItems { get; } = new();
 
@@ -100,29 +103,23 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
         set => Set(ref _onlyMatchCurvesWithSelectedLaneNodes, value);
     }
 
+    public LeftRightFilteringMode LaneBlockDirectionFilteringMode
+    {
+        get => _laneBlockDirectionFilteringMode;
+        set => Set(ref _laneBlockDirectionFilteringMode, value);
+    }
+
     public SelectionFilterOptionsViewModel(SelectionFilterViewModel selectionFilter)
     {
         SelectionFilter = selectionFilter;
 
-        // Call setters on settings to update UI
-        FilterSelectionChangeMode = _filterSelectionChangeMode;
-        IsCriticalFilterMode = _isCriticalFilterMode;
-        NodeTypeFilteringMode = _nodeTypeFilteringMode;
-        HoldPartFilteringMode = _holdPartFilteringMode;
-        TagFilter = _tagFilter;
-        IsTagFilterRegex = _isTagFilterRegex;
-        FlickDirectionFilteringMode = _flickDirectionFilteringMode;
-        OnlyMatchCurvesWithSelectedLaneNodes = _onlyMatchCurvesWithSelectedLaneNodes;
-
         FilterBulletPalettesItems.AddRange(selectionFilter.Editor.Fumen.BulletPalleteList.Select(bpl => new FilterBulletPalettesItem(bpl)));
-        FilterBulletPalettesItems.ForEach(i => i.PropertyChanged += (sender, args) =>
-        {
-            OptionChanged?.Invoke(sender, args);
-        });
+
+        // Set up OptionChanged events
 
         PropertyChanged += (_, args) =>
         {
-            OptionChanged?.Invoke(this, args);
+            OptionChanged?.Invoke();
         };
 
         FilterDockableLaneOptions.ForEach(x =>
@@ -130,9 +127,14 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
             x.PropertyChanged += (_, args) =>
             {
                 if (args.PropertyName == nameof(FilterDockableLaneOption.IsSelected)) {
-                    OptionChanged?.Invoke(this, new PropertyChangedEventArgs(""));
+                    OptionChanged?.Invoke();
                 }
             };
+        });
+
+        FilterBulletPalettesItems.ForEach(i => i.PropertyChanged += (sender, args) =>
+        {
+            OptionChanged?.Invoke();
         });
 
         // Initialize bullet palletes list
@@ -180,7 +182,7 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
                 if (!Regex.IsMatch(tag, TagFilter))
                     return false;
             }
-            else if (tag == TagFilter) {
+            else if (tag != TagFilter) {
                 return false;
             }
         }
@@ -205,10 +207,17 @@ public sealed class SelectionFilterOptionsViewModel : PropertyChangedBase
             if (!SelectionFilter.Editor.SelectObjects.Contains(laneNext.ReferenceStartObject)) {
                 return false;
             }
-        } else if (OnlyMatchLanesWithSelectedStartNodes && obj is HoldEnd holdEnd) {
+        }
+
+        if (OnlyMatchLanesWithSelectedStartNodes && obj is HoldEnd holdEnd) {
             if (!SelectionFilter.Editor.SelectObjects.Contains(holdEnd.ReferenceLaneStart)) {
                 return false;
             }
+        }
+
+        if (OnlyMatchCurvesWithSelectedLaneNodes && obj is LaneCurvePathControlObject curve) {
+            if (!SelectionFilter.Editor.SelectObjects.Contains(curve.RefCurveObject))
+                return false;
         }
 
         return true;

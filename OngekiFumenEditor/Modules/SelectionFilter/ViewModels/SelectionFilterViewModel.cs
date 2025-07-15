@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
-using AngleSharp.Common;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
@@ -14,6 +13,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -48,7 +48,7 @@ public class SelectionFilterViewModel : ViewAware
         InitObjectTypeFilter();
 
         FilterOptions = new(this);
-        FilterOptions.OptionChanged += (sender, args) =>
+        FilterOptions.OptionChanged += () =>
         {
             // Update filter option matches
             OptionFilterRemovals.Clear();
@@ -62,7 +62,6 @@ public class SelectionFilterViewModel : ViewAware
     private void InitObjectTypeFilter()
     {
         FilterCategories.Add(new(this, "Lanes", [
-
             new(this) { Text = "Wall Left", Types = [typeof(WallLeftNext), typeof(WallLeftStart)] },
             new(this) { Text = "Lane Left", Types = [typeof(LaneLeftNext), typeof(LaneLeftStart)] },
             new(this) { Text = "Lane Center", Types = [typeof(LaneCenterNext), typeof(LaneCenterStart)] },
@@ -123,7 +122,7 @@ public class SelectionFilterViewModel : ViewAware
         }
     }
 
-    private IEnumerable<ISelectableObject> GetAllFilterMatches()
+    public IEnumerable<ISelectableObject> GetAllFilterMatches()
         => ObjectTypeFilterMatches.Except(OptionFilterRemovals);
 
     public void FilterObjectTypeSelectedChanged(FilterObjectTypesItem filterType)
@@ -142,6 +141,22 @@ public class SelectionFilterViewModel : ViewAware
     {
         var matches = GetAllFilterMatches();
         FilterOutcomeText = $"{matches.Count()} objects will be remaining in the selection";
+    }
+
+    public void ApplyFilterToSelection()
+    {
+        if (FilterOptions.FilterSelectionChangeMode == FilterMode.Replace) {
+            foreach (var selectedObject in Editor.SelectObjects.Except(GetAllFilterMatches())) {
+                selectedObject.IsSelected = false;
+            }
+        }
+        else {
+            foreach (var selectableObject in GetAllFilterMatches()) {
+                selectableObject.IsSelected = false;
+            }
+        }
+
+        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
     }
 
     public void FilterObjectTypesSelectAll()
