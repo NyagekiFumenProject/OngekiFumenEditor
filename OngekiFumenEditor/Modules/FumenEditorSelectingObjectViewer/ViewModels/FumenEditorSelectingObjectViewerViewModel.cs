@@ -12,11 +12,10 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Data;
-using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views;
+using OngekiFumenEditor.Modules.SelectionFilter.ViewModels;
 using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
@@ -169,9 +168,8 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 			FilterWindow.ShowDialog();
 
 			if (FilterWindow.DialogResult == true) {
-//				var results = ((SelectionFilterViewModel)FilterWindow.DataContext).;
-//				results.ForEach(x => x.IsSelected = false);
-				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+				var filterViewModel = (SelectionFilterViewModel)FilterWindow.DataContext;
+				filterViewModel.ApplyFilterToSelection();
 			}
 
 			FilterWindow = null;
