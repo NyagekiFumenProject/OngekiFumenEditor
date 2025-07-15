@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
 using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels;
+using OngekiFumenEditor.Modules.SelectionFilter.ViewModels;
 using OngekiFumenEditor.Utils;
 using Xceed.Wpf.AvalonDock.Controls;
 using Xceed.Wpf.Toolkit;

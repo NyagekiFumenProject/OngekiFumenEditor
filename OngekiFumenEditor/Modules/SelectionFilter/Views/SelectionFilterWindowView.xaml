@@ -6,13 +6,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:viewModels="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
+        xmlns:viewModels="clr-namespace:OngekiFumenEditor.Modules.SelectionFilter.ViewModels"
         xmlns:ongekiObjects="clr-namespace:OngekiFumenEditor.Base.OngekiObjects"
+        xmlns:selectionFilter="clr-namespace:OngekiFumenEditor.Modules.SelectionFilter"
         mc:Ignorable="d"
         ShowInTaskbar="False"
         ShowActivated="True"
         SizeToContent="WidthAndHeight"
         Padding="3"
+        ResizeMode="NoResize"
         d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=viewModels:SelectionFilterViewModel}">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModels:FilterObjectTypesItem}">
@@ -97,16 +99,18 @@
                         <Label Content="Node type" />
                         <RadioButton GroupName="LaneNodeTypeOptions"
                                      Content="Any"
-                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Any}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LinePointTypeFilteringMode.Any}, Mode=TwoWay}" />
                         <RadioButton GroupName="LaneNodeTypeOptions"
                                      Content="Start"
-                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Head}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LinePointTypeFilteringMode.Head}, Mode=TwoWay}" />
                         <RadioButton GroupName="LaneNodeTypeOptions"
                                      Content="Next"
-                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Tail}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LinePointTypeFilteringMode.Tail}, Mode=TwoWay}" />
                     </StackPanel>
                     <CheckBox Margin="5" Content="Only match next nodes with a selected start node"
                               IsChecked="{Binding FilterOptions.OnlyMatchLanesWithSelectedStartNodes, Mode=TwoWay}" />
+                    <CheckBox Margin="5" Content="Only match curve points with a selected lane node"
+                              IsChecked="{Binding FilterOptions.OnlyMatchCurvesWithSelectedLaneNodes, Mode=TwoWay}" />
                 </StackPanel>
             </TabItem>
 
@@ -116,39 +120,39 @@
                         <Label>Is Critical</Label>
                         <RadioButton GroupName="IsCriticalOptions"
                                      Content="Any"
-                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:YesNoFilteringMode.Any}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:YesNoFilteringMode.Any}, Mode=TwoWay}" />
                         <RadioButton GroupName="IsCriticalOptions"
                                      Content="Yes"
-                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:YesNoFilteringMode.Yes}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:YesNoFilteringMode.Yes}, Mode=TwoWay}" />
                         <RadioButton GroupName="IsCriticalOptions"
                                      Content="No"
-                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:YesNoFilteringMode.No}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.IsCriticalFilterMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:YesNoFilteringMode.No}, Mode=TwoWay}" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="5 5">
                         <Label>Flick Direction</Label>
                         <RadioButton GroupName="FlickDirectionRadio"
                                      Content="Any"
-                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LeftRightFilteringMode.Any}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LeftRightFilteringMode.Any}, Mode=TwoWay}" />
                         <RadioButton GroupName="FlickDirectionRadio"
                                      Content="Left"
-                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LeftRightFilteringMode.Left}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LeftRightFilteringMode.Left}, Mode=TwoWay}" />
                         <RadioButton GroupName="FlickDirectionRadio"
                                      Content="Right"
-                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LeftRightFilteringMode.Right}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.FlickDirectionFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LeftRightFilteringMode.Right}, Mode=TwoWay}" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <Label Content="Hold object type" />
                         <RadioButton GroupName="HoldPartOptions"
                                      Content="Any"
-                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Any}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LinePointTypeFilteringMode.Any}, Mode=TwoWay}" />
                         <RadioButton GroupName="HoldPartOptions"
                                      Content="Start"
-                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Head}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LinePointTypeFilteringMode.Head}, Mode=TwoWay}" />
                         <RadioButton GroupName="HoldPartOptions"
                                      Content="End"
-                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:LinePointTypeFilteringMode.Tail}, Mode=TwoWay}" />
+                                     IsChecked="{Binding FilterOptions.HoldPartFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LinePointTypeFilteringMode.Tail}, Mode=TwoWay}" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="5">
@@ -193,7 +197,7 @@
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
             <CheckBox Content="Invert filter"
-                      IsChecked="{Binding FilterOptions.FilterSelectionChangeMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static viewModels:FilterMode.Remove}, Mode=TwoWay}" />
+                      IsChecked="{Binding FilterOptions.FilterSelectionChangeMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:FilterMode.Remove}, Mode=TwoWay}" />
         </StackPanel>
 
         <TextBlock Text="{Binding FilterOutcomeText}">
