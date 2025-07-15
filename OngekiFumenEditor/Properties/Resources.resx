@@ -2220,4 +2220,7 @@
   <data name="SelectionFilter_OptionLabelLaneBlockDirection" xml:space="preserve">
     <value>Lane block direction</value>
   </data>
+  <data name="SelectionFilter_WindowTitle" xml:space="preserve">
+    <value>Selection Filter</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-<Window x:Class="OngekiFumenEditor.Modules.SelectionFilter.Views.SelectionFilterWindowView"
+<mah:MetroWindow x:Class="OngekiFumenEditor.Modules.SelectionFilter.Views.SelectionFilterWindowView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:cal="http://caliburnmicro.com"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,12 +8,14 @@
         xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.SelectionFilter.ViewModels"
         xmlns:selectionFilter="clr-namespace:OngekiFumenEditor.Modules.SelectionFilter"
         xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
         ShowInTaskbar="False"
         ShowActivated="True"
         SizeToContent="WidthAndHeight"
         Padding="3"
         ResizeMode="NoResize"
+        Title="{markup:Translate [SelectionFilter_WindowTitle]}"
         d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=vm:SelectionFilterViewModel}">
     <Window.Resources>
         <Style TargetType="CheckBox">
@@ -214,4 +216,4 @@
             <Button Content="{markup:Translate [Cancel]}" Click="CancelButton_Click" />
         </StackPanel>
     </StackPanel>
-</Window>
+</mah:MetroWindow>

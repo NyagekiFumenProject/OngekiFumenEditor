@@ -11,7 +11,7 @@ using Xceed.Wpf.Toolkit;
 
 namespace OngekiFumenEditor.Modules.SelectionFilter.Views;
 
-public partial class SelectionFilterWindowView : Window
+public partial class SelectionFilterWindowView : MetroWindow
 {
     public SelectionFilterWindowView()
     {

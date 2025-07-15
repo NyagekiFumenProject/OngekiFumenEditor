@@ -5452,6 +5452,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   查找类似 Selection Filter 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_WindowTitle {
+            get {
+                return ResourceManager.GetString("SelectionFilter_WindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Dockable objects 的本地化字符串。
         /// </summary>
         public static string SelectionFilterObjectCategoryDockable {
