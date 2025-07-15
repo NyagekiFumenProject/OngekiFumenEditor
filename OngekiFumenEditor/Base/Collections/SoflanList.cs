@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         public int Count => soflans.Count;
 
-        public event PropertyChangedEventHandler OnPropertyChangedEvent;
+        public event Action<ISoflan, PropertyChangedEventArgs> OnSoflanPropertyChangedEvent;
         public event Action<ISoflan> OnCollectionChangedEvent;
 
         public IEnumerator<ISoflan> GetEnumerator() => soflans.GetEnumerator();
@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         public SoflanList(IEnumerable<ISoflan> initSoflanChanges = default)
         {
-            OnPropertyChangedEvent += OnChilidrenSubPropsChangedEvent;
+            OnSoflanPropertyChangedEvent += OnChilidrenSubPropsChangedEvent;
             foreach (var item in initSoflanChanges ?? [new KeyframeSoflan()
             {
                 TGrid = new TGrid(0,0),
@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Base.Collections
                 Add(item);
         }
 
-        private void OnChilidrenSubPropsChangedEvent(object sender, PropertyChangedEventArgs e)
+        private void OnChilidrenSubPropsChangedEvent(ISoflan sender, PropertyChangedEventArgs e)
         {
             cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
         }
@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Base.Collections
                 case nameof(Soflan.EndTGrid):
                 case nameof(Soflan.GridLength):
                 case nameof(Soflan.SoflanGroup):
-                    OnPropertyChangedEvent?.Invoke(sender, e);
+                    OnSoflanPropertyChangedEvent?.Invoke((ISoflan)sender, e);
                     break;
                 default:
                     break;

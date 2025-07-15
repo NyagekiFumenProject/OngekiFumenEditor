@@ -196,7 +196,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             using var _d5 =
-                target.Editor.Fumen.IndividualSoflanAreaMap.Keys
+                target.Editor.Fumen.IndividualSoflanAreaMap.Keys.Concat(target.Editor.Fumen.SoflansMap.Keys)
+                .Distinct()
                 .Select(x => target.Editor.Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _))
                 .Where(x => x.IsDisplaySoflanDesignMode)
                 .Select(x => x.SoflanGroupId)
