@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
-using System.Windows.Data;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
@@ -18,7 +16,6 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
-using Binding = System.Windows.Data.Binding;
 
 namespace OngekiFumenEditor.Modules.SelectionFilter.ViewModels;
 
@@ -311,18 +308,5 @@ public class FilterBulletPalettesItem : PropertyChangedBase
     {
         get => _isSelected;
         set => Set(ref _isSelected, value);
-    }
-}
-
-public class ParamValueToBoolConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value?.Equals(parameter);
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value?.Equals(true) == true ? parameter : Binding.DoNothing;
     }
 }

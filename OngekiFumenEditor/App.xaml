@@ -32,6 +32,7 @@
             <valueconverters:NullToZeroConverter x:Key="NullToZeroConverter" />
             <valueconverters:DisplayFileSizeConverter x:Key="DisplayFileSizeConverter">
             </valueconverters:DisplayFileSizeConverter>
+            <valueconverters:ParamValueToBoolConverter x:Key="ParamValueToBoolConverter" />
             <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />
             <valueconverters:SelectionFullLaneCheckConverter x:Key="SelectionFullLaneCheckConverter" />
             <valueconverters:SelectionLaneObjectsCheckConverter x:Key="SelectionLaneObjectsCheckConverter" />

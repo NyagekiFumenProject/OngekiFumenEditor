@@ -16,10 +16,6 @@
         ResizeMode="NoResize"
         d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=vm:SelectionFilterViewModel}">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type vm:FilterObjectTypesItem}">
-            <TextBlock Text="{Binding Text}" />
-        </DataTemplate>
-
         <Style TargetType="CheckBox">
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -29,15 +25,6 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Margin" Value="4 0"></Setter>
         </Style>
-
-        <vm:ParamValueToBoolConverter x:Key="ParamValueToBoolConverter" />
-
-        <DataTemplate x:Key="ItemCheckListBoxTemplate">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding Display}" />
-            </StackPanel>
-        </DataTemplate>
-
     </Window.Resources>
 
     <Window.DataContext>
@@ -54,11 +41,12 @@
             <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderObjectType]}" />
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
                 <Button Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}"
-                    cal:Message.Attach="FilterObjectTypesSelectAll()" />
+                        cal:Message.Attach="FilterObjectTypesSelectAll()" />
                 <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}"
-                    cal:Message.Attach="FilterObjectTypesReset()" />
+                        cal:Message.Attach="FilterObjectTypesReset()" />
             </StackPanel>
         </Grid>
+
         <ItemsControl ItemsSource="{Binding FilterCategories}" x:Name="ObjectTypesCheckListBoxes">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -71,14 +59,13 @@
                                        HorizontalContentAlignment="Stretch"
                                        Height="Auto"
                                        IsSelectAllActive="True"
-                                       ItemTemplate="{StaticResource ItemCheckListBoxTemplate}"
+                                       DisplayMemberPath="Display"
                                        SelectedMemberPath="IsSelected"
                                        SelectAllContent="{Binding CategoryNameDisplay}"
                                        Loaded="FixFilterTypesAllSelect" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-
         <Label Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
 
         <TabControl>
@@ -88,7 +75,8 @@
                         <Label Content="{markup:Translate [SelectionFilter_OptionLabelTag]}" />
                         <xctk:WatermarkTextBox Width="100" Watermark="{markup:Translate [SelectionFilter_Any]}"
                                                Text="{Binding FilterOptions.TagFilter, Mode=TwoWay}" />
-                        <CheckBox Content="{markup:Translate [SelectionFilter_OptionLabelTagRegex]}" IsChecked="{Binding FilterOptions.IsTagFilterRegex, Mode=TwoWay}" />
+                        <CheckBox Content="{markup:Translate [SelectionFilter_OptionLabelTagRegex]}"
+                                  IsChecked="{Binding FilterOptions.IsTagFilterRegex, Mode=TwoWay}" />
                     </StackPanel>
                 </StackPanel>
             </TabItem>
@@ -107,9 +95,11 @@
                                      Content="{markup:Translate [SelectionFilter_OptionChoiceLaneNext]}"
                                      IsChecked="{Binding FilterOptions.NodeTypeFilteringMode, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={x:Static selectionFilter:LinePointTypeFilteringMode.Tail}, Mode=TwoWay}" />
                     </StackPanel>
-                    <CheckBox Margin="5" Content="{markup:Translate [SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead]}"
+                    <CheckBox Margin="5"
+                              Content="{markup:Translate [SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead]}"
                               IsChecked="{Binding FilterOptions.OnlyMatchLanesWithSelectedStartNodes, Mode=TwoWay}" />
-                    <CheckBox Margin="5" Content="{markup:Translate [SelectionFilter_OptionLabelMatchCurveControlsWithSelectedLane]}"
+                    <CheckBox Margin="5"
+                              Content="{markup:Translate [SelectionFilter_OptionLabelMatchCurveControlsWithSelectedLane]}"
                               IsChecked="{Binding FilterOptions.OnlyMatchCurvesWithSelectedLaneNodes, Mode=TwoWay}" />
                 </StackPanel>
             </TabItem>
@@ -164,7 +154,8 @@
                                             Text="" />
                     </StackPanel>
 
-                    <CheckBox Content="{markup:Translate [SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart]}" Margin="5"
+                    <CheckBox Content="{markup:Translate [SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart]}"
+                              Margin="5"
                               IsChecked="{Binding FilterOptions.OnlyMatchHoldsEndsWithSelectedStartNodes, Mode=TwoWay}" />
 
                 </StackPanel>
@@ -178,7 +169,8 @@
                                             SelectedMemberPath="IsSelected"
                                             IsSelectAllActive="True"
                                             Width="100" MaxWidth="100"
-                                            Text="" Loaded="BulletPaletteCheckList_SetText" Closed="BulletPaletteCheckList_SetText">
+                                            Text="" Loaded="BulletPaletteCheckList_SetText"
+                                            Closed="BulletPaletteCheckList_SetText">
                             <xctk:CheckComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Display}" />
@@ -202,7 +194,7 @@
 
         <TextBlock Text="{Binding FilterOutcomeText}" Margin="5" />
 
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Margin="5">
             <Button Content="{markup:Translate [ApplyFilter]}" Click="ApplyButton_Click" />
             <Button Content="{markup:Translate [Cancel]}" Click="CancelButton_Click" />
         </StackPanel>
