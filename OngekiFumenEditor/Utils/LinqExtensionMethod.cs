@@ -635,6 +635,14 @@ namespace OngekiFumenEditor.Utils
         public static IEnumerable<(T, int)> WithIndex<T>(this IEnumerable<T> list)
             => list.Select((a, b) => (a, b));
 
+        /// <summary>
+        /// 获取多个集合都存在的元素,比如[[1,2,5,4],[2,5,6],[1,2,4,5,7]] -> [2,5]
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="KEY"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="keySelector"></param>
+        /// <returns></returns>
         public static IEnumerable<T> IntersectMany<T, KEY>(this IEnumerable<IEnumerable<T>> list)
         {
             var itor = list.GetEnumerator();
@@ -646,6 +654,14 @@ namespace OngekiFumenEditor.Utils
             return cur;
         }
 
+        /// <summary>
+        /// 获取多个集合都存在的元素,比如[[1,2,5,4],[2,5,6],[1,2,4,5,7]] -> [2,5]
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="KEY"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="keySelector"></param>
+        /// <returns></returns>
         public static IEnumerable<T> IntersectManyBy<T, KEY>(this IEnumerable<IEnumerable<T>> list, Func<T, KEY> keySelector)
         {
             var itor = list.GetEnumerator();
