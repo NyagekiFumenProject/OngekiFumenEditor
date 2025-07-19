@@ -28,6 +28,9 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+
+        <Button cal:Message.Attach="Action ShowFilterWindow()">Filter...</Button>
+
         <ListView
             x:Name="listView"
             Grid.Row="1"

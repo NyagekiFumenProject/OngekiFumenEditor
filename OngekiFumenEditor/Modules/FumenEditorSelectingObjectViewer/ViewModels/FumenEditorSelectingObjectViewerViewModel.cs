@@ -12,10 +12,10 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Data;
-using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using OngekiFumenEditor.Modules.SelectionFilter.ViewModels;
+using OngekiFumenEditor.Modules.SelectionFilter.Views;
 using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
@@ -46,6 +46,8 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 					break;
 			}
 		}
+
+		private SelectionFilterWindowView FilterWindow;
 
 		public ObservableCollection<ISelectableObject> SelectedItems { get; } = new();
 
@@ -157,6 +159,20 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 					_lastDirection = direction;
 				}
 			}
+		}
+
+		public void ShowFilterWindow()
+		{
+			FilterWindow = new();
+			FilterWindow.Owner = Application.Current.MainWindow;
+			FilterWindow.ShowDialog();
+
+			if (FilterWindow.DialogResult == true) {
+				var filterViewModel = (SelectionFilterViewModel)FilterWindow.DataContext;
+				filterViewModel.ApplyFilterToSelection();
+			}
+
+			FilterWindow = null;
 		}
 	}
 }
