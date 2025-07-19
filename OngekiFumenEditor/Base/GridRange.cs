@@ -5,6 +5,9 @@
 		public GridBase Min { get; set; }
 		public GridBase Max { get; set; }
 
+		public GridOffset Distance =>
+			Max - Min;
+
 		public bool IsInRange(GridBase chk, bool includeEdge = true)
 		{
 			return includeEdge ? (Min <= chk && chk <= Max) : (Min < chk && chk < Max);
