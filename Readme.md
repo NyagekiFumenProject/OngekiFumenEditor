@@ -78,6 +78,5 @@
 * **另外本项目不是Phixxos编辑器**
 
 
-![image](https://user-images.githubusercontent.com/7549173/221399331-03899e43-81b1-4267-b289-a6691af27374.png)
-![image](https://user-images.githubusercontent.com/7549173/181236295-b182013a-5394-40e6-a749-66375d7affcb.png)
+<img width="1024" height="781" alt="6S0XO55LV 8(X61%NN$OWPY" src="https://github.com/user-attachments/assets/a7a55d77-a97f-4d14-a4b1-f12e5f88827d" />
 
