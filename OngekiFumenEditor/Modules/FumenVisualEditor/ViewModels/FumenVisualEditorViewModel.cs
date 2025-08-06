@@ -90,6 +90,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        public event LoadingFinishedEventHandler LoadingFinished;
+
         private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -263,6 +265,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
                 ScrollTo(dispTGrid);
                 RebuildObjectSoflanGroupRecord();
+
+                LoadingFinished?.Invoke(this, new(Fumen));
             }
             catch (Exception e)
             {
@@ -340,6 +344,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     return false;
             }
         }
+
+        public class LoadingFinishedEventArgs(OngekiFumen fumen)
+        {
+            public OngekiFumen Fumen { get; } = fumen;
+        }
+
+        public delegate void LoadingFinishedEventHandler(object sender, LoadingFinishedEventArgs args);
 
         #endregion
 

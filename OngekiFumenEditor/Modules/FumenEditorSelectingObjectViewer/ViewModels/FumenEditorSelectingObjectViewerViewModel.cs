@@ -14,8 +14,6 @@ using System.Windows;
 using System.Windows.Data;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
-using OngekiFumenEditor.Modules.SelectionFilter.ViewModels;
-using OngekiFumenEditor.Modules.SelectionFilter.Views;
 using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
@@ -47,11 +45,11 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 			}
 		}
 
-		private SelectionFilterWindowView FilterWindow;
+		public SelectionFilterViewModel SelectionFilter { get; }
 
 		public ObservableCollection<ISelectableObject> SelectedItems { get; } = new();
 
-		private List<ISelectableObject> editorSelectObjects = new();
+		public List<ISelectableObject> EditorSelectObjects { get; } = new();
 
 		public ICollectionView CollectionView => dataView;
 		private ICollectionView dataView;
@@ -63,10 +61,12 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
 		public FumenEditorSelectingObjectViewerViewModel()
 		{
+			SelectionFilter = new SelectionFilterViewModel(this);
+
 			DisplayName = Resources.FumenEditorSelectingObjectViewer;
 			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 
-			dataView = CollectionViewSource.GetDefaultView(editorSelectObjects);
+			dataView = CollectionViewSource.GetDefaultView(EditorSelectObjects);
 			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
 		}
 
@@ -77,8 +77,9 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
 		public void OnRefresh()
 		{
-			editorSelectObjects.Clear();
-			editorSelectObjects.AddRange(Editor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>());
+			EditorSelectObjects.Clear();
+			EditorSelectObjects.AddRange(Editor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>());
+			SelectionFilter.OnSelectedItemsRefreshed();
 			dataView.Refresh();
 		}
 
@@ -159,20 +160,6 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 					_lastDirection = direction;
 				}
 			}
-		}
-
-		public void ShowFilterWindow()
-		{
-			FilterWindow = new();
-			FilterWindow.Owner = Application.Current.MainWindow;
-			FilterWindow.ShowDialog();
-
-			if (FilterWindow.DialogResult == true) {
-				var filterViewModel = (SelectionFilterViewModel)FilterWindow.DataContext;
-				filterViewModel.ApplyFilterToSelection();
-			}
-
-			FilterWindow = null;
 		}
 	}
 }
