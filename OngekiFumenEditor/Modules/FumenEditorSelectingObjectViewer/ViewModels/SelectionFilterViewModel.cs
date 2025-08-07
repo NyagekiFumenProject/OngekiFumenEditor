@@ -85,17 +85,13 @@ public class SelectionFilterViewModel : ViewAware
         // Change object type filters to match the currently selected objects
         foreach (var category in FilterTypeCategories) {
             foreach (var item in category.Items) {
-                if (item.MatchingObjects.Count > 0) {
-                    item.IsSelected = true;
-                }
-                else {
-                    item.IsSelected = false;
-                }
+                item.IsSelected = item.MatchingObjects.Count > 0;
             }
 
             category.UpdateCategoryNameDisplay();
         }
 
+        OnOptionUpdated();
         UpdateFilterOutcomeText();
     }
 
@@ -104,45 +100,47 @@ public class SelectionFilterViewModel : ViewAware
         if (!FilterTypeCategories.IsEmpty())
             throw new InvalidOperationException();
 
-        FilterTypeCategories.Add(new(this, Resources.SelectionFilterObjectCategoryLane, [
-            new(this) { Text = Resources.WallLeft, Types = [typeof(WallLeftNext), typeof(WallLeftStart)] },
-            new(this) { Text = Resources.LaneLeft, Types = [typeof(LaneLeftNext), typeof(LaneLeftStart)] },
-            new(this) { Text = Resources.LaneCenter, Types = [typeof(LaneCenterNext), typeof(LaneCenterStart)] },
-            new(this) { Text = Resources.LaneRight, Types = [typeof(LaneRightNext), typeof(LaneRightStart)] },
-            new(this) { Text = Resources.WallRight, Types = [typeof(WallRightNext), typeof(WallRightStart)] },
-            new(this) { Text = Resources.LaneColorful, Types = [typeof(ColorfulLaneNext), typeof(ColorfulLaneStart)] },
-            new(this) { Text = Resources.EnemyLane, Types = [typeof(EnemyLaneNext), typeof(EnemyLaneStart)] },
-            new(this) { Text = Resources.AutoPlayFaderLane, Types = [typeof(AutoplayFaderLaneNext), typeof(AutoplayFaderLaneStart)] },
-            new(this) { Text = Resources.Beam, Types = [typeof(BeamNext), typeof(BeamStart)] },
-            new(this) { Text = Resources.CurveControlPoint, Types = [typeof(LaneCurvePathControlObject)] }
-        ]));
+        FilterTypeCategories.AddRange([
+            new(this, Resources.SelectionFilterObjectCategoryLane, [
+                new(this) { Text = Resources.WallLeft, Types = [typeof(WallLeftNext), typeof(WallLeftStart)] },
+                new(this) { Text = Resources.LaneLeft, Types = [typeof(LaneLeftNext), typeof(LaneLeftStart)] },
+                new(this) { Text = Resources.LaneCenter, Types = [typeof(LaneCenterNext), typeof(LaneCenterStart)] },
+                new(this) { Text = Resources.LaneRight, Types = [typeof(LaneRightNext), typeof(LaneRightStart)] },
+                new(this) { Text = Resources.WallRight, Types = [typeof(WallRightNext), typeof(WallRightStart)] },
+                new(this) { Text = Resources.LaneColorful, Types = [typeof(ColorfulLaneNext), typeof(ColorfulLaneStart)] },
+                new(this) { Text = Resources.EnemyLane, Types = [typeof(EnemyLaneNext), typeof(EnemyLaneStart)] },
+                new(this) { Text = Resources.AutoPlayFaderLane, Types = [typeof(AutoplayFaderLaneNext), typeof(AutoplayFaderLaneStart)] },
+                new(this) { Text = Resources.Beam, Types = [typeof(BeamNext), typeof(BeamStart)] },
+                new(this) { Text = Resources.CurveControlPoint, Types = [typeof(LaneCurvePathControlObject)] }
+            ]),
 
-        FilterTypeCategories.Add(new(this, Resources.SelectionFilterObjectCategoryDockable, [
-            new(this) { Text = Resources.Tap, Types = [typeof(Tap)] },
-            new(this) { Text = Resources.Hold, Types = [typeof(Hold), typeof(HoldEnd)] }
-        ]));
+            new(this, Resources.SelectionFilterObjectCategoryDockable, [
+                new(this) { Text = Resources.Tap, Types = [typeof(Tap)] },
+                new(this) { Text = Resources.Hold, Types = [typeof(Hold), typeof(HoldEnd)] }
+            ]),
 
-        FilterTypeCategories.Add(new(this, Resources.SelectionFilterObjectCategoryFloating, [
-            new(this) { Text = Resources.Bell, Types = [typeof(Bell)] },
-            new(this) { Text = Resources.Bullet, Types = [typeof(Bullet)] },
-            new(this) { Text = Resources.Flick, Types = [typeof(Flick)] }
-        ]));
+            new(this, Resources.SelectionFilterObjectCategoryFloating, [
+                new(this) { Text = Resources.Bell, Types = [typeof(Bell)] },
+                new(this) { Text = Resources.Bullet, Types = [typeof(Bullet)] },
+                new(this) { Text = Resources.Flick, Types = [typeof(Flick)] }
+            ]),
 
-        FilterTypeCategories.Add(new(this, Resources.SelectionFilterObjectCategoryTimeline, [
-            new(this) { Text = Resources.LaneBlock, Types = [typeof(LaneBlockArea), typeof(LaneBlockArea.LaneBlockAreaEndIndicator)] },
-            new(this) { Text = Resources.ClickSE, Types = [typeof(ClickSE)] },
-            new(this) { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)] },
-            new(this) { Text = Resources.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
-            new(this) { Text = Resources.DurationSoflan, Types = [typeof(IDurationSoflan)] },
-            new(this) { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
-            new(this) { Text = Resources.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] },
-        ]));
+            new(this, Resources.SelectionFilterObjectCategoryTimeline, [
+                new(this) { Text = Resources.LaneBlock, Types = [typeof(LaneBlockArea), typeof(LaneBlockArea.LaneBlockAreaEndIndicator)] },
+                new(this) { Text = Resources.ClickSE, Types = [typeof(ClickSE)] },
+                new(this) { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)] },
+                new(this) { Text = Resources.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
+                new(this) { Text = Resources.DurationSoflan, Types = [typeof(IDurationSoflan)] },
+                new(this) { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
+                new(this) { Text = Resources.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] },
+            ]),
 
-        FilterTypeCategories.Add(new(this, Resources.SelectionFilterObjectCategoryMisc, [
-            new(this) { Text = Resources.SvgPrefabFile, Types = [typeof(SvgImageFilePrefab)] },
-            new(this) { Text = Resources.SvgPrefabText, Types = [typeof(SvgStringPrefab)] },
-            new(this) { Text = Resources.Comment, Types = [typeof(Comment)] }
-        ]));
+            new(this, Resources.SelectionFilterObjectCategoryMisc, [
+                new(this) { Text = Resources.SvgPrefabFile, Types = [typeof(SvgImageFilePrefab)] },
+                new(this) { Text = Resources.SvgPrefabText, Types = [typeof(SvgStringPrefab)] },
+                new(this) { Text = Resources.Comment, Types = [typeof(Comment)] }
+            ])
+        ]);
     }
 
     private void InitOptions()
@@ -176,6 +174,7 @@ public class SelectionFilterViewModel : ViewAware
                     return (leftRight && flick.Direction == Flick.FlickDirection.Left)
                            || (!leftRight && flick.Direction == Flick.FlickDirection.Right);
                 }),
+                new DockableObjectLaneFilterOption(Resources.SelectionFilter_OptionLabelDockLanes),
                 new HoldObjectSpecificationOption(Resources.SelectionFilter_OptionLabelHoldType)
             ]),
             new(Resources.SelectionFilter_OptionTabBullets, [
@@ -191,27 +190,25 @@ public class SelectionFilterViewModel : ViewAware
             ])
         ]);
 
-        GetAllOptions().ForEach(o =>
-        {
+        foreach (var option in OptionCategories.SelectMany(o => o.Options)) {
             // Notify when an option is changed
-            o.OptionValueChanged += OnOptionUpdated;
-            o.PropertyChanged += (sender, args) =>
+            option.OptionValueChanged += OnOptionUpdated;
+            option.PropertyChanged += (_, args) =>
             {
                 if (args.PropertyName == nameof(SelectionFilterOption.IsEnabled)) {
                     OnOptionUpdated();
                 }
             };
-        });
-
-        return;
-
-        void OnOptionUpdated()
-        {
-            OptionFilterRemovals.Clear();
-            var enabledOptions = GetAllOptions().Where(o => o.IsEnabled);
-            OptionFilterRemovals.AddRange(ObjectTypeFilterMatches.Where(obj => enabledOptions.Any(opt => !opt.Filter((OngekiObjectBase)obj))));
-            UpdateFilterOutcomeText();
         }
+    }
+
+    private void OnOptionUpdated()
+    {
+        // Apply option filters
+        OptionFilterRemovals.Clear();
+        var enabledOptions = GetAllOptions().Where(o => o.IsEnabled);
+        OptionFilterRemovals.AddRange(ObjectTypeFilterMatches.Where(obj => enabledOptions.Any(opt => !opt.Filter((OngekiObjectBase)obj))));
+        UpdateFilterOutcomeText();
     }
 
     private static SelectionFilterOption GenerateBulletPaletteOption()
