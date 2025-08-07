@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using System.Collections.Generic;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -6,6 +7,8 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils.Attributes;
 using System.Linq;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {
@@ -14,6 +17,8 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 	{
 		private readonly ConnectableChildObjectBase frontChild;
 		private readonly ConnectableStartObject laterStart;
+
+		private readonly List<ILaneDockable> RedockedObjects = new();
 
 		/**
 		 合并前:
@@ -62,6 +67,12 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 					frontStart.AddChildObject(laterChild);
 				}
 
+				foreach (var dockable in editor.Fumen.Taps.Concat<ILaneDockable>(editor.Fumen.Holds)
+					         .Where(d => d.ReferenceLaneStart == laterStart)) {
+					dockable.ReferenceLaneStart = (LaneStartBase)frontStart;
+					RedockedObjects.Add(dockable);
+				}
+
 				editor.Fumen.RemoveObject(laterStart);
 				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
 			}, () =>
@@ -75,6 +86,10 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 				}
 				frontStart.RemoveChildObject(midChild);
 				editor.Fumen.AddObject(laterStart);
+
+				foreach (var dockable in RedockedObjects) {
+					dockable.ReferenceLaneStart = (LaneStartBase)laterStart;
+				}
 
 				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
 			}));
