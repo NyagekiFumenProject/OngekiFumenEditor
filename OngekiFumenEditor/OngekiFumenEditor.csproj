@@ -102,16 +102,6 @@
 		<Resource Include="Resources\Icons\Batch\LaneBlock.png" />
 		<None Remove="Resources\Icons\Batch\Clipboard.png" />
 		<Resource Include="Resources\Icons\Batch\Clipboard.png" />
-		<Page Update="Modules\SelectionFilter\Views\SelectionFilterWindowView.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		  <XamlRuntime>Wpf</XamlRuntime>
-		  <SubType>Designer</SubType>
-		</Page>
-		<Page Update="Modules\FumenEditorSelectingObjectViewer\Views\SelectionFilterView.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		  <XamlRuntime>Wpf</XamlRuntime>
-		  <SubType>Designer</SubType>
-		</Page>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -748,6 +738,10 @@
 			<SubType>Designer</SubType>
 		</Page>
 		<Page Update="Modules\TGridCalculatorToolViewer\Views\TGridCalculatorToolViewerView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+		<Page Update="Modules\FumenEditorSelectingObjectViewer\Views\SelectionFilterView.xaml">
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 			<SubType>Designer</SubType>
 		</Page>
