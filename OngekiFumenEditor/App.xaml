@@ -32,14 +32,19 @@
             <valueconverters:NullToZeroConverter x:Key="NullToZeroConverter" />
             <valueconverters:DisplayFileSizeConverter x:Key="DisplayFileSizeConverter">
             </valueconverters:DisplayFileSizeConverter>
+            <valueconverters:ParamValueToBoolConverter x:Key="ParamValueToBoolConverter" />
             <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />
             <valueconverters:SelectionFullLaneCheckConverter x:Key="SelectionFullLaneCheckConverter" />
+            <valueconverters:SelectionLaneObjectsCheckConverter x:Key="SelectionLaneObjectsCheckConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <local:AppBootstrapper x:Key="bootstrapper" />
                 </ResourceDictionary>
-                <ResourceDictionary Source="UI\Themes\TextBlock.xaml">
-                </ResourceDictionary>
+
+                <ResourceDictionary Source="UI\Themes\TextBlock.xaml" />
+                <ResourceDictionary Source="UI\Themes\TabControl.xaml" />
+                <ResourceDictionary Source="UI\Themes\CheckComboBox.xaml" />
+
                 <!--  Theme setting  -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
             </ResourceDictionary.MergedDictionaries>

@@ -13,6 +13,7 @@
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views"
     cal:Message.Attach="[Key Delete]=[Action OnCancelItemSelectedObjects($dataContext)];"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
@@ -23,11 +24,15 @@
     <UserControl.Resources>
         <valueconverters:GetObjectSoflanGroupConverter x:Key="GetObjectSoflanGroupConverter" />
     </UserControl.Resources>
-    <Grid>
+    <TabControl>
+        <TabItem Header="Selection">
+
+        <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+
         <ListView
             x:Name="listView"
             Grid.Row="1"
@@ -97,4 +102,10 @@
             </ListView.View>
         </ListView>
     </Grid>
+        </TabItem>
+
+        <TabItem Header="Filter">
+            <views:SelectionFilterView DataContext="{Binding SelectionFilter}" />
+        </TabItem>
+    </TabControl>
 </UserControl>

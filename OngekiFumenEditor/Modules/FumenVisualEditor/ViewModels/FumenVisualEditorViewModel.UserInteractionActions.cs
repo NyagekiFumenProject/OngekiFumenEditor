@@ -191,6 +191,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             await IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);
         }
 
+        public void MenuItemAction_SelectEntireLane(ActionExecutionContext e)
+        {
+            foreach (var connectable in SelectObjects.OfType<ConnectableObjectBase>().Select(c => c.ReferenceStartObject).Distinct()) {
+                foreach (var child in connectable.Children) {
+                    child.IsSelected = true;
+                }
+            }
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+        }
+
+        public void MenuItemAction_SelectAttachedCurves(ActionExecutionContext e)
+        {
+            foreach (var connectable in SelectObjects.OfType<ConnectableChildObjectBase>()) {
+                foreach (var curve in connectable.PathControls) {
+                    curve.IsSelected = true;
+                }
+            }
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+        }
+
         public enum PasteOption
         {
             XGridZeroMirror,

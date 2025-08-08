@@ -740,6 +740,10 @@
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 			<SubType>Designer</SubType>
 		</Page>
+		<Page Update="Modules\FumenEditorSelectingObjectViewer\Views\SelectionFilterView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
 	</ItemGroup>
 
 	<ItemGroup>
