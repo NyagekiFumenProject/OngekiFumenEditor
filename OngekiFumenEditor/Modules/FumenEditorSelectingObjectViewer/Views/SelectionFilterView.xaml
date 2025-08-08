@@ -13,7 +13,7 @@
              xmlns:valueConverters="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ValueConverters"
              mc:Ignorable="d"
              Padding="3"
-             Background="{DynamicResource EnvironmentWindowBackground}"
+             Background="Transparent"
              d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=vm:SelectionFilterViewModel}">
     <UserControl.Resources>
         <vm:WideModeToVisibilityConverter x:Key="WideModeToVisibilityConverter" />
@@ -32,13 +32,11 @@
             </Setter>
         </Style>
 
-        <!--
         <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Margin" Value="5 0" />
         </Style>
-
 
         <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -51,33 +49,8 @@
             <Setter Property="BorderBrush" Value="{DynamicResource TreeView.Static.Border}" />
         </Style>
 
-        <Style TargetType="xctk:CheckComboBox" BasedOn="{StaticResource {x:Type xctk:CheckComboBox}}">
-            <Style.Resources>
-                <Style TargetType="{x:Type xctk:SelectorItem}">
-                    <Setter Property="Background" Value="{DynamicResource ComboBox.DropDown.Background}" />
-                    <Setter Property="BorderBrush" Value="{DynamicResource ComboBox.DropDown.Background}" />
-                </Style>
-                <Style TargetType="{x:Type xctk:SelectAllSelectorItem}"
-                       BasedOn="{StaticResource {x:Type xctk:SelectorItem}}" />
-            </Style.Resources>
-
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="Focusable" Value="False" />
-            <Setter Property="IsTabStop" Value="False" />
-            <Setter Property="Background" Value="{DynamicResource ComboBox.Static.Background}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource ComboBox.Static.Border}" />
-            <Setter Property="Foreground" Value="{DynamicResource EnvironmentToolWindowText}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
-            <Setter Property="Padding" Value="6,3,5,3" />
-            <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
-            <Setter Property="ScrollViewer.PanningMode" Value="Both" />
-            <Setter Property="Stylus.IsFlicksEnabled" Value="False" />
-        </Style>
 
         <Style TargetType="xctk:WatermarkTextBox" BasedOn="{StaticResource {x:Type xctk:WatermarkTextBox}}" />
-        -->
 
         <DataTemplate DataType="{x:Type selectionFilter:BooleanOption}">
             <WrapPanel Margin="3 5">
