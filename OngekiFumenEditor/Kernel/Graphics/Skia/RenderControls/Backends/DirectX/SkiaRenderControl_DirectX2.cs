@@ -95,7 +95,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
 
             using var renderSurface = SKSurface.Create(grContext, true, info);
 
-            if (IgnorePixelScaling)
+            if (!IgnorePixelScaling)
             {
                 var canvas = renderSurface.Canvas;
                 canvas.Scale(scaleX, scaleY);
