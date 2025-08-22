@@ -6,6 +6,7 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 
@@ -351,6 +352,25 @@ public class BulletPaletteFilterOption : SelectionFilterOption
     }
 }
 
+public class DockableObjectLaneFilterOption : SelectionFilterOption
+{
+    public IEnumerable<DockableTargetSpecification> AllValues => Enum.GetValues<DockableTargetSpecification>();
+    public ObservableCollection<DockableTargetSpecification> SelectedTargets { get; } = new();
+
+    public DockableObjectLaneFilterOption(string text) : base(text)
+    {
+        SelectedTargets.CollectionChanged += (_, _) => NotifyOptionValueChanged();
+    }
+
+    public override bool Filter(OngekiObjectBase obj)
+    {
+        if (obj is not ILaneDockable dockable)
+            return true;
+
+        return SelectedTargets.Any(t => t.GetLaneType() == dockable.ReferenceLaneStart.LaneType);
+    }
+}
+
 public enum HeadTailSpecification
 {
     Head = 0,
@@ -359,4 +379,29 @@ public enum HeadTailSpecification
     HeadWithChild = 3,
     TailNoParent = 4,
     TailWithParent = 5
+}
+
+public enum DockableTargetSpecification
+{
+    WallLeft,
+    LaneLeft,
+    LaneCenter,
+    LaneRight,
+    WallRight
+}
+
+public static class FilterEnumExtensions
+{
+    public static LaneType GetLaneType(this DockableTargetSpecification spec)
+    {
+        return spec switch
+        {
+            DockableTargetSpecification.WallLeft => LaneType.WallLeft,
+            DockableTargetSpecification.LaneLeft => LaneType.Left,
+            DockableTargetSpecification.LaneCenter => LaneType.Center,
+            DockableTargetSpecification.LaneRight => LaneType.Right,
+            DockableTargetSpecification.WallRight => LaneType.WallRight,
+            _ => throw new ArgumentOutOfRangeException(nameof(spec), spec, null)
+        };
+    }
 }
