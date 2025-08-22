@@ -42,7 +42,6 @@
                 </ResourceDictionary>
 
                 <ResourceDictionary Source="UI\Themes\TextBlock.xaml" />
-                <ResourceDictionary Source="UI\Themes\TabControl.xaml" />
                 <ResourceDictionary Source="UI\Themes\CheckComboBox.xaml" />
 
                 <!--  Theme setting  -->
