@@ -64,7 +64,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
             // 新建一个DX渲染的Surface
             using var renderSurface = SKSurface.Create(grContext, true, info);
 
-            if (IgnorePixelScaling)
+            if (!IgnorePixelScaling)
             {
                 var canvas = renderSurface.Canvas;
                 canvas.Scale(scaleX, scaleY);
@@ -83,7 +83,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
             bitmap.AddDirtyRect(new Int32Rect(0, 0, info.Width, size.Height));
             bitmap.Unlock();
 
-            drawingContext.DrawImage(bitmap, new Rect(0, 0, ActualWidth, ActualHeight));
+            drawingContext.DrawImage(bitmap, new Rect(0, 0, CanvasSize.Width, CanvasSize.Height));
         }
     }
 }
