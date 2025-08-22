@@ -1922,43 +1922,33 @@
     <value>添加并选中</value>
   </data>
     <data name="LaneLeft" xml:space="preserve">
-    <value>红线</value>
-  </data>
+  <value>Lane Left</value></data>
     <data name="LaneCenter" xml:space="preserve">
-    <value>绿线</value>
-  </data>
+  <value>Lane Center</value></data>
     <data name="LaneRight" xml:space="preserve">
-    <value>蓝钱</value>
-  </data>
+  <value>Lane Right</value></data>
     <data name="WallLeft" xml:space="preserve">
-    <value>左墙</value>
-  </data>
+  <value>Wall Left</value></data>
     <data name="WallRight" xml:space="preserve">
-    <value>右墙</value>
-  </data>
+  <value>Wall Right</value></data>
     <data name="Tap" xml:space="preserve">
-    <value>Tap</value>
-  </data>
+  <value>Tap</value></data>
     <data name="Hold" xml:space="preserve">
-    <value>Hold</value>
-  </data>
+  <value>Hold</value></data>
     <data name="Flick" xml:space="preserve">
-    <value>Flick</value>
-  </data>
+  <value>Flick</value></data>
     <data name="LaneBlock" xml:space="preserve">
-    <value>锁边</value>
-  </data>
+  <value>Lane Block</value></data>
     <data name="LaneColorful" xml:space="preserve">
-    <value>彩色装饰轨道</value>
-  </data>
+  <value>Lane Colorful</value></data>
     <data name="BatchModeModifierSetCritical" type="System.Resources.ResXNullRef, System.Windows.Forms">
         <value>设置Critical属性</value>
     </data>
     <data name="BatchModeModifierSwitchDirection" type="System.Resources.ResXNullRef, System.Windows.Forms">
-        <value>设置Flick方向</value>
+        <value>切换Flick方向</value>
     </data>
     <data name="ObjectFilterLanes" type="System.Resources.ResXNullRef, System.Windows.Forms">
-        <value />
+        <value>Lanes</value>
     </data>
     <data name="ObjectFilterDockables" xml:space="preserve">
     <value>可附物件</value>
@@ -2050,133 +2040,215 @@
     <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value>当播放暂停后, 编辑器时间跳转回播放前</value>
   </data>
-    <data name="AutoPlayFaderLane" type="System.Resources.ResXNullRef, System.Windows.Forms"></data>
+    <data name="SelectionFilterObjectCategoryLane" xml:space="preserve">
+    <value>轨道物件</value>
+  </data>
+    <data name="SelectionFilterObjectCategoryDockable" xml:space="preserve">
+    <value>可击打轨道物件</value>
+  </data>
+    <data name="SelectionFilterObjectCategoryFloating" xml:space="preserve">
+    <value>悬浮物件</value>
+  </data>
+    <data name="SelectionFilterObjectCategoryMisc" xml:space="preserve">
+    <value>其他</value>
+  </data>
+    <data name="SelectionFilterObjectCategoryTimeline" xml:space="preserve">
+    <value>有时间轴的物件</value>
+  </data>
+    <data name="Bullet" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>Bullet</value>
+    </data>
+    <data name="AutoPlayFaderLane" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>AutoPlayFaderLane</value>
+    </data>
+    <data name="Beam" xml:space="preserve">
+  <value>Beam</value></data>
+    <data name="CurveControlPoint" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>Curve Control Point</value>
+    </data>
+    <data name="ClickSE" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>Click SE</value>
+    </data>
+    <data name="InterpolatableSoflan" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>Interpolatable Soflan</value>
+    </data>
+    <data name="KeyframeSoflan" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>Keyframe Soflan</value>
+    </data>
+    <data name="DurationSoflan" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>Duration Soflan</value>
+    </data>
+    <data name="MeterChange" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value>Meter Change</value>
+    </data>
     <data name="SvgPrefabText" xml:space="preserve">
-    <value />
+  <value>SVG Prefab (Text)</value></data>
+    <data name="Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+    <data name="SelectionFilter_ResultsLabelReplaceMode" xml:space="preserve">
+    <value>{0} 个对象将保留在选中状态</value>
+  </data>
+    <data name="SelectionFilter_ResultsLabelRemoveMode" xml:space="preserve">
+    <value>{0} 个对象将从选中项中移除</value>
+  </data>
+    <data name="NoBulletPalette" xml:space="preserve">
+    <value>无子弹模板</value>
+  </data>
+    <data name="SelectionFilter_Any" xml:space="preserve">
+    <value>任何</value>
+  </data>
+    <data name="SelectionFilter_None" xml:space="preserve">
+    <value>无</value>
   </data>
     <data name="SelectionFilter_AnyChoice" type="System.Resources.ResXNullRef, System.Windows.Forms">
         <value>任何</value>
     </data>
-    <data name="SelectionFilterObjectCategoryLane" xml:space="preserve">
-        <value>轨道物件</value>
+    <data name="SelectionFilter_HeaderObjectType" xml:space="preserve">
+    <value>物件类型</value>
+  </data>
+    <data name="SelectionFilter_HeaderOptions" xml:space="preserve">
+    <value>选项</value>
+  </data>
+    <data name="SelectionFilter_OptionTabGeneral" xml:space="preserve">
+    <value>通用</value>
+  </data>
+    <data name="SelectionFilter_OptionTabLanes" xml:space="preserve">
+    <value>轨道</value>
+  </data>
+    <data name="SelectionFilter_OptionChoiceHoldStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+    <data name="SelectionFilter_OptionChoiceHoldEnd" xml:space="preserve">
+    <value>End</value>
+  </data>
+    <data name="SelectionFilter_OptionChoiceLaneStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+    <data name="SelectionFilter_OptionChoiceLaneNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+    <data name="SelectionFilter_ActionLabelSelectAll" xml:space="preserve">
+    <value>选择全部</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelIsCritical" xml:space="preserve">
+    <value>是否为Critial</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelFlickDirection" xml:space="preserve">
+    <value>Flick方向</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelLaneNodeType" xml:space="preserve">
+    <value>轨道物件类型</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelHoldType" xml:space="preserve">
+    <value>Hold类型</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelDockLanes" xml:space="preserve">
+    <value>可依附轨道</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelBulletPalette" xml:space="preserve">
+    <value>子弹模板</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelInvertFilter" xml:space="preserve">
+    <value>反选过滤</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelInvertFilterTooltip" xml:space="preserve">
+    <value>删除符合筛选条件项，而非删除不符合筛选条件的项</value>
+  </data>
+    <data name="SelectionFilter_ActionLabelResetSelection" xml:space="preserve">
+    <value>重置</value>
+  </data>
+    <data name="SelectionFilter_ChoiceYes" xml:space="preserve">
+    <value>是</value>
+  </data>
+    <data name="SelectionFilter_ChoiceNo" xml:space="preserve">
+    <value>否</value>
+  </data>
+    <data name="SelectionFilter_ComboLabelBulletPaletteSelectCount" xml:space="preserve">
+    <value>{0} 个子弹模板</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead" xml:space="preserve">
+    <value>仅匹配与已选轨道Start物件相关联的Next物件</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelMatchCurveControlsWithSelectedLane" xml:space="preserve">
+    <value>仅匹配与已选轨道相关联的曲线控制物件</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart" xml:space="preserve">
+    <value>仅匹配已选Hold Start物件相关联的End物件</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart" xml:space="preserve">
+    <value>仅匹配已选LBK Start物件相匹配的End物件</value>
+  </data>
+    <data name="SelectionFilter_OptionLabelLaneBlockDirection" xml:space="preserve">
+    <value>LBK方向</value>
+  </data>
+    <data name="IndividualSoflanArea" xml:space="preserve">
+        <value>Individual Soflan Area</value>
     </data>
-    <data name="SelectionFilterObjectCategoryDockable" xml:space="preserve">
-        <value>可击打轨道物件</value>
+    <data name="SvgPrefabFile" xml:space="preserve">
+        <value>SVG Prefab (File)</value>
     </data>
-    <data name="SelectionFilterObjectCategoryFloating" xml:space="preserve">
-        <value>悬浮物件</value>
+    <data name="EnemyLane" xml:space="preserve">
+        <value>Enemy Lane</value>
     </data>
-    <data name="SelectionFilterObjectCategoryMisc" xml:space="preserve">
+    <data name="SelectionFilter_OptionTabHitObjects" xml:space="preserve">
+        <value>Hit</value>
+    </data>
+    <data name="SelectionFilter_OptionTabBullets" xml:space="preserve">
+        <value>Bullets</value>
+    </data>
+    <data name="SelectionFilter_OptionLabelTag" xml:space="preserve">
+        <value>Tag</value>
+    </data>
+    <data name="DirectionLeft" xml:space="preserve">
+        <value>Left</value>
+    </data>
+    <data name="DirectionRight" xml:space="preserve">
+        <value>Right</value>
+    </data>
+    <data name="SelectionFilter_OptionLabelTagRegex" xml:space="preserve">
+        <value>Regex</value>
+    </data>
+    <data name="SelectionFilter_OptionTabOther" xml:space="preserve">
         <value>其他</value>
     </data>
-    <data name="SelectionFilterObjectCategoryTimeline" xml:space="preserve">
-        <value>有时间轴的物件</value>
+    <data name="SelectionFilter_WindowTitle" xml:space="preserve">
+        <value>Selection Filter</value>
     </data>
-    <data name="Bullet" xml:space="preserve">
-    </data>
-    <data name="Beam" xml:space="preserve">
-    </data>
-    <data name="CurveControlPoint" xml:space="preserve">
-    </data>
-    <data name="ClickSE" xml:space="preserve">
-    </data>
-    <data name="InterpolatableSoflan" xml:space="preserve">
-    </data>
-    <data name="KeyframeSoflan" xml:space="preserve">
-    </data>
-    <data name="DurationSoflan" xml:space="preserve">
-    </data>
-    <data name="MeterChange" xml:space="preserve">
-    </data>
-    <data name="SelectionFilter_ResultsLabelReplaceMode" xml:space="preserve">
-        <value>{0} 个对象将保留在选中状态</value>
-    </data>
-    <data name="SelectionFilter_ResultsLabelRemoveMode" xml:space="preserve">
-        <value>{0} 个对象将从选中项中移除</value>
-    </data>
-    <data name="NoBulletPalette" xml:space="preserve">
-        <value>无子弹模板</value>
-    </data>
-    <data name="SelectionFilter_Any" xml:space="preserve">
-        <value>&lt;任何&gt;</value>
-    </data>
-    <data name="SelectionFilter_None" xml:space="preserve">
-        <value>&lt;无&gt;</value>
-    </data>
-    <data name="SelectionFilter_HeaderObjectType" xml:space="preserve">
-        <value>物件类型</value>
-    </data>
-    <data name="SelectionFilter_HeaderOptions" xml:space="preserve">
-        <value>选项</value>
-    </data>
-    <data name="SelectionFilter_OptionTabGeneral" xml:space="preserve">
-        <value>通用</value>
-    </data>
-    <data name="SelectionFilter_OptionTabLanes" xml:space="preserve">
-        <value>轨道</value>
-    </data>
-    <data name="SelectionFilter_OptionChoiceHoldStart" xml:space="preserve">
+    <data name="SelectionFilter_HeadTailHoldObject_Head" xml:space="preserve">
         <value>Start</value>
     </data>
-    <data name="SelectionFilter_OptionChoiceHoldEnd" xml:space="preserve">
+    <data name="SelectionFilter_HeadTailHoldObject_Tail" xml:space="preserve">
         <value>End</value>
     </data>
-    <data name="SelectionFilter_OptionChoiceLaneStart" xml:space="preserve">
+    <data name="SelectionFilter_HeadTailHoldObject_HeadNoChild" xml:space="preserve">
+        <value>Start (unselected end)</value>
+    </data>
+    <data name="SelectionFilter_HeadTailHoldObject_HeadWithChild" xml:space="preserve">
+        <value>Start (selected end)</value>
+    </data>
+    <data name="SelectionFilter_HeadTailHoldObject_TailNoParent" xml:space="preserve">
+        <value>End (unselected start)</value>
+    </data>
+    <data name="SelectionFilter_HeadTailHoldObject_TailWithParent" xml:space="preserve">
+        <value>End (selected start)</value>
+    </data>
+    <data name="SelectionFilter_HeadTailLaneNode_Head" xml:space="preserve">
         <value>Start</value>
     </data>
-    <data name="SelectionFilter_OptionChoiceLaneNext" xml:space="preserve">
+    <data name="SelectionFilter_HeadTailLaneNode_Tail" xml:space="preserve">
         <value>Next</value>
     </data>
-    <data name="SelectionFilter_ActionLabelSelectAll" xml:space="preserve">
-        <value>选择全部</value>
+    <data name="SelectionFilter_HeadTailLaneNode_HeadNoChild" xml:space="preserve">
+        <value>Start (unselected next node)</value>
     </data>
-    <data name="SelectionFilter_OptionLabelIsCritical" xml:space="preserve">
-    <value>是否为Critial</value></data>
-    <data name="SelectionFilter_OptionLabelLaneNodeType" xml:space="preserve">
-        <value>轨道物件类型</value>
+    <data name="SelectionFilter_HeadTailLaneNode_HeadWithChild" xml:space="preserve">
+        <value>Start (with selected next node)</value>
     </data>
-    <data name="SelectionFilter_OptionLabelHoldType" xml:space="preserve">
-        <value>Hold类型</value>
+    <data name="SelectionFilter_HeadTailLaneNode_TailNoParent" xml:space="preserve">
+        <value>Next (selected start node)</value>
     </data>
-    <data name="SelectionFilter_OptionLabelBulletPalette" xml:space="preserve">
-        <value>子弹模板</value>
-    </data>
-    <data name="SelectionFilter_OptionLabelInvertFilter" xml:space="preserve">
-    <value>反选过滤</value></data>
-    <data name="SelectionFilter_OptionLabelFlickDirection" xml:space="preserve">
-        <value>Flick方向</value>
-    </data>
-    <data name="SelectionFilter_OptionLabelDockLanes" xml:space="preserve">
-        <value>可依附轨道</value>
-    </data>
-    <data name="SelectionFilter_OptionLabelInvertFilterTooltip" xml:space="preserve">
-        <value>删除符合筛选条件项，而非删除不符合筛选条件的项</value>
-    </data>
-    <data name="SelectionFilter_ChoiceYes" xml:space="preserve">
-        <value>是</value>
-    </data>
-    <data name="SelectionFilter_ChoiceNo" xml:space="preserve">
-        <value>否</value>
-    </data>
-    <data name="SelectionFilter_ActionLabelResetSelection" xml:space="preserve">
-        <value>重置</value>
-    </data>
-    <data name="SelectionFilter_ComboLabelBulletPaletteSelectCount" xml:space="preserve">
-        <value>{0} 个子弹模板</value>
-    </data>
-    <data name="SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead" xml:space="preserve">
-        <value>仅匹配与已选轨道Start物件相关联的Next物件</value>
-    </data>
-    <data name="SelectionFilter_OptionLabelMatchCurveControlsWithSelectedLane" xml:space="preserve">
-        <value>仅匹配与已选轨道相关联的曲线控制物件</value>
-    </data>
-    <data name="SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart" xml:space="preserve">
-        <value>仅匹配已选Hold Start物件相关联的End物件</value>
-    </data>
-    <data name="SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart" xml:space="preserve">
-        <value>仅匹配已选LBK Start物件相匹配的End物件</value>
-    </data>
-    <data name="SelectionFilter_OptionLabelLaneBlockDirection" xml:space="preserve">
-        <value>LBK方向</value>
+    <data name="SelectionFilter_HeadTailLaneNode_TailWithParent" xml:space="preserve">
+        <value>Next (selected start node)</value>
     </data>
 </root>
