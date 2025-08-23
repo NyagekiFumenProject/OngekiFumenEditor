@@ -28,10 +28,26 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 
         #endregion
 
+
         private ConcurrentBag<T> cache_obj = new ConcurrentBag<T>();
 
         public static bool EnableTrim { get; set; } = true;
         public override int CachingObjectCount => cache_obj.Count;
+
+#if DEBUG
+        private ConcurrentDictionary<int, (DateTime, string)> rentTimeMap = new();
+        protected override void OnCheckIfLongTimeNotReturn()
+        {
+            foreach (var kvp in rentTimeMap)
+            {
+                var (time, mark) = kvp.Value;
+                if ((DateTime.UtcNow - time).TotalSeconds > 5)
+                {
+                    throw new Exception($"pooled object which is marked \"{mark}\" has been rented for more than 10 seconds. Please check if it has been returned properly.");
+                }
+            }
+        }
+#endif
 
         protected override void OnReduceObjects()
         {
@@ -79,6 +95,21 @@ namespace OngekiFumenEditor.Utils.ObjectPool
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Get(out T obj) => Instance.GetInternal(out obj);
 
+#if DEBUG
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Get(string rentMark, out T obj) => Instance.GetInternal(rentMark, out obj);
+
+        private bool GetInternal(string rentMark, out T obj)
+        {
+            var isSuccess = GetInternal(out obj);
+
+            if (isSuccess && !string.IsNullOrWhiteSpace(rentMark))
+                rentTimeMap[obj.GetHashCode()] = (DateTime.UtcNow, rentMark);
+
+            return !isSuccess;
+        }
+#endif
+
         private bool GetInternal(out T obj)
         {
             var isSuccess = cache_obj.TryTake(out obj);
@@ -89,6 +120,14 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 
             return !isSuccess;
         }
+
+#if DEBUG
+        public static T Get(string rentMark)
+        {
+            Get(rentMark, out var t);
+            return t;
+        }
+#endif
 
         public static T Get()
         {
@@ -106,6 +145,10 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 
             cache_obj.Add(obj);
             (obj as ICacheCleanable)?.OnAfterPutClean();
+
+#if DEBUG
+            rentTimeMap.TryRemove(obj.GetHashCode(), out _);
+#endif
         }
         #endregion
     }
@@ -115,6 +158,12 @@ namespace OngekiFumenEditor.Utils.ObjectPool
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Return<T>(T obj) where T : new()
             => ObjectPool<T>.Return(obj);
+
+#if DEBUG
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Get<T>(string rentMark) where T : new()
+            => ObjectPool<T>.Get(rentMark);
+#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>() where T : new()

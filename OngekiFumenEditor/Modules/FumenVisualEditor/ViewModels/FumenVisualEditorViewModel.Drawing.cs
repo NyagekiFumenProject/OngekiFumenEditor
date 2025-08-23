@@ -582,6 +582,14 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 ObjectPool.Return(item.Value);
             ObjectPool.Return(list);
         }
+
+        foreach (var list in drawMap.Values)
+        {
+            foreach (var item in list)
+                ObjectPool.Return(item.Value);
+            ObjectPool.Return(list);
+        }
+
         ObjectPool.Return(map);
         ObjectPool.Return(usedDrawingContexts);
         ObjectPool.Return(unusedSoflanGroups);
