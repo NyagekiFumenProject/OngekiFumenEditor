@@ -1902,9 +1902,8 @@
   <data name="kbd_batch_ModeNormalBell" xml:space="preserve">
     <value>[批量模式] Bell物件</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="BatchModeAddObject" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="BatchModeAddObject" xml:space="preserve">
+    <value>添加 {0}</value>
   </data>
   <data name="kbd_batch_ModeClipboard" xml:space="preserve">
     <value>[批量模式] 已复制物件</value>
@@ -1951,14 +1950,14 @@
   <data name="LaneColorful" xml:space="preserve">
     <value>Lane Colorful</value>
   </data>
-  <data name="BatchModeModifierSetCritical" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="BatchModeModifierSetCritical" xml:space="preserve">
+    <value>设置Critical属性</value>
   </data>
-  <data name="BatchModeModifierSwitchDirection" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="BatchModeModifierSwitchDirection" xml:space="preserve">
+    <value>设置Direction属性</value>
   </data>
-  <data name="ObjectFilterLanes" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="ObjectFilterLanes" xml:space="preserve">
+    <value>Lanes</value>
   </data>
   <data name="ObjectFilterDockables" xml:space="preserve">
     <value>可附物件</value>
@@ -1990,8 +1989,8 @@
   <data name="kbd_layer_Batch" xml:space="preserve">
     <value>批量模式</value>
   </data>
-  <data name="kbd_editor_ChangeDockableLaneType" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="kbd_editor_ChangeDockableLaneType" xml:space="preserve">
+    <value>更改可附轨道类型</value>
   </data>
   <data name="SelectOneDockableLaneOnly" xml:space="preserve">
     <value>请选择单独选择一个可击打轨道节点</value>
@@ -2065,32 +2064,32 @@
   <data name="SelectionFilterObjectCategoryTimeline" xml:space="preserve">
     <value>有时间轴的物件</value>
   </data>
-  <data name="Bullet" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="Bullet" xml:space="preserve">
+    <value>Bullet</value>
   </data>
-  <data name="AutoPlayFaderLane" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="AutoPlayFaderLane" xml:space="preserve">
+    <value>AutoPlayFaderLane</value>
   </data>
   <data name="Beam" xml:space="preserve">
     <value>Beam</value>
   </data>
-  <data name="CurveControlPoint" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="CurveControlPoint" xml:space="preserve">
+    <value>Curve Control Point</value>
   </data>
-  <data name="ClickSE" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="ClickSE" xml:space="preserve">
+    <value>Click SE</value>
   </data>
-  <data name="InterpolatableSoflan" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="InterpolatableSoflan" xml:space="preserve">
+    <value>Interpolatable Soflan</value>
   </data>
-  <data name="KeyframeSoflan" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="KeyframeSoflan" xml:space="preserve">
+    <value>Keyframe Soflan</value>
   </data>
-  <data name="DurationSoflan" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="DurationSoflan" xml:space="preserve">
+    <value>Duration Soflan</value>
   </data>
-  <data name="MeterChange" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="MeterChange" xml:space="preserve">
+    <value>Meter Change</value>
   </data>
   <data name="IndividualSoflanArea" xml:space="preserve">
     <value>Individual Soflan Area</value>
@@ -2122,8 +2121,8 @@
   <data name="SelectionFilter_None" xml:space="preserve">
     <value>无</value>
   </data>
-  <data name="SelectionFilter_AnyChoice" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
+  <data name="SelectionFilter_AnyChoice" xml:space="preserve">
+    <value>任何</value>
   </data>
   <data name="SelectionFilter_HeaderObjectType" xml:space="preserve">
     <value>物件类型</value>
@@ -2222,7 +2221,7 @@
     <value>其他</value>
   </data>
   <data name="SelectionFilter_OptionLabelLaneBlockDirection" xml:space="preserve">
-    <value>LBK方向</value>
+    <value>LaneBlockArea锁边方向</value>
   </data>
   <data name="SelectionFilter_WindowTitle" xml:space="preserve">
     <value>Selection Filter</value>
