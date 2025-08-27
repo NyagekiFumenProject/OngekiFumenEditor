@@ -17,7 +17,9 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 		private MultiObjectsPropertyInfoWrapper core;
 		private FumenVisualEditorViewModel referenceEditor;
 
-		public bool IsAllowSetNull => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAllowSetNull>() is not null;
+		public bool IsReadOnly => core.IsReadOnly;
+
+        public bool IsAllowSetNull => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAllowSetNull>() is not null;
 
 		public UndoableMultiObjectPropertyInfoWrapper(MultiObjectsPropertyInfoWrapper propertyWrapperCore, FumenVisualEditorViewModel referenceEditor)
 		{
@@ -65,7 +67,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 		public string DisplayPropertyName => core.DisplayPropertyName;
 		public string DisplayPropertyTipText => core.DisplayPropertyTipText;
 
-		public override string ToString() => $"[Undoable]{base.ToString()}";
+        public override string ToString() => $"[Undoable]{base.ToString()}";
 
 		public void Clear()
 		{

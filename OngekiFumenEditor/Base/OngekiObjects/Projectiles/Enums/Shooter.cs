@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums
+namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums
 {
 	public enum Shooter
 	{

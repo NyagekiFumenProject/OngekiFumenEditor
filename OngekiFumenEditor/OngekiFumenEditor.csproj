@@ -24,7 +24,7 @@
 	<!--当Release编译时, SoundTouch.dll就交给Costura.Fody处理-->
 	<ItemGroup Condition="'$(Configuration)' != 'Debug'">
 		<None Remove="Costura64\SoundTouch_x64.dll" />
-		<EmbeddedResource Include="Costura64\SoundTouch.dll" />
+		<EmbeddedResource Include="Costura64\SoundTouch.dll"/>
 	</ItemGroup>
 
 	<!--使用nvpatch工具让程序默认使用独显运行(核显给爷爬)-->
@@ -193,7 +193,6 @@
 		</PackageReference>
 		<PackageReference Include="FontStashSharp" Version="1.3.9" />
 		<PackageReference Include="Microsoft.Build" Version="17.7.2" />
-		<PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.8.27" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.11.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" ExcludeAssets="contentfiles;runtime;" />
 		<PackageReference Include="Microsoft.Wpf.Interop.DirectX-x64" Version="0.9.0-beta-22856" />
@@ -210,15 +209,12 @@
 		<PackageReference Include="SharpVectors" Version="1.8.4.2" />
 		<PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
 		<PackageReference Include="SixLabors.Fonts" Version="2.1.3" />
-		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
 		<PackageReference Include="SkiaSharp" Version="3.119.0" />
 		<PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.0" />
 		<PackageReference Include="Svg" Version="3.4.7" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
-		<PackageReference Include="System.Net.Http" Version="4.3.4" />
-		<PackageReference Include="System.Text.Json" Version="8.0.6" />
-		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
 		<PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
 		<PackageReference Include="Vortice.Direct3D12" Version="3.6.2" />
 		<PackageReference Include="Vortice.Direct3D9" Version="3.6.2" />

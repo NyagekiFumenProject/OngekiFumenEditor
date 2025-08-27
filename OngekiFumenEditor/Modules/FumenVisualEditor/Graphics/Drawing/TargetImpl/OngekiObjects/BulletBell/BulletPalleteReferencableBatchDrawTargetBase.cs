@@ -3,8 +3,9 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.UI.Controls.ObjectInspector;
 using OngekiFumenEditor.Utils;
@@ -179,7 +180,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                     switch (pallete.TargetValue)
                     {
-                        case OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums.Target.Player:
+                        case Target.Player:
                             var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(pallete.Speed, 1));
                             var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
                             if (targetAudioTime < TimeSpan.Zero)
@@ -188,7 +189,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                             toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);
                             toXUnit += obj.XGrid.TotalUnit;
                             break;
-                        case OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums.Target.FixField:
+                        case Target.FixField:
                         default:
                             toXUnit = obj.XGrid.TotalUnit;
                             break;
@@ -210,16 +211,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                     switch (pallete.ShooterValue)
                     {
-                        case OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums.Shooter.TargetHead:
+                        case Shooter.TargetHead:
                             fromXUnit = toXUnit;
                             break;
-                        case OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums.Shooter.Enemy:
+                        case Shooter.Enemy:
                             var tGrid = obj.TGrid;
                             var enemyLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<EnemyLaneStart>().LastOrDefault();
                             var xGrid = enemyLane?.CalulateXGrid(tGrid);
                             fromXUnit = xGrid?.TotalUnit ?? obj.XGrid.TotalUnit;
                             break;
-                        case OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums.Shooter.Center:
+                        case Shooter.Center:
                         default:
                             fromXUnit = 0;
                             break;

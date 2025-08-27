@@ -1,20 +1,14 @@
-using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+﻿using OngekiFumenEditor.Base.Attributes;
+
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using System.Collections.Generic;
 using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
-	public class Bell : OngekiMovableObjectBase, IBulletPalleteReferencable
+	//[DontShowPropertyInfoAttrbute]
+	public partial class Bullet : OngekiMovableObjectBase, IBulletPalleteReferencable
 	{
-		public static string CommandName => "BEL";
-		public override string IDShortName => CommandName;
-
-		public Bell()
-		{
-			ReferenceBulletPallete = null;
-		}
-
 		private BulletPallete referenceBulletPallete;
 		public BulletPallete ReferenceBulletPallete
 		{
@@ -34,9 +28,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 				NotifyOfPropertyChange(() => TypeValue);
 				NotifyOfPropertyChange(() => TargetValue);
 				NotifyOfPropertyChange(() => ShooterValue);
+				NotifyOfPropertyChange(() => SizeValue);
                 NotifyOfPropertyChange(() => RandomOffsetRange);
-                NotifyOfPropertyChange(() => SizeValue);
-			}
+            }
 		}
 
 		private void ReferenceBulletPallete_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -56,6 +50,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 			}
 		}
 
+		public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
+		{
+			yield return this;
+		}
+
+		private BulletDamageType bulletDamageTypeValue = BulletDamageType.Normal;
+		public BulletDamageType BulletDamageTypeValue
+		{
+			get { return bulletDamageTypeValue; }
+			set
+			{
+				bulletDamageTypeValue = value;
+				NotifyOfPropertyChange(() => BulletDamageTypeValue);
+			}
+		}
 
 		[ObjectPropertyBrowserAlias("BPL." + nameof(Speed))]
 		[ObjectPropertyBrowserShow]
@@ -67,7 +76,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         [ObjectPropertyBrowserAlias("BPL." + nameof(StrID))]
 		[ObjectPropertyBrowserShow]
-		public string StrID => ReferenceBulletPallete?.StrID;
+		public string StrID => ReferenceBulletPallete?.StrID ?? string.Empty;
 
 		private string setStrID;
 		[ObjectPropertyBrowserShow]
@@ -103,19 +112,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 		[ObjectPropertyBrowserShow]
 		public BulletSize SizeValue => ReferenceBulletPallete?.SizeValue ?? default;
 
-		public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
-		{
-			yield return this;
-		}
+		public override string IDShortName => CommandName;
+
+		public const string CommandName = "BLT";
+
+		public override string ToString() => $"{base.ToString()} Pallete[{ReferenceBulletPallete}] DamageType[{BulletDamageTypeValue}]";
 
 		public override void Copy(OngekiObjectBase fromObj)
 		{
 			base.Copy(fromObj);
 
-			if (fromObj is not Bell from)
+			if (fromObj is not Bullet from)
 				return;
 
 			ReferenceBulletPallete = from.ReferenceBulletPallete;
+			BulletDamageTypeValue = from.BulletDamageTypeValue;
 		}
 	}
 }

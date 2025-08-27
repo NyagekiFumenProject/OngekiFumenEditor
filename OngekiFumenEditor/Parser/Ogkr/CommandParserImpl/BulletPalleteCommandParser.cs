@@ -1,6 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using System;
 using System.ComponentModel.Composition;
 using System.Linq;

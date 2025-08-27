@@ -1,5 +1,4 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using SkiaSharp;
 using System.Collections.Generic;

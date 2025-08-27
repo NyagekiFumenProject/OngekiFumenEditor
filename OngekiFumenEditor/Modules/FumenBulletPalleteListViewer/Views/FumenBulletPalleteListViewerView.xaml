@@ -11,7 +11,6 @@
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
-    xmlns:s="clr-namespace:OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ValueConverters"
     d:DesignHeight="300"
@@ -170,8 +169,8 @@
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBullet($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
                                         Cursor="Hand"
                                         Text="{markup:Translate [BulletPaletteCreateBullet]}"
-                                        ToolTip="{markup:Translate [DragToCreateBullet]}"
-                                        TextDecorations="Baseline">
+                                        TextDecorations="Baseline"
+                                        ToolTip="{markup:Translate [DragToCreateBullet]}">
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
@@ -179,16 +178,16 @@
                                         cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
                                         Cursor="Hand"
                                         Text="{markup:Translate [BulletPaletteCreateBell]}"
-                                        ToolTip="{markup:Translate [DragToCreateBell]}"
-                                        TextDecorations="Baseline">
+                                        TextDecorations="Baseline"
+                                        ToolTip="{markup:Translate [DragToCreateBell]}">
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnCopyNewBPL($executionContext)];"
                                         Text="{markup:Translate [ClonePallete]}"
-                                        ToolTip="{markup:Translate [ClickToClonePalette]}"
-                                        TextDecorations="Baseline">
+                                        TextDecorations="Baseline"
+                                        ToolTip="{markup:Translate [ClickToClonePalette]}">
                                     </TextBlock>
                                 </StackPanel>
                             </DataTemplate>

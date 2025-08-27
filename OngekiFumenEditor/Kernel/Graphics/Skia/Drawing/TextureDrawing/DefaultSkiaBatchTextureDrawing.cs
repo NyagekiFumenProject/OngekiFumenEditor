@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+﻿
 using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Base;

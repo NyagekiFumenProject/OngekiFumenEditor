@@ -5,7 +5,7 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;

@@ -3,10 +3,11 @@ using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -328,9 +329,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
             {
                 var damage = u.BulletDamageTypeValue switch
                 {
-                    Bullet.BulletDamageType.Normal => "NML",
-                    Bullet.BulletDamageType.Hard => "STR",
-                    Bullet.BulletDamageType.Danger => "DNG",
+                    BulletDamageType.Normal => "NML",
+                    BulletDamageType.Hard => "STR",
+                    BulletDamageType.Danger => "DNG",
                     _ => default
                 };
 

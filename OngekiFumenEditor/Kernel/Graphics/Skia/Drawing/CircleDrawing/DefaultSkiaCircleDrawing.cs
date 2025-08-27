@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+﻿
 using OngekiFumenEditor.Utils;
 using SkiaSharp;
 using System.Numerics;

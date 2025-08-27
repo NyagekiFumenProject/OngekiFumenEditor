@@ -1,6 +1,6 @@
 ﻿using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 
 using System;

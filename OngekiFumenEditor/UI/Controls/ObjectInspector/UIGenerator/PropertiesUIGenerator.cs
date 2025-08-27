@@ -11,11 +11,9 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 	{
 		public static UIElement GenerateUI(IObjectPropertyAccessProxy wrapper)
 		{
-			var editable =
-				wrapper.PropertyInfo.CanWrite &&
-				wrapper.PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserReadOnly>() is null;
+			var editable = !wrapper.IsReadOnly;
 
-			var typeGenerators = IoC.GetAll<ITypeUIGenerator>();
+            var typeGenerators = IoC.GetAll<ITypeUIGenerator>();
 			var generator = typeGenerators
 				.Where(x =>
 					x.SupportTypes.Contains(wrapper.PropertyInfo.PropertyType) ||

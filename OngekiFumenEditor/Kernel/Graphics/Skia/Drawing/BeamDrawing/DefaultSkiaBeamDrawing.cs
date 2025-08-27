@@ -1,5 +1,4 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
+﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
 using SkiaSharp;
