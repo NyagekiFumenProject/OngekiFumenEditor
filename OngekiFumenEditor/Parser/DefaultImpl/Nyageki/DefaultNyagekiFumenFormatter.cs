@@ -243,6 +243,18 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 }
                 sb.WriteLine();
             }
+
+            foreach (var isfList in fumen.IndividualSoflanAreaMap.Values)
+            {
+                foreach (var isf in isfList.OrderBy(x => x.TGrid))
+                {
+                    sb.Write($"{nameof(IndividualSoflanArea)}\t:\t(T[{isf.TGrid.Unit},{isf.TGrid.Grid}])\t->\t(T[{isf.EndIndicator.TGrid.Unit},{isf.EndIndicator.TGrid.Grid}])");
+                    sb.Write($"\t:\t(X[{isf.XGrid.Unit},{isf.XGrid.Grid}])\t->\t(X[{isf.EndIndicator.XGrid.Unit},{isf.EndIndicator.XGrid.Grid}])");
+                    sb.Write($"\t:\tSoflanGroup[{isf.SoflanGroup}]");
+                    sb.WriteLine();
+                }
+                sb.WriteLine();
+            }
         }
 
         public void ProcessLANE(OngekiFumen fumen, StreamWriter sb)
