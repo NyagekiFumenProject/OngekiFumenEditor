@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
         protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
-        protected List<(Vector2 pos, T obj)> drawStrList = new();
+        protected List<(Vector2 pos, string str)> drawStrList = new();
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
         private IStringDrawing stringDrawing;
@@ -70,11 +70,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private void DrawPallateStr(IDrawingContext target)
         {
-            foreach ((var pos, var obj) in drawStrList)
-            {
-                if (obj is IBulletPalleteReferencable { ReferenceBulletPallete: { } } bulletPalleteRef)
-                    stringDrawing.Draw($"{bulletPalleteRef.ReferenceBulletPallete.StrID}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
-            }
+            foreach ((var pos, var str) in drawStrList)
+                stringDrawing.Draw($"{str}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
         }
 
         private void ClearDrawList()

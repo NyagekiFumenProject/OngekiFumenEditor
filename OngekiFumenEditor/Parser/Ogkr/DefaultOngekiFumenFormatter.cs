@@ -165,7 +165,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
 
             sb.AppendLine("[HEADER]");
             //sb.AppendLine($"VERSION\t{metaInfo.Version.Major}\t{metaInfo.Version.Minor}\t{metaInfo.Version.Build}");
-			sb.AppendLine($"VERSION\t{1}\t{7}\t{0}");
+            sb.AppendLine($"VERSION\t{1}\t{7}\t{0}");
             sb.AppendLine($"CREATOR\t{metaInfo.Creator}");
             sb.AppendLine($"BPM_DEF\t{metaInfo.BpmDefinition.First}\t{metaInfo.BpmDefinition.Common}\t{metaInfo.BpmDefinition.Maximum}\t{metaInfo.BpmDefinition.Minimum}");
             sb.AppendLine($"MET_DEF\t{metaInfo.MeterDefinition.Bunshi}\t{metaInfo.MeterDefinition.Bunbo}");
@@ -335,7 +335,47 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
                     _ => default
                 };
 
-                sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete?.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
+                if (u.ReferenceBulletPallete != null && u.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                {
+                    //serialize normal bullet
+                    sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete?.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
+                }
+                else
+                {
+                    //serialize custom bullet
+                    var shoot = u.ShooterValue switch
+                    {
+                        Shooter.TargetHead => "UPS",
+                        Shooter.Enemy => "ENE",
+                        Shooter.Center => "CEN",
+                        _ => default
+                    };
+
+                    var target = u.TargetValue switch
+                    {
+                        Target.Player => "PLR",
+                        Target.FixField => "FIX",
+                        _ => default
+                    };
+
+                    var size = u.SizeValue switch
+                    {
+                        BulletSize.Normal => "N",
+                        BulletSize.Large => "L",
+                        _ => default
+                    };
+
+                    var type = u.TypeValue switch
+                    {
+                        BulletType.Circle => "CIR",
+                        BulletType.Needle => "NDL",
+                        BulletType.Square => "SQR",
+                        _ => default
+                    };
+
+                    var idName = Bullet.CustomCommandName;
+                    sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{type}\t{u.RandomOffsetRange}");
+                }
             }
         }
 
@@ -365,7 +405,49 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
             sb.AppendLine("[BELL]");
 
             foreach (var u in fumen.Bells.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{u.ReferenceBulletPallete?.StrID ?? "--"}");
+            {
+                //Considering that the bell may not need BulletPallete, we only need to determine whether it is a DummyCustomPallete
+                if (u.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                {
+                    sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{u.ReferenceBulletPallete?.StrID ?? "--"}");
+                }
+                else
+                {
+                    //serialize custom bullet
+                    var shoot = u.ShooterValue switch
+                    {
+                        Shooter.TargetHead => "UPS",
+                        Shooter.Enemy => "ENE",
+                        Shooter.Center => "CEN",
+                        _ => default
+                    };
+
+                    var target = u.TargetValue switch
+                    {
+                        Target.Player => "PLR",
+                        Target.FixField => "FIX",
+                        _ => default
+                    };
+
+                    var size = u.SizeValue switch
+                    {
+                        BulletSize.Normal => "N",
+                        BulletSize.Large => "L",
+                        _ => default
+                    };
+
+                    var type = u.TypeValue switch
+                    {
+                        BulletType.Circle => "CIR",
+                        BulletType.Needle => "NDL",
+                        BulletType.Square => "SQR",
+                        _ => default
+                    };
+
+                    var idName = Bell.CustomCommandName;
+                    sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{type}\t{u.RandomOffsetRange}");
+                }
+            }
         }
 
         public void ProcessFLICK(OngekiFumen fumen, StringBuilder sb)

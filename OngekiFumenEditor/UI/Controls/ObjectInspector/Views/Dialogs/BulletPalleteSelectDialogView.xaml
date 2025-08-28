@@ -10,6 +10,7 @@
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
     Title="{markup:Translate [BulletPalleteSelectDialogTitle]}"
     Width="400"
     Height="300"
@@ -19,6 +20,9 @@
     SizeToContent="Width"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
+    <mah:MetroWindow.Resources>
+        <valueconverters:HideIfDummyPalleteConverter x:Key="HideIfDummyPalleteConverter" />
+    </mah:MetroWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -58,46 +62,110 @@
                         DisplayMemberBinding="{Binding EditorName}"
                         Header="{markup:Translate [Name]}">
                     </GridViewColumn>
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding ShooterValue}"
-                        Header="{markup:Translate [ShootSource]}">
+
+                    <GridViewColumn Width="100" Header="{markup:Translate [ShootSource]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="ShooterValue" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn
-                        Width="80"
-                        DisplayMemberBinding="{Binding PlaceOffset}"
-                        Header="{markup:Translate [ShootOffset]}">
+                    <GridViewColumn Width="80" Header="{markup:Translate [ShootOffset]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="PlaceOffset" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding TargetValue}"
-                        Header="{markup:Translate [ShootTarget]}">
+                    <GridViewColumn Width="100" Header="{markup:Translate [ShootTarget]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="TargetValue" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn
-                        Width="60"
-                        DisplayMemberBinding="{Binding Speed}"
-                        Header="{markup:Translate [BulletSpeed]}">
+                    <GridViewColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="Speed" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding SizeValue}"
-                        Header="{markup:Translate [BulletSize]}">
+                    <GridViewColumn Width="100" Header="{markup:Translate [BulletSize]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="SizeValue" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn
-                        Width="75"
-                        DisplayMemberBinding="{Binding TypeValue}"
-                        Header="{markup:Translate [BulletType]}">
+                    <GridViewColumn Width="75" Header="{markup:Translate [BulletType]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="TypeValue" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn
-                        Width="75"
-                        DisplayMemberBinding="{Binding RandomOffsetRange}"
-                        Header="{markup:Translate [RandomOffsetRange]}">
+                    <GridViewColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="RandomOffsetRange" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                 </GridView>
             </ListView.View>

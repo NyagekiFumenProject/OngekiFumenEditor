@@ -26,6 +26,5 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         BulletSize SizeValue { get; }
 
         bool IsEnableSoflan { get; }
-
     }
 }

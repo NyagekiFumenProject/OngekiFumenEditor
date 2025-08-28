@@ -47,7 +47,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
             if (obj.IsSelected)
                 selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
-            drawStrList.Add((offsetPos, obj));
+            if (obj.ReferenceBulletPallete is { } pallete && pallete != BulletPallete.DummyCustomPallete)
+                drawStrList.Add((offsetPos, pallete.StrID));
             target.RegisterSelectableObject(obj, offsetPos, size);
         }
 

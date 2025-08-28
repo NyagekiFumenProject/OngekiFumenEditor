@@ -13,6 +13,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     {
         public static int RandomSeed { get; set; } = DateTime.Now.ToString().GetHashCode();
 
+        public static BulletPallete DummyCustomPallete { get; } = new BulletPallete()
+        {
+            StrID = "----",
+            EditorName = "自定义无模板",
+        };
+
+        static BulletPallete()
+        {
+            DummyCustomPallete.PropertyChanged += (s, e) => throw new InvalidOperationException("DummyCustomPallete can't be modify");
+        }
+
         private string strID = string.Empty;
         public string StrID
         {
@@ -115,6 +126,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
+        /// <summary>
+        /// 是否受到变速影响
+        /// </summary>
         public bool IsEnableSoflan => TargetValue != Target.Player;
 
         public override string ToString() => $"{base.ToString()} StrID[{StrID}] Speed[{Speed:F3}] ShooterValue[{ShooterValue}] TargetValue[{TargetValue}] SizeValue[{SizeValue}] TypeValue[{TypeValue}] EditorName[{EditorName}] PlaceOffset[{PlaceOffset}] RandomOffsetRange[{RandomOffsetRange}]";

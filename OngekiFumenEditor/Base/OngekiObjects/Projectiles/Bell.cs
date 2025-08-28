@@ -10,12 +10,16 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     public partial class Bell : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile
     {
         public static string CommandName => "BEL";
+        public static string CustomCommandName => "[CUSTOM_BEL]";
+
         public override string IDShortName => CommandName;
 
         public Bell()
         {
             ReferenceBulletPallete = null;
         }
+
+        bool IsReferenceValidPallete => ReferenceBulletPallete != null && ReferenceBulletPallete != BulletPallete.DummyCustomPallete;
 
         private BulletPallete referenceBulletPallete;
         [ObjectPropertyBrowserAlias("子弹模板")]
@@ -24,6 +28,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             get { return referenceBulletPallete; }
             set
             {
+                Log.LogDebug($"bell(id:{Id})'s pallete has been changed from {referenceBulletPallete?.StrID} to {value?.StrID}");
                 this.RegisterOrUnregisterPropertyChangeEvent(referenceBulletPallete, value, ReferenceBulletPallete_PropertyChanged);
                 Set(ref referenceBulletPallete, value);
 
@@ -58,71 +63,127 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         private float localSpeed = 1f;
         [ObjectPropertyBrowserShow]
-        [PropertyBrowserReadOnlyForPalleteNotNull]
+        [PropertyBrowserReadOnlyForPalleteIsValid]
         public float Speed
         {
-            get => ReferenceBulletPallete?.Speed ?? localSpeed;
-            set => Set(ref localSpeed, value);
+            get => IsReferenceValidPallete ? ReferenceBulletPallete.Speed : localSpeed;
+            set
+            {
+                Set(ref localSpeed, value);
+                if (ReferenceBulletPallete == null)
+                {
+                    //auto set pallete to dummy if value is set and current pallete is null
+                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+                }
+            }
         }
 
         private float localRandomOffsetRange = 0f;
         [ObjectPropertyBrowserShow]
-        [PropertyBrowserReadOnlyForPalleteNotNull]
+        [PropertyBrowserReadOnlyForPalleteIsValid]
         public float RandomOffsetRange
         {
-            get => ReferenceBulletPallete?.RandomOffsetRange ?? localRandomOffsetRange;
-            set => Set(ref localRandomOffsetRange, value);
+            get => IsReferenceValidPallete ? ReferenceBulletPallete.RandomOffsetRange : localRandomOffsetRange;
+            set
+            {
+                Set(ref localRandomOffsetRange, value);
+                if (ReferenceBulletPallete == null)
+                {
+                    //auto set pallete to dummy if value is set and current pallete is null
+                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+                }
+            }
         }
 
         private int localPlaceOffset = 0;
         [ObjectPropertyBrowserShow]
-        [PropertyBrowserReadOnlyForPalleteNotNull]
+        [PropertyBrowserReadOnlyForPalleteIsValid]
         public int PlaceOffset
         {
-            get => ReferenceBulletPallete?.PlaceOffset ?? localPlaceOffset;
-            set => Set(ref localPlaceOffset, value);
+            get => IsReferenceValidPallete ? ReferenceBulletPallete.PlaceOffset : localPlaceOffset;
+            set
+            {
+                Set(ref localPlaceOffset, value);
+                if (ReferenceBulletPallete == null)
+                {
+                    //auto set pallete to dummy if value is set and current pallete is null
+                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+                }
+            }
         }
 
         private BulletType localTypeValue = BulletType.Circle;
         [ObjectPropertyBrowserShow]
-        [PropertyBrowserReadOnlyForPalleteNotNull]
+        [PropertyBrowserReadOnlyForPalleteIsValid]
         public BulletType TypeValue
         {
-            get => ReferenceBulletPallete?.TypeValue ?? localTypeValue;
-            set => Set(ref localTypeValue, value);
+            get => IsReferenceValidPallete ? ReferenceBulletPallete.TypeValue : localTypeValue;
+            set
+            {
+                Set(ref localTypeValue, value);
+                if (ReferenceBulletPallete == null)
+                {
+                    //auto set pallete to dummy if value is set and current pallete is null
+                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+                }
+            }
         }
 
         private Target localTargetValue = Target.FixField;
         [ObjectPropertyBrowserShow]
-        [PropertyBrowserReadOnlyForPalleteNotNull]
+        [PropertyBrowserReadOnlyForPalleteIsValid]
         public Target TargetValue
         {
-            get => ReferenceBulletPallete?.TargetValue ?? localTargetValue;
+            get => IsReferenceValidPallete ? ReferenceBulletPallete.TargetValue : localTargetValue;
             set
             {
                 Set(ref localTargetValue, value);
                 NotifyOfPropertyChange(() => IsEnableSoflan);
+                if (ReferenceBulletPallete == null)
+                {
+                    //auto set pallete to dummy if value is set and current pallete is null
+                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+                }
             }
         }
 
         private Shooter localShooterValue = Shooter.TargetHead;
         [ObjectPropertyBrowserShow]
-        [PropertyBrowserReadOnlyForPalleteNotNull]
+        [PropertyBrowserReadOnlyForPalleteIsValid]
         public Shooter ShooterValue
         {
-            get => ReferenceBulletPallete?.ShooterValue ?? localShooterValue;
-            set => Set(ref localShooterValue, value);
+            get => IsReferenceValidPallete ? ReferenceBulletPallete.ShooterValue : localShooterValue;
+            set
+            {
+                Set(ref localShooterValue, value);
+                if (ReferenceBulletPallete == null)
+                {
+                    //auto set pallete to dummy if value is set and current pallete is null
+                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+                }
+            }
         }
 
         private BulletSize localSizeValue = BulletSize.Normal;
         [ObjectPropertyBrowserShow]
-        [PropertyBrowserReadOnlyForPalleteNotNull]
+        [PropertyBrowserReadOnlyForPalleteIsValid]
         public BulletSize SizeValue
         {
-            get => ReferenceBulletPallete?.SizeValue ?? localSizeValue;
-            set => Set(ref localSizeValue, value);
+            get => IsReferenceValidPallete ? ReferenceBulletPallete.SizeValue : localSizeValue;
+            set
+            {
+                Set(ref localSizeValue, value);
+                if (ReferenceBulletPallete == null)
+                {
+                    //auto set pallete to dummy if value is set and current pallete is null
+                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+                }
+            }
         }
 
+        /// <summary>
+        /// 是否受到变速影响
+        /// </summary>
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()

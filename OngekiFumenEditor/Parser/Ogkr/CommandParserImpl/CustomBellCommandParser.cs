@@ -1,0 +1,70 @@
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
+using System;
+using System.ComponentModel.Composition;
+using System.Linq;
+
+namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+{
+    [Export(typeof(ICommandParser))]
+    public class CustomBellCommandParser : CommandParserBase
+    {
+        public override string CommandLineHeader => Bell.CustomCommandName;
+
+        public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+        {
+            //sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{type}\t{u.RandomOffsetRange}");
+
+            var dataArr = args.GetDataArray<float>();
+            var bell = new Bell();
+
+            bell.TGrid.Unit = dataArr[1];
+            bell.TGrid.Grid = (int)dataArr[2];
+            bell.XGrid.Unit = dataArr[3];
+            bell.ReferenceBulletPallete = default;
+
+            var shoot = args.GetData<string>(4)?.ToUpper();
+            bell.ShooterValue = shoot switch
+            {
+                "UPS" => Shooter.TargetHead,
+                "ENE" => Shooter.Enemy,
+                "CEN" => Shooter.Center,
+                _ => throw new NotImplementedException($"ShooterValue = {shoot}"),
+            };
+
+            bell.PlaceOffset = args.GetData<int>(5);
+
+            var target = args.GetData<string>(6)?.ToUpper();
+            bell.TargetValue = target switch
+            {
+                "PLR" => Target.Player,
+                "FIX" => Target.FixField,
+                _ => throw new NotImplementedException($"TargetValue = {target}"),
+            };
+
+            bell.Speed = args.GetData<float>(7);
+
+            var size = args.GetData<string>(8)?.ToUpper();
+            bell.SizeValue = size switch
+            {
+                "N" => BulletSize.Normal,
+                "L" => BulletSize.Large,
+                _ => throw new NotImplementedException($"SizeValue = {size}"),
+            };
+
+            var type = args.GetData<string>(9)?.ToUpper();
+            bell.TypeValue = type switch
+            {
+                "CIR" => BulletType.Circle,
+                "NDL" => BulletType.Needle,
+                "SQR" => BulletType.Square,
+                _ => throw new NotImplementedException($"TypeValue = {type}"),
+            };
+
+            bell.RandomOffsetRange = args.GetData<float>(10);
+
+            return bell;
+        }
+    }
+}

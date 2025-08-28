@@ -1,12 +1,11 @@
 ﻿using Caliburn.Micro;
-using Gemini.Framework.Services;
-using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels.Dialogs;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Linq;
 using System.Windows;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
@@ -64,7 +63,8 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
                 return;
             }
 
-            var dialog = new BulletPalleteSelectDialogViewModel(editor.Fumen.BulletPalleteList, TypedProxyValue);
+            var bplList = editor.Fumen.BulletPalleteList.Prepend(BulletPallete.DummyCustomPallete);
+            var dialog = new BulletPalleteSelectDialogViewModel(bplList, TypedProxyValue);
             if ((await IoC.Get<IWindowManager>().ShowDialogAsync(dialog)) ?? false)
             {
                 var selectedPallete = dialog.SelectedPallete;

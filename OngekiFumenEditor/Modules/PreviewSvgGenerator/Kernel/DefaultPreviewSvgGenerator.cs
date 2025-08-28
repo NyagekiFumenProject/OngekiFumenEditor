@@ -608,7 +608,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 return null;
             }
 
-            void AppendBell(SvgGroup group, IBulletPalleteReferencable referencable)
+            void AppendBell<T>(SvgGroup group, T referencable) where T : IBulletPalleteReferencable, IHorizonPositionObject, ITimelineObject
             {
                 var svgBell = new SvgUse();
                 var id = GetDefId(referencable);
