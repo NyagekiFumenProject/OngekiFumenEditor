@@ -2262,4 +2262,7 @@
   <data name="SelectionFilter_HeadTailLaneNode_TailWithParent" xml:space="preserve">
     <value>Next (selected start node)</value>
   </data>
+  <data name="BulletPalleteSelectDialogTitle" xml:space="preserve">
+    <value>请选择一个子弹模板</value>
+  </data>
 </root>

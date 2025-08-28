@@ -19,7 +19,7 @@ using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class BulletDrawingTarget : BulletPalleteReferencableBatchDrawTargetBase<Bullet>
+    public class BulletDrawingTarget : ProjectileBatchDrawTargetBase<Bullet>
     {
         private IDictionary<IImage, Vector2> spritesSize;
         private IDictionary<IImage, Vector2> spritesOriginOffset;
@@ -103,17 +103,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bullet obj, Vector2 pos, float rotate)
         {
-            if (obj.ReferenceBulletPallete is null)
-            {
-                Log.LogWarn($"Bullet {obj.Id} has null reference bullet pallete");
-                return;
-            }
             var damageType = obj.BulletDamageTypeValue;
-            var bulletType = obj.ReferenceBulletPallete.TypeValue;
+            var bulletType = obj.TypeValue;
 
             var texture = spritesMap[damageType][bulletType];
 
-            var isLarge = obj.ReferenceBulletPallete.SizeValue == BulletSize.Large;
+            var isLarge = obj.SizeValue == BulletSize.Large;
             var size = (isLarge ? spritesSizeLarge : spritesSize)[texture];
             var origOffset = (isLarge ? spritesOriginOffsetLarge : spritesOriginOffset)[texture];
 
@@ -128,11 +123,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, Bullet obj, Vector2 pos, float rotate)
         {
             var damageType = obj.BulletDamageTypeValue;
-            var bulletType = obj.ReferenceBulletPallete.TypeValue;
+            var bulletType = obj.TypeValue;
 
             var texture = spritesMap[damageType][bulletType];
 
-            var isLarge = obj.ReferenceBulletPallete.SizeValue == BulletSize.Large;
+            var isLarge = obj.SizeValue == BulletSize.Large;
             var size = (isLarge ? spritesSizeLarge : spritesSize)[texture];
             var origOffset = (isLarge ? spritesOriginOffsetLarge : spritesOriginOffset)[texture];
 

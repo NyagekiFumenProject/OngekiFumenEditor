@@ -5,6 +5,7 @@ using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.UI.Controls.ObjectInspector;
@@ -21,11 +22,11 @@ using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell
 {
-    public abstract class BulletPalleteReferencableBatchDrawTargetBase<T> : CommonBatchDrawTargetBase<T>, IDisposable where T : OngekiMovableObjectBase, IBulletPalleteReferencable
+    public abstract class ProjectileBatchDrawTargetBase<T> : CommonBatchDrawTargetBase<T>, IDisposable where T : OngekiMovableObjectBase, IProjectile
     {
         protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
         protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
-        protected List<(Vector2 pos, IBulletPalleteReferencable obj)> drawStrList = new();
+        protected List<(Vector2 pos, T obj)> drawStrList = new();
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
         private IStringDrawing stringDrawing;
@@ -71,9 +72,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             foreach ((var pos, var obj) in drawStrList)
             {
-                if (obj.ReferenceBulletPallete is null)
-                    continue;
-                stringDrawing.Draw($"{obj.ReferenceBulletPallete.StrID}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
+                if (obj is IBulletPalleteReferencable { ReferenceBulletPallete: { } } bulletPalleteRef)
+                    stringDrawing.Draw($"{bulletPalleteRef.ReferenceBulletPallete.StrID}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
             }
         }
 
@@ -119,9 +119,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 return target.ConvertToY(tgrid, soflans);
             }
 
+            var randomSeed = BulletPallete.RandomSeed;
+
             void _Draw(T obj)
             {
-                var bulletPallateRefObj = obj as IBulletPalleteReferencable;
                 /*
                 --------------------------- toTime 
                         \
@@ -140,14 +141,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                  */
 
                 //计算向量化的物件运动时间
-                var appearOffsetTime = height / (obj.ReferenceBulletPallete?.Speed ?? 1f);
+                var appearOffsetTime = height / obj.Speed;
 
                 var toTime = 0d;
                 var currentTime = 0d;
 
-                var isEnableSoflan = bulletPallateRefObj.ReferenceBulletPallete?.IsEnableSoflan ?? true;
-
-                if (isEnableSoflan)
+                if (obj.IsEnableSoflan)
                 {
                     var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
                     toTime = convertToY(obj.TGrid, soflanList);
@@ -172,69 +171,61 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var fromXUnit = 0d;
                 var toXUnit = 0d;
 
-                if (bulletPallateRefObj.ReferenceBulletPallete is BulletPallete pallete)
+                var fumen = target.Editor.Fumen;
+
+                #region ToXUnit
+
+                switch (obj.TargetValue)
                 {
-                    var fumen = target.Editor.Fumen;
+                    case Target.Player:
+                        var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(obj.Speed, 1));
+                        var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
+                        if (targetAudioTime < TimeSpan.Zero)
+                            targetAudioTime = TimeSpan.Zero;
 
-                    #region ToXUnit
-
-                    switch (pallete.TargetValue)
-                    {
-                        case Target.Player:
-                            var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(pallete.Speed, 1));
-                            var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
-                            if (targetAudioTime < TimeSpan.Zero)
-                                targetAudioTime = TimeSpan.Zero;
-
-                            toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);
-                            toXUnit += obj.XGrid.TotalUnit;
-                            break;
-                        case Target.FixField:
-                        default:
-                            toXUnit = obj.XGrid.TotalUnit;
-                            break;
-                    }
-
-                    var rosr = pallete.RandomOffsetRange;
-                    if (rosr > 0)
-                    {
-                        var id = obj.Id;
-                        //不想用Random类，直接异或计算吧
-                        var seed = Math.Abs((BulletPallete.RandomSeed * id + 123) * id ^ id);
-                        var actualRandomOffset = (-rosr) + (seed % (rosr - (-rosr) + 1));
-                        toXUnit += actualRandomOffset;
-                    }
-
-                    #endregion
-
-                    #region FromXUnit
-
-                    switch (pallete.ShooterValue)
-                    {
-                        case Shooter.TargetHead:
-                            fromXUnit = toXUnit;
-                            break;
-                        case Shooter.Enemy:
-                            var tGrid = obj.TGrid;
-                            var enemyLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<EnemyLaneStart>().LastOrDefault();
-                            var xGrid = enemyLane?.CalulateXGrid(tGrid);
-                            fromXUnit = xGrid?.TotalUnit ?? obj.XGrid.TotalUnit;
-                            break;
-                        case Shooter.Center:
-                        default:
-                            fromXUnit = 0;
-                            break;
-                    }
-
-                    fromXUnit += pallete.PlaceOffset;
-
-                    #endregion
+                        toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);
+                        toXUnit += obj.XGrid.TotalUnit;
+                        break;
+                    case Target.FixField:
+                    default:
+                        toXUnit = obj.XGrid.TotalUnit;
+                        break;
                 }
-                else
+
+                var rosr = obj.RandomOffsetRange;
+                if (rosr > 0)
                 {
-                    toXUnit = obj.XGrid.TotalUnit;
-                    fromXUnit = toXUnit;
+                    var id = obj.Id;
+                    //不想用Random类，直接异或计算吧
+                    var seed = Math.Abs((randomSeed * id + 123) * id ^ id);
+                    var actualRandomOffset = (-rosr) + (seed % (rosr - (-rosr) + 1));
+                    toXUnit += actualRandomOffset;
                 }
+
+                #endregion
+
+                #region FromXUnit
+
+                switch (obj.ShooterValue)
+                {
+                    case Shooter.TargetHead:
+                        fromXUnit = toXUnit;
+                        break;
+                    case Shooter.Enemy:
+                        var tGrid = obj.TGrid;
+                        var enemyLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<EnemyLaneStart>().LastOrDefault();
+                        var xGrid = enemyLane?.CalulateXGrid(tGrid);
+                        fromXUnit = xGrid?.TotalUnit ?? obj.XGrid.TotalUnit;
+                        break;
+                    case Shooter.Center:
+                    default:
+                        fromXUnit = 0;
+                        break;
+                }
+
+                fromXUnit += obj.PlaceOffset;
+
+                #endregion
 
                 var fromX = convertToX(fromXUnit);
                 var toX = convertToX(toXUnit);

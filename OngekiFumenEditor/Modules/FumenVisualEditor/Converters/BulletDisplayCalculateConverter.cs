@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
 				return 0;
 
 
-			var speed = bullet.ReferenceBulletPallete.Speed;
+			var speed = bullet.Speed;
 
 			//todo calculate fromTGrid
 

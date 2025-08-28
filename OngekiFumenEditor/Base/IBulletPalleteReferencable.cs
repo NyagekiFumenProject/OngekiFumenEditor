@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace OngekiFumenEditor.Base
 {
-	public interface IBulletPalleteReferencable : IDisplayableObject, IHorizonPositionObject, ITimelineObject, INotifyPropertyChanged, IBulletPalleteChangable
+	public interface IBulletPalleteReferencable : IDisplayableObject, IHorizonPositionObject, ITimelineObject, INotifyPropertyChanged
 	{
 		BulletPallete ReferenceBulletPallete { get; set; }
 	}

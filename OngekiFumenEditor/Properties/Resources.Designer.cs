@@ -655,6 +655,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Select a bullet pallete 的本地化字符串。
+        /// </summary>
+        public static string BulletPalleteSelectDialogTitle {
+            get {
+                return ResourceManager.GetString("BulletPalleteSelectDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Size 的本地化字符串。
         /// </summary>
         public static string BulletSize {

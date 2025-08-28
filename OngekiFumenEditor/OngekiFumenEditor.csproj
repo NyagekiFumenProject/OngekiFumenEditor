@@ -24,7 +24,7 @@
 	<!--当Release编译时, SoundTouch.dll就交给Costura.Fody处理-->
 	<ItemGroup Condition="'$(Configuration)' != 'Debug'">
 		<None Remove="Costura64\SoundTouch_x64.dll" />
-		<EmbeddedResource Include="Costura64\SoundTouch.dll"/>
+		<EmbeddedResource Include="Costura64\SoundTouch.dll" />
 	</ItemGroup>
 
 	<!--使用nvpatch工具让程序默认使用独显运行(核显给爷爬)-->

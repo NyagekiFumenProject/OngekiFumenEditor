@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class BellDrawingTarget : BulletPalleteReferencableBatchDrawTargetBase<Bell>
+    public class BellDrawingTarget : ProjectileBatchDrawTargetBase<Bell>
     {
         private IImage texture;
         private Vector2 sizeNormal;
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bell obj, Vector2 pos, float rotate)
         {
-            var size = obj.ReferenceBulletPallete?.SizeValue is BulletSize.Large ? sizeLarge : sizeNormal;
+            var size = obj.SizeValue is BulletSize.Large ? sizeLarge : sizeNormal;
             var offsetPos = pos;
 
             normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, Bell obj, Vector2 pos, float rotate)
         {
-            var size = obj.ReferenceBulletPallete?.SizeValue is BulletSize.Large ? sizeLarge : sizeNormal;
+            var size = obj.SizeValue is BulletSize.Large ? sizeLarge : sizeNormal;
             var offsetPos = pos;
 
             normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
