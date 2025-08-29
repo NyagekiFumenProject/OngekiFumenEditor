@@ -19,10 +19,11 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
             var dataArr = args.GetDataArray<float>();
             var bell = new Bell();
 
+            bell.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+
             bell.TGrid.Unit = dataArr[1];
             bell.TGrid.Grid = (int)dataArr[2];
             bell.XGrid.Unit = dataArr[3];
-            bell.ReferenceBulletPallete = default;
 
             var shoot = args.GetData<string>(4)?.ToUpper();
             bell.ShooterValue = shoot switch

@@ -19,7 +19,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
             var dataArr = args.GetDataArray<float>();
             var bullet = new Bullet();
 
-            bullet.ReferenceBulletPallete = default;
+            bullet.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
+
             bullet.TGrid.Unit = dataArr[1];
             bullet.TGrid.Grid = (int)dataArr[2];
             bullet.XGrid.Unit = dataArr[3];
