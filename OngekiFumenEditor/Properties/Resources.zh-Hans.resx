@@ -2265,4 +2265,7 @@
   <data name="BulletPalleteSelectDialogTitle" xml:space="preserve">
     <value>请选择一个子弹模板</value>
   </data>
+  <data name="BulletNullPalleteDescription" xml:space="preserve">
+    <value>子弹(id:{0})的模板为空</value>
+  </data>
 </root>

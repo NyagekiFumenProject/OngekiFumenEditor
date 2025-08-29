@@ -628,6 +628,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 bullet(id:{0}) pallete is NULL 的本地化字符串。
+        /// </summary>
+        public static string BulletNullPalleteDescription {
+            get {
+                return ResourceManager.GetString("BulletNullPalleteDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Bell 的本地化字符串。
         /// </summary>
         public static string BulletPaletteCreateBell {

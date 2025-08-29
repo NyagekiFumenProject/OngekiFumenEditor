@@ -1606,4 +1606,7 @@
   <data name="BulletPalleteSelectDialogTitle" xml:space="preserve">
     <value />
   </data>
+  <data name="BulletNullPalleteDescription" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
 </root>

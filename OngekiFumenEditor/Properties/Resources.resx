@@ -2265,4 +2265,7 @@
   <data name="BulletPalleteSelectDialogTitle" xml:space="preserve">
     <value>Select a bullet pallete</value>
   </data>
+  <data name="BulletNullPalleteDescription" xml:space="preserve">
+    <value>bullet(id:{0}) pallete is NULL</value>
+  </data>
 </root>
