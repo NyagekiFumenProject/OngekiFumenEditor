@@ -1,8 +1,9 @@
 ﻿using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
 	public class WallStartToolboxGenerator<T> : ToolboxGenerator<T> where T : WallStartBase, new()
 	{

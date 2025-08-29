@@ -1,8 +1,9 @@
 ﻿using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.OngekiObjects
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
 	public class LaneStartToolboxGenerator<T> : ToolboxGenerator<T> where T : LaneStartBase, new()
 	{
