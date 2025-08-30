@@ -35,7 +35,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
                 NotifyOfPropertyChange(() => Speed);
                 NotifyOfPropertyChange(() => PlaceOffset);
-                NotifyOfPropertyChange(() => TypeValue);
                 NotifyOfPropertyChange(() => TargetValue);
                 NotifyOfPropertyChange(() => ShooterValue);
                 NotifyOfPropertyChange(() => RandomOffsetRange);
@@ -113,23 +112,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        private BulletType localTypeValue = BulletType.Circle;
-        [ObjectPropertyBrowserShow]
-        [BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom]
-        public BulletType TypeValue
-        {
-            get => IsReferenceValidPallete ? ReferenceBulletPallete.TypeValue : localTypeValue;
-            set
-            {
-                Set(ref localTypeValue, value);
-                if (ReferenceBulletPallete == null)
-                {
-                    //auto set pallete to dummy if value is set and current pallete is null
-                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-                }
-            }
-        }
-
         private Target localTargetValue = Target.FixField;
         [ObjectPropertyBrowserShow]
         [BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom]
@@ -187,6 +169,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         /// </summary>
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
+        public BulletType TypeValue => BulletType.Circle;
+
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
             yield return this;
@@ -207,7 +191,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             localSizeValue = from.localSizeValue;
             localSpeed = from.localSpeed;
             localTargetValue = from.localTargetValue;
-            localTypeValue = from.localTypeValue;
         }
     }
 }

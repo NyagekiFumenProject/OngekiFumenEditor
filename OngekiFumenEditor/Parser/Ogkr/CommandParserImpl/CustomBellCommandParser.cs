@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
 
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
-            //sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{type}\t{u.RandomOffsetRange}");
+            //sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{u.RandomOffsetRange}");
 
             var dataArr = args.GetDataArray<float>();
             var bell = new Bell();
@@ -52,15 +52,6 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
                 "N" => BulletSize.Normal,
                 "L" => BulletSize.Large,
                 _ => throw new NotImplementedException($"SizeValue = {size}"),
-            };
-
-            var type = args.GetData<string>(9)?.ToUpper();
-            bell.TypeValue = type switch
-            {
-                "CIR" => BulletType.Circle,
-                "NDL" => BulletType.Needle,
-                "SQR" => BulletType.Square,
-                _ => throw new NotImplementedException($"TypeValue = {type}"),
             };
 
             bell.RandomOffsetRange = args.GetData<int>(10);

@@ -27,7 +27,6 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             bell.Speed = map["Speed"].ToFloatOrThrow();
             bell.PlaceOffset = map["PlaceOffset"].ToIntOrThrow();
             bell.RandomOffsetRange = map["RandomOffsetRange"].ToIntOrThrow();
-            bell.TypeValue = map["TypeValue"].ToEnumOrThrow<BulletType>();
             bell.SizeValue = map["SizeValue"].ToEnumOrThrow<BulletSize>();
             bell.ShooterValue = map["ShooterValue"].ToEnumOrThrow<Shooter>();
             bell.TargetValue = map["TargetValue"].ToEnumOrThrow<Target>();

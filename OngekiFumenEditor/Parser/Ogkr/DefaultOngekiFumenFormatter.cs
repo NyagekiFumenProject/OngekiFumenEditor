@@ -435,7 +435,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
                         BulletSize.Large => "L",
                         _ => default
                     };
-
+                    /*
                     var type = u.TypeValue switch
                     {
                         BulletType.Circle => "CIR",
@@ -443,9 +443,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
                         BulletType.Square => "SQR",
                         _ => default
                     };
-
+                    */
                     var idName = Bell.CustomCommandName;
-                    sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{type}\t{u.RandomOffsetRange}");
+                    sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{u.RandomOffsetRange}");
                 }
             }
         }
