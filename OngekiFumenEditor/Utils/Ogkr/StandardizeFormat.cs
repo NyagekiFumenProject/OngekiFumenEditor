@@ -46,18 +46,15 @@ namespace OngekiFumenEditor.Utils.Ogkr
         {
             var fumen = await CopyFumenObject(currentFumen);
 
-            var generatedSoflans = fumen.SoflansMap.Values.SelectMany(x => x.GenerateDurationSoflans(fumen.BpmList)).ToArray();
-
             //directly removes objects which not belong to ongeki.
             fumen.SvgPrefabs.Clear();
             fumen.Comments.Clear();
-            //interpolate soflans
-            fumen.RemoveObjects(fumen.SoflansMap.Values.SelectMany(x => x).OfType<OngekiObjectBase>().ToArray());
-            fumen.AddObjects(generatedSoflans);
 
             //check if fumen is serializable or user must fix it first.
             if (!CheckFumenIsSerializable(fumen, out var msg))
                 return new(false) { Message = msg };
+
+            InterpolateSoflans(fumen);
 
             InterpolateAllLanes(fumen);
 
@@ -66,6 +63,13 @@ namespace OngekiFumenEditor.Utils.Ogkr
             ConvertCustomProjectilesToPalleted(fumen);
 
             return new(true) { SerializedFumen = fumen };
+        }
+
+        private static void InterpolateSoflans(OngekiFumen fumen)
+        {
+            var generatedSoflans = fumen.SoflansMap.Values.SelectMany(x => x.GenerateDurationSoflans(fumen.BpmList)).ToArray();
+            fumen.RemoveObjects(fumen.SoflansMap.Values.SelectMany(x => x).OfType<OngekiObjectBase>().ToArray());
+            fumen.AddObjects(generatedSoflans);
         }
 
         private static void ConvertCustomProjectilesToPalleted(OngekiFumen fumen)
