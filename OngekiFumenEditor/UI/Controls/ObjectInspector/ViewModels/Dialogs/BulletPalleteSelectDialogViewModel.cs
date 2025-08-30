@@ -26,6 +26,12 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels.Dialogs
             set => Set(ref selectedPallete, value);
         }
 
+        public async void OnItemDoubleClick(BulletPallete bulletPallete)
+        {
+            SelectedPallete = bulletPallete;
+            await TryCloseAsync(true);
+        }
+
         public async void OnComfirmButtonClicked()
         {
             await TryCloseAsync(true);

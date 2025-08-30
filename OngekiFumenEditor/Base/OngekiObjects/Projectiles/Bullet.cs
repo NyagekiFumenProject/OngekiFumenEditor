@@ -10,8 +10,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     //[DontShowPropertyInfoAttrbute]
     public partial class Bullet : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile
     {
-
-        bool IsReferenceValidPallete => ReferenceBulletPallete != null && ReferenceBulletPallete != BulletPallete.DummyCustomPallete;
+        bool IsUsePalleteValue => ReferenceBulletPallete != null && ReferenceBulletPallete != BulletPallete.DummyCustomPallete;
 
         private BulletPallete referenceBulletPallete;
         [ObjectPropertyBrowserAlias("子弹模板")]
@@ -73,7 +72,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         [BulletPropertyBrowserReadOnlyForPalleteIsValid]
         public float Speed
         {
-            get => IsReferenceValidPallete ? ReferenceBulletPallete.Speed : localSpeed;
+            get => IsUsePalleteValue ? ReferenceBulletPallete.Speed : localSpeed;
             set => Set(ref localSpeed, value);
         }
 
@@ -82,7 +81,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         [BulletPropertyBrowserReadOnlyForPalleteIsValid]
         public int RandomOffsetRange
         {
-            get => IsReferenceValidPallete ? ReferenceBulletPallete.RandomOffsetRange : localRandomOffsetRange;
+            get => IsUsePalleteValue ? ReferenceBulletPallete.RandomOffsetRange : localRandomOffsetRange;
             set => Set(ref localRandomOffsetRange, value);
         }
 
@@ -91,7 +90,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         [BulletPropertyBrowserReadOnlyForPalleteIsValid]
         public int PlaceOffset
         {
-            get => IsReferenceValidPallete ? ReferenceBulletPallete.PlaceOffset : localPlaceOffset;
+            get => IsUsePalleteValue ? ReferenceBulletPallete.PlaceOffset : localPlaceOffset;
             set => Set(ref localPlaceOffset, value);
         }
 
@@ -100,7 +99,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         [BulletPropertyBrowserReadOnlyForPalleteIsValid]
         public BulletType TypeValue
         {
-            get => IsReferenceValidPallete ? ReferenceBulletPallete.TypeValue : localTypeValue;
+            get => IsUsePalleteValue ? ReferenceBulletPallete.TypeValue : localTypeValue;
             set => Set(ref localTypeValue, value);
         }
 
@@ -109,7 +108,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         [BulletPropertyBrowserReadOnlyForPalleteIsValid]
         public Target TargetValue
         {
-            get => IsReferenceValidPallete ? ReferenceBulletPallete.TargetValue : localTargetValue;
+            get => IsUsePalleteValue ? ReferenceBulletPallete.TargetValue : localTargetValue;
             set
             {
                 Set(ref localTargetValue, value);
@@ -122,7 +121,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         [BulletPropertyBrowserReadOnlyForPalleteIsValid]
         public Shooter ShooterValue
         {
-            get => IsReferenceValidPallete ? ReferenceBulletPallete.ShooterValue : localShooterValue;
+            get => IsUsePalleteValue ? ReferenceBulletPallete.ShooterValue : localShooterValue;
             set => Set(ref localShooterValue, value);
         }
 
@@ -131,7 +130,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         [BulletPropertyBrowserReadOnlyForPalleteIsValid]
         public BulletSize SizeValue
         {
-            get => IsReferenceValidPallete ? ReferenceBulletPallete.SizeValue : localSizeValue;
+            get => IsUsePalleteValue ? ReferenceBulletPallete.SizeValue : localSizeValue;
             set => Set(ref localSizeValue, value);
         }
 
