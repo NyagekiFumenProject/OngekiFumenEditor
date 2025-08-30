@@ -414,7 +414,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             EnumeratePoints(false, leftPoints);
             EnumeratePoints(true, rightPoints);
 
-            //解决左右墙交叉处理问题
+            //解决左右墙交叉处理问题, 确保左墙的点永远在右墙点的左侧
             AdjustLaneIntersection(target, leftPoints, rightPoints);
 
             //合并提交，准备进行三角剖分
