@@ -562,7 +562,7 @@ namespace OngekiFumenEditor.Base.Collections
             return soflan.Speed;
         }
 
-        public IEnumerable<Soflan> GenerateDurationSoflans(BpmList bpmList)
+        public IEnumerable<Soflan> GenerateDurationSoflans(BpmList bpmList, int soflanGroup)
         {
             var list = GetCachedSoflanPositionList_PreviewMode(bpmList).Select(x => new
             {
@@ -578,6 +578,7 @@ namespace OngekiFumenEditor.Base.Collections
                     TGrid = list[i].TGrid,
                     Speed = (float)list[i].Speed,
                     EndTGrid = list[i + 1].TGrid,
+                    SoflanGroup = soflanGroup
                 };
             }
         }

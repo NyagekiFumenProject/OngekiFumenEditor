@@ -67,7 +67,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
 
         private static void InterpolateSoflans(OngekiFumen fumen)
         {
-            var generatedSoflans = fumen.SoflansMap.Values.SelectMany(x => x.GenerateDurationSoflans(fumen.BpmList)).ToArray();
+            var generatedSoflans = fumen.SoflansMap.SelectMany(x => x.Value.GenerateDurationSoflans(fumen.BpmList, x.Key)).ToArray();
             fumen.RemoveObjects(fumen.SoflansMap.Values.SelectMany(x => x).OfType<OngekiObjectBase>().ToArray());
             fumen.AddObjects(generatedSoflans);
         }
