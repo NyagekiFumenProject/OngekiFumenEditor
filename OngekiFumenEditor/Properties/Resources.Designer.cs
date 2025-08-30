@@ -772,6 +772,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 bullet pallete(strID:{0}) which will be deleted has bell/bullet object references, so it cannot delete directly 的本地化字符串。
+        /// </summary>
+        public static string CantDeleteReferencedBulletPallete {
+            get {
+                return ResourceManager.GetString("CantDeleteReferencedBulletPallete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Unable to fast open the fumen:  的本地化字符串。
         /// </summary>
         public static string CantFastOpenFumen {

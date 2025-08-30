@@ -1609,4 +1609,7 @@
   <data name="BulletNullPalleteDescription" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
+  <data name="CantDeleteReferencedBulletPallete" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
 </root>
