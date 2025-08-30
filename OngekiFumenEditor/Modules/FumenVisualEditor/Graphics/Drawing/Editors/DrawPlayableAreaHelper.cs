@@ -1,17 +1,18 @@
 ﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.OngekiObjects;
+using EarcutNet;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 using static OngekiFumenEditor.Utils.MathUtils;
-using System.Linq;
-using OngekiFumenEditor.Utils;
-using System.Numerics;
-using OngekiFumenEditor.Utils.ObjectPool;
-using EarcutNet;
-using System.Drawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -514,6 +515,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var leftIdx = 1;
             var rightIdx = 1;
 
+            bool insert(List<Vector2> list, int idx, Vector2 point)
+            {
+                if (idx < list.Count)
+                    if (list[idx] == point)
+                        return false;
+                list.Insert(idx, point);
+                return true;
+            }
+
             bool tryExchange(int li, int ri)
             {
                 tempLeft.Clear();
@@ -524,25 +534,52 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 var lp = leftPoints[lpIdx];
                 var rp = rightPoints[rpIdx];
 
-                var ck = true;
-                while (lp == rp && ck)
+                var needCompare = true;
+                while (lp == rp && needCompare)
                 {
-                    ck = false;
+                    needCompare = false;
                     if (lpIdx + 1 < leftPoints.Count)
                     {
                         lpIdx++;
                         lp = leftPoints[lpIdx];
-                        ck = true;
+                        needCompare = true;
                     }
                     if (rpIdx + 1 < rightPoints.Count)
                     {
                         rpIdx++;
                         rp = rightPoints[rpIdx];
-                        ck = true;
+                        needCompare = true;
                     }
                 }
 
-                if (lp.X < rp.X)
+                var prevlpIdx = lpIdx - 1;
+                var prevlp = prevlpIdx < 0 ? new Vector2(leftPoints[0].X, leftPoints[0].Y - 10) : leftPoints[prevlpIdx];
+                var leftVector = lp - prevlp;
+
+                var prevrpIdx = rpIdx - 1;
+                var prevrp = prevrpIdx < 0 ? new Vector2(rightPoints[0].X, rightPoints[0].Y - 10) : rightPoints[prevrpIdx];
+                var rightVector = rp - prevrp;
+
+                var crossProduct = leftVector.X * rightVector.Y - leftVector.Y * rightVector.X;
+                var exchangedRemain = false;
+                if (Math.Abs(crossProduct) < 1e-6f)
+                {
+                    //colinear 共线（同向或反向)
+                    if (lp.X > rp.X)
+                        exchangedRemain = true;
+                }
+                else if (crossProduct > 0)
+                {
+                    //counterclockwise right向量在left向量的逆时针方向
+                    exchangedRemain = true;
+                }
+                else
+                {
+                    //clockwise 顺时针
+                }
+
+                //if left.X < right.X, just swap remain points following this index on both sides
+                if (!exchangedRemain)
                     return false;
 
                 tempLeft.AddRange(leftPoints[li..]);
@@ -587,10 +624,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                     if (isCross)
                     {
+                        /*
+                             \   /
+                              \ /
+                               x <---insert new point to both side
+                              / \
+                             /   \
+                         */
+
                         if (tryExchange(leftIdx, rightIdx))
                         {
-                            leftPoints.Insert(leftIdx, intersectionPoint);
-                            rightPoints.Insert(rightIdx, intersectionPoint);
+                            insert(leftPoints, leftIdx, intersectionPoint);
+                            insert(rightPoints, rightIdx, intersectionPoint);
                         }
                     }
                     else
@@ -610,13 +655,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             //先补个点
                             if (isRightIntersected)
                             {
-                                leftPoints.Insert(leftIdx, intersectionPoint);
-                                leftIdx++;
+                                if (insert(leftPoints, leftIdx, intersectionPoint))
+                                    leftIdx++;
                             }
                             else
                             {
-                                rightPoints.Insert(rightIdx, intersectionPoint);
-                                rightIdx++;
+                                if (insert(rightPoints, rightIdx, intersectionPoint))
+                                    rightIdx++;
                             }
 
                             if (isFromIntersected)
@@ -648,12 +693,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                             //两边再插入中点
                             if (leftPoints[leftIdx] != centerPoint)
-                                leftPoints.Insert(leftIdx, centerPoint);
+                                insert(leftPoints, leftIdx, centerPoint);
                             if (rightPoints[rightIdx] != centerPoint)
-                                rightPoints.Insert(rightIdx, centerPoint);
+                                insert(rightPoints, rightIdx, centerPoint);
                         }
                         else
                         {
+                            /*
+                               \   /            ----A-----
+                                \ /        or      / \
+                             ----v-----           /   \
+                             */
                             //说明是V字形或者A字形
                             var isVType = rightLine.to.Y > intersectionPoint.Y || leftLine.to.Y > intersectionPoint.Y;
                             var isAType = rightLine.from.Y < intersectionPoint.Y || leftLine.from.Y < intersectionPoint.Y;
@@ -703,12 +753,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     circleDrawing.End();
                     stringDrawing.Draw(
                         $"[{leftIdx}, {rightIdx}]",
-                        intersectionPoint - new Vector2(intersectionPoint.X <= target.Rect.CenterX ? -10 : 10, 10),
+                        intersectionPoint - new Vector2(intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX ? -10 : 10, 10),
                         Vector2.One,
                         15,
                         0,
                         new(1, 1, 0, 1),
-                        new(intersectionPoint.X <= target.Rect.CenterX ? 0 : 1, 1),
+                        new(intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX ? 0 : 1, 1),
                         default,
                         target,
                         default,
@@ -721,12 +771,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 }
 
                 //看看哪一边idx需要递增
-                if (rightLine.from.Y <= leftLine.to.Y && leftLine.to.Y <= rightLine.to.Y)
+                if (rightLine.from.Y < leftLine.to.Y && leftLine.to.Y < rightLine.to.Y)
                 {
                     //left的末端在right范围内，那么left需要递增
                     leftIdx++;
                 }
-                else if (leftLine.from.Y <= rightLine.to.Y && rightLine.to.Y <= leftLine.to.Y)
+                else if (leftLine.from.Y < rightLine.to.Y && rightLine.to.Y < leftLine.to.Y)
                 {
                     rightIdx++;
                 }
