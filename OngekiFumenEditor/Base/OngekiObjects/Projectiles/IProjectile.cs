@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
     {
         float Speed { get; }
 
-        float RandomOffsetRange { get; }
+        int RandomOffsetRange { get; }
 
         int PlaceOffset { get; }
 

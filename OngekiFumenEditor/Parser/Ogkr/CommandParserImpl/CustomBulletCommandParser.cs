@@ -72,7 +72,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
                 _ => throw new NotImplementedException($"TypeValue = {type}"),
             };
 
-            bullet.RandomOffsetRange = args.GetData<float>(11);
+            bullet.RandomOffsetRange = args.GetData<int>(11);
 
             return bullet;
         }
