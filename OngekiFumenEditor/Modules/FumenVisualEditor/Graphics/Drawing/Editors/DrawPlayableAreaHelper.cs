@@ -1,7 +1,9 @@
 ﻿using Caliburn.Micro;
 using EarcutNet;
+using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -13,6 +15,10 @@ using System.Linq;
 using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 using static OngekiFumenEditor.Utils.MathUtils;
+
+/*
+ musicId:0840
+ */
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
@@ -118,13 +124,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 var isPlayback = rangeInfos[i].speed < 0;
 
-                DrawPlayFieldInternal(target, segMinTGrid, segMaxTGrid, isPlayback);
+                //if (i != 28)
+                //    continue;
+
+                var flag = FieldRangeParam.None;
+                if (i == 0)
+                    flag |= FieldRangeParam.FirstRange;
+                if (i == rangeInfos.Count - 2)
+                    flag |= FieldRangeParam.LastRange;
+
+                DrawPlayFieldInternal(target, segMinTGrid, segMaxTGrid, flag);
             }
 
             ObjectPool<List<(TGrid, double)>>.Return(rangeInfos);
         }
 
-        public void DrawPlayFieldInternal(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid, bool isPlaybackSoflan)
+        [Flags]
+        private enum FieldRangeParam
+        {
+            None = 0,
+            FirstRange = 1,
+            LastRange = 2,
+        }
+
+        private void DrawPlayFieldInternal(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid, FieldRangeParam fieldFlag)
         {
             /*
 			 画游戏(黑色可移动)区域
@@ -276,11 +299,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     }
                 }
 
-                //解决变速过快导致的精度丢失问题
+                //解决变速过快过慢导致的精度丢失问题
                 Vector2? interpolate(TGrid tGrid, float actualY, out bool isPickLane)
                 {
+                    var tGrids = TGridCalculator.ConvertYToTGrid_PreviewMode(actualY, target.Editor);
+
                     isPickLane = false;
-                    var pickables = fumen.Lanes
+                    var pickables = tGrids.SelectMany(tGrid => fumen.Lanes
                             .GetVisibleStartObjects(tGrid, tGrid)
                             .Where(x => x.LaneType == type)
                             .Where(x =>
@@ -291,8 +316,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 return laneMinY <= actualY && actualY <= laneMaxY;
                             })
                             .Select(x => (x.CalulateXGrid(tGrid), x))
-                            .FilterNullBy(x => x.Item1)
-                            /*.ToArray()*/;
+                            .FilterNullBy(x => x.Item1));
+                    /*.ToArray()*/
+                    ;
 
                     (_, var pickLane) = pickables.IsEmpty() ? default : (isRight ? pickables.MaxBy(x => x.Item1) : pickables.MinBy(x => x.Item1));
 
@@ -305,7 +331,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         {
                             var cur = itor.Current.pos;
 
-                            if (cur.Y > tGrid.TotalGrid)
+                            var curPy = (float)target.ConvertToY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+
+                            if (/*cur.Y > tGrid.TotalGrid*/curPy > actualY)
                             {
                                 // prev ------------ cur
                                 //           ^
@@ -314,7 +342,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 if (prevOpt is OpenTK.Mathematics.Vector2 prev)
                                 {
                                     var curPx = (float)XGridCalculator.ConvertXGridToX(cur.X / XGrid.DEFAULT_RES_X, target.Editor);
-                                    var curPy = (float)target.ConvertToY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
                                     var prevPx = (float)XGridCalculator.ConvertXGridToX(prev.X / XGrid.DEFAULT_RES_X, target.Editor);
                                     var prevPy = (float)target.ConvertToY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
@@ -337,34 +364,49 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     return default;
                 }
 
-                if (minTGrid <= currentTGrid && currentTGrid <= maxTGrid)
+                void postInterpolatePoint(TGrid tGrid, float y, float defaultY, int index)
                 {
-                    var maxY = target.ConvertToY(maxTGrid, soflanGroup);
+                    if (interpolate(tGrid, y, out var isPickLane) is Vector2 pp)
+                    {
+                        if (!isPickLane)
+                            appendPoint3(result, (float)XGridCalculator.ConvertXGridToX(defaultX / XGrid.DEFAULT_RES_X, target.Editor), defaultY, index);
+                        appendPoint3(result, pp.X, pp.Y, index);
+                    }
+                }
+
+                if (fieldFlag.HasFlag(FieldRangeParam.LastRange) && currentTGrid <= maxTGrid)
+                {
+                    var maxY = (float)target.ConvertToY(maxTGrid, soflanGroup);
                     var actualMaxY = target.CurrentDrawingTargetContext.Rect.TopLeft.Y;
 
                     var maxDiff = maxY - actualMaxY;
-                    if (Math.Abs(maxDiff) >= 1)
+                    if (maxDiff > 0)
                     {
-                        if (interpolate(maxTGrid, (float)Math.Max(actualMaxY, maxY), out var isPickLane) is Vector2 pp)
-                        {
-                            if (!isPickLane)
-                                appendPoint3(result, (float)XGridCalculator.ConvertXGridToX(defaultX / XGrid.DEFAULT_RES_X, target.Editor), result.LastOrDefault().Y, result.Count);
-                            appendPoint3(result, pp.X, pp.Y, result.Count);
-                        }
+                        postInterpolatePoint(maxTGrid, actualMaxY, result.LastOrDefault().Y, result.Count);
+                        postInterpolatePoint(maxTGrid, maxY, result.LastOrDefault().Y, result.Count);
                     }
+                    else if (maxDiff < 0)
+                    {
+                        postInterpolatePoint(maxTGrid, maxY, result.LastOrDefault().Y, result.Count);
+                        postInterpolatePoint(maxTGrid, actualMaxY, result.LastOrDefault().Y, result.Count);
+                    }
+                }
 
-                    var minY = target.ConvertToY(minTGrid, soflanGroup);
+                if (fieldFlag.HasFlag(FieldRangeParam.FirstRange) && minTGrid <= currentTGrid)
+                {
+                    var minY = (float)target.ConvertToY(minTGrid, soflanGroup);
                     var actualMinY = target.CurrentDrawingTargetContext.Rect.ButtomRight.Y;
 
                     var minDiff = minY - actualMinY;
-                    if (Math.Abs(minDiff) >= 1)
+                    if (minDiff > 0)
                     {
-                        if (interpolate(minTGrid, (float)Math.Max(actualMinY, minY), out var isPickLane) is Vector2 pp)
-                        {
-                            if (!isPickLane)
-                                appendPoint3(result, (float)XGridCalculator.ConvertXGridToX(defaultX / XGrid.DEFAULT_RES_X, target.Editor), result.FirstOrDefault().Y, 0);
-                            appendPoint3(result, pp.X, pp.Y, 0);
-                        }
+                        postInterpolatePoint(minTGrid, minY, result.FirstOrDefault().Y, 0);
+                        postInterpolatePoint(minTGrid, actualMinY, result.FirstOrDefault().Y, 0);
+                    }
+                    else if (minDiff < 0)
+                    {
+                        postInterpolatePoint(minTGrid, actualMinY, result.FirstOrDefault().Y, 0);
+                        postInterpolatePoint(minTGrid, minY, result.FirstOrDefault().Y, 0);
                     }
                 }
 
@@ -423,6 +465,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 tessellatePoints.Add(pos.X);
                 tessellatePoints.Add(pos.Y);
             }
+
             foreach (var pos in rightPoints.AsEnumerable().Reverse())
             {
                 tessellatePoints.Add(pos.X);
@@ -434,13 +477,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             Earcut.Tessellate(tessellatePoints, idxList, tessellateList);
 
             polygonDrawing.Begin(target, Primitive.Triangles);
-            foreach (var seq in tessellateList.SequenceWrap(3))
             {
-                foreach (var idx in seq)
+                var i = 0;
+                foreach (var seq in tessellateList.SequenceWrap(3))
                 {
-                    var x = (float)tessellatePoints[idx * 2 + 0];
-                    var y = (float)tessellatePoints[idx * 2 + 1];
-                    polygonDrawing.PostPoint(new(x, y), playFieldForegroundColor);
+                    var color = playFieldForegroundColor;
+#if PLAYFIELD_DEBUG
+                    var (r, g, b) = Hsl2Rgb(Math.Abs($"{i}{i}".GetHashCode()) % 360f, 1f, 0.5f);
+                    color = new Vector4(r, g, b, 0.5f);
+#endif
+
+                    foreach (var idx in seq)
+                    {
+                        var x = (float)tessellatePoints[idx * 2 + 0];
+                        var y = (float)tessellatePoints[idx * 2 + 1];
+
+                        polygonDrawing.PostPoint(new(x, y), color);
+                    }
+                    i++;
                 }
             }
             polygonDrawing.End();
@@ -450,19 +504,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             playFieldForegroundColor.W = 0.4f;
             lineDrawing.Draw(target, leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
             lineDrawing.Draw(target, rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
-
-            var i = 0;
-            foreach (var seq in tessellateList.SequenceWrap(3))
             {
-                var (r, g, b) = Hsl2Rgb(39, 1f, 0.5f);
-                var color = new Vector4(r, g, b, 0.9f);
+                var i = 0;
+                foreach (var seq in tessellateList.SequenceWrap(3))
+                {
+                    var (r, g, b) = Hsl2Rgb(Math.Abs($"{i}{i}".GetHashCode()) % 360f, 1f, 0.5f);
+                    var color = new Vector4(r, g, b, 0.9f);
 
-                lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault())
-                    .Select(idx => new LineVertex(new((float)tessellatePoints[idx * 2 + 0], (float)tessellatePoints[idx * 2 + 1]), color, new(6, 4))), 2);
+                    lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault())
+                        .Select(idx => new LineVertex(new((float)tessellatePoints[idx * 2 + 0], (float)tessellatePoints[idx * 2 + 1]), color, new(6, 4))), 2);
 
-                i += 3;
+                    i += 3;
+                }
             }
-
             void printPoints(IEnumerable<Vector2> data, Vector4 color, bool isRight)
             {
                 color.W = 1;
@@ -788,7 +842,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
         }
 
-        public static (float r, float g, float b) Hsl2Rgb(float h, float s, float l)
+        private static (float r, float g, float b) Hsl2Rgb(float h, float s, float l)
         {
             // Ensure the Hue is in the range of 0 to 360
             h = h % 360;
