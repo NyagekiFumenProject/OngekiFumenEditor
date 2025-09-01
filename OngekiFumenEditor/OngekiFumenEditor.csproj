@@ -18,13 +18,13 @@
 
 	<!--当Debug编译时, SoundTouch.dll就复制到输出目录-->
 	<Target Condition="'$(Configuration)' == 'Debug'" Name="CopySoundTouchDll" AfterTargets="AfterBuild">
-		<Copy SourceFiles="Costura64\SoundTouch.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="costura-win-x64\SoundTouch.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
 	</Target>
 
 	<!--当Release编译时, SoundTouch.dll就交给Costura.Fody处理-->
 	<ItemGroup Condition="'$(Configuration)' != 'Debug'">
 		<None Remove="costura-win-x64\SoundTouch_x64.dll" />
-		<EmbeddedResource Include="Costura64\SoundTouch.dll" />
+		<EmbeddedResource Include="costura-win-x64\SoundTouch.dll" />
 	</ItemGroup>
 
 	<!--使用nvpatch工具让程序默认使用独显运行(核显给爷爬)-->
