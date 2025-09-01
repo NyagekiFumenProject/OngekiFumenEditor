@@ -23,7 +23,7 @@
 
 	<!--当Release编译时, SoundTouch.dll就交给Costura.Fody处理-->
 	<ItemGroup Condition="'$(Configuration)' != 'Debug'">
-		<None Remove="Costura64\SoundTouch_x64.dll" />
+		<None Remove="costura-win-x64\SoundTouch_x64.dll" />
 		<EmbeddedResource Include="Costura64\SoundTouch.dll" />
 	</ItemGroup>
 
@@ -67,7 +67,7 @@
 		<Page Remove="Dependencies\**" />
 		<Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
 		<Page Remove="_bin\**" />
-		<None Remove="Costura64\SoundTouch_x64.dll" />
+		<None Remove="costura-win-x64\SoundTouch_x64.dll" />
 		<None Remove="Resources\Icons\notication.png" />
 		<None Remove="Resources\suggestLayout.bin" />
 		<None Remove="Resources\Icons\icons8-selection-16.png" />
@@ -105,10 +105,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Costura64\crnlib.dll" />
-		<None Remove="Costura64\ispc_texcomp.dll" />
-		<None Remove="Costura64\PVRTexLib.dll" />
-		<None Remove="Costura64\TexToolWrap.dll" />
+		<None Remove="costura-win-x64\crnlib.dll" />
+		<None Remove="costura-win-x64\ispc_texcomp.dll" />
+		<None Remove="costura-win-x64\PVRTexLib.dll" />
+		<None Remove="costura-win-x64\TexToolWrap.dll" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\bell.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\flick.png" />
@@ -149,13 +149,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Costura64\crnlib.dll">
+		<EmbeddedResource Include="costura-win-x64\crnlib.dll">
 		</EmbeddedResource>
-		<EmbeddedResource Include="Costura64\ispc_texcomp.dll">
+		<EmbeddedResource Include="costura-win-x64\ispc_texcomp.dll">
 		</EmbeddedResource>
-		<EmbeddedResource Include="Costura64\PVRTexLib.dll">
+		<EmbeddedResource Include="costura-win-x64\PVRTexLib.dll">
 		</EmbeddedResource>
-		<EmbeddedResource Include="Costura64\TexToolWrap.dll">
+		<EmbeddedResource Include="costura-win-x64\TexToolWrap.dll">
 		</EmbeddedResource>
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\bell.png" />
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick.png" />
