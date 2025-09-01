@@ -1,19 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using ControlzEx.Standard;
 using Gemini.Framework;
+using NAudio.Gui;
 using NWaves.Utils;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
@@ -33,6 +21,21 @@ using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using OpenTK.Mathematics;
 using OpenTK.Wpf;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawXGridHelper;
 using Color = System.Drawing.Color;
 using Vector4 = System.Numerics.Vector4;
@@ -646,7 +649,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     {
     }
 
-    public Task OnScheduleCall(CancellationToken cancellationToken)
+    public async Task OnScheduleCall(CancellationToken cancellationToken)
     {
         if (IsDisplayFPS)
         {
@@ -668,14 +671,27 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
                 }
             }
+
+            if (IsPreviewMode)
+            {
+                var view = GetView() as FrameworkElement;
+                await view.Dispatcher.InvokeAsync(() =>
+                {
+                    stringBuilder.AppendLine();
+                    if (drawingContexts.ElementAtOrDefault(0).Value?.Rect.MaxY - Mouse.GetPosition(view).Y is double mouseY)
+                    {
+                        stringBuilder.AppendLine($"MouseY: {mouseY:F2}");
+                        foreach (var tGrid in TGridCalculator.ConvertYToTGrid_PreviewMode(mouseY, this))
+                            stringBuilder.AppendLine($"* {tGrid}");
+                    }
+                });
+            }
 #endif
 
             DisplayFPS = stringBuilder.ToString();
 
             PerfomenceMonitor?.Clear();
         }
-
-        return Task.CompletedTask;
     }
 
     protected override void OnViewLoaded(object v)
@@ -781,8 +797,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         if (IsDesignMode || !enablePlayFieldDrawing)
             cleanColor = new(16 / 255.0f, 16 / 255.0f, 16 / 255.0f, 1);
         else
+        {
             cleanColor = new(playFieldBackgroundColor.X, playFieldBackgroundColor.Y, playFieldBackgroundColor.Z,
                 playFieldBackgroundColor.W);
+#if PLAYFIELD_DEBUG
+            cleanColor = new(0, 0, 0, 1);
+#endif
+        }
         RenderContext?.CleanRender(this, cleanColor);
     }
 
