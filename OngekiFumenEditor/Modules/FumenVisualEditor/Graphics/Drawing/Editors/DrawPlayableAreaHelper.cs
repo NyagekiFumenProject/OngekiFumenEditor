@@ -17,7 +17,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 using static OngekiFumenEditor.Utils.MathUtils;
 
 /*
- musicId:0840
+ musicId:0840/1119
  */
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
@@ -124,7 +124,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 var isPlayback = rangeInfos[i].speed < 0;
 
-                //if (i != 28)
+                //if (i != 0)
                 //    continue;
 
                 var flag = FieldRangeParam.None;
@@ -179,6 +179,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 var prevX = (float)Random();
                 var prevY = (float)Random();
+
+                XGrid calculateXGrid(ConnectableStartObject start, TGrid calcTGrid)
+                {
+                    var children = start.GetChildObjectsFromTGrid(calcTGrid);
+                    var calcXGrids = children.Select(child => child.CalulateXGrid(calcTGrid));
+
+                    return isRight ? calcXGrids.MaxByOrDefault(x => x) : calcXGrids.MinByOrDefault(x => x);
+                }
 
                 void appendPoint2(List<Vector2> list, float totalXGrid, float totalTGrid)
                 {
@@ -269,7 +277,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     var pickables = fumen.Lanes
                             .GetVisibleStartObjects(midTGrid, midTGrid)
                             .Where(x => x.LaneType == type)
-                            .Select(x => (x.CalulateXGrid(midTGrid), x))
+                            .Select(x => (calculateXGrid(x, midTGrid), x))
                             .FilterNullBy(x => x.Item1)
                             /*.ToArray()*/;
 
@@ -315,7 +323,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                                 return laneMinY <= actualY && actualY <= laneMaxY;
                             })
-                            .Select(x => (x.CalulateXGrid(tGrid), x))
+                            .Select(x => (calculateXGrid(x, tGrid), x))
                             .FilterNullBy(x => x.Item1));
                     /*.ToArray()*/
                     ;
@@ -368,6 +376,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 {
                     if (interpolate(tGrid, y, out var isPickLane) is Vector2 pp)
                     {
+                        //If this interpolated value is calculated from a picked lane
+                        //then there is no need to calculate&append the default value.
                         if (!isPickLane)
                             appendPoint3(result, (float)XGridCalculator.ConvertXGridToX(defaultX / XGrid.DEFAULT_RES_X, target.Editor), defaultY, index);
                         appendPoint3(result, pp.X, pp.Y, index);

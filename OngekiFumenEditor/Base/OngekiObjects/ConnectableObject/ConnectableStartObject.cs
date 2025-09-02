@@ -282,6 +282,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public ConnectableChildObjectBase GetChildObjectFromTGrid(TGrid tGrid)
         {
+            /*
             if (tGrid < TGrid)
                 return default;
 
@@ -292,6 +293,35 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
 
             return default;
+            */
+
+            return GetChildObjectsFromTGrid(tGrid).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// 获取范围在tGrid内所有子物体
+        /// </summary>
+        /// <param name="tGrid"></param>
+        /// <returns></returns>
+        public IEnumerable<ConnectableChildObjectBase> GetChildObjectsFromTGrid(TGrid tGrid)
+        {
+            if (tGrid is null || tGrid < TGrid || Children.IsEmpty())
+                return Enumerable.Empty<ConnectableChildObjectBase>();
+
+            var seqs = Children
+                .AsEnumerable<ConnectableObjectBase>()
+                .Prepend(this)
+                .SequenceConsecutivelyWrap(2)
+                .Select(x => (x.First(), x.Last()))
+                .SkipWhile(seq => seq.Item2.TGrid < tGrid)
+                .ToArray();
+
+            var seq2 = seqs
+                .TakeWhile(seq => seq.Item1.TGrid <= tGrid && tGrid <= seq.Item2.TGrid);
+            var result = seq2
+                .Select(x => x.Item2 as ConnectableChildObjectBase);
+
+            return result;
         }
 
         public XGrid CalulateXGrid(TGrid tGrid)
