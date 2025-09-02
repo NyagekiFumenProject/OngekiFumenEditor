@@ -372,15 +372,51 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     return default;
                 }
 
-                void postInterpolatePoint(TGrid tGrid, float y, float defaultY, int index)
+                void postInterpolatePoint(TGrid tGrid, float y, FieldRangeParam flag)
                 {
-                    if (interpolate(tGrid, y, out var isPickLane) is Vector2 pp)
+                    if (interpolate(tGrid, y, out var isPickLane) is Vector2 interpolatedPoint)
                     {
                         //If this interpolated value is calculated from a picked lane
                         //then there is no need to calculate&append the default value.
                         if (!isPickLane)
-                            appendPoint3(result, (float)XGridCalculator.ConvertXGridToX(defaultX / XGrid.DEFAULT_RES_X, target.Editor), defaultY, index);
-                        appendPoint3(result, pp.X, pp.Y, index);
+                        {
+                            var defaultY = flag switch
+                            {
+                                FieldRangeParam.LastRange => result.LastOrDefault().Y,
+                                FieldRangeParam.FirstRange => result.FirstOrDefault().Y
+                            };
+                            var a = interpolatedPoint;
+                            var b = new Vector2((float)XGridCalculator.ConvertXGridToX(defaultX / XGrid.DEFAULT_RES_X, target.Editor), defaultY);
+
+                            //swap points to keep y order
+                            if (flag switch
+                            {
+                                FieldRangeParam.LastRange => a.Y > b.Y,
+                                FieldRangeParam.FirstRange => a.Y < b.Y,
+                                _ => false
+                            })
+                                (a, b) = (b, a);
+
+
+                            appendPoint3(result, a.X, a.Y, flag switch
+                            {
+                                FieldRangeParam.LastRange => result.Count,
+                                FieldRangeParam.FirstRange => 0
+                            });
+                            appendPoint3(result, b.X, b.Y, flag switch
+                            {
+                                FieldRangeParam.LastRange => result.Count,
+                                FieldRangeParam.FirstRange => 0
+                            });
+                        }
+                        else
+                        {
+                            appendPoint3(result, interpolatedPoint.X, interpolatedPoint.Y, flag switch
+                            {
+                                FieldRangeParam.LastRange => result.Count,
+                                FieldRangeParam.FirstRange => 0
+                            });
+                        }
                     }
                 }
 
@@ -390,15 +426,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     var actualMaxY = target.CurrentDrawingTargetContext.Rect.TopLeft.Y;
 
                     var maxDiff = maxY - actualMaxY;
-                    if (maxDiff > 0)
+                    IEnumerable<float> calcYArr = maxDiff > 0 ? [actualMaxY, maxY] : [maxY, actualMaxY];
+
+                    if (maxDiff != 0)
                     {
-                        postInterpolatePoint(maxTGrid, actualMaxY, result.LastOrDefault().Y, result.Count);
-                        postInterpolatePoint(maxTGrid, maxY, result.LastOrDefault().Y, result.Count);
-                    }
-                    else if (maxDiff < 0)
-                    {
-                        postInterpolatePoint(maxTGrid, maxY, result.LastOrDefault().Y, result.Count);
-                        postInterpolatePoint(maxTGrid, actualMaxY, result.LastOrDefault().Y, result.Count);
+                        foreach (var calcY in calcYArr)
+                            postInterpolatePoint(maxTGrid, calcY, FieldRangeParam.LastRange);
                     }
                 }
 
@@ -408,15 +441,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     var actualMinY = target.CurrentDrawingTargetContext.Rect.ButtomRight.Y;
 
                     var minDiff = minY - actualMinY;
-                    if (minDiff > 0)
+                    IEnumerable<float> calcYArr = minDiff > 0 ? [minY, actualMinY] : [actualMinY, minY];
+
+                    if (minDiff != 0)
                     {
-                        postInterpolatePoint(minTGrid, minY, result.FirstOrDefault().Y, 0);
-                        postInterpolatePoint(minTGrid, actualMinY, result.FirstOrDefault().Y, 0);
-                    }
-                    else if (minDiff < 0)
-                    {
-                        postInterpolatePoint(minTGrid, actualMinY, result.FirstOrDefault().Y, 0);
-                        postInterpolatePoint(minTGrid, minY, result.FirstOrDefault().Y, 0);
+                        foreach (var calcY in calcYArr)
+                            postInterpolatePoint(minTGrid, calcY, FieldRangeParam.FirstRange);
                     }
                 }
 
