@@ -84,7 +84,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing.Draw(target, vertices, 3);
         }
 
-        public void DrawPlayField(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid)
+        /// <summary>
+        /// 绘制可击打区域
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="fieldMinTGrid"></param>
+        /// <param name="fieldMaxTGrid"></param>
+        public void DrawPlayField(IFumenEditorDrawingContext target, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
         {
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
@@ -93,36 +99,43 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             //todo 暂时显示默认的变速组
             var soflanList = fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList);
 
-            var minIdx = soflanList.LastOrDefaultIndexByBinarySearch(minTGrid, x => x.TGrid);
-            var maxIdx = soflanList.LastOrDefaultIndexByBinarySearch(maxTGrid, x => x.TGrid);
+            var minIdx = soflanList.LastOrDefaultIndexByBinarySearch(fieldMinTGrid, x => x.TGrid);
+            var maxIdx = soflanList.LastOrDefaultIndexByBinarySearch(fieldMaxTGrid, x => x.TGrid);
 
             // ---|------o----|-----------------------------|---o------|---
-            //           x    x                             x   x
+            //           ^    ^                             ^   ^      ^
+            //   sp1    minT sp2                           sp3 maxT    sp4
+            //range between [minT(sp1), sp2], [sp2, sp3] and [sp3, maxT(sp4)] will be calculated and drawn in different range (because speed may reverse)
 
             var curSoflanPoint = soflanList[minIdx];
             var rangeInfos = ObjectPool<List<(TGrid tGrid, double speed)>>.Get();
             rangeInfos.Clear();
-            rangeInfos.Add((minTGrid, soflanList[minIdx].Speed));
+
+            //like [minT(sp1), sp2]
+            rangeInfos.Add((fieldMinTGrid, soflanList[minIdx].Speed));
 
             for (int i = minIdx + 1; i <= maxIdx; i++)
             {
                 var soflanPoint = soflanList[i];
 
+                //speed direction is different, so needs to be divided as new range
+                //like [sp2, sp3]
                 if (soflanPoint.Speed * rangeInfos[^1].speed < 0)
                     rangeInfos.Add((soflanPoint.TGrid, soflanPoint.Speed));
 
                 curSoflanPoint = soflanPoint;
             }
 
-            if (rangeInfos[^1].tGrid != maxTGrid)
-                rangeInfos.Add((maxTGrid, rangeInfos[^1].speed));
+            //like [sp3, maxT(sp4)]
+            if (rangeInfos[^1].tGrid != fieldMaxTGrid)
+                rangeInfos.Add((fieldMaxTGrid, rangeInfos[^1].speed));
 
             for (int i = 0; i < rangeInfos.Count - 1; i++)
             {
                 var segMinTGrid = rangeInfos[i].tGrid;
                 var segMaxTGrid = rangeInfos[i + 1].tGrid;
 
-                var isPlayback = rangeInfos[i].speed < 0;
+                //var isPlayback = rangeInfos[i].speed < 0;
 
                 //if (i != 0)
                 //    continue;
@@ -143,7 +156,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private enum FieldRangeParam
         {
             None = 0,
+            //normally mean bottom of field
             FirstRange = 1,
+            //normally mean top of field
             LastRange = 2,
         }
 
