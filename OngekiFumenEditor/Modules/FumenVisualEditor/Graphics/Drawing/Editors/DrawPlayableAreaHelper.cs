@@ -17,7 +17,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 using static OngekiFumenEditor.Utils.MathUtils;
 
 /*
- musicId:0840/1119
+ musicId:0840/1119/1011
  */
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
