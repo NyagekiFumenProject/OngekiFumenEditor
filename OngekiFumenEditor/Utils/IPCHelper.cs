@@ -22,8 +22,10 @@ namespace OngekiFumenEditor.Utils
         private static MemoryMappedFile mmf;
         private static bool enableMultiProc;
         private static readonly int currentPid;
+        private static Mutex mutex = new Mutex(false, "OngekiFumenEditor_Mutex");
+        private static EventWaitHandle ReadEvent = new(false, EventResetMode.AutoReset, "OngekiFumenEditor_ReadEvent");
 
-        internal class ArgsWrapper
+		internal class ArgsWrapper
         {
             public string[] Args { get; set; }
         }
@@ -57,7 +59,7 @@ namespace OngekiFumenEditor.Utils
                         //check if have to wait for host editor
                         if (isWaitForPrev)
                         {
-                            Thread.Sleep(10);
+                            Thread.Sleep(100);
                             continue;
                         }
 
@@ -86,14 +88,29 @@ namespace OngekiFumenEditor.Utils
 
             while (!cancellation.IsCancellationRequested)
             {
+                while (true)
+                {
+                    if (ReadEvent.WaitOne(2000))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        if (cancellation.IsCancellationRequested)
+                        {
+                            return string.Empty;
+                        }
+                    }
+                }
                 var size = accessor.ReadInt32(sizeof(int));
                 //check if readable
                 if (size > 0)
                 {
+                    mutex.WaitOne();
                     var bytes = new byte[size];
                     accessor.ReadArray(sizeof(int) * 2, bytes, 0, size);
                     accessor.Write(sizeof(int), 0); //set 0, notify others mmf is writable.
-
+                    mutex.ReleaseMutex();
                     return Encoding.UTF8.GetString(bytes);
                 }
                 Thread.Sleep(10);
@@ -108,6 +125,7 @@ namespace OngekiFumenEditor.Utils
 
             while (!cancellation.IsCancellationRequested)
             {
+                mutex.WaitOne();
                 var size = accessor.ReadInt32(sizeof(int));
                 //check if writable 
                 if (size > 0)
@@ -120,7 +138,8 @@ namespace OngekiFumenEditor.Utils
                 accessor.WriteArray(sizeof(int) * 2, buffer, 0, Math.Min(buffer.Length, FileSize - sizeof(int) * 2));
                 accessor.Write(sizeof(int), buffer.Length); //notify others mmf is readable.
                 accessor.Flush();
-
+                mutex.ReleaseMutex();
+                ReadEvent.Set();
                 break;
             }
         }

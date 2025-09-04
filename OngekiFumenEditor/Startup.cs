@@ -19,12 +19,16 @@ namespace OngekiFumenEditor
         public static int Main(string[] args)
         {
             var isGUIMode = !(args.Length > 0 && !args[0].StartsWith("--"));
-
             if (isGUIMode)
             {
                 IPCHelper.Init(args);
             }
-
+            else
+            {
+                ConsoleWindowHelper.AttachConsole();
+                Console.WriteLine();
+                Console.WriteLine("CLI initializing...");
+            }
             var app = new App(isGUIMode);
             app.InitializeComponent();
 
