@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Utils
@@ -36,7 +37,8 @@ namespace OngekiFumenEditor.Utils
         [LibraryImport("Kernel32.dll")]
         private static partial int GetConsoleProcessList(IntPtr lpdwProcessList, int dwProcessCount);
 
-        private static bool hasConsole = false;
+        private static int hasConsole = 1;
+
 
         private enum StdHandle
         {
@@ -62,7 +64,8 @@ namespace OngekiFumenEditor.Utils
 
         public static void Hide()
         {
-            if (!hasConsole)
+            var ori = Interlocked.CompareExchange(ref hasConsole, 0, 1);
+            if (ori == 0)
             {
                 return;
             }
@@ -74,7 +77,8 @@ namespace OngekiFumenEditor.Utils
 
         public static void Show()
         {
-            if (hasConsole)
+            var ori = Interlocked.CompareExchange(ref hasConsole, 1, 0);
+            if (ori == 1)
             {
                 return;
             }
