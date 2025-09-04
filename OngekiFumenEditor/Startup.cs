@@ -23,12 +23,6 @@ namespace OngekiFumenEditor
             {
                 IPCHelper.Init(args);
             }
-            else
-            {
-                ConsoleWindowHelper.AttachConsole();
-                Console.WriteLine();
-                Console.WriteLine("CLI initializing...");
-            }
             var app = new App(isGUIMode);
             app.InitializeComponent();
 
