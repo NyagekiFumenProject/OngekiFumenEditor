@@ -135,10 +135,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 var segMinTGrid = rangeInfos[i].tGrid;
                 var segMaxTGrid = rangeInfos[i + 1].tGrid;
 
-                //var isPlayback = rangeInfos[i].speed < 0;
+                var isReversePlayback = rangeInfos[i].speed < 0;
 
-                //if (i != 0)
-                //    continue;
+                if (isReversePlayback)
+                    continue; //we needn't draw reverse-speed range because they are included by forward-speed range
 
                 var flag = FieldRangeParam.None;
                 if (i == 0)
