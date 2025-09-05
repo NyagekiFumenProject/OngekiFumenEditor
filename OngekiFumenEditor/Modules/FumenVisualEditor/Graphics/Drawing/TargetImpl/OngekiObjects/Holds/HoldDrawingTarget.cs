@@ -114,7 +114,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
                 list.Clear();
-                VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, VertexDash.Solider, color, list);
+                VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, soflanList, VertexDash.Solider, color, list);
                 if (list.Count > 0)
                 {
                     while (list.Count > 0 && holdPoint.Y > list[0].Point.Y)

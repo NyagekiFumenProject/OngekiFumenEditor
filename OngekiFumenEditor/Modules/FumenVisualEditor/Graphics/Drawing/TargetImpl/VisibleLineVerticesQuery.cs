@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
         {
             if (start is null)
                 return;
@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
 
-            var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start,out var soflanGroup);
+            //var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
 
             var tempVertices = ObjectPool<List<LineVertex>>.Get();
             tempVertices.Clear();

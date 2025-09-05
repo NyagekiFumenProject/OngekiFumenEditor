@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             get { return referenceBulletPallete; }
             set
             {
-                Log.LogDebug($"bullet(id:{Id})'s pallete has been changed from {referenceBulletPallete?.StrID} to {value?.StrID}");
+                //Log.LogDebug($"bullet(id:{Id})'s pallete has been changed from {referenceBulletPallete?.StrID} to {value?.StrID}");
                 this.RegisterOrUnregisterPropertyChangeEvent(referenceBulletPallete, value, ReferenceBulletPallete_PropertyChanged);
                 Set(ref referenceBulletPallete, value);
 

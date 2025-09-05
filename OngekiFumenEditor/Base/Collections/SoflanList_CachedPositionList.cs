@@ -245,7 +245,7 @@ namespace OngekiFumenEditor.Base.Collections
                 {
                     if (cachedSoflanListCacheHash != hash)
                     {
-                        Log.LogDebug("recalculate all.");
+                        //Log.LogDebug("recalculate all.");
                         UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_DesignMode, true);
                         UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_PreviewMode, false);
                         cachePostionList_PreviewMode = RebuildIntervalTreePositionList(cachedSoflanPositionList_PreviewMode);
