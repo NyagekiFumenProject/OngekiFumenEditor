@@ -58,6 +58,7 @@
 [wiki](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki)
 
 ## 教程&问题&建议
+* [<img width="75" height="80" alt="image" src="https://github.com/user-attachments/assets/de64798a-014a-469c-9c95-c2e5a789af01" />](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=wMjr4kyJH1-yMv3ttYH_bed-40_3Su2f&authKey=aceTGynrs0EV1Up%2BcCbM4U%2F9b9%2Fx4AScW0B6W6KS0qDcrNuFt4xM%2FR9R3dMmqC4n&noverify=0&group_code=923862477)
 * [如何使用?](https://github.com/MikiraSora/OngekiFumenEditor/wiki)
 * [如何解决问题?](https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-debugger?view=vs-2022)
 * [如何提交建议?](https://github.com/MikiraSora/OngekiFumenEditor/pulls)
