@@ -63,6 +63,13 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         set => isGUIMode = value;
     }
 
+    private EventWaitHandle ReadyEvent = new(false, EventResetMode.AutoReset, "OngekiFumenEditor_ReadyEvent");
+
+    private void SetAppReady()
+    {
+        ReadyEvent.Set();
+    }
+
     protected override void BindServices(CompositionBatch batch)
     {
         base.BindServices(batch);
@@ -187,6 +194,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     {
         IsGUIMode = false;
         Log.Instance.RemoveOutput<ConsoleLogOutput>();
+        SetAppReady();
 
         await IoC.Get<ISchedulerManager>().Init();
 
@@ -296,7 +304,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                                !ProgramSetting.Default.DisableShowSplashScreenAfterBoot;
         if (showSplashWindow)
             await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
-
+        SetAppReady();
         if (ProgramSetting.Default.IsFirstTimeOpenEditor)
         {
             if (MessageBox.Show(Resources.ShouldLoadSuggestLayout, Resources.Suggest, MessageBoxButton.YesNo) == MessageBoxResult.Yes)

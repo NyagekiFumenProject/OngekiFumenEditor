@@ -4,7 +4,7 @@
     {
         Soflan,
         AbsSoflan,
-        WeightedSoflan,
+        //WeightedSoflan,
         NoSoflan
     }
 }
