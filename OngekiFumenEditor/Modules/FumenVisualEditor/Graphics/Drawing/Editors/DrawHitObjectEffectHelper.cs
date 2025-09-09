@@ -44,33 +44,57 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 minTGrid = TGrid.Zero;
             var durationTotalGrid = maxTGrid.TotalGrid - minTGrid.TotalGrid;
 
-            var hitObjects = Enumerable.Empty<OngekiMovableObjectBase>()
-            .Concat(target.Editor.Fumen.Flicks.BinaryFindRange(minTGrid, maxTGrid))
-            .Concat(target.Editor.Fumen.Taps.BinaryFindRange(minTGrid, maxTGrid))
-            .Concat(target.Editor.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid));
-
             var y = (float)target.ConvertToY_DefaultSoflanGroup(maxTGrid);
 
-            circleDrawing.Begin(target);
-
-            foreach (var obj in hitObjects)
+            void drawColorCircle(float progress, Vector2 pos, Vector4 solidColor, float radius)
             {
-                var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-                var p = new Vector2(x, y);
-
-                var tGrid = obj.TGrid;
-                var progress = (maxTGrid.TotalGrid * 1.0f - tGrid.TotalGrid) / durationTotalGrid;
                 progress = Math.Clamp(progress, 0, 1);
 
-                var circleScale = (float)Interpolation.EasingValue(progress, 0, 1, EasingTypes.OutExpo) * 20f;
+                var circleScale = (float)Interpolation.EasingValue(progress, 0, 1, EasingTypes.OutExpo) * radius;
 
                 var shortProgress = Interpolation.EasingValue(progress, 0, 0.65, 0, 1);
                 var soliderCircleAlpha = (float)Interpolation.EasingValue(shortProgress, 1, 0, EasingTypes.In);
 
                 var hollowCircleAlpha = (float)Interpolation.EasingValue(progress, 1, 0, EasingTypes.InQuart);
 
-                circleDrawing.Post(p, new(1, 1, 1, soliderCircleAlpha), true, circleScale);
-                circleDrawing.Post(p, new(1, 1, 1, hollowCircleAlpha), false, circleScale, 2);
+                var solderColor = new Vector4(solidColor.X, solidColor.Y, solidColor.Z, soliderCircleAlpha);
+                var hollowColor = new Vector4(solidColor.X, solidColor.Y, solidColor.Z, hollowCircleAlpha);
+
+                circleDrawing.Post(pos, solderColor, true, circleScale);
+                circleDrawing.Post(pos, hollowColor, false, circleScale, 2);
+            }
+
+            var hitObjects = Enumerable.Empty<OngekiMovableObjectBase>()
+            .Concat(target.Editor.Fumen.Flicks.BinaryFindRange(minTGrid, maxTGrid))
+            .Concat(target.Editor.Fumen.Taps.BinaryFindRange(minTGrid, maxTGrid))
+            .Concat(target.Editor.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid));
+
+            circleDrawing.Begin(target);
+            foreach (var hit in hitObjects)
+            {
+                var x = (float)XGridCalculator.ConvertXGridToX(hit.XGrid, target.Editor);
+                var p = new Vector2(x, y);
+
+                var tGrid = hit.TGrid;
+                var progress = (maxTGrid.TotalGrid * 1.0f - tGrid.TotalGrid) / durationTotalGrid;
+
+                drawColorCircle(progress, p, Vector4.One, 20);
+            }
+            circleDrawing.End();
+
+
+            var bellObjects = target.Editor.Fumen.Bells.BinaryFindRange(minTGrid, maxTGrid);
+
+            circleDrawing.Begin(target);
+            foreach (var bell in bellObjects)
+            {
+                var x = (float)XGridCalculator.ConvertXGridToX(bell.XGrid, target.Editor);
+                var p = new Vector2(x, y);
+
+                var tGrid = bell.TGrid;
+                var progress = (maxTGrid.TotalGrid * 1.0f - tGrid.TotalGrid) / durationTotalGrid;
+
+                drawColorCircle(progress, p, new(1, 1, 0, 0), 15);
             }
             circleDrawing.End();
         }
