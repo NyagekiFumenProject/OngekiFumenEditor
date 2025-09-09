@@ -118,12 +118,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             }
         }
 
-        public IEnumerable<TGrid> CalculateJudgeTGrid(BpmList bpmList, int progressJudgeBpm)
+        public IEnumerable<TGrid> CalculateJudgeTGrid(BpmList bpmList, float progressJudgeBpm)
         {
             return CalculateJudgeTGrid(TGrid, EndTGrid, bpmList, progressJudgeBpm);
         }
 
-        public IEnumerable<TGrid> CalculateJudgeTGrid(TGrid minTGrid, TGrid maxTGrid, BpmList bpmList, int progressJudgeBpm)
+        public IEnumerable<TGrid> CalculateJudgeTGrid(TGrid minTGrid, TGrid maxTGrid, BpmList bpmList, float progressJudgeBpm)
         {
             int CalcHoldTickStepSize(double bpm)
             {
@@ -157,11 +157,20 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 var bpm = bpmList.GetBpm(curTGrid);
                 var nextTGrid = bpmList.GetNextBpm(curTGrid)?.TGrid ?? TGrid.MaxValue;
 
+                //minTGrid is between this bpm and the next, so we could start to enumerate them from this bpm
                 if (bpm.TGrid <= minTGrid && minTGrid <= nextTGrid)
                 {
                     var tickGrid = CalcHoldTickStepSize(bpm.BPM);
-                    curTGrid = holdStartTGrid + new GridOffset(0, tickGrid);
+                    curTGrid = curTGrid + new GridOffset(0, tickGrid);
 
+                    //skip to minTGrid
+                    while (curTGrid < minTGrid)
+                    {
+                        tickGrid = CalcHoldTickStepSize(bpm.BPM);
+                        curTGrid = curTGrid + new GridOffset(0, tickGrid);
+                    }
+
+                    //enumerate until hold end or maxTGrid
                     while (curTGrid < holdEndTGrid && curTGrid < maxTGrid)
                     {
                         yield return curTGrid;
@@ -171,9 +180,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                         curTGrid = curTGrid + new GridOffset(0, tickGrid);
                     }
 
+                    //finally check if need to yield hold end
                     if (maxTGrid >= holdEndTGrid && curTGrid >= holdEndTGrid)
                         yield return holdEndTGrid;
 
+                    //done :D
                     break;
                 }
                 else

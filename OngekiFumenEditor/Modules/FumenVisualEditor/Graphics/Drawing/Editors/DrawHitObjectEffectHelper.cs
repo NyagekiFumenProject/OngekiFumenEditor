@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
@@ -46,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             var y = (float)target.ConvertToY_DefaultSoflanGroup(maxTGrid);
 
-            void drawColorCircle(float progress, Vector2 pos, Vector4 solidColor, float radius)
+            void drawColorCircle(float progress, Vector2 pos, Vector4 solidColor, float radius, bool showHollow = true)
             {
                 progress = Math.Clamp(progress, 0, 1);
 
@@ -61,7 +62,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 var hollowColor = new Vector4(solidColor.X, solidColor.Y, solidColor.Z, hollowCircleAlpha);
 
                 circleDrawing.Post(pos, solderColor, true, circleScale);
-                circleDrawing.Post(pos, hollowColor, false, circleScale, 2);
+                if (showHollow)
+                    circleDrawing.Post(pos, hollowColor, false, circleScale, 2);
             }
 
             var hitObjects = Enumerable.Empty<OngekiMovableObjectBase>()
@@ -114,6 +116,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             circleDrawing.End();
 
+            var holdObjects = target.Editor.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid);
+            circleDrawing.Begin(target);
+            foreach (var hold in holdObjects)
+            {
+                if (hold.ReferenceLaneStart is not { } start)
+                    continue;
+
+                foreach (var judgeTGrid in hold.CalculateJudgeTGrid(minTGrid, maxTGrid, target.Editor.Fumen.BpmList, target.Editor.Fumen.MetaInfo.ProgJudgeBpm))
+                {
+                    var xGrid = start.CalulateXGrid(judgeTGrid);
+                    var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
+                    var p = new Vector2(x, y);
+
+                    var tGrid = judgeTGrid;
+                    var progress = (maxTGrid.TotalGrid * 1.0f - tGrid.TotalGrid) / durationTotalGrid;
+
+                    drawColorCircle(progress, p, Vector4.One, 15, false);
+                }
+            }
+            circleDrawing.End();
         }
     }
 }
