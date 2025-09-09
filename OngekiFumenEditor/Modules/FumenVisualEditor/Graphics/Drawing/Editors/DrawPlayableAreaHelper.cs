@@ -10,6 +10,7 @@ using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -17,7 +18,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 using static OngekiFumenEditor.Utils.MathUtils;
 
 /*
- musicId:0840/1119/1011
+ musicId:0840/1119/1011/0591
  */
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
@@ -554,8 +555,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             polygonDrawing.End();
 
+            debugDrawEnumeratedPoints(target, tessellatePoints, leftPoints, rightPoints, tessellateList);
 
-#if PLAYFIELD_DEBUG
+            ObjectPool<List<int>>.Return(tessellateList);
+        }
+
+        [Conditional("PLAYFIELD_DEBUG")]
+        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, List<double> tessellatePoints, List<Vector2> leftPoints, List<Vector2> rightPoints, List<int> tessellateList)
+        {
             playFieldForegroundColor.W = 0.4f;
             lineDrawing.Draw(target, leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
             lineDrawing.Draw(target, rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
@@ -607,9 +614,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             printPoints(leftPoints, debugLeftColor, false);
             printPoints(rightPoints, debugRightColor, true);
-#endif
-
-            ObjectPool<List<int>>.Return(tessellateList);
         }
 
         private void AdjustLaneIntersection(IDrawingContext target, List<Vector2> leftPoints, List<Vector2> rightPoints)
@@ -715,8 +719,84 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     continue;
                 }
 
-                if (GetLinesIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to) is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
+                var intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to);
+                if (intersectResult is null
+                    && leftLine.from.Y == leftLine.to.Y && leftLine.from.Y == rightLine.to.Y && leftLine.from.Y == rightLine.from.Y
+                    && (rightLine.to.X <= leftLine.from.X || leftLine.to.X >= rightLine.from.X))
                 {
+                    // L      R
+                    // |      |
+                    // L------R====L------R
+                    //             |      |
+                    //             |      |
+                    //             L      R
+                    bool tryGetLine(List<Vector2> linePoints, int lineIdx, out (Vector2 from, Vector2 to) line)
+                    {
+                        line = default;
+
+                        if (!(1 < lineIdx && lineIdx < linePoints.Count))
+                            return default;
+
+                        line = (linePoints[lineIdx - 1], linePoints[lineIdx]);
+                        return true;
+                    }
+
+                    if (tryGetLine(leftPoints, leftIdx - 1, out var prevLeftLine))
+                    {
+                        intersectResult = GetLinesIntersection(prevLeftLine.from, prevLeftLine.to, rightLine.from, rightLine.to);
+                        if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                        {
+                            debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                            intersectionPoints.Add(intersectPoint);
+                            insert(rightPoints, rightIdx, intersectPoint);
+                            rightIdx++;
+                            continue;
+                        }
+                    }
+
+                    if (tryGetLine(rightPoints, rightIdx - 1, out var prevRightLine))
+                    {
+                        intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, prevRightLine.from, prevRightLine.to);
+                        if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                        {
+                            debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                            intersectionPoints.Add(intersectPoint);
+                            insert(leftPoints, leftIdx, intersectPoint);
+                            leftIdx++;
+                            continue;
+                        }
+                    }
+
+                    if (tryGetLine(leftPoints, leftIdx + 1, out var nextLeftLine))
+                    {
+                        intersectResult = GetLinesIntersection(nextLeftLine.from, nextLeftLine.to, rightLine.from, rightLine.to);
+                        if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                        {
+                            debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                            intersectionPoints.Add(intersectPoint);
+                            insert(rightPoints, rightIdx, intersectPoint);
+                            rightIdx++;
+                            continue;
+                        }
+                    }
+
+                    if (tryGetLine(rightPoints, rightIdx + 1, out var nextRightLine))
+                    {
+                        intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, nextRightLine.from, nextRightLine.to);
+                        if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                        {
+                            debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                            intersectionPoints.Add(intersectPoint);
+                            insert(leftPoints, leftIdx, intersectPoint);
+                            leftIdx++;
+                            continue;
+                        }
+                    }
+                }
+
+                if (intersectResult is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
+                {
+                    debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectionPoint);
                     intersectionPoints.Add(intersectionPoint);
 
                     var isCross = !(intersectionPoint == leftLine.from ||
@@ -856,24 +936,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                         tryExchange(leftIdx, rightIdx);
                     }
-#if PLAYFIELD_DEBUG
-                    circleDrawing.Begin(target);
-                    circleDrawing.Post(intersectionPoint, isCross ? new(1, 1, 0, 0.75f) : new(0, 153 / 255f, 153 / 255f, 0.75f), false, 30);
-                    circleDrawing.End();
-                    stringDrawing.Draw(
-                        $"[{leftIdx}, {rightIdx}]",
-                        intersectionPoint - new Vector2(intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX ? -10 : 10, 10),
-                        Vector2.One,
-                        15,
-                        0,
-                        new(1, 1, 0, 1),
-                        new(intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX ? 0 : 1, 1),
-                        default,
-                        target,
-                        default,
-                        out _
-                        );
-#endif
+
                     leftIdx++;
                     rightIdx++;
                     continue;
@@ -895,6 +958,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     rightIdx++;
                 }
             }
+        }
+
+        [Conditional("PLAYFIELD_DEBUG")]
+        private void debugDrawIntersectionPoint(IDrawingContext target, int leftIdx, int rightIdx, Vector2 intersectionPoint)
+        {
+            var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX*/true;
+            circleDrawing.Begin(target);
+            circleDrawing.Post(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
+            circleDrawing.End();
+            stringDrawing.Draw(
+                $"[{leftIdx}, {rightIdx}]",
+                intersectionPoint - new Vector2(isShowLeft ? -10 : 10, 10),
+                Vector2.One,
+                15,
+                0,
+                new(1, 1, 0, 1),
+                new(isShowLeft ? 0 : 1, 1),
+                default,
+                target,
+                default,
+                out _
+                );
         }
 
         private static (float r, float g, float b) Hsl2Rgb(float h, float s, float l)
