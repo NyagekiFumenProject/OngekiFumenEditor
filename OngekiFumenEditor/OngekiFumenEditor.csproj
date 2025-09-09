@@ -142,7 +142,6 @@
 		<None Remove="Resources\Icons\preview.png" />
 		<None Remove="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
 		<None Remove="Resources\Icons\search.png" />
-		<None Remove="Resources\Images\logo.png" />
 		<None Remove="Resources\Music.xml" />
 		<None Remove="Resources\MusicSource.xml" />
 		<None Remove="Resources\ui_jacket_0666" />
@@ -285,7 +284,6 @@
 		<Resource Include="Resources\Icons\open-folder.png" />
 		<Resource Include="Resources\Icons\preview.png" />
 		<Resource Include="Resources\Icons\search.png" />
-		<Resource Include="Resources\logo.png" />
 	</ItemGroup>
 
 	<ItemGroup>

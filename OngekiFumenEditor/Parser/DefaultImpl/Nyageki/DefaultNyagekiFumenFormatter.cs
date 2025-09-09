@@ -323,7 +323,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 string SerializeOutput(ConnectableObjectBase o)
                 {
                     var b = ((IBeamObject)o);
-                    var r = $"(Type[{o.IDShortName}], X[{o.XGrid.Unit},{o.XGrid.Grid}], T[{o.TGrid.Unit},{o.TGrid.Grid}], W[{b.WidthId}]";
+                    var r = $"(Type[{o.IDShortName}], X[{o.XGrid.Unit},{o.XGrid.Grid}], T[{o.TGrid.Unit},{o.TGrid.Grid}], W[{b.WidthId.Id}]";
                     if (b.ObliqueSourceXGridOffset is not null)
                         r += $", OX[{b.ObliqueSourceXGridOffset.Unit},{b.ObliqueSourceXGridOffset.Grid}]";
                     return r + ")";

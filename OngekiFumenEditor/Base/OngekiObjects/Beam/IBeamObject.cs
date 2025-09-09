@@ -2,7 +2,7 @@
 {
 	public interface IBeamObject
 	{
-		int WidthId { get; set; }
+        WidthId WidthId { get; set; }
 		XGrid ObliqueSourceXGridOffset { get; set; }
 	}
 }
