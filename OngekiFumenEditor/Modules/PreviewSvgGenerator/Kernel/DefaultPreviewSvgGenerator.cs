@@ -231,7 +231,8 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 var polyline = new SvgPolyline();
                 polyline.AddCustomClass("beamPolyline");
                 var collection = new SvgPointCollection();
-                var width = xGridWidth * 3f * start.WidthId.Id;
+                //var width = xGridWidth * 3f * start.WidthId.Id;
+                var width = xGridWidth * start.WidthId.WidthDraw;
 
                 polyline.StrokeWidth = new SvgUnit(SvgUnitType.Pixel, width);
                 polyline.CustomAttributes.Add("stroke", "url(#beamBody)");
