@@ -7,7 +7,6 @@ namespace OngekiFumenEditor.Kernel.Graphics
 {
     public interface IDrawingTarget
     {
-
         void Initialize(IRenderManagerImpl impl);
     }
 }

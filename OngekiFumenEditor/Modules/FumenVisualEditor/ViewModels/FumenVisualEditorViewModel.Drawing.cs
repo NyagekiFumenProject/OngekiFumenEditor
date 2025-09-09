@@ -62,6 +62,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private DrawJudgeLineHelper judgeLineHelper;
     private DrawPlayableAreaHelper playableAreaHelper;
     internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
+    private DrawHitObjectEffectHelper hitObjectEffectHelper;
     private DrawPlayerLocationHelper playerLocationHelper;
     private Vector4 playFieldBackgroundColor;
 
@@ -246,6 +247,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         playerLocationHelper = new DrawPlayerLocationHelper();
         playerLocationHelper.Initalize(renderImpl);
+
+        hitObjectEffectHelper = new DrawHitObjectEffectHelper();
+        hitObjectEffectHelper.Initalize(renderImpl);
 
         actualPerformenceMonitor = IoC.Get<IPerfomenceMonitor>();
         IsDisplayFPS = IsDisplayFPS;
@@ -573,6 +577,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         timeSignatureHelper.DrawTimeSigntureText(this);
         xGridHelper.DrawXGridText(this, CachedMagneticXGridLines);
         judgeLineHelper.Draw(this);
+        hitObjectEffectHelper.Draw(this);
         playerLocationHelper.Draw(this);
         selectingRangeHelper.Draw(this);
 

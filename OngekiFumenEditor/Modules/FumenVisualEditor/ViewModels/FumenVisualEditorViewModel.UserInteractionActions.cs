@@ -1021,6 +1021,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var mousePos = Mouse.GetPosition(GetView() as FrameworkElement);
             UpdateCurrentCursorPosition(mousePos);
 
+            RebuildObjectSoflanGroupRecord();
+        }
+
+        private void RebuildObjectSoflanGroupRecord()
+        {
             _cacheSoflanGroupRecorder.Clear();
 
             //if (IsPreviewMode)

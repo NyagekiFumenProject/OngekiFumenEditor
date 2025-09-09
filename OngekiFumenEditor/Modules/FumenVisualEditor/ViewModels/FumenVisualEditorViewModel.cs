@@ -262,6 +262,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
                 ScrollTo(dispTGrid);
+                RebuildObjectSoflanGroupRecord();
             }
             catch (Exception e)
             {

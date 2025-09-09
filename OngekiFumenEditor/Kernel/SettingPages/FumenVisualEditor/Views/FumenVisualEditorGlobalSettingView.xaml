@@ -201,6 +201,9 @@
                         <CheckBox IsChecked="{Binding Setting.EnableShowPlayerLocation}">
                             <TextBlock Text="{markup:Translate [EnableShowPlayerLocation]}" TextWrapping="WrapWithOverflow" />
                         </CheckBox>
+                        <CheckBox IsChecked="{Binding Setting.ShowHitObjectEffectInPreviewMode}">
+                            <TextBlock Text="{markup:Translate [ShowHitObjectEffectInPreviewMode]}" TextWrapping="WrapWithOverflow" />
+                        </CheckBox>
                     </StackPanel>
                 </GroupBox>
             </StackPanel>

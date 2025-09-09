@@ -2271,4 +2271,7 @@
   <data name="CantDeleteReferencedBulletPallete" xml:space="preserve">
     <value>bullet pallete(strID:{0}) which will be deleted has bell/bullet object references, so it cannot delete directly</value>
   </data>
+  <data name="ShowHitObjectEffectInPreviewMode" xml:space="preserve">
+    <value>Display hit effect when objects arrived judge line.</value>
+  </data>
 </root>

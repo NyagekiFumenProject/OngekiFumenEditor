@@ -5758,6 +5758,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Display hit effect when objects arrived judge line. 的本地化字符串。
+        /// </summary>
+        public static string ShowHitObjectEffectInPreviewMode {
+            get {
+                return ResourceManager.GetString("ShowHitObjectEffectInPreviewMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Updater 的本地化字符串。
         /// </summary>
         public static string ShowNewVersionTitle {
