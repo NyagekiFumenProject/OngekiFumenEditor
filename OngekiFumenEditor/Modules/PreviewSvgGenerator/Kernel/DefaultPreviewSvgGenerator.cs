@@ -39,6 +39,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
     [Export(typeof(IPreviewSvgGenerator))]
     public class DefaultPreviewSvgGenerator : IPreviewSvgGenerator
     {
+        /*
         private SoflanList GenerateWeightedSoflan(SoflanList soflans, SvgGenerateOption opt)
         {
             var offset = opt.WeightedSoflanOffset;
@@ -71,7 +72,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
             return newList;
         }
-
+        */
         public async Task<byte[]> GenerateSvgAsync(OngekiFumen rawFumen, SvgGenerateOption option)
         {
             var svgDocument = new SvgDocument();
@@ -82,13 +83,14 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 foreach (var sfl in fumen.SoflansMap.Values.SelectMany(x => x))
                     sfl.ApplySpeedInDesignMode = true;
             }
-            var specifySoflans = option.SoflanMode != SoflanMode.WeightedSoflan ? fumen.SoflansMap.DefaultSoflanList : GenerateWeightedSoflan(fumen.SoflansMap.DefaultSoflanList, option);
+            //var specifySoflans = option.SoflanMode != SoflanMode.WeightedSoflan ? fumen.SoflansMap.DefaultSoflanList : GenerateWeightedSoflan(fumen.SoflansMap.DefaultSoflanList, option);
+            var specifySoflans = fumen.SoflansMap.DefaultSoflanList;
 
             var totalWidth = option.ViewWidth;
             var maxTGrid = TGridCalculator.ConvertAudioTimeToTGrid(option.Duration, fumen.BpmList);
 
             double totalHeight;
-            if (option.SoflanMode == SoflanMode.Soflan || option.SoflanMode == SoflanMode.WeightedSoflan)
+            if (option.SoflanMode == SoflanMode.Soflan)
                 totalHeight = TGridCalculator.ConvertTGridToY_PreviewMode(maxTGrid, specifySoflans, fumen.BpmList, option.VerticalScale);
             else
                 totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(maxTGrid, fumen.SoflansMap.DefaultSoflanList, fumen.BpmList, option.VerticalScale);
