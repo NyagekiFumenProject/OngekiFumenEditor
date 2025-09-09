@@ -220,7 +220,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             foreach (var met in fumen.MeterChanges.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.MeterChanges.FirstMeter.TGrid))
                 sb.WriteLine($"MeterChange\t:\t{met.BunShi}/{met.Bunbo}\t:\tT[{met.TGrid.Unit},{met.TGrid.Grid}]");
             sb.WriteLine();
-            foreach (var bpm in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
+            foreach (var bpm in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != TGrid.Zero))
                 sb.WriteLine($"BpmChange\t:\t{bpm.BPM}\t:\tT[{bpm.TGrid.Unit},{bpm.TGrid.Grid}]");
             sb.WriteLine();
 
@@ -351,7 +351,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 else
                 {
                     sb.Write($"CustomBell\t:\tX[{bell.XGrid.Unit},{bell.XGrid.Grid}], T[{bell.TGrid.Unit},{bell.TGrid.Grid}]");
-                   
+
                     sb.Write($", Speed[{bell.Speed}]");
                     sb.Write($", PlaceOffset[{bell.PlaceOffset}]");
                     sb.Write($", RandomOffsetRange[{bell.RandomOffsetRange}]");

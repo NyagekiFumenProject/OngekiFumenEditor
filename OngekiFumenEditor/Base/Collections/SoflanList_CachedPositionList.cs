@@ -210,7 +210,7 @@ namespace OngekiFumenEditor.Base.Collections
             }
 
             if (list.Count == 0)
-                list.Add(new(0, TGrid.Zero, 1.0d, bpmList.FirstBpm));
+                list.Add(new(0, TGrid.Zero, 1.0d, bpmList.FirstOrDefault()));
             else if (prevEvent.TGrid != list.First().TGrid)
                 list.Add(new(currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
         }

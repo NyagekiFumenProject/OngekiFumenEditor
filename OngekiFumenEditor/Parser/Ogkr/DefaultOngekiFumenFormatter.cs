@@ -234,7 +234,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
         {
             sb.AppendLine("[COMPOSITION]");
 
-            foreach (var o in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
+            foreach (var o in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != TGrid.Zero))
                 sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.BPM:F6}");
             sb.AppendLine();
 

@@ -97,6 +97,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 drawColorCircle(progress, p, new(1, 1, 0, 0), 15);
             }
             circleDrawing.End();
+
+
+            var bulletObjects = target.Editor.Fumen.Bullets.BinaryFindRange(minTGrid, maxTGrid);
+
+            circleDrawing.Begin(target);
+            foreach (var bullet in bulletObjects)
+            {
+                var x = (float)XGridCalculator.ConvertXGridToX(bullet.XGrid, target.Editor);
+                var p = new Vector2(x, y);
+
+                var tGrid = bullet.TGrid;
+                var progress = (maxTGrid.TotalGrid * 1.0f - tGrid.TotalGrid) / durationTotalGrid;
+
+                drawColorCircle(progress, p, new(0.5f, 0, 1, 0), 10);
+            }
+            circleDrawing.End();
+
         }
     }
 }

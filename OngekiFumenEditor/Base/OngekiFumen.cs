@@ -100,14 +100,7 @@ namespace OngekiFumenEditor.Base
             #region BpmList
 
             //setup firstBPM from fumen metainfo
-            var firstBpm = new BPMChange()
-            {
-                BPM = MetaInfo.BpmDefinition.First,
-            };
-            var unusedBpm = BpmList.FirstOrDefault(x => x.BPM == firstBpm.BPM && x.TGrid == TGrid.Zero);
-            if (unusedBpm is not null && unusedBpm != BpmList.FirstBpm)
-                BpmList.Remove(unusedBpm);
-            BpmList.SetFirstBpm(firstBpm);
+            BpmList.FirstBpm = MetaInfo.BpmDefinition.First;
 
             #endregion
 
@@ -428,8 +421,8 @@ namespace OngekiFumenEditor.Base
         {
             if (e.PropertyName == nameof(FumenMetaInfo.BpmDefinition))
             {
-                BpmList.FirstBpm.BPM = MetaInfo.BpmDefinition.First;
-                Log.LogDebug($"Apply metainfo.firstBpm to bpmList.firstBpm : {BpmList.FirstBpm.BPM}");
+                BpmList.FirstBpm = MetaInfo.BpmDefinition.First;
+                Log.LogDebug($"Apply metainfo.firstBpm to bpmList.firstBpm : {BpmList.FirstBpm}");
             }
             if (e.PropertyName == nameof(FumenMetaInfo.MeterDefinition))
             {

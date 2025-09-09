@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
             get
             {
                 if (IsCurrentEditorAsInputFumen)
-                    return editorDocumentManager.CurrentActivatedEditor?.Fumen.BpmList.FirstBpm.BPM ?? 0;
+                    return editorDocumentManager.CurrentActivatedEditor?.Fumen.BpmList.FirstBpm ?? 0;
                 if (bpm is double b)
                     return b;
                 return default;
@@ -174,7 +174,7 @@ namespace OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels
                 {
                     if (IsRecalculateObjects)
                     {
-                        var offset = currentEditor.Fumen.BpmList.FirstBpm.LengthConvertToOffset(timeOffset.TotalMilliseconds);
+                        var offset = currentEditor.Fumen.BpmList.FirstOrDefault().LengthConvertToOffset(timeOffset.TotalMilliseconds);
                         var map = new Dictionary<ITimelineObject, (TGrid before, TGrid after)>();
 
                         foreach (var timelineObject in currentEditor.Fumen.GetAllDisplayableObjects().OfType<ITimelineObject>())
