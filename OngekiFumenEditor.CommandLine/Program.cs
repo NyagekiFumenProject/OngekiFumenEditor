@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.CommandLine
                 return -1;
             }
             */
-            attachMethod?.Invoke(null, []);
+            attachMethod?.Invoke(null, [true]);
 
             var appType = assembly.GetType("OngekiFumenEditor.App");
             if (appType is null)
