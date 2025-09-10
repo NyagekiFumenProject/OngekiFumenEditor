@@ -69,6 +69,9 @@
 * 应用VisualStudio IDE风格由UI框架提供实现:Gemini
 * ~~编辑器物件更新基于WPF的DataBinding , 渲染全依赖于WPF提供的控件组合实现~~物件由OpenGL/SKIA渲染
 
+## 感谢
+[![](https://resources.jetbrains.com/storage/products/company/brand/logos/Rider.png)](https://jb.gg/OpenSourceSupport)
+
 ## 声明
 ----
 * 禁止在外网公开平台讨论项目或相关内容
