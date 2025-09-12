@@ -208,7 +208,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             zipFile.ExtractToDirectory(tempZipFolder);
             zipFile.ExtractToDirectory(sourceFolder);
 
-            var updaterFilePath = Path.Combine(tempZipFolder, "OngekiFumenEditor.exe");
+            var updaterFilePath = Path.Combine(tempZipFolder, "OngekiFumenEditor.CommandLine.exe");
             if (!File.Exists(updaterFilePath))
                 throw new Exception($"Downloaded wrong file, updater file is not found: {updaterFilePath}");
 

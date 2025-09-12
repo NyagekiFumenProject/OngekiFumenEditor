@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+﻿
 using OngekiFumenEditor.Utils;
 using SkiaSharp;
 using System.Numerics;
@@ -35,12 +35,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
             prevPaint?.Dispose();
         }
 
-        private (Vector4 color, bool isSolid) prevPaintParam = default;
+        private (Vector4 color, bool isSolid, float hollowLineWidth) prevPaintParam = default;
         private SKPaint prevPaint = default;
 
-        private SKPaint GetPaint(Vector4 color, bool isSolid)
+        private SKPaint GetPaint(Vector4 color, bool isSolid, float hollowLineWidth)
         {
-            var param = (color, isSolid);
+            var param = (color, isSolid, hollowLineWidth);
             if (param == prevPaintParam && prevPaint != null)
                 return prevPaint;
 
@@ -57,7 +57,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
                 Color = skColor,
                 IsAntialias = true,
                 Style = isSolid ? SKPaintStyle.Fill : SKPaintStyle.Stroke,
-                StrokeWidth = 2f
+                StrokeWidth = hollowLineWidth,
             };
 
             prevPaint = paint;
@@ -66,9 +66,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
             return paint;
         }
 
-        public void Post(Vector2 point, Vector4 color, bool isSolid, float radius)
+        public void Post(Vector2 point, Vector4 color, bool isSolid, float radius, float hollowLineWidth)
         {
-            var paint = GetPaint(color, isSolid);
+            var paint = GetPaint(color, isSolid, hollowLineWidth);
             canvas.DrawCircle(point.X, point.Y, radius, paint);
             target.PerfomenceMonitor.CountDrawCall(this);
         }

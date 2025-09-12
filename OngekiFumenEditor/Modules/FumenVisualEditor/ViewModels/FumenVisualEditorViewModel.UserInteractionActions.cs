@@ -1021,6 +1021,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var mousePos = Mouse.GetPosition(GetView() as FrameworkElement);
             UpdateCurrentCursorPosition(mousePos);
 
+            RebuildObjectSoflanGroupRecord();
+        }
+
+        private void RebuildObjectSoflanGroupRecord()
+        {
             _cacheSoflanGroupRecorder.Clear();
 
             //if (IsPreviewMode)
@@ -1056,9 +1061,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         return;
                     }
                     _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
-                    //目前只有Hold物件能影响到所属轨道的SoflanGroup
+                    //目前只有Hold物件能影响到所属轨道的SoflanGroup?
+                    /* 注释代码因为id:1120
                     if (obj is Hold hold && hold.ReferenceLaneStart is ConnectableStartObject start)
                         _cacheSoflanGroupRecorder.SetCache(start.Id, soflanList, soflanGroup);
+                    */
                 });
 
                 _cacheSoflanGroupRecorder.Freeze();

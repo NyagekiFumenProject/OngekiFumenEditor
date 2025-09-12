@@ -76,7 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorProjectFiles
 				if (Fumen is not null)
 				{
 					Fumen.MetaInfo.BpmDefinition.First = value;
-					Fumen.BpmList.FirstBpm.BPM = value;
+					Fumen.BpmList.FirstBpm = value;
 				}
 				NotifyOfPropertyChange(() => BaseBPM);
 			}

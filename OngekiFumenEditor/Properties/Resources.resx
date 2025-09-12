@@ -2049,4 +2049,229 @@
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value>Restore the current time to before playback time when editor paused</value>
   </data>
+  <data name="SelectionFilterObjectCategoryLane" xml:space="preserve">
+    <value>Lane objects</value>
+  </data>
+  <data name="SelectionFilterObjectCategoryDockable" xml:space="preserve">
+    <value>Dockable objects</value>
+  </data>
+  <data name="SelectionFilterObjectCategoryFloating" xml:space="preserve">
+    <value>Floating objects</value>
+  </data>
+  <data name="SelectionFilterObjectCategoryMisc" xml:space="preserve">
+    <value>Misc. objects</value>
+  </data>
+  <data name="SelectionFilterObjectCategoryTimeline" xml:space="preserve">
+    <value>Timeline objects</value>
+  </data>
+  <data name="Bullet" xml:space="preserve">
+    <value>Bullet</value>
+  </data>
+  <data name="AutoPlayFaderLane" xml:space="preserve">
+    <value>AutoPlayFaderLane</value>
+  </data>
+  <data name="Beam" xml:space="preserve">
+    <value>Beam</value>
+  </data>
+  <data name="CurveControlPoint" xml:space="preserve">
+    <value>Curve Control Point</value>
+  </data>
+  <data name="ClickSE" xml:space="preserve">
+    <value>Click SE</value>
+  </data>
+  <data name="InterpolatableSoflan" xml:space="preserve">
+    <value>Interpolatable Soflan</value>
+  </data>
+  <data name="KeyframeSoflan" xml:space="preserve">
+    <value>Keyframe Soflan</value>
+  </data>
+  <data name="DurationSoflan" xml:space="preserve">
+    <value>DurationSoflan</value>
+  </data>
+  <data name="MeterChange" xml:space="preserve">
+    <value>Meter Change</value>
+  </data>
+  <data name="IndividualSoflanArea" xml:space="preserve">
+    <value>IndividualSoflanArea</value>
+  </data>
+  <data name="SvgPrefabFile" xml:space="preserve">
+    <value>SVG Prefab (File)</value>
+  </data>
+  <data name="SvgPrefabText" xml:space="preserve">
+    <value>SVG Prefab (Text)</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="EnemyLane" xml:space="preserve">
+    <value>Enemy Lane</value>
+  </data>
+  <data name="SelectionFilter_ResultsLabelReplaceMode" xml:space="preserve">
+    <value>{0} objects will be remaining in the selection</value>
+  </data>
+  <data name="SelectionFilter_ResultsLabelRemoveMode" xml:space="preserve">
+    <value>{0} objects will be removed from the selection</value>
+  </data>
+  <data name="NoBulletPalette" xml:space="preserve">
+    <value>No palette</value>
+  </data>
+  <data name="SelectionFilter_Any" xml:space="preserve">
+    <value>&lt;Any&gt;</value>
+  </data>
+  <data name="SelectionFilter_None" xml:space="preserve">
+    <value>&lt;None&gt;</value>
+  </data>
+  <data name="SelectionFilter_AnyChoice" xml:space="preserve">
+    <value>Any</value>
+  </data>
+  <data name="SelectionFilter_HeaderObjectType" xml:space="preserve">
+    <value>Object type</value>
+  </data>
+  <data name="SelectionFilter_HeaderOptions" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="SelectionFilter_OptionTabGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="SelectionFilter_OptionTabLanes" xml:space="preserve">
+    <value>Lanes</value>
+  </data>
+  <data name="SelectionFilter_OptionTabHitObjects" xml:space="preserve">
+    <value>Hit</value>
+  </data>
+  <data name="SelectionFilter_OptionTabBullets" xml:space="preserve">
+    <value>Bullets</value>
+  </data>
+  <data name="SelectionFilter_OptionChoiceHoldStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="SelectionFilter_OptionChoiceHoldEnd" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="SelectionFilter_OptionChoiceLaneStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="SelectionFilter_OptionChoiceLaneNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="SelectionFilter_ActionLabelSelectAll" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelIsCritical" xml:space="preserve">
+    <value>Is critical</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelFlickDirection" xml:space="preserve">
+    <value>Flick direction</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelLaneNodeType" xml:space="preserve">
+    <value>Lane node type</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelHoldType" xml:space="preserve">
+    <value>Hold object type</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelDockLanes" xml:space="preserve">
+    <value>Dock lanes</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelBulletPalette" xml:space="preserve">
+    <value>Bullet palette</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelInvertFilter" xml:space="preserve">
+    <value>Invert filter</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelInvertFilterTooltip" xml:space="preserve">
+    <value>Remove items that match the filter instead of items that do not match the filter</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelTag" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="SelectionFilter_ActionLabelResetSelection" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="SelectionFilter_ChoiceYes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="SelectionFilter_ChoiceNo" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="DirectionLeft" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="DirectionRight" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelTagRegex" xml:space="preserve">
+    <value>Regex</value>
+  </data>
+  <data name="SelectionFilter_ComboLabelBulletPaletteSelectCount" xml:space="preserve">
+    <value>{0} palettes</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead" xml:space="preserve">
+    <value>Only match next nodes with a selected start node</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelMatchCurveControlsWithSelectedLane" xml:space="preserve">
+    <value>Only match curve control points with a selected lane node</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart" xml:space="preserve">
+    <value>Only match hold ends with a selected hold start</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart" xml:space="preserve">
+    <value>Only match lane block ends with a selected lane block start</value>
+  </data>
+  <data name="SelectionFilter_OptionTabOther" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelLaneBlockDirection" xml:space="preserve">
+    <value>Lane block direction</value>
+  </data>
+  <data name="SelectionFilter_WindowTitle" xml:space="preserve">
+    <value>Selection Filter</value>
+  </data>
+  <data name="SelectionFilter_HeadTailHoldObject_Head" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="SelectionFilter_HeadTailHoldObject_Tail" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="SelectionFilter_HeadTailHoldObject_HeadNoChild" xml:space="preserve">
+    <value>Start (unselected end)</value>
+  </data>
+  <data name="SelectionFilter_HeadTailHoldObject_HeadWithChild" xml:space="preserve">
+    <value>Start (selected end)</value>
+  </data>
+  <data name="SelectionFilter_HeadTailHoldObject_TailNoParent" xml:space="preserve">
+    <value>End (unselected start)</value>
+  </data>
+  <data name="SelectionFilter_HeadTailHoldObject_TailWithParent" xml:space="preserve">
+    <value>End (selected start)</value>
+  </data>
+  <data name="SelectionFilter_HeadTailLaneNode_Head" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="SelectionFilter_HeadTailLaneNode_Tail" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="SelectionFilter_HeadTailLaneNode_HeadNoChild" xml:space="preserve">
+    <value>Start (unselected next node)</value>
+  </data>
+  <data name="SelectionFilter_HeadTailLaneNode_HeadWithChild" xml:space="preserve">
+    <value>Start (with selected next node)</value>
+  </data>
+  <data name="SelectionFilter_HeadTailLaneNode_TailNoParent" xml:space="preserve">
+    <value>Next (unselected start node)</value>
+  </data>
+  <data name="SelectionFilter_HeadTailLaneNode_TailWithParent" xml:space="preserve">
+    <value>Next (selected start node)</value>
+  </data>
+  <data name="BulletPalleteSelectDialogTitle" xml:space="preserve">
+    <value>Select a bullet pallete</value>
+  </data>
+  <data name="BulletNullPalleteDescription" xml:space="preserve">
+    <value>bullet(id:{0}) pallete is NULL</value>
+  </data>
+  <data name="CantDeleteReferencedBulletPallete" xml:space="preserve">
+    <value>bullet pallete(strID:{0}) which will be deleted has bell/bullet object references, so it cannot delete directly</value>
+  </data>
+  <data name="ShowHitObjectEffectInPreviewMode" xml:space="preserve">
+    <value>Display hit effect when objects arrived judge line.</value>
+  </data>
 </root>

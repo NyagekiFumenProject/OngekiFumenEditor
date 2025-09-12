@@ -1603,4 +1603,16 @@
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value />
   </data>
+  <data name="BulletPalleteSelectDialogTitle" xml:space="preserve">
+    <value />
+  </data>
+  <data name="BulletNullPalleteDescription" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="CantDeleteReferencedBulletPallete" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="ShowHitObjectEffectInPreviewMode" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
 </root>

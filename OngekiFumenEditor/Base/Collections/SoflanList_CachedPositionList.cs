@@ -210,7 +210,7 @@ namespace OngekiFumenEditor.Base.Collections
             }
 
             if (list.Count == 0)
-                list.Add(new(0, TGrid.Zero, 1.0d, bpmList.FirstBpm));
+                list.Add(new(0, TGrid.Zero, 1.0d, bpmList.FirstOrDefault()));
             else if (prevEvent.TGrid != list.First().TGrid)
                 list.Add(new(currentY, prevEvent.TGrid, prevEvent.speed, prevEvent.curBpm));
         }
@@ -245,7 +245,7 @@ namespace OngekiFumenEditor.Base.Collections
                 {
                     if (cachedSoflanListCacheHash != hash)
                     {
-                        Log.LogDebug("recalculate all.");
+                        //Log.LogDebug("recalculate all.");
                         UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_DesignMode, true);
                         UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_PreviewMode, false);
                         cachePostionList_PreviewMode = RebuildIntervalTreePositionList(cachedSoflanPositionList_PreviewMode);
@@ -562,7 +562,7 @@ namespace OngekiFumenEditor.Base.Collections
             return soflan.Speed;
         }
 
-        public IEnumerable<Soflan> GenerateDurationSoflans(BpmList bpmList)
+        public IEnumerable<Soflan> GenerateDurationSoflans(BpmList bpmList, int soflanGroup)
         {
             var list = GetCachedSoflanPositionList_PreviewMode(bpmList).Select(x => new
             {
@@ -578,6 +578,7 @@ namespace OngekiFumenEditor.Base.Collections
                     TGrid = list[i].TGrid,
                     Speed = (float)list[i].Speed,
                     EndTGrid = list[i + 1].TGrid,
+                    SoflanGroup = soflanGroup
                 };
             }
         }

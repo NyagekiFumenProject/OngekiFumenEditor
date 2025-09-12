@@ -502,5 +502,17 @@ namespace OngekiFumenEditor.Properties {
                 this["ReturnStartTimeAfterPause"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowHitObjectEffectInPreviewMode {
+            get {
+                return ((bool)(this["ShowHitObjectEffectInPreviewMode"]));
+            }
+            set {
+                this["ShowHitObjectEffectInPreviewMode"] = value;
+            }
+        }
     }
 }

@@ -3,10 +3,11 @@ using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -38,6 +39,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
     [Export(typeof(IPreviewSvgGenerator))]
     public class DefaultPreviewSvgGenerator : IPreviewSvgGenerator
     {
+        /*
         private SoflanList GenerateWeightedSoflan(SoflanList soflans, SvgGenerateOption opt)
         {
             var offset = opt.WeightedSoflanOffset;
@@ -70,7 +72,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
             return newList;
         }
-
+        */
         public async Task<byte[]> GenerateSvgAsync(OngekiFumen rawFumen, SvgGenerateOption option)
         {
             var svgDocument = new SvgDocument();
@@ -81,13 +83,14 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 foreach (var sfl in fumen.SoflansMap.Values.SelectMany(x => x))
                     sfl.ApplySpeedInDesignMode = true;
             }
-            var specifySoflans = option.SoflanMode != SoflanMode.WeightedSoflan ? fumen.SoflansMap.DefaultSoflanList : GenerateWeightedSoflan(fumen.SoflansMap.DefaultSoflanList, option);
+            //var specifySoflans = option.SoflanMode != SoflanMode.WeightedSoflan ? fumen.SoflansMap.DefaultSoflanList : GenerateWeightedSoflan(fumen.SoflansMap.DefaultSoflanList, option);
+            var specifySoflans = fumen.SoflansMap.DefaultSoflanList;
 
             var totalWidth = option.ViewWidth;
             var maxTGrid = TGridCalculator.ConvertAudioTimeToTGrid(option.Duration, fumen.BpmList);
 
             double totalHeight;
-            if (option.SoflanMode == SoflanMode.Soflan || option.SoflanMode == SoflanMode.WeightedSoflan)
+            if (option.SoflanMode == SoflanMode.Soflan)
                 totalHeight = TGridCalculator.ConvertTGridToY_PreviewMode(maxTGrid, specifySoflans, fumen.BpmList, option.VerticalScale);
             else
                 totalHeight = TGridCalculator.ConvertTGridToY_DesignMode(maxTGrid, fumen.SoflansMap.DefaultSoflanList, fumen.BpmList, option.VerticalScale);
@@ -230,7 +233,8 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 var polyline = new SvgPolyline();
                 polyline.AddCustomClass("beamPolyline");
                 var collection = new SvgPointCollection();
-                var width = xGridWidth * 3f * start.WidthId;
+                //var width = xGridWidth * 3f * start.WidthId.Id;
+                var width = xGridWidth * start.WidthId.WidthDraw;
 
                 polyline.StrokeWidth = new SvgUnit(SvgUnitType.Pixel, width);
                 polyline.CustomAttributes.Add("stroke", "url(#beamBody)");
@@ -607,7 +611,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 return null;
             }
 
-            void AppendBell(SvgGroup group, IBulletPalleteReferencable referencable)
+            void AppendBell<T>(SvgGroup group, T referencable) where T : IBulletPalleteReferencable, IHorizonPositionObject, ITimelineObject
             {
                 var svgBell = new SvgUse();
                 var id = GetDefId(referencable);

@@ -340,6 +340,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 AutoPlayFaderLane 的本地化字符串。
+        /// </summary>
+        public static string AutoPlayFaderLane {
+            get {
+                return ResourceManager.GetString("AutoPlayFaderLane", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Autosave 的本地化字符串。
         /// </summary>
         public static string AutoSave {
@@ -462,6 +471,15 @@ namespace OngekiFumenEditor.Properties {
         public static string BatchSwitchFlickDirection {
             get {
                 return ResourceManager.GetString("BatchSwitchFlickDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Beam 的本地化字符串。
+        /// </summary>
+        public static string Beam {
+            get {
+                return ResourceManager.GetString("Beam", resourceCulture);
             }
         }
         
@@ -601,6 +619,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Bullet 的本地化字符串。
+        /// </summary>
+        public static string Bullet {
+            get {
+                return ResourceManager.GetString("Bullet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 bullet(id:{0}) pallete is NULL 的本地化字符串。
+        /// </summary>
+        public static string BulletNullPalleteDescription {
+            get {
+                return ResourceManager.GetString("BulletNullPalleteDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Bell 的本地化字符串。
         /// </summary>
         public static string BulletPaletteCreateBell {
@@ -624,6 +660,15 @@ namespace OngekiFumenEditor.Properties {
         public static string BulletPaletteId {
             get {
                 return ResourceManager.GetString("BulletPaletteId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Select a bullet pallete 的本地化字符串。
+        /// </summary>
+        public static string BulletPalleteSelectDialogTitle {
+            get {
+                return ResourceManager.GetString("BulletPalleteSelectDialogTitle", resourceCulture);
             }
         }
         
@@ -723,6 +768,15 @@ namespace OngekiFumenEditor.Properties {
         public static string CantCreateProject {
             get {
                 return ResourceManager.GetString("CantCreateProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 bullet pallete(strID:{0}) which will be deleted has bell/bullet object references, so it cannot delete directly 的本地化字符串。
+        /// </summary>
+        public static string CantDeleteReferencedBulletPallete {
+            get {
+                return ResourceManager.GetString("CantDeleteReferencedBulletPallete", resourceCulture);
             }
         }
         
@@ -952,6 +1006,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Click SE 的本地化字符串。
+        /// </summary>
+        public static string ClickSE {
+            get {
+                return ResourceManager.GetString("ClickSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Click to clone this palette 的本地化字符串。
         /// </summary>
         public static string ClickToClonePalette {
@@ -1177,6 +1240,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Comment 的本地化字符串。
+        /// </summary>
+        public static string Comment {
+            get {
+                return ResourceManager.GetString("Comment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Compilation failed:  的本地化字符串。
         /// </summary>
         public static string CompileError {
@@ -1393,6 +1465,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Curve Control Point 的本地化字符串。
+        /// </summary>
+        public static string CurveControlPoint {
+            get {
+                return ResourceManager.GetString("CurveControlPoint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Default Implementation 的本地化字符串。
         /// </summary>
         public static string CurveInterpolaterFactoryDefaultImpl {
@@ -1506,6 +1587,24 @@ namespace OngekiFumenEditor.Properties {
         public static string DiffLevel {
             get {
                 return ResourceManager.GetString("DiffLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Left 的本地化字符串。
+        /// </summary>
+        public static string DirectionLeft {
+            get {
+                return ResourceManager.GetString("DirectionLeft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Right 的本地化字符串。
+        /// </summary>
+        public static string DirectionRight {
+            get {
+                return ResourceManager.GetString("DirectionRight", resourceCulture);
             }
         }
         
@@ -1722,6 +1821,15 @@ namespace OngekiFumenEditor.Properties {
         public static string DumpFileSaveTo {
             get {
                 return ResourceManager.GetString("DumpFileSaveTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 DurationSoflan 的本地化字符串。
+        /// </summary>
+        public static string DurationSoflan {
+            get {
+                return ResourceManager.GetString("DurationSoflan", resourceCulture);
             }
         }
         
@@ -1956,6 +2064,15 @@ namespace OngekiFumenEditor.Properties {
         public static string EnableVisualizerDisplay {
             get {
                 return ResourceManager.GetString("EnableVisualizerDisplay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enemy Lane 的本地化字符串。
+        /// </summary>
+        public static string EnemyLane {
+            get {
+                return ResourceManager.GetString("EnemyLane", resourceCulture);
             }
         }
         
@@ -2716,6 +2833,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 IndividualSoflanArea 的本地化字符串。
+        /// </summary>
+        public static string IndividualSoflanArea {
+            get {
+                return ResourceManager.GetString("IndividualSoflanArea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Inner exception message: 的本地化字符串。
         /// </summary>
         public static string InnerExceptionMessage {
@@ -2730,6 +2856,15 @@ namespace OngekiFumenEditor.Properties {
         public static string InputPictureFileNotFound {
             get {
                 return ResourceManager.GetString("InputPictureFileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Interpolatable Soflan 的本地化字符串。
+        /// </summary>
+        public static string InterpolatableSoflan {
+            get {
+                return ResourceManager.GetString("InterpolatableSoflan", resourceCulture);
             }
         }
         
@@ -3229,6 +3364,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Keyframe Soflan 的本地化字符串。
+        /// </summary>
+        public static string KeyframeSoflan {
+            get {
+                return ResourceManager.GetString("KeyframeSoflan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 KeyMap 的本地化字符串。
         /// </summary>
         public static string KeyMap {
@@ -3490,6 +3634,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Meter Change 的本地化字符串。
+        /// </summary>
+        public static string MeterChange {
+            get {
+                return ResourceManager.GetString("MeterChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 ms 的本地化字符串。
         /// </summary>
         public static string Millisecond {
@@ -3675,6 +3828,15 @@ namespace OngekiFumenEditor.Properties {
         public static string NewVersion {
             get {
                 return ResourceManager.GetString("NewVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No palette 的本地化字符串。
+        /// </summary>
+        public static string NoBulletPalette {
+            get {
+                return ResourceManager.GetString("NoBulletPalette", resourceCulture);
             }
         }
         
@@ -4966,6 +5128,492 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Reset 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_ActionLabelResetSelection {
+            get {
+                return ResourceManager.GetString("SelectionFilter_ActionLabelResetSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Select all 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_ActionLabelSelectAll {
+            get {
+                return ResourceManager.GetString("SelectionFilter_ActionLabelSelectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 &lt;Any&gt; 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_Any {
+            get {
+                return ResourceManager.GetString("SelectionFilter_Any", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Any 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_AnyChoice {
+            get {
+                return ResourceManager.GetString("SelectionFilter_AnyChoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_ChoiceNo {
+            get {
+                return ResourceManager.GetString("SelectionFilter_ChoiceNo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Yes 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_ChoiceYes {
+            get {
+                return ResourceManager.GetString("SelectionFilter_ChoiceYes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} palettes 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_ComboLabelBulletPaletteSelectCount {
+            get {
+                return ResourceManager.GetString("SelectionFilter_ComboLabelBulletPaletteSelectCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Object type 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeaderObjectType {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeaderObjectType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Options 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeaderOptions {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeaderOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailHoldObject_Head {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailHoldObject_Head", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start (unselected end) 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailHoldObject_HeadNoChild {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailHoldObject_HeadNoChild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start (selected end) 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailHoldObject_HeadWithChild {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailHoldObject_HeadWithChild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 End 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailHoldObject_Tail {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailHoldObject_Tail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 End (unselected start) 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailHoldObject_TailNoParent {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailHoldObject_TailNoParent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 End (selected start) 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailHoldObject_TailWithParent {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailHoldObject_TailWithParent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailLaneNode_Head {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailLaneNode_Head", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start (unselected next node) 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailLaneNode_HeadNoChild {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailLaneNode_HeadNoChild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start (with selected next node) 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailLaneNode_HeadWithChild {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailLaneNode_HeadWithChild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Next 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailLaneNode_Tail {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailLaneNode_Tail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Next (unselected start node) 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailLaneNode_TailNoParent {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailLaneNode_TailNoParent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Next (selected start node) 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_HeadTailLaneNode_TailWithParent {
+            get {
+                return ResourceManager.GetString("SelectionFilter_HeadTailLaneNode_TailWithParent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 &lt;None&gt; 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_None {
+            get {
+                return ResourceManager.GetString("SelectionFilter_None", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 End 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionChoiceHoldEnd {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionChoiceHoldEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionChoiceHoldStart {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionChoiceHoldStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Next 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionChoiceLaneNext {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionChoiceLaneNext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionChoiceLaneStart {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionChoiceLaneStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bullet palette 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelBulletPalette {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelBulletPalette", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Dock lanes 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelDockLanes {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelDockLanes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Flick direction 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelFlickDirection {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelFlickDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hold object type 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelHoldType {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelHoldType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Invert filter 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelInvertFilter {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelInvertFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Remove items that match the filter instead of items that do not match the filter 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelInvertFilterTooltip {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelInvertFilterTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Is critical 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelIsCritical {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelIsCritical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lane block direction 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelLaneBlockDirection {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelLaneBlockDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lane node type 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelLaneNodeType {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelLaneNodeType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Only match curve control points with a selected lane node 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelMatchCurveControlsWithSelectedLane {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelMatchCurveControlsWithSelectedLane", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Only match hold ends with a selected hold start 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelMatchHoldEndsWithSelectedStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Only match lane block ends with a selected lane block start 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelMatchLaneBlockEndsWithSelectedStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Only match next nodes with a selected start node 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Tag 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelTag {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelTag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Regex 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionLabelTagRegex {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelTagRegex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bullets 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionTabBullets {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionTabBullets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 General 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionTabGeneral {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionTabGeneral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hit 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionTabHitObjects {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionTabHitObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lanes 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionTabLanes {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionTabLanes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Other 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_OptionTabOther {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionTabOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} objects will be removed from the selection 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_ResultsLabelRemoveMode {
+            get {
+                return ResourceManager.GetString("SelectionFilter_ResultsLabelRemoveMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} objects will be remaining in the selection 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_ResultsLabelReplaceMode {
+            get {
+                return ResourceManager.GetString("SelectionFilter_ResultsLabelReplaceMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Selection Filter 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilter_WindowTitle {
+            get {
+                return ResourceManager.GetString("SelectionFilter_WindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Dockable objects 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilterObjectCategoryDockable {
+            get {
+                return ResourceManager.GetString("SelectionFilterObjectCategoryDockable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Floating objects 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilterObjectCategoryFloating {
+            get {
+                return ResourceManager.GetString("SelectionFilterObjectCategoryFloating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lane objects 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilterObjectCategoryLane {
+            get {
+                return ResourceManager.GetString("SelectionFilterObjectCategoryLane", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Misc. objects 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilterObjectCategoryMisc {
+            get {
+                return ResourceManager.GetString("SelectionFilterObjectCategoryMisc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Timeline objects 的本地化字符串。
+        /// </summary>
+        public static string SelectionFilterObjectCategoryTimeline {
+            get {
+                return ResourceManager.GetString("SelectionFilterObjectCategoryTimeline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Select Music.xml file 的本地化字符串。
         /// </summary>
         public static string SelectMusicXmlFile {
@@ -5106,6 +5754,15 @@ namespace OngekiFumenEditor.Properties {
         public static string ShowFPS {
             get {
                 return ResourceManager.GetString("ShowFPS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Display hit effect when objects arrived judge line. 的本地化字符串。
+        /// </summary>
+        public static string ShowHitObjectEffectInPreviewMode {
+            get {
+                return ResourceManager.GetString("ShowHitObjectEffectInPreviewMode", resourceCulture);
             }
         }
         
@@ -5313,6 +5970,24 @@ namespace OngekiFumenEditor.Properties {
         public static string SvgGenerateLane {
             get {
                 return ResourceManager.GetString("SvgGenerateLane", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 SVG Prefab (File) 的本地化字符串。
+        /// </summary>
+        public static string SvgPrefabFile {
+            get {
+                return ResourceManager.GetString("SvgPrefabFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 SVG Prefab (Text) 的本地化字符串。
+        /// </summary>
+        public static string SvgPrefabText {
+            get {
+                return ResourceManager.GetString("SvgPrefabText", resourceCulture);
             }
         }
         

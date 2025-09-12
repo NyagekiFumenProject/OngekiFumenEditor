@@ -40,10 +40,10 @@ jobs:
         fetch-depth: 0
         ref: ${{ env.Branch }}
         submodules: recursive
-    - name: Setup .NET8
+    - name: Setup .NET9
       uses: actions/setup-dotnet@v4.3.1
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 9.0.x
     - name: get-version-action
       id: project-version
       uses: euberdeveloper/ga-project-version@main
@@ -51,8 +51,12 @@ jobs:
         path: .\OngekiFumenEditor\version.json
     - name: Restore dependencies
       run: dotnet restore
-    - name: Publish
+    - name: Publish OngekiFumenEditor
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o C:\ogkrEditorBuild\
+    - name: Publish OngekiFumenEditor.CommandLine
+      run: dotnet publish .\OngekiFumenEditor.CommandLine\OngekiFumenEditor.CommandLine.csproj --no-restore -c ${{env.Configuration}} -o C:\editorCmdBuild\
+    - name: Combine CommandLine into OngekiFumenEditor
+      run: xcopy "C:\editorCmdBuild\" "C:\ogkrEditorBuild\" /E /Y /I
     - name: Delete unused .xml files
       run: Remove-Item -Path "C:\ogkrEditorBuild\*.xml" -Force
     - name: Delete unused runtime subfolders

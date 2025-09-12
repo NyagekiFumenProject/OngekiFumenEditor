@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
 
             using var surface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
 
-            if (IgnorePixelScaling)
+            if (!IgnorePixelScaling)
             {
                 var canvas = surface.Canvas;
                 canvas.Scale(scaleX, scaleY);
@@ -65,10 +65,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
             CurrentRenderSurface = default;
 
             // draw the bitmap to the screen
-            bitmap.AddDirtyRect(new Int32Rect(0, 0, info.Width, size.Height));
+            bitmap.AddDirtyRect(new Int32Rect(0, 0, info.Width, info.Height));
             bitmap.Unlock();
 
-            drawingContext.DrawImage(bitmap, new Rect(0, 0, ActualWidth, ActualHeight));
+            drawingContext.DrawImage(bitmap, new Rect(0, 0, CanvasSize.Width, CanvasSize.Height));
         }
     }
 }

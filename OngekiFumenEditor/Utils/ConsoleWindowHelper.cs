@@ -37,8 +37,7 @@ namespace OngekiFumenEditor.Utils
         [LibraryImport("Kernel32.dll")]
         private static partial int GetConsoleProcessList(IntPtr lpdwProcessList, int dwProcessCount);
 
-        private static int hasConsole = 1;
-
+        private static int hasConsole = 0;
 
         private enum StdHandle
         {

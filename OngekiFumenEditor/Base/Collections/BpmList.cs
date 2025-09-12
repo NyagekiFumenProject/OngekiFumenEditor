@@ -6,135 +6,171 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Base.Collections
 {
-	public class BpmList : IBinaryFindRangeEnumable<BPMChange, TGrid>
-	{
-		private BPMChange firstBpm;
-		private TGridSortList<BPMChange> changedBpmList = new();
-		public BPMChange FirstBpm => firstBpm;
+    public class BpmList : IBinaryFindRangeEnumable<BPMChange, TGrid>
+    {
+        public const double DefaultFirstBpm = 240;
 
-		public int Count => 1 + changedBpmList.Count;
+        private TGridSortList<BPMChange> changedBpmList = new();
 
-		public event Action OnChangedEvent;
+        public int Count => 1 + changedBpmList.Count;
 
-		public BpmList(IEnumerable<BPMChange> initBpmChanges = default)
-		{
-			SetFirstBpm(new BPMChange());
+        public event Action OnChangedEvent;
 
-			OnChangedEvent += BpmList_OnChangedEvent;
-			foreach (var item in initBpmChanges ?? Enumerable.Empty<BPMChange>())
-				Add(item);
-		}
+        public double FirstBpm
+        {
+            get
+            {
+                return changedBpmList.FirstOrDefault()?.BPM ?? DefaultFirstBpm;
+            }
+            set
+            {
+                if (changedBpmList.FirstOrDefault() is not BPMChange bpmChange)
+                {
+                    bpmChange = new BPMChange()
+                    {
+                        TGrid = new(0, 0)
+                    };
+                    Add(bpmChange);
+                }
 
-		private void BpmList_OnChangedEvent()
-		{
-			cachedBpmContentHash = RandomHepler.Random(int.MinValue, int.MaxValue);
-		}
+                bpmChange.BPM = value;
+            }
+        }
 
-		public void Add(BPMChange bpm)
-		{
-			changedBpmList.Add(bpm);
-			bpm.PropertyChanged += OnBpmPropChanged;
-			OnChangedEvent?.Invoke();
-		}
+        public BpmList(IEnumerable<BPMChange> initBpmChanges = default)
+        {
+            FirstBpm = DefaultFirstBpm;
 
-		private void OnBpmPropChanged(object sender, PropertyChangedEventArgs e)
-		{
-			OnChangedEvent?.Invoke();
-		}
+            OnChangedEvent += BpmList_OnChangedEvent;
+            foreach (var item in initBpmChanges ?? Enumerable.Empty<BPMChange>())
+                Add(item);
+        }
 
-		public void SetFirstBpm(BPMChange firstBpm)
-		{
-			if (this.firstBpm != null)
-				this.firstBpm.PropertyChanged -= OnBpmPropChanged;
-			this.firstBpm = firstBpm;
-			OnChangedEvent?.Invoke();
-			firstBpm.PropertyChanged += OnBpmPropChanged;
-		}
+        private void BpmList_OnChangedEvent()
+        {
+            cachedBpmContentHash = RandomHepler.Random(int.MinValue, int.MaxValue);
+        }
 
-		public bool Remove(BPMChange bpm)
-		{
-			if (bpm == firstBpm)
-				throw new Exception($"BpmList can't delete firstBpm : {bpm}, but you can use SetFirstBpm()");
-			var r = changedBpmList.Remove(bpm);
-			if (r)
-			{
-				bpm.PropertyChanged -= OnBpmPropChanged;
-				OnChangedEvent?.Invoke();
-			}
-			return r;
-		}
+        public void Add(BPMChange bpm)
+        {
+            changedBpmList.Add(bpm);
+            bpm.PropertyChanged += OnBpmPropChanged;
+            OnChangedEvent?.Invoke();
+        }
 
-		public IEnumerator<BPMChange> GetEnumerator()
-		{
-			yield return firstBpm;
-			foreach (var item in changedBpmList)
-				yield return item;
-		}
+        private void OnBpmPropChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnChangedEvent?.Invoke();
+        }
 
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public bool Remove(BPMChange bpm)
+        {
+            if (bpm == changedBpmList.FirstOrDefault())
+                throw new Exception($"BpmList can't delete firstBpm : {bpm}, but you can use SetFirstBpm({bpm})");
+            var r = changedBpmList.Remove(bpm);
+            if (r)
+            {
+                bpm.PropertyChanged -= OnBpmPropChanged;
+                OnChangedEvent?.Invoke();
+            }
+            return r;
+        }
 
-		public BPMChange GetBpm(TGrid time) => this.LastOrDefault(bpm => bpm.TGrid <= time);
+        public IEnumerator<BPMChange> GetEnumerator()
+        {
+            return changedBpmList.GetEnumerator();
+        }
 
-		public BPMChange GetPrevBpm(BPMChange time) => GetPrevBpm(time.TGrid);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		public BPMChange GetPrevBpm(TGrid time) => this.LastOrDefault(bpm => bpm.TGrid < time);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetBpmIndex(TGrid time)
+        {
+            var idx = changedBpmList.BinarySearchBy(time);
+            var actualIdx = idx < 0 ? ((~idx) - 1) : idx;
+            return actualIdx;
+        }
 
-		public BPMChange GetNextBpm(BPMChange bpm) => GetNextBpm(bpm.TGrid);
+        public BPMChange GetBpm(TGrid time)
+        {
+            var idx = GetBpmIndex(time);
+            return changedBpmList[idx];
+        }
 
-		public BPMChange GetNextBpm(TGrid time) => this.FirstOrDefault(bpm => time < bpm.TGrid);
+        public BPMChange GetPrevBpm(BPMChange time) => GetPrevBpm(time.TGrid);
 
-		private List<(TimeSpan audioTime, BPMChange bpm)> cachedBpmUniformPosition = new();
-		internal int cachedBpmContentHash = RandomHepler.Random(int.MinValue, int.MaxValue);
+        public BPMChange GetPrevBpm(TGrid time)
+        {
+            var idx = GetBpmIndex(time);
+            return changedBpmList.ElementAtOrDefault(idx - 1);
+        }
 
-		private void UpdateCachedAllBpmUniformPositionList()
-		{
-			cachedBpmUniformPosition.Clear();
+        public BPMChange GetNextBpm(BPMChange bpm) => GetNextBpm(bpm.TGrid);
 
-			var prev = FirstBpm;
-			var currentTimeMs = 0d;
+        public BPMChange GetNextBpm(TGrid time)
+        {
+            var idx = GetBpmIndex(time);
+            return changedBpmList.ElementAtOrDefault(idx + 1);
+        }
 
-			cachedBpmUniformPosition.Add((TimeSpan.FromMilliseconds(0), FirstBpm));
+        private List<(TimeSpan audioTime, BPMChange bpm)> cachedBpmUniformPosition = new();
+        internal int cachedBpmContentHash = RandomHepler.Random(int.MinValue, int.MaxValue);
 
-			while (true)
-			{
-				var cur = GetNextBpm(prev);
-				if (cur is null)
-					break;
-				var len = MathUtils.CalculateBPMLength(prev, cur.TGrid);
-				prev = cur;
-				currentTimeMs += len;
+        private void UpdateCachedAllBpmUniformPositionList()
+        {
+            cachedBpmUniformPosition.Clear();
 
-				var time = TimeSpan.FromMilliseconds(currentTimeMs);
-				cachedBpmUniformPosition.Add((time, cur));
-			}
-		}
+            var itor = changedBpmList.GetEnumerator();
 
-		public List<(TimeSpan audioTime, BPMChange bpm)> GetCachedAllBpmUniformPositionList()
-		{
-			int calcHash(BPMChange e) => HashCode.Combine(e.BPM, e.TGrid.TotalGrid);
-			var hash = this.Aggregate(calcHash(FirstBpm), (x, e) => HashCode.Combine(x, calcHash(e)));
-			hash = HashCode.Combine(hash);
+            if (itor.MoveNext())
+            {
+                var prev = itor.Current;
+                var currentTimeMs = 0d;
 
-			if (hash != cachedBpmContentHash)
-			{
-				//Log.LogDebug("recalculate all bpm postions.");
-				UpdateCachedAllBpmUniformPositionList();
-				cachedBpmContentHash = hash;
-			}
+                cachedBpmUniformPosition.Add((TimeSpan.FromMilliseconds(0), prev));
 
-			return cachedBpmUniformPosition;
-		}
+                while (itor.MoveNext())
+                {
+                    var cur = itor.Current;
+                    if (cur is null)
+                        break;
+                    var len = MathUtils.CalculateBPMLength(prev, cur.TGrid);
+                    prev = cur;
+                    currentTimeMs += len;
 
-		public (int minIndex, int maxIndex) BinaryFindRangeIndex(TGrid min, TGrid max)
-			=> ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).BinaryFindRangeIndex(min, max);
+                    var time = TimeSpan.FromMilliseconds(currentTimeMs);
+                    cachedBpmUniformPosition.Add((time, cur));
+                }
+            }
+        }
 
-		public IEnumerable<BPMChange> BinaryFindRange(TGrid min, TGrid max)
-			=> ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).BinaryFindRange(min, max);
+        public List<(TimeSpan audioTime, BPMChange bpm)> GetCachedAllBpmUniformPositionList()
+        {
+            int calcHash(BPMChange e) => HashCode.Combine(e.BPM, e.TGrid.TotalGrid);
+            var hash = this.Aggregate(0, (x, e) => HashCode.Combine(x, calcHash(e)));
+            hash = HashCode.Combine(hash);
 
-		public bool Contains(BPMChange obj)
-			=> ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).Contains(obj);
-	}
+            if (hash != cachedBpmContentHash)
+            {
+                //Log.LogDebug("recalculate all bpm postions.");
+                UpdateCachedAllBpmUniformPositionList();
+                cachedBpmContentHash = hash;
+            }
+
+            return cachedBpmUniformPosition;
+        }
+
+        public (int minIndex, int maxIndex) BinaryFindRangeIndex(TGrid min, TGrid max)
+            => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).BinaryFindRangeIndex(min, max);
+
+        public IEnumerable<BPMChange> BinaryFindRange(TGrid min, TGrid max)
+            => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).BinaryFindRange(min, max);
+
+        public bool Contains(BPMChange obj)
+            => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).Contains(obj);
+    }
 }

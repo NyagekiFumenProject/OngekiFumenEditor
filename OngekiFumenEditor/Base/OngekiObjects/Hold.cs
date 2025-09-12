@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using System;
 using System.Collections.Generic;
@@ -114,6 +115,86 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             {
                 //delete
                 SetHoldEnd(default);
+            }
+        }
+
+        public IEnumerable<TGrid> CalculateJudgeTGrid(BpmList bpmList, float progressJudgeBpm)
+        {
+            return CalculateJudgeTGrid(TGrid, EndTGrid, bpmList, progressJudgeBpm);
+        }
+
+        public IEnumerable<TGrid> CalculateJudgeTGrid(TGrid minTGrid, TGrid maxTGrid, BpmList bpmList, float progressJudgeBpm)
+        {
+            int CalcHoldTickStepSize(double bpm)
+            {
+                var standardBeatLen = TGrid.DEFAULT_RES_T / 4;
+
+                if (bpm < progressJudgeBpm)
+                {
+                    var ratio = progressJudgeBpm / bpm;
+                    var power = (int)Math.Ceiling(Math.Log2(ratio));
+                    standardBeatLen >>= power;
+                }
+                else
+                {
+                    var ratio = bpm / progressJudgeBpm;
+                    var power = (int)Math.Floor(Math.Log2(ratio));
+                    standardBeatLen <<= power;
+                }
+
+                return (int)standardBeatLen;
+            }
+
+            var holdStartTGrid = TGrid;
+            var holdEndTGrid = HoldEnd?.TGrid;
+            if (holdEndTGrid is null)
+                yield break;
+
+            var curTGrid = holdStartTGrid;
+
+            while (curTGrid < holdEndTGrid)
+            {
+                var bpm = bpmList.GetBpm(curTGrid);
+                var nextTGrid = bpmList.GetNextBpm(curTGrid)?.TGrid ?? TGrid.MaxValue;
+
+                //minTGrid is between this bpm and the next, so we could start to enumerate them from this bpm
+                if (bpm.TGrid <= minTGrid && minTGrid <= nextTGrid)
+                {
+                    var tickGrid = CalcHoldTickStepSize(bpm.BPM);
+                    curTGrid = curTGrid + new GridOffset(0, tickGrid);
+
+                    //skip to minTGrid
+                    while (curTGrid < minTGrid)
+                    {
+                        tickGrid = CalcHoldTickStepSize(bpm.BPM);
+                        curTGrid = curTGrid + new GridOffset(0, tickGrid);
+                    }
+
+                    //enumerate until hold end or maxTGrid
+                    while (curTGrid < holdEndTGrid && curTGrid < maxTGrid)
+                    {
+                        yield return curTGrid;
+
+                        bpm = bpmList.GetBpm(curTGrid);
+                        tickGrid = CalcHoldTickStepSize(bpm.BPM);
+                        curTGrid = curTGrid + new GridOffset(0, tickGrid);
+                    }
+
+                    //finally check if need to yield hold end
+                    if (maxTGrid >= holdEndTGrid && curTGrid >= holdEndTGrid)
+                        yield return holdEndTGrid;
+
+                    //done :D
+                    break;
+                }
+                else
+                {
+                    //not in range yet, skip curTGrid to relative pos of next bpm
+                    var tickGrid = CalcHoldTickStepSize(bpm.BPM);
+                    var nextBpmCurTGrid = curTGrid + new GridOffset(0, tickGrid * ((nextTGrid.TotalGrid - curTGrid.TotalGrid) / tickGrid + 1));
+
+                    curTGrid = nextBpmCurTGrid;
+                }
             }
         }
     }

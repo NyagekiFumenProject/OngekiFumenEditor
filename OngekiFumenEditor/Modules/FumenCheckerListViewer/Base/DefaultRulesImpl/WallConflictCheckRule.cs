@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
-	[Export(typeof(IFumenCheckRule))]
+	//[Export(typeof(IFumenCheckRule))]
 	internal class WallConflictCheckRule : IFumenCheckRule
 	{
 		const string RuleName = "WallConflict";

@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.BulletPalleteEnums;
+
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
@@ -18,7 +19,7 @@ using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class BulletDrawingTarget : BulletPalleteReferencableBatchDrawTargetBase<Bullet>
+    public class BulletDrawingTarget : ProjectileBatchDrawTargetBase<Bullet>
     {
         private IDictionary<IImage, Vector2> spritesSize;
         private IDictionary<IImage, Vector2> spritesOriginOffset;
@@ -102,17 +103,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bullet obj, Vector2 pos, float rotate)
         {
-            if (obj.ReferenceBulletPallete is null)
-            {
-                Log.LogWarn($"Bullet {obj.Id} has null reference bullet pallete");
-                return;
-            }
             var damageType = obj.BulletDamageTypeValue;
-            var bulletType = obj.ReferenceBulletPallete.TypeValue;
+            var bulletType = obj.TypeValue;
 
             var texture = spritesMap[damageType][bulletType];
 
-            var isLarge = obj.ReferenceBulletPallete.SizeValue == BulletSize.Large;
+            var isLarge = obj.SizeValue == BulletSize.Large;
             var size = (isLarge ? spritesSizeLarge : spritesSize)[texture];
             var origOffset = (isLarge ? spritesOriginOffsetLarge : spritesOriginOffset)[texture];
 
@@ -120,18 +116,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
             if (obj.IsSelected)
                 selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
-            drawStrList.Add((offsetPos, obj));
+            if (obj.ReferenceBulletPallete is { } pallete && pallete != BulletPallete.DummyCustomPallete)
+                drawStrList.Add((offsetPos, pallete.StrID));
             target.RegisterSelectableObject(obj, offsetPos, size);
         }
 
         public override void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, Bullet obj, Vector2 pos, float rotate)
         {
             var damageType = obj.BulletDamageTypeValue;
-            var bulletType = obj.ReferenceBulletPallete.TypeValue;
+            var bulletType = obj.TypeValue;
 
             var texture = spritesMap[damageType][bulletType];
 
-            var isLarge = obj.ReferenceBulletPallete.SizeValue == BulletSize.Large;
+            var isLarge = obj.SizeValue == BulletSize.Large;
             var size = (isLarge ? spritesSizeLarge : spritesSize)[texture];
             var origOffset = (isLarge ? spritesOriginOffsetLarge : spritesOriginOffset)[texture];
 

@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
         private IDrawingContext target;
 
         //private float backupPointSize;
-        private const int VertexSize = (4 + 2 + 1) * sizeof(float);
+        private const int VertexSize = (4 + 2 + 1 + 1) * sizeof(float);
         private const int MAX_DRAW_COUNT = 3000;
         private const float MAX_CIRCILE_SIZE = 50f;
 
@@ -63,6 +63,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
                     GL.EnableVertexAttribArray(2);
                     strip += 2 * sizeof(float);
                     GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, VertexSize, strip);
+                    //GL.VertexAttribDivisor(2, 1);
+
+                    //radius
+                    GL.EnableVertexAttribArray(3);
+                    strip += 1 * sizeof(float);
+                    GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, VertexSize, strip);
                     //GL.VertexAttribDivisor(2, 1);
                 }
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
@@ -122,12 +128,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
             //GL.PointSize(backupPointSize);
         }
 
-        public void Post(Vector2 point, Vector4 color, bool isSolid, float radius)
+        public void Post(Vector2 point, Vector4 color, bool isSolid, float radius, float hollowLineWidth)
         {
 
             /*-----------------CURRENT VERSION------------------ -
-			*     color          position             radius
-			*     vec4 (16)       vec2 (8)           float(4)  
+			*     color          position             radius      hollowLineWidth
+			*     vec4 (16)       vec2 (8)           float(4)        float(4)
 			*/
 
 
@@ -142,6 +148,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDra
             buffer[5] = point.Y;
 
             buffer[6] = radius;
+
+            buffer[7] = hollowLineWidth;
 
             currentPostCount++;
             currentPostBaseIndex += VertexSize;

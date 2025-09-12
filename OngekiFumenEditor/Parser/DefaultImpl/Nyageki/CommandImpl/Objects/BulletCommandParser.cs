@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using System;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			using var d = data[1].GetValuesMapWithDisposable(out var map);
 			bullet.TGrid = map["T"].ParseToTGrid();
 			bullet.XGrid = map["X"].ParseToXGrid();
-			bullet.BulletDamageTypeValue = Enum.Parse<Bullet.BulletDamageType>(map["D"]);
+			bullet.BulletDamageTypeValue = Enum.Parse<BulletDamageType>(map["D"]);
 
 			fumen.AddObject(bullet);
 		}

@@ -27,9 +27,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
         {
-            //todo 宽度目测的，需要精确计算
             var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.CurrentDrawingTargetContext.Rect.Width, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
-            var width = xGridWidth * 3f * obj.WidthId;
+            //var width = xGridWidth * 3f * obj.WidthId.Id;
+            var width = xGridWidth * obj.WidthId.WidthDraw;
 
             var beginTGrid = obj.MinTGrid;
             var endTGrid = obj.MaxTGrid;

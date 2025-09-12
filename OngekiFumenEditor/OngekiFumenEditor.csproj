@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>preview</LangVersion>
@@ -18,13 +18,13 @@
 
 	<!--当Debug编译时, SoundTouch.dll就复制到输出目录-->
 	<Target Condition="'$(Configuration)' == 'Debug'" Name="CopySoundTouchDll" AfterTargets="AfterBuild">
-		<Copy SourceFiles="Costura64\SoundTouch.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="costura-win-x64\SoundTouch.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
 	</Target>
 
 	<!--当Release编译时, SoundTouch.dll就交给Costura.Fody处理-->
 	<ItemGroup Condition="'$(Configuration)' != 'Debug'">
-		<None Remove="Costura64\SoundTouch_x64.dll" />
-		<EmbeddedResource Include="Costura64\SoundTouch.dll"/>
+		<None Remove="costura-win-x64\SoundTouch_x64.dll" />
+		<EmbeddedResource Include="costura-win-x64\SoundTouch.dll" />
 	</ItemGroup>
 
 	<!--使用nvpatch工具让程序默认使用独显运行(核显给爷爬)-->
@@ -50,6 +50,9 @@
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<DebugType>none</DebugType>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DefineConstants>$(DefineConstants);PLAYFIELD_DEBUG</DefineConstants>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<Compile Remove="Dependencies\**" />
@@ -64,7 +67,7 @@
 		<Page Remove="Dependencies\**" />
 		<Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
 		<Page Remove="_bin\**" />
-		<None Remove="Costura64\SoundTouch_x64.dll" />
+		<None Remove="costura-win-x64\SoundTouch_x64.dll" />
 		<None Remove="Resources\Icons\notication.png" />
 		<None Remove="Resources\suggestLayout.bin" />
 		<None Remove="Resources\Icons\icons8-selection-16.png" />
@@ -102,10 +105,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Costura64\crnlib.dll" />
-		<None Remove="Costura64\ispc_texcomp.dll" />
-		<None Remove="Costura64\PVRTexLib.dll" />
-		<None Remove="Costura64\TexToolWrap.dll" />
+		<None Remove="costura-win-x64\crnlib.dll" />
+		<None Remove="costura-win-x64\ispc_texcomp.dll" />
+		<None Remove="costura-win-x64\PVRTexLib.dll" />
+		<None Remove="costura-win-x64\TexToolWrap.dll" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\bell.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\flick.png" />
@@ -139,20 +142,19 @@
 		<None Remove="Resources\Icons\preview.png" />
 		<None Remove="Resources\Icons\refreshtwocounterclockwisecirculararrowsinterfacesymbol_79835.png" />
 		<None Remove="Resources\Icons\search.png" />
-		<None Remove="Resources\Images\logo.png" />
 		<None Remove="Resources\Music.xml" />
 		<None Remove="Resources\MusicSource.xml" />
 		<None Remove="Resources\ui_jacket_0666" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Costura64\crnlib.dll">
+		<EmbeddedResource Include="costura-win-x64\crnlib.dll">
 		</EmbeddedResource>
-		<EmbeddedResource Include="Costura64\ispc_texcomp.dll">
+		<EmbeddedResource Include="costura-win-x64\ispc_texcomp.dll">
 		</EmbeddedResource>
-		<EmbeddedResource Include="Costura64\PVRTexLib.dll">
+		<EmbeddedResource Include="costura-win-x64\PVRTexLib.dll">
 		</EmbeddedResource>
-		<EmbeddedResource Include="Costura64\TexToolWrap.dll">
+		<EmbeddedResource Include="costura-win-x64\TexToolWrap.dll">
 		</EmbeddedResource>
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\bell.png" />
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick.png" />
@@ -186,8 +188,8 @@
 	<ItemGroup>
 		<PackageReference Include="AssetsTools.NET" Version="2.0.12" />
 		<PackageReference Include="AssocSupport" Version="1.1.0" />
-		<PackageReference Include="AvalonEdit" Version="6.3.0.90" />
-		<PackageReference Include="Costura.Fody" Version="5.7.0">
+		<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+		<PackageReference Include="Costura.Fody" Version="6.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -198,23 +200,23 @@
 		<PackageReference Include="Microsoft.Wpf.Interop.DirectX-x64" Version="0.9.0-beta-22856" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
 		<PackageReference Include="NAudio" Version="2.2.1" />
-		<PackageReference Include="Nerdbank.GitVersioning" Version="3.6.146">
+		<PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="NetTopologySuite" Version="2.6.0" />
 		<PackageReference Include="OpenTK" Version="4.8.2" />
 		<PackageReference Include="OpenTK.GLWpfControl" Version="4.3.3" />
-		<PackageReference Include="PixiEditor.ColorPicker" Version="3.4.1" />
-		<PackageReference Include="SharpVectors" Version="1.8.4.2" />
+		<PackageReference Include="PixiEditor.ColorPicker" Version="3.4.2" />
+		<PackageReference Include="SharpVectors" Version="1.8.5" />
 		<PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
 		<PackageReference Include="SixLabors.Fonts" Version="2.1.3" />
-		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
 		<PackageReference Include="SkiaSharp" Version="3.119.0" />
 		<PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.0" />
 		<PackageReference Include="Svg" Version="3.4.7" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.8" />
 		<PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
 		<PackageReference Include="Vortice.Direct3D12" Version="3.6.2" />
 		<PackageReference Include="Vortice.Direct3D9" Version="3.6.2" />
@@ -282,7 +284,6 @@
 		<Resource Include="Resources\Icons\open-folder.png" />
 		<Resource Include="Resources\Icons\preview.png" />
 		<Resource Include="Resources\Icons\search.png" />
-		<Resource Include="Resources\logo.png" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -220,7 +220,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
             foreach (var met in fumen.MeterChanges.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.MeterChanges.FirstMeter.TGrid))
                 sb.WriteLine($"MeterChange\t:\t{met.BunShi}/{met.Bunbo}\t:\tT[{met.TGrid.Unit},{met.TGrid.Grid}]");
             sb.WriteLine();
-            foreach (var bpm in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != fumen.BpmList.FirstBpm.TGrid))
+            foreach (var bpm in fumen.BpmList.OrderBy(x => x.TGrid).Where(x => x.TGrid != TGrid.Zero))
                 sb.WriteLine($"BpmChange\t:\t{bpm.BPM}\t:\tT[{bpm.TGrid.Unit},{bpm.TGrid.Grid}]");
             sb.WriteLine();
 
@@ -290,7 +290,24 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
         public void ProcessBULLET(OngekiFumen fumen, StreamWriter sb)
         {
             foreach (var bullet in fumen.Bullets.OrderBy(x => x.TGrid))
-                sb.WriteLine($"Bullet\t:\t{bullet.ReferenceBulletPallete?.StrID}\t:\tX[{bullet.XGrid.Unit},{bullet.XGrid.Grid}], T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}], D[{bullet.BulletDamageTypeValue}]");
+            {
+                if (bullet.ReferenceBulletPallete is { } pallete && pallete != BulletPallete.DummyCustomPallete)
+                {
+                    sb.WriteLine($"Bullet\t:\t{bullet.ReferenceBulletPallete?.StrID}\t:\tX[{bullet.XGrid.Unit},{bullet.XGrid.Grid}], T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}], D[{bullet.BulletDamageTypeValue}]");
+                }
+                else
+                {
+                    sb.Write($"CustomBullet\t:\tX[{bullet.XGrid.Unit},{bullet.XGrid.Grid}], T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}], D[{bullet.BulletDamageTypeValue}]");
+                    sb.Write($", Speed[{bullet.Speed}]");
+                    sb.Write($", PlaceOffset[{bullet.PlaceOffset}]");
+                    sb.Write($", RandomOffsetRange[{bullet.RandomOffsetRange}]");
+                    sb.Write($", TypeValue[{bullet.TypeValue}]");
+                    sb.Write($", SizeValue[{bullet.SizeValue}]");
+                    sb.Write($", ShooterValue[{bullet.ShooterValue}]");
+                    sb.Write($", TargetValue[{bullet.TargetValue}]");
+                    sb.WriteLine($", Speed[{bullet.Speed}]");
+                }
+            }
             sb.WriteLine();
         }
 
@@ -306,7 +323,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
                 string SerializeOutput(ConnectableObjectBase o)
                 {
                     var b = ((IBeamObject)o);
-                    var r = $"(Type[{o.IDShortName}], X[{o.XGrid.Unit},{o.XGrid.Grid}], T[{o.TGrid.Unit},{o.TGrid.Grid}], W[{b.WidthId}]";
+                    var r = $"(Type[{o.IDShortName}], X[{o.XGrid.Unit},{o.XGrid.Grid}], T[{o.TGrid.Unit},{o.TGrid.Grid}], W[{b.WidthId.Id}]";
                     if (b.ObliqueSourceXGridOffset is not null)
                         r += $", OX[{b.ObliqueSourceXGridOffset.Unit},{b.ObliqueSourceXGridOffset.Grid}]";
                     return r + ")";
@@ -325,9 +342,25 @@ namespace OngekiFumenEditor.Parser.DefaultImpl
 
         public void ProcessBELL(OngekiFumen fumen, StreamWriter sb)
         {
-
             foreach (var bell in fumen.Bells.OrderBy(x => x.TGrid))
-                sb.WriteLine($"Bell\t:\t{bell.ReferenceBulletPallete?.StrID}\t:\tX[{bell.XGrid.Unit},{bell.XGrid.Grid}], T[{bell.TGrid.Unit},{bell.TGrid.Grid}]");
+            {
+                if (bell.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                {
+                    sb.WriteLine($"Bell\t:\t{bell.ReferenceBulletPallete?.StrID}\t:\tX[{bell.XGrid.Unit},{bell.XGrid.Grid}], T[{bell.TGrid.Unit},{bell.TGrid.Grid}]");
+                }
+                else
+                {
+                    sb.Write($"CustomBell\t:\tX[{bell.XGrid.Unit},{bell.XGrid.Grid}], T[{bell.TGrid.Unit},{bell.TGrid.Grid}]");
+
+                    sb.Write($", Speed[{bell.Speed}]");
+                    sb.Write($", PlaceOffset[{bell.PlaceOffset}]");
+                    sb.Write($", RandomOffsetRange[{bell.RandomOffsetRange}]");
+                    sb.Write($", TypeValue[{bell.TypeValue}]");
+                    sb.Write($", SizeValue[{bell.SizeValue}]");
+                    sb.Write($", ShooterValue[{bell.ShooterValue}]");
+                    sb.WriteLine($", TargetValue[{bell.TargetValue}]");
+                }
+            }
             sb.WriteLine();
         }
 

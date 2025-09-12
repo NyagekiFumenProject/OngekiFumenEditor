@@ -29,9 +29,11 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 case SoflanMode.Soflan:
                     y = TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, soflans, Fumen.BpmList, Option.VerticalScale);
                     break;
+                    /*
                 case SoflanMode.WeightedSoflan:
                     y = TGridCalculator.ConvertTGridUnitToY_PreviewMode(totalUnit, SpecifySoflans, Fumen.BpmList, Option.VerticalScale);
                     break;
+                    */
                 case SoflanMode.NoSoflan:
                 case SoflanMode.AbsSoflan:
                 default:

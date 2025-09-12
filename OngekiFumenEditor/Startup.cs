@@ -18,12 +18,8 @@ namespace OngekiFumenEditor
         [STAThread]
         public static int Main(string[] args)
         {
-            var isGUIMode = !(args.Length > 0 && !args[0].StartsWith("--"));
-            if (isGUIMode)
-            {
-                IPCHelper.Init(args);
-            }
-            var app = new App(isGUIMode);
+            IPCHelper.Init(args);
+            var app = new App(true);
             app.InitializeComponent();
 
             return app.Run();

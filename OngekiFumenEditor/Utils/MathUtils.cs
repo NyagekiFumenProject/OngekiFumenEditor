@@ -52,21 +52,29 @@ public static class MathUtils
         return b == 0 ? a : GCD(b, a % b);
     }
 
-    public static System.Numerics.Vector2? GetLinesIntersection(System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 q1, System.Numerics.Vector2 q2)
+    public static Vector2? GetLinesIntersection(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2)
     {
-        var r = new System.Numerics.Vector2(p2.X - p1.X, p2.Y - p1.Y);
-        var s = new System.Numerics.Vector2(q2.X - q1.X, q2.Y - q1.Y);
+        const float epsilon = 1e-6f;
+        if (p1 == q1)
+            return p1;
+        if (p2 == q2)
+            return p2;
+        var r = new Vector2(p2.X - p1.X, p2.Y - p1.Y);
+        var s = new Vector2(q2.X - q1.X, q2.Y - q1.Y);
 
         float cross_r_s = r.X * s.Y - r.Y * s.X;
 
-        if (Math.Abs(cross_r_s) < 1e-6)
+        if (Math.Abs(cross_r_s) < epsilon)
             return null;
 
         float t = ((q1.X - p1.X) * s.Y - (q1.Y - p1.Y) * s.X) / cross_r_s;
         float u = ((q1.X - p1.X) * r.Y - (q1.Y - p1.Y) * r.X) / cross_r_s;
 
-        if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+        if (t >= -epsilon && t <= 1 + epsilon && u >= -epsilon && u <= 1 + epsilon)
+        {
+            t = Math.Clamp(t, 0, 1);
             return new(p1.X + t * r.X, p1.Y + t * r.Y);
+        }
 
         return null;
     }

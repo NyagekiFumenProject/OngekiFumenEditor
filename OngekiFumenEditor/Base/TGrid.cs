@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Base
         public const uint DEFAULT_RES_T = 1920;
         public uint ResT => DEFAULT_RES_T;
 
-        public static TGrid Zero { get; } = new TGrid();
+        public static TGrid Zero { get; } = new TGrid(0, 0);
         public static TGrid MaxValue { get; } = new TGrid((int.MaxValue - DEFAULT_RES_T) / DEFAULT_RES_T, (int)DEFAULT_RES_T);
         public static TGrid MinValue { get; } = new TGrid(float.MinValue, int.MinValue);
 

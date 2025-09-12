@@ -1,0 +1,193 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.UI.Controls.ObjectInspector.Views.Dialogs.BulletPalleteSelectDialogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialog="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels.Dialogs"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views.Dialog"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
+    Title="{markup:Translate [BulletPalleteSelectDialogTitle]}"
+    Width="400"
+    Height="300"
+    d:DataContext="{d:DesignInstance Type=dialog:BulletPalleteSelectDialogViewModel}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    SaveWindowPosition="True"
+    SizeToContent="Width"
+    Style="{StaticResource MainWindowStyle}"
+    mc:Ignorable="d">
+    <mah:MetroWindow.Resources>
+        <valueconverters:HideIfDummyPalleteConverter x:Key="HideIfDummyPalleteConverter" />
+    </mah:MetroWindow.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ListView
+            Grid.Row="0"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding BulletPalleteList}"
+            ScrollViewer.CanContentScroll="True"
+            SelectedItem="{Binding SelectedPallete}"
+            SelectionMode="Single"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling">
+            <ListView.Resources>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+                </Style>
+            </ListView.Resources>
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                    <GridViewColumn
+                        Width="60"
+                        DisplayMemberBinding="{Binding StrID}"
+                        Header="{markup:Translate [BulletPaletteId]}" />
+                    <GridViewColumn
+                        Width="120"
+                        DisplayMemberBinding="{Binding EditorName}"
+                        Header="{markup:Translate [Name]}">
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="100" Header="{markup:Translate [ShootSource]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="ShooterValue" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="80" Header="{markup:Translate [ShootOffset]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="PlaceOffset" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="100" Header="{markup:Translate [ShootTarget]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="TargetValue" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="Speed" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="100" Header="{markup:Translate [BulletSize]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="SizeValue" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="75" Header="{markup:Translate [BulletType]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="TypeValue" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
+                                            <Binding Path="RandomOffsetRange" />
+                                            <Binding Path="." />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button
+                Margin="10"
+                Padding="10,5,10,5"
+                cal:Message.Attach="[Event Click] = [Action OnComfirmButtonClicked()];"
+                Content="{markup:Translate [Confirm]}">
+            </Button>
+            <Button
+                Grid.Column="1"
+                Margin="10"
+                Padding="10,5,10,5"
+                cal:Message.Attach="[Event Click] = [Action OnCancelButtonClicked()];"
+                Content="{markup:Translate [Cancel]}">
+            </Button>
+        </Grid>
+    </Grid>
+</mah:MetroWindow>

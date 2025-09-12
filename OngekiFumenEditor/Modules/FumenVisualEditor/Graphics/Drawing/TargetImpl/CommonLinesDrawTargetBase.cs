@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public virtual int LineWidth { get; } = 2;
         private ISimpleLineDrawing lineDrawing;
-        private static VertexDash invailedDash = new VertexDash(6,3);
+        private static VertexDash invailedDash = new VertexDash(6, 3);
 
         public override void Initialize(IRenderManagerImpl impl)
         {
@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();
-            VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, invailedDash, color, list);
+            VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, target.CurrentDrawingTargetContext.CurrentSoflanList, invailedDash, color, list);
             lineDrawing.Draw(target, list, LineWidth);
         }
 

@@ -10,8 +10,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 
 		public bool IsObliqueBeam => ObliqueSourceXGridOffset is not null;
 
-		private int widthId = 2;
-		public int WidthId
+		private WidthId widthId = WidthIdConst.Id_1;
+        public WidthId WidthId
 		{
 			get => widthId;
 			set => Set(ref widthId, value);

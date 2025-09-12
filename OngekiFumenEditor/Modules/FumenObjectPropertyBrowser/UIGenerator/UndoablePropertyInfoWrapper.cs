@@ -8,64 +8,66 @@ using System.Reflection;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator
 {
-	public class UndoablePropertyInfoWrapper : PropertyChangedBase, IObjectPropertyAccessProxy
-	{
-		public PropertyInfo PropertyInfo => core.PropertyInfo;
+    public class UndoablePropertyInfoWrapper : PropertyChangedBase, IObjectPropertyAccessProxy
+    {
+        public PropertyInfo PropertyInfo => core.PropertyInfo;
 
-		private IObjectPropertyAccessProxy core;
-		private FumenVisualEditorViewModel referenceEditor;
+        private IObjectPropertyAccessProxy core;
+        private FumenVisualEditorViewModel referenceEditor;
 
-		public bool IsAllowSetNull => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAllowSetNull>() is not null;
+        public bool IsAllowSetNull => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAllowSetNull>() is not null;
 
-		public UndoablePropertyInfoWrapper(IObjectPropertyAccessProxy propertyWrapperCore, FumenVisualEditorViewModel referenceEditor)
-		{
-			core = propertyWrapperCore;
-			this.referenceEditor = referenceEditor;
-			core.PropertyChanged += Core_PropertyChanged;
-		}
+        public UndoablePropertyInfoWrapper(IObjectPropertyAccessProxy propertyWrapperCore, FumenVisualEditorViewModel referenceEditor)
+        {
+            core = propertyWrapperCore;
+            this.referenceEditor = referenceEditor;
+            core.PropertyChanged += Core_PropertyChanged;
+        }
 
-		private void Core_PropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			switch (e.PropertyName)
-			{
-				case nameof(IObjectPropertyAccessProxy.ProxyValue):
-					NotifyOfPropertyChange(() => ProxyValue);
-					break;
-				default:
-					NotifyOfPropertyChange(e.PropertyName);
-					break;
-			}
-		}
+        private void Core_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(IObjectPropertyAccessProxy.ProxyValue):
+                    NotifyOfPropertyChange(() => ProxyValue);
+                    break;
+                default:
+                    NotifyOfPropertyChange(e.PropertyName);
+                    break;
+            }
+        }
 
-		public object ProxyValue
-		{
-			get => core.ProxyValue;
-			set
-			{
-				var oldValue = ProxyValue;
-				var newValue = value;
-				referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction(core.PropertyInfo.Name, core, oldValue, newValue));
+        public object ProxyValue
+        {
+            get => core.ProxyValue;
+            set
+            {
+                var oldValue = ProxyValue;
+                var newValue = value;
+                referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction(core.PropertyInfo.Name, core, oldValue, newValue));
 
-				NotifyOfPropertyChange(() => ProxyValue);
-			}
-		}
+                NotifyOfPropertyChange(() => ProxyValue);
+            }
+        }
 
-		public string DisplayPropertyName => core.DisplayPropertyName;
-		public string DisplayPropertyTipText => core.DisplayPropertyTipText;
+        public string DisplayPropertyName => core.DisplayPropertyName;
+        public string DisplayPropertyTipText => core.DisplayPropertyTipText;
 
-		public void ExecuteSubPropertySetAction<T>(string subPropName, Action<T> setterAction, T oldValue, T newValue)
-		{
-			referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction<T>($"{PropertyInfo.Name}.{subPropName}", setterAction, oldValue, newValue));
-			NotifyOfPropertyChange(() => ProxyValue);
-		}
+        public bool IsReadOnly => core.IsReadOnly;
 
-		public override string ToString() => $"[Undoable]{base.ToString()}";
+        public void ExecuteSubPropertySetAction<T>(string subPropName, Action<T> setterAction, T oldValue, T newValue)
+        {
+            referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction<T>($"{PropertyInfo.Name}.{subPropName}", setterAction, oldValue, newValue));
+            NotifyOfPropertyChange(() => ProxyValue);
+        }
 
-		public void Clear()
-		{
-			core.PropertyChanged -= Core_PropertyChanged;
-			core.Clear();
-			//core = null;
-		}
-	}
+        public override string ToString() => $"[Undoable]{base.ToString()}";
+
+        public void Clear()
+        {
+            core.PropertyChanged -= Core_PropertyChanged;
+            core.Clear();
+            //core = null;
+        }
+    }
 }
