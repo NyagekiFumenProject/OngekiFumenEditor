@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         bool IsUsePalleteValue => ReferenceBulletPallete != null && ReferenceBulletPallete != BulletPallete.DummyCustomPallete;
 
         private BulletPallete referenceBulletPallete;
-        [ObjectPropertyBrowserAlias("子弹模板")]
+        [LocalizableObjectPropertyBrowserAlias("BulletPalleteDisplayName")]
         public BulletPallete ReferenceBulletPallete
         {
             get { return referenceBulletPallete; }

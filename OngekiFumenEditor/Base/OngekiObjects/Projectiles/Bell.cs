@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         bool IsUseLocalCustomValue => ReferenceBulletPallete == BulletPallete.DummyCustomPallete;
 
         private BulletPallete referenceBulletPallete;
-        [ObjectPropertyBrowserAlias("×Óµ¯Ä£°å")]
+        [LocalizableObjectPropertyBrowserAlias("BulletPalleteDisplayName")]
         public BulletPallete ReferenceBulletPallete
         {
             get { return referenceBulletPallete; }

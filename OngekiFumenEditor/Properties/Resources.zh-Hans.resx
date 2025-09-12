@@ -2274,4 +2274,7 @@
   <data name="ShowHitObjectEffectInPreviewMode" xml:space="preserve">
     <value>当物件到达判定线时，显示击打特效</value>
   </data>
+  <data name="BulletPalleteDisplayName" xml:space="preserve">
+    <value>子弹模板</value>
+  </data>
 </root>
