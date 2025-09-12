@@ -581,7 +581,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             void printPoints(IEnumerable<Vector2> data, Vector4 color, bool isRight)
             {
-                color.W = 1;
                 circleDrawing.Begin(target);
                 foreach (var pos in data)
                     circleDrawing.Post(pos, color, false, 10);
@@ -596,6 +595,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         prevR = 0;
                     prevY = pos.Y;
 
+                    color.W = 1;
                     stringDrawing.Draw(
                         $"({pos.X}, {pos.Y})",
                         pos - new Vector2(isRight ? -10 : 10, -prevR * 10),
@@ -691,7 +691,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     //clockwise 顺时针
                 }
 
-                //if left.X < right.X, just swap remain points following this index on both sides
                 if (!exchangedRemain)
                     return false;
 
@@ -709,6 +708,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             while (leftIdx < leftPoints.Count && rightIdx < rightPoints.Count)
             {
+                /*
+                leftIdx = Math.Min(leftIdx, leftPoints.Count - 1);
+                rightIdx = Math.Min(rightIdx, rightPoints.Count - 1);
+                */
+
                 (Vector2 from, Vector2 to) leftLine = (leftPoints[leftIdx - 1], leftPoints[leftIdx]);
                 (Vector2 from, Vector2 to) rightLine = (rightPoints[rightIdx - 1], rightPoints[rightIdx]);
 
@@ -720,76 +724,125 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 }
 
                 var intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, rightLine.from, rightLine.to);
-                if (intersectResult is null
-                    && leftLine.from.Y == leftLine.to.Y && leftLine.from.Y == rightLine.to.Y && leftLine.from.Y == rightLine.from.Y
-                    && (rightLine.to.X <= leftLine.from.X || leftLine.to.X >= rightLine.from.X))
+                if (/*intersectResult is null
+                    &&*/ leftLine.from.Y == leftLine.to.Y && leftLine.from.Y == rightLine.to.Y && leftLine.from.Y == rightLine.from.Y)
                 {
-                    // L      R
-                    // |      |
-                    // L------R====L------R
-                    //             |      |
-                    //             |      |
-                    //             L      R
-                    bool tryGetLine(List<Vector2> linePoints, int lineIdx, out (Vector2 from, Vector2 to) line)
+                    // CASE A:
+                    // R                L
+                    // |                |
+                    // R----L======R----L
+                    //      |      |
+                    //      |      |
+                    //      L      R
+
+                    if (rightLine.to == leftLine.to)
                     {
-                        line = default;
-
-                        if (!(1 < lineIdx && lineIdx < linePoints.Count))
-                            return default;
-
-                        line = (linePoints[lineIdx - 1], linePoints[lineIdx]);
-                        return true;
+                        intersectResult = rightLine.to;
                     }
-
-                    if (tryGetLine(leftPoints, leftIdx - 1, out var prevLeftLine))
+                    else
                     {
-                        intersectResult = GetLinesIntersection(prevLeftLine.from, prevLeftLine.to, rightLine.from, rightLine.to);
-                        if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                        if (rightLine.to.X <= leftLine.from.X &&
+                            leftLine.from.X <= rightLine.from.X &&
+                            leftLine.from.X <= rightLine.from.X &&
+                            rightLine.from.X <= leftLine.to.X)
                         {
-                            debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
-                            intersectionPoints.Add(intersectPoint);
-                            insert(rightPoints, rightIdx, intersectPoint);
-                            rightIdx++;
-                            continue;
+                            if (tryExchange(leftIdx, rightIdx))
+                            {
+                                leftIdx++;
+                                rightIdx++;
+                                continue;
+                            }
                         }
-                    }
 
-                    if (tryGetLine(rightPoints, rightIdx - 1, out var prevRightLine))
-                    {
-                        intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, prevRightLine.from, prevRightLine.to);
-                        if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                        // CASE B:
+                        //      R   L
+                        //      |   |
+                        // L----R===L----R
+                        // |             |
+                        // |             |
+                        // L             R
+
+                        if (leftLine.from.X <= rightLine.to.X &&
+                            rightLine.to.X <= leftLine.to.X &&
+                            rightLine.to.X <= leftLine.to.X &&
+                            leftLine.to.X <= rightLine.from.X)
                         {
-                            debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
-                            intersectionPoints.Add(intersectPoint);
-                            insert(leftPoints, leftIdx, intersectPoint);
-                            leftIdx++;
-                            continue;
+                            if (tryExchange(leftIdx, rightIdx))
+                            {
+                                leftIdx++;
+                                rightIdx++;
+                                continue;
+                            }
                         }
-                    }
 
-                    if (tryGetLine(leftPoints, leftIdx + 1, out var nextLeftLine))
-                    {
-                        intersectResult = GetLinesIntersection(nextLeftLine.from, nextLeftLine.to, rightLine.from, rightLine.to);
-                        if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                        // CASE C:
+                        // L      R
+                        // |      |
+                        // L------R====L------R
+                        //             |      |
+                        //             |      |
+                        //             L      R
+                        bool tryGetLine(List<Vector2> linePoints, int lineIdx, out (Vector2 from, Vector2 to) line)
                         {
-                            debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
-                            intersectionPoints.Add(intersectPoint);
-                            insert(rightPoints, rightIdx, intersectPoint);
-                            rightIdx++;
-                            continue;
+                            line = default;
+
+                            if (!(1 < lineIdx && lineIdx < linePoints.Count))
+                                return default;
+
+                            line = (linePoints[lineIdx - 1], linePoints[lineIdx]);
+                            return true;
                         }
-                    }
 
-                    if (tryGetLine(rightPoints, rightIdx + 1, out var nextRightLine))
-                    {
-                        intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, nextRightLine.from, nextRightLine.to);
-                        if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                        if (tryGetLine(leftPoints, leftIdx - 1, out var prevLeftLine))
                         {
-                            debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
-                            intersectionPoints.Add(intersectPoint);
-                            insert(leftPoints, leftIdx, intersectPoint);
-                            leftIdx++;
-                            continue;
+                            intersectResult = GetLinesIntersection(prevLeftLine.from, prevLeftLine.to, rightLine.from, rightLine.to);
+                            if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                            {
+                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                intersectionPoints.Add(intersectPoint);
+                                insert(rightPoints, rightIdx, intersectPoint);
+                                rightIdx++;
+                                continue;
+                            }
+                        }
+
+                        if (tryGetLine(rightPoints, rightIdx - 1, out var prevRightLine))
+                        {
+                            intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, prevRightLine.from, prevRightLine.to);
+                            if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                            {
+                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                intersectionPoints.Add(intersectPoint);
+                                insert(leftPoints, leftIdx, intersectPoint);
+                                leftIdx++;
+                                continue;
+                            }
+                        }
+
+                        if (tryGetLine(leftPoints, leftIdx + 1, out var nextLeftLine))
+                        {
+                            intersectResult = GetLinesIntersection(nextLeftLine.from, nextLeftLine.to, rightLine.from, rightLine.to);
+                            if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                            {
+                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                intersectionPoints.Add(intersectPoint);
+                                insert(rightPoints, rightIdx, intersectPoint);
+                                rightIdx++;
+                                continue;
+                            }
+                        }
+
+                        if (tryGetLine(rightPoints, rightIdx + 1, out var nextRightLine))
+                        {
+                            intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, nextRightLine.from, nextRightLine.to);
+                            if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
+                            {
+                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                intersectionPoints.Add(intersectPoint);
+                                insert(leftPoints, leftIdx, intersectPoint);
+                                leftIdx++;
+                                continue;
+                            }
                         }
                     }
                 }
@@ -808,23 +861,49 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     if (rightLine.to == intersectionPoint && intersectionPoint == leftLine.to)
                         isCross = true;
 
-                    if (!(rightLine.from.Y == rightLine.to.Y || leftLine.from.Y == leftLine.to.Y))
+                    var isLeftLineHorizon = leftLine.from.Y == leftLine.to.Y;
+                    var isRightLineHorizon = rightLine.from.Y == rightLine.to.Y;
+                    if (!(isRightLineHorizon || isLeftLineHorizon))
                         isCross &= true;
 
                     if (isCross)
                     {
                         /*
-                             \   /
-                              \ /
-                               x <---insert new point to both side
-                              / \
-                             /   \
+                         CASE A:
+                                |
+                                |
+                             ---x---
+                                | 
+                                |
                          */
 
-                        if (tryExchange(leftIdx, rightIdx))
+                        if (isRightLineHorizon)
                         {
                             insert(leftPoints, leftIdx, intersectionPoint);
                             insert(rightPoints, rightIdx, intersectionPoint);
+                            tryExchange(leftIdx, rightIdx);
+                        }
+                        else if (isLeftLineHorizon)
+                        {
+                            insert(leftPoints, leftIdx, intersectionPoint);
+                            insert(rightPoints, rightIdx, intersectionPoint);
+                            tryExchange(leftIdx, rightIdx);
+                        }
+                        else
+                        {
+                            /* CASE B:
+                                 \   /
+                                  \ /
+                                   x <---insert new point to both side
+                                  / \
+                                 /   \
+                             */
+
+                            if (tryExchange(leftIdx, rightIdx))
+                            {
+                                insert(leftPoints, leftIdx, intersectionPoint);
+                                insert(rightPoints, rightIdx, intersectionPoint);
+                            }
                         }
                     }
                     else
@@ -879,12 +958,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             //获取左右两点之间的中点
                             var centerX = (leftPoints[leftIdx].X + rightPoints[rightIdx].X) / 2;
                             var centerPoint = new Vector2(centerX, intersectionPoint.Y);
-
                             //两边再插入中点
                             if (leftPoints[leftIdx] != centerPoint)
+                            {
                                 insert(leftPoints, leftIdx, centerPoint);
+                                //leftIdx--;
+                            }
                             if (rightPoints[rightIdx] != centerPoint)
+                            {
                                 insert(rightPoints, rightIdx, centerPoint);
+                                //rightIdx--;
+                            }
                         }
                         else
                         {
@@ -942,15 +1026,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     continue;
                 }
 
+                leftLine = (leftPoints[leftIdx - 1], leftPoints[leftIdx]);
+                rightLine = (rightPoints[rightIdx - 1], rightPoints[rightIdx]);
+
+                var isLeftNextIdx = rightLine.from.Y <= leftLine.to.Y && leftLine.to.Y <= rightLine.to.Y;
+                var isRightNextIdx = leftLine.from.Y <= rightLine.to.Y && rightLine.to.Y <= leftLine.to.Y;
                 //看看哪一边idx需要递增
-                if (rightLine.from.Y < leftLine.to.Y && leftLine.to.Y < rightLine.to.Y)
+                if (isRightNextIdx && isLeftNextIdx)
                 {
-                    //left的末端在right范围内，那么left需要递增
                     leftIdx++;
+                    rightIdx++;
                 }
-                else if (leftLine.from.Y < rightLine.to.Y && rightLine.to.Y < leftLine.to.Y)
+                else if (isRightNextIdx)
                 {
                     rightIdx++;
+                }
+                else if (isLeftNextIdx)
+                {
+                    leftIdx++;
                 }
                 else
                 {

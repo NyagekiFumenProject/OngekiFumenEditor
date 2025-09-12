@@ -50,7 +50,9 @@
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<DebugType>none</DebugType>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DefineConstants>$(DefineConstants);PLAYFIELD_DEBUG</DefineConstants>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<Compile Remove="Dependencies\**" />

@@ -55,12 +55,10 @@ public static class MathUtils
     public static Vector2? GetLinesIntersection(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2)
     {
         const float epsilon = 1e-6f;
-
         if (p1 == q1)
             return p1;
         if (p2 == q2)
             return p2;
-
         var r = new Vector2(p2.X - p1.X, p2.Y - p1.Y);
         var s = new Vector2(q2.X - q1.X, q2.Y - q1.Y);
 
