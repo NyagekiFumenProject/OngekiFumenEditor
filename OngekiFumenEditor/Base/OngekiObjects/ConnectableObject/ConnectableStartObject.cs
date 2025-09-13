@@ -305,22 +305,59 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         /// <returns></returns>
         public IEnumerable<ConnectableChildObjectBase> GetChildObjectsFromTGrid(TGrid tGrid)
         {
-            if (tGrid is null || tGrid < TGrid || Children.IsEmpty())
+            if (tGrid is null || tGrid < TGrid || children.Count == 0)
                 return Enumerable.Empty<ConnectableChildObjectBase>();
 
-            var seqs = Children
-                .AsEnumerable<ConnectableObjectBase>()
-                .Prepend(this)
-                .SequenceConsecutivelyWrap(2)
-                .Select(x => (x.First(), x.Last()))
-                .SkipWhile(seq => seq.Item2.TGrid < tGrid);
+            if (IsPathVaild())
+            {
+                //path is vaild, means children are sorted by TGrid, just find by binary search
+                if (children.Count > 1)
+                {
+                    var idx = children.BinarySearchBy(tGrid, x => x.TGrid);
+                    var actualIdx = idx < 0 ? ~idx : idx;
+                    var fixedIdx = (actualIdx == children.Count - 1 && tGrid > children[actualIdx].TGrid)
+                        ? -1
+                        : actualIdx++;
 
-            var seq2 = seqs
-                .TakeWhile(seq => seq.Item1.TGrid <= tGrid && tGrid <= seq.Item2.TGrid);
-            var result = seq2
-                .Select(x => x.Item2 as ConnectableChildObjectBase);
+                    if (fixedIdx < 0 || fixedIdx >= children.Count)
+                        return Enumerable.Empty<ConnectableChildObjectBase>();
 
-            return result;
+                    var selectedTGrid = children[fixedIdx].TGrid;
+
+                    var minIdx = fixedIdx;
+                    while (minIdx > 0 && children[minIdx - 1].TGrid == selectedTGrid)
+                        minIdx--;
+
+                    var maxIdx = fixedIdx;
+                    while (maxIdx < children.Count - 1 && children[maxIdx + 1].TGrid == selectedTGrid)
+                        maxIdx++;
+
+                    return children.GetRange(minIdx, maxIdx - minIdx + 1);
+                }
+                else
+                {
+                    var child = children[0];
+                    if (tGrid > child.TGrid)
+                        return Enumerable.Empty<ConnectableChildObjectBase>();
+                    return [child];
+                }
+            }
+            else
+            {
+                var seqs = Children
+                    .AsEnumerable<ConnectableObjectBase>()
+                    .Prepend(this)
+                    .SequenceConsecutivelyWrap(2)
+                    .Select(x => (x[0], x[1]))
+                    .SkipWhile(seq => seq.Item2.TGrid < tGrid);
+
+                var seq2 = seqs
+                    .TakeWhile(seq => seq.Item1.TGrid <= tGrid && tGrid <= seq.Item2.TGrid);
+                var result = seq2
+                    .Select(x => x.Item2 as ConnectableChildObjectBase);
+
+                return result;
+            }
         }
 
         public XGrid CalulateXGrid(TGrid tGrid)
@@ -330,7 +367,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             return default;
         }
 
-        public bool IsPathVaild() => GenAllPath().All(x => x.isVaild);
+        public bool IsPathVaild() => children.Count == 0 ? true : children.All(x => x.IsVaildPath) /*GenAllPath().All(x => x.isVaild)*/;
 
         public IEnumerable<(Vector2 pos, bool isVaild)> GenAllPath(bool filterSamePointSameSeq = true)
         {

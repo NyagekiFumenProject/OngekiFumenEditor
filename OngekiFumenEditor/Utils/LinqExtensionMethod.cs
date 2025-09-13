@@ -460,7 +460,7 @@ namespace OngekiFumenEditor.Utils
         /// <param name="collection"></param>
         /// <param name="wrapCount">子集合数量,如果参数collection集合少于此数量则不提供子集合</param>
         /// <returns></returns>
-        public static IEnumerable<IEnumerable<T>> SequenceConsecutivelyWrap<T>(this IEnumerable<T> collection, int wrapCount)
+        public static IEnumerable<T[]> SequenceConsecutivelyWrap<T>(this IEnumerable<T> collection, int wrapCount)
         {
 #if DEBUG
             if (wrapCount < 2)

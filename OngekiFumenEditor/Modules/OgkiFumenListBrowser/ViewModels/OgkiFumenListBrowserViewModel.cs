@@ -130,7 +130,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 			{
 				var goodVal = int.MaxValue;
 
-				foreach (var str in strs)
+				foreach (var str in strs.FilterNull())
 				{
 					var modCount = LevenshteinDistance(str.ToLowerInvariant(), keyword);
 					goodVal = Math.Min(modCount, goodVal);
