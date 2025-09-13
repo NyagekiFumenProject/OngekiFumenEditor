@@ -1,11 +1,9 @@
 ﻿using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
-using SharpVectors.Net;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
@@ -14,7 +12,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Markup;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -27,38 +24,50 @@ namespace OngekiFumenEditor.Utils
         private readonly ConcurrentDictionary<string, WeakReference<byte[]>> cacheMap = new();
         private readonly ConcurrentStack<LoadTask> tasks = new();
 
-        public ImageLoader()
-        {
-            Task.Run(PrcessQueue);
-        }
+        private volatile bool isProcessing = false;
 
         public Task<byte[]> LoadImage(string url, CancellationToken cancellationToken)
         {
             var taskCompleteSource = new TaskCompletionSource<byte[]>();
             tasks.Push(new LoadTask(taskCompleteSource, url));
+            PrcessQueue();
             return taskCompleteSource.Task;
         }
 
         private async void PrcessQueue()
         {
-            var currentRunningTasks = new List<Task>(ParallelCount);
-            while (true)
+            if (isProcessing)
+                return;
+            isProcessing = true;
+
+            var currentTaskRunningCount = 0;
+            while (!tasks.IsEmpty)
             {
-                for (var i = 0; i < ParallelCount; i++)
-                    if (tasks.TryPop(out var task))
-                        currentRunningTasks.Add(Task.Run(() =>
-                        {
-                            var url = task.url;
-                            var taskSource = task.TaskSource;
+                if (currentTaskRunningCount >= ParallelCount)
+                {
+                    await Task.Delay(0);
+                    continue;
+                }
+                Interlocked.Increment(ref currentTaskRunningCount);
 
-                            return ProcessTask(url, taskSource);
-                        }));
+                if (tasks.TryPop(out var task))
+                {
+                    Task.Run(async () =>
+                    {
+                        var url = task.url;
+                        var taskSource = task.TaskSource;
 
-                if (currentRunningTasks.Count > 0)
-                    await Task.WhenAll(currentRunningTasks);
-                currentRunningTasks.Clear();
-                await Task.Delay(0);
+                        await ProcessTask(url, taskSource);
+                        Interlocked.Decrement(ref currentTaskRunningCount);
+                    }).NoWait();
+                }
+                else
+                {
+                    Interlocked.Decrement(ref currentTaskRunningCount);
+                }
             }
+
+            isProcessing = false;
         }
 
         private async ValueTask ProcessTask(string path, TaskCompletionSource<byte[]> taskSource)

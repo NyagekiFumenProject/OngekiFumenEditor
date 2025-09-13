@@ -313,8 +313,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 .Prepend(this)
                 .SequenceConsecutivelyWrap(2)
                 .Select(x => (x.First(), x.Last()))
-                .SkipWhile(seq => seq.Item2.TGrid < tGrid)
-                .ToArray();
+                .SkipWhile(seq => seq.Item2.TGrid < tGrid);
 
             var seq2 = seqs
                 .TakeWhile(seq => seq.Item1.TGrid <= tGrid && tGrid <= seq.Item2.TGrid);
