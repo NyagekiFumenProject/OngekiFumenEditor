@@ -489,8 +489,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             var curTGrid = GetCurrentTGrid();
             if (IsPreviewMode)
             {
-                blts = blts.Where(x => x.TGrid > curTGrid);
-                bels = bels.Where(x => x.TGrid > curTGrid);
+                blts = Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);
+                bels = Fumen.Bells.BinaryFindRange(curTGrid, TGrid.MaxValue);
             }
             bels = bels.Where(x =>
             {
