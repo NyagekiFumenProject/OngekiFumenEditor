@@ -5,6 +5,7 @@ using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -69,7 +70,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             var durationMs = (toTime - fromTime).TotalMilliseconds;
 
             //绘制波形
-            if (option.ShowWaveform)
+            if (option.ShowWaveform && peakData.Count != 0)
             {
                 (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
                 lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4.CreateScale(1, target.WaveformVecticalScale, 1f));

@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils.ObjectPool;
+﻿using OngekiFumenEditor.Base.Collections.Base;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Buffers;
 using System.Collections;
@@ -594,6 +595,9 @@ namespace OngekiFumenEditor.Utils
 
             if (source is ICollection collection)
                 return collection.Count == 0;
+
+            if (source is IReadOnlyCollection<T> roc)
+                return roc.Count == 0;
 
             return !source.Any();
         }
