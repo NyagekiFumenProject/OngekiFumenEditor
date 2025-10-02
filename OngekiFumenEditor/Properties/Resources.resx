@@ -2262,4 +2262,19 @@
   <data name="SelectionFilter_HeadTailLaneNode_TailWithParent" xml:space="preserve">
     <value>Next (selected start node)</value>
   </data>
+  <data name="BulletPalleteSelectDialogTitle" xml:space="preserve">
+    <value>Select a bullet pallete</value>
+  </data>
+  <data name="BulletNullPalleteDescription" xml:space="preserve">
+    <value>bullet(id:{0}) pallete is NULL</value>
+  </data>
+  <data name="CantDeleteReferencedBulletPallete" xml:space="preserve">
+    <value>bullet pallete(strID:{0}) which will be deleted has bell/bullet object references, so it cannot delete directly</value>
+  </data>
+  <data name="ShowHitObjectEffectInPreviewMode" xml:space="preserve">
+    <value>Display hit effect when objects arrived judge line.</value>
+  </data>
+  <data name="BulletPalleteDisplayName" xml:space="preserve">
+    <value>BulletPallete</value>
+  </data>
 </root>

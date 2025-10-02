@@ -627,6 +627,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to bullet(id:{0}) pallete is NULL.
+        /// </summary>
+        public static string BulletNullPalleteDescription {
+            get {
+                return ResourceManager.GetString("BulletNullPalleteDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bell.
         /// </summary>
         public static string BulletPaletteCreateBell {
@@ -650,6 +659,24 @@ namespace OngekiFumenEditor.Properties {
         public static string BulletPaletteId {
             get {
                 return ResourceManager.GetString("BulletPaletteId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BulletPallete.
+        /// </summary>
+        public static string BulletPalleteDisplayName {
+            get {
+                return ResourceManager.GetString("BulletPalleteDisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a bullet pallete.
+        /// </summary>
+        public static string BulletPalleteSelectDialogTitle {
+            get {
+                return ResourceManager.GetString("BulletPalleteSelectDialogTitle", resourceCulture);
             }
         }
         
@@ -749,6 +776,15 @@ namespace OngekiFumenEditor.Properties {
         public static string CantCreateProject {
             get {
                 return ResourceManager.GetString("CantCreateProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to bullet pallete(strID:{0}) which will be deleted has bell/bullet object references, so it cannot delete directly.
+        /// </summary>
+        public static string CantDeleteReferencedBulletPallete {
+            get {
+                return ResourceManager.GetString("CantDeleteReferencedBulletPallete", resourceCulture);
             }
         }
         
@@ -5726,6 +5762,15 @@ namespace OngekiFumenEditor.Properties {
         public static string ShowFPS {
             get {
                 return ResourceManager.GetString("ShowFPS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display hit effect when objects arrived judge line..
+        /// </summary>
+        public static string ShowHitObjectEffectInPreviewMode {
+            get {
+                return ResourceManager.GetString("ShowHitObjectEffectInPreviewMode", resourceCulture);
             }
         }
         
