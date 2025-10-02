@@ -42,7 +42,11 @@ public class SelectionFilterViewModel : ViewAware
     public bool IsInvertFilter
     {
         get;
-        set => Set(ref field, value);
+        set
+        {
+            Set(ref field, value);
+            UpdateFilterOutcomeText();
+        }
     }
 
     public string FilterOutcomeText
@@ -203,9 +207,7 @@ public class SelectionFilterViewModel : ViewAware
     private void OnOptionUpdated()
     {
         // Apply option filters
-        OptionFilterRemovals.Clear();
-        var enabledOptions = GetAllOptions().Where(o => o.IsEnabled);
-        OptionFilterRemovals.AddRange(ObjectTypeFilterMatches.Where(obj => enabledOptions.Any(opt => !opt.Filter((OngekiObjectBase)obj))));
+        UpdateOptionFilterRemovals();
         UpdateFilterOutcomeText();
     }
 
@@ -237,7 +239,7 @@ public class SelectionFilterViewModel : ViewAware
     public IEnumerable<ISelectableObject> GetAllFilterMatches()
         => ObjectTypeFilterMatches.Except(OptionFilterRemovals);
 
-    public void FilterObjectTypeSelectedChanged(FilterObjectTypesItem filterType)
+    public void OnTypeFilterEnabledChanged(FilterObjectTypesItem filterType)
     {
         if (filterType.IsSelected) {
             ObjectTypeFilterMatches.AddRange(filterType.MatchingObjects);
@@ -263,6 +265,13 @@ public class SelectionFilterViewModel : ViewAware
     private IEnumerable<SelectionFilterOption> GetAllOptions()
         => OptionCategories.SelectMany(c => c.Options);
 
+    private void UpdateOptionFilterRemovals()
+    {
+        OptionFilterRemovals.Clear();
+        var enabledOptions = GetAllOptions().Where(o => o.IsEnabled).ToArray();
+        OptionFilterRemovals.AddRange(ObjectTypeFilterMatches.Where(obj => enabledOptions.Any(opt => !opt.Filter((OngekiObjectBase)obj))));
+    }
+
     public void ApplyFilterToSelection()
     {
         if (Editor is null)
@@ -280,6 +289,12 @@ public class SelectionFilterViewModel : ViewAware
         }
 
         IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+
+        // Re-register items that remained in the selection
+        foreach (var typeFilter in FilterTypeCategories.SelectMany(c => c.Items)) {
+            ObjectTypeFilterMatches.AddRange(typeFilter.MatchingObjects);
+        }
+        UpdateFilterOutcomeText();
     }
 
     public void FilterObjectTypesSelectAll()
@@ -355,7 +370,7 @@ public sealed class FilterObjectTypeCategory : PropertyChangedBase
                     item.PropertyChanged += (_, typeArgs) =>
                     {
                         if (typeArgs.PropertyName == nameof(FilterObjectTypesItem.IsSelected)) {
-                            filter.FilterObjectTypeSelectedChanged(item);
+                            Filter.OnTypeFilterEnabledChanged(item);
                             UpdateCategoryNameDisplay();
                         }
                     };
