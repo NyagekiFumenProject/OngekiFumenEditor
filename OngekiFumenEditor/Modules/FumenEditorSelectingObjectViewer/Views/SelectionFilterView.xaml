@@ -11,6 +11,8 @@
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:selectionFilter="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Base.SelectionFilter"
              xmlns:valueConverters="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ValueConverters"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:OngekiFumenEditor.UI.Behaviors"
              mc:Ignorable="d"
              Padding="3"
              Background="Transparent"
@@ -171,8 +173,11 @@
                                                    IsSelectAllActive="True"
                                                    DisplayMemberPath="Display"
                                                    SelectedMemberPath="IsSelected"
-                                                   SelectAllContent="{Binding CategoryNameDisplay}"
-                                                   PreviewMouseWheel="BubbleMouseWheel" />
+                                                   SelectAllContent="{Binding CategoryNameDisplay}">
+                                    <b:Interaction.Behaviors>
+                                        <behaviors:BubbleScrollWheelEventBehavior />
+                                    </b:Interaction.Behaviors>
+                                </xctk:CheckListBox>
                             </controls:ExpanderEx>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -193,8 +198,11 @@
                                                IsSelectAllActive="True"
                                                DisplayMemberPath="Display"
                                                SelectedMemberPath="IsSelected"
-                                               SelectAllContent="{Binding CategoryNameDisplay}"
-                                               PreviewMouseWheel="BubbleMouseWheel" />
+                                               SelectAllContent="{Binding CategoryNameDisplay}">
+                                <b:Interaction.Behaviors>
+                                    <behaviors:BubbleScrollWheelEventBehavior />
+                                </b:Interaction.Behaviors>
+                            </xctk:CheckListBox>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -246,7 +254,7 @@
             <TextBlock Text="{Binding FilterOutcomeText}" Margin="5" />
 
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button>Apply</Button>
+                <Button cal:Message.Attach="ApplyFilterToSelection()">Apply</Button>
             </StackPanel>
         </StackPanel>
     </Grid>

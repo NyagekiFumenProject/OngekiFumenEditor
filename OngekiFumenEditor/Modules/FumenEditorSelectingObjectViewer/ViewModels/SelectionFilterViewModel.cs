@@ -39,18 +39,16 @@ public class SelectionFilterViewModel : ViewAware
     public ObservableCollection<ISelectableObject> OptionFilterRemovals { get; } = new();
 
 
-    private bool _isInvertFilter;
     public bool IsInvertFilter
     {
-        get => _isInvertFilter;
-        set => Set(ref _isInvertFilter, value);
+        get;
+        set => Set(ref field, value);
     }
 
-    private string _filterOutcomeText;
     public string FilterOutcomeText
     {
-        get => _filterOutcomeText;
-        private set => Set(ref _filterOutcomeText, value);
+        get;
+        private set => Set(ref field, value);
     }
 
     public SelectionFilterViewModel(FumenEditorSelectingObjectViewerViewModel selectionViewerTool)
@@ -217,18 +215,19 @@ public class SelectionFilterViewModel : ViewAware
 
         FumenVisualEditorViewModel.LoadingFinishedEventHandler loaded = (sender, args) =>
         {
-            bulletPaletteOption.UpdateOptions(args.Fumen);
+            bulletPaletteOption.UpdateOptions(args.Fumen.BulletPalleteList);
         };
 
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (@new, old) =>
         {
             if (old is not null) {
+                bulletPaletteOption.FumenUnloaded(old.Fumen);
                 old.LoadingFinished -= loaded;
             }
 
             if (@new is not null) {
                 @new.LoadingFinished += loaded;
-                bulletPaletteOption.UpdateOptions(@new.Fumen);
+                bulletPaletteOption.FumenLoaded(@new.Fumen);
             }
         };
 
@@ -283,7 +282,7 @@ public class SelectionFilterViewModel : ViewAware
         IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
     }
 
-    public void SelectAllObjectTypes()
+    public void FilterObjectTypesSelectAll()
     {
         bool allSelected = true;
         foreach (var category in FilterTypeCategories) {
@@ -304,7 +303,7 @@ public class SelectionFilterViewModel : ViewAware
         }
     }
 
-    public void ResetObjectTypes()
+    public void FilterObjectTypesReset()
     {
         foreach (var category in FilterTypeCategories) {
             foreach (var item in category.Items) {
@@ -332,18 +331,16 @@ public sealed class FilterObjectTypeCategory : PropertyChangedBase
 
     private readonly string CategoryName;
 
-    private string _categoryNameDisplay;
     public string CategoryNameDisplay
     {
-        get => _categoryNameDisplay;
-        private set => Set(ref _categoryNameDisplay, value);
+        get;
+        private set => Set(ref field, value);
     }
 
-    private string _categoryNameDisplayCheckCount;
     public string CategoryNameDisplayCheckCount
     {
-        get => _categoryNameDisplayCheckCount;
-        private set => Set(ref _categoryNameDisplayCheckCount, value);
+        get;
+        private set => Set(ref field, value);
     }
 
     public FilterObjectTypeCategory(SelectionFilterViewModel filter, string categoryName, IEnumerable<FilterObjectTypesItem> items)
@@ -395,16 +392,15 @@ public class FilterObjectTypesItem : PropertyChangedBase
 
     public string Display => $"{Text} ({MatchingObjects.Count})";
 
-    private bool _isSelected = false;
     public bool IsSelected
     {
-        get => _isSelected;
+        get;
         set
         {
-            Set(ref _isSelected, value);
+            Set(ref field, value);
             NotifyOfPropertyChange(nameof(Display));
         }
-    }
+    } = false;
 }
 
 public class WideModeToVisibilityConverter : IValueConverter

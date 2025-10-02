@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
@@ -296,13 +298,29 @@ public class BulletPaletteFilterOption : SelectionFilterOption
         };
     }
 
-    public void UpdateOptions(OngekiFumen fumen)
+    public void FumenLoaded(OngekiFumen fumen)
+    {
+        fumen.BulletPalleteList.CollectionChanged += BulletPaletteCollectionChanged;
+        UpdateOptions(fumen.BulletPalleteList);
+    }
+
+    public void FumenUnloaded(OngekiFumen fumen)
+    {
+        fumen.BulletPalleteList.CollectionChanged -= BulletPaletteCollectionChanged;
+    }
+
+    public void UpdateOptions(BulletPalleteList paletteList)
     {
         SelectedPalettes.Clear();
         FumenPalettes.Clear();
-        FumenPalettes.AddRange(fumen.BulletPalleteList.Select(p => new Item(p)));
+        FumenPalettes.AddRange(paletteList.Select(p => new Item(p)));
 
         PaletteTable = FumenPalettes.ToDictionary(i => i.Palette, i => i);
+    }
+
+    private void BulletPaletteCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        UpdateOptions((BulletPalleteList)sender);
     }
 
     public override void OnSelectionRefreshed(IEnumerable<ISelectableObject> selection)
