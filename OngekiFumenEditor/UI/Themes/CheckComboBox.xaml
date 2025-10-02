@@ -14,6 +14,7 @@
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
                     <Trigger.Setters>
+                        <Setter Property="Background" Value="{DynamicResource ComboBox.Disabled.Background}" />
                         <Setter Property="BorderBrush" Value="{DynamicResource ComboBox.Disabled.Border}" />
                     </Trigger.Setters>
                 </Trigger>
