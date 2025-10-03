@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ValueConverters;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 
@@ -31,11 +32,10 @@ public abstract class SelectionFilterOption : PropertyChangedBase
     public delegate void OptionValueChangedEventHandler();
     public event OptionValueChangedEventHandler OptionValueChanged;
 
-    private bool _isEnabled;
     public bool IsEnabled
     {
-        get => _isEnabled;
-        set => Set(ref _isEnabled, value);
+        get;
+        set => Set(ref field, value);
     }
 
     public string Text { get; }
@@ -59,25 +59,22 @@ public class TextWithRegexOption : SelectionFilterOption
 {
     public delegate bool FilterPredicate(OngekiObjectBase obj, string input, bool filterIsEnabled);
 
-    private bool _isRegex;
-    private string _inputText;
-
     public bool IsRegex
     {
-        get => _isRegex;
+        get;
         set
         {
-            Set(ref _isRegex, value);
+            Set(ref field, value);
             NotifyOptionValueChanged();
         }
     }
 
     public string InputText
     {
-        get => _inputText;
+        get;
         set
         {
-            Set(ref _inputText, value);
+            Set(ref field, value);
             NotifyOptionValueChanged();
         }
     }
@@ -97,8 +94,6 @@ public class TextWithRegexOption : SelectionFilterOption
 
 public abstract class SelectionFilterOption<T> : SelectionFilterOption
 {
-    private object? _value = null;
-
     public readonly Func<OngekiObjectBase, T, bool> Predicate;
 
     protected SelectionFilterOption(string text, Func<OngekiObjectBase, T, bool> predicate)
@@ -107,16 +102,16 @@ public abstract class SelectionFilterOption<T> : SelectionFilterOption
         Predicate = predicate;
     }
 
-    public object? Value
+    public object Value
     {
-        get => _value;
+        get;
         set
         {
             if (value is not T and not null) {
                 throw new InvalidOperationException();
             }
 
-            Set(ref _value, value);
+            Set(ref field, value);
             NotifyOptionValueChanged();
         }
     }
@@ -129,33 +124,22 @@ public abstract class SelectionFilterOption<T> : SelectionFilterOption
 
 public class BooleanOption : SelectionFilterOption<bool>
 {
-    private string _falseText;
-    private string _trueText;
-
     public string FalseText
     {
-        get => _falseText;
-        set => Set(ref _falseText, value);
+        get;
+        init => Set(ref field, value);
     }
 
     public string TrueText
     {
-        get => _trueText;
-        set => Set(ref _trueText, value);
+        get;
+        init => Set(ref field, value);
     }
 
     public BooleanOption(string text, Func<OngekiObjectBase, bool, bool> filter)
         : base(text, filter)
     {
-        base.PropertyChanged += (_, args) =>
-        {
-            if (args.PropertyName == nameof(IsEnabled)) {
-                if (IsEnabled)
-                    Value = true;
-                else
-                    Value = null;
-            }
-        };
+        Value = true;
     }
 
     public static BooleanOption YesNoOption(string text, Func<OngekiObjectBase, bool, bool> filter)
@@ -184,27 +168,31 @@ public abstract class EnumSpecificationOption(string text) : SelectionFilterOpti
     public abstract object[] Selections { get; }
     public abstract Dictionary<object, string> SelectionsText { get; }
 
-    private object _value;
     public object Value
     {
-        get => _value;
+        get;
         set
         {
             if (value.GetType() != EnumType)
                 throw new InvalidOperationException();
-            Set(ref _value, value);
+            Set(ref field, value);
             NotifyOptionValueChanged();
         }
     }
 }
 
-public abstract class EnumSpecificationOption<T>(string text) : EnumSpecificationOption(text) where T : Enum
+public abstract class EnumSpecificationOption<T> : EnumSpecificationOption where T : Enum
 {
+    public EnumSpecificationOption(string text) : base(text)
+    {
+        Value = default(T);
+    }
+
     protected sealed override Type EnumType => typeof(T);
     public sealed override object[] Selections => Enum.GetValues(typeof(T)).Cast<object>().ToArray();
 }
 
-public class LaneNodeSpecificationOption(string text) : EnumSpecificationOption<HeadTailSpecification>(text)
+public sealed class LaneNodeSpecificationOption(string text) : EnumSpecificationOption<HeadTailSpecification>(text)
 {
     private static readonly Dictionary<object, string> _selectionsText = new()
     {
@@ -283,18 +271,38 @@ public sealed class HoldObjectSpecificationOption(string text) : EnumSpecificati
     }
 }
 
-public class BulletPaletteFilterOption : SelectionFilterOption
+public sealed class BulletPaletteFilterOption : SelectionFilterOption
 {
     public ObservableCollection<Item> FumenPalettes { get; } = new();
-    public ObservableCollection<Item> SelectedPalettes { get; } = new();
     private Dictionary<BulletPallete, Item> PaletteTable = new();
+
+    public string ValueText
+    {
+        get
+        {
+            var selectedPalettes = FumenPalettes.Where(p => p.IsSelected).ToArray();
+            return $"({selectedPalettes.Length}) {string.Join(", ", selectedPalettes.Select(p => p.Palette.StrID))}";
+        }
+    }
 
     public BulletPaletteFilterOption(string text)
         : base(text)
     {
-        SelectedPalettes.CollectionChanged += (s, e) =>
+        PropertyChangedEventHandler handler = (_, propChange) =>
         {
-            NotifyOptionValueChanged();
+            if (propChange.PropertyName == nameof(Item.IsSelected)) {
+                NotifyOptionValueChanged();
+            }
+        };
+
+        FumenPalettes.CollectionChanged += (s, e) =>
+        {
+            foreach (var i in e.NewItems?.Cast<Item>() ?? []) {
+                i.PropertyChanged += handler;
+            }
+            foreach (var i in e.OldItems?.Cast<Item>() ?? []) {
+                i.PropertyChanged -= handler;
+            }
         };
     }
 
@@ -311,7 +319,6 @@ public class BulletPaletteFilterOption : SelectionFilterOption
 
     public void UpdateOptions(BulletPalleteList paletteList)
     {
-        SelectedPalettes.Clear();
         FumenPalettes.Clear();
         FumenPalettes.AddRange(paletteList.Select(p => new Item(p)));
 
@@ -346,16 +353,23 @@ public class BulletPaletteFilterOption : SelectionFilterOption
         if (obj is not IBulletPalleteReferencable bullet)
             return true;
 
-        if (SelectedPalettes.IsEmpty()) {
+        var selectedPalettes = FumenPalettes.Where(p => p.IsSelected).ToArray();
+        if (selectedPalettes.IsEmpty()) {
             return bullet.ReferenceBulletPallete == null;
         }
 
-        return SelectedPalettes.Any(i => i.Palette == bullet.ReferenceBulletPallete);
+        return selectedPalettes.Any(i => i.Palette == bullet.ReferenceBulletPallete);
     }
 
     public class Item : PropertyChangedBase
     {
         public string Text => $"{Palette.StrID} {Palette.EditorName} ({BulletObjects.Count} | {BellObjects.Count})";
+
+        public bool IsSelected
+        {
+            get;
+            set => Set(ref field, value);
+        }
 
         public Item(BulletPallete palette)
         {
@@ -370,14 +384,13 @@ public class BulletPaletteFilterOption : SelectionFilterOption
     }
 }
 
-public class DockableObjectLaneFilterOption : SelectionFilterOption
+public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
 {
-    public IEnumerable<DockableTargetSpecification> AllValues => Enum.GetValues<DockableTargetSpecification>();
-    public ObservableCollection<DockableTargetSpecification> SelectedTargets { get; } = new();
+    public ObservableCollection<Item> AllValues { get; } = new();
 
     public DockableObjectLaneFilterOption(string text) : base(text)
     {
-        SelectedTargets.CollectionChanged += (_, _) => NotifyOptionValueChanged();
+        AllValues.AddRange(Enum.GetValues<DockableTargetSpecification>().Select(d => new Item(d)));
     }
 
     public override bool Filter(OngekiObjectBase obj)
@@ -385,7 +398,25 @@ public class DockableObjectLaneFilterOption : SelectionFilterOption
         if (obj is not ILaneDockable dockable)
             return true;
 
-        return SelectedTargets.Any(t => t.GetLaneType() == dockable.ReferenceLaneStart.LaneType);
+        return AllValues.Where(v => v.IsSelected).Any(t => t.DockLane.GetLaneType() == dockable.ReferenceLaneStart.LaneType);
+    }
+
+    public class Item : PropertyChangedBase
+    {
+        public DockableTargetSpecification DockLane { get; }
+
+        public Item(DockableTargetSpecification dockLane)
+        {
+            DockLane = dockLane;
+        }
+
+        public bool IsSelected
+        {
+            get;
+            set => Set(ref field, value);
+        }
+
+        public string Text => DockLane.ToString();
     }
 }
 

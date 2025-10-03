@@ -26,8 +26,7 @@ public partial class SelectionFilterView : UserControl
         var items = listBox.Items.Cast<FilterObjectTypesItem>().ToArray();
 
         // Stupid hack to refresh the "select all" button for partial selections.
-        items[0].IsSelected = !items[0].IsSelected;
-        items[0].IsSelected = !items[0].IsSelected;
+        items[0].NotifyOfPropertyChange(nameof(FilterObjectTypesItem.IsSelected));
 
         // Properly check the "Select All" option when all types exist in the selection
         if (items.All(o => o.IsSelected)) {
