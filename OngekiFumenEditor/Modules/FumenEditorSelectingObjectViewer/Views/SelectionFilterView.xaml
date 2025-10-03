@@ -110,6 +110,7 @@
                                     DisplayMemberPath="Text"
                                     IsEnabled="{Binding IsEnabled}"
                                     Width="200"
+                                    IsSelectAllActive="True"
                                     Closed="BulletPaletteCheckList_SetText"
                                     Loaded="BulletPaletteCheckList_SetText"
                                     ItemSelectionChanged="BulletPaletteCheckList_SetText" />
@@ -124,6 +125,7 @@
                                     DisplayMemberPath="Text"
                                     Width="200"
                                     HorizontalAlignment="Left"
+                                    IsSelectAllActive="True"
                                     IsEnabled="{Binding IsEnabled}">
                     <xctk:CheckComboBox.ItemTemplate>
                         <DataTemplate>
