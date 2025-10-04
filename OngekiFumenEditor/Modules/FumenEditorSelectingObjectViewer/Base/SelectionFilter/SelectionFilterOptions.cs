@@ -305,8 +305,8 @@ public sealed class LaneNodeSpecificationOption(string text) : EnumSpecification
         [HeadTailSpecification.Tail] = Resources.SelectionFilter_HeadTailLaneNode_Tail,
         [HeadTailSpecification.HeadWithChild] = Resources.SelectionFilter_HeadTailLaneNode_HeadWithChild,
         [HeadTailSpecification.HeadNoChild] = Resources.SelectionFilter_HeadTailLaneNode_HeadNoChild,
-        [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailLaneNode_TailNoParent,
         [HeadTailSpecification.TailWithParent] = Resources.SelectionFilter_HeadTailLaneNode_TailWithParent,
+        [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailLaneNode_TailNoParent,
     };
 
     public override Dictionary<object, string> SelectionsText => _selectionsText;
@@ -344,8 +344,8 @@ public sealed class HoldObjectSpecificationOption(string text) : EnumSpecificati
         [HeadTailSpecification.Tail] = Resources.SelectionFilter_HeadTailHoldObject_Tail,
         [HeadTailSpecification.HeadWithChild] = Resources.SelectionFilter_HeadTailHoldObject_HeadWithChild,
         [HeadTailSpecification.HeadNoChild] = Resources.SelectionFilter_HeadTailHoldObject_HeadNoChild,
-        [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailHoldObject_TailNoParent,
         [HeadTailSpecification.TailWithParent] = Resources.SelectionFilter_HeadTailHoldObject_TailWithParent,
+        [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailHoldObject_TailNoParent,
     };
 
     public override Dictionary<object, string> SelectionsText => _selectionsText;
@@ -384,8 +384,8 @@ public sealed class LaneBlockSpecificationOption(string text) : EnumSpecificatio
         [HeadTailSpecification.Tail] = Resources.SelectionFilter_HeadTailHoldObject_Tail,
         [HeadTailSpecification.HeadWithChild] = Resources.SelectionFilter_HeadTailHoldObject_HeadWithChild,
         [HeadTailSpecification.HeadNoChild] = Resources.SelectionFilter_HeadTailHoldObject_HeadNoChild,
-        [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailHoldObject_TailNoParent,
         [HeadTailSpecification.TailWithParent] = Resources.SelectionFilter_HeadTailHoldObject_TailWithParent,
+        [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailHoldObject_TailNoParent,
     };
 
     public override Dictionary<object, string> SelectionsText => _selectionsText;
