@@ -18,12 +18,31 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Base.Select
 public class OptionCategory : PropertyChangedBase
 {
     public ObservableCollection<SelectionFilterOption> Options { get; } = new();
+
     public string Name { get; }
+    public string DisplayName => $"{Name} ({Options.Count(o => o.IsEnabled)} / {Options.Count})";
 
     public OptionCategory(string name, IEnumerable<SelectionFilterOption> options)
     {
+        Options.CollectionChanged += (_, args) =>
+        {
+            foreach (var item in args.NewItems?.Cast<SelectionFilterOption>() ?? Array.Empty<SelectionFilterOption>()) {
+                item.PropertyChanged += OnItemPropertyChanged;
+            }
+            foreach (var item in args.OldItems?.Cast<SelectionFilterOption>() ?? Array.Empty<SelectionFilterOption>()) {
+                item.PropertyChanged -= OnItemPropertyChanged;
+            }
+        };
+
         Options.AddRange(options);
         Name = name;
+    }
+
+    private void OnItemPropertyChanged(object? _, PropertyChangedEventArgs propArgs)
+    {
+        if (propArgs.PropertyName == nameof(SelectionFilterOption.IsEnabled)) {
+            NotifyOfPropertyChange(nameof(DisplayName));
+        }
     }
 }
 
@@ -254,7 +273,7 @@ public abstract class EnumSpecificationOption<T> : EnumSpecificationOption where
         }
     }
 
-    public Dictionary<T, int> OptionMatchCounts { get; } = Enum.GetValues(typeof(T)).Cast<T>().ToDictionary(x => x, x => 0);
+    public Dictionary<T, int> OptionMatchCounts { get; } = Enum.GetValues(typeof(T)).Cast<T>().ToDictionary(x => x, _ => 0);
 
     public override int SelectedOptionMatchCount
     {

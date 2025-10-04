@@ -246,7 +246,7 @@
                               Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type selectionFilter:OptionCategory}">
-                            <controls:ExpanderEx Header="{Binding Name}">
+                            <controls:ExpanderEx Header="{Binding DisplayName}">
                                 <StackPanel Orientation="Vertical">
                                     <ItemsControl ItemsSource="{Binding Options}" />
                                 </StackPanel>
@@ -259,7 +259,7 @@
                             Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource WideModeToVisibilityConverter}}">
                     <TabControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type selectionFilter:OptionCategory}">
-                            <TextBlock Text="{Binding Name}" />
+                            <TextBlock Text="{Binding DisplayName}" />
                         </DataTemplate>
                     </TabControl.ItemTemplate>
                     <TabControl.ContentTemplate>
