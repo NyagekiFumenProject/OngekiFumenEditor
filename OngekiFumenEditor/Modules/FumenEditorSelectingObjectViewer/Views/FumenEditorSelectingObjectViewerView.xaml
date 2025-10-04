@@ -104,7 +104,7 @@
     </Grid>
         </TabItem>
 
-        <TabItem Header="Filter">
+        <TabItem Header="Filter" IsSelected="{Binding IsFilterMenuVisible}">
             <views:SelectionFilterView DataContext="{Binding SelectionFilter}" />
         </TabItem>
     </TabControl>

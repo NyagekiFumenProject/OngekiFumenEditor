@@ -59,6 +59,18 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 
 		public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
+		public bool IsFilterMenuVisible
+		{
+			get;
+			set
+			{
+				Set(ref field, value);
+				if (field) {
+					SelectionFilter.OnSelectedItemsRefreshed();
+				}
+			}
+		}
+
 		public FumenEditorSelectingObjectViewerViewModel()
 		{
 			SelectionFilter = new SelectionFilterViewModel(this);
@@ -79,7 +91,10 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 		{
 			EditorSelectObjects.Clear();
 			EditorSelectObjects.AddRange(Editor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>());
-			SelectionFilter.OnSelectedItemsRefreshed();
+
+			if (IsFilterMenuVisible)
+				SelectionFilter.OnSelectedItemsRefreshed();
+
 			dataView.Refresh();
 		}
 
