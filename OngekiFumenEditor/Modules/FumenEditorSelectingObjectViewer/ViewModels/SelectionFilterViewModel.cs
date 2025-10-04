@@ -293,6 +293,8 @@ public class SelectionFilterViewModel : ViewAware
         foreach (var typeFilter in FilterTypeCategories.SelectMany(c => c.Items)) {
             ObjectTypeFilterMatches.AddRange(typeFilter.MatchingObjects);
         }
+        UpdateOptionFilterRemovals();
+        
         UpdateFilterOutcomeText();
     }
 
