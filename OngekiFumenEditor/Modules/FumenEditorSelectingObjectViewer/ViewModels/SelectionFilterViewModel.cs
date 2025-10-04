@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Data;
 using Caliburn.Micro;
+using Mono.Cecil;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
@@ -15,6 +16,7 @@ using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Base.SelectionFilter;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -152,7 +154,19 @@ public class SelectionFilterViewModel : ViewAware
                 new HoldObjectSpecificationOption(Resources.SelectionFilter_OptionLabelHoldType)
             ]),
             new(Resources.SelectionFilter_OptionTabBullets, [
-                GenerateBulletPaletteOption()
+                GenerateBulletPaletteOption(),
+                new BooleanOption(Resources.BulletSize, (obj, smallLarge) =>
+                {
+                    if (obj is not Bullet bullet)
+                        return FilterOptionResult.NotApplicable;
+                    return (bullet.SizeValue == BulletSize.Normal) == smallLarge
+                        ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
+                })
+                {
+                    TrueText = BulletSize.Normal.ToString(),
+                    FalseText = BulletSize.Large.ToString()
+                },
+                new BulletShapeOption(Resources.BulletType)
             ]),
             new(Resources.SelectionFilter_OptionTabOther, [
                 BooleanOption.LeftRightOption(Resources.SelectionFilter_OptionLabelLaneBlockDirection, (obj, leftRight) =>

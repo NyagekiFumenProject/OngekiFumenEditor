@@ -10,6 +10,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 
@@ -477,6 +478,21 @@ public sealed class SoflanAreaSpecificationOption(string text) : EnumSpecificati
             default:
                 return FilterOptionResult.NotApplicable;
         }
+    }
+}
+
+public sealed class BulletShapeOption(string text) : EnumSpecificationOption<BulletType>(text)
+{
+    private static readonly Dictionary<object, string> _selectionsText = Enum.GetValues<BulletType>()
+        .ToDictionary(t => (object)t, t => t.ToString());
+
+    public override Dictionary<object, string> SelectionsText => _selectionsText;
+
+    protected override FilterOptionResult Predicate(BulletType input, OngekiObjectBase obj)
+    {
+        if (obj is not Bullet bullet)
+            return FilterOptionResult.NotApplicable;
+        return (bullet.TypeValue == input) ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
     }
 }
 
