@@ -1,10 +1,10 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using AngleSharp.Dom;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
@@ -421,6 +421,8 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
     public ObservableCollection<Item> FumenPalettes { get; } = new();
     private Dictionary<BulletPallete, Item> PaletteTable = new();
 
+    private Item NullPaletteItem;
+
     public int FilterMatches
     {
         get;
@@ -448,6 +450,8 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
                 i.PropertyChanged -= handler;
             }
         };
+
+        NullPaletteItem = new Item(null);
     }
 
     public void FumenLoaded(OngekiFumen fumen)
@@ -464,14 +468,18 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
     public void UpdateOptions(BulletPalleteList paletteList)
     {
         FumenPalettes.Clear();
+
+        NullPaletteItem = new Item(null);
+        FumenPalettes.Add(NullPaletteItem);
+        FumenPalettes.Add(new(BulletPallete.DummyCustomPallete));
         FumenPalettes.AddRange(paletteList.Select(p => new Item(p)));
 
-        PaletteTable = FumenPalettes.ToDictionary(i => i.Palette, i => i);
+        PaletteTable = FumenPalettes.Except([NullPaletteItem]).ToDictionary(i => i.Palette!, i => i);
     }
 
     private void BulletPaletteCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        UpdateOptions((BulletPalleteList)sender);
+        UpdateOptions((BulletPalleteList)sender!);
     }
 
     public override FilterOptionResult Filter(OngekiObjectBase obj)
@@ -492,10 +500,9 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
         if (obj is not IBulletPalleteReferencable bullet)
             return;
 
-        if (bullet.ReferenceBulletPallete == null)
-            return;
-        if (!PaletteTable.TryGetValue(bullet.ReferenceBulletPallete, out var item))
-            return;
+        var item = bullet.ReferenceBulletPallete == null
+            ? NullPaletteItem
+            : PaletteTable[bullet.ReferenceBulletPallete];
 
         if (bullet is Bullet)
             item.BulletCount++;
@@ -520,9 +527,9 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
         FilterMatches = FumenPalettes.Where(i => i.IsSelected).Sum(i => i.BulletCount + i.BellCount);
     }
 
-    public class Item(BulletPallete palette) : PropertyChangedBase
+    public class Item(BulletPallete? palette) : PropertyChangedBase
     {
-        public BulletPallete Palette { get; } = palette;
+        public BulletPallete? Palette { get; } = palette;
 
         public bool IsSelected
         {
@@ -550,7 +557,18 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
             }
         }
 
-        public string Text => $"{Palette.StrID} {Palette.EditorName} ({BulletCount} | {BellCount})";
+        public string Text
+        {
+            get
+            {
+                var baseText = Palette is null
+                    ? Resources.NoBulletPalette
+                    : Palette == BulletPallete.DummyCustomPallete
+                        ? Palette.EditorName
+                        : $"{Palette.StrID} {Palette.EditorName}";
+                return $"{baseText} ({BulletCount} | {BellCount})";
+            }
+        }
     }
 }
 
@@ -584,20 +602,17 @@ public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
         if (obj is not ILaneDockable dockable)
             return FilterOptionResult.NotApplicable;
 
-        return Values.Where(v => v.IsSelected).Any(t => t.DockLane.GetLaneType() == dockable.ReferenceLaneStart.LaneType)
+        return GetItemFromObject(dockable) is not null
             ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
     }
 
     public override void UpdateFilterCounts(OngekiObjectBase obj)
     {
-        if (obj is not ILaneDockable dockable) {
+        if (obj is not ILaneDockable dockable)
             return;
-        }
-
-        var match = Values.SingleOrDefault(i => i.DockLane == dockable.ReferenceLaneStart.LaneType.GetDockableTargetSpecification());
-        if (match is not null) {
-            match.MatchCount++;
-        }
+        var item = GetItemFromObject(dockable);
+        if (item is not null)
+            item.MatchCount++;
 
         UpdateFilterMatches();
     }
@@ -606,6 +621,9 @@ public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
     {
         FilterMatches = Values.Where(i => i.IsSelected).Sum(i => i.MatchCount);
     }
+
+    private Item? GetItemFromObject(ILaneDockable dockable)
+        => Values.SingleOrDefault(i => i.DockLane == (dockable.ReferenceLaneStart?.LaneType ?? LaneType.Undefined).GetDockableTargetSpecification());
 
     public override void ResetFilterCounts()
     {
@@ -655,6 +673,7 @@ public enum HeadTailSpecification
 
 public enum DockableTargetSpecification
 {
+    NoLane,
     WallLeft,
     LaneLeft,
     LaneCenter,
@@ -675,6 +694,7 @@ public static class FilterEnumExtensions
     {
         return spec switch
         {
+            DockableTargetSpecification.NoLane => LaneType.Undefined,
             DockableTargetSpecification.WallLeft => LaneType.WallLeft,
             DockableTargetSpecification.LaneLeft => LaneType.Left,
             DockableTargetSpecification.LaneCenter => LaneType.Center,
@@ -688,6 +708,7 @@ public static class FilterEnumExtensions
     {
         return laneType switch
         {
+            LaneType.Undefined => DockableTargetSpecification.NoLane,
             LaneType.WallLeft => DockableTargetSpecification.WallLeft,
             LaneType.Left => DockableTargetSpecification.LaneLeft,
             LaneType.Center => DockableTargetSpecification.LaneCenter,
@@ -701,6 +722,7 @@ public static class FilterEnumExtensions
     {
         return spec switch
         {
+            DockableTargetSpecification.NoLane => Resources.SelectionFilter_None,
             DockableTargetSpecification.WallLeft => Resources.WallLeft,
             DockableTargetSpecification.WallRight => Resources.WallRight,
             DockableTargetSpecification.LaneLeft => Resources.LaneLeft,
