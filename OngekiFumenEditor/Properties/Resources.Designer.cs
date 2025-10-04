@@ -5442,6 +5442,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Lane block object type.
+        /// </summary>
+        public static string SelectionFilter_OptionLabelLaneBlockType {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelLaneBlockType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Lane node type.
         /// </summary>
         public static string SelectionFilter_OptionLabelLaneNodeType {
@@ -5483,6 +5492,15 @@ namespace OngekiFumenEditor.Properties {
         public static string SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead {
             get {
                 return ResourceManager.GetString("SelectionFilter_OptionLabelMatchNextNodesWithSelectedHead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Soflan area object type.
+        /// </summary>
+        public static string SelectionFilter_OptionLabelSoflanAreaType {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelSoflanAreaType", resourceCulture);
             }
         }
         

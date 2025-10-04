@@ -162,6 +162,8 @@ public class SelectionFilterViewModel : ViewAware
                     return (lbk.Direction == LaneBlockArea.BlockDirection.Left) == leftRight
                         ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
                 }),
+                new LaneBlockSpecificationOption(Resources.SelectionFilter_OptionLabelLaneBlockType),
+                new SoflanAreaSpecificationOption(Resources.SelectionFilter_OptionLabelSoflanAreaType)
             ])
         ]);
 
@@ -182,7 +184,7 @@ public class SelectionFilterViewModel : ViewAware
         FilterTypeCategories.SelectMany(c => c.Items).ForEach(i => i.MatchingObjects.Clear());
         ObjectTypeFilterMatches.Clear();
 
-        OptionCategories.SelectMany(c => c.Options).ForEach(o => o.ResetFilterCounts());
+        OptionCategories.SelectMany(c => c.Options).ForEach(o => o.ResetOptionMatchCount());
 
         // Add selected objects to each category
         if (Editor is not null) {
@@ -191,7 +193,7 @@ public class SelectionFilterViewModel : ViewAware
                     .FirstOrDefault(i => i.Types.Any(t => t.IsInstanceOfType(item)));
                 matchingCategory?.MatchingObjects.Add(item);
 
-                OptionCategories.SelectMany(c => c.Options).ForEach(o => o.UpdateFilterCounts((OngekiObjectBase)item));
+                OptionCategories.SelectMany(c => c.Options).ForEach(o => o.IncrementOptionMatchCount((OngekiObjectBase)item));
             }
         }
 

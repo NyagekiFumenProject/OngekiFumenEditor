@@ -33,7 +33,7 @@ public class OptionCategory : PropertyChangedBase
 public abstract class SelectionFilterOption : PropertyChangedBase
 {
     public delegate void OptionValueChangedEventHandler();
-    public event OptionValueChangedEventHandler OptionValueChanged;
+    public event OptionValueChangedEventHandler? OptionValueChanged;
 
     public bool IsEnabled
     {
@@ -50,8 +50,8 @@ public abstract class SelectionFilterOption : PropertyChangedBase
 
     public abstract FilterOptionResult Filter(OngekiObjectBase obj);
 
-    public abstract void UpdateFilterCounts(OngekiObjectBase obj);
-    public abstract void ResetFilterCounts();
+    public abstract void IncrementOptionMatchCount(OngekiObjectBase obj);
+    public abstract void ResetOptionMatchCount();
 
     protected void NotifyOptionValueChanged()
     {
@@ -74,7 +74,7 @@ public class TextWithRegexOption : SelectionFilterOption
             Set(ref field, value);
             NotifyOptionValueChanged();
         }
-    }
+    } = false;
 
     public string InputText
     {
@@ -84,13 +84,13 @@ public class TextWithRegexOption : SelectionFilterOption
             Set(ref field, value);
             NotifyOptionValueChanged();
         }
-    }
+    } = string.Empty;
 
     public int MatchCount
     {
         get;
-        set => Set(ref field, value);
-    }
+        private set => Set(ref field, value);
+    } = 0;
 
     public FilterPredicate Predicate { get; }
 
@@ -104,24 +104,25 @@ public class TextWithRegexOption : SelectionFilterOption
         return Predicate(obj, InputText, IsRegex);
     }
 
-    public override void UpdateFilterCounts(OngekiObjectBase obj)
+    public override void IncrementOptionMatchCount(OngekiObjectBase obj)
     {
         if (Filter(obj) == FilterOptionResult.Match)
             MatchCount++;
     }
 
-    public override void ResetFilterCounts()
+    public override void ResetOptionMatchCount()
     {
         MatchCount = 0;
     }
 }
 
 /// <summary>
-/// Base class for single-value filter options.
+/// Base class for single-value filter options of value types (ex. bool, int).
 /// </summary>
 public abstract class SelectionFilterOption<T> : SelectionFilterOption
+    where T : struct
 {
-    public readonly Func<OngekiObjectBase, T, FilterOptionResult> Predicate;
+    protected readonly Func<OngekiObjectBase, T, FilterOptionResult> Predicate;
 
     protected SelectionFilterOption(string text, Func<OngekiObjectBase, T, FilterOptionResult> predicate)
         : base(text)
@@ -129,23 +130,19 @@ public abstract class SelectionFilterOption<T> : SelectionFilterOption
         Predicate = predicate;
     }
 
-    public object Value
+    public T Value
     {
         get;
         set
         {
-            if (value is not T and not null) {
-                throw new InvalidOperationException();
-            }
-
             Set(ref field, value);
             NotifyOptionValueChanged();
         }
-    }
+    } = default;
 
     public sealed override FilterOptionResult Filter(OngekiObjectBase obj)
     {
-        return Predicate(obj, (T)Value);
+        return Predicate(obj, Value);
     }
 }
 
@@ -170,13 +167,13 @@ public class BooleanOption : SelectionFilterOption<bool>
     {
         get;
         init => Set(ref field, value);
-    }
+    } = string.Empty;
 
     public string TrueText
     {
         get;
         init => Set(ref field, value);
-    }
+    } = string.Empty;
 
     public BooleanOption(string text, Func<OngekiObjectBase, bool, FilterOptionResult> filter)
         : base(text, filter)
@@ -184,7 +181,7 @@ public class BooleanOption : SelectionFilterOption<bool>
         Value = true;
     }
 
-    public override void UpdateFilterCounts(OngekiObjectBase obj)
+    public override void IncrementOptionMatchCount(OngekiObjectBase obj)
     {
         if (Predicate(obj, true) == FilterOptionResult.Match) {
             TrueMatches++;
@@ -195,7 +192,7 @@ public class BooleanOption : SelectionFilterOption<bool>
         }
     }
 
-    public override void ResetFilterCounts()
+    public override void ResetOptionMatchCount()
     {
         TrueMatches = 0;
         FalseMatches = 0;
@@ -225,31 +222,41 @@ public class BooleanOption : SelectionFilterOption<bool>
 /// </summary>
 public abstract class EnumSpecificationOption(string text) : SelectionFilterOption(text)
 {
-    protected abstract Type EnumType { get; }
-
-    public abstract object[] Selections { get; }
     public abstract Dictionary<object, string> SelectionsText { get; }
-    public abstract int TotalMatches { get; set; }
+    public abstract int SelectedOptionMatchCount { get; set; }
 
-    public object Value
-    {
-        get;
-        set
-        {
-            if (value.GetType() != EnumType)
-                throw new InvalidOperationException();
-            Set(ref field, value);
-            NotifyOptionValueChanged();
-        }
-    }
+    public abstract object Value { get; set; }
 }
 
 /// <inheritdoc />
 public abstract class EnumSpecificationOption<T> : EnumSpecificationOption where T : Enum
 {
-    public Dictionary<T, int> MatchCounts { get; } = Enum.GetValues(typeof(T)).Cast<T>().ToDictionary(x => x, x => 0);
+    public override object Value
+    {
+        get => TypedValue;
+        set
+        {
+            if (value is not T tValue)
+                throw new InvalidOperationException();
+            TypedValue = tValue;
+            NotifyOptionValueChanged();
+        }
+    }
 
-    public override int TotalMatches
+    public T TypedValue
+    {
+        get;
+        set
+        {
+            Set(ref field, value);
+            NotifyOfPropertyChange(nameof(Value));
+            NotifyOptionValueChanged();
+        }
+    }
+
+    public Dictionary<T, int> OptionMatchCounts { get; } = Enum.GetValues(typeof(T)).Cast<T>().ToDictionary(x => x, x => 0);
+
+    public override int SelectedOptionMatchCount
     {
         get;
         set => Set(ref field, value);
@@ -257,33 +264,34 @@ public abstract class EnumSpecificationOption<T> : EnumSpecificationOption where
 
     public EnumSpecificationOption(string text) : base(text)
     {
-        Value = default(T);
+        TypedValue = default!;
+
         OptionValueChanged += () =>
         {
-            TotalMatches = MatchCounts[(T)Value];
+            SelectedOptionMatchCount = OptionMatchCounts[TypedValue];
         };
     }
 
-    public override void UpdateFilterCounts(OngekiObjectBase obj)
+    public override void IncrementOptionMatchCount(OngekiObjectBase obj)
     {
         foreach (var v in Enum.GetValues(typeof(T)).Cast<T>()) {
             var res = Predicate(v, obj);
             if (res == FilterOptionResult.NotApplicable)
                 break;
             if (res == FilterOptionResult.Match)
-                MatchCounts[v]++;
+                OptionMatchCounts[v]++;
         }
 
-        TotalMatches = MatchCounts.ContainsKey((T)Value) ? MatchCounts[(T)Value] : 0;
+        SelectedOptionMatchCount = OptionMatchCounts.ContainsKey(TypedValue) ? OptionMatchCounts[TypedValue] : 0;
     }
 
-    public override void ResetFilterCounts()
+    public override void ResetOptionMatchCount()
     {
-        foreach (var k in MatchCounts.Keys) {
-            MatchCounts[k] = 0;
+        foreach (var k in OptionMatchCounts.Keys) {
+            OptionMatchCounts[k] = 0;
         }
 
-        TotalMatches = 0;
+        SelectedOptionMatchCount = 0;
     }
 
     public override FilterOptionResult Filter(OngekiObjectBase obj)
@@ -292,9 +300,6 @@ public abstract class EnumSpecificationOption<T> : EnumSpecificationOption where
     }
 
     protected abstract FilterOptionResult Predicate(T input, OngekiObjectBase obj);
-
-    protected sealed override Type EnumType => typeof(T);
-    public sealed override object[] Selections => Enum.GetValues(typeof(T)).Cast<object>().ToArray();
 }
 
 public sealed class LaneNodeSpecificationOption(string text) : EnumSpecificationOption<HeadTailSpecification>(text)
@@ -354,7 +359,7 @@ public sealed class HoldObjectSpecificationOption(string text) : EnumSpecificati
     {
         switch (obj) {
             case Hold hold:
-                switch (Value) {
+                switch (input) {
                     case HeadTailSpecification.Head:
                     case HeadTailSpecification.HeadNoChild
                         when hold.HoldEnd is null || !hold.HoldEnd.IsSelected:
@@ -363,7 +368,7 @@ public sealed class HoldObjectSpecificationOption(string text) : EnumSpecificati
                 }
                 return FilterOptionResult.NoMatch;
             case HoldEnd holdEnd:
-                switch (Value) {
+                switch (input) {
                     case HeadTailSpecification.Tail:
                     case HeadTailSpecification.TailNoParent when !holdEnd.RefHold.IsSelected:
                     case HeadTailSpecification.TailWithParent when holdEnd.RefHold.IsSelected:
@@ -394,7 +399,7 @@ public sealed class LaneBlockSpecificationOption(string text) : EnumSpecificatio
     {
         switch (obj) {
             case LaneBlockArea hold:
-                switch (Value) {
+                switch (input) {
                     case HeadTailSpecification.Head:
                     case HeadTailSpecification.HeadNoChild
                         when hold.EndIndicator is null || !hold.EndIndicator.IsSelected:
@@ -403,7 +408,7 @@ public sealed class LaneBlockSpecificationOption(string text) : EnumSpecificatio
                 }
                 return FilterOptionResult.NoMatch;
             case LaneBlockArea.LaneBlockAreaEndIndicator holdEnd:
-                switch (Value) {
+                switch (input) {
                     case HeadTailSpecification.Tail:
                     case HeadTailSpecification.TailNoParent when !holdEnd.RefLaneBlockArea.IsSelected:
                     case HeadTailSpecification.TailWithParent when holdEnd.RefLaneBlockArea.IsSelected:
@@ -416,9 +421,49 @@ public sealed class LaneBlockSpecificationOption(string text) : EnumSpecificatio
     }
 }
 
+public sealed class SoflanAreaSpecificationOption(string text) : EnumSpecificationOption<HeadTailSpecification>(text)
+{
+    private static readonly Dictionary<object, string> _selectionsText = new()
+    {
+        [HeadTailSpecification.Head] = Resources.SelectionFilter_HeadTailHoldObject_Head,
+        [HeadTailSpecification.Tail] = Resources.SelectionFilter_HeadTailHoldObject_Tail,
+        [HeadTailSpecification.HeadWithChild] = Resources.SelectionFilter_HeadTailHoldObject_HeadWithChild,
+        [HeadTailSpecification.HeadNoChild] = Resources.SelectionFilter_HeadTailHoldObject_HeadNoChild,
+        [HeadTailSpecification.TailWithParent] = Resources.SelectionFilter_HeadTailHoldObject_TailWithParent,
+        [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailHoldObject_TailNoParent,
+    };
+
+    public override Dictionary<object, string> SelectionsText => _selectionsText;
+
+    protected override FilterOptionResult Predicate(HeadTailSpecification input, OngekiObjectBase obj)
+    {
+        switch (obj) {
+            case Soflan soflanStart:
+                switch (input) {
+                    case HeadTailSpecification.Head:
+                    case HeadTailSpecification.HeadNoChild
+                        when soflanStart.EndIndicator is null || !soflanStart.EndIndicator.IsSelected:
+                    case HeadTailSpecification.HeadWithChild when soflanStart.EndIndicator.IsSelected:
+                        return FilterOptionResult.Match;
+                }
+                return FilterOptionResult.NoMatch;
+            case Soflan.SoflanEndIndicator soflanEnd:
+                switch (input) {
+                    case HeadTailSpecification.Tail:
+                    case HeadTailSpecification.TailNoParent when !soflanEnd.RefSoflan.IsSelected:
+                    case HeadTailSpecification.TailWithParent when soflanEnd.RefSoflan.IsSelected:
+                        return FilterOptionResult.Match;
+                }
+                return FilterOptionResult.NoMatch;
+            default:
+                return FilterOptionResult.NotApplicable;
+        }
+    }
+}
+
 public sealed class BulletPaletteFilterOption : SelectionFilterOption
 {
-    public ObservableCollection<Item> FumenPalettes { get; } = new();
+    public ObservableCollection<Item> Items { get; } = new();
     private Dictionary<BulletPallete, Item> PaletteTable = new();
 
     private Item NullPaletteItem;
@@ -441,7 +486,7 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
             }
         };
 
-        FumenPalettes.CollectionChanged += (s, e) =>
+        Items.CollectionChanged += (s, e) =>
         {
             foreach (var i in e.NewItems?.Cast<Item>() ?? []) {
                 i.PropertyChanged += handler;
@@ -467,14 +512,14 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
     public void UpdateOptions(BulletPalleteList paletteList)
     {
-        FumenPalettes.Clear();
+        Items.Clear();
 
         NullPaletteItem = new Item(null);
-        FumenPalettes.Add(NullPaletteItem);
-        FumenPalettes.Add(new(BulletPallete.DummyCustomPallete));
-        FumenPalettes.AddRange(paletteList.Select(p => new Item(p)));
+        Items.Add(NullPaletteItem);
+        Items.Add(new(BulletPallete.DummyCustomPallete));
+        Items.AddRange(paletteList.Select(p => new Item(p)));
 
-        PaletteTable = FumenPalettes.Except([NullPaletteItem]).ToDictionary(i => i.Palette!, i => i);
+        PaletteTable = Items.Except([NullPaletteItem]).ToDictionary(i => i.Palette!, i => i);
     }
 
     private void BulletPaletteCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -487,7 +532,7 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
         if (obj is not IBulletPalleteReferencable bullet)
             return FilterOptionResult.NotApplicable;
 
-        var selectedPalettes = FumenPalettes.Where(p => p.IsSelected).ToArray();
+        var selectedPalettes = Items.Where(p => p.IsSelected).ToArray();
         if (selectedPalettes.IsEmpty()) {
             return bullet.ReferenceBulletPallete == null ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
         }
@@ -495,7 +540,7 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
         return selectedPalettes.Any(i => i.Palette == bullet.ReferenceBulletPallete) ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
     }
 
-    public override void UpdateFilterCounts(OngekiObjectBase obj)
+    public override void IncrementOptionMatchCount(OngekiObjectBase obj)
     {
         if (obj is not IBulletPalleteReferencable bullet)
             return;
@@ -512,9 +557,9 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
         UpdateFilterMatches();
     }
 
-    public override void ResetFilterCounts()
+    public override void ResetOptionMatchCount()
     {
-        foreach (var palette in FumenPalettes) {
+        foreach (var palette in Items) {
             palette.BulletCount = 0;
             palette.BellCount = 0;
         }
@@ -524,7 +569,7 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
     private void UpdateFilterMatches()
     {
-        FilterMatches = FumenPalettes.Where(i => i.IsSelected).Sum(i => i.BulletCount + i.BellCount);
+        FilterMatches = Items.Where(i => i.IsSelected).Sum(i => i.BulletCount + i.BellCount);
     }
 
     public class Item(BulletPallete? palette) : PropertyChangedBase
@@ -606,7 +651,7 @@ public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
             ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
     }
 
-    public override void UpdateFilterCounts(OngekiObjectBase obj)
+    public override void IncrementOptionMatchCount(OngekiObjectBase obj)
     {
         if (obj is not ILaneDockable dockable)
             return;
@@ -625,7 +670,7 @@ public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
     private Item? GetItemFromObject(ILaneDockable dockable)
         => Values.SingleOrDefault(i => i.DockLane == (dockable.ReferenceLaneStart?.LaneType ?? LaneType.Undefined).GetDockableTargetSpecification());
 
-    public override void ResetFilterCounts()
+    public override void ResetOptionMatchCount()
     {
         foreach (var item in Values)
             item.MatchCount = 0;

@@ -2277,4 +2277,10 @@
   <data name="BulletPalleteDisplayName" xml:space="preserve">
     <value>BulletPallete</value>
   </data>
+  <data name="SelectionFilter_OptionLabelLaneBlockType" xml:space="preserve">
+    <value>Lane block object type</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelSoflanAreaType" xml:space="preserve">
+    <value>Soflan area object type</value>
+  </data>
 </root>
