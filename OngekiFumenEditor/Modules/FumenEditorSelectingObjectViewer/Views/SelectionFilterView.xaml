@@ -231,7 +231,18 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <Label Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}"
+                                cal:Message.Attach="FilterOptionsReset()" />
+                    </StackPanel>
+                </Grid>
 
                 <ItemsControl ItemsSource="{Binding OptionCategories}"
                               Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource InverseWideModeToVisibilityConverter}}">

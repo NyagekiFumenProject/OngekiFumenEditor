@@ -344,6 +344,13 @@ public class SelectionFilterViewModel : ViewAware
             }
         }
     }
+
+    public void FilterOptionsReset()
+    {
+        foreach (var opt in OptionCategories.SelectMany(c => c.Options)) {
+            opt.IsEnabled = false;
+        }
+    }
 }
 
 public sealed class FilterObjectTypeCategory : PropertyChangedBase
