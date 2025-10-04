@@ -20,8 +20,6 @@
     <UserControl.Resources>
         <vm:WideModeToVisibilityConverter x:Key="WideModeToVisibilityConverter" />
         <vm:WideModeToVisibilityConverter x:Key="InverseWideModeToVisibilityConverter" IsInverse="true" />
-        <vm:ParenthesizeTextConverter x:Key="ParenthesizeTextConverter" />
-        <valueConverters:DockableTargetSpecificationConverter x:Key="DockableTargetSpecificationConverter" />
         <system:Boolean x:Key="True">True</system:Boolean>
         <system:Boolean x:Key="False">False</system:Boolean>
 
@@ -189,7 +187,7 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:FilterObjectTypeCategory}">
+                        <DataTemplate DataType="{x:Type selectionFilter:FilterObjectTypeCategory}">
                             <controls:ExpanderEx Header="{Binding CategoryNameDisplayCheckCount}">
                                 <xctk:CheckListBox ItemsSource="{Binding Items}"
                                                    HorizontalContentAlignment="Stretch"
@@ -215,7 +213,7 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:FilterObjectTypeCategory}">
+                        <DataTemplate DataType="{x:Type selectionFilter:FilterObjectTypeCategory}">
                             <xctk:CheckListBox ItemsSource="{Binding Items}"
                                                HorizontalContentAlignment="Stretch"
                                                Height="Auto"
