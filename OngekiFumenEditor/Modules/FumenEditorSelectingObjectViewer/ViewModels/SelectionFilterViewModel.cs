@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Data;
 using Caliburn.Micro;
@@ -122,6 +123,10 @@ public class SelectionFilterViewModel : ViewAware
                 {
                     if (obj is not OngekiObjectBase ongekiObj)
                         return FilterOptionResult.NotApplicable;
+
+                    if (isRegex) {
+                        return Regex.IsMatch(ongekiObj.Tag, input) ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
+                    }
                     return ongekiObj.Tag == input ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
                 }),
             ]),
@@ -294,7 +299,7 @@ public class SelectionFilterViewModel : ViewAware
             ObjectTypeFilterMatches.AddRange(typeFilter.MatchingObjects);
         }
         UpdateOptionFilterRemovals();
-        
+
         UpdateFilterOutcomeText();
     }
 
