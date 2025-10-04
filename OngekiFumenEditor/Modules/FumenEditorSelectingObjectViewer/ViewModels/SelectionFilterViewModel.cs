@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -47,13 +45,13 @@ public class SelectionFilterViewModel : ViewAware
             Set(ref field, value);
             UpdateFilterOutcomeText();
         }
-    }
+    } = false;
 
     public string FilterOutcomeText
     {
         get;
         private set => Set(ref field, value);
-    }
+    } = string.Empty;
 
     public SelectionFilterViewModel(FumenEditorSelectingObjectViewerViewModel selectionViewerTool)
     {
@@ -62,38 +60,6 @@ public class SelectionFilterViewModel : ViewAware
         InitObjectTypeFilter();
         InitOptions();
 
-        UpdateFilterOutcomeText();
-    }
-
-    public void OnSelectedItemsRefreshed()
-    {
-        FilterTypeCategories.SelectMany(c => c.Items).ForEach(i => i.MatchingObjects.Clear());
-        ObjectTypeFilterMatches.Clear();
-
-        // Add selected objects to each category
-        if (Editor is not null) {
-            foreach (var item in Editor.SelectObjects) {
-                var matchingCategory = FilterTypeCategories.SelectMany(c => c.Items)
-                    .FirstOrDefault(i => i.Types.Any(t => t.IsInstanceOfType(item)));
-                matchingCategory?.MatchingObjects.Add(item);
-            }
-
-            // Refresh options
-            foreach (var option in OptionCategories.SelectMany(c => c.Options)) {
-                option.OnSelectionRefreshed(Editor.SelectObjects);
-            }
-        }
-
-        // Change object type filters to match the currently selected objects
-        foreach (var category in FilterTypeCategories) {
-            foreach (var item in category.Items) {
-                item.IsSelected = item.MatchingObjects.Count > 0;
-            }
-
-            category.UpdateCategoryNameDisplay();
-        }
-
-        OnOptionUpdated();
         UpdateFilterOutcomeText();
     }
 
@@ -155,8 +121,8 @@ public class SelectionFilterViewModel : ViewAware
                 new TextWithRegexOption(Resources.SelectionFilter_OptionLabelTag, (obj, input, isRegex) =>
                 {
                     if (obj is not OngekiObjectBase ongekiObj)
-                        return true;
-                    return ongekiObj.Tag == input;
+                        return FilterOptionResult.NotApplicable;
+                    return ongekiObj.Tag == input ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
                 }),
             ]),
             new(Resources.SelectionFilter_OptionTabLanes, [
@@ -166,15 +132,16 @@ public class SelectionFilterViewModel : ViewAware
                 BooleanOption.YesNoOption(Resources.SelectionFilter_OptionLabelIsCritical, (obj, yesNo) =>
                 {
                     if (obj is not ICriticalableObject crit)
-                        return true;
-                    return crit.IsCritical == yesNo;
+                        return FilterOptionResult.NotApplicable;
+                    return crit.IsCritical == yesNo ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
                 }),
                 BooleanOption.LeftRightOption(Resources.SelectionFilter_OptionLabelFlickDirection, (obj, leftRight) =>
                 {
                     if (obj is not Flick flick)
-                        return true;
+                        return FilterOptionResult.NotApplicable;
                     return (leftRight && flick.Direction == Flick.FlickDirection.Left)
-                           || (!leftRight && flick.Direction == Flick.FlickDirection.Right);
+                           || (!leftRight && flick.Direction == Flick.FlickDirection.Right)
+                        ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
                 }),
                 new DockableObjectLaneFilterOption(Resources.SelectionFilter_OptionLabelDockLanes),
                 new HoldObjectSpecificationOption(Resources.SelectionFilter_OptionLabelHoldType)
@@ -186,8 +153,9 @@ public class SelectionFilterViewModel : ViewAware
                 BooleanOption.LeftRightOption(Resources.SelectionFilter_OptionLabelLaneBlockDirection, (obj, leftRight) =>
                 {
                     if (obj is not LaneBlockArea lbk)
-                        return true;
-                    return (lbk.Direction == LaneBlockArea.BlockDirection.Left) == leftRight;
+                        return FilterOptionResult.NotApplicable;
+                    return (lbk.Direction == LaneBlockArea.BlockDirection.Left) == leftRight
+                        ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
                 }),
             ])
         ]);
@@ -202,6 +170,37 @@ public class SelectionFilterViewModel : ViewAware
                 }
             };
         }
+    }
+
+    public void OnSelectedItemsRefreshed()
+    {
+        FilterTypeCategories.SelectMany(c => c.Items).ForEach(i => i.MatchingObjects.Clear());
+        ObjectTypeFilterMatches.Clear();
+
+        OptionCategories.SelectMany(c => c.Options).ForEach(o => o.ResetFilterCounts());
+
+        // Add selected objects to each category
+        if (Editor is not null) {
+            foreach (var item in Editor.SelectObjects) {
+                var matchingCategory = FilterTypeCategories.SelectMany(c => c.Items)
+                    .FirstOrDefault(i => i.Types.Any(t => t.IsInstanceOfType(item)));
+                matchingCategory?.MatchingObjects.Add(item);
+
+                OptionCategories.SelectMany(c => c.Options).ForEach(o => o.UpdateFilterCounts((OngekiObjectBase)item));
+            }
+        }
+
+        // Change object type filters to match the currently selected objects
+        foreach (var category in FilterTypeCategories) {
+            foreach (var item in category.Items) {
+                item.IsSelected = item.MatchingObjects.Count > 0;
+            }
+
+            category.UpdateCategoryNameDisplay();
+        }
+
+        UpdateOptionFilterRemovals();
+        UpdateFilterOutcomeText();
     }
 
     private void OnOptionUpdated()
@@ -269,7 +268,7 @@ public class SelectionFilterViewModel : ViewAware
     {
         OptionFilterRemovals.Clear();
         var enabledOptions = GetAllOptions().Where(o => o.IsEnabled).ToArray();
-        OptionFilterRemovals.AddRange(ObjectTypeFilterMatches.Where(obj => enabledOptions.Any(opt => !opt.Filter((OngekiObjectBase)obj))));
+        OptionFilterRemovals.AddRange(ObjectTypeFilterMatches.Where(obj => enabledOptions.Any(opt => opt.Filter((OngekiObjectBase)obj) == FilterOptionResult.NoMatch)));
     }
 
     public void ApplyFilterToSelection()
@@ -416,6 +415,19 @@ public class FilterObjectTypesItem : PropertyChangedBase
             NotifyOfPropertyChange(nameof(Display));
         }
     } = false;
+}
+
+public class ParenthesizeTextConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return $"({value})";
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class WideModeToVisibilityConverter : IValueConverter

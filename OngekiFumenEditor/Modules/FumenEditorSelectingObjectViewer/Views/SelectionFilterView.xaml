@@ -20,10 +20,12 @@
     <UserControl.Resources>
         <vm:WideModeToVisibilityConverter x:Key="WideModeToVisibilityConverter" />
         <vm:WideModeToVisibilityConverter x:Key="InverseWideModeToVisibilityConverter" IsInverse="true" />
+        <vm:ParenthesizeTextConverter x:Key="ParenthesizeTextConverter" />
         <valueConverters:DockableTargetSpecificationConverter x:Key="DockableTargetSpecificationConverter" />
         <system:Boolean x:Key="True">True</system:Boolean>
         <system:Boolean x:Key="False">False</system:Boolean>
 
+        <!-- STYLES -->
         <Style x:Key="WrappedTextCheckBox" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
@@ -51,8 +53,9 @@
             <Setter Property="BorderBrush" Value="{DynamicResource TreeView.Static.Border}" />
         </Style>
 
-
         <Style TargetType="xctk:WatermarkTextBox" BasedOn="{StaticResource {x:Type xctk:WatermarkTextBox}}" />
+
+        <!-- FILTER OPTIONS -->
 
         <DataTemplate DataType="{x:Type selectionFilter:BooleanOption}">
             <WrapPanel Margin="3 5">
@@ -61,24 +64,34 @@
                     <RadioButton
                         IsChecked="{Binding Value, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={StaticResource True}, Mode=TwoWay}"
                         Content="{Binding TrueText}" />
+                    <Label Content="{Binding TrueMatches, Converter={StaticResource ParenthesizeTextConverter}}" FontStyle="Italic"/>
                     <RadioButton
                         IsChecked="{Binding Value, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={StaticResource False}, Mode=TwoWay}"
                         Content="{Binding FalseText}" />
+                    <Label Content="{Binding FalseMatches, Converter={StaticResource ParenthesizeTextConverter}}" FontStyle="Italic"/>
                 </StackPanel>
             </WrapPanel>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type selectionFilter:TextWithRegexOption}">
             <Grid Margin="3 5">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
-                <TextBox Grid.Column="1" Text="{Binding InputText, Mode=TwoWay}" IsEnabled="{Binding IsEnabled}" />
-                <CheckBox Grid.Column="2" IsChecked="{Binding IsRegex, Mode=TwoWay}" IsEnabled="{Binding IsEnabled}"
+                <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding InputText, Mode=TwoWay}" IsEnabled="{Binding IsEnabled}" />
+                <CheckBox Grid.Row="0" Grid.Column="2" IsChecked="{Binding IsRegex, Mode=TwoWay}" IsEnabled="{Binding IsEnabled}"
                           Content="{markup:Translate [SelectionFilter_OptionLabelTagRegex]}" />
+                <Label Grid.Row="1" Grid.Column="1"
+                           Content="{Binding MatchCount, Converter={StaticResource ParenthesizeTextConverter}}"
+                           FontStyle="Italic" VerticalContentAlignment="Center"
+                           Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
         </DataTemplate>
 
@@ -87,6 +100,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" MaxWidth="200" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <CheckBox Grid.Column="0"
@@ -99,6 +113,10 @@
                           Width="200"
                           HorizontalAlignment="Left"
                           IsEnabled="{Binding IsEnabled}" />
+                <Label Grid.Column="2"
+                       Content="{Binding TotalMatches, Converter={StaticResource ParenthesizeTextConverter}}"
+                       FontStyle="Italic" VerticalContentAlignment="Center"
+                       Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
         </DataTemplate>
 
@@ -114,29 +132,31 @@
                                     Closed="BulletPaletteCheckList_SetText"
                                     Loaded="BulletPaletteCheckList_SetText"
                                     ItemSelectionChanged="BulletPaletteCheckList_SetText" />
+                <Label Content="{Binding FilterMatches, Converter={StaticResource ParenthesizeTextConverter}}"
+                       Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+                       FontStyle="Italic" VerticalContentAlignment="Center" />
             </StackPanel>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type selectionFilter:DockableObjectLaneFilterOption}">
             <StackPanel Orientation="Horizontal" Margin="3 5">
                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
-                <xctk:CheckComboBox ItemsSource="{Binding AllValues}"
+                <xctk:CheckComboBox ItemsSource="{Binding Values}"
                                     SelectedMemberPath="IsSelected"
                                     DisplayMemberPath="Text"
-                                    Width="200"
+                                    ValueMemberPath="DockLane"
+                                    Width="250"
                                     HorizontalAlignment="Left"
                                     IsSelectAllActive="True"
-                                    IsEnabled="{Binding IsEnabled}">
-                    <xctk:CheckComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock
-                                Text="{Binding DockLane, Converter={StaticResource DockableTargetSpecificationConverter}}" />
-                        </DataTemplate>
-                    </xctk:CheckComboBox.ItemTemplate>
-                </xctk:CheckComboBox>
+                                    IsEnabled="{Binding IsEnabled}" />
+                <Label Content="{Binding FilterMatches, Converter={StaticResource ParenthesizeTextConverter}}"
+                       Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+                       FontStyle="Italic" VerticalContentAlignment="Center" />
             </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
+
+    <!-- PAGE LAYOUT -->
 
     <Grid>
         <Grid.RowDefinitions>
