@@ -287,7 +287,7 @@
             <TextBlock Text="{Binding FilterOutcomeText}" Margin="5" />
 
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button cal:Message.Attach="ApplyFilterToSelection()">Apply</Button>
+                <Button cal:Message.Attach="ApplyFilterToSelection()" Content="{markup:Translate [ApplyFilter]}" />
             </StackPanel>
         </StackPanel>
     </Grid>
