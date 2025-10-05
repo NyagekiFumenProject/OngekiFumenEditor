@@ -23,7 +23,13 @@
         <system:Boolean x:Key="False">False</system:Boolean>
 
         <!-- STYLES -->
-        <Style x:Key="WrappedTextCheckBox" TargetType="CheckBox">
+        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="5 0" />
+        </Style>
+
+        <Style x:Key="WrappedTextCheckBox" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
@@ -31,12 +37,6 @@
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
-
-        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Margin" Value="5 0" />
         </Style>
 
         <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
@@ -59,13 +59,19 @@
                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
                 <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsEnabled}">
                     <RadioButton
-                        IsChecked="{Binding Value, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={StaticResource True}, Mode=TwoWay}"
-                        Content="{Binding TrueText}" />
-                    <Label Content="{Binding TrueMatches, Converter={StaticResource ParenthesizeTextConverter}}" FontStyle="Italic"/>
+                        IsChecked="{Binding Value, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={StaticResource True}, Mode=TwoWay}">
+                        <TextBlock>
+                            <Run Text="{Binding TrueText}" />
+                            <Run Text="{Binding TrueMatches, Converter={StaticResource ParenthesizeTextConverter}, Mode=OneWay}" FontStyle="Italic" />
+                        </TextBlock>
+                    </RadioButton>
                     <RadioButton
-                        IsChecked="{Binding Value, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={StaticResource False}, Mode=TwoWay}"
-                        Content="{Binding FalseText}" />
-                    <Label Content="{Binding FalseMatches, Converter={StaticResource ParenthesizeTextConverter}}" FontStyle="Italic"/>
+                        IsChecked="{Binding Value, Converter={StaticResource ParamValueToBoolConverter}, ConverterParameter={StaticResource False}, Mode=TwoWay}">
+                        <TextBlock>
+                            <Run Text="{Binding FalseText}" />
+                            <Run Text="{Binding FalseMatches, Converter={StaticResource ParenthesizeTextConverter}, Mode=OneWay}" FontStyle="Italic" />
+                        </TextBlock>
+                    </RadioButton>
                 </StackPanel>
             </WrapPanel>
         </DataTemplate>
@@ -88,7 +94,7 @@
                 <Label Grid.Row="1" Grid.Column="1"
                            Content="{Binding MatchCount, Converter={StaticResource ParenthesizeTextConverter}}"
                            FontStyle="Italic" VerticalContentAlignment="Center"
-                           Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+                           Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=true}" />
             </Grid>
         </DataTemplate>
 
