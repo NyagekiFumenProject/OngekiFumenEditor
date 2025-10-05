@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Data;
 using Caliburn.Micro;
-using Mono.Cecil;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
@@ -30,11 +29,11 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels;
 
 public class SelectionFilterViewModel : ViewAware
 {
-    public FumenEditorSelectingObjectViewerViewModel SelectionViewerTool { get; set; }
+    public FumenEditorSelectingObjectViewerViewModel SelectionViewerTool { get; }
     public FumenVisualEditorViewModel? Editor => SelectionViewerTool.Editor;
 
     public ObservableCollection<OptionCategory> OptionCategories { get; } = new();
-    public ObservableCollection<FilterObjectTypeCategory> FilterTypeCategories { get; set; } = new();
+    public ObservableCollection<FilterObjectTypeCategory> FilterTypeCategories { get; } = new();
 
     public ObservableCollection<ISelectableObject> ObjectTypeFilterMatches { get; } = new();
     public ObservableCollection<ISelectableObject> OptionFilterRemovals { get; } = new();
@@ -73,43 +72,43 @@ public class SelectionFilterViewModel : ViewAware
 
         FilterTypeCategories.AddRange([
             new(this, Resources.SelectionFilterObjectCategoryLane, [
-                new(this) { Text = Resources.WallLeft, Types = [typeof(WallLeftNext), typeof(WallLeftStart)] },
-                new(this) { Text = Resources.LaneLeft, Types = [typeof(LaneLeftNext), typeof(LaneLeftStart)] },
-                new(this) { Text = Resources.LaneCenter, Types = [typeof(LaneCenterNext), typeof(LaneCenterStart)] },
-                new(this) { Text = Resources.LaneRight, Types = [typeof(LaneRightNext), typeof(LaneRightStart)] },
-                new(this) { Text = Resources.WallRight, Types = [typeof(WallRightNext), typeof(WallRightStart)] },
-                new(this) { Text = Resources.LaneColorful, Types = [typeof(ColorfulLaneNext), typeof(ColorfulLaneStart)] },
-                new(this) { Text = Resources.EnemyLane, Types = [typeof(EnemyLaneNext), typeof(EnemyLaneStart)] },
-                new(this) { Text = Resources.AutoPlayFaderLane, Types = [typeof(AutoplayFaderLaneNext), typeof(AutoplayFaderLaneStart)] },
-                new(this) { Text = Resources.Beam, Types = [typeof(BeamNext), typeof(BeamStart)] },
-                new(this) { Text = Resources.CurveControlPoint, Types = [typeof(LaneCurvePathControlObject)] }
+                new() { Text = Resources.WallLeft, Types = [typeof(WallLeftNext), typeof(WallLeftStart)] },
+                new() { Text = Resources.LaneLeft, Types = [typeof(LaneLeftNext), typeof(LaneLeftStart)] },
+                new() { Text = Resources.LaneCenter, Types = [typeof(LaneCenterNext), typeof(LaneCenterStart)] },
+                new() { Text = Resources.LaneRight, Types = [typeof(LaneRightNext), typeof(LaneRightStart)] },
+                new() { Text = Resources.WallRight, Types = [typeof(WallRightNext), typeof(WallRightStart)] },
+                new() { Text = Resources.LaneColorful, Types = [typeof(ColorfulLaneNext), typeof(ColorfulLaneStart)] },
+                new() { Text = Resources.EnemyLane, Types = [typeof(EnemyLaneNext), typeof(EnemyLaneStart)] },
+                new() { Text = Resources.AutoPlayFaderLane, Types = [typeof(AutoplayFaderLaneNext), typeof(AutoplayFaderLaneStart)] },
+                new() { Text = Resources.Beam, Types = [typeof(BeamNext), typeof(BeamStart)] },
+                new() { Text = Resources.CurveControlPoint, Types = [typeof(LaneCurvePathControlObject)] }
             ]),
 
             new(this, Resources.SelectionFilterObjectCategoryDockable, [
-                new(this) { Text = Resources.Tap, Types = [typeof(Tap)] },
-                new(this) { Text = Resources.Hold, Types = [typeof(Hold), typeof(HoldEnd)] }
+                new() { Text = Resources.Tap, Types = [typeof(Tap)] },
+                new() { Text = Resources.Hold, Types = [typeof(Hold), typeof(HoldEnd)] }
             ]),
 
             new(this, Resources.SelectionFilterObjectCategoryFloating, [
-                new(this) { Text = Resources.Bell, Types = [typeof(Bell)] },
-                new(this) { Text = Resources.Bullet, Types = [typeof(Bullet)] },
-                new(this) { Text = Resources.Flick, Types = [typeof(Flick)] }
+                new() { Text = Resources.Bell, Types = [typeof(Bell)] },
+                new() { Text = Resources.Bullet, Types = [typeof(Bullet)] },
+                new() { Text = Resources.Flick, Types = [typeof(Flick)] }
             ]),
 
             new(this, Resources.SelectionFilterObjectCategoryTimeline, [
-                new(this) { Text = Resources.LaneBlock, Types = [typeof(LaneBlockArea), typeof(LaneBlockArea.LaneBlockAreaEndIndicator)] },
-                new(this) { Text = Resources.ClickSE, Types = [typeof(ClickSE)] },
-                new(this) { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)] },
-                new(this) { Text = Resources.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
-                new(this) { Text = Resources.DurationSoflan, Types = [typeof(IDurationSoflan)] },
-                new(this) { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
-                new(this) { Text = Resources.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] },
+                new() { Text = Resources.LaneBlock, Types = [typeof(LaneBlockArea), typeof(LaneBlockArea.LaneBlockAreaEndIndicator)] },
+                new() { Text = Resources.ClickSE, Types = [typeof(ClickSE)] },
+                new() { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)] },
+                new() { Text = Resources.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
+                new() { Text = Resources.DurationSoflan, Types = [typeof(IDurationSoflan)] },
+                new() { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
+                new() { Text = Resources.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] },
             ]),
 
             new(this, Resources.SelectionFilterObjectCategoryMisc, [
-                new(this) { Text = Resources.SvgPrefabFile, Types = [typeof(SvgImageFilePrefab)] },
-                new(this) { Text = Resources.SvgPrefabText, Types = [typeof(SvgStringPrefab)] },
-                new(this) { Text = Resources.Comment, Types = [typeof(Comment)] }
+                new() { Text = Resources.SvgPrefabFile, Types = [typeof(SvgImageFilePrefab)] },
+                new() { Text = Resources.SvgPrefabText, Types = [typeof(SvgStringPrefab)] },
+                new() { Text = Resources.Comment, Types = [typeof(Comment)] }
             ])
         ]);
     }
@@ -235,7 +234,7 @@ public class SelectionFilterViewModel : ViewAware
     {
         var bulletPaletteOption = new BulletPaletteFilterOption(Resources.SelectionFilter_OptionLabelBulletPalette);
 
-        FumenVisualEditorViewModel.LoadingFinishedEventHandler loaded = (sender, args) =>
+        FumenVisualEditorViewModel.LoadingFinishedEventHandler loaded = (_, args) =>
         {
             bulletPaletteOption.UpdateOptions(args.Fumen.BulletPalleteList);
         };
@@ -292,6 +291,8 @@ public class SelectionFilterViewModel : ViewAware
         OptionFilterRemovals.AddRange(ObjectTypeFilterMatches.Where(obj => enabledOptions.Any(opt => opt.Filter((OngekiObjectBase)obj) == FilterOptionResult.NoMatch)));
     }
 
+    #region Actions
+
     public void ApplyFilterToSelection()
     {
         if (Editor is null)
@@ -319,7 +320,7 @@ public class SelectionFilterViewModel : ViewAware
         UpdateFilterOutcomeText();
     }
 
-    public void FilterObjectTypesSelectAll()
+    public void SelectAllObjectTypes()
     {
         bool allSelected = true;
         foreach (var category in FilterTypeCategories) {
@@ -340,7 +341,7 @@ public class SelectionFilterViewModel : ViewAware
         }
     }
 
-    public void FilterObjectTypesReset()
+    public void ResetSelectedObjectTypes()
     {
         foreach (var category in FilterTypeCategories) {
             foreach (var item in category.Items) {
@@ -359,20 +360,25 @@ public class SelectionFilterViewModel : ViewAware
         }
     }
 
-    public void FilterOptionsReset()
+    public void ResetFilterOptions()
     {
         foreach (var opt in OptionCategories.SelectMany(c => c.Options)) {
             opt.IsEnabled = false;
         }
     }
+
+    #endregion
 }
 
 public class WideModeToVisibilityConverter : IValueConverter
 {
     public bool IsInverse { get; init; }
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
+        if (value is null)
+            return null;
+
         if (IsInverse) {
             if ((double)value < 700)
                 return Visibility.Visible;
@@ -389,7 +395,7 @@ public class WideModeToVisibilityConverter : IValueConverter
         }
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotImplementedException();
     }

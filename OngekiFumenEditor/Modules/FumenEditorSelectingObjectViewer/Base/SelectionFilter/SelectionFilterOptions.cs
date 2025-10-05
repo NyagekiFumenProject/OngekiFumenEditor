@@ -63,7 +63,7 @@ public abstract class SelectionFilterOption : PropertyChangedBase
 
     public string Text { get; }
 
-    public SelectionFilterOption(string text)
+    protected SelectionFilterOption(string text)
     {
         Text = text;
     }
@@ -324,7 +324,7 @@ public abstract class EnumSpecificationOption<T> : EnumSpecificationOption where
 
 public sealed class LaneNodeSpecificationOption(string text) : EnumSpecificationOption<HeadTailSpecification>(text)
 {
-    private static readonly Dictionary<object, string> _selectionsText = new()
+    private static readonly Dictionary<object, string> SelectionsTextMap = new()
     {
         [HeadTailSpecification.Head] = Resources.SelectionFilter_HeadTailLaneNode_Head,
         [HeadTailSpecification.Tail] = Resources.SelectionFilter_HeadTailLaneNode_Tail,
@@ -334,7 +334,7 @@ public sealed class LaneNodeSpecificationOption(string text) : EnumSpecification
         [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailLaneNode_TailNoParent,
     };
 
-    public override Dictionary<object, string> SelectionsText => _selectionsText;
+    public override Dictionary<object, string> SelectionsText => SelectionsTextMap;
 
     protected override FilterOptionResult Predicate(HeadTailSpecification input, OngekiObjectBase obj)
     {
@@ -363,7 +363,7 @@ public sealed class LaneNodeSpecificationOption(string text) : EnumSpecification
 
 public sealed class HoldObjectSpecificationOption(string text) : EnumSpecificationOption<HeadTailSpecification>(text)
 {
-    private static readonly Dictionary<object, string> _selectionsText = new()
+    private static readonly Dictionary<object, string> SelectionsTextMap = new()
     {
         [HeadTailSpecification.Head] = Resources.SelectionFilter_HeadTailHoldObject_Head,
         [HeadTailSpecification.Tail] = Resources.SelectionFilter_HeadTailHoldObject_Tail,
@@ -373,7 +373,7 @@ public sealed class HoldObjectSpecificationOption(string text) : EnumSpecificati
         [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailHoldObject_TailNoParent,
     };
 
-    public override Dictionary<object, string> SelectionsText => _selectionsText;
+    public override Dictionary<object, string> SelectionsText => SelectionsTextMap;
 
     protected override FilterOptionResult Predicate(HeadTailSpecification input, OngekiObjectBase obj)
     {
@@ -403,7 +403,7 @@ public sealed class HoldObjectSpecificationOption(string text) : EnumSpecificati
 
 public sealed class LaneBlockSpecificationOption(string text) : EnumSpecificationOption<HeadTailSpecification>(text)
 {
-    private static readonly Dictionary<object, string> _selectionsText = new()
+    private static readonly Dictionary<object, string> SelectionsTextMap = new()
     {
         [HeadTailSpecification.Head] = Resources.SelectionFilter_HeadTailHoldObject_Head,
         [HeadTailSpecification.Tail] = Resources.SelectionFilter_HeadTailHoldObject_Tail,
@@ -413,7 +413,7 @@ public sealed class LaneBlockSpecificationOption(string text) : EnumSpecificatio
         [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailHoldObject_TailNoParent,
     };
 
-    public override Dictionary<object, string> SelectionsText => _selectionsText;
+    public override Dictionary<object, string> SelectionsText => SelectionsTextMap;
 
     protected override FilterOptionResult Predicate(HeadTailSpecification input, OngekiObjectBase obj)
     {
@@ -443,7 +443,7 @@ public sealed class LaneBlockSpecificationOption(string text) : EnumSpecificatio
 
 public sealed class SoflanAreaSpecificationOption(string text) : EnumSpecificationOption<HeadTailSpecification>(text)
 {
-    private static readonly Dictionary<object, string> _selectionsText = new()
+    private static readonly Dictionary<object, string> SelectionsTextMap = new()
     {
         [HeadTailSpecification.Head] = Resources.SelectionFilter_HeadTailHoldObject_Head,
         [HeadTailSpecification.Tail] = Resources.SelectionFilter_HeadTailHoldObject_Tail,
@@ -453,7 +453,7 @@ public sealed class SoflanAreaSpecificationOption(string text) : EnumSpecificati
         [HeadTailSpecification.TailNoParent] = Resources.SelectionFilter_HeadTailHoldObject_TailNoParent,
     };
 
-    public override Dictionary<object, string> SelectionsText => _selectionsText;
+    public override Dictionary<object, string> SelectionsText => SelectionsTextMap;
 
     protected override FilterOptionResult Predicate(HeadTailSpecification input, OngekiObjectBase obj)
     {
@@ -483,10 +483,10 @@ public sealed class SoflanAreaSpecificationOption(string text) : EnumSpecificati
 
 public sealed class BulletShapeOption(string text) : EnumSpecificationOption<BulletType>(text)
 {
-    private static readonly Dictionary<object, string> _selectionsText = Enum.GetValues<BulletType>()
-        .ToDictionary(t => (object)t, t => t.ToString());
+    private static readonly Dictionary<object, string> SelectionsTextMap
+        = Enum.GetValues<BulletType>().ToDictionary(t => (object)t, t => t.ToString());
 
-    public override Dictionary<object, string> SelectionsText => _selectionsText;
+    public override Dictionary<object, string> SelectionsText => SelectionsTextMap;
 
     protected override FilterOptionResult Predicate(BulletType input, OngekiObjectBase obj)
     {
@@ -521,7 +521,7 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
             }
         };
 
-        Items.CollectionChanged += (s, e) =>
+        Items.CollectionChanged += (_, e) =>
         {
             foreach (var i in e.NewItems?.Cast<Item>() ?? []) {
                 i.PropertyChanged += handler;
@@ -682,7 +682,7 @@ public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
         if (obj is not ILaneDockable dockable)
             return FilterOptionResult.NotApplicable;
 
-        return GetItemFromObject(dockable) is not null
+        return GetItemFromObject(dockable) is { IsSelected: true }
             ? FilterOptionResult.Match : FilterOptionResult.NoMatch;
     }
 

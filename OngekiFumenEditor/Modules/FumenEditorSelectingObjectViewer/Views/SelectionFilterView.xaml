@@ -10,7 +10,6 @@
              xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:selectionFilter="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Base.SelectionFilter"
-             xmlns:valueConverters="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ValueConverters"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:OngekiFumenEditor.UI.Behaviors"
              mc:Ignorable="d"
@@ -24,7 +23,7 @@
         <system:Boolean x:Key="False">False</system:Boolean>
 
         <!-- STYLES -->
-        <Style x:Key="WrappedTextCheckBox" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+        <Style x:Key="WrappedTextCheckBox" TargetType="CheckBox">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
@@ -173,9 +172,9 @@
                     <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderObjectType]}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
                         <Button Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}"
-                                cal:Message.Attach="FilterObjectTypesSelectAll()" />
+                                cal:Message.Attach="SelectAllObjectTypes()" />
                         <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}"
-                                cal:Message.Attach="FilterObjectTypesReset()" />
+                                cal:Message.Attach="ResetSelectedObjectTypes()" />
                     </StackPanel>
                 </Grid>
 
@@ -238,7 +237,7 @@
                     <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
                         <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}"
-                                cal:Message.Attach="FilterOptionsReset()" />
+                                cal:Message.Attach="ResetFilterOptions()" />
                     </StackPanel>
                 </Grid>
 

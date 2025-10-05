@@ -11,8 +11,6 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Base.Select
 
 public sealed class FilterObjectTypeCategory : PropertyChangedBase
 {
-    private readonly SelectionFilterViewModel Filter;
-
     public ObservableCollection<FilterObjectTypesItem> Items { get; private set; } = new();
 
     private readonly string CategoryName;
@@ -31,7 +29,6 @@ public sealed class FilterObjectTypeCategory : PropertyChangedBase
 
     public FilterObjectTypeCategory(SelectionFilterViewModel filter, string categoryName, IEnumerable<FilterObjectTypesItem> items)
     {
-        Filter = filter;
         CategoryName = categoryName;
 
         Items.CollectionChanged += (_, args) =>
@@ -41,7 +38,7 @@ public sealed class FilterObjectTypeCategory : PropertyChangedBase
                     item.PropertyChanged += (_, typeArgs) =>
                     {
                         if (typeArgs.PropertyName == nameof(FilterObjectTypesItem.IsSelected)) {
-                            Filter.OnTypeFilterEnabledChanged(item);
+                            filter.OnTypeFilterEnabledChanged(item);
                             UpdateCategoryNameDisplay();
                         }
                     };
@@ -63,16 +60,13 @@ public sealed class FilterObjectTypeCategory : PropertyChangedBase
 
 public class FilterObjectTypesItem : PropertyChangedBase
 {
-    private readonly SelectionFilterViewModel SelectionFilter;
-
     public required string Text { get; init; }
     public required Type[] Types { get; init; }
 
     public ObservableCollection<ISelectableObject> MatchingObjects { get; } = new();
 
-    public FilterObjectTypesItem(SelectionFilterViewModel selectionFilter)
+    public FilterObjectTypesItem()
     {
-        SelectionFilter = selectionFilter;
         MatchingObjects.CollectionChanged += (_, _) => NotifyOfPropertyChange(nameof(Display));
     }
 
