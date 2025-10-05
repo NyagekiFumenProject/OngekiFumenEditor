@@ -5379,6 +5379,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Curve point next node.
+        /// </summary>
+        public static string SelectionFilter_OptionLabelCurveNextSelected {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelCurveNextSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Curve point previous node.
+        /// </summary>
+        public static string SelectionFilter_OptionLabelCurvePrevSelected {
+            get {
+                return ResourceManager.GetString("SelectionFilter_OptionLabelCurvePrevSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dock lanes.
         /// </summary>
         public static string SelectionFilter_OptionLabelDockLanes {

@@ -2283,4 +2283,10 @@
   <data name="SelectionFilter_OptionLabelSoflanAreaType" xml:space="preserve">
     <value>Soflan area object type</value>
   </data>
+  <data name="SelectionFilter_OptionLabelCurveNextSelected" xml:space="preserve">
+    <value>Curve point next node</value>
+  </data>
+  <data name="SelectionFilter_OptionLabelCurvePrevSelected" xml:space="preserve">
+    <value>Curve point previous node</value>
+  </data>
 </root>
