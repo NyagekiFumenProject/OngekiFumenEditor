@@ -35,9 +35,7 @@ public class SelectionFilterViewModel : ViewAware
     public ObservableCollection<OptionCategory> OptionCategories { get; } = new();
     public ObservableCollection<FilterObjectTypeCategory> FilterTypeCategories { get; } = new();
 
-    public ObservableCollection<ISelectableObject> ObjectTypeFilterMatches { get; } = new();
     public ObservableCollection<ISelectableObject> OptionFilterRemovals { get; } = new();
-
 
     public bool IsInvertFilter
     {
@@ -67,8 +65,10 @@ public class SelectionFilterViewModel : ViewAware
 
     public void OnSelectedItemsRefreshed()
     {
+        // Clear type matchers
+        // TODO Use CollectionChanged events so we don't have to recreate the list every time we change selection.
+        //  This requires changes to other Editor modules.
         FilterTypeCategories.SelectMany(c => c.Items).ForEach(i => i.MatchingObjects.Clear());
-        ObjectTypeFilterMatches.Clear();
 
         OptionCategories.SelectMany(c => c.Options).ForEach(o => o.ResetOptionMatchCount());
 
@@ -86,7 +86,9 @@ public class SelectionFilterViewModel : ViewAware
         // Change object type filters to match the currently selected objects
         foreach (var category in FilterTypeCategories) {
             foreach (var item in category.Items) {
+                item.IsNotifying = false;
                 item.IsSelected = item.MatchingObjects.Count > 0;
+                item.IsNotifying = true;
             }
 
             category.UpdateCategoryNameDisplay();
@@ -128,18 +130,8 @@ public class SelectionFilterViewModel : ViewAware
         return bulletPaletteOption;
     }
 
-    public IEnumerable<ISelectableObject> GetAllFilterMatches()
-        => ObjectTypeFilterMatches.Except(OptionFilterRemovals);
-
     public void OnTypeFilterEnabledChanged(FilterObjectTypesItem filterType)
     {
-        if (filterType.IsSelected) {
-            ObjectTypeFilterMatches.AddRange(filterType.MatchingObjects);
-        }
-        else {
-            ObjectTypeFilterMatches.RemoveRange(filterType.MatchingObjects);
-        }
-
         UpdateFilterOutcomeText();
     }
 
@@ -161,8 +153,14 @@ public class SelectionFilterViewModel : ViewAware
     {
         OptionFilterRemovals.Clear();
         var enabledOptions = GetAllOptions().Where(o => o.IsEnabled).ToArray();
-        OptionFilterRemovals.AddRange(ObjectTypeFilterMatches.Where(obj => enabledOptions.Any(opt => opt.Filter((OngekiObjectBase)obj) == FilterOptionResult.NoMatch)));
+        OptionFilterRemovals.AddRange(GetAllMatchingTypeObjects().Where(obj => enabledOptions.Any(opt => opt.Filter((OngekiObjectBase)obj) == FilterOptionResult.NoMatch)));
     }
+
+    private IEnumerable<ISelectableObject> GetAllMatchingTypeObjects()
+        => FilterTypeCategories.SelectMany(c => c.Items).SelectMany(i => i.MatchingObjects);
+
+    private IEnumerable<ISelectableObject> GetAllFilterMatches()
+        => GetAllMatchingTypeObjects().Except(OptionFilterRemovals);
 
     #region Option Generation
     private void InitObjectTypeFilter()
@@ -333,12 +331,7 @@ public class SelectionFilterViewModel : ViewAware
 
         IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
 
-        // Re-register items that remained in the selection
-        foreach (var typeFilter in FilterTypeCategories.SelectMany(c => c.Items)) {
-            ObjectTypeFilterMatches.AddRange(typeFilter.MatchingObjects);
-        }
         UpdateOptionFilterRemovals();
-
         UpdateFilterOutcomeText();
     }
 
