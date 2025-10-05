@@ -50,8 +50,6 @@
             <Setter Property="BorderBrush" Value="{DynamicResource TreeView.Static.Border}" />
         </Style>
 
-        <Style TargetType="xctk:WatermarkTextBox" BasedOn="{StaticResource {x:Type xctk:WatermarkTextBox}}" />
-
         <!-- FILTER OPTIONS -->
 
         <DataTemplate DataType="{x:Type selectionFilter:BooleanOption}">
