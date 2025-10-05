@@ -75,9 +75,10 @@ public class SelectionFilterViewModel : ViewAware
         // Add selected objects to each category
         if (Editor is not null) {
             foreach (var item in Editor.SelectObjects) {
-                var matchingCategory = FilterTypeCategories.SelectMany(c => c.Items)
-                    .FirstOrDefault(i => i.Types.Any(t => t.IsInstanceOfType(item)));
-                matchingCategory?.MatchingObjects.Add(item);
+                if (FilterTypeCategories.SelectMany(c => c.Items)
+                        .FirstOrDefault(i => i.Types.Any(t => t.IsInstanceOfType(item))) is { } matchingItem) {
+                    matchingItem.MatchingObjects.Add(item);
+                }
 
                 OptionCategories.SelectMany(c => c.Options).ForEach(o => o.IncrementOptionMatchCount((OngekiObjectBase)item));
             }
@@ -86,12 +87,8 @@ public class SelectionFilterViewModel : ViewAware
         // Change object type filters to match the currently selected objects
         foreach (var category in FilterTypeCategories) {
             foreach (var item in category.Items) {
-                item.IsNotifying = false;
                 item.IsSelected = item.MatchingObjects.Count > 0;
-                item.IsNotifying = true;
             }
-
-            category.UpdateCategoryNameDisplay();
         }
 
         UpdateOptionFilterRemovals();
@@ -130,7 +127,7 @@ public class SelectionFilterViewModel : ViewAware
         return bulletPaletteOption;
     }
 
-    public void OnTypeFilterEnabledChanged(FilterObjectTypesItem filterType)
+    public void OnTypeFilterEnabledChanged(FilterObjectTypesItem _)
     {
         UpdateFilterOutcomeText();
     }
@@ -157,7 +154,7 @@ public class SelectionFilterViewModel : ViewAware
     }
 
     private IEnumerable<ISelectableObject> GetAllMatchingTypeObjects()
-        => FilterTypeCategories.SelectMany(c => c.Items).SelectMany(i => i.MatchingObjects);
+        => FilterTypeCategories.SelectMany(c => c.Items).Where(i => i.IsSelected).SelectMany(i => i.MatchingObjects);
 
     private IEnumerable<ISelectableObject> GetAllFilterMatches()
         => GetAllMatchingTypeObjects().Except(OptionFilterRemovals);

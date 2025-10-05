@@ -111,8 +111,7 @@
                           ItemsSource="{Binding SelectionsText}"
                           DisplayMemberPath="Value"
                           SelectedValuePath="Key"
-                          Width="200"
-                          HorizontalAlignment="Left"
+                          HorizontalAlignment="Stretch"
                           IsEnabled="{Binding IsEnabled}" />
                 <Label Grid.Column="2"
                        Content="{Binding SelectedOptionMatchCount, Converter={StaticResource ParenthesizeTextConverter}}"
