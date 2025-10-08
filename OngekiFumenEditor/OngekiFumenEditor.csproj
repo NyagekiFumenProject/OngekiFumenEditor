@@ -193,7 +193,8 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="FontStashSharp" Version="1.3.9" />
+		<PackageReference Include="FontStashSharp.PlatformAgnostic" Version="1.4.1" />
+		<PackageReference Include="FontStashSharp.Rasterizers.FreeType" Version="1.1.11" />
 		<PackageReference Include="Microsoft.Build" Version="17.7.2" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.11.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" ExcludeAssets="contentfiles;runtime;" />

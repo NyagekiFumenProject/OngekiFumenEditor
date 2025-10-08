@@ -1,6 +1,6 @@
 ﻿using FontStashSharp;
-using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String.Platform;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using FontStashSharp.Rasterizers.FreeType;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.Platform;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 {
     internal class DefaultStringDrawing : CommonOpenGLDrawingBase, IStringDrawing, IDisposable
     {
@@ -34,6 +34,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDra
                 FamilyName = Path.GetFileNameWithoutExtension(x),
                 FilePath = x
             }).Where(x => Path.GetExtension(x.FilePath).ToLower() == ".ttf").ToArray();
+        }
+
+        static DefaultStringDrawing()
+        {
+            FontSystemDefaults.FontLoader = new FreeTypeLoader();
         }
 
         public DefaultStringDrawing(DefaultOpenGLRenderManagerImpl manager) : base(manager)
