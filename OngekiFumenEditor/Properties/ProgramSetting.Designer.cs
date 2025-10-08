@@ -226,5 +226,17 @@ namespace OngekiFumenEditor.Properties {
                 this["SkiaRenderBackend"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool @__NeedUpgradeSetting {
+            get {
+                return ((bool)(this["__NeedUpgradeSetting"]));
+            }
+            set {
+                this["__NeedUpgradeSetting"] = value;
+            }
+        }
     }
 }

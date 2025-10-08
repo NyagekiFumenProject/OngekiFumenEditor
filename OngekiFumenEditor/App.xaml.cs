@@ -1,6 +1,10 @@
 ﻿using OngekiFumenEditor.Base.Collections.Base.NotQuadTree;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -25,10 +29,61 @@ namespace OngekiFumenEditor
 
         public App(bool isGUIMode = true)
         {
+            CheckOrUpgradeAllSettings();
+
             AppDomain.CurrentDomain.AssemblyResolve += OnSatelliteAssemblyResolve;
             // 设置工作目录为执行文件所在的目录
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             IsGUIMode = isGUIMode;
+        }
+
+        public static void CheckOrUpgradeAllSettings()
+        {
+            FileLogOutput.WriteLog($"current setting file:{ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath}\n");
+
+            if (!OngekiFumenEditor.Properties.ProgramSetting.Default.__NeedUpgradeSetting)
+                return;
+            /*
+             fuck M$ why not auto-upgrade for other settings
+             */
+
+            FileLogOutput.WriteLog($"Begin upgrade program settings\n");
+
+            //only upgrade settings in these assembly:
+            IEnumerable<Assembly> assemblyList = [
+                typeof(Properties.AudioSetting).Assembly,
+                typeof(Gemini.AppBootstrapper).Assembly
+                ];
+
+            var settingsTypes = assemblyList.Distinct().SelectMany(
+                x => x.GetTypes()
+                .Where(t => typeof(ApplicationSettingsBase).IsAssignableFrom(t))
+                )
+                .ToList();
+
+            foreach (var type in settingsTypes)
+            {
+                try
+                {
+                    var defaultProperty = type.GetProperty("Default",
+                        BindingFlags.Public | BindingFlags.Static);
+
+                    var settings = defaultProperty?.GetValue(null) as ApplicationSettingsBase;
+                    settings?.Upgrade();
+                    settings?.Reload();
+                    settings?.Save();
+                    FileLogOutput.WriteLog($"upgrade setting successfully: {type.FullName}\n");
+                }
+                catch (Exception ex)
+                {
+                    FileLogOutput.WriteLog($"upgrade setting failed: {type.FullName}: {ex}\n");
+                }
+            }
+
+            OngekiFumenEditor.Properties.ProgramSetting.Default.__NeedUpgradeSetting = false;
+            OngekiFumenEditor.Properties.ProgramSetting.Default.Save();
+
+            FileLogOutput.WriteLog($"Upgrade program settings finished\n");
         }
 
         private Assembly OnSatelliteAssemblyResolve(object sender, ResolveEventArgs args)
