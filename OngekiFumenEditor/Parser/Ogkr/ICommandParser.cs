@@ -1,6 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
+namespace OngekiFumenEditor.Parser.Ogkr
 {
 	public interface ICommandParser
 	{

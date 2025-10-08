@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Globalization;

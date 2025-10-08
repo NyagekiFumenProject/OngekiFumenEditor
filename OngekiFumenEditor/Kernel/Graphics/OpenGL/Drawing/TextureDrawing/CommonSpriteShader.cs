@@ -2,7 +2,7 @@
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Utils;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
     public class CommonSpriteShader : DefaultOpenGLShader
 	{

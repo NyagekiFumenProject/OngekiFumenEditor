@@ -5,7 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gemini="http://schemas.timjones.io/gemini"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views"
+    xmlns:local="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels"
     d:Background="White"

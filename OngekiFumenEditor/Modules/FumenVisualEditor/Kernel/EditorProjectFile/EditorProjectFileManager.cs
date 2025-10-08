@@ -6,7 +6,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjManager
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile
 {
 	public class EditorProjectFileManager
 	{

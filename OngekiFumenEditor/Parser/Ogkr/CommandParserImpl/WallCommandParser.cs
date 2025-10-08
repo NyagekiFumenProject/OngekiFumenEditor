@@ -1,11 +1,11 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
 	public abstract class WallCommandParserBase : CommandParserBase
 	{

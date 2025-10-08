@@ -1,7 +1,7 @@
 ﻿using Gemini.Framework.Commands;
 using OngekiFumenEditor.Properties;
 
-namespace OngekiFumenEditor.Kernel.EditorLayout.Commands.About
+namespace OngekiFumenEditor.Kernel.EditorLayout.Commands.ApplySuggestEditorLayout
 {
 	[CommandDefinition]
 	public class ApplySuggestEditorLayoutCommandDefinition : CommandDefinition

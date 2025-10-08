@@ -1,12 +1,10 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
+﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.PolygonDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing
 {
     internal class DefaultPolygonDrawing : CommonOpenGLDrawingBase, IPolygonDrawing, IDisposable
     {

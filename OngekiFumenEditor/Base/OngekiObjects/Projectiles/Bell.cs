@@ -5,7 +5,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
 {
     public partial class Bell : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile
     {
@@ -166,7 +166,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         /// <summary>
-        /// ÊÇ·ñÊÜµ½±äËÙÓ°Ïì
+        /// ï¿½Ç·ï¿½ï¿½Üµï¿½ï¿½ï¿½ï¿½ï¿½Ó°ï¿½ï¿½
         /// </summary>
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 

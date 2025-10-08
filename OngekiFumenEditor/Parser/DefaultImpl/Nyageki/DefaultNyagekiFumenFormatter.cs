@@ -18,7 +18,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl
+namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
 {
     [Export(typeof(IFumenSerializable))]
     class DefaultNyagekiFumenFormatter : IFumenSerializable

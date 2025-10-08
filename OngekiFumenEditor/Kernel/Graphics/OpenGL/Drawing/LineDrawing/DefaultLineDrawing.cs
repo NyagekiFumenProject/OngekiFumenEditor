@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.LineDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
     internal class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
 	{

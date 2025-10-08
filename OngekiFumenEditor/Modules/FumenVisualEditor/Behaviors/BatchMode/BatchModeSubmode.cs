@@ -9,7 +9,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Properties;

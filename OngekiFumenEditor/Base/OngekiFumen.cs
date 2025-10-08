@@ -8,7 +8,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;

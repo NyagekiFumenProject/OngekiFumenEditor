@@ -1,5 +1,5 @@
 ﻿using Gemini.Framework;
-using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
+using OngekiFumenEditor.Base.EditorObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;

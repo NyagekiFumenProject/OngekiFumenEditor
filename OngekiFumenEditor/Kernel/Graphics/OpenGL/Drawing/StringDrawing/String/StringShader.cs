@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String
 {
     public class StringShader : DefaultOpenGLShader
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace SkiaSharp.Tests
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Cgl
 {
 	internal enum CGLOpenGLProfile {
 		kCGLOGLPVersion_Legacy   = 0x1000,

@@ -8,10 +8,8 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using WPF.JoshSmith.Adorners;
-using WPF.JoshSmith.Controls.Utilities;
 
-namespace WPF.JoshSmith.ServiceProviders.UI
+namespace OngekiFumenEditor.UI.ListViewDragDropManager
 {
     #region ListViewDragDropManager
 

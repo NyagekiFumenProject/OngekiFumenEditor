@@ -5,7 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:jas="clr-namespace:WPF.JoshSmith.ServiceProviders.UI"
+    xmlns:jas="clr-namespace:OngekiFumenEditor.UI.ListViewDragDropManager"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Views"
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

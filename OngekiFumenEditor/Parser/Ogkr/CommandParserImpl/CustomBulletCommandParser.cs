@@ -1,12 +1,12 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using System;
 using System.ComponentModel.Composition;
 using System.Linq;
-using static OngekiFumenEditor.Base.OngekiObjects.Bullet;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
     public class CustomBulletCommandParser : CommandParserBase

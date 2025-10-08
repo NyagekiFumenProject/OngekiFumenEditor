@@ -6,7 +6,7 @@ using System;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl.Editor
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.Editor
 {
 	[Export(typeof(ICommandParser))]
 	public class CurveControlCommand : CommandParserBase

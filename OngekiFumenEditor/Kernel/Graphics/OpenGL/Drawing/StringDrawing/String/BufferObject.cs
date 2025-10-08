@@ -4,7 +4,7 @@ using OpenTK.Graphics.OpenGL;
 using System;
 using System.Runtime.InteropServices;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String
 {
 	internal class BufferObject<T> : IDisposable where T : unmanaged
 	{

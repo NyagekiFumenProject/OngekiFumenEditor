@@ -1,13 +1,13 @@
 ﻿using System.Windows.Controls;
 
-namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views
+namespace OngekiFumenEditor.Kernel.SettingPages.Audio.Views
 {
-	/// <summary>
-	/// FumenVisualEditorGlobalSettingView.xaml 的交互逻辑
-	/// </summary>
-	public partial class FumenVisualEditorGlobalSettingView : UserControl
+    /// <summary>
+    /// AudioSettingView.xaml 的交互逻辑
+    /// </summary>
+    public partial class AudioSettingView : UserControl
 	{
-		public FumenVisualEditorGlobalSettingView()
+		public AudioSettingView()
 		{
 			InitializeComponent();
 		}

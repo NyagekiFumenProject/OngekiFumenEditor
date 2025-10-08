@@ -5,7 +5,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
 {
     //[DontShowPropertyInfoAttrbute]
     public partial class Bullet : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile

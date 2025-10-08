@@ -1,8 +1,9 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace SkiaSharp.Tests
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Cgl
 {
 	internal class CglContext : GlContext
 	{

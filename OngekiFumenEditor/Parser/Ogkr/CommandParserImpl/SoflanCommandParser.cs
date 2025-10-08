@@ -6,7 +6,7 @@ using System;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class SoflanCommandParser : CommandParserBase

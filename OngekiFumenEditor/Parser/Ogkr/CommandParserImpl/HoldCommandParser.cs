@@ -4,7 +4,7 @@ using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class HoldCommandParser : CommandParserBase

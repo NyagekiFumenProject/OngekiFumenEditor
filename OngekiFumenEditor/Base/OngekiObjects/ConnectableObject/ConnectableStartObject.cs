@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using OpenTK.Mathematics;

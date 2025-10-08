@@ -3,7 +3,7 @@ using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using System.ComponentModel.Composition;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.SvgDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.SvgDrawing
 {
     internal class DefaultSvgDrawing : CommonOpenGLDrawingBase, ISvgDrawing
 	{

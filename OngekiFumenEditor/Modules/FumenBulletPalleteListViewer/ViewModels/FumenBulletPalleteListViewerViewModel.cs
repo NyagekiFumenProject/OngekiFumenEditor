@@ -5,8 +5,9 @@ using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
+using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Views;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
@@ -26,7 +27,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
+namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
 {
     [Export(typeof(IFumenBulletPalleteListViewer))]
     public class FumenBulletPalleteListViewerViewModel : Tool, IFumenBulletPalleteListViewer

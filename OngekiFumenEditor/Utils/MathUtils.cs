@@ -1,6 +1,6 @@
-﻿using IntervalTree;
-using OngekiFumenEditor.Base;
+﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.Collections.Base.RangeTree;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;

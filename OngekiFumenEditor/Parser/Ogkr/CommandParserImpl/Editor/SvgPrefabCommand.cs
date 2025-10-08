@@ -7,7 +7,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl.Editor
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.Editor
 {
 	public abstract class SvgPrefabCommandBase : ICommandParser
 	{

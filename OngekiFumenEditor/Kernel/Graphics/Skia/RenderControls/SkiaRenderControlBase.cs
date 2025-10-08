@@ -10,7 +10,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
 using OngekiFumenEditor.Kernel.Graphics.Skia;
-using SkiaSharp.Tests;
 using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls

@@ -21,8 +21,8 @@
             </converters:CurvePathControlVisibilityConverter>
             <valueconverters:EnumToStringConverter x:Key="EnumToStringConverter">
             </valueconverters:EnumToStringConverter>
-            <converters1:CultureInfoNameConverter x:Key="CultureInfoNameConverter">
-            </converters1:CultureInfoNameConverter>
+            <valueconverters:CultureInfoNameConverter x:Key="CultureInfoNameConverter">
+            </valueconverters:CultureInfoNameConverter>
             <valueconverters:NullToVisibilityConverter x:Key="NullToVisibilityConverter">
             </valueconverters:NullToVisibilityConverter>
             <valueconverters:LocalizeConverter x:Key="LocalizeConverter">

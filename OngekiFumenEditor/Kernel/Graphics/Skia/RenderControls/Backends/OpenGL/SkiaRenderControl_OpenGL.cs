@@ -1,5 +1,4 @@
 ﻿using SkiaSharp;
-using SkiaSharp.Tests;
 using SkiaSharp.Views.Desktop;
 using System;
 using System.Collections.Generic;
@@ -10,12 +9,12 @@ using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
-using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.StringDrawing.String;
 using NWaves.Utils;
 using AngleSharp.Media;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.OpenGL
 {
     internal class SkiaRenderControl_OpenGL : SkiaRenderControlBase
     {

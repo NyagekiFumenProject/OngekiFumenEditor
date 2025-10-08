@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;

@@ -3,7 +3,7 @@ using ControlzEx.Standard;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using OngekiFumenEditor.Kernel.Audio.DefaultImp.Music;
+using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.SoundTouch;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;

@@ -1,9 +1,10 @@
 ﻿using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class BellCommandParser : CommandParserBase

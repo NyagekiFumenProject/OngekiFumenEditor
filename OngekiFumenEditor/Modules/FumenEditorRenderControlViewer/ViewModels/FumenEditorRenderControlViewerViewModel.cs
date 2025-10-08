@@ -7,6 +7,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.UI.ListViewDragDropManager;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Immutable;
@@ -16,7 +17,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using WPF.JoshSmith.ServiceProviders.UI;
 
 namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
 {

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Utils.X11;
+using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace SkiaSharp.Tests
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Glx
 {
 	internal class GlxContext : GlContext
 	{

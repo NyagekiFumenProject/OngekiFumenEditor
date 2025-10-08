@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace SkiaSharp.Tests
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.Utils.Win32
 {
 	public delegate IntPtr WNDPROC(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 

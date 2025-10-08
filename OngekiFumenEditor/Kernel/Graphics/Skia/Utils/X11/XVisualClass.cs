@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace SkiaSharp.Tests
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.Utils.X11
 {
 	internal enum XVisualClass : int {
 		StaticGray = 0,

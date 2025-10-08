@@ -1,13 +1,12 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Parser.DefaultImpl.Ogkr;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
+using OngekiFumenEditor.Base.EditorObjects;
 
 namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {

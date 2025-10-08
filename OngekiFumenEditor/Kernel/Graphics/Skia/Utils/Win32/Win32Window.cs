@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SkiaSharp.Tests
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.Utils.Win32
 {
 	public class Win32Window : IDisposable
 	{

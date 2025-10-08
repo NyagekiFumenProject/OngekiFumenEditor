@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
+namespace OngekiFumenEditor.Parser.Ogkr
 {
 	[Export(typeof(IFumenDeserializable))]
 	public class DefaultOngekiFumenParser : IFumenDeserializable

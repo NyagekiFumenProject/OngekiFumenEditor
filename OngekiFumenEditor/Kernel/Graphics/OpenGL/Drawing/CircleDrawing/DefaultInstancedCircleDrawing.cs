@@ -6,7 +6,7 @@ using System;
 using System.ComponentModel.Composition;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.CircleDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
 {
     internal class DefaultInstancedCircleDrawing : CommonOpenGLDrawingBase, ICircleDrawing
     {

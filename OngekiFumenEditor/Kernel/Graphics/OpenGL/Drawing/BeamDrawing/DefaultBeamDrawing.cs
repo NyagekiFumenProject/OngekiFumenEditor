@@ -1,6 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam;
+﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;

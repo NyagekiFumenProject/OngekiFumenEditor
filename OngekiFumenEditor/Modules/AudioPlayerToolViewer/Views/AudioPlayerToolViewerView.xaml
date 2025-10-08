@@ -8,7 +8,7 @@
     xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gemini="http://schemas.timjones.io/gemini"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Views"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

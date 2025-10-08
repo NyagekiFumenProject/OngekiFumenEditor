@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {

@@ -2,7 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
+namespace OngekiFumenEditor.Parser.Ogkr
 {
 	//special thanks geeki___ for saving my hair. ^_^
 	public class FumenStatisticsCalculator

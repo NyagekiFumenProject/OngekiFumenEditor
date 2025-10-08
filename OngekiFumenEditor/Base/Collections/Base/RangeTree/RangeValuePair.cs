@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace IntervalTree
+namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
 {
 	/// <summary>
 	/// Represents a range of values.

@@ -1,6 +1,7 @@
+using SkiaSharp;
 using System;
 
-namespace SkiaSharp.Extended
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.Utils
 {
 	public static class SKPixelComparer
 	{

@@ -1,9 +1,5 @@
 ﻿using Gemini.Framework.Menus;
-using OngekiFumenEditor.Kernel.EditorLayout.Commands.About;
-using OngekiFumenEditor.Kernel.MiscMenu.Commands.About;
-using OngekiFumenEditor.Kernel.MiscMenu.Commands.CallFullGC;
-using OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon;
-using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Kernel.EditorLayout.Commands.ApplySuggestEditorLayout;
 using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Kernel.EditorLayout

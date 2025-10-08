@@ -1,6 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Parser.DefaultImpl.Ogkr;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

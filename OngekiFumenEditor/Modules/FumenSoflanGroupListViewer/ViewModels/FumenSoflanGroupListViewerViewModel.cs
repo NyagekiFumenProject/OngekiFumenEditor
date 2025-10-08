@@ -2,7 +2,6 @@
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -13,13 +12,14 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using static OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels.FumenEditorRenderControlViewerViewModel;
 using System.Windows;
-using WPF.JoshSmith.ServiceProviders.UI;
 using System.Windows.Controls;
 using System.Collections.Specialized;
 using System.Linq;
 using static OngekiFumenEditor.Base.Collections.SoflanList;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.UI.ListViewDragDropManager;
 
 namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 {

@@ -6,7 +6,7 @@ using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
     public abstract class BeamCommandParserBase : CommandParserBase
     {

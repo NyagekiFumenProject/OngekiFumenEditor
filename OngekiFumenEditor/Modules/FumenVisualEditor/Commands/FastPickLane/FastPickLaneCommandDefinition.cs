@@ -1,6 +1,5 @@
 ﻿using Gemini.Framework.Commands;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;

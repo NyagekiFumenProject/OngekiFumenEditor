@@ -3,16 +3,16 @@ using Gemini.Framework.Services;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Parser.DefaultImpl.Ogkr.Rules;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
+namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
 {
 	[Export(typeof(IFumenCheckRule))]
 	[Export(typeof(IOngekiFumenCheckRule))]

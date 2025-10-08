@@ -1,5 +1,4 @@
 ﻿using SkiaSharp;
-using SkiaSharp.Tests;
 using SkiaSharp.Views.Desktop;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ using System.Windows.Media;
 using System.Windows;
 using OngekiFumenEditor.Kernel.Graphics.Skia.D3dContexts;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
 {
     internal class SkiaRenderControl_DirectX : SkiaRenderControlBase
     {

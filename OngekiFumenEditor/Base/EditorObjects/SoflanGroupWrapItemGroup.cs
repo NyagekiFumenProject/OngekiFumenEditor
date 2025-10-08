@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models
+namespace OngekiFumenEditor.Base.EditorObjects
 {
     public class SoflanGroupWrapItemGroup : SoflanGroupDisplayItemListViewBase
     {

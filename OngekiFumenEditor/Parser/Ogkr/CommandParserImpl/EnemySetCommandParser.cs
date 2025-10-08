@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel.Composition;
 using static OngekiFumenEditor.Base.OngekiObjects.EnemySet;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class EnemySetCommandParser : CommandParserBase

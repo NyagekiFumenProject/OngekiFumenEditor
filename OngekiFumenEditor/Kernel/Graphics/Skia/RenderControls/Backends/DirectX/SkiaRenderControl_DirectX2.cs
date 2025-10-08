@@ -14,7 +14,7 @@ using Vortice.DXGI;
 using NWaves.Utils;
 using System.Drawing;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
 {
     internal class SkiaRenderControl_DirectX2 : SkiaRenderControlBase
     {

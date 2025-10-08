@@ -1,7 +1,7 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections.Base;
+using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;

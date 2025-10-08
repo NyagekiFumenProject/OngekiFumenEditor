@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects
 {
 	[Export(typeof(IFumenEditorDrawingTarget))]
 	public class AutoPlayFaderLaneDrawTarget : LaneDrawingTargetBase

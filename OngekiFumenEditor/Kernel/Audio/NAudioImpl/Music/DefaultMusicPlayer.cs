@@ -13,7 +13,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Kernel.Audio.DefaultImp.Music
+namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 {
     internal class DefaultMusicPlayer : PropertyChangedBase, IAudioPlayer, ISchedulable
     {

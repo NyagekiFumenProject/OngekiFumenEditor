@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views
+namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Views
 {
 	/// <summary>
 	/// FumenMetaInfoBrowserView.xaml 的交互逻辑

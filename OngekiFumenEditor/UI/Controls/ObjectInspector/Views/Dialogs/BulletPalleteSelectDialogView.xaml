@@ -5,7 +5,7 @@
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dialog="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels.Dialogs"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views.Dialog"
+    xmlns:local="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.Views.Dialogs"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

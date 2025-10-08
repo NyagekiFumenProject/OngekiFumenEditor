@@ -7,6 +7,8 @@ using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU;
+using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX;
+using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.OpenGL;
 using OngekiFumenEditor.Utils;
 using SkiaSharp;
 using System;

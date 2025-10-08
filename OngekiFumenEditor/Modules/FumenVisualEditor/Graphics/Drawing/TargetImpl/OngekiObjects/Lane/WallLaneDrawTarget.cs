@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.Lane
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Lane
 {
     internal abstract class WallLaneDrawTarget : LaneDrawingTargetBase
     {

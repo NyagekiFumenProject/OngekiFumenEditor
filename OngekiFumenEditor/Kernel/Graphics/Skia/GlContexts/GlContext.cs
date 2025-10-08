@@ -1,8 +1,12 @@
 ﻿// sources fetched and modified from https://github.com/mono/SkiaSharp/blob/main/tests/Tests/
+using OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Cgl;
+using OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Glx;
+using OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Wgl;
+using SkiaSharp;
 using SkiaSharp.Internals;
 using System;
 
-namespace SkiaSharp.Tests
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts
 {
 	public abstract class GlContext : IDisposable
 	{

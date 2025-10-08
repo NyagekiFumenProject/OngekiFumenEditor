@@ -2,7 +2,7 @@
 using OngekiFumenEditor.Utils.ObjectPool;
 using System.Collections.Generic;
 
-namespace IntervalTree
+namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
 {
 	/// <summary>
 	///     A node of the range tree. Given a list of items, it builds

@@ -2,7 +2,7 @@
 using OngekiFumenEditor.Parser.Ogkr;
 using System;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr
+namespace OngekiFumenEditor.Parser.Ogkr
 {
 	public abstract class CommandFormatterBase<T> : ICommandFormatter
 	{

@@ -3,7 +3,7 @@ using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.Editor
 {
 	[Export(typeof(ICommandParser))]
 	public class CommentCommandParser : CommandParserBase

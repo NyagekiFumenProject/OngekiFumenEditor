@@ -33,7 +33,6 @@ using System.Windows.Input;
 using Gemini.Framework.Commands;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Wall;
 using System.Threading;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 using System.Windows.Controls;

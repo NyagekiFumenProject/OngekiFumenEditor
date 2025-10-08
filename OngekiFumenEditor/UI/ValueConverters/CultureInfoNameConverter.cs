@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace Gemini.Modules.MainMenu.Converters
+namespace OngekiFumenEditor.UI.ValueConverters
 {
     public class CultureInfoNameConverter : IValueConverter
     {
@@ -13,12 +13,12 @@ namespace Gemini.Modules.MainMenu.Converters
 
             if (string.Empty.Equals(value))
             {
-                if (Properties.Resources.LanguageSystem.Equals("System"))
-                    return Properties.Resources.LanguageSystem;
+                if (Gemini.Properties.Resources.LanguageSystem.Equals("System"))
+                    return Gemini.Properties.Resources.LanguageSystem;
 
                 return string.Format("{0} ({1})",
-                    Properties.Resources.LanguageSystem,
-                    Properties.Resources.ResourceManager.GetString("LanguageSystem", CultureInfo.InvariantCulture)
+                    Gemini.Properties.Resources.LanguageSystem,
+                    Gemini.Properties.Resources.ResourceManager.GetString("LanguageSystem", CultureInfo.InvariantCulture)
                     );
             }
 

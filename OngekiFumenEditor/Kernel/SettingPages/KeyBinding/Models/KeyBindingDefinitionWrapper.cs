@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Models
+namespace OngekiFumenEditor.Kernel.SettingPages.KeyBinding.Models
 {
     public class KeyBindingDefinitionWrapper : PropertyChangedBase
     {

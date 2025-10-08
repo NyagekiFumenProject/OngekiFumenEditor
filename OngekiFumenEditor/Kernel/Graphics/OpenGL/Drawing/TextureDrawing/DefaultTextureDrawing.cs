@@ -11,7 +11,7 @@ using System.Numerics;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = OpenTK.Mathematics.Vector3;
 
-namespace OngekiFumenEditor.Kernel.Graphics.Drawing.DefaultDrawingImpl.TextureDrawing
+namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
     internal class DefaultTextureDrawing : CommonOpenGLDrawingBase, ITextureDrawing, IDisposable
     {

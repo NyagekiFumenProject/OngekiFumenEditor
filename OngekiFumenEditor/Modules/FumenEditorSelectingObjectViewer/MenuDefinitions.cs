@@ -2,7 +2,7 @@
 using OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Commands;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Modules.IFumenEditorSelectingObjectViewer
+namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer
 {
 	public static class MenuDefinitions
 	{

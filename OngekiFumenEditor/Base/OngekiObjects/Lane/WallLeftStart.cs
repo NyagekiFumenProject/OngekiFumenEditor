@@ -1,7 +1,7 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Wall.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Wall
+namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 {
 	public class WallLeftStart : WallStartBase
 	{

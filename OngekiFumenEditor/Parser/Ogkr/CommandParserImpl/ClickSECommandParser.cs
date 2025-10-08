@@ -2,7 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class ClickSECommandParser : CommandParserBase

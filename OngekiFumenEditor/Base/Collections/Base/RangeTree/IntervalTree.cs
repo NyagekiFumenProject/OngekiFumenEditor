@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace IntervalTree
+namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
 {
 	public class IntervalTree<TKey, TValue> : IIntervalTree<TKey, TValue>
 	{

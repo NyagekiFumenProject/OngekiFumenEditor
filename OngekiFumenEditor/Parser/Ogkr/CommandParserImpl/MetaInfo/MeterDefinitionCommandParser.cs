@@ -2,7 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Ogkr.CommandParserImpl.MetaInfo
+namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.MetaInfo
 {
 	[Export(typeof(ICommandParser))]
 	class MeterDefinitionCommandParser : MetaInfoCommandParserBase

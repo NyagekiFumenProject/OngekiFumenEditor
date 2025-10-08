@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;

@@ -181,7 +181,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         public bool IsBatchMode
-            => Interaction.GetBehaviors((DependencyObject)GetView()).Contains(BatchModeBehavior);
+            => GetView() is DependencyObject obj ? Interaction.GetBehaviors(obj).Contains(BatchModeBehavior) : false;
 
         public EditorSetting Setting { get; } = new EditorSetting();
 

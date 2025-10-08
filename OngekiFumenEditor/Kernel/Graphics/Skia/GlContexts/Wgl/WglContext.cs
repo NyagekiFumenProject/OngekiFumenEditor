@@ -1,6 +1,8 @@
-﻿using System;
+﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Utils.Win32;
+using SkiaSharp;
+using System;
 
-namespace SkiaSharp.Tests
+namespace OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Wgl
 {
 	internal class WglContext : GlContext
 	{
