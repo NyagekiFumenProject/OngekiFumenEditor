@@ -106,9 +106,12 @@ public class SelectionFilterViewModel : ViewAware
     {
         var bulletPaletteOption = new BulletPaletteFilterOption(Resources.SelectionFilter_OptionLabelBulletPalette);
 
-        FumenVisualEditorViewModel.LoadingFinishedEventHandler loaded = (_, args) =>
+        FumenVisualEditorViewModel.LoadingFinishedEventHandler loaded = (sender, args) =>
         {
-            bulletPaletteOption.UpdateOptions(args.Fumen.BulletPalleteList);
+            var vm = (FumenVisualEditorViewModel)sender;
+            if (vm.IsActive) {
+                bulletPaletteOption.FumenLoaded(args.Fumen);
+            }
         };
 
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (@new, old) =>
@@ -119,8 +122,8 @@ public class SelectionFilterViewModel : ViewAware
             }
 
             if (@new is not null) {
-                @new.LoadingFinished += loaded;
                 bulletPaletteOption.FumenLoaded(@new.Fumen);
+                @new.LoadingFinished += loaded;
             }
         };
 
