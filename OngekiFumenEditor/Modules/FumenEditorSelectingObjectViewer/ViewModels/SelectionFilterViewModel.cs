@@ -37,6 +37,9 @@ public class SelectionFilterViewModel : ViewAware
 
     public ObservableCollection<ISelectableObject> OptionFilterRemovals { get; } = new();
 
+    /// <see cref="GetFinalFilterMatches" />
+    private List<ISelectableObject>? FinalFilterMatchCache { get; set; } = new();
+
     public bool IsInvertFilter
     {
         get;
@@ -80,7 +83,8 @@ public class SelectionFilterViewModel : ViewAware
                     matchingItem.MatchingObjects.Add(item);
                 }
 
-                OptionCategories.SelectMany(c => c.Options).ForEach(o => o.IncrementOptionMatchCount((OngekiObjectBase)item));
+                OptionCategories.SelectMany(c => c.Options)
+                    .ForEach(o => o.IncrementOptionMatchCount((OngekiObjectBase)item));
             }
         }
 
@@ -97,8 +101,14 @@ public class SelectionFilterViewModel : ViewAware
 
     private void OnOptionUpdated()
     {
-        // Apply option filters
+        FinalFilterMatchCache = null;
         UpdateOptionFilterRemovals();
+        UpdateFilterOutcomeText();
+    }
+
+    public void OnTypeFilterEnabledChanged(FilterObjectTypesItem _)
+    {
+        FinalFilterMatchCache = null;
         UpdateFilterOutcomeText();
     }
 
@@ -130,14 +140,9 @@ public class SelectionFilterViewModel : ViewAware
         return bulletPaletteOption;
     }
 
-    public void OnTypeFilterEnabledChanged(FilterObjectTypesItem _)
-    {
-        UpdateFilterOutcomeText();
-    }
-
     private void UpdateFilterOutcomeText()
     {
-        var matches = GetAllFilterMatches();
+        var matches = GetFinalFilterMatches();
         if (IsInvertFilter) {
             FilterOutcomeText = Resources.SelectionFilter_ResultsLabelRemoveMode.Format(matches.Count());
         }
@@ -159,8 +164,13 @@ public class SelectionFilterViewModel : ViewAware
     private IEnumerable<ISelectableObject> GetAllMatchingTypeObjects()
         => FilterTypeCategories.SelectMany(c => c.Items).Where(i => i.IsSelected).SelectMany(i => i.MatchingObjects);
 
-    private IEnumerable<ISelectableObject> GetAllFilterMatches()
-        => GetAllMatchingTypeObjects().Except(OptionFilterRemovals);
+    public IEnumerable<ISelectableObject> GetFinalFilterMatches()
+    {
+        if (FinalFilterMatchCache is null) {
+            FinalFilterMatchCache = new(GetAllMatchingTypeObjects().Except(OptionFilterRemovals));
+        }
+        return FinalFilterMatchCache;
+    }
 
     #region Option Generation
     private void InitObjectTypeFilter()
@@ -319,12 +329,12 @@ public class SelectionFilterViewModel : ViewAware
             return;
 
         if (IsInvertFilter) {
-            foreach (var selectableObject in GetAllFilterMatches()) {
+            foreach (var selectableObject in GetFinalFilterMatches()) {
                 selectableObject.IsSelected = false;
             }
         }
         else {
-            foreach (var selectedObject in Editor.SelectObjects.Except(GetAllFilterMatches())) {
+            foreach (var selectedObject in Editor.SelectObjects.Except(GetFinalFilterMatches())) {
                 selectedObject.IsSelected = false;
             }
         }
