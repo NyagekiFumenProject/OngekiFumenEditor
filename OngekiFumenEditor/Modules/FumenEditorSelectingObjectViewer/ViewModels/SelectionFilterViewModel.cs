@@ -37,6 +37,10 @@ public class SelectionFilterViewModel : ViewAware
 
     public ObservableCollection<ISelectableObject> OptionFilterRemovals { get; } = new();
 
+    /// <summary>
+    /// Basic cache to store the results of filter.
+    /// Set to null to invalidate.
+    /// </summary>
     /// <see cref="GetFinalFilterMatches" />
     private List<ISelectableObject>? FinalFilterMatchCache { get; set; } = new();
 
@@ -62,6 +66,12 @@ public class SelectionFilterViewModel : ViewAware
 
         InitObjectTypeFilter();
         InitOptions();
+
+        IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (_, _) =>
+        {
+            FinalFilterMatchCache = null;
+            OnSelectedItemsRefreshed();
+        };
 
         UpdateFilterOutcomeText();
     }
