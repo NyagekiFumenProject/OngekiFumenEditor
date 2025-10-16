@@ -338,8 +338,8 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
     where THead : OngekiObjectBase, ISelectableObject
     where TTail : OngekiObjectBase, ISelectableObject
 {
-    public delegate THead HeadGetter(TTail obj);
-    public delegate TTail TailGetter(THead obj);
+    public delegate THead? HeadGetter(TTail obj);
+    public delegate TTail? TailGetter(THead obj);
 
     public HeadTailSpecificationOption(string text,
         HeadGetter headGetter,
@@ -359,7 +359,7 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
                     switch (input) {
                         case HeadTailSpecification.Head:
                         case HeadTailSpecification.HeadNoChild when tailObj is null || !tailObj.IsSelected:
-                        case HeadTailSpecification.HeadWithChild when tailObj.IsSelected:
+                        case HeadTailSpecification.HeadWithChild when tailObj is { IsSelected: true }:
                             return FilterOptionResult.Match;
                         default:
                             return FilterOptionResult.NoMatch;
@@ -370,8 +370,8 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
                     var headObj = headGetter(tail);
                     switch (input) {
                         case HeadTailSpecification.Tail:
-                        case HeadTailSpecification.TailNoParent when !headObj.IsSelected:
-                        case HeadTailSpecification.TailWithParent when headObj.IsSelected:
+                        case HeadTailSpecification.TailNoParent when headObj is null || !headObj.IsSelected:
+                        case HeadTailSpecification.TailWithParent when headObj is { IsSelected: true }:
                             return FilterOptionResult.Match;
                         default:
                             return FilterOptionResult.NoMatch;
