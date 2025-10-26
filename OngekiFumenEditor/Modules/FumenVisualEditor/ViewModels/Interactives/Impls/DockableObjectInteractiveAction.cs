@@ -71,9 +71,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 					if (closestLaneObject?.Item1 < magneticDockDistance || //可能拖动到另一条线上
 						closestLaneObject?.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
 					{
+						if (dockable.ReferenceLaneStart is null ||
+						    !dockable.ReferenceLaneStart.Children.Prepend<ConnectableObjectBase>(dockable.ReferenceLaneStart)
+							    .Any(n => n.IsSelected))
+						{
+							dockable.ReferenceLaneStart = closestLaneObject?.startObject;
+							//Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
+						}
 						relativePoint.X = closestLaneObject?.Value ?? default;
-						dockable.ReferenceLaneStart = closestLaneObject?.startObject;
-						//Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
 						enableMoveTo = true;
 					}
 				}
