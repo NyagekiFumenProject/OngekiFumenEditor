@@ -40,10 +40,10 @@ jobs:
         fetch-depth: 0
         ref: ${{ env.Branch }}
         submodules: recursive
-    - name: Setup .NET9
+    - name: Setup .NET10
       uses: actions/setup-dotnet@v4.3.1
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
     - name: get-version-action
       id: project-version
       uses: euberdeveloper/ga-project-version@main
