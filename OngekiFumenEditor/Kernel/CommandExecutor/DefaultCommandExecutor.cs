@@ -36,20 +36,22 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
 
         public DefaultCommandExecutor()
         {
-            rootCommand = new RootCommand("CommandLine for OngekiFumenEditor");
-            rootCommand.AddCommand(GenerateVerbCommands<SvgGenerateOption>("svg", Resources.ProgramCommandDescriptionSvg, ProcessSvgCommand));
-            rootCommand.AddCommand(GenerateVerbCommands<FumenConvertOption>("convert", Resources.ProgramCommandConvert, ProcessConvertCommand));
-            rootCommand.AddCommand(GenerateVerbCommands<JacketGenerateOption>("jacket", Resources.ProgramCommandJacket, ProcessJacketCommand));
-            rootCommand.AddCommand(GenerateVerbCommands<AcbGenerateOption>("acb", Resources.ProgramCommandAcb, ProcessAcbCommand));
-            rootCommand.AddCommand(GenerateVerbCommands<UpdaterOption>("updater", string.Empty, ProcessUpdaterCommand));
+            rootCommand = new RootCommand("CommandLine for OngekiFumenEditor")
+            {
+                GenerateVerbCommands<SvgGenerateOption>("svg", Resources.ProgramCommandDescriptionSvg, ProcessSvgCommand),
+                GenerateVerbCommands<FumenConvertOption>("convert", Resources.ProgramCommandConvert, ProcessConvertCommand),
+                GenerateVerbCommands<JacketGenerateOption>("jacket", Resources.ProgramCommandJacket, ProcessJacketCommand),
+                GenerateVerbCommands<AcbGenerateOption>("acb", Resources.ProgramCommandAcb, ProcessAcbCommand),
+                GenerateVerbCommands<UpdaterOption>("updater", string.Empty, ProcessUpdaterCommand)
+            };
 
-            var verbosityOption = new Option<bool>(new[] { "--verbose", "-v" }, Resources.ProgramOptionDescriptionVerbose);
-            verbosityOption.AddValidator(res =>
+            var verbosityOption = new Option<bool>(Resources.ProgramOptionDescriptionVerbose, "--verbose", "-v");
+            verbosityOption.Validators.Add(res =>
             {
                 if (res.GetValueOrDefault<bool>())
                     Log.Instance.AddOutputIfNotExist<ConsoleLogOutput>();
             });
-            rootCommand.AddGlobalOption(verbosityOption);
+            rootCommand.Options.Add(verbosityOption);
         }
 
         private async Task<int> ProcessUpdaterCommand(UpdaterOption option)
@@ -61,18 +63,18 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
         }
 
         public Task<int> Execute(string[] args)
-            => rootCommand.InvokeAsync(args);
+            => rootCommand.Parse(args).InvokeAsync();
 
         private Command GenerateVerbCommands<T>(string verb, string description, Func<T, Task<int>> callbackFunc) where T : new()
         {
             var command = new Command(verb, description);
             foreach (var option in GenerateOptionsByAttributes<T>())
-                command.AddOption(option);
+                command.Options.Add(option);
 
-            command.SetHandler(async ctx =>
+            command.SetAction(async parseResult =>
             {
-                var opt = Generate<T>(command, ctx.ParseResult);
-                ctx.ExitCode = await callbackFunc(opt);
+                var opt = Generate<T>(command, parseResult);
+                return await callbackFunc(opt);
             });
 
             return command;
@@ -208,7 +210,7 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
                     var optName = $"--{attrbuteBase.Name}";
 
                     var option = (Option)LambdaActivator.CreateInstance(optionType, optName, func, attrbuteBase.Description);
-                    option.IsRequired = attrbuteBase.Require;
+                    option.Required = attrbuteBase.Require;
 
                     yield return option;
                 }
@@ -224,9 +226,9 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
                 if (prop.GetCustomAttribute<OptionBindingAttrbuteBase>() is OptionBindingAttrbuteBase attrbuteBase)
                 {
                     var name = $"{attrbuteBase.Name}";
-                    if (command.Options.FirstOrDefault(x => x.Name == name) is Option opt)
+                    if (command.Options.FirstOrDefault(x => x.Name == name) is Option<T> opt)
                     {
-                        var val = result.GetValueForOption(opt);
+                        var val = result.GetValue(opt);
                         prop.SetValue(obj, val);
                     }
                 }
