@@ -49,11 +49,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             PostObject(start, getNextIsVaild(start));
             var prevInvaild = true;
             var prevObj = start as ConnectableObjectBase;
-
+            
             //todo 再判断设计模式怎么钦定
             var soflanPositionList = target.Editor.IsDesignMode ?
                 target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
-                target.Editor._cacheSoflanGroupRecorder.GetCache(start).GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+                target.Editor._cacheSoflanGroupRecorder.GetCache(start)?.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+            if (soflanPositionList is null)
+                return;
 
             var minIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MinTGrid, x => x.TGrid);
             var maxIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MaxTGrid, x => x.TGrid);
