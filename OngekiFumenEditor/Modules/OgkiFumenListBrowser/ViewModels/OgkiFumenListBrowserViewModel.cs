@@ -26,11 +26,6 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 	[Export(typeof(IOgkiFumenListBrowser))]
 	public class OgkiFumenListBrowserViewModel : WindowBase, IOgkiFumenListBrowser
 	{
-		private readonly static EnumerationOptions enumOpt = new EnumerationOptions()
-		{
-			MatchCasing = MatchCasing.CaseInsensitive,
-		};
-
 		private List<OngekiFumenSet> fumenSets = new();
 
 		private string rootFolderPath = string.Empty;

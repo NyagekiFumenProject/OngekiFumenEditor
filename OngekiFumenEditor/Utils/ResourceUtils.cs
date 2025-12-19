@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Utils
     {
         private static Dictionary<string, string> textureSizeOriginMap = new();
 
-        public static Stream OpenReadFromLocalAssemblyResourcesFolder(string resourceName)
+        public static Stream OpenReadFromLocalAssemblyEmbbedResources(string resourceName)
             => typeof(ResourceUtils).Assembly.GetManifestResourceStream("OngekiFumenEditor.Resources." + resourceName);
 
         public static Stream OpenReadResourceStream(string relativeUrl)
@@ -30,9 +30,9 @@ namespace OngekiFumenEditor.Utils
             return impl.LoadImageFromStream(stream);
         }
 
-        public static IImage OpenReadTextureFromFile(IRenderManagerImpl impl, string path)
+        public static IImage OpenReadTextureFromFile(IRenderManagerImpl impl, string filePath)
         {
-            using var stream = File.OpenRead(path);
+            using var stream = File.OpenRead(filePath);
             return impl.LoadImageFromStream(stream);
         }
 
