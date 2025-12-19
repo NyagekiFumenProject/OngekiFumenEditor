@@ -45,7 +45,10 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
                 GenerateVerbCommands<UpdaterOption>("updater", string.Empty, ProcessUpdaterCommand)
             };
 
-            var verbosityOption = new Option<bool>(Resources.ProgramOptionDescriptionVerbose, "--verbose", "-v");
+            var verbosityOption = new Option<bool>("--verbose", "-v")
+            {
+                Description = Resources.ProgramOptionDescriptionVerbose
+            };
             verbosityOption.Validators.Add(res =>
             {
                 if (res.GetValueOrDefault<bool>())
@@ -201,16 +204,20 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
             {
                 if (prop.GetCustomAttribute<OptionBindingAttrbuteBase>() is OptionBindingAttrbuteBase attrbuteBase)
                 {
-                    var funcType = typeof(Func<>).MakeGenericType(attrbuteBase.Type);
+                    var funcType = typeof(Func<,>).MakeGenericType(typeof(ArgumentResult), attrbuteBase.Type);
+                    var arg = Expression.Parameter(typeof(ArgumentResult), "result");
                     var valParam = Expression.Constant(attrbuteBase.DefaultValue, attrbuteBase.Type);
-                    var lambda = Expression.Lambda(funcType, valParam);
+                    var lambda = Expression.Lambda(funcType, valParam, arg);
                     var func = lambda.Compile();
 
                     var optionType = typeof(Option<>).MakeGenericType(attrbuteBase.Type);
                     var optName = $"--{attrbuteBase.Name}";
 
-                    var option = (Option)LambdaActivator.CreateInstance(optionType, optName, func, attrbuteBase.Description);
+                    var option = (Option)LambdaActivator.CreateInstance(optionType, optName, new string[0]);
                     option.Required = attrbuteBase.Require;
+                    option.Description = attrbuteBase.Description;
+
+                    optionType.GetProperty(nameof(Option<>.DefaultValueFactory)).SetValue(option, func);
 
                     yield return option;
                 }

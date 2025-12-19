@@ -70,8 +70,10 @@ namespace OngekiFumenEditor.Utils
 			if (constructor is null)
 			{
 				//print
-				Log.LogError($"Can't get ctor for activating: {type.FullName}, args: {string.Join("| ", args.Select(x=>x?.GetType().Name))}");
-				return null;
+				var errorMsg = $"Can't get ctor for activating: {type.FullName}, args: {string.Join("| ", args.Select(x => x?.GetType().Name))}";
+
+                Log.LogError(errorMsg);
+				throw new Exception(errorMsg);
             }
 
 			if (type.IsValueType)
