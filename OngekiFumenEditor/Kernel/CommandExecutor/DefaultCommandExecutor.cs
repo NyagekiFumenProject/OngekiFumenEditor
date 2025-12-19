@@ -54,7 +54,17 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
                 if (res.GetValueOrDefault<bool>())
                     Log.Instance.AddOutputIfNotExist<ConsoleLogOutput>();
             });
-            rootCommand.Options.Add(verbosityOption);
+
+            //rootCommand.AddGlobalOption(verbosityOption);
+
+            void AddGlobalOption(Command c, Option o)
+            {
+                c.Options.Add(o);
+                foreach (var sc in c.Subcommands)
+                    AddGlobalOption(sc, o);
+            }
+
+            AddGlobalOption(rootCommand, verbosityOption);
         }
 
         private async Task<int> ProcessUpdaterCommand(UpdaterOption option)
