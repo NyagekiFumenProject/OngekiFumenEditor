@@ -67,6 +67,13 @@ namespace OngekiFumenEditor.Utils
 		{
 			var constructor = GetMatchingConstructor(type, args);
 
+			if (constructor is null)
+			{
+				//print
+				Log.LogError($"Can't get ctor for activating: {type.FullName}, args: {string.Join("| ", args.Select(x=>x?.GetType().Name))}");
+				return null;
+            }
+
 			if (type.IsValueType)
 			{
 				return Activator.CreateInstance(type, args);
