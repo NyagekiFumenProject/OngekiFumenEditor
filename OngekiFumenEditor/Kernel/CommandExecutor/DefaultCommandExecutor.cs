@@ -55,8 +55,6 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
                     Log.Instance.AddOutputIfNotExist<ConsoleLogOutput>();
             });
 
-            //rootCommand.AddGlobalOption(verbosityOption);
-
             void AddGlobalOption(Command c, Option o)
             {
                 c.Options.Add(o);
@@ -242,10 +240,11 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
             {
                 if (prop.GetCustomAttribute<OptionBindingAttrbuteBase>() is OptionBindingAttrbuteBase attrbuteBase)
                 {
-                    var name = $"{attrbuteBase.Name}";
-                    if (command.Options.FirstOrDefault(x => x.Name == name) is Option<T> opt)
+                    var name = $"--{attrbuteBase.Name}";
+                    if (command.Options.FirstOrDefault(x => x.Name == name) is Option opt)
                     {
-                        var val = result.GetValue(opt);
+                        var valResult = result.GetResult(opt);
+                        var val = valResult.GetValueOrDefault<object>();
                         prop.SetValue(obj, val);
                     }
                 }
