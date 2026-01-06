@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
+    One for Windows with net8.0-windows TFM, one for MacOS with net8.0-macos and one with net8.0 TFM for Linux.-->
+        <TargetFramework>net10.0</TargetFramework>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia.Desktop"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Console"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj"/>
+
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj"/>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj"/>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj"/>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj"/>
+        <ProjectReference Include="..\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj"/>
+    </ItemGroup>
+</Project>

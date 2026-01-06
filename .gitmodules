@@ -13,3 +13,6 @@
 [submodule "earcut.net"]
 	path = Dependences/earcut.net
 	url = https://github.com/NyagekiFumenProject/earcut.net
+[submodule "Avalonia/Dependencies/Gekimini.Avalonia"]
+	path = Avalonia/Dependencies/Gekimini.Avalonia
+	url = https://github.com/MikiraSora/Gekimini.Avalonia

@@ -1,0 +1,60 @@
+<Project>
+    <PropertyGroup>
+        <AvaloniaVersion>11.3.10</AvaloniaVersion>
+        <LLVMVersion>10.0.0-preview.2.25455.1</LLVMVersion>
+        <HarfBuzzSharpVersion>8.3.1.2</HarfBuzzSharpVersion>
+        <SkiaSharpVersion>3.119.1</SkiaSharpVersion>
+        <MsExtVersion>10.0.1</MsExtVersion>
+        <SystemVersion>10.0.1</SystemVersion>
+    </PropertyGroup>
+    
+    <ItemGroup>
+    <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Browser" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Skia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+
+    <PackageVersion Include="AvaloniaControlsToolBar" Version="11.3.6" />
+    <PackageVersion Include="AvaloniaDialogs" Version="3.7.0" />
+    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.1.1" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="DialogHost.Avalonia" Version="0.10.3" />
+    <PackageVersion Include="FluentIcons.Avalonia.Fluent" Version="1.2.313" />
+
+    <PackageVersion Include="HarfBuzzSharp" Version="$(HarfBuzzSharpVersion)" />
+    <PackageVersion Include="HarfBuzzSharp.NativeAssets.Linux" Version="$(HarfBuzzSharpVersion)" />
+    <PackageVersion Include="HarfBuzzSharp.NativeAssets.macOS" Version="$(HarfBuzzSharpVersion)" />
+    <PackageVersion Include="HarfBuzzSharp.NativeAssets.WebAssembly" Version="$(HarfBuzzSharpVersion)" />
+    <PackageVersion Include="HarfBuzzSharp.NativeAssets.Win32" Version="$(HarfBuzzSharpVersion)" />
+
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.0" />
+
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
+
+    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.9.50" />
+
+    <PackageVersion Include="Microsoft.DotNet.ILCompiler.LLVM" Version="$(LLVMVersion)" />
+    <PackageVersion Include="runtime.linux-x64.Microsoft.DotNet.ILCompiler.LLVM" Version="$(LLVMVersion)" />
+    <PackageVersion Include="runtime.win-x64.Microsoft.DotNet.ILCompiler.LLVM" Version="$(LLVMVersion)" />
+
+    <PackageVersion Include="SkiaSharp" Version="$(SkiaSharpVersion)" />
+    <PackageVersion Include="SkiaSharp.HarfBuzz" Version="$(SkiaSharpVersion)" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="$(SkiaSharpVersion)" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.macOS" Version="$(SkiaSharpVersion)" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.WebAssembly" Version="$(SkiaSharpVersion)" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Win32" Version="$(SkiaSharpVersion)" />
+
+    <PackageVersion Include="StatusBar.Avalonia" Version="0.0.2" />
+    <PackageVersion Include="System.IO.Hashing" Version="$(SystemVersion)" />
+    <PackageVersion Include="Xaml.Behaviors" Version="11.3.9" />
+</ItemGroup>
+</Project>

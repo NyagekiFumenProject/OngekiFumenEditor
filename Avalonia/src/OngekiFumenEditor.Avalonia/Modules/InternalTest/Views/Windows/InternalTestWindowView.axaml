@@ -1,0 +1,19 @@
+﻿<views1:WindowViewBase xmlns="https://github.com/avaloniaui"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:windows="clr-namespace:OngekiFumenEditor.Avalonia.Modules.InternalTest.ViewModels.Windows"
+                       xmlns:views1="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
+                       mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                       x:DataType="windows:InternalTestWindowViewModel"
+                       Title="Oh my test window~"
+                       x:Class="OngekiFumenEditor.Avalonia.Modules.InternalTest.Views.Windows.InternalTestWindowView">
+    <Design.DataContext>
+        <windows:InternalTestWindowViewModel />
+    </Design.DataContext>
+    <StackPanel>
+        <TextBlock Text="{Binding CurrentValue,StringFormat=CurrentValue:{0}}" />
+        <TextBlock Text="123" />
+        <TextBlock Text="345" Foreground="Red" />
+    </StackPanel>
+</views1:WindowViewBase>

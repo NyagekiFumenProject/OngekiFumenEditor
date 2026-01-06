@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Avalonia", "OngekiFumenEditor.Avalonia.csproj", "{D25118CB-2616-5CC8-FD7E-08D78BBE1155}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D25118CB-2616-5CC8-FD7E-08D78BBE1155}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D25118CB-2616-5CC8-FD7E-08D78BBE1155}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D25118CB-2616-5CC8-FD7E-08D78BBE1155}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D25118CB-2616-5CC8-FD7E-08D78BBE1155}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {14772793-C2B6-4EFD-88FB-92087D070D94}
+	EndGlobalSection
+EndGlobal

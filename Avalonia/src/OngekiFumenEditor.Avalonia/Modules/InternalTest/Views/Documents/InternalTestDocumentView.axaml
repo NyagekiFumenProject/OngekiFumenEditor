@@ -1,0 +1,33 @@
+﻿<views:ViewBase xmlns="https://github.com/avaloniaui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                xmlns:documents="clr-namespace:OngekiFumenEditor.Avalonia.Modules.InternalTest.ViewModels.Documents"
+                xmlns:views="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
+                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                x:DataType="documents:InternalTestDocumentViewModel"
+                Background="{DynamicResource ContainerBackgroundBrush}"
+                x:Class="OngekiFumenEditor.Avalonia.Modules.InternalTest.Views.Documents.InternalTestDocumentView">
+    <Design.DataContext>
+        <documents:InternalTestDocumentViewModel />
+    </Design.DataContext>
+    <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding IncrementCommand}" Content="Increment Value" />
+            <Button Command="{Binding DecrementCommand}" Content="Decrement Value" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding UndoCommand}" IsEnabled="{Binding UndoRedoManager.CanUndo}" Content="Undo" />
+            <Button Command="{Binding RedoCommand}" Content="Redo" IsEnabled="{Binding UndoRedoManager.CanRedo}" />
+        </StackPanel>
+        <TextBlock Text="{Binding Value,StringFormat=Value is {0}}" />
+
+        <WrapPanel Orientation="Horizontal">
+            <Button Command="{Binding AddToolCommand}" CommandParameter="Left" Content="Add Left Tool" />
+            <Button Command="{Binding AddToolCommand}" CommandParameter="Top" Content="Add Top Tool" />
+            <Button Command="{Binding AddToolCommand}" CommandParameter="Right" Content="Add Right Tool" />
+            <Button Command="{Binding AddToolCommand}" CommandParameter="Bottom" Content="Add Bottom Tool" />
+            <Button Command="{Binding ShowNewWindowCommand}" Content="Show New Window" />
+        </WrapPanel>
+    </StackPanel>
+</views:ViewBase>

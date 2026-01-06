@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Avalonia.Browser", "OngekiFumenEditor.Avalonia.Browser.csproj", "{FAD7B988-1CBD-C0B6-0C2F-E36F0E1FE838}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Avalonia.Browser.LLVM", "OngekiFumenEditor.Avalonia.Browser.LLVM.csproj", "{ACF33D0F-2F4B-C859-2CF0-1D18BC651F6E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FAD7B988-1CBD-C0B6-0C2F-E36F0E1FE838}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAD7B988-1CBD-C0B6-0C2F-E36F0E1FE838}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAD7B988-1CBD-C0B6-0C2F-E36F0E1FE838}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAD7B988-1CBD-C0B6-0C2F-E36F0E1FE838}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACF33D0F-2F4B-C859-2CF0-1D18BC651F6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACF33D0F-2F4B-C859-2CF0-1D18BC651F6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACF33D0F-2F4B-C859-2CF0-1D18BC651F6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACF33D0F-2F4B-C859-2CF0-1D18BC651F6E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7625331C-F73C-48C4-8292-A4E8E2BE96B9}
+	EndGlobalSection
+EndGlobal

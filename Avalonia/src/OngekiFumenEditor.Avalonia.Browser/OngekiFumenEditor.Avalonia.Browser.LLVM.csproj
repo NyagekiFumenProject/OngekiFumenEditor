@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0-browser</TargetFramework>
+        <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+        <WasmMainJSPath>wwwroot\main.js</WasmMainJSPath>
+        <OutputType>Exe</OutputType>
+        <DotNetJsApi>true</DotNetJsApi>
+        <PublishTrimmed>true</PublishTrimmed>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <NativeDebugSymbols>false</NativeDebugSymbols>
+        <StackTraceSupport>false</StackTraceSupport>
+        <DebugType>none</DebugType>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <IlcHostPackagePath Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'true'">$(Pkgruntime_win-x64_Microsoft_DotNet_ILCompiler_LLVM)</IlcHostPackagePath>
+        <IlcHostPackagePath Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'false'">$(Pkgruntime_linux-x64_Microsoft_DotNet_ILCompiler_LLVM)</IlcHostPackagePath>
+        <UseAppHost>false</UseAppHost>
+        <UsingBrowserRuntimeWorkload>false</UsingBrowserRuntimeWorkload>
+        <UsingWasiRuntimeWorkload>false</UsingWasiRuntimeWorkload>
+        <UsingEmscriptenWorkload>true</UsingEmscriptenWorkload>
+    </PropertyGroup>
+    <ItemGroup>
+        <EmccExportedRuntimeMethod Include="GL" />
+    </ItemGroup>
+    <PropertyGroup>
+        <EmccExtraArgs>$(EmccExtraArgs) -lcompiler_rt-wasm-sjlj</EmccExtraArgs>
+        <EmccFlags>$(EmccFlags) -sUSE_WEBGL2=1 -sMAX_WEBGL_VERSION=2 -lGL -Oz</EmccFlags>
+    </PropertyGroup>
+    <ItemGroup>
+        <WasmExtraFilesToDeploy Include="wwwroot\**" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\Dependencies\Avalonia.Browser\Avalonia.Browser.csproj" />
+        <PackageReference Include="Avalonia.Fonts.Inter" />
+        <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" />
+        <PackageReference Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'true'"
+                          Include="runtime.win-x64.Microsoft.DotNet.ILCompiler.LLVM" />
+        <PackageReference Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'false'"
+                          Include="runtime.linux-x64.Microsoft.DotNet.ILCompiler.LLVM" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+        <ProjectReference Include="..\..\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj" />
+        <ProjectReference OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="true"
+                          Include="..\..\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj" />
+        <ProjectReference OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"
+                          Include="..\..\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj" />
+        <ProjectReference OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="true"
+                          Include="..\..\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj" />
+        <ProjectReference OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"
+                          Include="..\..\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj" />
+        <ProjectReference Include="..\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
+    </ItemGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+        <DefineConstants>TRACE;AVALONIA_BROWSER;LLVM_BUILD;</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <DefineConstants>AVALONIA_BROWSER;LLVM_BUILD;</DefineConstants>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="HarfBuzzSharp" />
+        <PackageReference Include="SkiaSharp" />
+        <PackageReference Include="SkiaSharp.HarfBuzz" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="HarfBuzzSharp.NativeAssets.WebAssembly" />
+        <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" />
+    </ItemGroup>
+    <PropertyGroup>
+        <ExecutableExtensionName Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'true'">.exe</ExecutableExtensionName>
+    </PropertyGroup>
+    <ItemGroup>
+        <EmscriptenEnvVars Include="DOTNET_EMSCRIPTEN_LLVM_ROOT=$(EmscriptenUpstreamBinPath)" />
+        <EmscriptenEnvVars Include="DOTNET_EMSCRIPTEN_BINARYEN_ROOT=$(EmscriptenSdkToolsPath)" />
+        <EmscriptenEnvVars Include="DOTNET_EMSCRIPTEN_NODE_JS=$(EmscriptenNodeBinPath)node$(ExecutableExtensionName)" />
+        <EmscriptenEnvVars Include="EM_CACHE=$(EmscriptenCacheSdkCacheDir)" />
+    </ItemGroup>
+    <ItemGroup>
+        <NativeLibrary Include="$(SkiaSharpStaticLibraryPath)/3.1.56/st/*.a" />
+        <NativeLibrary Include="$(HarfBuzzSharpStaticLibraryPath)/3.1.56/st/*.a" />
+        <DirectPInvoke Include="libSkiaSharp" />
+        <DirectPInvoke Include="libHarfBuzzSharp" />
+    </ItemGroup>
+    <ItemGroup>
+        <UnmanagedEntryPointsAssembly Include="Avalonia.Browser" />
+    </ItemGroup>
+</Project>

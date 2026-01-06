@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>preview</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+
+    <!--For Injectio-->
+    <PropertyGroup>
+        <InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>
+    </PropertyGroup>
+    <ItemGroup>
+        <CompilerVisibleProperty Include="InjectioDuplicateStrategy"/>
+    </ItemGroup>
+    <!---->
+
+    <ItemGroup>
+        <AdditionalFiles Include="Assets\Languages\*.json"/>
+        <AdditionalFiles Include="Modules\InternalTest\Views\Documents\InternalTestDocumentView.axaml"/>
+        <AdditionalFiles Include="Modules\InternalTest\Views\Tools\InternalTestToolView.axaml"/>
+        <AdditionalFiles Include="Modules\InternalTest\Views\Windows\InternalTestWindowView.axaml"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\SimpleTypedLocalizer\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator.csproj"/>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj"/>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj"/>
+        <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj"/>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj"/>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Modules\"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,11 @@
+{
+  "InternalTestDocumentTitle": "Test Document",
+  "InternalTestDocumentFileExtDesc": "Internal Document File",
+  "InternalTestDocumentFileDialogTitle": "Select a internal document file to load.",
+  "InternalTestDocumentLoadFailedByBadRecentData": "Can't load document file because recent data has been expired/invalid.",
+  "InternalTestDocumentCantSaveFile": "Can't save document file.",
+  "IncrementValue": "Increment Value",
+  "DecrementValue": "Decrement Value",
+  "MultiplyValue": "Multiply Value",
+  "InternalTestToolTitle": "Test Tool"
+}

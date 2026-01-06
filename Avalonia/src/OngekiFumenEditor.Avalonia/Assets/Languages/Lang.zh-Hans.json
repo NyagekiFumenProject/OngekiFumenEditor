@@ -1,0 +1,11 @@
+{
+  "InternalTestDocumentTitle": "测试文档",
+  "InternalTestDocumentFileExtDesc": "测试文档文件",
+  "InternalTestDocumentFileDialogTitle": "请选择一个测试文档文件用于读取",
+  "InternalTestDocumentLoadFailedByBadRecentData": "无法加载文档, 因为最近文件项目已过期或无效的",
+  "InternalTestDocumentCantSaveFile": "无法保存文档文件",
+  "IncrementValue": "递增当前值",
+  "DecrementValue": "递减当前值",
+  "MultiplyValue": "平方当前值",
+  "InternalTestToolTitle": "测试工具栏"
+}
