@@ -246,8 +246,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 				?? ConvertYToTGrid_DesignMode(minVisibleCanvasY + judgeLineOffsetY, soflans, bpmList, 1);
 
 			var timeSignatures = meterList.GetCachedAllTimeSignatureUniformPositionList(bpmList);
-			//快速定位,尽量避免计算完全不用画的timesignature(
-			var currentTimeSignatureIndex = timeSignatures.LastOrDefaultIndexByBinarySearch(minVisibleCanvasTGrid, x => x.startTGrid);
+            if (timeSignatures is null)
+                yield break;
+
+            //快速定位,尽量避免计算完全不用画的timesignature(
+            var currentTimeSignatureIndex = timeSignatures.LastOrDefaultIndexByBinarySearch(minVisibleCanvasTGrid, x => x.startTGrid);
 
 			//钦定好要画的起始timeSignatrue
 			(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm) currentTimeSignature = timeSignatures[currentTimeSignatureIndex];
@@ -267,8 +270,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
 				//计算每一拍的(grid)长度
 				var resT = currentTGridBase.ResT;
-				var beatCount = currentMeter.BunShi * beatSplit;
-				var lengthPerBeat = resT * 1.0d / beatCount;
+                var beatCount = currentMeter.BunShi * beatSplit;
+                var lengthCount = currentMeter.Bunbo * beatSplit;
+				var lengthPerBeat = resT * 1.0d / lengthCount;
 
 				//这里也可以跳过添加完全看不到的线
 				var diff = currentTGridBaseOffset - currentTGridBase;
@@ -309,7 +313,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
 				currentTGridBaseOffset = nextTGridBase;
 				currentTimeSignatureIndex = nextTimeSignatureIndex;
-				currentTimeSignature = timeSignatures.Count > currentTimeSignatureIndex ? timeSignatures[currentTimeSignatureIndex] : default;
+				currentTimeSignature = nextTimeSignature;
 			}
 		}
 
