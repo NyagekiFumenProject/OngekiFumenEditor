@@ -1,9 +1,9 @@
 ﻿using Caliburn.Micro;
+using CommunityToolkit.HighPerformance.Helpers;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
-
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -28,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
         protected List<(Vector2 pos, string str)> drawStrList = new();
 
-        private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
+        private static readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
         private IStringDrawing stringDrawing;
         private IHighlightBatchTextureDrawing highlightDrawing;
         private IBatchTextureDrawing batchTextureDrawing;
@@ -85,14 +86,54 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private void DrawPreviewMode(IFumenEditorDrawingContext target, IEnumerable<T> objs)
         {
-            var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
-            var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
-            var baseY = Math.Min(target.CurrentDrawingTargetContext.Rect.MinY, target.CurrentDrawingTargetContext.Rect.MaxY) + judgeOffset;
-            var scale = target.Editor.Setting.VerticalDisplayScale;
-            var bpmList = target.Editor.Fumen.BpmList;
-            var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
-            //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
-            var height = target.CurrentDrawingTargetContext.Rect.Height;
+            var updater = new ProjectileUpdater(target, DrawVisibleObject_PreviewMode);
+
+            /*
+             存在spd < 1或者soflan影响的子弹/bell物件。因此无法简单的使用二分法快速枚举筛选物件
+             使用并行计算，将所有bell/bullet全部判断，当然判断的结果也能直接拿来做计算
+             //todo 还能优化
+             */
+            if (objs.Count() < parallelCountLimit)
+            {
+                foreach (var obj in objs)
+                    updater.Draw(obj);
+            }
+            else
+            {
+                if (objs is List<T> list)
+                {
+                    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_items")]
+                    extern static ref T[] GetListItems(List<T> li);
+                    var listArray = GetListItems(list);
+                    var listMemory = new Memory<T>(listArray, 0, list.Count);
+
+                    ParallelHelper.ForEach(listMemory, updater);
+                }
+                else
+                {
+                    Parallel.ForEach(objs, parallelOptions, x=> updater.Invoke(ref x));
+                }
+            }
+        }
+
+        public readonly struct ProjectileUpdater : IRefAction<T>
+        {
+            private readonly TGrid currentTGrid;
+            private readonly double judgeOffset;
+            private readonly float rectMinY;
+            private readonly float rectMaxY;
+            private readonly float rectMinX;
+            private readonly float rectMaxX;
+            private readonly double baseY;
+            private readonly double scale;
+            private readonly BpmList bpmList;
+            private readonly double nonSoflanCurrentTime;
+            private readonly float height;
+            private readonly int randomSeed;
+
+            private static readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
+            private readonly IFumenEditorDrawingContext target;
+            private readonly Action<IFumenEditorDrawingContext, T, Vector2, float> drawVisibleObject_PreviewMode;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToYNonSoflan(TGrid tgrid)
@@ -116,10 +157,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 return target.ConvertToY(tgrid, soflans);
             }
 
-            var randomSeed = BulletPallete.RandomSeed;
-
-            void _Draw(T obj)
+            public ProjectileUpdater(IFumenEditorDrawingContext target, Action<IFumenEditorDrawingContext, T, Vector2, float> drawVisibleObject_PreviewMode)
             {
+                currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
+                judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
+                rectMinY = target.CurrentDrawingTargetContext.Rect.MinY;
+                rectMaxY = target.CurrentDrawingTargetContext.Rect.MaxY;
+                rectMinX = target.CurrentDrawingTargetContext.Rect.MinX;
+                rectMaxX = target.CurrentDrawingTargetContext.Rect.MaxX;
+                baseY = Math.Min(rectMinY, rectMaxY) + judgeOffset;
+                scale = target.Editor.Setting.VerticalDisplayScale;
+                bpmList = target.Editor.Fumen.BpmList;
+                nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
+                height = target.CurrentDrawingTargetContext.Rect.Height;
+                randomSeed = BulletPallete.RandomSeed;
+                this.target = target;
+                this.drawVisibleObject_PreviewMode = drawVisibleObject_PreviewMode;
+            }
+
+            public void Invoke(ref T x)
+            {
+                Draw(x);
+            }
+
+            public void Draw(T obj)
+            {
+                var objXGridTotalUnit = obj.XGrid.TotalUnit;
                 /*
                 --------------------------- toTime 
                         \
@@ -159,10 +222,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var precent = (currentTime - fromTime) / appearOffsetTime;
                 var timeY = baseY + height * (1 - precent);
 
-                if (timeY > target.CurrentDrawingTargetContext.Rect.MaxY)
+                if (timeY > rectMaxY)
                     return;
                 //todo CheckVisible()这里是考虑到光焰那个Bell会残留，因为画轴速度太快（感觉是个bug但后面有精力再坐牢吧）
-                if (timeY < target.CurrentDrawingTargetContext.Rect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
+                if (timeY < rectMinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
                     return;
 
                 var fromXUnit = 0d;
@@ -181,11 +244,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                             targetAudioTime = TimeSpan.Zero;
 
                         toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);
-                        toXUnit += obj.XGrid.TotalUnit;
+                        toXUnit += objXGridTotalUnit;
                         break;
                     case Target.FixField:
                     default:
-                        toXUnit = obj.XGrid.TotalUnit;
+                        toXUnit = objXGridTotalUnit;
                         break;
                 }
 
@@ -212,7 +275,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         var tGrid = obj.TGrid;
                         var enemyLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<EnemyLaneStart>().LastOrDefault();
                         var xGrid = enemyLane?.CalulateXGrid(tGrid);
-                        fromXUnit = xGrid?.TotalUnit ?? obj.XGrid.TotalUnit;
+                        fromXUnit = xGrid?.TotalUnit ?? objXGridTotalUnit;
                         break;
                     case Shooter.Center:
                     default:
@@ -228,28 +291,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var toX = convertToX(toXUnit);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
-                if (!(target.CurrentDrawingTargetContext.Rect.MinX <= timeX && timeX <= target.CurrentDrawingTargetContext.Rect.MaxX))
+                if (!(rectMinX <= timeX && timeX <= rectMaxX))
                     return;
 
                 var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
                 var pos = new Vector2((float)timeX, (float)timeY);
 
-                DrawVisibleObject_PreviewMode(target, obj, pos, rotate);
-            }
-
-            /*
-             存在spd < 1或者soflan影响的子弹/bell物件。因此无法简单的使用二分法快速枚举筛选物件
-             使用并行计算，将所有bell/bullet全部判断，当然判断的结果也能直接拿来做计算
-             //todo 还能优化
-             */
-            if (objs.Count() < parallelCountLimit)
-            {
-                foreach (var obj in objs)
-                    _Draw(obj);
-            }
-            else
-            {
-                Parallel.ForEach(objs, parallelOptions, _Draw);
+                drawVisibleObject_PreviewMode(target, obj, pos, rotate);
             }
         }
 

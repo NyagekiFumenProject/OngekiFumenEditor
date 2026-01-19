@@ -1028,6 +1028,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void SwitchMode(bool isPreviewMode)
         {
+            //refresh seed once
             BulletPallete.RandomSeed = DateTime.Now.ToString().GetHashCode();
 
             var tGrid = GetCurrentTGrid();
