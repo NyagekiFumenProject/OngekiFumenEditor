@@ -2079,6 +2079,9 @@
   <data name="ClickSE" xml:space="preserve">
     <value>Click SE</value>
   </data>
+  <data name="BpmChange" xml:space="preserve">
+    <value>BPM Change</value>
+  </data>
   <data name="InterpolatableSoflan" xml:space="preserve">
     <value>Interpolatable Soflan</value>
   </data>

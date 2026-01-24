@@ -219,8 +219,9 @@ public class SelectionFilterViewModel : ViewAware
                 new() { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)] },
                 new() { Text = Resources.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
                 new() { Text = Resources.DurationSoflan, Types = [typeof(IDurationSoflan)] },
-                new() { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
                 new() { Text = Resources.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] },
+                new() { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
+                new() { Text = Resources.BpmChange, Types = [typeof(BPMChange)] }
             ]),
 
             new(this, Resources.SelectionFilterObjectCategoryMisc, [
