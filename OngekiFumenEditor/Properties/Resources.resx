@@ -2292,4 +2292,10 @@
   <data name="SelectionFilter_OptionLabelCurvePrevSelected" xml:space="preserve">
     <value>Curve point previous node</value>
   </data>
+  <data name="SelectOnlyItemsOfSelectedType" xml:space="preserve">
+    <value>Select only objects of selected type(s)</value>
+  </data>
+  <data name="DeselectItemsOfSelectedType" xml:space="preserve">
+    <value>Deselect objects of selected type(s)</value>
+  </data>
 </root>

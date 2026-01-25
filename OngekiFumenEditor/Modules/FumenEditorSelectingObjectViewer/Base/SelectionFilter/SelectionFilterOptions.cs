@@ -507,7 +507,10 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
         var item = bullet.ReferenceBulletPallete == null
             ? NullPaletteItem
-            : PaletteTable[bullet.ReferenceBulletPallete];
+            : PaletteTable.ContainsKey(bullet.ReferenceBulletPallete) ? PaletteTable[bullet.ReferenceBulletPallete] : null;
+
+        if (item is null)
+            return;
 
         if (bullet is Bullet)
             item.BulletCount++;
