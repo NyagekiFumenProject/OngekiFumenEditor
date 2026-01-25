@@ -1572,6 +1572,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Deselect objects of selected type(s).
+        /// </summary>
+        public static string DeselectItemsOfSelectedType {
+            get {
+                return ResourceManager.GetString("DeselectItemsOfSelectedType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parsing fumen file failed: .
         /// </summary>
         public static string DeserializeFumenFileFail {
@@ -5681,6 +5690,15 @@ namespace OngekiFumenEditor.Properties {
         public static string SelectOneDockableLaneOnly {
             get {
                 return ResourceManager.GetString("SelectOneDockableLaneOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select only objects of selected type(s).
+        /// </summary>
+        public static string SelectOnlyItemsOfSelectedType {
+            get {
+                return ResourceManager.GetString("SelectOnlyItemsOfSelectedType", resourceCulture);
             }
         }
         

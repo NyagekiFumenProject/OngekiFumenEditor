@@ -176,5 +176,19 @@ namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 				}
 			}
 		}
+
+		public void SelectOnlyItemsOfSelectedType()
+		{
+			var types = SelectedItems.Select(o => o.GetType()).Distinct().ToArray();
+			Editor.SelectObjects.Where(o => !types.Contains(o.GetType())).ForEach(o => o.IsSelected = false);
+			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+		}
+
+		public void DeselectItemsOfSelectedType()
+		{
+			var types = SelectedItems.Select(o => o.GetType()).Distinct().ToArray();
+			Editor.SelectObjects.Where(o => types.Contains(o.GetType())).ForEach(o => o.IsSelected = false);
+			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+		}
 	}
 }
