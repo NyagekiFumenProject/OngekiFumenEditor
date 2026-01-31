@@ -111,7 +111,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
                 else
                 {
-                    Parallel.ForEach(objs, parallelOptions, x=> updater.Invoke(ref x));
+                    Parallel.ForEach(objs, parallelOptions, x => updater.Invoke(ref x));
                 }
             }
         }
