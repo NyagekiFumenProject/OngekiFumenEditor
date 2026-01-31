@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.Collections.Base;
+﻿using Faster.Collections.Pooled;
+using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Buffers;
@@ -65,7 +66,7 @@ namespace OngekiFumenEditor.Utils
         /// <param name="collection"></param>
         public static void DistinctSelf<T>(this ICollection<T> collection)
         {
-            using var d = collection.Except(collection.Distinct()).ToListWithObjectPool(out var removes);
+            using var d = collection.Except(collection.Distinct()).ToListWithPool(out var removes);
             foreach (var rm in removes)
                 collection.Remove(rm);
         }
@@ -79,7 +80,7 @@ namespace OngekiFumenEditor.Utils
         /// <param name="keySelect"></param>
         public static void DistinctBySelf<T, Y>(this ICollection<T> collection, Func<T, Y> keySelect)
         {
-            using var d = collection.Except(collection.DistinctBy(keySelect)).ToListWithObjectPool(out var removes);
+            using var d = collection.Except(collection.DistinctBy(keySelect)).ToListWithPool(out var removes);
             foreach (var rm in removes)
                 collection.Remove(rm);
         }
@@ -244,12 +245,31 @@ namespace OngekiFumenEditor.Utils
             return default;
         }
 
-        public static IDisposable ToListWithObjectPool<T>(this IEnumerable<T> collection, out List<T> list)
+        public static void RemoveAll<T>(this IList<T> a, Predicate<T> predicate)
         {
-            var disposable = ObjectPool<List<T>>.GetWithUsingDisposable(out list, out _);
-            list.Clear();
-            list.AddRange(collection);
-            return disposable;
+            switch (a)
+            {
+                case List<T> list:
+                    list.RemoveAll(predicate);
+                    break;
+                case PooledList<T> pooledList:
+                    pooledList.RemoveAll(predicate);
+                    break;
+                default:
+                    {
+                        using var _ = a.Where(x => predicate(x)).ToListWithPool(out var removes);
+                        foreach (var obj in removes)
+                            a.Remove(obj);
+                    }
+                    break;
+            }
+        }
+
+        public static IDisposable ToListWithPool<T>(this IEnumerable<T> collection, out IList<T> list)
+        {
+            var pooledList = collection.ToPooledList();
+            list = pooledList;
+            return pooledList;
         }
 
         public static IDisposable ToHashSetWithObjectPool<T>(this IEnumerable<T> collection, out HashSet<T> set)
@@ -260,13 +280,22 @@ namespace OngekiFumenEditor.Utils
             return disposable;
         }
 
-        public static IDisposable ToDictionaryWithObjectPool<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector, out Dictionary<K, V> dic)
+        public static IDisposable ToDictionaryWithPool<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector, out IDictionary<K, V> dic)
         {
+            /*
             var disposable = ObjectPool<Dictionary<K, V>>.GetWithUsingDisposable(out dic, out _);
             dic.Clear();
             foreach (var item in collection)
                 dic[keySelector(item)] = valueSelector(item);
             return disposable;
+            */
+            var pooledDic = new PooledDictionary<K, V>();
+
+            foreach (var item in collection)
+                pooledDic[keySelector(item)] = valueSelector(item);
+
+            dic = pooledDic;
+            return pooledDic;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

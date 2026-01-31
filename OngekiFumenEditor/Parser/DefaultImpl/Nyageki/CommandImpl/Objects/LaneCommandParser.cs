@@ -22,16 +22,16 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             var data = seg[1].Split(":");
 
             var recordId = int.Parse(data[0]);
-            var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
+            var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetPooledValuesMapWithDisposable(out var d), d)).ToArray();
             var notes = maps.Select(x => x.d).ToArray();
 
-            void buildCommon(ConnectableObjectBase obj, Dictionary<string, string> map)
+            void buildCommon(ConnectableObjectBase obj, IDictionary<string, string> map)
             {
                 obj.TGrid = map["T"].ParseToTGrid();
                 obj.XGrid = map["X"].ParseToXGrid();
             }
 
-            void buildColorfulLane(IColorfulLane obj, Dictionary<string, string> map)
+            void buildColorfulLane(IColorfulLane obj, IDictionary<string, string> map)
             {
                 var colorfulData = map["C"].Split(",");
                 var colorId = colorfulData[0];

@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 
 			blk.Direction = Enum.Parse<LaneBlockArea.BlockDirection>(data[0]);
 
-			var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
+			var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetPooledValuesMapWithDisposable(out var d), d)).ToArray();
 			var notes = maps.Select(x => x.d).ToArray();
 
 			blk.TGrid = notes[0]["T"].ParseToTGrid();

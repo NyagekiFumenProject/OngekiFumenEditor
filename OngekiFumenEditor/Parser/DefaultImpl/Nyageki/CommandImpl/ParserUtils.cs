@@ -8,9 +8,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl
 {
 	internal static class ParserUtils
 	{
-		public static IDisposable GetValuesMapWithDisposable(this string paramsDataStr, out Dictionary<string, string> map)
+		public static IDisposable GetPooledValuesMapWithDisposable(this string paramsDataStr, out IDictionary<string, string> map)
 		{
-			return ParseParams(paramsDataStr).ToDictionaryWithObjectPool(x => x.name, x => x.value, out map);
+			return ParseParams(paramsDataStr).ToDictionaryWithPool(x => x.name, x => x.value, out map);
 		}
 
 		private static Regex s = new Regex(@"(\w+)\[(.*?)\]\s*(,|$)");

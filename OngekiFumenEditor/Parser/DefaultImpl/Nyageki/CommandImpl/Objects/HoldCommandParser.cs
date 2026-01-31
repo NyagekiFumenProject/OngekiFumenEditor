@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			hold.ReferenceLaneStart = refLane;
 			hold.IsCritical = bool.Parse(commData[1]);
 
-			var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
+			var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetPooledValuesMapWithDisposable(out var d), d)).ToArray();
 			var notes = maps.Select(x => x.d).ToArray();
 
 			hold.TGrid = notes[0]["T"].ParseToTGrid();

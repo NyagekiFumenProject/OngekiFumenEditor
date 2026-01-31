@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 
             bell.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
 
-            using var d = data[0].GetValuesMapWithDisposable(out var map);
+            using var d = data[0].GetPooledValuesMapWithDisposable(out var map);
             bell.TGrid = map["T"].ParseToTGrid();
             bell.XGrid = map["X"].ParseToXGrid();
 

@@ -188,7 +188,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 using var _d = CombinableRange<int>.CombineRanges(fumen.Lanes.GetVisibleStartObjects(minTGrid, maxTGrid)
                     .Where(x => x.LaneType == type)
                     .Select(x => new CombinableRange<int>(x.MinTGrid.TotalGrid, x.MaxTGrid.TotalGrid)))
-                    .OrderBy(x => isRight ? x.Max : x.Min).ToListWithObjectPool(out var ranges);
+                    .OrderBy(x => isRight ? x.Max : x.Min).ToListWithPool(out var ranges);
 
                 var points = ObjectPool<HashSet<float>>.Get();
                 points.Clear();
@@ -239,7 +239,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     using var _d2 = fumen.Lanes
                         .GetVisibleStartObjects(TGrid.FromTotalGrid(curRange.Min), TGrid.FromTotalGrid(curRange.Max))
                         .Where(x => x.LaneType == type)
-                        .ToListWithObjectPool(out var lanes);
+                        .ToListWithPool(out var lanes);
 
                     var polylines = lanes
                         .SelectMany(x =>
@@ -279,7 +279,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         );
                 }
 
-                using var _d3 = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToListWithObjectPool(out var sortedPoints);
+                using var _d3 = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToListWithPool(out var sortedPoints);
 
                 sortedPoints.InsertBySortBy(minTGrid.TotalGrid, x => x);
                 sortedPoints.InsertBySortBy(maxTGrid.TotalGrid, x => x);

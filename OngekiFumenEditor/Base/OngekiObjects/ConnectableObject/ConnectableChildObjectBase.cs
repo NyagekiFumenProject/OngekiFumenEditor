@@ -172,7 +172,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 return Math.Sign(b.Y - a.Y);
             }
 
-            using var d = GridBasePoints.ToListWithObjectPool(out var points);
+            using var d = GridBasePoints.ToListWithPool(out var points);
             if (points.Count <= 2)
             {
                 var fromP = points[0];

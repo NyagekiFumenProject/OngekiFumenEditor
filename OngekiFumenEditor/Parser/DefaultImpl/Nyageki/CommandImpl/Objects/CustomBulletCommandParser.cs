@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 
             bullet.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
 
-            using var d = data[0].GetValuesMapWithDisposable(out var map);
+            using var d = data[0].GetPooledValuesMapWithDisposable(out var map);
             bullet.TGrid = map["T"].ParseToTGrid();
             bullet.XGrid = map["X"].ParseToXGrid();
             bullet.BulletDamageTypeValue = Enum.Parse<BulletDamageType>(map["D"]);

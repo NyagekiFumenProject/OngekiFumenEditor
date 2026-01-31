@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 		{
 			var data = seg[1].Split(":", 2);
 
-			using var d = data[0].GetValuesMapWithDisposable(out var map);
+			using var d = data[0].GetPooledValuesMapWithDisposable(out var map);
 
 			var type = map["Type"];
 			SvgPrefabBase svg = type switch

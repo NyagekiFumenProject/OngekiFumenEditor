@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			//$"Flick:X[{flick.XGrid.Unit},{flick.XGrid.Grid}],T[{flick.TGrid.Unit},{flick.TGrid.Grid}],C[{flick.IsCritical}],D[{flick.Direction}]"
 			var flick = new Flick();
 
-			using var d = seg[1].GetValuesMapWithDisposable(out var map);
+			using var d = seg[1].GetPooledValuesMapWithDisposable(out var map);
 
 			flick.TGrid = map["T"].ParseToTGrid();
 			flick.XGrid = map["X"].ParseToXGrid();

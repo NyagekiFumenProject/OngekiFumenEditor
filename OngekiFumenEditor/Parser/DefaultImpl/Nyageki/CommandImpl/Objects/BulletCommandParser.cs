@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			var strId = data[0].Trim();
 			bullet.ReferenceBulletPallete = fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == strId);
 
-			using var d = data[1].GetValuesMapWithDisposable(out var map);
+			using var d = data[1].GetPooledValuesMapWithDisposable(out var map);
 			bullet.TGrid = map["T"].ParseToTGrid();
 			bullet.XGrid = map["X"].ParseToXGrid();
 			bullet.BulletDamageTypeValue = Enum.Parse<BulletDamageType>(map["D"]);

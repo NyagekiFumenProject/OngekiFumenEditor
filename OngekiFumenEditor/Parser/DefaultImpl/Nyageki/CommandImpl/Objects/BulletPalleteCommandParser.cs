@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             var bpl = new BulletPallete();
 
             var data = seg[1].Split(":");
-            using var d = data[1].GetValuesMapWithDisposable(out var map);
+            using var d = data[1].GetPooledValuesMapWithDisposable(out var map);
 
             bpl.StrID = data[0].Trim();
             bpl.ShooterValue = Enum.Parse<Shooter>(map["Shooter"]);

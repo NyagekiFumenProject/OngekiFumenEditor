@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 			//    throw new Exception($"Can't parse line as Tap/WallTap because reference lane ({refRecordId}) is not found.");
 			//}
 
-			using var d = data[1].GetValuesMapWithDisposable(out var map);
+			using var d = data[1].GetPooledValuesMapWithDisposable(out var map);
 			//var isWall = (refLane?.IsWallLane ?? false) || (map.TryGetValue("W", out var w) ? bool.Parse(w) : false);
 			var tap = new Tap();
 			tap.ReferenceLaneStart = refLane;

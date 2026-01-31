@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 
 			childObj.CurvePrecision = curvePrecision;
 
-			var maps = curPathData.Split("...").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
+			var maps = curPathData.Split("...").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetPooledValuesMapWithDisposable(out var d), d)).ToArray();
 
 			foreach (var curPointData in maps.Select(x => x.d))
 			{

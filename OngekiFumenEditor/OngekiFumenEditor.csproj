@@ -192,6 +192,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Faster.Collections.Pooled" Version="1.0.3" />
 		<PackageReference Include="FontStashSharp.PlatformAgnostic" Version="1.5.1" />
 		<PackageReference Include="FontStashSharp.Rasterizers.FreeType" Version="1.2.2" />
 		<PackageReference Include="Microsoft.Build" Version="17.7.2" />

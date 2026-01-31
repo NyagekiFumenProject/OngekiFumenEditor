@@ -53,7 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 (float)target.ConvertToY_DefaultSoflanGroup(x.TGrid),
                 (float)XGridCalculator.ConvertXGridToX(x.XGrid, target.Editor),
                 x
-            )).ToListWithObjectPool<(float y, float x, LaneCurvePathControlObject obj)>(out var list);
+            )).ToListWithPool<(float y, float x, LaneCurvePathControlObject obj)>(out var list);
 
             if (list.Count == 0)
                 return;

@@ -471,7 +471,7 @@ namespace OngekiFumenEditor.Base.Collections
                         .Concat(segments.Query(actualViewMinY, actualViewMaxY))
                         .Distinct()
                         .OrderBy(x => x.curIdx)
-                        .ToListWithObjectPool(out var querySegments);
+                        .ToListWithPool(out var querySegments);
 
                     var scanLeftLength = actualViewHeight - actualPreOffset;
                     for (int i = querySegments.Count - 1; i >= 0; i--)

@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             isf.XGrid = xgridRange[0];
             isf.EndIndicator.XGrid = xgridRange[1];
 
-            using var d = data.LastOrDefault().GetValuesMapWithDisposable(out var map);
+            using var d = data.LastOrDefault().GetPooledValuesMapWithDisposable(out var map);
             if (map.TryGetValue("SoflanGroup", out var soflanGroupStr))
             {
                 if (int.TryParse(soflanGroupStr, out var soflanGroup))

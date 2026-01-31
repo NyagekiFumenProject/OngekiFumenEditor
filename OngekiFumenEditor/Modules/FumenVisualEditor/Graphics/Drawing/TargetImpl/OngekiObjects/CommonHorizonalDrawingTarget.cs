@@ -53,12 +53,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiTimelineObjectBase> objs)
         {
-            using var d4 = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToY_DefaultSoflanGroup(x.TGrid))).ToListWithObjectPool(out var objects);
+            using var d4 = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToY_DefaultSoflanGroup(x.TGrid))).ToListWithPool(out var objects);
 
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
             {
                 var tGrid = g.FirstOrDefault().TimelineObject.TGrid;
-                using var d3 = g.ToListWithObjectPool(out var actualItems);
+                using var d3 = g.ToListWithPool(out var actualItems);
                 if (!target.CheckVisible(tGrid))
                 {
                     actualItems.RemoveAll(x => x.TimelineObject switch
@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
 
                 var y = (float)g.FirstOrDefault().Y;
-                using var d = actualItems.Select(x => colors[x.TimelineObject.IDShortName]).OrderBy(x => x.PackedValue).ToListWithObjectPool(out var regColors);
+                using var d = actualItems.Select(x => colors[x.TimelineObject.IDShortName]).OrderBy(x => x.PackedValue).ToListWithPool(out var regColors);
                 var per = 1.0f * target.CurrentDrawingTargetContext.Rect.Width / regColors.Count;
                 lineDrawing.Begin(target, 2);
                 for (int i = 0; i < regColors.Count; i++)
