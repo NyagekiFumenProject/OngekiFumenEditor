@@ -174,12 +174,30 @@ namespace OngekiFumenEditor.Utils.ObjectPool
         public static IDisposable GetWithUsingDisposable<T>(out T obj, out bool isNewObject) where T : new()
             => ObjectPool<T>.GetWithUsingDisposable(out obj, out isNewObject);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IDisposable NewPooledList<T>(out PooledList<T> pooledList)
-            => (IDisposable)(pooledList = new PooledList<T>());
+        private class AutoDisposablePooledObject<T> : IDisposable where T : IDisposable, new()
+        {
+            public T PooledObject { get; set; }
+
+            public void Dispose()
+            {
+                if (PooledObject is not null)
+                {
+                    PooledObject.Dispose();
+                    Return(PooledObject);
+                }
+                PooledObject = default;
+                Return(this);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IDisposable NewPooledDictionary<K, V>(out PooledDictionary<K, V> pooledDic)
-            => (IDisposable)(pooledDic = new PooledDictionary<K, V>());
+        public static IDisposable NewPooledList<T>(out PooledList<T> pooledList)
+        {
+            pooledList = Get<PooledList<T>>();
+            var d = Get<AutoDisposablePooledObject<PooledList<T>>>();
+            d.PooledObject = pooledList;
+            pooledList.Clear();
+            return d;
+        }
     }
 }
