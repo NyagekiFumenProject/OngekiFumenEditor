@@ -112,8 +112,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     return false;
                 }
 
-                using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-                list.Clear();
+                using var d = ObjectPool.NewPooledList<LineVertex>(out var list);
                 VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, soflanList, VertexDash.Solider, color, list);
                 if (list.Count > 0)
                 {

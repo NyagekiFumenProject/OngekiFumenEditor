@@ -265,6 +265,25 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
+        public static void AddRange<T>(this IList<T> a, IEnumerable<T> adds)
+        {
+            switch (a)
+            {
+                case List<T> list:
+                    list.AddRange(adds);
+                    break;
+                case PooledList<T> pooledList:
+                    pooledList.AddRange(adds);
+                    break;
+                default:
+                    {
+                        foreach (var obj in adds)
+                            a.Add(obj);
+                    }
+                    break;
+            }
+        }
+
         public static IDisposable ToListWithPool<T>(this IEnumerable<T> collection, out IList<T> list)
         {
             var pooledList = collection.ToPooledList();

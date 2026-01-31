@@ -33,8 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (target.Editor.IsPreviewMode)
                 return;
 
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-            list.Clear();
+            using var d = ObjectPool.NewPooledList<LineVertex>(out var list);
 
             foreach (var result in drawLines)
             {

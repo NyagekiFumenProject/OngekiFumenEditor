@@ -61,14 +61,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             float width = 70f;
             var endDash = new VertexDash(7, 5);
 
-            using var _d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var lines, out _);
-            lines.Clear();
-            using var _d3 = ObjectPool<List<(Vector2, Vector4)>>.GetWithUsingDisposable(out var polygonPoints, out _);
-            polygonPoints.Clear();
-            using var _d4 = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var lines2, out _);
-            lines2.Clear();
-            using var _d2 = ObjectPool<List<(string, Vector2, Vector4, OngekiTimelineObjectBase)>>.GetWithUsingDisposable(out var strings, out _);
-            strings.Clear();
+            using var _d = ObjectPool.NewPooledList<LineVertex>(out var lines);
+            using var _d3 = ObjectPool.NewPooledList<(Vector2, Vector4)>(out var polygonPoints);
+            using var _d4 = ObjectPool.NewPooledList<LineVertex>(out var lines2);
+            using var _d2 = ObjectPool.NewPooledList<(string, Vector2, Vector4, OngekiTimelineObjectBase)>(out var strings);
 
             void PushLine(LineVertex start, LineVertex end)
             {

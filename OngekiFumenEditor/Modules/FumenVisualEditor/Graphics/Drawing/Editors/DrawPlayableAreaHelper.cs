@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using EarcutNet;
+using Faster.Collections.Pooled;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -181,7 +182,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var currentTGrid = target.Editor.GetCurrentTGrid();
             var soflanGroup = target.CurrentDrawingTargetContext.CurrentSoflanList;
 
-            void EnumeratePoints(bool isRight, List<Vector2> result)
+            void EnumeratePoints(bool isRight, IList<Vector2> result)
             {
                 var defaultX = isRight ? defaultRightX : defaultLeftX;
                 var type = isRight ? LaneType.WallRight : LaneType.WallLeft;
@@ -204,7 +205,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     return isRight ? calcXGrids.MaxByOrDefault(x => x) : calcXGrids.MinByOrDefault(x => x);
                 }
 
-                void appendPoint2(List<Vector2> list, float totalXGrid, float totalTGrid)
+                void appendPoint2(IList<Vector2> list, float totalXGrid, float totalTGrid)
                 {
                     var px = (float)XGridCalculator.ConvertXGridToX(totalXGrid / XGrid.DEFAULT_RES_X, target.Editor);
                     var py = (float)target.ConvertToY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
@@ -212,7 +213,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     appendPoint3(list, px, py, list.Count);
                 }
 
-                void appendPoint3(List<Vector2> list, float px, float py, int insertIdx)
+                void appendPoint3(IList<Vector2> list, float px, float py, int insertIdx)
                 {
                     var po = list.ElementAtOrDefault(insertIdx);
                     if (po.X == px && po.Y == py)
@@ -224,7 +225,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     //DebugPrintPoint(p, isRight, false, 10);
                 }
 
-                void appendPoint(List<Vector2> list, XGrid xGrid, float y)
+                void appendPoint(IList<Vector2> list, XGrid xGrid, float y)
                 {
                     if (xGrid is null)
                         return;
@@ -498,15 +499,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 ObjectPool<HashSet<float>>.Return(points);
             }
 
-            using var d3 = ObjectPool<List<double>>.GetWithUsingDisposable(out var tessellatePoints, out _);
-            tessellatePoints.Clear();
-            using var d4 = ObjectPool<List<int>>.GetWithUsingDisposable(out var idxList, out _);
-            idxList.Clear();
-
-            using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var leftPoints, out _);
-            leftPoints.Clear();
-            using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var rightPoints, out _);
-            rightPoints.Clear();
+            using var d3 = ObjectPool.NewPooledList<double>(out var tessellatePoints);
+            using var d4 = ObjectPool.NewPooledList<int>(out var idxList);
+            using var d = ObjectPool.NewPooledList<Vector2>(out var leftPoints);
+            using var d2 = ObjectPool.NewPooledList<Vector2>(out var rightPoints);
 
             //计算左右墙的点
             EnumeratePoints(false, leftPoints);
@@ -561,7 +557,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
 
         [Conditional("PLAYFIELD_DEBUG")]
-        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, List<double> tessellatePoints, List<Vector2> leftPoints, List<Vector2> rightPoints, List<int> tessellateList)
+        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, IList<double> tessellatePoints, IList<Vector2> leftPoints, IList<Vector2> rightPoints, IList<int> tessellateList)
         {
             playFieldForegroundColor.W = 0.4f;
             lineDrawing.Draw(target, leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
@@ -616,10 +612,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             printPoints(rightPoints, debugRightColor, true);
         }
 
-        private void AdjustLaneIntersection(IDrawingContext target, List<Vector2> leftPoints, List<Vector2> rightPoints)
+        private void AdjustLaneIntersection(IDrawingContext target, PooledList<Vector2> leftPoints, PooledList<Vector2> rightPoints)
         {
-            using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempLeft, out _);
-            using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempRight, out _);
+            using var d = ObjectPool.NewPooledList<Vector2>(out var tempLeft);
+            using var d2 = ObjectPool.NewPooledList<Vector2>(out var tempRight);
             using var d3 = ObjectPool<HashSet<Vector2>>.GetWithUsingDisposable(out var intersectionPoints, out _);
             intersectionPoints.Clear();
 
@@ -628,7 +624,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var leftIdx = 1;
             var rightIdx = 1;
 
-            bool insert(List<Vector2> list, int idx, Vector2 point)
+            bool insert(IList<Vector2> list, int idx, Vector2 point)
             {
                 if (idx < list.Count)
                     if (list[idx] == point)
@@ -782,7 +778,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         //             |      |
                         //             |      |
                         //             L      R
-                        bool tryGetLine(List<Vector2> linePoints, int lineIdx, out (Vector2 from, Vector2 to) line)
+                        bool tryGetLine(IList<Vector2> linePoints, int lineIdx, out (Vector2 from, Vector2 to) line)
                         {
                             line = default;
 

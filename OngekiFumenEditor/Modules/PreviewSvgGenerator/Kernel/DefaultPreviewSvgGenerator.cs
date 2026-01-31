@@ -430,8 +430,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     return false;
                 }
 
-                using var d = ObjectPool<List<PointF>>.GetWithUsingDisposable(out var list, out _);
-                list.Clear();
+                using var d = ObjectPool.NewPooledList<PointF>(out var list);
                 QueryVisibleLineVertices(ctx, hold.ReferenceLaneStart, hold.TGrid, hold.EndTGrid, list);
                 if (list.Count > 0)
                 {
@@ -495,7 +494,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             ctx.Document.Children.Add(flickGroup);
         }
 
-        private void QueryVisibleLineVertices(GenerateContext ctx, LaneStartBase start, TGrid min, TGrid max, List<PointF> outVertices)
+        private void QueryVisibleLineVertices(GenerateContext ctx, LaneStartBase start, TGrid min, TGrid max, IList<PointF> outVertices)
         {
             if (start is null)
                 return;
@@ -948,7 +947,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     lbkGroup.Children.Add(polyline);
                 }
 
-                void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid fromTGrid, TGrid toTGrid, List<Vector2> list)
+                void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid fromTGrid, TGrid toTGrid, IList<Vector2> list)
                 {
                     var fromXGridOpt = obj.CalulateXGridTotalGrid(fromTGrid.TotalGrid);
                     var toXGridOpt = obj.CalulateXGridTotalGrid(toTGrid.TotalGrid);
@@ -959,7 +958,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     }
                 }
 
-                void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid, List<Vector2> list)
+                void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid, IList<Vector2> list)
                 {
                     var minTotalGrid = minTGrid.TotalGrid;
                     var maxTotalGrid = maxTGrid.TotalGrid;
@@ -978,8 +977,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
                 void ProcessWallLane(LaneStartBase start, TGrid minTGrid, TGrid maxTGrid)
                 {
-                    using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var list, out _);
-                    list.Clear();
+                    using var d = ObjectPool.NewPooledList<Vector2>(out var list);
 
                     foreach (var child in start.Children)
                     {

@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Faster.Collections.Pooled;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -172,5 +173,13 @@ namespace OngekiFumenEditor.Utils.ObjectPool
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IDisposable GetWithUsingDisposable<T>(out T obj, out bool isNewObject) where T : new()
             => ObjectPool<T>.GetWithUsingDisposable(out obj, out isNewObject);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IDisposable NewPooledList<T>(out PooledList<T> pooledList)
+            => (IDisposable)(pooledList = new PooledList<T>());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IDisposable NewPooledDictionary<K, V>(out PooledDictionary<K, V> pooledDic)
+            => (IDisposable)(pooledDic = new PooledDictionary<K, V>());
     }
 }

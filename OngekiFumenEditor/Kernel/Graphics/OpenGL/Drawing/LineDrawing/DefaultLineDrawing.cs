@@ -74,8 +74,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 
 		private int UpdateBuffer(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
 		{
-			using var d = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var vecList, out _);
-			vecList.Clear();
+			using var d = ObjectPool.NewPooledList<Vec2>(out var vecList);
 
 			var color = points.FirstOrDefault().Color;
 

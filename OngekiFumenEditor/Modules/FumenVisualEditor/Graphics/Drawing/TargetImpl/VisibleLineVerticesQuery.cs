@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
         {
             if (start is null)
                 return;
