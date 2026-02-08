@@ -573,6 +573,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 BPM Change 的本地化字符串。
+        /// </summary>
+        public static string BpmChange {
+            get {
+                return ResourceManager.GetString("BpmChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Branch 的本地化字符串。
         /// </summary>
         public static string Branch {
@@ -1559,6 +1568,15 @@ namespace OngekiFumenEditor.Properties {
         public static string Description {
             get {
                 return ResourceManager.GetString("Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Deselect objects of selected type(s) 的本地化字符串。
+        /// </summary>
+        public static string DeselectItemsOfSelectedType {
+            get {
+                return ResourceManager.GetString("DeselectItemsOfSelectedType", resourceCulture);
             }
         }
         
@@ -5672,6 +5690,15 @@ namespace OngekiFumenEditor.Properties {
         public static string SelectOneDockableLaneOnly {
             get {
                 return ResourceManager.GetString("SelectOneDockableLaneOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Select only objects of selected type(s) 的本地化字符串。
+        /// </summary>
+        public static string SelectOnlyItemsOfSelectedType {
+            get {
+                return ResourceManager.GetString("SelectOnlyItemsOfSelectedType", resourceCulture);
             }
         }
         

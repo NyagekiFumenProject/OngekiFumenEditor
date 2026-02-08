@@ -46,8 +46,11 @@
             </i:Interaction.Behaviors>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{markup:Translate [Refresh]}" />
+                    <MenuItem cal:Message.Attach="SelectOnlyItemsOfSelectedType()" Header="{markup:Translate [SelectOnlyItemsOfSelectedType]}" />
+                    <MenuItem cal:Message.Attach="DeselectItemsOfSelectedType()" Header="{markup:Translate [DeselectItemsOfSelectedType]}" />
                     <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{markup:Translate [CancelSelected]}" />
+                    <Separator />
+                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{markup:Translate [Refresh]}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemContainerStyle>

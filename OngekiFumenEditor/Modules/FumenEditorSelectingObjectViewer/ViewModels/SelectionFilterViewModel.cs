@@ -37,6 +37,13 @@ public class SelectionFilterViewModel : ViewAware
 
     public ObservableCollection<ISelectableObject> OptionFilterRemovals { get; } = new();
 
+    /// <summary>
+    /// Basic cache to store the results of filter.
+    /// Set to null to invalidate.
+    /// </summary>
+    /// <see cref="GetFinalFilterMatches" />
+    private List<ISelectableObject>? FinalFilterMatchCache { get; set; } = new();
+
     public bool IsInvertFilter
     {
         get;
@@ -60,6 +67,12 @@ public class SelectionFilterViewModel : ViewAware
         InitObjectTypeFilter();
         InitOptions();
 
+        IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (_, _) =>
+        {
+            FinalFilterMatchCache = null;
+            OnSelectedItemsRefreshed();
+        };
+
         UpdateFilterOutcomeText();
     }
 
@@ -80,7 +93,8 @@ public class SelectionFilterViewModel : ViewAware
                     matchingItem.MatchingObjects.Add(item);
                 }
 
-                OptionCategories.SelectMany(c => c.Options).ForEach(o => o.IncrementOptionMatchCount((OngekiObjectBase)item));
+                OptionCategories.SelectMany(c => c.Options)
+                    .ForEach(o => o.IncrementOptionMatchCount((OngekiObjectBase)item));
             }
         }
 
@@ -97,8 +111,14 @@ public class SelectionFilterViewModel : ViewAware
 
     private void OnOptionUpdated()
     {
-        // Apply option filters
+        FinalFilterMatchCache = null;
         UpdateOptionFilterRemovals();
+        UpdateFilterOutcomeText();
+    }
+
+    public void OnTypeFilterEnabledChanged(FilterObjectTypesItem _)
+    {
+        FinalFilterMatchCache = null;
         UpdateFilterOutcomeText();
     }
 
@@ -106,9 +126,12 @@ public class SelectionFilterViewModel : ViewAware
     {
         var bulletPaletteOption = new BulletPaletteFilterOption(Resources.SelectionFilter_OptionLabelBulletPalette);
 
-        FumenVisualEditorViewModel.LoadingFinishedEventHandler loaded = (_, args) =>
+        FumenVisualEditorViewModel.LoadingFinishedEventHandler loaded = (sender, args) =>
         {
-            bulletPaletteOption.UpdateOptions(args.Fumen.BulletPalleteList);
+            var vm = (FumenVisualEditorViewModel)sender;
+            if (vm.IsActive) {
+                bulletPaletteOption.FumenLoaded(args.Fumen);
+            }
         };
 
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (@new, old) =>
@@ -119,22 +142,17 @@ public class SelectionFilterViewModel : ViewAware
             }
 
             if (@new is not null) {
-                @new.LoadingFinished += loaded;
                 bulletPaletteOption.FumenLoaded(@new.Fumen);
+                @new.LoadingFinished += loaded;
             }
         };
 
         return bulletPaletteOption;
     }
 
-    public void OnTypeFilterEnabledChanged(FilterObjectTypesItem _)
-    {
-        UpdateFilterOutcomeText();
-    }
-
     private void UpdateFilterOutcomeText()
     {
-        var matches = GetAllFilterMatches();
+        var matches = GetFinalFilterMatches();
         if (IsInvertFilter) {
             FilterOutcomeText = Resources.SelectionFilter_ResultsLabelRemoveMode.Format(matches.Count());
         }
@@ -156,8 +174,13 @@ public class SelectionFilterViewModel : ViewAware
     private IEnumerable<ISelectableObject> GetAllMatchingTypeObjects()
         => FilterTypeCategories.SelectMany(c => c.Items).Where(i => i.IsSelected).SelectMany(i => i.MatchingObjects);
 
-    private IEnumerable<ISelectableObject> GetAllFilterMatches()
-        => GetAllMatchingTypeObjects().Except(OptionFilterRemovals);
+    public IEnumerable<ISelectableObject> GetFinalFilterMatches()
+    {
+        if (FinalFilterMatchCache is null) {
+            FinalFilterMatchCache = new(GetAllMatchingTypeObjects().Except(OptionFilterRemovals));
+        }
+        return FinalFilterMatchCache;
+    }
 
     #region Option Generation
     private void InitObjectTypeFilter()
@@ -196,8 +219,9 @@ public class SelectionFilterViewModel : ViewAware
                 new() { Text = Resources.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)] },
                 new() { Text = Resources.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
                 new() { Text = Resources.DurationSoflan, Types = [typeof(IDurationSoflan)] },
-                new() { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
                 new() { Text = Resources.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] },
+                new() { Text = Resources.MeterChange, Types = [typeof(MeterChange)] },
+                new() { Text = Resources.BpmChange, Types = [typeof(BPMChange)] }
             ]),
 
             new(this, Resources.SelectionFilterObjectCategoryMisc, [
@@ -316,12 +340,12 @@ public class SelectionFilterViewModel : ViewAware
             return;
 
         if (IsInvertFilter) {
-            foreach (var selectableObject in GetAllFilterMatches()) {
+            foreach (var selectableObject in GetFinalFilterMatches()) {
                 selectableObject.IsSelected = false;
             }
         }
         else {
-            foreach (var selectedObject in Editor.SelectObjects.Except(GetAllFilterMatches())) {
+            foreach (var selectedObject in Editor.SelectObjects.Except(GetFinalFilterMatches())) {
                 selectedObject.IsSelected = false;
             }
         }

@@ -2079,6 +2079,9 @@
   <data name="ClickSE" xml:space="preserve">
     <value>Click SE</value>
   </data>
+  <data name="BpmChange" xml:space="preserve">
+    <value>BPM Change</value>
+  </data>
   <data name="InterpolatableSoflan" xml:space="preserve">
     <value>Interpolatable Soflan</value>
   </data>
@@ -2288,5 +2291,11 @@
   </data>
   <data name="SelectionFilter_OptionLabelCurvePrevSelected" xml:space="preserve">
     <value>Curve point previous node</value>
+  </data>
+  <data name="SelectOnlyItemsOfSelectedType" xml:space="preserve">
+    <value>Select only objects of selected type(s)</value>
+  </data>
+  <data name="DeselectItemsOfSelectedType" xml:space="preserve">
+    <value>Deselect objects of selected type(s)</value>
   </data>
 </root>
