@@ -29,6 +29,6 @@ public partial class Program
 
     public static AppBuilder BuildAvaloniaApp()
     {
-        return AppBuilder.Configure<ExampleBrowserApp>();
+        return AppBuilder.Configure<OngekiFumenEditorBrowserApp>();
     }
 }

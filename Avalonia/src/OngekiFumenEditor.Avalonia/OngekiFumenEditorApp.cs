@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OngekiFumenEditor.Avalonia;
 
-public abstract class ExampleApp : App
+public abstract class OngekiFumenEditorApp : App
 {
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {

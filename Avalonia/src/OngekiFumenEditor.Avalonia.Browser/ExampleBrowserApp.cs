@@ -1,19 +1,18 @@
-﻿using System;
-using Gekimini.Avalonia;
-using OngekiFumenEditor.Avalonia.Browser.Utils;
-using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
+﻿using Gekimini.Avalonia;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Framework.Documents;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OngekiFumenEditor.Avalonia.Browser.Utils;
+using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
 
 namespace OngekiFumenEditor.Avalonia.Browser;
 
-public class ExampleBrowserApp : ExampleApp
+public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
 {
-    private ILogger<ExampleBrowserApp> logger;
+    private ILogger<OngekiFumenEditorBrowserApp> logger;
 
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {
@@ -42,7 +41,7 @@ public class ExampleBrowserApp : ExampleApp
     {
         base.OnFrameworkInitializationCompleted();
 
-        logger = ServiceProvider.GetService<ILogger<ExampleBrowserApp>>();
+        logger = ServiceProvider.GetService<ILogger<OngekiFumenEditorBrowserApp>>();
         var shell = ServiceProvider.GetService<IShell>();
 
         shell.DockableOpened += AutoSaveLayout;

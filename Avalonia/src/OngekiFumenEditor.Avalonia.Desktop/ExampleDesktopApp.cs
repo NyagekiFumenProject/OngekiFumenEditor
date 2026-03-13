@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace OngekiFumenEditor.Avalonia.Desktop;
 
-public class ExampleDesktopApp : ExampleApp
+public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
 {
-    private ILogger<ExampleDesktopApp> logger;
+    private ILogger<OngekiFumenEditorDesktopApp> logger;
 
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {
@@ -34,7 +34,7 @@ public class ExampleDesktopApp : ExampleApp
     {
         base.OnFrameworkInitializationCompleted();
 
-        logger = ServiceProvider.GetService<ILogger<ExampleDesktopApp>>();
+        logger = ServiceProvider.GetService<ILogger<OngekiFumenEditorDesktopApp>>();
     }
 
     protected override void DoExit(int exitCode = 0)
