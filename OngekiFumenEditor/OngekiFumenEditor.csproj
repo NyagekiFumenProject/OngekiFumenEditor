@@ -248,6 +248,9 @@
 		<Reference Include="AcbGeneratorFuck">
 			<HintPath>Dependencies\AcbGeneratorFuck\AcbGeneratorFuck.dll</HintPath>
 		</Reference>
+		<Reference Include="AkiraMindController.Communication">
+		  <HintPath>Dependencies\AkiraMindController.Communication\AkiraMindController.Communication.dll</HintPath>
+		</Reference>
 		<Reference Include="DereTore.Common">
 			<HintPath>Dependencies\DereTore\DereTore.Common.dll</HintPath>
 		</Reference>
@@ -263,8 +266,14 @@
 		<Reference Include="DereTore.Interop.OS">
 			<HintPath>Dependencies\DereTore\DereTore.Interop.OS.dll</HintPath>
 		</Reference>
+		<Reference Include="kRpc">
+		  <HintPath>Dependencies\AkiraMindController.Communication\kRpc.dll</HintPath>
+		</Reference>
 		<Reference Include="TexturePlugin">
 			<HintPath>Dependencies\JacketGenerator\TexturePlugin.dll</HintPath>
+		</Reference>
+		<Reference Include="websocket-sharp">
+		  <HintPath>Dependencies\AkiraMindController.Communication\websocket-sharp.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

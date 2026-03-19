@@ -1,0 +1,246 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Views.OngekiGamePlayControllerViewerView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:avalonia="http://icsharpcode.net/sharpdevelop/avalonedit"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels"
+    d:DataContext="{d:DesignInstance Type=vm:OngekiGamePlayControllerViewerViewModel,
+                                     IsDesignTimeCreatable=False}"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:EnumToStringConverter x:Key="EnumToStringConverter">
+        </valueconverters:EnumToStringConverter>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="10,5,10,5">
+            </Setter>
+            <Setter Property="Margin" Value="10,5,10,5">
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <GroupBox Margin="5">
+                <GroupBox.Header>
+                    <Label Content="连接" />
+                </GroupBox.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Content="Port" />
+                        <TextBox
+                            Width="100"
+                            Margin="10,5,10,5"
+                            VerticalAlignment="Center"
+                            Text="{Binding Port}">
+                        </TextBox>
+                        <Button cal:Message.Attach="Connect()">连接</Button>
+                        <Label
+                            Margin="20,0,0,0"
+                            VerticalAlignment="Center"
+                            Content="状态:" />
+                        <TextBlock
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            OverridesDefaultStyle="True">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="NotConnect">
+                                            <Setter Property="Text" Value="未发起连接" />
+                                            <Setter Property="Foreground" Value="Orange" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="Connected">
+                                            <Setter Property="Text" Value="已连接" />
+                                            <Setter Property="Foreground" Value="Green" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="Disconnected">
+                                            <Setter Property="Text" Value="连接已断开" />
+                                            <Setter Property="Foreground" Value="red" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button
+                            Margin="20,0,0,0"
+                            VerticalAlignment="Center"
+                            cal:Message.Attach="RefreshUI()">
+                            刷新
+                        </Button>
+                    </StackPanel>
+                    <Label
+                        Grid.Column="1"
+                        Margin="0,0,10,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                        <Hyperlink Click="Hyperlink_RequestNavigate">使用教程</Hyperlink>
+                    </Label>
+                </Grid>
+            </GroupBox>
+            <GroupBox Margin="5">
+                <GroupBox.Header>
+                    <Label Content="控制" />
+                </GroupBox.Header>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsPlayGuideSEAfterPlay}">
+                            恢复播放是否先播放节奏音效
+                        </CheckBox>
+                        <Button cal:Message.Attach="Play()" IsEnabled="{Binding IsConnected}">播放</Button>
+                        <Button cal:Message.Attach="Pause()" IsEnabled="{Binding IsConnected}">暂停</Button>
+                        <Button cal:Message.Attach="Restart()" IsEnabled="{Binding IsConnected}">重开</Button>
+                        <Button cal:Message.Attach="ForceEnd()" IsEnabled="{Binding IsConnected}">强制结束</Button>
+                        <CheckBox
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsAutoPlay}">
+                            自动游戏
+                        </CheckBox>
+                        <CheckBox
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsPauseIfMissBellOrDamaged}">
+                            受伤或者错失Bell时自动暂停
+                        </CheckBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Content="跳转" />
+                        <TextBox
+                            Width="100"
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Text="{Binding SeekTimeMsec}">
+
+                        </TextBox>
+                        <CheckBox
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsPlayAfterSeek}">
+                            是否跳转后自动播放
+                        </CheckBox>
+                        <Button
+                            VerticalAlignment="Center"
+                            cal:Message.Attach="SeekTo()"
+                            IsEnabled="{Binding IsConnected}">
+                            执行跳转
+                        </Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center">.ogkr谱面生成路径</Label>
+                        <TextBox
+                            Width="350"
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            IsReadOnly="True"
+                            Text="{Binding OgkrSavePath}">
+                        </TextBox>
+                        <Button cal:Message.Attach="OpenOgkrSavePathDialog()" IsEnabled="{Binding IsConnected}">浏览</Button>
+                        <Button cal:Message.Attach="Reload()" IsEnabled="{Binding IsConnected}">游戏重新加载谱面</Button>
+                        <Button cal:Message.Attach="GetOgkrSavePathFromGamePlay()" IsEnabled="{Binding IsConnected}">获取谱面路径</Button>
+                    </StackPanel>
+                    <CheckBox
+                        Margin="10,5,10,5"
+                        Padding="2"
+                        VerticalAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        IsChecked="{Binding IsReloadAfterSeek}">
+                        是否跳转也重新加载谱面
+                    </CheckBox>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="5">
+                <GroupBox.Header>
+                    <Label Content="其他" />
+                </GroupBox.Header>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Button cal:Message.Attach="PlayGuideSE()" IsEnabled="{Binding IsConnected}">播放节奏音效</Button>
+                        <Button cal:Message.Attach="DumpUnfinishInfo()" IsEnabled="{Binding IsConnected}">打印未完成内容</Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox
+                            Width="100"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            Text="{Binding CueId}" />
+                        <Button cal:Message.Attach="PlayCustomSound()" IsEnabled="{Binding IsConnected}">播放指定cueId的音效</Button>
+                    </StackPanel>
+
+
+                    <GroupBox Margin="5">
+                        <GroupBox.Header>
+                            <Label Content="AutoFaderTarget Debugger" />
+                        </GroupBox.Header>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button cal:Message.Attach="GetAutoFaderData()" IsEnabled="{Binding IsConnected}">获取当前AutoFader数据</Button>
+                                <Button cal:Message.Attach="ApplyAutoFaderData()" IsEnabled="{Binding IsConnected}">设置当前AutoFader数据</Button>
+                                <Button cal:Message.Attach="DumpAutoFaderTarget()" IsEnabled="{Binding IsConnected}">将所有AutoFaderTarget数据转储到文件</Button>
+                            </StackPanel>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label VerticalAlignment="Center" Content="curAutoFaderTarget" />
+                                    <TextBox
+                                        Width="600"
+                                        Margin="10,5,10,5"
+                                        Padding="2"
+                                        VerticalAlignment="Center"
+                                        AcceptsReturn="True"
+                                        AcceptsTab="True"
+                                        Text="{Binding CurAutoFaderTargetDataStr}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label VerticalAlignment="Center" Content="preAutoFaderTarget" />
+                                    <TextBox
+                                        Width="600"
+                                        Margin="10,5,10,5"
+                                        Padding="2"
+                                        VerticalAlignment="Center"
+                                        AcceptsReturn="True"
+                                        AcceptsTab="True"
+                                        Text="{Binding PreAutoFaderTargetDataStr}"
+                                        TextWrapping="NoWrap" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <Label VerticalAlignment="Center" Content="curFrame" />
+                                    <TextBox
+                                        Width="100"
+                                        Margin="10,5,10,5"
+                                        Padding="2"
+                                        VerticalAlignment="Center"
+                                        AcceptsReturn="True"
+                                        AcceptsTab="True"
+                                        Text="{Binding CalcCurFrame}" />
+                                    <Button cal:Message.Attach="ManualCallCalcAutoPlayFader()" IsEnabled="{Binding IsConnected}">手动调用calcAutoPlayFader()</Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,85 @@
+using AkiraMindController.Communication.Bases;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Utils;
+using OngekiFumenEditorPlugins.EditorScriptExecutor.Scripts;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+var adfFilePath = @"F:\hdd\package\FaildAutoFaderTargetData\123123.afdList";
+
+var targetEditor = ScriptArgs.TargetEditor;
+if (targetEditor is null)
+    return;
+
+if (!File.Exists(adfFilePath))
+{
+    Log.LogError($".adfFile is not found.");
+    return;
+}
+
+var list = new List<AutoFaderTarget>();
+using (var stream = File.OpenRead(adfFilePath))
+{
+    using (var reader = new StreamReader(stream))
+    {
+        string str = string.Empty;
+        while (!reader.EndOfStream)
+        {
+            var line = reader.ReadLine();
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                var aft = new AutoFaderTarget();
+                aft.Deerialize(str);
+                str = string.Empty;
+                list.Add(aft);
+            }
+            else
+            {
+                str += line + '\n';
+            }
+        }
+    }
+}
+
+void buildLaneCommon(ConnectableObjectBase obj, AutoFaderTarget autoFaderTarget)
+{
+    if (obj is IColorfulLane colorfulLane)
+        colorfulLane.ColorId = ColorIdConst.Ayaka;
+
+    var xGrid = new XGrid((autoFaderTarget.targetPlaceRange.min + autoFaderTarget.targetPlaceRange.max) / 2, 0);
+    xGrid.NormalizeSelf();
+    obj.XGrid = xGrid;
+
+    var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(TimeSpan.FromMilliseconds(autoFaderTarget.finalTargetFrame * 16.6666666f), targetEditor);
+    obj.TGrid = tGrid;
+
+    obj.Tag = $"({autoFaderTarget.finalTargetFrame}){autoFaderTarget.finalTargetFrame * 16.666666f}ms {autoFaderTarget.targetPlaceRange}";
+}
+
+var start = new ColorfulLaneStart();
+buildLaneCommon(start, list[0]);
+
+foreach (var item in list.Skip(1))
+{
+    var next = new ColorfulLaneNext();
+    buildLaneCommon(next, item);
+
+    start.AddChildObject(next);
+}
+
+var fumen = targetEditor.Fumen; // 谱面文件
+var setting = targetEditor.Setting; // 编辑器选项
+var nyagekiProj = targetEditor.EditorProjectData; // 编辑器项目文件
+
+targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("添加自动游戏摇杆轨迹",()=>{
+	fumen.AddObject(start);
+},()=>{
+	fumen.RemoveObject(start);
+}))
