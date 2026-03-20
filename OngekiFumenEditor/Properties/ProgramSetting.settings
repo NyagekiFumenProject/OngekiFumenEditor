@@ -44,6 +44,12 @@
     <Setting Name="ShowConsoleWindowInGUIMode" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="EnableMcpServerInGUIMode" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="McpServerListenPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">39281</Value>
+    </Setting>
     <Setting Name="DisableStringRendererAntialiasing" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

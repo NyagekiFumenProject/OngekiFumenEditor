@@ -28,6 +28,7 @@ using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor;
 using OngekiFumenEditor.Kernel.EditorLayout;
+using OngekiFumenEditor.Kernel.Mcp;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
@@ -306,6 +307,9 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         if (showSplashWindow)
             await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
         SetAppReady();
+
+        await TryStartMcpServerAsync();
+
         if (ProgramSetting.Default.IsFirstTimeOpenEditor)
         {
             if (MessageBox.Show(Resources.ShouldLoadSuggestLayout, Resources.Suggest, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -511,13 +515,45 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         };
     }
 
-    protected override async void OnExit(object sender, EventArgs e)
+    protected override void OnExit(object sender, EventArgs e)
     {
         ipcThread?.Abort();
+        TryStopMcpServerAsync().GetAwaiter().GetResult();
         IoC.Get<IAudioManager>().Dispose();
-        await IoC.Get<ISchedulerManager>().Term();
-        await Log.WaitForAllLogWriteDone();
+        IoC.Get<ISchedulerManager>().Term().GetAwaiter().GetResult();
+        Log.WaitForAllLogWriteDone().GetAwaiter().GetResult();
         FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
         base.OnExit(sender, e);
+    }
+
+    private static bool ShouldAutoStartMcpServer() => ProgramSetting.Default.EnableMcpServerInGUIMode;
+
+    private static async Task TryStartMcpServerAsync()
+    {
+        if (!ShouldAutoStartMcpServer())
+            return;
+
+        try
+        {
+            await IoC.Get<IMcpServerHost>().StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Failed to start MCP server host: {ex}");
+        }
+    }
+
+    private static async Task TryStopMcpServerAsync()
+    {
+        try
+        {
+            var host = IoC.Get<IMcpServerHost>();
+            if (host?.IsRunning ?? false)
+                await host.StopAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Failed to stop MCP server host: {ex}");
+        }
     }
 }

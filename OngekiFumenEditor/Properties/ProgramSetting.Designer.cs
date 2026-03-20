@@ -194,6 +194,30 @@ namespace OngekiFumenEditor.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableMcpServerInGUIMode {
+            get {
+                return ((bool)(this["EnableMcpServerInGUIMode"]));
+            }
+            set {
+                this["EnableMcpServerInGUIMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("39281")]
+        public int McpServerListenPort {
+            get {
+                return ((int)(this["McpServerListenPort"]));
+            }
+            set {
+                this["McpServerListenPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool DisableStringRendererAntialiasing {
             get {
                 return ((bool)(this["DisableStringRendererAntialiasing"]));

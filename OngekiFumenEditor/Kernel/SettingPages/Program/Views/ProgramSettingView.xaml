@@ -33,6 +33,18 @@
                     Margin="10,0,10,10"
                     Content="Show console window"
                     IsChecked="{Binding Setting.ShowConsoleWindowInGUIMode}" />
+                <CheckBox
+                    Margin="10,0,10,10"
+                    Content="Enable MCP server"
+                    IsChecked="{Binding Setting.EnableMcpServerInGUIMode}" />
+                <StackPanel Margin="10,0,10,10" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="MCP listen port" />
+                    <TextBox
+                        Width="100"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Setting.McpServerListenPort}" />
+                </StackPanel>
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">
