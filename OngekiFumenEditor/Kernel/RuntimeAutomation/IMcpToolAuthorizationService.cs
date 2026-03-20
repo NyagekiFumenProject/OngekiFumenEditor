@@ -5,6 +5,6 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 {
     public interface IMcpToolAuthorizationService
     {
-        Task<bool> EnsureAuthorizedAsync(string toolName, string requestedBy, string clientId, string requestPreview, CancellationToken cancellationToken = default);
+        Task<McpToolAuthorizationResult> EnsureAuthorizedAsync(string toolName, string requestedBy, string clientId, string requestPreview, bool allowInteractivePrompt = true, CancellationToken cancellationToken = default);
     }
 }

@@ -171,11 +171,49 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
             if (command?.Tag is not McpClientRegistrationInfo client)
                 return TaskUtility.Completed;
 
+            McpOperationLogHelper.LogRequest("authorization.revoke", new
+            {
+                identityKey = client.IdentityKey,
+                requestedBy = client.RequestedBy,
+                clientId = client.ClientId,
+                isExecutionApproved = client.IsExecutionApproved,
+            });
+
+            if (!client.IsExecutionApproved)
+            {
+                McpOperationLogHelper.LogResult("authorization.revoke", new
+                {
+                    identityKey = client.IdentityKey,
+                    success = false,
+                    reason = "CLIENT_NOT_AUTHORIZED",
+                });
+                return TaskUtility.Completed;
+            }
+
+            if (!ConfirmRevokeAuthorization(client))
+            {
+                McpOperationLogHelper.LogResult("authorization.revoke", new
+                {
+                    identityKey = client.IdentityKey,
+                    success = false,
+                    cancelled = true,
+                });
+                return TaskUtility.Completed;
+            }
+
             var revoked = mcpClientAuthorizationManager.RevokeExecutionApproval(client.IdentityKey);
             if (revoked)
                 Log.LogInfo($"Revoked MCP tool authorization for client '{BuildClientDisplayName(client)}' ({client.IdentityKey}).");
             else
                 Log.LogInfo($"MCP client '{BuildClientDisplayName(client)}' ({client.IdentityKey}) was already not authorized.");
+
+            McpOperationLogHelper.LogResult("authorization.revoke", new
+            {
+                identityKey = client.IdentityKey,
+                requestedBy = client.RequestedBy,
+                clientId = client.ClientId,
+                success = revoked,
+            });
 
             return TaskUtility.Completed;
         }
@@ -197,11 +235,20 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
 
         private static string BuildClientDisplayName(McpClientRegistrationInfo client)
         {
-            var requestedBy = string.IsNullOrWhiteSpace(client?.RequestedBy) ? "Unknown Client" : client.RequestedBy;
+            var requestedBy = string.IsNullOrWhiteSpace(client?.RequestedBy) ? "Anonymous Client" : client.RequestedBy;
             if (string.IsNullOrWhiteSpace(client?.ClientId))
                 return requestedBy;
 
             return $"{requestedBy} ({client.ClientId})";
+        }
+
+        private static bool ConfirmRevokeAuthorization(McpClientRegistrationInfo client)
+        {
+            var displayName = BuildClientDisplayName(client);
+            var identityKey = string.IsNullOrWhiteSpace(client?.IdentityKey) ? "Unknown" : client.IdentityKey;
+            var message = $"Revoke MCP tool authorization for this client?{Environment.NewLine}{Environment.NewLine}Client: {displayName}{Environment.NewLine}Identity Key: {identityKey}";
+            var result = MessageBox.Show(message, "MCP", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+            return result == MessageBoxResult.Yes;
         }
     }
 }

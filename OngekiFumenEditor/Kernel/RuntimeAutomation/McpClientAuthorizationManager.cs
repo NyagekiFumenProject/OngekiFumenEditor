@@ -9,6 +9,8 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal sealed class McpClientAuthorizationManager : IMcpClientAuthorizationManager
     {
+        private const string AnonymousIdentityKey = "anonymous";
+
         private sealed class Entry
         {
             public string IdentityKey { get; set; }
@@ -141,7 +143,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             if (!string.IsNullOrWhiteSpace(requestedBy))
                 return $"requestedBy:{requestedBy}";
 
-            return default;
+            return AnonymousIdentityKey;
         }
     }
 }

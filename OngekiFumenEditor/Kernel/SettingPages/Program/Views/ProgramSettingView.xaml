@@ -45,10 +45,14 @@
                         VerticalAlignment="Center"
                         Text="{Binding Setting.McpServerListenPort}" />
                 </StackPanel>
+                <CheckBox
+                    Margin="10,0,10,10"
+                    Content="Allow anonymous MCP client usage"
+                    IsChecked="{Binding Setting.AllowAnonymousMcpClientUsage}" />
                 <TextBlock
                     Margin="10,0,10,10"
                     Foreground="DarkSlateGray"
-                    Text="MCP menu visibility and auto-start changes apply after restart. Port changes apply on the next server start."
+                    Text="MCP menu visibility and auto-start changes apply after restart. Port changes apply on the next server start. When anonymous MCP usage is disabled, clients must provide clientId or requestedBy."
                     TextWrapping="Wrap" />
             </StackPanel>
         </GroupBox>

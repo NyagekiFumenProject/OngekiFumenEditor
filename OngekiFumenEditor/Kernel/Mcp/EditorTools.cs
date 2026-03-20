@@ -24,46 +24,99 @@ namespace OngekiFumenEditor.Kernel.Mcp
 
         [McpServerTool(Name = "editor.get_current", Title = "Get Current Editor", ReadOnly = true, Destructive = false, OpenWorld = false)]
         [Description("Get the currently active editor in the running Ongeki Fumen Editor instance.")]
-        public async Task<EditorContextInfo> GetCurrent(string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
+        public async Task<object> GetCurrent(string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
         {
-            if (!await mcpToolAuthorizationService.EnsureAuthorizedAsync("editor.get_current", requestedBy, clientId, "Read the currently active editor in the running Ongeki Fumen Editor instance.", cancellationToken))
-                return default;
+            const string operationName = "editor.get_current";
+            McpOperationLogHelper.LogRequest(operationName, new
+            {
+                requestedBy,
+                clientId,
+            });
 
-            return editorContextProvider.GetCurrentEditor();
+            var authorizationResult = await mcpToolAuthorizationService.EnsureAuthorizedAsync("editor.get_current", requestedBy, clientId, "Read the currently active editor in the running Ongeki Fumen Editor instance.", cancellationToken: cancellationToken);
+            if (!authorizationResult.IsAuthorized)
+            {
+                var deniedResult = new
+                {
+                    success = false,
+                    errorCode = authorizationResult.ErrorCode,
+                    errorMessage = authorizationResult.ErrorMessage,
+                };
+                McpOperationLogHelper.LogResult(operationName, deniedResult);
+                return deniedResult;
+            }
+
+            var result = editorContextProvider.GetCurrentEditor();
+            McpOperationLogHelper.LogResult(operationName, result);
+            return result;
         }
 
         [McpServerTool(Name = "editor.list_opened", Title = "List Opened Editors", ReadOnly = true, Destructive = false, OpenWorld = false)]
         [Description("List all currently opened editors in the running Ongeki Fumen Editor instance.")]
-        public async Task<IReadOnlyList<EditorContextInfo>> ListOpened(string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
+        public async Task<object> ListOpened(string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
         {
-            if (!await mcpToolAuthorizationService.EnsureAuthorizedAsync("editor.list_opened", requestedBy, clientId, "List all currently opened editors in the running Ongeki Fumen Editor instance.", cancellationToken))
-                return [];
+            const string operationName = "editor.list_opened";
+            McpOperationLogHelper.LogRequest(operationName, new
+            {
+                requestedBy,
+                clientId,
+            });
 
-            return editorContextProvider.GetOpenedEditors();
+            var authorizationResult = await mcpToolAuthorizationService.EnsureAuthorizedAsync("editor.list_opened", requestedBy, clientId, "List all currently opened editors in the running Ongeki Fumen Editor instance.", cancellationToken: cancellationToken);
+            if (!authorizationResult.IsAuthorized)
+            {
+                var deniedResult = new
+                {
+                    success = false,
+                    errorCode = authorizationResult.ErrorCode,
+                    errorMessage = authorizationResult.ErrorMessage,
+                };
+                McpOperationLogHelper.LogResult(operationName, deniedResult);
+                return deniedResult;
+            }
+
+            var result = editorContextProvider.GetOpenedEditors();
+            McpOperationLogHelper.LogResult(operationName, result);
+            return result;
         }
 
         [McpServerTool(Name = "editor.get_current_summary", Title = "Get Current Editor Summary", ReadOnly = true, Destructive = false, OpenWorld = false)]
         [Description("Get a lightweight summary of the currently active editor, including file paths and object counts.")]
         public async Task<object> GetCurrentSummary(string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
         {
-            if (!await mcpToolAuthorizationService.EnsureAuthorizedAsync("editor.get_current_summary", requestedBy, clientId, "Read a lightweight summary of the currently active editor, including file paths and object counts.", cancellationToken))
-                return new
+            const string operationName = "editor.get_current_summary";
+            McpOperationLogHelper.LogRequest(operationName, new
+            {
+                requestedBy,
+                clientId,
+            });
+
+            var authorizationResult = await mcpToolAuthorizationService.EnsureAuthorizedAsync("editor.get_current_summary", requestedBy, clientId, "Read a lightweight summary of the currently active editor, including file paths and object counts.", cancellationToken: cancellationToken);
+            if (!authorizationResult.IsAuthorized)
+            {
+                var deniedResult = new
                 {
                     success = false,
-                    errorCode = "USER_CONFIRMATION_REQUIRED"
+                    errorCode = authorizationResult.ErrorCode,
+                    errorMessage = authorizationResult.ErrorMessage,
                 };
+                McpOperationLogHelper.LogResult(operationName, deniedResult);
+                return deniedResult;
+            }
 
             var current = editorContextProvider.GetCurrentEditor();
             if (current is null)
             {
-                return new
+                var noActiveEditorResult = new
                 {
                     success = false,
                     errorCode = "NO_ACTIVE_EDITOR"
                 };
+                McpOperationLogHelper.LogResult(operationName, noActiveEditorResult);
+                return noActiveEditorResult;
             }
 
-            return new
+            var result = new
             {
                 success = true,
                 editorId = current.EditorId,
@@ -83,6 +136,8 @@ namespace OngekiFumenEditor.Kernel.Mcp
                     soflans = current.SoflanCount,
                 }
             };
+            McpOperationLogHelper.LogResult(operationName, result);
+            return result;
         }
     }
 }

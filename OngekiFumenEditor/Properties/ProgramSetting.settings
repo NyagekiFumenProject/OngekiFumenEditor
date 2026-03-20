@@ -50,6 +50,9 @@
     <Setting Name="McpServerListenPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">39281</Value>
     </Setting>
+    <Setting Name="AllowAnonymousMcpClientUsage" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
     <Setting Name="DisableStringRendererAntialiasing" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

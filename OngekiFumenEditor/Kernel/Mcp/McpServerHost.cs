@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using OngekiFumenEditor.Kernel.RuntimeAutomation;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
@@ -42,10 +43,25 @@ namespace OngekiFumenEditor.Kernel.Mcp
             await lifecycleLock.WaitAsync(cancellationToken);
             try
             {
-                if (IsRunning)
-                    return;
-
                 var requestedPort = NormalizePort(ProgramSetting.Default.McpServerListenPort);
+                McpOperationLogHelper.LogRequest("server.start", new
+                {
+                    requestedPort,
+                    isRunning = IsRunning,
+                    serverUrl = runningEndpoint,
+                });
+
+                if (IsRunning)
+                {
+                    McpOperationLogHelper.LogResult("server.start", new
+                    {
+                        success = true,
+                        alreadyRunning = true,
+                        serverUrl = runningEndpoint,
+                    });
+                    return;
+                }
+
                 var port = requestedPort;
                 Exception lastAddressInUseException = null;
 
@@ -67,6 +83,14 @@ namespace OngekiFumenEditor.Kernel.Mcp
                         else
                             Log.LogWarn($"Requested MCP port {requestedPort} was unavailable. McpServerHost started at {runningEndpoint} instead.");
 
+                        McpOperationLogHelper.LogResult("server.start", new
+                        {
+                            success = true,
+                            requestedPort,
+                            actualPort = port,
+                            serverUrl = runningEndpoint,
+                        });
+
                         return;
                     }
                     catch (Exception ex) when (IsAddressInUseException(ex))
@@ -79,6 +103,13 @@ namespace OngekiFumenEditor.Kernel.Mcp
                             throw new InvalidOperationException($"Unable to start MCP server. No available TCP port was found after probing from {requestedPort}.", lastAddressInUseException);
 
                         Log.LogWarn($"MCP port {port} is already in use. Retrying with port {nextPort}.");
+                        McpOperationLogHelper.LogWarning("RETRY", "server.start", new
+                        {
+                            requestedPort,
+                            currentPort = port,
+                            nextPort,
+                            reason = "AddressAlreadyInUse",
+                        });
                         port = nextPort;
                     }
                     catch
@@ -87,6 +118,17 @@ namespace OngekiFumenEditor.Kernel.Mcp
                         throw;
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                McpOperationLogHelper.LogError("RESULT", "server.start", new
+                {
+                    success = false,
+                    requestedPort = NormalizePort(ProgramSetting.Default.McpServerListenPort),
+                    serverUrl = runningEndpoint,
+                    errorMessage = ex.Message,
+                });
+                throw;
             }
             finally
             {
@@ -100,8 +142,21 @@ namespace OngekiFumenEditor.Kernel.Mcp
             await lifecycleLock.WaitAsync(cancellationToken);
             try
             {
+                McpOperationLogHelper.LogRequest("server.stop", new
+                {
+                    isRunning = IsRunning,
+                    serverUrl = runningEndpoint,
+                });
+
                 if (!IsRunning && webApplication is null)
+                {
+                    McpOperationLogHelper.LogResult("server.stop", new
+                    {
+                        success = true,
+                        alreadyStopped = true,
+                    });
                     return;
+                }
 
                 var app = webApplication;
                 var endpoint = runningEndpoint;
@@ -116,6 +171,21 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 }
 
                 Log.LogInfo(string.IsNullOrWhiteSpace(endpoint) ? "McpServerHost stopped." : $"McpServerHost stopped: {endpoint}");
+                McpOperationLogHelper.LogResult("server.stop", new
+                {
+                    success = true,
+                    serverUrl = endpoint,
+                });
+            }
+            catch (Exception ex)
+            {
+                McpOperationLogHelper.LogError("RESULT", "server.stop", new
+                {
+                    success = false,
+                    serverUrl = runningEndpoint,
+                    errorMessage = ex.Message,
+                });
+                throw;
             }
             finally
             {

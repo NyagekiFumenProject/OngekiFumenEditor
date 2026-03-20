@@ -9,6 +9,7 @@ using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -96,13 +97,20 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
         private async Task<ScriptRunResult> RunOnEditorCoreAsync(FumenVisualEditorViewModel editor, string editorId, ScriptRunRequest request, bool requireActiveEditor, CancellationToken cancellationToken)
         {
             request ??= new ScriptRunRequest();
-            if (request.RequireConfirmation && !await mcpToolAuthorizationService.EnsureAuthorizedAsync(
+            var authorizationResult = await mcpToolAuthorizationService.EnsureAuthorizedAsync(
                 requireActiveEditor ? "script.run_current_editor" : "script.run_editor",
                 request.RequestedBy,
                 request.ClientId,
-                BuildScriptRequestPreview(editor, request),
-                cancellationToken))
-                return CacheResult(CreateRunFailure("USER_CONFIRMATION_REQUIRED", "Script execution was cancelled by user confirmation.", editorId, GetTransactionName(request)));
+                BuildScriptRequestPreview(editor, editorId, request),
+                request.RequireConfirmation,
+                cancellationToken);
+
+            if (!authorizationResult.IsAuthorized)
+                return CacheResult(CreateRunFailure(
+                    authorizationResult.ErrorCode ?? "USER_CONFIRMATION_REQUIRED",
+                    authorizationResult.ErrorMessage ?? "Script execution was cancelled by user confirmation.",
+                    editorId,
+                    GetTransactionName(request)));
 
             var buildResult = await BuildInternalAsync(new ScriptBuildRequest
             {
@@ -130,13 +138,13 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
                 return CacheResult(CreateRunFailure("SCRIPT_RUNTIME_ERROR", "No dispatcher is available for script execution.", editorId, GetTransactionName(request)));
 
             if (dispatcher.CheckAccess())
-                return CacheResult(await ExecuteBuiltScriptAsync(editor, editorId, request, buildResult.RawBuildResult, requireActiveEditor, cancellationToken));
+                return CacheResult(await ExecuteBuiltScriptAsync(editor, editorId, request, buildResult.RawBuildResult, requireActiveEditor, authorizationResult.BackupFumenBeforeExecution, cancellationToken));
 
             return CacheResult(await dispatcher.InvokeAsync(() =>
-                ExecuteBuiltScriptAsync(editor, editorId, request, buildResult.RawBuildResult, requireActiveEditor, cancellationToken)).Task.Unwrap());
+                ExecuteBuiltScriptAsync(editor, editorId, request, buildResult.RawBuildResult, requireActiveEditor, authorizationResult.BackupFumenBeforeExecution, cancellationToken)).Task.Unwrap());
         }
 
-        private async Task<ScriptRunResult> ExecuteBuiltScriptAsync(FumenVisualEditorViewModel editor, string editorId, ScriptRunRequest request, BuildResult buildResult, bool requireActiveEditor, CancellationToken cancellationToken)
+        private async Task<ScriptRunResult> ExecuteBuiltScriptAsync(FumenVisualEditorViewModel editor, string editorId, ScriptRunRequest request, BuildResult buildResult, bool requireActiveEditor, bool backupFumenBeforeExecution, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -152,6 +160,15 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
             try
             {
+                if (backupFumenBeforeExecution)
+                {
+                    var backupResult = await BackupFumenFileBeforeExecutionAsync(editor, editorId, cancellationToken);
+                    if (!backupResult.IsSuccess)
+                        return CreateRunFailure("FUMEN_BACKUP_FAILED", backupResult.ErrorMessage, editorId, GetTransactionName(request), logs);
+
+                    logs.Add($"Backup fumen file: {backupResult.BackupFilePath}");
+                }
+
                 if (hasOpenedUndoCombine)
                     editor.UndoRedoManager.BeginCombineAction();
 
@@ -208,6 +225,46 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             {
                 if (buildResult.Assembly is not null)
                     ScriptArgsGlobalStore.Clear(buildResult.Assembly);
+            }
+        }
+
+        private async Task<(bool IsSuccess, string BackupFilePath, string ErrorMessage)> BackupFumenFileBeforeExecutionAsync(FumenVisualEditorViewModel editor, string editorId, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var sourceFumenFilePath = editor?.EditorProjectData?.FumenFilePath;
+            if (string.IsNullOrWhiteSpace(sourceFumenFilePath))
+                return (false, default, "The current editor project does not specify a fumen file path.");
+
+            if (!File.Exists(sourceFumenFilePath))
+                return (false, default, $"The source fumen file does not exist: {sourceFumenFilePath}");
+
+            var backupFilePath = TempFileHelper.GetTempFilePath(
+                subTempFolderName: "FumenFile",
+                prefix: Path.GetFileNameWithoutExtension(sourceFumenFilePath),
+                extension: Path.GetExtension(sourceFumenFilePath));
+
+            try
+            {
+                File.Copy(sourceFumenFilePath, backupFilePath, true);
+                McpOperationLogHelper.LogResult("script.backup_fumen_file", new
+                {
+                    editorId,
+                    sourceFumenFilePath,
+                    backupFumenFilePath = backupFilePath,
+                });
+                return (true, backupFilePath, default);
+            }
+            catch (Exception ex)
+            {
+                McpOperationLogHelper.LogError("RESULT", "script.backup_fumen_file", new
+                {
+                    editorId,
+                    sourceFumenFilePath,
+                    backupFumenFilePath = backupFilePath,
+                    errorMessage = ex.Message,
+                });
+                return (false, default, ex.Message);
             }
         }
 
@@ -344,14 +401,18 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             }
         }
 
-        private static string BuildScriptRequestPreview(FumenVisualEditorViewModel editor, ScriptRunRequest request)
+        private static string BuildScriptRequestPreview(FumenVisualEditorViewModel editor, string editorId, ScriptRunRequest request)
         {
             var preview = request?.ScriptText ?? string.Empty;
             preview = preview.Replace("\r\n", "\n");
             if (preview.Length > 400)
                 preview = preview[..400] + Environment.NewLine + "...";
 
-            return $"Editor: {editor?.DisplayName ?? "Unknown"}{Environment.NewLine}Transaction: {GetTransactionName(request)}{Environment.NewLine}{Environment.NewLine}{preview}";
+            var expectedEditorIdLine = string.IsNullOrWhiteSpace(request?.ExpectedEditorId)
+                ? string.Empty
+                : $"{Environment.NewLine}Expected Editor ID: {request.ExpectedEditorId}";
+
+            return $"Target Editor: {editor?.DisplayName ?? "Unknown"}{Environment.NewLine}Target Editor ID: {editorId ?? "Unknown"}{expectedEditorIdLine}{Environment.NewLine}Transaction: {GetTransactionName(request)}{Environment.NewLine}{Environment.NewLine}{preview}";
         }
 
         private ScriptRunResult CacheResult(ScriptRunResult result)

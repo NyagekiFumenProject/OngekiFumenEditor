@@ -25,27 +25,53 @@ namespace OngekiFumenEditor.Kernel.Mcp
         [Description("Compile a runtime automation script and run security checks without executing it.")]
         public async Task<ScriptBuildResult> Compile(string scriptText, bool enableSecurityCheck = true, string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
         {
-            if (!await mcpToolAuthorizationService.EnsureAuthorizedAsync("script.compile", requestedBy, clientId, BuildScriptPreview(scriptText), cancellationToken))
+            const string operationName = "script.compile";
+            McpOperationLogHelper.LogRequest(operationName, new
             {
-                return new ScriptBuildResult
+                scriptText,
+                enableSecurityCheck,
+                requestedBy,
+                clientId,
+            });
+
+            var authorizationResult = await mcpToolAuthorizationService.EnsureAuthorizedAsync("script.compile", requestedBy, clientId, BuildScriptPreview(scriptText), cancellationToken: cancellationToken);
+            if (!authorizationResult.IsAuthorized)
+            {
+                var deniedResult = new ScriptBuildResult
                 {
                     Success = false,
-                    SecurityIssues = ["Tool authorization was denied by user confirmation."]
+                    SecurityIssues = [authorizationResult.ErrorMessage ?? "Tool authorization was denied."]
                 };
+                McpOperationLogHelper.LogResult(operationName, deniedResult);
+                return deniedResult;
             }
 
-            return await scriptHost.BuildAsync(new ScriptBuildRequest
+            var result = await scriptHost.BuildAsync(new ScriptBuildRequest
             {
                 ScriptText = scriptText,
                 EnableSecurityCheck = enableSecurityCheck,
             }, cancellationToken);
+            McpOperationLogHelper.LogResult(operationName, result);
+            return result;
         }
 
         [McpServerTool(Name = "script.run_current_editor", Title = "Run Script On Current Editor", ReadOnly = false, Destructive = true, OpenWorld = false)]
         [Description("Execute a runtime automation script against the currently active editor.")]
-        public Task<ScriptRunResult> RunCurrentEditor(string scriptText, string expectedEditorId = default, bool requireConfirmation = true, bool wrapUndoTransaction = true, string transactionName = default, string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
+        public async Task<ScriptRunResult> RunCurrentEditor(string scriptText, string expectedEditorId = default, bool requireConfirmation = true, bool wrapUndoTransaction = true, string transactionName = default, string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
         {
-            return scriptHost.RunOnCurrentEditorAsync(new ScriptRunRequest
+            const string operationName = "script.run_current_editor";
+            McpOperationLogHelper.LogRequest(operationName, new
+            {
+                scriptText,
+                expectedEditorId,
+                requireConfirmation,
+                wrapUndoTransaction,
+                transactionName,
+                requestedBy,
+                clientId,
+            });
+
+            var result = await scriptHost.RunOnCurrentEditorAsync(new ScriptRunRequest
             {
                 ScriptText = scriptText,
                 ExpectedEditorId = expectedEditorId,
@@ -55,13 +81,28 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 RequestedBy = requestedBy,
                 ClientId = clientId,
             }, cancellationToken);
+            McpOperationLogHelper.LogResult(operationName, result);
+            return result;
         }
 
         [McpServerTool(Name = "script.run_editor", Title = "Run Script On Specified Editor", ReadOnly = false, Destructive = true, OpenWorld = false)]
         [Description("Execute a runtime automation script against a specific opened editor.")]
-        public Task<ScriptRunResult> RunEditor(string editorId, string scriptText, string expectedEditorId = default, bool requireConfirmation = true, bool wrapUndoTransaction = true, string transactionName = default, string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
+        public async Task<ScriptRunResult> RunEditor(string editorId, string scriptText, string expectedEditorId = default, bool requireConfirmation = true, bool wrapUndoTransaction = true, string transactionName = default, string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
         {
-            return scriptHost.RunOnEditorAsync(editorId, new ScriptRunRequest
+            const string operationName = "script.run_editor";
+            McpOperationLogHelper.LogRequest(operationName, new
+            {
+                editorId,
+                scriptText,
+                expectedEditorId,
+                requireConfirmation,
+                wrapUndoTransaction,
+                transactionName,
+                requestedBy,
+                clientId,
+            });
+
+            var result = await scriptHost.RunOnEditorAsync(editorId, new ScriptRunRequest
             {
                 ScriptText = scriptText,
                 ExpectedEditorId = expectedEditorId,
@@ -71,23 +112,37 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 RequestedBy = requestedBy,
                 ClientId = clientId,
             }, cancellationToken);
+            McpOperationLogHelper.LogResult(operationName, result);
+            return result;
         }
 
         [McpServerTool(Name = "script.get_last_result", Title = "Get Last Script Result", ReadOnly = true, Destructive = false, OpenWorld = false)]
         [Description("Get the last runtime automation script result returned by the host.")]
         public async Task<ScriptRunResult> GetLastResult(string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
         {
-            if (!await mcpToolAuthorizationService.EnsureAuthorizedAsync("script.get_last_result", requestedBy, clientId, "Read the last runtime automation script result cached by the host.", cancellationToken))
+            const string operationName = "script.get_last_result";
+            McpOperationLogHelper.LogRequest(operationName, new
             {
-                return new ScriptRunResult
+                requestedBy,
+                clientId,
+            });
+
+            var authorizationResult = await mcpToolAuthorizationService.EnsureAuthorizedAsync("script.get_last_result", requestedBy, clientId, "Read the last runtime automation script result cached by the host.", cancellationToken: cancellationToken);
+            if (!authorizationResult.IsAuthorized)
+            {
+                var deniedResult = new ScriptRunResult
                 {
                     Success = false,
-                    ErrorCode = "USER_CONFIRMATION_REQUIRED",
-                    ErrorMessage = "Tool execution was cancelled by user confirmation.",
+                    ErrorCode = authorizationResult.ErrorCode,
+                    ErrorMessage = authorizationResult.ErrorMessage,
                 };
+                McpOperationLogHelper.LogResult(operationName, deniedResult);
+                return deniedResult;
             }
 
-            return scriptHost.GetLastResult();
+            var result = scriptHost.GetLastResult();
+            McpOperationLogHelper.LogResult(operationName, result);
+            return result;
         }
 
         private static string BuildScriptPreview(string scriptText)

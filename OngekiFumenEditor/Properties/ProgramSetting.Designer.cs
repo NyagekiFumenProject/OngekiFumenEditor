@@ -214,6 +214,18 @@ namespace OngekiFumenEditor.Properties {
                 this["McpServerListenPort"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AllowAnonymousMcpClientUsage {
+            get {
+                return ((bool)(this["AllowAnonymousMcpClientUsage"]));
+            }
+            set {
+                this["AllowAnonymousMcpClientUsage"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
