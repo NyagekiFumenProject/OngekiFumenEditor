@@ -515,14 +515,14 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         };
     }
 
-    protected override void OnExit(object sender, EventArgs e)
+    protected override async void OnExit(object sender, EventArgs e)
     {
         ipcThread?.Abort();
-        TryStopMcpServerAsync().GetAwaiter().GetResult();
+        await TryStopMcpServerAsync();
         IoC.Get<IAudioManager>().Dispose();
-        IoC.Get<ISchedulerManager>().Term().GetAwaiter().GetResult();
-        Log.WaitForAllLogWriteDone().GetAwaiter().GetResult();
-        FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
+        await IoC.Get<ISchedulerManager>().Term();
+        await Log.WaitForAllLogWriteDone();
+        await FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
         base.OnExit(sender, e);
     }
 

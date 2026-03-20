@@ -45,6 +45,11 @@
                         VerticalAlignment="Center"
                         Text="{Binding Setting.McpServerListenPort}" />
                 </StackPanel>
+                <TextBlock
+                    Margin="10,0,10,10"
+                    Foreground="DarkSlateGray"
+                    Text="MCP menu visibility and auto-start changes apply after restart. Port changes apply on the next server start."
+                    TextWrapping="Wrap" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">

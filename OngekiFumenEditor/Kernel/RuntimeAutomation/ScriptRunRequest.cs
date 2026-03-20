@@ -8,5 +8,6 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
         public bool WrapUndoTransaction { get; set; } = true;
         public string TransactionName { get; set; }
         public string RequestedBy { get; set; }
+        public string ClientId { get; set; }
     }
 }

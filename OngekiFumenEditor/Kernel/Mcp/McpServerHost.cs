@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
+using System;
 using System.ComponentModel.Composition;
+using System.IO;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +17,8 @@ namespace OngekiFumenEditor.Kernel.Mcp
     internal sealed class McpServerHost : IMcpServerHost
     {
         private const string DefaultPath = "/mcp";
+        private const int MinPort = 1;
+        private const int MaxPort = 65535;
 
         private readonly EditorTools editorTools;
         private readonly ScriptTools scriptTools;
@@ -29,6 +34,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
         }
 
         public bool IsRunning { get; private set; }
+        public string ServerUrl => IsRunning && !string.IsNullOrWhiteSpace(runningEndpoint) ? runningEndpoint : BuildServerUrl(NormalizePort(ProgramSetting.Default.McpServerListenPort));
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
@@ -39,40 +45,48 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 if (IsRunning)
                     return;
 
-                var port = NormalizePort(ProgramSetting.Default.McpServerListenPort);
-                var url = $"http://127.0.0.1:{port}";
+                var requestedPort = NormalizePort(ProgramSetting.Default.McpServerListenPort);
+                var port = requestedPort;
+                Exception lastAddressInUseException = null;
 
-                var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+                while (true)
                 {
-                    Args = [],
-                    ApplicationName = typeof(McpServerHost).Assembly.FullName,
-                });
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                builder.WebHost.UseUrls(url);
+                    var app = BuildWebApplication(port);
+                    try
+                    {
+                        await app.StartAsync(cancellationToken);
 
-                builder.Services
-                    .AddMcpServer()
-                    .WithHttpTransport()
-                    .WithTools<EditorTools>(editorTools)
-                    .WithTools<ScriptTools>(scriptTools);
+                        webApplication = app;
+                        runningEndpoint = BuildServerUrl(port);
+                        IsRunning = true;
 
-                var app = builder.Build();
-                app.MapMcp(DefaultPath);
+                        if (port == requestedPort)
+                            Log.LogInfo($"McpServerHost started at {runningEndpoint}");
+                        else
+                            Log.LogWarn($"Requested MCP port {requestedPort} was unavailable. McpServerHost started at {runningEndpoint} instead.");
 
-                try
-                {
-                    await app.StartAsync(cancellationToken);
+                        return;
+                    }
+                    catch (Exception ex) when (IsAddressInUseException(ex))
+                    {
+                        lastAddressInUseException = ex;
+                        await app.DisposeAsync();
+
+                        var nextPort = GetNextPort(port);
+                        if (nextPort == requestedPort)
+                            throw new InvalidOperationException($"Unable to start MCP server. No available TCP port was found after probing from {requestedPort}.", lastAddressInUseException);
+
+                        Log.LogWarn($"MCP port {port} is already in use. Retrying with port {nextPort}.");
+                        port = nextPort;
+                    }
+                    catch
+                    {
+                        await app.DisposeAsync();
+                        throw;
+                    }
                 }
-                catch
-                {
-                    await app.DisposeAsync();
-                    throw;
-                }
-
-                webApplication = app;
-                runningEndpoint = $"{url}{DefaultPath}";
-                IsRunning = true;
-                Log.LogInfo($"McpServerHost started at {runningEndpoint}");
             }
             finally
             {
@@ -112,6 +126,52 @@ namespace OngekiFumenEditor.Kernel.Mcp
         private static int NormalizePort(int port)
         {
             return port is > 0 and <= 65535 ? port : 39281;
+        }
+
+        private WebApplication BuildWebApplication(int port)
+        {
+            var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+            {
+                Args = [],
+                ApplicationName = typeof(McpServerHost).Assembly.FullName,
+            });
+
+            builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
+
+            builder.Services
+                .AddMcpServer()
+                .WithHttpTransport()
+                .WithTools<EditorTools>(editorTools)
+                .WithTools<ScriptTools>(scriptTools);
+
+            var app = builder.Build();
+            app.MapMcp(DefaultPath);
+            return app;
+        }
+
+        private static int GetNextPort(int port)
+        {
+            return port >= MaxPort ? MinPort : port + 1;
+        }
+
+        private static bool IsAddressInUseException(Exception exception)
+        {
+            for (var current = exception; current is not null; current = current.InnerException)
+            {
+                if (current is SocketException socketException && socketException.SocketErrorCode == SocketError.AddressAlreadyInUse)
+                    return true;
+
+                if (current is IOException ioException &&
+                    ioException.Message?.IndexOf("address already in use", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static string BuildServerUrl(int port)
+        {
+            return $"http://127.0.0.1:{port}{DefaultPath}";
         }
     }
 }

@@ -26,6 +26,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
         private readonly IScriptSecurityPolicy scriptSecurityPolicy;
         private readonly IEditorScriptExecutor editorScriptExecutor;
         private readonly IEditorDocumentManager editorDocumentManager;
+        private readonly IMcpToolAuthorizationService mcpToolAuthorizationService;
         private ScriptRunResult lastResult;
 
         private sealed class InternalBuildResult
@@ -39,12 +40,14 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             IRuntimeEditorContextProvider editorContextProvider,
             IScriptSecurityPolicy scriptSecurityPolicy,
             IEditorScriptExecutor editorScriptExecutor,
-            IEditorDocumentManager editorDocumentManager)
+            IEditorDocumentManager editorDocumentManager,
+            IMcpToolAuthorizationService mcpToolAuthorizationService)
         {
             this.editorContextProvider = editorContextProvider;
             this.scriptSecurityPolicy = scriptSecurityPolicy;
             this.editorScriptExecutor = editorScriptExecutor;
             this.editorDocumentManager = editorDocumentManager;
+            this.mcpToolAuthorizationService = mcpToolAuthorizationService;
         }
 
         public ScriptRunResult GetLastResult()
@@ -93,8 +96,12 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
         private async Task<ScriptRunResult> RunOnEditorCoreAsync(FumenVisualEditorViewModel editor, string editorId, ScriptRunRequest request, bool requireActiveEditor, CancellationToken cancellationToken)
         {
             request ??= new ScriptRunRequest();
-
-            if (request.RequireConfirmation && !await ConfirmExecutionAsync(editor, request, cancellationToken))
+            if (request.RequireConfirmation && !await mcpToolAuthorizationService.EnsureAuthorizedAsync(
+                requireActiveEditor ? "script.run_current_editor" : "script.run_editor",
+                request.RequestedBy,
+                request.ClientId,
+                BuildScriptRequestPreview(editor, request),
+                cancellationToken))
                 return CacheResult(CreateRunFailure("USER_CONFIRMATION_REQUIRED", "Script execution was cancelled by user confirmation.", editorId, GetTransactionName(request)));
 
             var buildResult = await BuildInternalAsync(new ScriptBuildRequest
@@ -337,33 +344,14 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             }
         }
 
-        private async Task<bool> ConfirmExecutionAsync(FumenVisualEditorViewModel editor, ScriptRunRequest request, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
-            if (dispatcher.CheckAccess())
-                return ConfirmExecutionCore(editor, request);
-
-            return await dispatcher.InvokeAsync(() => ConfirmExecutionCore(editor, request)).Task;
-        }
-
-        private static bool ConfirmExecutionCore(FumenVisualEditorViewModel editor, ScriptRunRequest request)
+        private static string BuildScriptRequestPreview(FumenVisualEditorViewModel editor, ScriptRunRequest request)
         {
             var preview = request?.ScriptText ?? string.Empty;
             preview = preview.Replace("\r\n", "\n");
             if (preview.Length > 400)
                 preview = preview[..400] + Environment.NewLine + "...";
 
-            var requestedBy = string.IsNullOrWhiteSpace(request?.RequestedBy) ? default : request.RequestedBy.Trim();
-
-            var message = $"About to execute a runtime script on '{editor?.DisplayName ?? "Unknown"}'." +
-                          $"{Environment.NewLine}{Environment.NewLine}Transaction: {GetTransactionName(request)}" +
-                          $"{(string.IsNullOrWhiteSpace(requestedBy) ? string.Empty : $"{Environment.NewLine}Requested by: {requestedBy}")}" +
-                          $"{Environment.NewLine}{Environment.NewLine}Script preview:{Environment.NewLine}{preview}" +
-                          $"{Environment.NewLine}{Environment.NewLine}Continue?";
-
-            return MessageBox.Show(message, "Confirm MCP Script Execution", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK;
+            return $"Editor: {editor?.DisplayName ?? "Unknown"}{Environment.NewLine}Transaction: {GetTransactionName(request)}{Environment.NewLine}{Environment.NewLine}{preview}";
         }
 
         private ScriptRunResult CacheResult(ScriptRunResult result)
