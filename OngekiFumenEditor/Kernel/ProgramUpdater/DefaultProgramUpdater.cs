@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal class DefaultProgramUpdater : PropertyChangedBase, IProgramUpdater, ISchedulable
     {
-        private const string ApiEndPoint = "https://fumen.naominet.live";
+        private const string ApiEndPoint = "https://fumen.nageki-net.com";
 
         public bool HasNewVersion
         {
