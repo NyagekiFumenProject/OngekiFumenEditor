@@ -32,6 +32,8 @@ namespace OngekiFumenEditor.Kernel.MiscMenu
 		[Export]
 		public static MenuItemDefinition UsageWikiMenuItem = new CommandMenuItemDefinition<UsageWikiCommandDefinition>(HelpMenuGroup, 2);
 		[Export]
+		public static MenuItemDefinition CustomFumenListMenuItem = new CommandMenuItemDefinition<CustomFumenListCommandDefinition>(HelpMenuGroup, 3);
+		[Export]
 		public static MenuItemDefinition AboutMenuItem = new CommandMenuItemDefinition<AboutCommandDefinition>(AboutMenuGroup, 4);
 	}
 }

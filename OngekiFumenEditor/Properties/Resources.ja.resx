@@ -381,6 +381,9 @@
   <data name="CommandInterpolateAllWithXGridLimit" xml:space="preserve">
     <value>全曲線レーンを補完（XGridを制限）</value>
   </data>
+  <data name="CommandCustomFumenList" xml:space="preserve">
+    <value>自作譜面リスト</value>
+  </data>
   <data name="CommandOpenProjectUrl" xml:space="preserve">
     <value>プロジェクトURL</value>
   </data>

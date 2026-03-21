@@ -27,6 +27,13 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon
 		public override string Url => "https://github.com/NyagekiFumenProject/OngekiFumenEditor";
 	}
 
+	[CommandDefinition]
+	public class CustomFumenListCommandDefinition : OpenUrlCommonCommandDefinition
+	{
+		public override string NameOverride => "CustomFumenList";
+		public override string Text => Resources.ResourceManager.GetString("CommandCustomFumenList", Resources.Culture) ?? "Custom Fumen List";
+		public override string Url => "https://next.nageki-net.com/net/custom-fumen-list";
+	}
 
 	[CommandDefinition]
 	public class RequestIssueHelpCommandDefinition : OpenUrlCommonCommandDefinition

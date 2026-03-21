@@ -22,6 +22,9 @@ namespace OngekiFumenEditor.Kernel.MiscMenu.Commands.OpenUrlCommon
 	public class OpenProjectUrlCommonHandler : OpenUrlCommonHandler<OpenProjectUrlCommandDefinition> { }
 
 	[CommandHandler]
+	public class CustomFumenListCommonHandler : OpenUrlCommonHandler<CustomFumenListCommandDefinition> { }
+
+	[CommandHandler]
 	public class RequestIssueHelpCommonHandler : OpenUrlCommonHandler<RequestIssueHelpCommandDefinition> { }
 
 	[CommandHandler]

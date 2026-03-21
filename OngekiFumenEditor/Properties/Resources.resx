@@ -384,6 +384,9 @@
   <data name="CommandInterpolateAllWithXGridLimit" xml:space="preserve">
     <value>Interpolate all curved lanes with XGrid limit</value>
   </data>
+  <data name="CommandCustomFumenList" xml:space="preserve">
+    <value>Custom Fumen List</value>
+  </data>
   <data name="CommandOpenProjectUrl" xml:space="preserve">
     <value>Project URL</value>
   </data>

@@ -384,6 +384,9 @@
   <data name="CommandInterpolateAllWithXGridLimit" xml:space="preserve">
     <value>插值所有曲线轨道(XGrid限制)</value>
   </data>
+  <data name="CommandCustomFumenList" xml:space="preserve">
+    <value>自制谱列表</value>
+  </data>
   <data name="CommandOpenProjectUrl" xml:space="preserve">
     <value>项目网址</value>
   </data>
