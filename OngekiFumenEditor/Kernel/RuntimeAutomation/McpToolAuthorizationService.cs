@@ -1,8 +1,10 @@
+using Caliburn.Micro;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using OngekiFumenEditor.Kernel.RuntimeAutomation.ViewModels;
 using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Kernel.RuntimeAutomation
@@ -16,12 +18,14 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
         private readonly record struct AuthorizationDecision(bool Approved, bool RememberApproval, bool BackupFumenBeforeExecution);
 
         private readonly IMcpClientAuthorizationManager mcpClientAuthorizationManager;
+        private readonly IWindowManager windowManager;
         private volatile bool backupFumenBeforeScriptExecutionEnabled;
 
         [ImportingConstructor]
-        public McpToolAuthorizationService(IMcpClientAuthorizationManager mcpClientAuthorizationManager)
+        public McpToolAuthorizationService(IMcpClientAuthorizationManager mcpClientAuthorizationManager, IWindowManager windowManager)
         {
             this.mcpClientAuthorizationManager = mcpClientAuthorizationManager;
+            this.windowManager = windowManager;
         }
 
         public async Task<McpToolAuthorizationResult> EnsureAuthorizedAsync(string toolName, string requestedBy, string clientId, string requestPreview, bool allowInteractivePrompt = true, CancellationToken cancellationToken = default)
@@ -86,7 +90,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             var dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
             if (dispatcher.CheckAccess())
             {
-                var decision = ConfirmCore(toolName, requestedBy, clientId, requestPreview);
+                var decision = await ConfirmCoreAsync(toolName, requestedBy, clientId, requestPreview);
                 LogAuthorizationDecision(toolName, requestedBy, clientId, registrationInfo?.IdentityKey, decision);
                 return decision.Approved
                     ? new McpToolAuthorizationResult
@@ -97,7 +101,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
                     : McpToolAuthorizationResult.Denied("USER_CONFIRMATION_REQUIRED", "Tool execution was cancelled by user confirmation.", decision.BackupFumenBeforeExecution);
             }
 
-            var dispatcherDecision = await dispatcher.InvokeAsync(() => ConfirmCore(toolName, requestedBy, clientId, requestPreview)).Task;
+            var dispatcherDecision = await dispatcher.InvokeAsync(() => ConfirmCoreAsync(toolName, requestedBy, clientId, requestPreview)).Task.Unwrap();
             LogAuthorizationDecision(toolName, requestedBy, clientId, registrationInfo?.IdentityKey, dispatcherDecision);
             return dispatcherDecision.Approved
                 ? new McpToolAuthorizationResult
@@ -108,16 +112,11 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
                 : McpToolAuthorizationResult.Denied("USER_CONFIRMATION_REQUIRED", "Tool execution was cancelled by user confirmation.", dispatcherDecision.BackupFumenBeforeExecution);
         }
 
-        private AuthorizationDecision ConfirmCore(string toolName, string requestedBy, string clientId, string requestPreview)
+        private async Task<AuthorizationDecision> ConfirmCoreAsync(string toolName, string requestedBy, string clientId, string requestPreview)
         {
             var isScriptExecutionTool = IsScriptExecutionTool(toolName);
-            var dialog = new McpScriptConfirmationDialog(toolName, requestedBy, clientId, requestPreview, isScriptExecutionTool, backupFumenBeforeScriptExecutionEnabled);
-
-            var mainWindow = Application.Current?.MainWindow;
-            if (mainWindow is not null && mainWindow != dialog)
-                dialog.Owner = mainWindow;
-
-            var approved = dialog.ShowDialog() == true;
+            var dialog = new McpScriptConfirmationDialogViewModel(toolName, requestedBy, clientId, requestPreview, isScriptExecutionTool, backupFumenBeforeScriptExecutionEnabled);
+            var approved = await windowManager.ShowDialogAsync(dialog) == true;
             var rememberApproval = approved && dialog.RememberApproval;
             if (rememberApproval)
                 mcpClientAuthorizationManager.RememberExecutionApproval(requestedBy, clientId);
