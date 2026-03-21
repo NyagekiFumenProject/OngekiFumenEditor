@@ -31,14 +31,14 @@
                     IsChecked="{Binding Setting.DisableShowSplashScreenAfterBoot}" />
                 <CheckBox
                     Margin="10,0,10,10"
-                    Content="Show console window"
+                    Content="{markup:Translate [ShowConsoleWindowInGUIMode]}"
                     IsChecked="{Binding Setting.ShowConsoleWindowInGUIMode}" />
                 <CheckBox
                     Margin="10,0,10,10"
-                    Content="Enable MCP server"
+                    Content="{markup:Translate [EnableMcpServerInGUIMode]}"
                     IsChecked="{Binding Setting.EnableMcpServerInGUIMode}" />
                 <StackPanel Margin="10,0,10,10" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="MCP listen port" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [McpServerListenPort]}" />
                     <TextBox
                         Width="100"
                         Margin="10,0,0,0"
@@ -47,12 +47,12 @@
                 </StackPanel>
                 <CheckBox
                     Margin="10,0,10,10"
-                    Content="Allow anonymous MCP client usage"
+                    Content="{markup:Translate [AllowAnonymousMcpClientUsage]}"
                     IsChecked="{Binding Setting.AllowAnonymousMcpClientUsage}" />
                 <TextBlock
                     Margin="10,0,10,10"
                     Foreground="DarkSlateGray"
-                    Text="MCP menu visibility and auto-start changes apply after restart. Port changes apply on the next server start. When anonymous MCP usage is disabled, clients must provide clientId or requestedBy."
+                    Text="{markup:Translate [McpProgramSettingsNote]}"
                     TextWrapping="Wrap" />
             </StackPanel>
         </GroupBox>

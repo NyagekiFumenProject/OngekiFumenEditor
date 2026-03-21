@@ -2277,4 +2277,127 @@
   <data name="BulletPalleteDisplayName" xml:space="preserve">
     <value>子弹模板</value>
   </data>
+  <data name="ShowConsoleWindowInGUIMode" xml:space="preserve">
+    <value>显示控制台窗口</value>
+  </data>
+  <data name="EnableMcpServerInGUIMode" xml:space="preserve">
+    <value>启用 MCP 服务器</value>
+  </data>
+  <data name="McpServerListenPort" xml:space="preserve">
+    <value>MCP 监听端口</value>
+  </data>
+  <data name="AllowAnonymousMcpClientUsage" xml:space="preserve">
+    <value>允许匿名 MCP 客户端使用</value>
+  </data>
+  <data name="McpProgramSettingsNote" xml:space="preserve">
+    <value>MCP 菜单显示和自动启动的改动会在重启后生效。端口改动会在下次服务器启动时生效。禁用匿名 MCP 使用后，客户端必须提供 clientId 或 requestedBy。</value>
+  </data>
+  <data name="McpMenuTitle" xml:space="preserve">
+    <value>MCP</value>
+  </data>
+  <data name="McpServerUrlMenuText" xml:space="preserve">
+    <value>服务器 URL</value>
+  </data>
+  <data name="McpServerUrlMenuToolTip" xml:space="preserve">
+    <value>显示当前 MCP 服务器 URL。</value>
+  </data>
+  <data name="McpStartServerMenuText" xml:space="preserve">
+    <value>启动 MCP 服务器</value>
+  </data>
+  <data name="McpStartServerMenuToolTip" xml:space="preserve">
+    <value>启动 MCP 服务器。</value>
+  </data>
+  <data name="McpStopServerMenuText" xml:space="preserve">
+    <value>停止 MCP 服务器</value>
+  </data>
+  <data name="McpStopServerMenuToolTip" xml:space="preserve">
+    <value>停止 MCP 服务器。</value>
+  </data>
+  <data name="McpConnectedClientsMenuText" xml:space="preserve">
+    <value>已连接使用的客户端</value>
+  </data>
+  <data name="McpConnectedClientsMenuToolTip" xml:space="preserve">
+    <value>列出使用过 MCP 工具的客户端，并可撤销其授权。</value>
+  </data>
+  <data name="McpServerUrlStatusFormat" xml:space="preserve">
+    <value>服务器 URL：{0}{1}</value>
+  </data>
+  <data name="McpServerStoppedSuffix" xml:space="preserve">
+    <value>（已停止）</value>
+  </data>
+  <data name="McpCopyServerUrlToolTip" xml:space="preserve">
+    <value>点击复制当前 MCP 服务器 URL。</value>
+  </data>
+  <data name="McpCopyServerUrlFailed" xml:space="preserve">
+    <value>复制 MCP 服务器 URL 失败。{0}{0}{1}</value>
+  </data>
+  <data name="McpStartServerFailed" xml:space="preserve">
+    <value>启动 MCP 服务器失败。{0}{0}{1}</value>
+  </data>
+  <data name="McpStopServerFailed" xml:space="preserve">
+    <value>停止 MCP 服务器失败。{0}{0}{1}</value>
+  </data>
+  <data name="McpConnectedClientsMenuTextFormat" xml:space="preserve">
+    <value>已连接使用的客户端 ({0})</value>
+  </data>
+  <data name="McpNone" xml:space="preserve">
+    <value>（无）</value>
+  </data>
+  <data name="McpClientAuthorizedStatus" xml:space="preserve">
+    <value>[已授权]</value>
+  </data>
+  <data name="McpClientNotAuthorizedStatus" xml:space="preserve">
+    <value>[未授权]</value>
+  </data>
+  <data name="McpClientNotAuthorizedToolTip" xml:space="preserve">
+    <value>此客户端当前未获准调用 MCP 工具。</value>
+  </data>
+  <data name="McpClientRevokeAuthorizationToolTipFormat" xml:space="preserve">
+    <value>点击撤销 {0} 的 MCP 工具授权。</value>
+  </data>
+  <data name="McpAnonymousClient" xml:space="preserve">
+    <value>匿名客户端</value>
+  </data>
+  <data name="McpUnknownIdentityKey" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="McpRevokeAuthorizationConfirmFormat" xml:space="preserve">
+    <value>要撤销该客户端的 MCP 工具授权吗？{0}{0}客户端：{1}{0}身份标识：{2}</value>
+  </data>
+  <data name="McpConfirmToolRequestTitle" xml:space="preserve">
+    <value>确认 MCP 工具请求</value>
+  </data>
+  <data name="McpConfirmToolRequestIntroFormat" xml:space="preserve">
+    <value>即将允许 MCP 工具调用“{0}”。</value>
+  </data>
+  <data name="McpBackupFumenBeforeExecution" xml:space="preserve">
+    <value>每次代码执行前先备份谱面文件</value>
+  </data>
+  <data name="McpBackupFumenHintForNonScriptTool" xml:space="preserve">
+    <value>此选项会应用到后续的 script.run_* 代码执行请求。</value>
+  </data>
+  <data name="McpAllow" xml:space="preserve">
+    <value>允许</value>
+  </data>
+  <data name="McpConfirmationToolLabel" xml:space="preserve">
+    <value>工具</value>
+  </data>
+  <data name="McpConfirmationClientLabel" xml:space="preserve">
+    <value>客户端</value>
+  </data>
+  <data name="McpConfirmationRequestedByLabel" xml:space="preserve">
+    <value>请求来源</value>
+  </data>
+  <data name="McpConfirmationClientIdLabel" xml:space="preserve">
+    <value>客户端 ID</value>
+  </data>
+  <data name="McpConfirmationReviewHint" xml:space="preserve">
+    <value>请先检查下方请求详情，再决定是否继续。</value>
+  </data>
+  <data name="McpRememberApprovalWithIdentity" xml:space="preserve">
+    <value>在本次程序运行期间默认允许此 MCP 客户端的后续请求</value>
+  </data>
+  <data name="McpRememberApprovalAnonymous" xml:space="preserve">
+    <value>在本次程序运行期间默认允许未提供客户端标识的 MCP 请求</value>
+  </data>
 </root>

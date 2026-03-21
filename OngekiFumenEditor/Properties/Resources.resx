@@ -2298,4 +2298,127 @@
   <data name="DeselectItemsOfSelectedType" xml:space="preserve">
     <value>Deselect objects of selected type(s)</value>
   </data>
+  <data name="ShowConsoleWindowInGUIMode" xml:space="preserve">
+    <value>Show console window</value>
+  </data>
+  <data name="EnableMcpServerInGUIMode" xml:space="preserve">
+    <value>Enable MCP server</value>
+  </data>
+  <data name="McpServerListenPort" xml:space="preserve">
+    <value>MCP listen port</value>
+  </data>
+  <data name="AllowAnonymousMcpClientUsage" xml:space="preserve">
+    <value>Allow anonymous MCP client usage</value>
+  </data>
+  <data name="McpProgramSettingsNote" xml:space="preserve">
+    <value>MCP menu visibility and auto-start changes apply after restart. Port changes apply on the next server start. When anonymous MCP usage is disabled, clients must provide clientId or requestedBy.</value>
+  </data>
+  <data name="McpMenuTitle" xml:space="preserve">
+    <value>MCP</value>
+  </data>
+  <data name="McpServerUrlMenuText" xml:space="preserve">
+    <value>Server URL</value>
+  </data>
+  <data name="McpServerUrlMenuToolTip" xml:space="preserve">
+    <value>Show the current MCP server URL.</value>
+  </data>
+  <data name="McpStartServerMenuText" xml:space="preserve">
+    <value>Start MCP Server</value>
+  </data>
+  <data name="McpStartServerMenuToolTip" xml:space="preserve">
+    <value>Start the MCP server.</value>
+  </data>
+  <data name="McpStopServerMenuText" xml:space="preserve">
+    <value>Stop MCP Server</value>
+  </data>
+  <data name="McpStopServerMenuToolTip" xml:space="preserve">
+    <value>Stop the MCP server.</value>
+  </data>
+  <data name="McpConnectedClientsMenuText" xml:space="preserve">
+    <value>Connected Clients</value>
+  </data>
+  <data name="McpConnectedClientsMenuToolTip" xml:space="preserve">
+    <value>List MCP clients that have used MCP tools and revoke their authorization.</value>
+  </data>
+  <data name="McpServerUrlStatusFormat" xml:space="preserve">
+    <value>Server URL: {0}{1}</value>
+  </data>
+  <data name="McpServerStoppedSuffix" xml:space="preserve">
+    <value> (Stopped)</value>
+  </data>
+  <data name="McpCopyServerUrlToolTip" xml:space="preserve">
+    <value>Click to copy the current MCP server URL.</value>
+  </data>
+  <data name="McpCopyServerUrlFailed" xml:space="preserve">
+    <value>Failed to copy MCP server URL.{0}{0}{1}</value>
+  </data>
+  <data name="McpStartServerFailed" xml:space="preserve">
+    <value>Failed to start MCP server.{0}{0}{1}</value>
+  </data>
+  <data name="McpStopServerFailed" xml:space="preserve">
+    <value>Failed to stop MCP server.{0}{0}{1}</value>
+  </data>
+  <data name="McpConnectedClientsMenuTextFormat" xml:space="preserve">
+    <value>Connected Clients ({0})</value>
+  </data>
+  <data name="McpNone" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="McpClientAuthorizedStatus" xml:space="preserve">
+    <value>[Authorized]</value>
+  </data>
+  <data name="McpClientNotAuthorizedStatus" xml:space="preserve">
+    <value>[Not Authorized]</value>
+  </data>
+  <data name="McpClientNotAuthorizedToolTip" xml:space="preserve">
+    <value>This client is currently not authorized to call MCP tools.</value>
+  </data>
+  <data name="McpClientRevokeAuthorizationToolTipFormat" xml:space="preserve">
+    <value>Click to revoke MCP tool authorization for {0}.</value>
+  </data>
+  <data name="McpAnonymousClient" xml:space="preserve">
+    <value>Anonymous Client</value>
+  </data>
+  <data name="McpUnknownIdentityKey" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="McpRevokeAuthorizationConfirmFormat" xml:space="preserve">
+    <value>Revoke MCP tool authorization for this client?{0}{0}Client: {1}{0}Identity Key: {2}</value>
+  </data>
+  <data name="McpConfirmToolRequestTitle" xml:space="preserve">
+    <value>Confirm MCP Tool Request</value>
+  </data>
+  <data name="McpConfirmToolRequestIntroFormat" xml:space="preserve">
+    <value>About to allow MCP tool call '{0}'.</value>
+  </data>
+  <data name="McpBackupFumenBeforeExecution" xml:space="preserve">
+    <value>Back up the fumen file before each code execution</value>
+  </data>
+  <data name="McpBackupFumenHintForNonScriptTool" xml:space="preserve">
+    <value>This option will apply to subsequent script.run_* code execution requests.</value>
+  </data>
+  <data name="McpAllow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="McpConfirmationToolLabel" xml:space="preserve">
+    <value>Tool</value>
+  </data>
+  <data name="McpConfirmationClientLabel" xml:space="preserve">
+    <value>Client</value>
+  </data>
+  <data name="McpConfirmationRequestedByLabel" xml:space="preserve">
+    <value>Requested by</value>
+  </data>
+  <data name="McpConfirmationClientIdLabel" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="McpConfirmationReviewHint" xml:space="preserve">
+    <value>Review the request details below before continuing.</value>
+  </data>
+  <data name="McpRememberApprovalWithIdentity" xml:space="preserve">
+    <value>Default-allow subsequent requests from this MCP client during this app session</value>
+  </data>
+  <data name="McpRememberApprovalAnonymous" xml:space="preserve">
+    <value>Default-allow subsequent anonymous MCP requests during this app session</value>
+  </data>
 </root>

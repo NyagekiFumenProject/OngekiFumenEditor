@@ -1618,4 +1618,127 @@
   <data name="BulletPalleteDisplayName" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
+  <data name="ShowConsoleWindowInGUIMode" xml:space="preserve">
+    <value>コンソールウィンドウを表示</value>
+  </data>
+  <data name="EnableMcpServerInGUIMode" xml:space="preserve">
+    <value>MCP サーバーを有効化</value>
+  </data>
+  <data name="McpServerListenPort" xml:space="preserve">
+    <value>MCP リッスンポート</value>
+  </data>
+  <data name="AllowAnonymousMcpClientUsage" xml:space="preserve">
+    <value>匿名 MCP クライアントの利用を許可</value>
+  </data>
+  <data name="McpProgramSettingsNote" xml:space="preserve">
+    <value>MCP メニュー表示と自動起動の変更は再起動後に反映されます。ポート変更は次回サーバー起動時に反映されます。匿名 MCP 利用を無効にした場合、クライアントは clientId または requestedBy を指定する必要があります。</value>
+  </data>
+  <data name="McpMenuTitle" xml:space="preserve">
+    <value>MCP</value>
+  </data>
+  <data name="McpServerUrlMenuText" xml:space="preserve">
+    <value>サーバー URL</value>
+  </data>
+  <data name="McpServerUrlMenuToolTip" xml:space="preserve">
+    <value>現在の MCP サーバー URL を表示します。</value>
+  </data>
+  <data name="McpStartServerMenuText" xml:space="preserve">
+    <value>MCP サーバーを開始</value>
+  </data>
+  <data name="McpStartServerMenuToolTip" xml:space="preserve">
+    <value>MCP サーバーを開始します。</value>
+  </data>
+  <data name="McpStopServerMenuText" xml:space="preserve">
+    <value>MCP サーバーを停止</value>
+  </data>
+  <data name="McpStopServerMenuToolTip" xml:space="preserve">
+    <value>MCP サーバーを停止します。</value>
+  </data>
+  <data name="McpConnectedClientsMenuText" xml:space="preserve">
+    <value>接続済みクライアント</value>
+  </data>
+  <data name="McpConnectedClientsMenuToolTip" xml:space="preserve">
+    <value>MCP ツールを使用したクライアントを一覧表示し、認可を取り消せます。</value>
+  </data>
+  <data name="McpServerUrlStatusFormat" xml:space="preserve">
+    <value>サーバー URL: {0}{1}</value>
+  </data>
+  <data name="McpServerStoppedSuffix" xml:space="preserve">
+    <value> （停止中）</value>
+  </data>
+  <data name="McpCopyServerUrlToolTip" xml:space="preserve">
+    <value>現在の MCP サーバー URL をクリックしてコピーします。</value>
+  </data>
+  <data name="McpCopyServerUrlFailed" xml:space="preserve">
+    <value>MCP サーバー URL のコピーに失敗しました。{0}{0}{1}</value>
+  </data>
+  <data name="McpStartServerFailed" xml:space="preserve">
+    <value>MCP サーバーの起動に失敗しました。{0}{0}{1}</value>
+  </data>
+  <data name="McpStopServerFailed" xml:space="preserve">
+    <value>MCP サーバーの停止に失敗しました。{0}{0}{1}</value>
+  </data>
+  <data name="McpConnectedClientsMenuTextFormat" xml:space="preserve">
+    <value>接続済みクライアント ({0})</value>
+  </data>
+  <data name="McpNone" xml:space="preserve">
+    <value>（なし）</value>
+  </data>
+  <data name="McpClientAuthorizedStatus" xml:space="preserve">
+    <value>[認可済み]</value>
+  </data>
+  <data name="McpClientNotAuthorizedStatus" xml:space="preserve">
+    <value>[未認可]</value>
+  </data>
+  <data name="McpClientNotAuthorizedToolTip" xml:space="preserve">
+    <value>このクライアントは現在 MCP ツールの呼び出しを許可されていません。</value>
+  </data>
+  <data name="McpClientRevokeAuthorizationToolTipFormat" xml:space="preserve">
+    <value>{0} の MCP ツール認可を取り消します。</value>
+  </data>
+  <data name="McpAnonymousClient" xml:space="preserve">
+    <value>匿名クライアント</value>
+  </data>
+  <data name="McpUnknownIdentityKey" xml:space="preserve">
+    <value>不明</value>
+  </data>
+  <data name="McpRevokeAuthorizationConfirmFormat" xml:space="preserve">
+    <value>このクライアントの MCP ツール認可を取り消しますか？{0}{0}クライアント: {1}{0}識別キー: {2}</value>
+  </data>
+  <data name="McpConfirmToolRequestTitle" xml:space="preserve">
+    <value>MCP ツール要求の確認</value>
+  </data>
+  <data name="McpConfirmToolRequestIntroFormat" xml:space="preserve">
+    <value>MCP ツール呼び出し「{0}」を許可しようとしています。</value>
+  </data>
+  <data name="McpBackupFumenBeforeExecution" xml:space="preserve">
+    <value>コード実行前に毎回譜面ファイルをバックアップする</value>
+  </data>
+  <data name="McpBackupFumenHintForNonScriptTool" xml:space="preserve">
+    <value>この設定は後続の script.run_* コード実行要求に適用されます。</value>
+  </data>
+  <data name="McpAllow" xml:space="preserve">
+    <value>許可</value>
+  </data>
+  <data name="McpConfirmationToolLabel" xml:space="preserve">
+    <value>ツール</value>
+  </data>
+  <data name="McpConfirmationClientLabel" xml:space="preserve">
+    <value>クライアント</value>
+  </data>
+  <data name="McpConfirmationRequestedByLabel" xml:space="preserve">
+    <value>要求元</value>
+  </data>
+  <data name="McpConfirmationClientIdLabel" xml:space="preserve">
+    <value>クライアント ID</value>
+  </data>
+  <data name="McpConfirmationReviewHint" xml:space="preserve">
+    <value>続行する前に、以下の要求内容を確認してください。</value>
+  </data>
+  <data name="McpRememberApprovalWithIdentity" xml:space="preserve">
+    <value>このアプリ実行中はこの MCP クライアントからの後続要求を既定で許可する</value>
+  </data>
+  <data name="McpRememberApprovalAnonymous" xml:space="preserve">
+    <value>このアプリ実行中は識別情報のない MCP 要求を既定で許可する</value>
+  </data>
 </root>

@@ -1,6 +1,7 @@
 using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
 using OngekiFumenEditor.Kernel.RuntimeAutomation;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,14 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Kernel.Mcp.Commands
 {
+    internal static class McpMenuCommandHandlerResources
+    {
+        public static string GetString(string key, string fallback)
+        {
+            return Resources.ResourceManager.GetString(key) ?? fallback;
+        }
+    }
+
     [CommandHandler]
     public sealed class McpServerUrlCommandHandler : CommandHandlerBase<McpServerUrlCommandDefinition>
     {
@@ -25,8 +34,11 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
         public override void Update(Command command)
         {
             command.Enabled = true;
-            command.Text = $"Server URL: {mcpServerHost.ServerUrl}{(mcpServerHost.IsRunning ? string.Empty : " (Stopped)")}";
-            command.ToolTip = "Click to copy the current MCP server URL.";
+            command.Text = string.Format(
+                McpMenuCommandHandlerResources.GetString("McpServerUrlStatusFormat", "Server URL: {0}{1}"),
+                mcpServerHost.ServerUrl,
+                mcpServerHost.IsRunning ? string.Empty : McpMenuCommandHandlerResources.GetString("McpServerStoppedSuffix", " (Stopped)"));
+            command.ToolTip = McpMenuCommandHandlerResources.GetString("McpCopyServerUrlToolTip", "Click to copy the current MCP server URL.");
         }
 
         public override Task Run(Command command)
@@ -39,7 +51,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
             catch (Exception ex)
             {
                 Log.LogError($"Failed to copy MCP server URL: {ex}");
-                MessageBox.Show($"Failed to copy MCP server URL.{Environment.NewLine}{Environment.NewLine}{ex.Message}", "MCP", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(McpMenuCommandHandlerResources.GetString("McpCopyServerUrlFailed", "Failed to copy MCP server URL.{0}{0}{1}"), Environment.NewLine, ex.Message), McpMenuCommandHandlerResources.GetString("McpMenuTitle", "MCP"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             return TaskUtility.Completed;
@@ -71,7 +83,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
             catch (Exception ex)
             {
                 Log.LogError($"Failed to start MCP server from menu: {ex}");
-                MessageBox.Show($"Failed to start MCP server.{Environment.NewLine}{Environment.NewLine}{ex.Message}", "MCP", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(McpMenuCommandHandlerResources.GetString("McpStartServerFailed", "Failed to start MCP server.{0}{0}{1}"), Environment.NewLine, ex.Message), McpMenuCommandHandlerResources.GetString("McpMenuTitle", "MCP"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
@@ -101,7 +113,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
             catch (Exception ex)
             {
                 Log.LogError($"Failed to stop MCP server from menu: {ex}");
-                MessageBox.Show($"Failed to stop MCP server.{Environment.NewLine}{Environment.NewLine}{ex.Message}", "MCP", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(McpMenuCommandHandlerResources.GetString("McpStopServerFailed", "Failed to stop MCP server.{0}{0}{1}"), Environment.NewLine, ex.Message), McpMenuCommandHandlerResources.GetString("McpMenuTitle", "MCP"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
@@ -121,7 +133,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
         {
             var clients = mcpClientAuthorizationManager.GetKnownClients();
             command.Enabled = clients.Any();
-            command.Text = $"\u5df2\u8fde\u63a5\u4f7f\u7528\u7684\u5ba2\u6237\u7aef ({clients.Count})";
+            command.Text = string.Format(McpMenuCommandHandlerResources.GetString("McpConnectedClientsMenuTextFormat", "Connected Clients ({0})"), clients.Count);
         }
 
         public override Task Run(Command command)
@@ -148,7 +160,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
             {
                 commands.Add(new Command(command.CommandDefinition)
                 {
-                    Text = "(none)",
+                    Text = McpMenuCommandHandlerResources.GetString("McpNone", "(none)"),
                     Enabled = false,
                 });
                 return;
@@ -220,7 +232,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
 
         private static string BuildClientMenuText(McpClientRegistrationInfo client)
         {
-            var status = client.IsExecutionApproved ? "[Authorized]" : "[Not Authorized]";
+            var status = client.IsExecutionApproved ? McpMenuCommandHandlerResources.GetString("McpClientAuthorizedStatus", "[Authorized]") : McpMenuCommandHandlerResources.GetString("McpClientNotAuthorizedStatus", "[Not Authorized]");
             var displayName = BuildClientDisplayName(client);
             return $"{status} {displayName}";
         }
@@ -228,14 +240,14 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
         private static string BuildClientToolTip(McpClientRegistrationInfo client)
         {
             if (!client.IsExecutionApproved)
-                return "This client is currently not authorized to call MCP tools.";
+                return McpMenuCommandHandlerResources.GetString("McpClientNotAuthorizedToolTip", "This client is currently not authorized to call MCP tools.");
 
-            return $"Click to revoke MCP tool authorization for {BuildClientDisplayName(client)}.";
+            return string.Format(McpMenuCommandHandlerResources.GetString("McpClientRevokeAuthorizationToolTipFormat", "Click to revoke MCP tool authorization for {0}."), BuildClientDisplayName(client));
         }
 
         private static string BuildClientDisplayName(McpClientRegistrationInfo client)
         {
-            var requestedBy = string.IsNullOrWhiteSpace(client?.RequestedBy) ? "Anonymous Client" : client.RequestedBy;
+            var requestedBy = string.IsNullOrWhiteSpace(client?.RequestedBy) ? McpMenuCommandHandlerResources.GetString("McpAnonymousClient", "Anonymous Client") : client.RequestedBy;
             if (string.IsNullOrWhiteSpace(client?.ClientId))
                 return requestedBy;
 
@@ -245,9 +257,9 @@ namespace OngekiFumenEditor.Kernel.Mcp.Commands
         private static bool ConfirmRevokeAuthorization(McpClientRegistrationInfo client)
         {
             var displayName = BuildClientDisplayName(client);
-            var identityKey = string.IsNullOrWhiteSpace(client?.IdentityKey) ? "Unknown" : client.IdentityKey;
-            var message = $"Revoke MCP tool authorization for this client?{Environment.NewLine}{Environment.NewLine}Client: {displayName}{Environment.NewLine}Identity Key: {identityKey}";
-            var result = MessageBox.Show(message, "MCP", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+            var identityKey = string.IsNullOrWhiteSpace(client?.IdentityKey) ? McpMenuCommandHandlerResources.GetString("McpUnknownIdentityKey", "Unknown") : client.IdentityKey;
+            var message = string.Format(McpMenuCommandHandlerResources.GetString("McpRevokeAuthorizationConfirmFormat", "Revoke MCP tool authorization for this client?{0}{0}Client: {1}{0}Identity Key: {2}"), Environment.NewLine, displayName, identityKey);
+            var result = MessageBox.Show(message, McpMenuCommandHandlerResources.GetString("McpMenuTitle", "MCP"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
             return result == MessageBoxResult.Yes;
         }
     }

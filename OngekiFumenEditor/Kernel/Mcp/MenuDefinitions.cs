@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
     public static class MenuDefinitions
     {
         [Export]
-        public static MenuDefinition McpMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 99998, "MCP");
+        public static MenuDefinition McpMenu = new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 99998, Resources.ResourceManager.GetString("McpMenuTitle") ?? "MCP");
 
         [Export]
         public static ExcludeMenuDefinition ExcludeMcpMenu = new ExcludeMenuDefinition(ProgramSetting.Default.EnableMcpServerInGUIMode ? null : McpMenu);
