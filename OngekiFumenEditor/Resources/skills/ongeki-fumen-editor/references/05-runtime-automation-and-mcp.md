@@ -21,6 +21,17 @@
 * `editor.get_current_summary` returns the most useful stable summary shape for assistants:
   editor id, display name, project path, fumen path, dirty/active flags, and lightweight object counts.
 
+## Current MCP Resource Surface
+
+* `Kernel/Mcp/SkillResources.cs` exposes built-in repo guidance as read-only MCP resources.
+* On connection, the server sends short discovery instructions that point clients at `skill://index`.
+* Packaged skill files are also registered as direct resources so clients can discover real URIs through `resources/list`, not only through resource templates.
+* The normal read flow is:
+  `skill://index` -> `skill://ongeki-fumen-editor/index` -> `skill://ongeki-fumen-editor/SKILL.md`.
+* Reference pages and agent metadata are then readable through URIs like:
+  `skill://ongeki-fumen-editor/references/05-runtime-automation-and-mcp.md` and `skill://ongeki-fumen-editor/agents/openai.yaml`.
+* This resource surface is guidance-only. Live editor state and script execution still flow through tools and `Kernel/RuntimeAutomation/`.
+
 ## Editor Context Lane
 
 * `RuntimeEditorContextProvider` converts `FumenVisualEditorViewModel` instances into `EditorContextInfo`.

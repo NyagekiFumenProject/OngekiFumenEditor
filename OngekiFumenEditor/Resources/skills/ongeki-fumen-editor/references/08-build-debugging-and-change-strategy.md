@@ -33,4 +33,4 @@
 
 ## Resource-Specific Note
 
-* Files under `Resources/skills/` are currently copied to the output directory as loose files. If that packaging behavior changes, update both the project file and this skill reference set.
+* Files under `Resources/skills/` are currently copied to the output directory as loose files and are also exposed by the MCP host as read-only `skill://...` resources. If that packaging or host behavior changes, update both the project file and this skill reference set.

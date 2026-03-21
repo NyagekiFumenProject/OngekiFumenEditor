@@ -23,15 +23,17 @@ namespace OngekiFumenEditor.Kernel.Mcp
 
         private readonly EditorTools editorTools;
         private readonly ScriptTools scriptTools;
+        private readonly SkillResources skillResources;
         private readonly SemaphoreSlim lifecycleLock = new SemaphoreSlim(1, 1);
         private WebApplication webApplication;
         private string runningEndpoint;
 
         [ImportingConstructor]
-        public McpServerHost(EditorTools editorTools, ScriptTools scriptTools)
+        public McpServerHost(EditorTools editorTools, ScriptTools scriptTools, SkillResources skillResources)
         {
             this.editorTools = editorTools;
             this.scriptTools = scriptTools;
+            this.skillResources = skillResources;
         }
 
         public bool IsRunning { get; private set; }
@@ -209,10 +211,15 @@ namespace OngekiFumenEditor.Kernel.Mcp
             builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
 
             builder.Services
-                .AddMcpServer()
+                .AddMcpServer(options =>
+                {
+                    options.ServerInstructions = skillResources.BuildServerInstructions();
+                })
                 .WithHttpTransport()
                 .WithTools<EditorTools>(editorTools)
-                .WithTools<ScriptTools>(scriptTools);
+                .WithTools<ScriptTools>(scriptTools)
+                .WithResources(skillResources.BuildDirectResources())
+                .WithResources<SkillResources>(skillResources);
 
             var app = builder.Build();
             app.MapMcp(DefaultPath);

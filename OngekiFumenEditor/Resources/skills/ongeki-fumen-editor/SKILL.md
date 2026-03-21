@@ -82,4 +82,4 @@ When reviewing changes in this repo, prioritize:
 * Expect `.nyagekiProj` save/load to normalize relative paths and use temp-file copy strategies.
 * If a change affects user-facing strings or settings, update the relevant `.resx`, `.settings`, and setting page view/viewmodel together.
 * If a change adds files under `Resources`, verify whether they must be `Resource`, `EmbeddedResource`, or copied as `None` in `OngekiFumenEditor.csproj`.
-* Files under `Resources/skills/` are currently copied to the build output as loose files. Treat them as documentation assets, not embedded resources, unless the project file changes again.
+* Files under `Resources/skills/` are currently copied to the build output as loose files and exposed to MCP clients as read-only `skill://...` resources. Treat them as documentation assets, not embedded resources, unless the project file or MCP host wiring changes again.
