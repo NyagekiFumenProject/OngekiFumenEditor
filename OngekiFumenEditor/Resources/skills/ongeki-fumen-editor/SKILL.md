@@ -13,6 +13,8 @@ Primary entry for the reference set:
 
 ## Quick Routing
 
+* Need source code but only have the skill package or partial local files:
+  read `references/20-remote-source-access-and-code-lookup.md`.
 * Startup, plugin loading, shell, GUI/CMD behavior, IPC, or app lifetime:
   read `references/01-bootstrap-composition-and-lifetimes.md`.
 * Chart object definitions, object counts, relationship wiring, or editing primitives:
@@ -36,6 +38,7 @@ Primary entry for the reference set:
 
 1. Route the task before editing.
 * Read `references/00-repository-map.md` if the target subsystem is unclear.
+* If the local checkout is missing, partial, or not exposed to the current agent, use `references/20-remote-source-access-and-code-lookup.md` to open the canonical GitHub source tree first.
 * Then load only the pages needed for the current lane.
 
 2. Preserve repository wiring before introducing new abstractions.

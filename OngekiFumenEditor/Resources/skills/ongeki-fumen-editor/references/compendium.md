@@ -26,6 +26,7 @@ Load only the pages needed for the current task. This repository is large, and m
 17. Common object property index: `17-common-object-property-index.md`
 18. Legacy script authoring and debugging: `18-legacy-script-authoring-and-debugging.md`
 19. Selection, clipboard, and viewport operations: `19-selection-clipboard-and-viewport-operations.md`
+20. Remote source access and code lookup: `20-remote-source-access-and-code-lookup.md`
 
 ## Recommended Entry Paths
 
@@ -34,6 +35,7 @@ Load only the pages needed for the current task. This repository is large, and m
 * Editor feature, tool window, toolbox, property browser, or interaction change: `04-fumen-visual-editor-and-modules.md`
 * MCP tool, runtime script host, security policy, or editor summaries: `05-runtime-automation-and-mcp.md`
 * Use scripts to satisfy a live chart-editing request: `10-script-execution-surfaces.md`, `11-script-api-cheatsheet.md`, `12-script-task-recipes.md`, `13-script-object-type-index.md`, `14-time-grid-xgrid-and-navigation.md`, `15-runtime-script-safety-and-undo-patterns.md`, `16-request-routing-and-script-strategy.md`, `17-common-object-property-index.md`, `18-legacy-script-authoring-and-debugging.md`, and `19-selection-clipboard-and-viewport-operations.md`
+* Need to inspect repo source from GitHub because the local checkout is unavailable or incomplete: `20-remote-source-access-and-code-lookup.md`
 * Setting page, menu item, localization text, or keybinding: `06-settings-menus-localization-and-input.md`
 * Graphics backend, audio player, asset packaging, or resource lookup: `07-rendering-audio-and-resources.md`
 * Safe repo-specific implementation checklists: `09-common-change-recipes.md`
