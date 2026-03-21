@@ -2421,4 +2421,130 @@
   <data name="McpRememberApprovalAnonymous" xml:space="preserve">
     <value>Default-allow subsequent anonymous MCP requests during this app session</value>
   </data>
+  <data name="SplashWindowTitle" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="ApplicationTitle" xml:space="preserve">
+    <value>Ongeki Fumen Editor</value>
+  </data>
+  <data name="ShowSplashScreenCommand" xml:space="preserve">
+    <value>Show Splash Screen</value>
+  </data>
+  <data name="GamePlayControllerWindowTitle" xml:space="preserve">
+    <value>Game Play Controller</value>
+  </data>
+  <data name="GamePlayControllerConnection" xml:space="preserve">
+    <value>Connection</value>
+  </data>
+  <data name="GamePlayControllerPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="GamePlayControllerConnect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="GamePlayControllerStatus" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="GamePlayControllerStatusNotConnected" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="GamePlayControllerStatusConnected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="GamePlayControllerStatusDisconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="GamePlayControllerTutorial" xml:space="preserve">
+    <value>Tutorial</value>
+  </data>
+  <data name="GamePlayControllerControl" xml:space="preserve">
+    <value>Control</value>
+  </data>
+  <data name="GamePlayControllerPlayGuideSeAfterResume" xml:space="preserve">
+    <value>Play guide sound effect before resuming playback</value>
+  </data>
+  <data name="GamePlayControllerPlay" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="GamePlayControllerPause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="GamePlayControllerRestart" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+  <data name="GamePlayControllerForceEnd" xml:space="preserve">
+    <value>Force End</value>
+  </data>
+  <data name="GamePlayControllerAutoPlay" xml:space="preserve">
+    <value>Auto play</value>
+  </data>
+  <data name="GamePlayControllerPauseOnDamageOrMissBell" xml:space="preserve">
+    <value>Pause automatically when damaged or missing a bell</value>
+  </data>
+  <data name="GamePlayControllerSeek" xml:space="preserve">
+    <value>Seek</value>
+  </data>
+  <data name="GamePlayControllerPlayAfterSeek" xml:space="preserve">
+    <value>Play automatically after seeking</value>
+  </data>
+  <data name="GamePlayControllerExecuteSeek" xml:space="preserve">
+    <value>Execute Seek</value>
+  </data>
+  <data name="GamePlayControllerOgkrSavePath" xml:space="preserve">
+    <value>.ogkr save path</value>
+  </data>
+  <data name="GamePlayControllerReloadFumenInGame" xml:space="preserve">
+    <value>Reload fumen in game</value>
+  </data>
+  <data name="GamePlayControllerGetFumenPath" xml:space="preserve">
+    <value>Get fumen path</value>
+  </data>
+  <data name="GamePlayControllerReloadAfterSeek" xml:space="preserve">
+    <value>Reload fumen when seeking as well</value>
+  </data>
+  <data name="GamePlayControllerPlayGuideSe" xml:space="preserve">
+    <value>Play guide sound effect</value>
+  </data>
+  <data name="GamePlayControllerDumpUnfinishedInfo" xml:space="preserve">
+    <value>Dump unfinished info</value>
+  </data>
+  <data name="GamePlayControllerPlayCustomCue" xml:space="preserve">
+    <value>Play sound effect for specified cueId</value>
+  </data>
+  <data name="GamePlayControllerAutoFaderDebugger" xml:space="preserve">
+    <value>AutoFaderTarget Debugger</value>
+  </data>
+  <data name="GamePlayControllerGetAutoFaderData" xml:space="preserve">
+    <value>Get current AutoFader data</value>
+  </data>
+  <data name="GamePlayControllerApplyAutoFaderData" xml:space="preserve">
+    <value>Apply current AutoFader data</value>
+  </data>
+  <data name="GamePlayControllerDumpAutoFaderData" xml:space="preserve">
+    <value>Dump all AutoFaderTarget data to file</value>
+  </data>
+  <data name="GamePlayControllerCurrentAutoFaderTarget" xml:space="preserve">
+    <value>Current AutoFaderTarget</value>
+  </data>
+  <data name="GamePlayControllerPreviousAutoFaderTarget" xml:space="preserve">
+    <value>Previous AutoFaderTarget</value>
+  </data>
+  <data name="GamePlayControllerCurrentFrame" xml:space="preserve">
+    <value>Current Frame</value>
+  </data>
+  <data name="GamePlayControllerManualCalcAutoPlayFader" xml:space="preserve">
+    <value>Call calcAutoPlayFader() manually</value>
+  </data>
+  <data name="GamePlayControllerSelectOgkrSavePathPrompt" xml:space="preserve">
+    <value>Please specify a .ogkr save path for the game to read.</value>
+  </data>
+  <data name="GamePlayControllerOgkrFileType" xml:space="preserve">
+    <value>Standard Ongeki fumen file</value>
+  </data>
+  <data name="GamePlayControllerGetFumenPathSuccess" xml:space="preserve">
+    <value>Succeeded.</value>
+  </data>
+  <data name="GamePlayControllerGenerateOgkrFailedFormat" xml:space="preserve">
+    <value>Unable to generate the fumen and update it into the game: {0}</value>
+  </data>
 </root>

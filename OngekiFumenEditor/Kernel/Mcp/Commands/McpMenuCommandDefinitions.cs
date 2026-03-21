@@ -3,44 +3,36 @@ using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Kernel.Mcp.Commands
 {
-    internal static class McpMenuCommandResources
-    {
-        public static string GetString(string key, string fallback)
-        {
-            return Resources.ResourceManager.GetString(key) ?? fallback;
-        }
-    }
-
     [CommandDefinition]
     public sealed class McpServerUrlCommandDefinition : CommandDefinition
     {
         public override string Name => "Mcp.ServerUrl";
-        public override string Text => McpMenuCommandResources.GetString("McpServerUrlMenuText", "Server URL");
-        public override string ToolTip => McpMenuCommandResources.GetString("McpServerUrlMenuToolTip", "Show the current MCP server URL.");
+        public override string Text => Resources.McpServerUrlMenuText;
+        public override string ToolTip => Resources.McpServerUrlMenuToolTip;
     }
 
     [CommandDefinition]
     public sealed class StartMcpServerCommandDefinition : CommandDefinition
     {
         public override string Name => "Mcp.StartServer";
-        public override string Text => McpMenuCommandResources.GetString("McpStartServerMenuText", "Start MCP Server");
-        public override string ToolTip => McpMenuCommandResources.GetString("McpStartServerMenuToolTip", "Start the MCP server.");
+        public override string Text => Resources.McpStartServerMenuText;
+        public override string ToolTip => Resources.McpStartServerMenuToolTip;
     }
 
     [CommandDefinition]
     public sealed class StopMcpServerCommandDefinition : CommandDefinition
     {
         public override string Name => "Mcp.StopServer";
-        public override string Text => McpMenuCommandResources.GetString("McpStopServerMenuText", "Stop MCP Server");
-        public override string ToolTip => McpMenuCommandResources.GetString("McpStopServerMenuToolTip", "Stop the MCP server.");
+        public override string Text => Resources.McpStopServerMenuText;
+        public override string ToolTip => Resources.McpStopServerMenuToolTip;
     }
 
     [CommandDefinition]
     public sealed class ConnectedMcpClientsCommandDefinition : CommandDefinition
     {
         public override string Name => "Mcp.ConnectedClients";
-        public override string Text => McpMenuCommandResources.GetString("McpConnectedClientsMenuText", "Connected Clients");
-        public override string ToolTip => McpMenuCommandResources.GetString("McpConnectedClientsMenuToolTip", "List MCP clients that have used MCP tools and revoke their authorization.");
+        public override string Text => Resources.McpConnectedClientsMenuText;
+        public override string ToolTip => Resources.McpConnectedClientsMenuToolTip;
     }
 
     [CommandDefinition]

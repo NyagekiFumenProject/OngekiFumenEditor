@@ -11,7 +11,7 @@
     xmlns:rec="clr-namespace:OngekiFumenEditor.Kernel.RecentFiles"
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.SplashScreen.ViewModels"
-    Title="Welcome"
+    Title="{markup:Translate [SplashWindowTitle]}"
     WindowTitleBrush="Transparent"
     Width="1000"
     Height="700"
@@ -45,7 +45,7 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Label
-                Content="Ongeki Fumen Editor"
+                Content="{markup:Translate [ApplicationTitle]}"
                 FontSize="40"
                 FontWeight="Bold" />
             <TextBlock

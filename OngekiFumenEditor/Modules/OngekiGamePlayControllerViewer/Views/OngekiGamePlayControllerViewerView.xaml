@@ -5,6 +5,7 @@
     xmlns:avalonia="http://icsharpcode.net/sharpdevelop/avalonedit"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels"
@@ -26,7 +27,7 @@
         <StackPanel>
             <GroupBox Margin="5">
                 <GroupBox.Header>
-                    <Label Content="连接" />
+                    <Label Content="{markup:Translate [GamePlayControllerConnection]}" />
                 </GroupBox.Header>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -34,18 +35,18 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center" Content="Port" />
+                        <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerPort]}" />
                         <TextBox
                             Width="100"
                             Margin="10,5,10,5"
                             VerticalAlignment="Center"
                             Text="{Binding Port}">
                         </TextBox>
-                        <Button cal:Message.Attach="Connect()">连接</Button>
+                        <Button cal:Message.Attach="Connect()" Content="{markup:Translate [GamePlayControllerConnect]}" />
                         <Label
                             Margin="20,0,0,0"
                             VerticalAlignment="Center"
-                            Content="状态:" />
+                            Content="{markup:Translate [GamePlayControllerStatus]}" />
                         <TextBlock
                             Margin="10,0,0,0"
                             VerticalAlignment="Center"
@@ -55,15 +56,15 @@
                                 <Style TargetType="TextBlock">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="NotConnect">
-                                            <Setter Property="Text" Value="未发起连接" />
+                                            <Setter Property="Text" Value="{markup:Translate [GamePlayControllerStatusNotConnected]}" />
                                             <Setter Property="Foreground" Value="Orange" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="Connected">
-                                            <Setter Property="Text" Value="已连接" />
+                                            <Setter Property="Text" Value="{markup:Translate [GamePlayControllerStatusConnected]}" />
                                             <Setter Property="Foreground" Value="Green" />
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="Disconnected">
-                                            <Setter Property="Text" Value="连接已断开" />
+                                            <Setter Property="Text" Value="{markup:Translate [GamePlayControllerStatusDisconnected]}" />
                                             <Setter Property="Foreground" Value="red" />
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -73,22 +74,21 @@
                         <Button
                             Margin="20,0,0,0"
                             VerticalAlignment="Center"
-                            cal:Message.Attach="RefreshUI()">
-                            刷新
-                        </Button>
+                            cal:Message.Attach="RefreshUI()"
+                            Content="{markup:Translate [Refresh]}" />
                     </StackPanel>
                     <Label
                         Grid.Column="1"
                         Margin="0,0,10,0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center">
-                        <Hyperlink Click="Hyperlink_RequestNavigate">使用教程</Hyperlink>
+                        <Hyperlink Click="Hyperlink_RequestNavigate">{markup:Translate [GamePlayControllerTutorial]}</Hyperlink>
                     </Label>
                 </Grid>
             </GroupBox>
             <GroupBox Margin="5">
                 <GroupBox.Header>
-                    <Label Content="控制" />
+                    <Label Content="{markup:Translate [GamePlayControllerControl]}" />
                 </GroupBox.Header>
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -98,19 +98,19 @@
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
                             IsChecked="{Binding IsPlayGuideSEAfterPlay}">
-                            恢复播放是否先播放节奏音效
+                            <TextBlock Text="{markup:Translate [GamePlayControllerPlayGuideSeAfterResume]}" TextWrapping="Wrap" />
                         </CheckBox>
-                        <Button cal:Message.Attach="Play()" IsEnabled="{Binding IsConnected}">播放</Button>
-                        <Button cal:Message.Attach="Pause()" IsEnabled="{Binding IsConnected}">暂停</Button>
-                        <Button cal:Message.Attach="Restart()" IsEnabled="{Binding IsConnected}">重开</Button>
-                        <Button cal:Message.Attach="ForceEnd()" IsEnabled="{Binding IsConnected}">强制结束</Button>
+                        <Button cal:Message.Attach="Play()" Content="{markup:Translate [GamePlayControllerPlay]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="Pause()" Content="{markup:Translate [GamePlayControllerPause]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="Restart()" Content="{markup:Translate [GamePlayControllerRestart]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="ForceEnd()" Content="{markup:Translate [GamePlayControllerForceEnd]}" IsEnabled="{Binding IsConnected}" />
                         <CheckBox
                             Margin="10,5,10,5"
                             Padding="2"
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
                             IsChecked="{Binding IsAutoPlay}">
-                            自动游戏
+                            <TextBlock Text="{markup:Translate [GamePlayControllerAutoPlay]}" TextWrapping="Wrap" />
                         </CheckBox>
                         <CheckBox
                             Margin="10,5,10,5"
@@ -118,11 +118,11 @@
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
                             IsChecked="{Binding IsPauseIfMissBellOrDamaged}">
-                            受伤或者错失Bell时自动暂停
+                            <TextBlock Text="{markup:Translate [GamePlayControllerPauseOnDamageOrMissBell]}" TextWrapping="Wrap" />
                         </CheckBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center" Content="跳转" />
+                        <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerSeek]}" />
                         <TextBox
                             Width="100"
                             Margin="10,5,10,5"
@@ -137,17 +137,16 @@
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
                             IsChecked="{Binding IsPlayAfterSeek}">
-                            是否跳转后自动播放
+                            <TextBlock Text="{markup:Translate [GamePlayControllerPlayAfterSeek]}" TextWrapping="Wrap" />
                         </CheckBox>
                         <Button
                             VerticalAlignment="Center"
                             cal:Message.Attach="SeekTo()"
-                            IsEnabled="{Binding IsConnected}">
-                            执行跳转
-                        </Button>
+                            Content="{markup:Translate [GamePlayControllerExecuteSeek]}"
+                            IsEnabled="{Binding IsConnected}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center">.ogkr谱面生成路径</Label>
+                        <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerOgkrSavePath]}" />
                         <TextBox
                             Width="350"
                             Margin="10,5,10,5"
@@ -156,9 +155,9 @@
                             IsReadOnly="True"
                             Text="{Binding OgkrSavePath}">
                         </TextBox>
-                        <Button cal:Message.Attach="OpenOgkrSavePathDialog()" IsEnabled="{Binding IsConnected}">浏览</Button>
-                        <Button cal:Message.Attach="Reload()" IsEnabled="{Binding IsConnected}">游戏重新加载谱面</Button>
-                        <Button cal:Message.Attach="GetOgkrSavePathFromGamePlay()" IsEnabled="{Binding IsConnected}">获取谱面路径</Button>
+                        <Button cal:Message.Attach="OpenOgkrSavePathDialog()" Content="{markup:Translate [Browser]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="Reload()" Content="{markup:Translate [GamePlayControllerReloadFumenInGame]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="GetOgkrSavePathFromGamePlay()" Content="{markup:Translate [GamePlayControllerGetFumenPath]}" IsEnabled="{Binding IsConnected}" />
                     </StackPanel>
                     <CheckBox
                         Margin="10,5,10,5"
@@ -166,18 +165,18 @@
                         VerticalAlignment="Center"
                         VerticalContentAlignment="Center"
                         IsChecked="{Binding IsReloadAfterSeek}">
-                        是否跳转也重新加载谱面
+                        <TextBlock Text="{markup:Translate [GamePlayControllerReloadAfterSeek]}" TextWrapping="Wrap" />
                     </CheckBox>
                 </StackPanel>
             </GroupBox>
             <GroupBox Margin="5">
                 <GroupBox.Header>
-                    <Label Content="其他" />
+                    <Label Content="{markup:Translate [Other]}" />
                 </GroupBox.Header>
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Button cal:Message.Attach="PlayGuideSE()" IsEnabled="{Binding IsConnected}">播放节奏音效</Button>
-                        <Button cal:Message.Attach="DumpUnfinishInfo()" IsEnabled="{Binding IsConnected}">打印未完成内容</Button>
+                        <Button cal:Message.Attach="PlayGuideSE()" Content="{markup:Translate [GamePlayControllerPlayGuideSe]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="DumpUnfinishInfo()" Content="{markup:Translate [GamePlayControllerDumpUnfinishedInfo]}" IsEnabled="{Binding IsConnected}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBox
@@ -185,23 +184,23 @@
                             Margin="10,0,0,0"
                             VerticalAlignment="Center"
                             Text="{Binding CueId}" />
-                        <Button cal:Message.Attach="PlayCustomSound()" IsEnabled="{Binding IsConnected}">播放指定cueId的音效</Button>
+                        <Button cal:Message.Attach="PlayCustomSound()" Content="{markup:Translate [GamePlayControllerPlayCustomCue]}" IsEnabled="{Binding IsConnected}" />
                     </StackPanel>
 
 
                     <GroupBox Margin="5">
                         <GroupBox.Header>
-                            <Label Content="AutoFaderTarget Debugger" />
+                            <Label Content="{markup:Translate [GamePlayControllerAutoFaderDebugger]}" />
                         </GroupBox.Header>
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Button cal:Message.Attach="GetAutoFaderData()" IsEnabled="{Binding IsConnected}">获取当前AutoFader数据</Button>
-                                <Button cal:Message.Attach="ApplyAutoFaderData()" IsEnabled="{Binding IsConnected}">设置当前AutoFader数据</Button>
-                                <Button cal:Message.Attach="DumpAutoFaderTarget()" IsEnabled="{Binding IsConnected}">将所有AutoFaderTarget数据转储到文件</Button>
+                                <Button cal:Message.Attach="GetAutoFaderData()" Content="{markup:Translate [GamePlayControllerGetAutoFaderData]}" IsEnabled="{Binding IsConnected}" />
+                                <Button cal:Message.Attach="ApplyAutoFaderData()" Content="{markup:Translate [GamePlayControllerApplyAutoFaderData]}" IsEnabled="{Binding IsConnected}" />
+                                <Button cal:Message.Attach="DumpAutoFaderTarget()" Content="{markup:Translate [GamePlayControllerDumpAutoFaderData]}" IsEnabled="{Binding IsConnected}" />
                             </StackPanel>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label VerticalAlignment="Center" Content="curAutoFaderTarget" />
+                                    <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerCurrentAutoFaderTarget]}" />
                                     <TextBox
                                         Width="600"
                                         Margin="10,5,10,5"
@@ -212,7 +211,7 @@
                                         Text="{Binding CurAutoFaderTargetDataStr}" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label VerticalAlignment="Center" Content="preAutoFaderTarget" />
+                                    <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerPreviousAutoFaderTarget]}" />
                                     <TextBox
                                         Width="600"
                                         Margin="10,5,10,5"
@@ -225,7 +224,7 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal">
-                                    <Label VerticalAlignment="Center" Content="curFrame" />
+                                    <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerCurrentFrame]}" />
                                     <TextBox
                                         Width="100"
                                         Margin="10,5,10,5"
@@ -234,7 +233,7 @@
                                         AcceptsReturn="True"
                                         AcceptsTab="True"
                                         Text="{Binding CalcCurFrame}" />
-                                    <Button cal:Message.Attach="ManualCallCalcAutoPlayFader()" IsEnabled="{Binding IsConnected}">手动调用calcAutoPlayFader()</Button>
+                                    <Button cal:Message.Attach="ManualCallCalcAutoPlayFader()" Content="{markup:Translate [GamePlayControllerManualCalcAutoPlayFader]}" IsEnabled="{Binding IsConnected}" />
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>

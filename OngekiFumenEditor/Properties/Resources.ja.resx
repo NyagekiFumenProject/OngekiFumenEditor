@@ -1741,4 +1741,130 @@
   <data name="McpRememberApprovalAnonymous" xml:space="preserve">
     <value>このアプリ実行中は識別情報のない MCP 要求を既定で許可する</value>
   </data>
+  <data name="SplashWindowTitle" xml:space="preserve">
+    <value>ようこそ</value>
+  </data>
+  <data name="ApplicationTitle" xml:space="preserve">
+    <value>Ongeki Fumen Editor</value>
+  </data>
+  <data name="ShowSplashScreenCommand" xml:space="preserve">
+    <value>スプラッシュ画面を表示</value>
+  </data>
+  <data name="GamePlayControllerWindowTitle" xml:space="preserve">
+    <value>ゲームコントローラー</value>
+  </data>
+  <data name="GamePlayControllerConnection" xml:space="preserve">
+    <value>接続</value>
+  </data>
+  <data name="GamePlayControllerPort" xml:space="preserve">
+    <value>ポート</value>
+  </data>
+  <data name="GamePlayControllerConnect" xml:space="preserve">
+    <value>接続</value>
+  </data>
+  <data name="GamePlayControllerStatus" xml:space="preserve">
+    <value>状態:</value>
+  </data>
+  <data name="GamePlayControllerStatusNotConnected" xml:space="preserve">
+    <value>未接続</value>
+  </data>
+  <data name="GamePlayControllerStatusConnected" xml:space="preserve">
+    <value>接続済み</value>
+  </data>
+  <data name="GamePlayControllerStatusDisconnected" xml:space="preserve">
+    <value>接続が切断されました</value>
+  </data>
+  <data name="GamePlayControllerTutorial" xml:space="preserve">
+    <value>チュートリアル</value>
+  </data>
+  <data name="GamePlayControllerControl" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="GamePlayControllerPlayGuideSeAfterResume" xml:space="preserve">
+    <value>再生再開前にガイド効果音を再生する</value>
+  </data>
+  <data name="GamePlayControllerPlay" xml:space="preserve">
+    <value>再生</value>
+  </data>
+  <data name="GamePlayControllerPause" xml:space="preserve">
+    <value>一時停止</value>
+  </data>
+  <data name="GamePlayControllerRestart" xml:space="preserve">
+    <value>リスタート</value>
+  </data>
+  <data name="GamePlayControllerForceEnd" xml:space="preserve">
+    <value>強制終了</value>
+  </data>
+  <data name="GamePlayControllerAutoPlay" xml:space="preserve">
+    <value>自動プレイ</value>
+  </data>
+  <data name="GamePlayControllerPauseOnDamageOrMissBell" xml:space="preserve">
+    <value>ダメージまたは Bell ミス時に自動停止する</value>
+  </data>
+  <data name="GamePlayControllerSeek" xml:space="preserve">
+    <value>シーク</value>
+  </data>
+  <data name="GamePlayControllerPlayAfterSeek" xml:space="preserve">
+    <value>シーク後に自動再生する</value>
+  </data>
+  <data name="GamePlayControllerExecuteSeek" xml:space="preserve">
+    <value>シーク実行</value>
+  </data>
+  <data name="GamePlayControllerOgkrSavePath" xml:space="preserve">
+    <value>.ogkr 譜面保存パス</value>
+  </data>
+  <data name="GamePlayControllerReloadFumenInGame" xml:space="preserve">
+    <value>ゲーム内で譜面を再読み込み</value>
+  </data>
+  <data name="GamePlayControllerGetFumenPath" xml:space="preserve">
+    <value>譜面パスを取得</value>
+  </data>
+  <data name="GamePlayControllerReloadAfterSeek" xml:space="preserve">
+    <value>シーク時にも譜面を再読み込みする</value>
+  </data>
+  <data name="GamePlayControllerPlayGuideSe" xml:space="preserve">
+    <value>ガイド効果音を再生</value>
+  </data>
+  <data name="GamePlayControllerDumpUnfinishedInfo" xml:space="preserve">
+    <value>未完了情報を出力</value>
+  </data>
+  <data name="GamePlayControllerPlayCustomCue" xml:space="preserve">
+    <value>指定 cueId の効果音を再生</value>
+  </data>
+  <data name="GamePlayControllerAutoFaderDebugger" xml:space="preserve">
+    <value>AutoFaderTarget デバッガー</value>
+  </data>
+  <data name="GamePlayControllerGetAutoFaderData" xml:space="preserve">
+    <value>現在の AutoFader データを取得</value>
+  </data>
+  <data name="GamePlayControllerApplyAutoFaderData" xml:space="preserve">
+    <value>現在の AutoFader データを適用</value>
+  </data>
+  <data name="GamePlayControllerDumpAutoFaderData" xml:space="preserve">
+    <value>全 AutoFaderTarget データをファイルへ出力</value>
+  </data>
+  <data name="GamePlayControllerCurrentAutoFaderTarget" xml:space="preserve">
+    <value>現在の AutoFaderTarget</value>
+  </data>
+  <data name="GamePlayControllerPreviousAutoFaderTarget" xml:space="preserve">
+    <value>前回の AutoFaderTarget</value>
+  </data>
+  <data name="GamePlayControllerCurrentFrame" xml:space="preserve">
+    <value>現在フレーム</value>
+  </data>
+  <data name="GamePlayControllerManualCalcAutoPlayFader" xml:space="preserve">
+    <value>calcAutoPlayFader() を手動実行</value>
+  </data>
+  <data name="GamePlayControllerSelectOgkrSavePathPrompt" xml:space="preserve">
+    <value>ゲームが読み取る .ogkr 保存パスを指定してください。</value>
+  </data>
+  <data name="GamePlayControllerOgkrFileType" xml:space="preserve">
+    <value>標準 Ongeki 譜面ファイル</value>
+  </data>
+  <data name="GamePlayControllerGetFumenPathSuccess" xml:space="preserve">
+    <value>取得に成功しました</value>
+  </data>
+  <data name="GamePlayControllerGenerateOgkrFailedFormat" xml:space="preserve">
+    <value>譜面を生成してゲームへ反映できませんでした: {0}</value>
+  </data>
 </root>

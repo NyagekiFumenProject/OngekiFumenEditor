@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Res = OngekiFumenEditor.Properties.Resources;
 
 namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 {
@@ -11,7 +12,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
         public McpScriptConfirmationDialog(string toolName, string requestedBy, string clientId, string requestPreview, bool isScriptExecutionTool, bool backupFumenBeforeExecution)
         {
-            Title = GetString("McpConfirmToolRequestTitle", "Confirm MCP Tool Request");
+            Title = Res.McpConfirmToolRequestTitle;
             Width = 760;
             Height = 560;
             MinWidth = 640;
@@ -33,7 +34,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
             var intro = new TextBlock
             {
-                Text = string.Format(GetString("McpConfirmToolRequestIntroFormat", "About to allow MCP tool call '{0}'."), toolName),
+                Text = string.Format(Res.McpConfirmToolRequestIntroFormat, toolName),
                 TextWrapping = TextWrapping.Wrap,
                 FontWeight = FontWeights.SemiBold,
             };
@@ -80,7 +81,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
             backupFumenBeforeExecutionCheckBox = new CheckBox
             {
-                Content = GetString("McpBackupFumenBeforeExecution", "\u6bcf\u6b21\u4ee3\u7801\u6267\u884c\u524d\u5148\u5907\u4efd\u8c31\u9762\u6587\u4ef6"),
+                Content = Res.McpBackupFumenBeforeExecution,
                 IsChecked = backupFumenBeforeExecution,
             };
             backupOptionsPanel.Children.Add(backupFumenBeforeExecutionCheckBox);
@@ -90,7 +91,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
                 backupOptionsPanel.Children.Add(new TextBlock
                 {
                     Margin = new Thickness(24, 4, 0, 0),
-                    Text = GetString("McpBackupFumenHintForNonScriptTool", "\u6b64\u9009\u9879\u4f1a\u5e94\u7528\u5230\u540e\u7eed\u7684 script.run_* \u4ee3\u7801\u6267\u884c\u8bf7\u6c42\u3002"),
+                    Text = Res.McpBackupFumenHintForNonScriptTool,
                     Foreground = Brushes.DimGray,
                     TextWrapping = TextWrapping.Wrap,
                 });
@@ -107,7 +108,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
             var cancelButton = new Button
             {
-                Content = GetString("Cancel", "Cancel"),
+                Content = Res.Cancel,
                 Width = 96,
                 MinHeight = 28,
                 Margin = new Thickness(0, 0, 8, 0),
@@ -117,10 +118,11 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
             var okButton = new Button
             {
-                Content = GetString("McpAllow", "Allow"),
+                Content = Res.McpAllow,
                 Width = 96,
                 MinHeight = 28,
                 IsDefault = true,
+                Margin = new Thickness(0,0,10,0)
             };
             okButton.Click += (_, _) => DialogResult = true;
 
@@ -140,20 +142,20 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
         {
             var lines = new System.Collections.Generic.List<string>
             {
-                $"{GetString("McpConfirmationToolLabel", "Tool")}: {toolName}"
+                $"{Res.McpConfirmationToolLabel}: {toolName}"
             };
 
             if (!HasIdentityInfo(requestedBy, clientId))
-                lines.Add($"{GetString("McpConfirmationClientLabel", "Client")}: {GetString("McpAnonymousClient", "Anonymous Client")}");
+                lines.Add($"{Res.McpConfirmationClientLabel}: {Res.McpAnonymousClient}");
 
             if (!string.IsNullOrWhiteSpace(requestedBy))
-                lines.Add($"{GetString("McpConfirmationRequestedByLabel", "Requested by")}: {requestedBy}");
+                lines.Add($"{Res.McpConfirmationRequestedByLabel}: {requestedBy}");
 
             if (!string.IsNullOrWhiteSpace(clientId))
-                lines.Add($"{GetString("McpConfirmationClientIdLabel", "Client ID")}: {clientId}");
+                lines.Add($"{Res.McpConfirmationClientIdLabel}: {clientId}");
 
             lines.Add(string.Empty);
-            lines.Add(GetString("McpConfirmationReviewHint", "Review the request details below before continuing."));
+            lines.Add(Res.McpConfirmationReviewHint);
             return string.Join(System.Environment.NewLine, lines);
         }
 
@@ -165,13 +167,8 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
         private static string BuildRememberApprovalText(string requestedBy, string clientId)
         {
             return HasIdentityInfo(requestedBy, clientId)
-                ? GetString("McpRememberApprovalWithIdentity", "\u9ed8\u8ba4\u5141\u8bb8\u6b64 MCP \u5ba2\u6237\u7aef\u5728\u672c\u6b21\u7a0b\u5e8f\u8fd0\u884c\u671f\u95f4\u7684\u540e\u7eed\u8bf7\u6c42")
-                : GetString("McpRememberApprovalAnonymous", "\u9ed8\u8ba4\u5141\u8bb8\u672a\u63d0\u4f9b\u5ba2\u6237\u7aef\u6807\u8bc6\u7684 MCP \u8bf7\u6c42\u5728\u672c\u6b21\u7a0b\u5e8f\u8fd0\u884c\u671f\u95f4\u7684\u540e\u7eed\u8bf7\u6c42");
-        }
-
-        private static string GetString(string key, string fallback)
-        {
-            return OngekiFumenEditor.Properties.Resources.ResourceManager.GetString(key) ?? fallback;
+                ? Res.McpRememberApprovalWithIdentity
+                : Res.McpRememberApprovalAnonymous;
         }
     }
 }

@@ -9,6 +9,7 @@
 
 .dotnet-home/
 .nuget-packages/
+.codex*/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

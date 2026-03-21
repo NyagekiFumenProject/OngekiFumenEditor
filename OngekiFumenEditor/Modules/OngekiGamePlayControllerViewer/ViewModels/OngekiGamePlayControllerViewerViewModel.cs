@@ -17,6 +17,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Base;
 using OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Views;
 using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using OngekiFumenEditor.Utils.Ogkr;
@@ -224,7 +225,9 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
         public void OpenOgkrSavePathDialog()
         {
-            OgkrSavePath = FileDialogHelper.SaveFile("请指定.ogkr保存的路径用于音击程序读取.", new[] { (".ogkr", "标准音击谱面文件") }) ?? OgkrSavePath;
+            OgkrSavePath = FileDialogHelper.SaveFile(
+                Resources.GamePlayControllerSelectOgkrSavePathPrompt,
+                new[] { (".ogkr", Resources.GamePlayControllerOgkrFileType) }) ?? OgkrSavePath;
         }
 
         public async void GetOgkrSavePathFromGamePlay()
@@ -240,7 +243,11 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
 
             OgkrSavePath = await assets.GetFumenFilePath(musicData.MusicId, fumenData.Difficulty).StartValueTask();
-            MessageBox.Show("获取成功");
+            MessageBox.Show(
+                Resources.GamePlayControllerGetFumenPathSuccess,
+                Resources.GamePlayControllerWindowTitle,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
 
         public async Task Play()
@@ -344,7 +351,11 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             {
                 var errorMsg = result.Message;
                 Log.LogError($"AkariMindController can't generate fumen : {errorMsg}");
-                MessageBox.Show($"无法生成谱面并更新到游戏中:{errorMsg}");
+                MessageBox.Show(
+                    string.Format(Resources.GamePlayControllerGenerateOgkrFailedFormat, errorMsg),
+                    Resources.GamePlayControllerWindowTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 

@@ -2400,4 +2400,130 @@
   <data name="McpRememberApprovalAnonymous" xml:space="preserve">
     <value>在本次程序运行期间默认允许未提供客户端标识的 MCP 请求</value>
   </data>
+  <data name="SplashWindowTitle" xml:space="preserve">
+    <value>欢迎</value>
+  </data>
+  <data name="ApplicationTitle" xml:space="preserve">
+    <value>Ongeki Fumen Editor</value>
+  </data>
+  <data name="ShowSplashScreenCommand" xml:space="preserve">
+    <value>显示启动窗口</value>
+  </data>
+  <data name="GamePlayControllerWindowTitle" xml:space="preserve">
+    <value>游戏控制</value>
+  </data>
+  <data name="GamePlayControllerConnection" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="GamePlayControllerPort" xml:space="preserve">
+    <value>端口</value>
+  </data>
+  <data name="GamePlayControllerConnect" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="GamePlayControllerStatus" xml:space="preserve">
+    <value>状态:</value>
+  </data>
+  <data name="GamePlayControllerStatusNotConnected" xml:space="preserve">
+    <value>未发起连接</value>
+  </data>
+  <data name="GamePlayControllerStatusConnected" xml:space="preserve">
+    <value>已连接</value>
+  </data>
+  <data name="GamePlayControllerStatusDisconnected" xml:space="preserve">
+    <value>连接已断开</value>
+  </data>
+  <data name="GamePlayControllerTutorial" xml:space="preserve">
+    <value>使用教程</value>
+  </data>
+  <data name="GamePlayControllerControl" xml:space="preserve">
+    <value>控制</value>
+  </data>
+  <data name="GamePlayControllerPlayGuideSeAfterResume" xml:space="preserve">
+    <value>恢复播放是否先播放节奏音效</value>
+  </data>
+  <data name="GamePlayControllerPlay" xml:space="preserve">
+    <value>播放</value>
+  </data>
+  <data name="GamePlayControllerPause" xml:space="preserve">
+    <value>暂停</value>
+  </data>
+  <data name="GamePlayControllerRestart" xml:space="preserve">
+    <value>重开</value>
+  </data>
+  <data name="GamePlayControllerForceEnd" xml:space="preserve">
+    <value>强制结束</value>
+  </data>
+  <data name="GamePlayControllerAutoPlay" xml:space="preserve">
+    <value>自动游戏</value>
+  </data>
+  <data name="GamePlayControllerPauseOnDamageOrMissBell" xml:space="preserve">
+    <value>受伤或者错失Bell时自动暂停</value>
+  </data>
+  <data name="GamePlayControllerSeek" xml:space="preserve">
+    <value>跳转</value>
+  </data>
+  <data name="GamePlayControllerPlayAfterSeek" xml:space="preserve">
+    <value>是否跳转后自动播放</value>
+  </data>
+  <data name="GamePlayControllerExecuteSeek" xml:space="preserve">
+    <value>执行跳转</value>
+  </data>
+  <data name="GamePlayControllerOgkrSavePath" xml:space="preserve">
+    <value>.ogkr谱面生成路径</value>
+  </data>
+  <data name="GamePlayControllerReloadFumenInGame" xml:space="preserve">
+    <value>游戏重新加载谱面</value>
+  </data>
+  <data name="GamePlayControllerGetFumenPath" xml:space="preserve">
+    <value>获取谱面路径</value>
+  </data>
+  <data name="GamePlayControllerReloadAfterSeek" xml:space="preserve">
+    <value>是否跳转也重新加载谱面</value>
+  </data>
+  <data name="GamePlayControllerPlayGuideSe" xml:space="preserve">
+    <value>播放节奏音效</value>
+  </data>
+  <data name="GamePlayControllerDumpUnfinishedInfo" xml:space="preserve">
+    <value>打印未完成内容</value>
+  </data>
+  <data name="GamePlayControllerPlayCustomCue" xml:space="preserve">
+    <value>播放指定cueId的音效</value>
+  </data>
+  <data name="GamePlayControllerAutoFaderDebugger" xml:space="preserve">
+    <value>AutoFaderTarget 调试器</value>
+  </data>
+  <data name="GamePlayControllerGetAutoFaderData" xml:space="preserve">
+    <value>获取当前AutoFader数据</value>
+  </data>
+  <data name="GamePlayControllerApplyAutoFaderData" xml:space="preserve">
+    <value>设置当前AutoFader数据</value>
+  </data>
+  <data name="GamePlayControllerDumpAutoFaderData" xml:space="preserve">
+    <value>将所有AutoFaderTarget数据转储到文件</value>
+  </data>
+  <data name="GamePlayControllerCurrentAutoFaderTarget" xml:space="preserve">
+    <value>当前 AutoFaderTarget</value>
+  </data>
+  <data name="GamePlayControllerPreviousAutoFaderTarget" xml:space="preserve">
+    <value>前一帧 AutoFaderTarget</value>
+  </data>
+  <data name="GamePlayControllerCurrentFrame" xml:space="preserve">
+    <value>当前帧</value>
+  </data>
+  <data name="GamePlayControllerManualCalcAutoPlayFader" xml:space="preserve">
+    <value>手动调用 calcAutoPlayFader()</value>
+  </data>
+  <data name="GamePlayControllerSelectOgkrSavePathPrompt" xml:space="preserve">
+    <value>请指定供音击程序读取的 .ogkr 保存路径。</value>
+  </data>
+  <data name="GamePlayControllerOgkrFileType" xml:space="preserve">
+    <value>标准音击谱面文件</value>
+  </data>
+  <data name="GamePlayControllerGetFumenPathSuccess" xml:space="preserve">
+    <value>获取成功</value>
+  </data>
+  <data name="GamePlayControllerGenerateOgkrFailedFormat" xml:space="preserve">
+    <value>无法生成谱面并更新到游戏中: {0}</value>
+  </data>
 </root>

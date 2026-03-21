@@ -9,9 +9,9 @@ namespace OngekiFumenEditor.Modules.SplashScreen.Commands.ShowSplashScreen
 	{
 		public override string Name => "Toolbar.ShowSplashScreen";
 
-		public override string Text => "显示启动窗口";
+		public override string Text => Resources.ShowSplashScreenCommand;
 
-		public override string ToolTip => "显示启动窗口";
+		public override string ToolTip => Resources.ShowSplashScreenCommand;
 
 		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/home.png");
 	}
