@@ -13,3 +13,6 @@
 [submodule "earcut.net"]
 	path = Dependences/earcut.net
 	url = https://github.com/NyagekiFumenProject/earcut.net
+[submodule "OngekiFumenEditor.wiki"]
+	path = OngekiFumenEditor.wiki
+	url = https://github.com/NyagekiFumenProject/OngekiFumenEditor.wiki.git
