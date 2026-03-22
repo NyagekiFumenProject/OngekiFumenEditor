@@ -1,5 +1,4 @@
 ﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -36,7 +35,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
 			var genObjList = new List<(OngekiObjectBase obj, ICommandParser parser)>();
 			var fumen = new OngekiFumen();
 
-			var commandArg = ObjectPool<CommandArgs>.Get();
+			var commandArg = new CommandArgs();
 
 			while (!reader.EndOfStream)
 			{
@@ -53,8 +52,6 @@ namespace OngekiFumenEditor.Parser.Ogkr
 					}
 				}
 			}
-
-			ObjectPool<CommandArgs>.Return(commandArg);
 
 			foreach (var pair in genObjList)
 			{

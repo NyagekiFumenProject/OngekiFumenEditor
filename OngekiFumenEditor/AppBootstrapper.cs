@@ -41,11 +41,41 @@ using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.DeadHandler;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
+using OngekiFumenEditor.Utils.ObjectPool;
 
 namespace OngekiFumenEditor;
 
 public class AppBootstrapper : Gemini.AppBootstrapper
 {
+    private sealed class EditorCoreLogTarget : ICoreLogTarget
+    {
+        public void Write(CoreLogLevel level, string message, Exception exception, string memberName, string filePath, int lineNumber)
+        {
+            var actualMessage = string.IsNullOrWhiteSpace(memberName) ? message : $"[{memberName}:{lineNumber}] {message}";
+
+            switch (level)
+            {
+                case CoreLogLevel.Debug:
+                    Log.LogDebug(actualMessage);
+                    break;
+                case CoreLogLevel.Info:
+                    Log.LogInfo(actualMessage);
+                    break;
+                case CoreLogLevel.Warn:
+                    Log.LogWarn(actualMessage);
+                    break;
+                case CoreLogLevel.Error when exception is not null:
+                    Log.LogError(actualMessage, exception);
+                    break;
+                case CoreLogLevel.Error:
+                    Log.LogError(actualMessage);
+                    break;
+            }
+        }
+    }
+
+    private static readonly ICoreLogTarget coreLogTarget = new EditorCoreLogTarget();
+
 #if !DEBUG
     public override bool IsPublishSingleFileHandled => true;
 #endif
@@ -124,6 +154,8 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     {
         FileLogOutput.Init();
         DumpFileHelper.Init();
+        CoreLog.SetResolver(() => coreLogTarget);
+        ObjectPool.SetRegisterAction(pool => IoC.Get<ObjectPoolManager>().RegisterNewObjectPool(pool));
         base.Configure();
         var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
 

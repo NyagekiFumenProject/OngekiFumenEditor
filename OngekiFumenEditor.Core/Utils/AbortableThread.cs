@@ -23,16 +23,16 @@ namespace OngekiFumenEditor.Utils
         public void Start()
         {
             task.Start();
-            Log.LogDebug($"Thread {Name} started.", prefix: "AbortableThread");
+            CoreLog.LogDebug($"Thread {Name} started.");
         }
 
         public void Abort(bool waitForTask = true)
         {
-            Log.LogDebug($"Begin to abort thread {Name}.", prefix: "AbortableThread");
+            CoreLog.LogDebug($"Begin to abort thread {Name}.");
             cancellationTokenSource.Cancel();
             if (waitForTask)
                 task?.Wait();
-            Log.LogDebug($"Aborted thread {Name}.", prefix: "AbortableThread");
+            CoreLog.LogDebug($"Aborted thread {Name}.");
         }
     }
 }

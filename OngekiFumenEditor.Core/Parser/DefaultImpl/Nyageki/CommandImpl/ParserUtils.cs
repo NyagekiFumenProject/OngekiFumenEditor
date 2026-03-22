@@ -1,16 +1,25 @@
 ﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl
 {
 	internal static class ParserUtils
 	{
+		private sealed class EmptyDisposable : IDisposable
+		{
+			public static readonly EmptyDisposable Shared = new();
+			public void Dispose()
+			{
+			}
+		}
+
 		public static IDisposable GetValuesMapWithDisposable(this string paramsDataStr, out Dictionary<string, string> map)
 		{
-			return ParseParams(paramsDataStr).ToDictionaryWithObjectPool(x => x.name, x => x.value, out map);
+			map = ParseParams(paramsDataStr).ToDictionary(x => x.name, x => x.value);
+			return EmptyDisposable.Shared;
 		}
 
 		private static Regex s = new Regex(@"(\w+)\[(.*?)\]\s*(,|$)");

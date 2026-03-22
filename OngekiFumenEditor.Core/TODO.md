@@ -31,6 +31,13 @@ Create a platform-neutral library for:
 - Reworked SVG processing around `VectorScene` / `VectorPath` / `VectorPoint`
 - Removed direct WPF and `SvgConverter` dependencies from `OngekiFumenEditor.Core`
 - Moved WPF-specific SVG scene building back to `OngekiFumenEditor`, which now builds `VectorScene` and calls `ApplySvgContent(...)` itself
+- Moved the remaining default curve interpolater factory into `OngekiFumenEditor.Core`
+- Moved object pool primitives and array/object pool helper extensions into `OngekiFumenEditor.Core`
+- Moved shared LINQ and `TGrid` extension helpers into `OngekiFumenEditor.Core` with `netstandard2.1`-safe implementations
+- Moved the pure portions of `MathUtils` into `OngekiFumenEditor.Core`, including range-combine helpers and BPM/grid math
+- Moved `AbortableThread` and `ViewModelReferenceAttribute` into `OngekiFumenEditor.Core`
+- Moved pure `Utils.Ogkr.InterpolateAll` lane interpolation helper into `OngekiFumenEditor.Core`
+- Left editor-only utils such as WPF/Skia/OpenTK converters (`BrushHelper`, `ColorExtensionMethod`, `SvgExtensionMethod`, `Vector*ExtensionMethod`, `Matrix4ExtensionMethod`), command routing and view plumbing (`CommandRouterHelper`, `ActionExecutionContextExtensionMethod`, `CoroutineExtensionMethod`, `MapToViewAttribute`, `ViewHelper`, `WindowTitleHelper`), resource and shell helpers (`ResourceUtils`, `FileDialogHelper`, `DocumentOpenHelper`, `ProcessUtils`, `ConsoleWindowHelper`, `IPCHelper`, `IniFile`), status/logging infrastructure (`CommonStatusBar`, `StatusBarHelper`, `Log`, `Logs/*`, `ObjectPoolManager`), crash handling (`DeadHandler/*`), and editor-only OGKR workflow helper (`Utils.Ogkr.StandardizeFormat`) in `OngekiFumenEditor`
 
 ## Phase 2
 
