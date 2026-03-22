@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Base.Collections
             nameof(IndividualSoflanArea.EndIndicator.TGrid)
             );
 
-        private NotQuadTreeWrapper<float, float, IndividualSoflanArea> cacheTotalTree = new(
+        private QuadTreeWrapper<IndividualSoflanArea> cacheTotalTree = new(
             x => (float)x.XGrid.TotalUnit,
             x => (float)x.TGrid.TotalUnit,
             x => (float)x.EndIndicator.XGrid.TotalUnit,

@@ -1,4 +1,3 @@
-﻿using OngekiFumenEditor.Base.Collections.Base.NotQuadTree;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
