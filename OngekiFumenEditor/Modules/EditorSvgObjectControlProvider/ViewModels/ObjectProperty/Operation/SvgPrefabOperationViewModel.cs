@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
@@ -14,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Windows;
-using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.ObjectProperty.Operation
 {
@@ -29,6 +29,8 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 
 		public void OnGenerateLaneToEditor()
 		{
+			SvgPrefabBuildHelper.EnsureBuilt(SvgPrefab);
+
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 			{
 				MessageBox.Show(Resources.MustMakeEditorActive);
@@ -41,7 +43,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 				return;
 			}
 
-			if (SvgPrefab.ProcessingDrawingGroup is not DrawingGroup drawingGroup)
+			if (SvgPrefab.ProcessingVectorScene is null)
 			{
 				MessageBox.Show(Resources.SvgContentNotSupport);
 				return;

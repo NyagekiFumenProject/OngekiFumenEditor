@@ -349,7 +349,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     if (pickLane is not null)
                     {
                         var itor = pickLane.GenAllPath().GetEnumerator();
-                        var prevOpt = default(OpenTK.Mathematics.Vector2?);
+                        var prevOpt = default(Vector2?);
 
                         while (itor.MoveNext())
                         {
@@ -363,7 +363,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 //           ^
                                 //         tGrid
 
-                                if (prevOpt is OpenTK.Mathematics.Vector2 prev)
+                                if (prevOpt is Vector2 prev)
                                 {
                                     var curPx = (float)XGridCalculator.ConvertXGridToX(cur.X / XGrid.DEFAULT_RES_X, target.Editor);
                                     var prevPx = (float)XGridCalculator.ConvertXGridToX(prev.X / XGrid.DEFAULT_RES_X, target.Editor);
