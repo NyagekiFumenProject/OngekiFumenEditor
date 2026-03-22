@@ -49,6 +49,7 @@
 * 自定义快捷键按键绑定
 * 实现分组变速功能
 * 提供更好的变速工具/界面 **<--- we are here! ---**
+* 实现[MCP Server](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/Tutorial_16(zh-CN)),支持AI辅助写谱
 * 塞小功能&修BUG.... 
 ....、
 
