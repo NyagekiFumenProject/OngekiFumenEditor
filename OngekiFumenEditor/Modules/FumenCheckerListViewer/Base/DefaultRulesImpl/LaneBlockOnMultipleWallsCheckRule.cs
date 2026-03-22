@@ -13,7 +13,7 @@ public class LaneBlockOnMultipleWallsCheckRule : IFumenCheckRule
 {
     private const string RuleName = "LaneBlockAcrossWalls";
 
-    public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostEditor)
+    public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostEditor)
     {
         foreach (var laneBlock in fumen.LaneBlocks) {
             var (refLaneStart, refLaneEnd) = laneBlock.CalculateReferenceWallLanes(fumen);

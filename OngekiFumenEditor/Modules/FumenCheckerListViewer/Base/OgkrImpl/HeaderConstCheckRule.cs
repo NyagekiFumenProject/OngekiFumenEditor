@@ -20,13 +20,13 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
 	{
 		private class NavigateMetaInfoViewBehavior : INavigateBehavior
 		{
-			public void Navigate(FumenVisualEditorViewModel editor)
+			public void Navigate(IFumenCheckContext editor)
 			{
-				IoC.Get<IShell>().ShowTool<IFumenMetaInfoBrowser>();
+				editor?.ShowFumenMetaInfo();
 			}
 		}
 
-		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
 		{
 			const string RuleName = "[Ongeki] HeaderConstMismatch";
 			var locationDescription = Resources.HeaderConstMismatch;

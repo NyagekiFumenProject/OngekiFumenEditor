@@ -52,6 +52,13 @@ Create a platform-neutral library for:
 - Replace `FumenVisualEditorViewModel` parameters in checker interfaces with a core-safe context abstraction
 - Extract runtime automation request and result DTOs plus service abstractions
 
+### Phase 3 Progress
+
+- Moved checker result models and validation contracts into `OngekiFumenEditor.Core`
+- Introduced `IFumenCheckContext` in `Core` to replace direct `FumenVisualEditorViewModel` references in checker contracts and navigate behaviors
+- Moved reusable checker result and default navigate behavior implementations into `OngekiFumenEditor.Core`
+- Left concrete checker rule implementations in `OngekiFumenEditor` for now because they still depend on editor resources and composition
+
 ## Blockers
 
 - `Base` currently uses `Caliburn.Micro.PropertyChangedBase`

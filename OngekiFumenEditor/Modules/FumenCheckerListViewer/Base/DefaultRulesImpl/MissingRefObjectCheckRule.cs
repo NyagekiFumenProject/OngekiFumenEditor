@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 	{
 		const string RuleName = "MissingRefObject";
 
-		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
 		{
 			foreach (var dockableObj in fumen.Holds.AsEnumerable<ILaneDockable>().Concat(fumen.Taps).Where(x => x.ReferenceLaneStart is null))
 			{

@@ -1,7 +1,9 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
+using OngekiFumenEditor.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -18,7 +20,7 @@ using System.Windows.Data;
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 {
 	[Export(typeof(IFumenCheckerListViewer))]
-	public class FumenCheckerListViewerViewModel : Tool, IFumenCheckerListViewer
+	public class FumenCheckerListViewerViewModel : Tool, IFumenCheckerListViewer, IFumenCheckContext
 	{
 		public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
@@ -92,7 +94,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 
 		public void OnItemDoubleClick(ICheckResult checkResult)
 		{
-			checkResult?.NavigateBehavior?.Navigate(Editor);
+			checkResult?.NavigateBehavior?.Navigate(this);
 		}
 
 		public void RefreshCurrentFumen()
@@ -105,7 +107,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 				{
 					var fumen = Editor.Fumen;
 
-					foreach (var checkRule in checkRules.SelectMany(x => x.CheckRule(fumen, Editor)))
+					foreach (var checkRule in checkRules.SelectMany(x => x.CheckRule(fumen, this)))
 					{
 						CheckResults.Add(checkRule);
 					}
@@ -145,5 +147,13 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 					return false;
 			}
 		}
+
+		public void ScrollTo(TGrid tGrid) => Editor?.ScrollTo(tGrid);
+
+		public void ScrollTo(OngekiTimelineObjectBase ongekiObject) => Editor?.ScrollTo(ongekiObject);
+
+		public void NotifyObjectClicked(OngekiTimelineObjectBase ongekiObject) => Editor?.NotifyObjectClicked(ongekiObject);
+
+		public void ShowFumenMetaInfo() => IoC.Get<IShell>().ShowTool<IFumenMetaInfoBrowser>();
 	}
 }

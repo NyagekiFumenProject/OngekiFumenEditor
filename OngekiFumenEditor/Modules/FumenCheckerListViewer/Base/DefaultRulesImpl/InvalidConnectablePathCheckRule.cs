@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 	[Export(typeof(IFumenCheckRule))]
 	internal class InvalidConnectablePathCheckRule : IFumenCheckRule
 	{
-		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
 		{
 			IEnumerable<ICheckResult> CheckList(IEnumerable<ConnectableChildObjectBase> objs)
 			{

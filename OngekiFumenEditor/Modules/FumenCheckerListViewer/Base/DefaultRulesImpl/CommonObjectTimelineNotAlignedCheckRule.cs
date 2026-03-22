@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 	[Export(typeof(IFumenCheckRule))]
 	internal class CommonObjectTimelineNotAlignedCheckRule : IFumenCheckRule
 	{
-		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
 		{
 			IEnumerable<ICheckResult> CheckList(IEnumerable<OngekiTimelineObjectBase> objs)
 			{

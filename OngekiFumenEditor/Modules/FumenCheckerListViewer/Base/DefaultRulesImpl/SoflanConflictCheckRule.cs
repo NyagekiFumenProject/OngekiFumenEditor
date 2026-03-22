@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     [Export(typeof(IFumenCheckRule))]
     internal class SoflanConflictCheckRule : IFumenCheckRule
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
         {
             bool IsConflict(double start1, double end1, double start2, double end2) => (start1 < end2 && start2 < end1) || (start2 < end1 && start1 < end2);
             var conflictRecMap = new HashSet<OngekiTimelineObjectBase>();

@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 	[Export(typeof(IFumenCheckRule))]
 	internal class MissingHoldEndObjectCheckRule : IFumenCheckRule
 	{
-		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
 		{
 			const string RuleName = "MissingHoldEndObject";
 

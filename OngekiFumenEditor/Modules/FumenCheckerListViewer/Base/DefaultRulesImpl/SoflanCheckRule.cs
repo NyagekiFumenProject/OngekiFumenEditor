@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     [Export(typeof(IFumenCheckRule))]
     internal class SoflanCheckRule : IFumenCheckRule
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
         {
             foreach (KeyValuePair<int, SoflanList> pair in fumen.SoflansMap)
             {

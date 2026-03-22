@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     [Export(typeof(IFumenCheckRule))]
     internal class ConflictRecordIdLanesCheckRule : IFumenCheckRule
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
         {
             IEnumerable<ICheckResult> CheckList(IEnumerable<IGrouping<int, OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase>> conflictLaneGroups)
             {

@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
 	[Export(typeof(IOngekiFumenCheckRule))]
 	internal class NotInterpolatedCurveCheckRule : IOngekiFumenCheckRule
 	{
-		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
 		{
 			IEnumerable<ICheckResult> CheckList(IEnumerable<ConnectableChildObjectBase> objs)
 			{

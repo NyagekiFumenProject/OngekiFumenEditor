@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     [Export(typeof(IFumenCheckRule))]
     internal class CommonObjectOverlapCheckRule : IFumenCheckRule
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
         {
             IEnumerable<ICheckResult> CheckList<T>(IEnumerable<T> objs) where T : OngekiObjectBase, ITimelineObject, IHorizonPositionObject
             {

@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
     [Export(typeof(IOngekiFumenCheckRule))]
     internal class ColorfulLaneBrightnessCheckRule : IOngekiFumenCheckRule
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
         {
             IEnumerable<ICheckResult> CheckList(IEnumerable<ColorfulLaneStart> objs)
             {
