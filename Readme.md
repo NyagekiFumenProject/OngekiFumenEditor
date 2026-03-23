@@ -4,6 +4,12 @@
 ## 简介
 ![image](https://github.com/NyagekiFumenProject/OngekiFumenEditor/assets/7549173/a495c5a2-0d6b-4995-8730-e5ee4e10b56a)
 
+## 编译&下载&Wiki
+[![Build Program](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml/badge.svg)](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml)<br/>
+[*下载最新最热制谱器*](https://next.nageki-net.com/fumen/editor/get)<br/>
+[谱面站](https://next.nageki-net.com/net/custom-fumen-list)<br/>
+[wiki](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki)<br/>
+
 ## 当前进度&roadmap:
 * Tap实现 
 * WallTap实现 
@@ -52,11 +58,6 @@
 * 实现[MCP Server](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/Tutorial_16(zh-CN)),支持AI辅助写谱
 * 塞小功能&修BUG.... 
 ....、
-
-## 编译&下载&Wiki
-[*下载最新最热制谱器*](https://next.nageki-net.com/fumen/editor/get)
-[![Build Program](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml/badge.svg)](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml)
-[wiki](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki)
 
 ## 教程&问题&建议
 * [<img width="75" height="80" alt="image" src="https://github.com/user-attachments/assets/de64798a-014a-469c-9c95-c2e5a789af01" />](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=wMjr4kyJH1-yMv3ttYH_bed-40_3Su2f&authKey=aceTGynrs0EV1Up%2BcCbM4U%2F9b9%2Fx4AScW0B6W6KS0qDcrNuFt4xM%2FR9R3dMmqC4n&noverify=0&group_code=923862477)
