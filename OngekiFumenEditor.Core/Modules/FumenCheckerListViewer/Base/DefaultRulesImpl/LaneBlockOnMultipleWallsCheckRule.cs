@@ -1,10 +1,8 @@
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
 
@@ -15,13 +13,15 @@ public class LaneBlockOnMultipleWallsCheckRule : IFumenCheckRule
 
     public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostEditor)
     {
-        foreach (var laneBlock in fumen.LaneBlocks) {
+        foreach (var laneBlock in fumen.LaneBlocks)
+        {
             var (refLaneStart, refLaneEnd) = laneBlock.CalculateReferenceWallLanes(fumen);
-            if (refLaneStart != refLaneEnd) {
-                yield return new CommonCheckResult()
+            if (refLaneStart != refLaneEnd)
+            {
+                yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Problem,
-                    Description = Resources.LaneBlockOnMultipleWalls.Format(refLaneStart?.RecordId, refLaneEnd?.RecordId),
+                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.LaneBlockOnMultipleWalls, refLaneStart?.RecordId, refLaneEnd?.RecordId),
                     LocationDescription = laneBlock.TGrid.ToString(),
                     NavigateBehavior = new NavigateToTGridBehavior(refLaneEnd?.ReferenceStartObject.TGrid),
                     RuleName = RuleName

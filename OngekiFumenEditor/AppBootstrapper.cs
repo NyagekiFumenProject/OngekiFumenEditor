@@ -32,6 +32,7 @@ using OngekiFumenEditor.Kernel.Mcp;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.SplashScreen;
 using OngekiFumenEditor.Parser;

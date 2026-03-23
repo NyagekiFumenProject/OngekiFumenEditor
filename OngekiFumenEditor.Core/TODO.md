@@ -8,7 +8,6 @@ Create a platform-neutral library for:
 - parsing and serialization
 - pure calculations and interpolation
 - validation contracts and reusable rules
-- runtime automation DTOs and abstractions
 
 ## Phase 1
 
@@ -19,7 +18,6 @@ Create a platform-neutral library for:
 
 ### Phase 1 Progress
 
-- Moved runtime automation DTOs and abstractions
 - Moved comparer, hashing, file, reflection, random, interpolation, and parser helper utilities
 - Moved grid primitives and basic object infrastructure needed by pure domain code
 - Moved property browser metadata attributes and property change helper extensions
@@ -50,14 +48,15 @@ Create a platform-neutral library for:
 
 - Extract checker result models and validation contracts
 - Replace `FumenVisualEditorViewModel` parameters in checker interfaces with a core-safe context abstraction
-- Extract runtime automation request and result DTOs plus service abstractions
 
 ### Phase 3 Progress
 
 - Moved checker result models and validation contracts into `OngekiFumenEditor.Core`
 - Introduced `IFumenCheckContext` in `Core` to replace direct `FumenVisualEditorViewModel` references in checker contracts and navigate behaviors
 - Moved reusable checker result and default navigate behavior implementations into `OngekiFumenEditor.Core`
-- Left concrete checker rule implementations in `OngekiFumenEditor` for now because they still depend on editor resources and composition
+- Moved reusable default checker rule implementations into `OngekiFumenEditor.Core` and replaced direct editor resource access with `FumenCheckMessages`
+- Moved checker multilingual resources into `OngekiFumenEditor.Core/Properties/Resources*.resx` and removed the editor-side message provider bridge
+- Left checker UI/composition and all `Kernel`-side editor automation infrastructure in `OngekiFumenEditor`
 
 ## Blockers
 
@@ -67,6 +66,7 @@ Create a platform-neutral library for:
 - some helpers still resolve services through `IoC`
 - some calculators and rule interfaces still depend on `FumenVisualEditorViewModel`
 - current `OpenTK` 4.x packages in this repo target `netstandard2.1`, so connectable-object curve interpolation code cannot move into `netstandard2.0` core without an abstraction or package/version strategy change
+- `Kernel`-scoped editor infrastructure is intentionally excluded from `OngekiFumenEditor.Core` except `CurveInterpolater`
 
 ## Nice To Have Later
 
