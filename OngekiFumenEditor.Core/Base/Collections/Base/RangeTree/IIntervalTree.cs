@@ -1,7 +1,7 @@
-﻿//copy&modify from repo : https://github.com/mbuchetics/RangeTree , LICENSE.txt : https://github.com/mbuchetics/RangeTree/blob/master/LICENSE.txt
+//copy&modify from repo : https://github.com/mbuchetics/RangeTree , LICENSE.txt : https://github.com/mbuchetics/RangeTree/blob/master/LICENSE.txt
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
+namespace OngekiFumenEditor.Core.Base.Collections.Base.RangeTree
 {
 	/// <summary>
 	/// The standard interval tree implementation. Keeps a root node and forwards all queries to it.

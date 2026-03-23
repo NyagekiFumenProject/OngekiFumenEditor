@@ -1,9 +1,9 @@
-using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public abstract class OngekiTimelineObjectBase : OngekiObjectBase, ITimelineObject, IDisplayableObject, ISelectableObject, IDisposable
     {
@@ -61,3 +61,4 @@ namespace OngekiFumenEditor.Base
         }
     }
 }
+

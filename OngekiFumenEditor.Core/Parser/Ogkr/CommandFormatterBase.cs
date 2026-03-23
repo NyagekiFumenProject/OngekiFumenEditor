@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Parser.Ogkr;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Parser.Ogkr;
 using System;
 
-namespace OngekiFumenEditor.Parser.Ogkr
+namespace OngekiFumenEditor.Core.Parser.Ogkr
 {
 	public abstract class CommandFormatterBase<T> : ICommandFormatter
 	{

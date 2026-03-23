@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Base.ValueTypes;
+namespace OngekiFumenEditor.Core.Base.ValueTypes;
 
 public readonly record struct Color(byte A, byte R, byte G, byte B)
 {

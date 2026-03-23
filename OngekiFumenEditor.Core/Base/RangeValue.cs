@@ -1,7 +1,7 @@
 using Caliburn.Micro;
 using System;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public class RangeValue : PropertyChangedBase
     {

@@ -1,15 +1,15 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Microsoft.Win32;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Windows;
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Modules.FumenConverter.Kernel;
 using MessageBox = System.Windows.MessageBox;
 

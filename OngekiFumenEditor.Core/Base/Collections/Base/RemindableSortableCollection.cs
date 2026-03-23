@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.Collections.Base
+namespace OngekiFumenEditor.Core.Base.Collections.Base
 {
     public class RemindableSortableCollection<T, X> : SortableCollection<T, X> where T : INotifyPropertyChanged where X : IComparable<X>
     {

@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Base.OngekiObjects.Beam
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Beam
 {
     public interface IBeamObject
     {

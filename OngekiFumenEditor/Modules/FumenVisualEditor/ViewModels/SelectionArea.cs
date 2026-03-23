@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Forms.Design;
 using Caliburn.Micro;
 using Gemini.Framework.Services;
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Properties;

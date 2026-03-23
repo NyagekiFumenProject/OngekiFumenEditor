@@ -1,11 +1,11 @@
-﻿using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Attributes;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Core.Utils;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles
 {
     //[DontShowPropertyInfoAttrbute]
     public partial class Bullet : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile
@@ -163,3 +163,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
     }
 }
+

@@ -1,14 +1,14 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.OngekiObjects;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Core.Properties;
-using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
-using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Core.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
     [Export(typeof(IFumenCheckRule))]
     internal class SoflanConflictCheckRule : IFumenCheckRule
@@ -48,3 +48,4 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
         }
     }
 }
+

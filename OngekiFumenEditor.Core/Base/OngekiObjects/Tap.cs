@@ -1,7 +1,7 @@
-﻿using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
     public class Tap : OngekiMovableObjectBase, ILaneDockableChangable, ICriticalableObject
     {

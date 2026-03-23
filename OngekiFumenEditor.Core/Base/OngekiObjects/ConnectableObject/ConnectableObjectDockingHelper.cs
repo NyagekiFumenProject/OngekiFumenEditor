@@ -1,7 +1,7 @@
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Utils;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject
 {
     public static class ConnectableObjectDockingHelper
     {
@@ -51,3 +51,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         }
     }
 }
+

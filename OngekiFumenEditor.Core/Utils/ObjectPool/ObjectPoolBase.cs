@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Utils.ObjectPool
+﻿namespace OngekiFumenEditor.Core.Utils.ObjectPool
 {
     public abstract class ObjectPoolBase
     {
@@ -26,3 +26,4 @@
 #endif
     }
 }
+

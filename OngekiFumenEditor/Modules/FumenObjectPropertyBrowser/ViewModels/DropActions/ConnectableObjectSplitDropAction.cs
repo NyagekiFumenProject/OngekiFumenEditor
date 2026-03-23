@@ -1,6 +1,6 @@
-ï»¿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
@@ -40,13 +40,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.SplitLane, () =>
 			{
-				//è®¡ç®—å‡ºéœ€è¦è¢«åˆ’åˆ†å‡ºæ¥çš„åè¾¹å­ç‰©ä»¶é›†åˆ
+				//¼ÆËã³öĞèÒª±»»®·Ö³öÀ´µÄºó±ß×ÓÎï¼ş¼¯ºÏ
 				splitOutChildren.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
 				affactedObjects.AddRange(editor.Fumen.Taps.AsEnumerable<ILaneDockable>()
 					.Concat(editor.Fumen.Holds)
 					.Where(x => x.ReferenceLaneStart == startObject));
 
-				//è¢«åˆ’åˆ†çš„å­ç‰©ä»¶åˆ é™¤å‡ºæ¥
+				//±»»®·ÖµÄ×ÓÎï¼şÉ¾³ı³öÀ´
 				foreach (var item in splitOutChildren)
 				{
 					startObject.RemoveChildObject(item);

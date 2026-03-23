@@ -1,10 +1,10 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki.CommandImpl
 {
 	internal static class ParserUtils
 	{

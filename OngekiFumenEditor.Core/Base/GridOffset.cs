@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public sealed record GridOffset(float Unit, int Grid)
     {

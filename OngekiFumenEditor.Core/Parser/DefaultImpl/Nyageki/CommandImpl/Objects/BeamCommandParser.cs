@@ -1,13 +1,13 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 {
     [Export(typeof(INyagekiCommandParser))]
     public class BeamCommandParser : INyagekiCommandParser
@@ -66,3 +66,4 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
         }
     }
 }
+

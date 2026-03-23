@@ -1,10 +1,10 @@
-锘縰sing OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
     public class Hold : OngekiMovableObjectBase, ILaneDockableChangable, ICriticalableObject
     {
@@ -101,7 +101,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public void CopyEntire(Hold from)
         {
-            //鍖呮嫭End涓�璧峰鍒朵簡
+            //包括End一起复制了
             Copy(from);
 
             if (from.HoldEnd != null)

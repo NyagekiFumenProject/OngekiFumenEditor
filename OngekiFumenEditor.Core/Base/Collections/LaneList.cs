@@ -1,9 +1,9 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
     public class LaneList : ConnectableObjectList<LaneStartBase, ConnectableChildObjectBase>
     {

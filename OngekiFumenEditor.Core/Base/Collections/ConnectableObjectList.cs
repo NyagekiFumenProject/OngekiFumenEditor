@@ -1,11 +1,11 @@
-using OngekiFumenEditor.Base.Collections.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.Collections.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
     public class ConnectableObjectList<START_TYPE, CHILD_TYPE> : IReadOnlyCollection<START_TYPE>
         where START_TYPE : ConnectableStartObject

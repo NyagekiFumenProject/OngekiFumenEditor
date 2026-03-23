@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class CollectionHelper
     {
@@ -50,3 +50,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

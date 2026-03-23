@@ -1,7 +1,7 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.Collections.Base;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.OngekiObjects;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.Collections.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
     public class IndividualSoflanAreaListMap : PropertyChangedBase, IReadOnlyDictionary<int, IndividualSoflanAreaList>
     {

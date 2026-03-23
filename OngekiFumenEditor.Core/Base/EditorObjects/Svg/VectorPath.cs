@@ -1,7 +1,7 @@
-using OngekiFumenEditor.Base.ValueTypes;
+using OngekiFumenEditor.Core.Base.ValueTypes;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.EditorObjects.Svg;
+namespace OngekiFumenEditor.Core.Base.EditorObjects.Svg;
 
 public class VectorPath
 {

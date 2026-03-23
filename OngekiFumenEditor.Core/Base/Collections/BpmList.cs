@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base.Collections.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Collections.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
     public class BpmList : IBinaryFindRangeEnumable<BPMChange, TGrid>
     {
@@ -178,3 +178,4 @@ namespace OngekiFumenEditor.Base.Collections
             => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).Contains(obj);
     }
 }
+

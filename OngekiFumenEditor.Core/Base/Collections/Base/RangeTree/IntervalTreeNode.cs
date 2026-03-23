@@ -1,7 +1,7 @@
 //copy&modify from repo : https://github.com/mbuchetics/RangeTree , LICENSE.txt : https://github.com/mbuchetics/RangeTree/blob/master/LICENSE.txt
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
+namespace OngekiFumenEditor.Core.Base.Collections.Base.RangeTree
 {
     /// <summary>
     ///     A node of the range tree. Given a list of items, it builds

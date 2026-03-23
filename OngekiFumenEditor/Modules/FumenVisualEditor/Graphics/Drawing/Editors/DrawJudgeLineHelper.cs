@@ -1,6 +1,6 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.EditorObjects;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;

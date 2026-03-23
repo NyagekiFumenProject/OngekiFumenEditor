@@ -1,7 +1,7 @@
-using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Utils;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public abstract class OngekiMovableObjectBase : OngekiTimelineObjectBase, IHorizonPositionObject
     {
@@ -38,3 +38,4 @@ namespace OngekiFumenEditor.Base
         }
     }
 }
+

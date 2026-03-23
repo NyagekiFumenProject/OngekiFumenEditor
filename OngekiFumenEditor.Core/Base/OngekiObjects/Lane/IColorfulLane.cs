@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Base.OngekiObjects.Lane
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Lane
 {
 	public interface IColorfulLane
 	{

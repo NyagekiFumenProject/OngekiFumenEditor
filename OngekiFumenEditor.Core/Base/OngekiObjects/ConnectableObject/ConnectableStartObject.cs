@@ -1,13 +1,13 @@
-using OngekiFumenEditor.Kernel.CurveInterpolater;
-using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject
 {
     public abstract class ConnectableStartObject : ConnectableObjectBase
     {
@@ -534,3 +534,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         }
     }
 }
+

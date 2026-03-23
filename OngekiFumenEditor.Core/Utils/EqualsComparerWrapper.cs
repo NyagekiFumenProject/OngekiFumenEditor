@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public class EqualsComparerWrapper<T> : IEqualityComparer<T>
     {
@@ -14,3 +14,4 @@ namespace OngekiFumenEditor.Utils
         public int GetHashCode(T obj) => obj?.GetHashCode() ?? 0;
     }
 }
+

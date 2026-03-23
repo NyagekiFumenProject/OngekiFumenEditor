@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl
 {
     public class NavigateToTGridBehavior : INavigateBehavior
     {

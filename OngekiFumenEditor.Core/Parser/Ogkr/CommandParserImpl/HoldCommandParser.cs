@@ -1,10 +1,10 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Utils;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class HoldCommandParser : CommandParserBase
@@ -60,3 +60,4 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 		public override string CommandLineHeader => "XHD";
 	}
 }
+

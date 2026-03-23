@@ -1,8 +1,8 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Modules.Toolbox;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Properties;

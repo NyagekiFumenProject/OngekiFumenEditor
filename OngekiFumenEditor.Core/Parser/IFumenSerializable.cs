@@ -1,7 +1,7 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser
+namespace OngekiFumenEditor.Core.Parser
 {
 	public interface IFumenSerializable
 	{

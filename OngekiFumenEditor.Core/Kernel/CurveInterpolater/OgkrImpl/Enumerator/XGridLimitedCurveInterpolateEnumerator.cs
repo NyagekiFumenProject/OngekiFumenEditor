@@ -1,10 +1,10 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.DefaultImpl.Enumerator;
 using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Enumerator
+namespace OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Enumerator
 {
     public class XGridLimitedCurveInterpolateEnumerator : DefaultCurveInterpolateEnumerator
     {

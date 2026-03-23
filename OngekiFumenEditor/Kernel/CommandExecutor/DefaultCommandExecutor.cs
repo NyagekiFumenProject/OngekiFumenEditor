@@ -1,5 +1,5 @@
-ï»¿using Caliburn.Micro;
-using OngekiFumenEditor.Base;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor.Attributes;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
@@ -10,7 +10,7 @@ using OngekiFumenEditor.Modules.OptionGeneratorTools.Base;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
 using OngekiFumenEditor.Modules.PreviewSvgGenerator;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
@@ -112,7 +112,7 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
                 }
                 else
                 {
-                    //åªèƒ½é€šè¿‡è°±é¢æ¥è®¡ç®—
+                    //Ö»ÄÜÍ¨¹ıÆ×ÃæÀ´¼ÆËã
                     var maxTGrid = fumen.GetAllDisplayableObjects().OfType<ITimelineObject>().Max(x => x.TGrid);
                     maxTGrid += new GridOffset(5, 0);
                     var duration = TGridCalculator.ConvertTGridToAudioTime(maxTGrid, fumen.BpmList);

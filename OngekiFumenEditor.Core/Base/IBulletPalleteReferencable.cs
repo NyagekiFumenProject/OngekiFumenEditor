@@ -1,7 +1,7 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System.ComponentModel;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public interface IBulletPalleteReferencable
     {

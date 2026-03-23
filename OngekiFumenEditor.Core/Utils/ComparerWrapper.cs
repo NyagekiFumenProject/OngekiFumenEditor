@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public class ComparerWrapper<T> : IComparer<T>
     {
@@ -15,3 +15,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

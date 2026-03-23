@@ -1,9 +1,9 @@
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Utils;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
 	public class LaneBlockArea : OngekiTimelineObjectBase
 	{
@@ -129,3 +129,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 		}
 	}
 }
+

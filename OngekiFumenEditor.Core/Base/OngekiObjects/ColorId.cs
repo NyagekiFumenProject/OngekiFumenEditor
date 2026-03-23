@@ -1,7 +1,7 @@
 using System;
-using OngekiFumenEditor.Base.ValueTypes;
+using OngekiFumenEditor.Core.Base.ValueTypes;
 
-namespace OngekiFumenEditor.Base.OngekiObjects;
+namespace OngekiFumenEditor.Core.Base.OngekiObjects;
 
 public struct ColorId : IEquatable<ColorId>
 {

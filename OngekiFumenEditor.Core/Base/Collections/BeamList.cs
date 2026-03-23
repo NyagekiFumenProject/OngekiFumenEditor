@@ -1,7 +1,7 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
 	public class BeamList : ConnectableObjectList<BeamStart, ConnectableChildObjectBase>
 	{

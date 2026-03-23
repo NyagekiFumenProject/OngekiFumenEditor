@@ -1,10 +1,10 @@
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
     public class SoflanListMap : IReadOnlyDictionary<int, SoflanList>
     {

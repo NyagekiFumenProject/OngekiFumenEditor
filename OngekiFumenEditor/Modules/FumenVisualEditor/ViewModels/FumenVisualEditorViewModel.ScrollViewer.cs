@@ -1,5 +1,5 @@
 using Gemini.Framework;
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Linq;

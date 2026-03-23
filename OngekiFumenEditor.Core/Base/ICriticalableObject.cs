@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public interface ICriticalableObject
     {

@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using static OngekiFumenEditor.Utils.LambdaActivator;
+using static OngekiFumenEditor.Core.Utils.LambdaActivator;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     /*
         Source from : https://github.com/eallegretta/lambda-activator/blob/master/src/LambdaActivator/LambdaActivator.cs
@@ -144,3 +144,4 @@ namespace OngekiFumenEditor.Utils
         public static T CreateInstance<T>() where T : class, new() => CreateInstance(typeof(T)) as T;
     }
 }
+

@@ -1,7 +1,8 @@
-﻿namespace OngekiFumenEditor.Utils
+﻿namespace OngekiFumenEditor.Core.Utils
 {
     public static class ObjectExtensionMethod
     {
         public static void ReturnToObjectPool<T>(this T obj) where T : new() => ObjectPool.ObjectPool<T>.Return(obj);
     }
 }
+

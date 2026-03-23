@@ -1,9 +1,9 @@
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.Collections.Base
+namespace OngekiFumenEditor.Core.Base.Collections.Base
 {
     public class SortableCollection<T, X> : IBinaryFindRangeEnumable<T, X> where X : IComparable<X>
     {
@@ -156,3 +156,4 @@ namespace OngekiFumenEditor.Base.Collections.Base
         }
     }
 }
+

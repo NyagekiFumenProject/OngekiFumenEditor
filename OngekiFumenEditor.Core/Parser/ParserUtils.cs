@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser
+namespace OngekiFumenEditor.Core.Parser
 {
     public static class ParserUtils
     {

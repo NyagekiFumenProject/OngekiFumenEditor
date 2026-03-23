@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base
 {
     public interface ICheckResult
     {

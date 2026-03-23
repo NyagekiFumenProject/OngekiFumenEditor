@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Core.Base.Attributes;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject
 {
     public abstract class ConnectableObjectBase : OngekiMovableObjectBase
     {

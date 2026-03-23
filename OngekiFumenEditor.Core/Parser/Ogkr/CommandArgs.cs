@@ -1,10 +1,10 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.Ogkr
+namespace OngekiFumenEditor.Core.Parser.Ogkr
 {
 	public class CommandArgs
 	{

@@ -1,47 +1,48 @@
 ﻿using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
 {
-	public class RangeValueTypeUIViewModel : CommonUIViewModelBase<Base.RangeValue>
+	public class RangeValueTypeUIViewModel : CommonUIViewModelBase<RangeValue>
 	{
-		public float CurrentValue
+		public double CurrentValue
 		{
 			get => TypedProxyValue.CurrentValue;
 			set
 			{
 				if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-					undoable.ExecuteSubPropertySetAction(nameof(RangeValue.CurrentValue), (val) => TypedProxyValue.CurrentValue = val, CurrentValue, value);
+					undoable.ExecuteSubPropertySetAction<float>(nameof(RangeValue.CurrentValue), (float val) => TypedProxyValue.CurrentValue = val, (float)TypedProxyValue.CurrentValue, (float)value);
 				else
-					TypedProxyValue.CurrentValue = value;
+					TypedProxyValue.CurrentValue = (float)value;
 
 				NotifyOfPropertyChange(() => CurrentValue);
 			}
 		}
 
-		public float MinValue
+		public double MinValue
 		{
 			get => TypedProxyValue.MinValue;
 			set
 			{
 				if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-					undoable.ExecuteSubPropertySetAction(nameof(RangeValue.MinValue), (val) => TypedProxyValue.MinValue = val, MinValue, value);
+					undoable.ExecuteSubPropertySetAction<float>(nameof(RangeValue.MinValue), (float val) => TypedProxyValue.MinValue = val, (float)TypedProxyValue.MinValue, (float)value);
 				else
-					TypedProxyValue.MinValue = value;
+					TypedProxyValue.MinValue = (float)value;
 
 				NotifyOfPropertyChange(() => MinValue);
 			}
 		}
 
-		public float MaxValue
+		public double MaxValue
 		{
 			get => TypedProxyValue.MaxValue;
 			set
 			{
 				if (PropertyInfo is UndoablePropertyInfoWrapper undoable)
-					undoable.ExecuteSubPropertySetAction(nameof(RangeValue.MaxValue), (val) => TypedProxyValue.MaxValue = val, MaxValue, value);
+					undoable.ExecuteSubPropertySetAction<float>(nameof(RangeValue.MaxValue), (float val) => TypedProxyValue.MaxValue = val, (float)TypedProxyValue.MaxValue, (float)value);
 				else
-					TypedProxyValue.MaxValue = value;
+					TypedProxyValue.MaxValue = (float)value;
 
 				NotifyOfPropertyChange(() => MaxValue);
 			}

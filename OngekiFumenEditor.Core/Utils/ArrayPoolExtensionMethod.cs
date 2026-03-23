@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Utils.ObjectPool;
+﻿using OngekiFumenEditor.Core.Utils.ObjectPool;
 using System;
 using System.Buffers;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
 	public static class ArrayPoolExtensionMethod
 	{
@@ -31,3 +31,4 @@ namespace OngekiFumenEditor.Utils
 		}
 	}
 }
+

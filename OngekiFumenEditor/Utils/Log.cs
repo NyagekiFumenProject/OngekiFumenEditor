@@ -61,7 +61,7 @@ public class Log
             prefix = Path.GetFileNameWithoutExtension(record.FilePath) + prefix;
         prefix += $":{record.LineNumber}";
 
-        using var _d = ObjectPool.ObjectPool.GetWithUsingDisposable<StringBuilder>(out var sb, out _);
+        using var _d = OngekiFumenEditor.Core.Utils.ObjectPool.ObjectPool.GetWithUsingDisposable<StringBuilder>(out var sb, out _);
         sb.Clear();
 
         sb.AppendFormat("[{0} {1}:{2}]", record.Time ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") : string.Empty,

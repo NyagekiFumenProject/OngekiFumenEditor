@@ -1,8 +1,8 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class TaskExtensionMethod
     {
@@ -21,3 +21,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

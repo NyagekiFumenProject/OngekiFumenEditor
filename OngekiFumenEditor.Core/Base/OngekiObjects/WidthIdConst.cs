@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
     public static class WidthIdConst
     {

@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Utils.ObjectPool
+﻿namespace OngekiFumenEditor.Core.Utils.ObjectPool
 {
     public interface ICacheCleanable
     {
@@ -6,3 +6,4 @@ namespace OngekiFumenEditor.Utils.ObjectPool
         void OnAfterPutClean();
     }
 }
+

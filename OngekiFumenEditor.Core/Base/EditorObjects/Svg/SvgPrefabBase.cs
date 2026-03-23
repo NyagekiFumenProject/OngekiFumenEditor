@@ -1,16 +1,16 @@
-using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.ValueTypes;
-using OngekiFumenEditor.Kernel.CurveInterpolater;
-using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.ValueTypes;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Base.EditorObjects.Svg
+namespace OngekiFumenEditor.Core.Base.EditorObjects.Svg
 {
 	public abstract class SvgPrefabBase : OngekiMovableObjectBase
 	{
@@ -354,3 +354,4 @@ namespace OngekiFumenEditor.Base.EditorObjects.Svg
 		}
 	}
 }
+

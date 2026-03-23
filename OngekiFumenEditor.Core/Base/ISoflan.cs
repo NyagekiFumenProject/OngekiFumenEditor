@@ -1,11 +1,11 @@
-锘縰sing System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
 	public interface ISoflan : ITimelineObject, INotifyPropertyChanged, IDisplayableObject
 	{
@@ -15,6 +15,6 @@ namespace OngekiFumenEditor.Base
 
         float SpeedInEditor { get; }
 
-		TGrid EndTGrid { get; set; } // 鑰冭檻鍒癝oflanList鐨勯棿闅旀爲浣跨敤
+		TGrid EndTGrid { get; set; } // 考虑到SoflanList的间隔树使用
     }
 }

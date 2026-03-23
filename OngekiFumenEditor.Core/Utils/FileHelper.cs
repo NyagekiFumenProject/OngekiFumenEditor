@@ -1,7 +1,7 @@
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class FileHelper
     {
@@ -46,3 +46,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

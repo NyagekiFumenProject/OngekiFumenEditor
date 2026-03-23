@@ -1,13 +1,13 @@
-using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Kernel.CurveInterpolater;
-using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject
 {
     public abstract class ConnectableChildObjectBase : ConnectableObjectBase
     {

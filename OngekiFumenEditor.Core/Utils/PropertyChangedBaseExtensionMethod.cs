@@ -1,10 +1,10 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class PropertyChangedBaseExtensionMethod
     {
@@ -38,3 +38,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

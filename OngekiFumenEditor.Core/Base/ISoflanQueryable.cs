@@ -1,13 +1,13 @@
-﻿using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.EditorObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static OngekiFumenEditor.Base.Collections.SoflanList;
+using static OngekiFumenEditor.Core.Base.Collections.SoflanList;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public interface ISoflanQueryable
     {

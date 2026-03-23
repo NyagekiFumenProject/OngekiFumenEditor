@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.Collections.Base
+namespace OngekiFumenEditor.Core.Base.Collections.Base
 {
     public class QuadTreeWrapper<TValue> : IReadOnlyCollection<TValue> where TValue : INotifyPropertyChanged
     {

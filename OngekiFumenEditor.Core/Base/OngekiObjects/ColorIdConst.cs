@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using OngekiFumenEditor.Base.ValueTypes;
+using System.Collections.Generic;
+using OngekiFumenEditor.Core.Base.ValueTypes;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
 	public static class ColorIdConst
 	{

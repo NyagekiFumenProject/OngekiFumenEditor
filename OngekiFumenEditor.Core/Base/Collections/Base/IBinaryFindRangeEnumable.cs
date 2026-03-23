@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.Collections.Base
+namespace OngekiFumenEditor.Core.Base.Collections.Base
 {
     public interface IBinaryFindRangeEnumable<T, X> : IReadOnlyCollection<T> where X : IComparable<X>
     {

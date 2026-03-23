@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Base.EditorObjects.Svg
+namespace OngekiFumenEditor.Core.Base.EditorObjects.Svg
 {
 	public class SvgStringPrefab : SvgPrefabBase
 	{

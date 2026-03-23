@@ -1,11 +1,11 @@
-ï»¿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework.Results;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using System;
 using System.IO;
@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Utils
         {
             if (IoC.GetAll<IEditorProvider>().FirstOrDefault(x => x.Handles(filePath)) is IEditorProvider provider)
             {
-                Log.LogInfo($"é€šè¿‡å‘½ä»¤è¡Œå¿«é€Ÿæ‰“å¼€æ–‡æ¡£:({provider}) {filePath}");
+                Log.LogInfo($"Í¨¹ıÃüÁîĞĞ¿ìËÙ´ò¿ªÎÄµµ:({provider}) {filePath}");
                 await Dispatcher.Yield();
                 var openDocument = Show.Document(filePath);
                 await Coroutine.ExecuteAsync(new IResult[] { openDocument }.AsEnumerable().GetEnumerator());
@@ -122,7 +122,7 @@ namespace OngekiFumenEditor.Utils
             var ogkrFileDir = Path.GetDirectoryName(ogkrFilePath);
             var musicXmlFilePath = Path.Combine(ogkrFileDir, "Music.xml");
 
-            //ä»Music.xmlè¯»å–musicId
+            //´ÓMusic.xml¶ÁÈ¡musicId
             if (File.Exists(musicXmlFilePath))
             {
                 var musicXml = await XDocument.LoadAsync(File.OpenRead(musicXmlFilePath), LoadOptions.None, default);
@@ -142,7 +142,7 @@ namespace OngekiFumenEditor.Utils
 
             if (File.Exists(musicXmlFilePath))
             {
-                //ä»Music.xmlè¯»å–musicId
+                //´ÓMusic.xml¶ÁÈ¡musicId
                 var musicXml = await XDocument.LoadAsync(File.OpenRead(musicXmlFilePath), LoadOptions.None, default);
                 var element = musicXml.XPathSelectElement(@"//MusicSourceName[1]/id[1]");
                 if (element != null)
@@ -153,7 +153,7 @@ namespace OngekiFumenEditor.Utils
 
             if (musicId < 0)
             {
-                //ä»æ–‡ä»¶åè¯»å–musicId
+                //´ÓÎÄ¼şÃû¶ÁÈ¡musicId
                 var match = new Regex(@"(\d+)_\d+").Match(Path.GetFileNameWithoutExtension(ogkrFilePath));
                 if (match.Success)
                 {
@@ -186,7 +186,7 @@ namespace OngekiFumenEditor.Utils
 
             if (Directory.Exists(musicSourceFolder))
             {
-                //å»å¯¹åº”çš„musicsourceæ–‡ä»¶å¤¹æ£€æŸ¥
+                //È¥¶ÔÓ¦µÄmusicsourceÎÄ¼ş¼Ğ¼ì²é
                 audioFile = Directory.GetFiles(musicSourceFolder, $"music{musicIdStr}.*").Where(x => audioExts.Any(t => x.EndsWith(t))).FirstOrDefault();
             }
 

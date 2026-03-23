@@ -1,6 +1,6 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.MetaInfo
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl.MetaInfo
 {
 	public abstract class MetaInfoCommandParserBase : CommandParserBase
 	{

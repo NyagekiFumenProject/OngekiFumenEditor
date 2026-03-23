@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class StringExtensionMethod
     {
@@ -24,3 +24,4 @@ namespace OngekiFumenEditor.Utils
         public static string Format(this string str, params object[] args) => string.Format(str, args);
     }
 }
+

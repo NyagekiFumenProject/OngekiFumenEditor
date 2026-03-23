@@ -1,9 +1,9 @@
-using Caliburn.Micro;
-using OngekiFumenEditor.Utils;
+﻿using Caliburn.Micro;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.ComponentModel;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public class FumenMetaInfo : PropertyChangedBase
     {
@@ -63,3 +63,4 @@ namespace OngekiFumenEditor.Base
         public float ProgJudgeBpm { get; set; } = 240;
     }
 }
+

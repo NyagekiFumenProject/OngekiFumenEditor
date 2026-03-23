@@ -1,11 +1,11 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Core.Utils;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl
 {
 	public abstract class WallCommandParserBase : CommandParserBase
 	{
@@ -94,3 +94,4 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 
 	#endregion
 }
+

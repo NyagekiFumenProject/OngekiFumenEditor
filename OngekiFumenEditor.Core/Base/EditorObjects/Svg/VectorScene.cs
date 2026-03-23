@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.EditorObjects.Svg;
+namespace OngekiFumenEditor.Core.Base.EditorObjects.Svg;
 
 public class VectorScene
 {

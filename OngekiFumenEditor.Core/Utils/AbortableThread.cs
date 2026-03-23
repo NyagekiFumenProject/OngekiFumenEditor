@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public class AbortableThread
     {
@@ -36,3 +36,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

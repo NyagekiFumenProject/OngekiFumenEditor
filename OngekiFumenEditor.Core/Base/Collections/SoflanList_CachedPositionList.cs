@@ -1,13 +1,13 @@
-using OngekiFumenEditor.Base.Collections.Base;
-using OngekiFumenEditor.Base.Collections.Base.RangeTree;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Collections.Base;
+using OngekiFumenEditor.Core.Base.Collections.Base.RangeTree;
+using OngekiFumenEditor.Core.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
     public partial class SoflanList
     {
@@ -530,3 +530,4 @@ namespace OngekiFumenEditor.Base.Collections
         }
     }
 }
+

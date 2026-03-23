@@ -1,13 +1,13 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects.Svg;
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 {
 	[Export(typeof(INyagekiCommandParser))]
 	public class SvgPrefabCommandParser : INyagekiCommandParser

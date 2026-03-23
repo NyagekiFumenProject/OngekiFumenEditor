@@ -1,9 +1,10 @@
 ﻿using System;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
 	public class ViewModelReferenceAttribute : Attribute
 	{
 		public Type ViewModelType { get; set; }
 	}
 }
+

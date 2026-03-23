@@ -1,12 +1,12 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class SoflanCommandParser : CommandParserBase
@@ -70,3 +70,4 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 		}
 	}
 }
+

@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 {
 	[Export(typeof(INyagekiCommandParser))]
 	public class ClickSECommandParser : INyagekiCommandParser

@@ -1,7 +1,7 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 				if (projectData.StoreBulletPalleteEditorDatas.TryGetValue(bpl.StrID, out var storeEditorData))
 				{
 					bpl.EditorName = storeEditorData.Name;
-					bpl.EditorAxuiliaryLineColor = OngekiFumenEditor.Base.ValueTypes.Color.FromArgb(storeEditorData.AuxiliaryLineColor.A, storeEditorData.AuxiliaryLineColor.R, storeEditorData.AuxiliaryLineColor.G, storeEditorData.AuxiliaryLineColor.B);
+					bpl.EditorAxuiliaryLineColor = OngekiFumenEditor.Core.Base.ValueTypes.Color.FromArgb(storeEditorData.AuxiliaryLineColor.A, storeEditorData.AuxiliaryLineColor.R, storeEditorData.AuxiliaryLineColor.G, storeEditorData.AuxiliaryLineColor.B);
 				}
 			}
 		}

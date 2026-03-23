@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class RandomHepler
     {
@@ -40,3 +40,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

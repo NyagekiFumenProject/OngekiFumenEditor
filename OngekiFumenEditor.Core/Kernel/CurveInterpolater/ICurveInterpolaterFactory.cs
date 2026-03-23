@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 
-namespace OngekiFumenEditor.Kernel.CurveInterpolater
+namespace OngekiFumenEditor.Core.Kernel.CurveInterpolater
 {
     public interface ICurveInterpolaterFactory
     {

@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Parser.Ogkr
+namespace OngekiFumenEditor.Core.Parser.Ogkr
 {
 	public class FumenStatisticsResult
 	{

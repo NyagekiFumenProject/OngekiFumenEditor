@@ -1,4 +1,4 @@
-ï»¿using AkiraMindController.Communication;
+using AkiraMindController.Communication;
 using AkiraMindController.Communication.Services.Assets;
 using AkiraMindController.Communication.Services.GameStatus;
 using AkiraMindController.Communication.Services.MusicSelect;
@@ -10,13 +10,13 @@ using Gemini.Framework.Services;
 using kRpc.Client;
 using kRpc.Coroutines;
 using kRpc.Utils;
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Base;
 using OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Views;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
@@ -474,7 +474,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
         //        var filePath = data.dumpFilePath;
         //        if (File.Exists(filePath))
         //        {
-        //            if (MessageBox.Show("è½¬å‚¨æˆåŠŸ,æ˜¯å¦æ‰“å¼€æ–‡ä»¶å¤¹?", "DumpAutoFaderTarget", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+        //            if (MessageBox.Show("×ª´¢³É¹¦,ÊÇ·ñ´ò¿ªÎÄ¼ş¼Ğ?", "DumpAutoFaderTarget", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
         //            {
         //                var dir = Path.GetDirectoryName(filePath);
         //                ProcessUtils.OpenPath(dir);
@@ -482,7 +482,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
         //        }
         //        else
         //        {
-        //            MessageBox.Show("è½¬å‚¨å¤±è´¥,è¯·è‡ªè¡ŒæŸ¥çœ‹æ¸¸æˆæ—¥å¿—", "DumpAutoFaderTarget");
+        //            MessageBox.Show("×ª´¢Ê§°Ü,Çë×ÔĞĞ²é¿´ÓÎÏ·ÈÕÖ¾", "DumpAutoFaderTarget");
         //        }
         //    }
         //}

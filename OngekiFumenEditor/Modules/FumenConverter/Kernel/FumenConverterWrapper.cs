@@ -2,10 +2,10 @@ using System.IO;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using Microsoft.CodeAnalysis.Options;
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Base;
-using OngekiFumenEditor.Parser;
-using OngekiFumenEditor.Parser.DefaultImpl;
+using OngekiFumenEditor.Core.Parser;
+using OngekiFumenEditor.Core.Parser.DefaultImpl;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils.Ogkr;
 

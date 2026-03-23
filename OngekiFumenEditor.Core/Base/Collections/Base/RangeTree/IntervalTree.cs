@@ -1,10 +1,10 @@
-﻿//copy&modify from repo : https://github.com/mbuchetics/RangeTree , LICENSE.txt : https://github.com/mbuchetics/RangeTree/blob/master/LICENSE.txt
+//copy&modify from repo : https://github.com/mbuchetics/RangeTree , LICENSE.txt : https://github.com/mbuchetics/RangeTree/blob/master/LICENSE.txt
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
+namespace OngekiFumenEditor.Core.Base.Collections.Base.RangeTree
 {
 	public class IntervalTree<TKey, TValue> : IIntervalTree<TKey, TValue>
 	{

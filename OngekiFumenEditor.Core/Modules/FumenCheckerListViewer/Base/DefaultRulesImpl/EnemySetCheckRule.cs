@@ -1,11 +1,11 @@
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Properties;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using static OngekiFumenEditor.Base.OngekiObjects.EnemySet;
+using static OngekiFumenEditor.Core.Base.OngekiObjects.EnemySet;
 
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
     [Export(typeof(IFumenCheckRule))]
     internal class EnemySetCheckRule : IFumenCheckRule

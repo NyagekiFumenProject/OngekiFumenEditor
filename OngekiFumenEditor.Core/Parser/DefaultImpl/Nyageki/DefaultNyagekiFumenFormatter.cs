@@ -1,14 +1,14 @@
 ﻿using Caliburn.Micro;
 using DereTore.Common;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.EditorObjects.Svg;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -16,7 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki
 {
     [Export(typeof(IFumenSerializable))]
     class DefaultNyagekiFumenFormatter : IFumenSerializable
@@ -386,3 +386,4 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
         }
     }
 }
+

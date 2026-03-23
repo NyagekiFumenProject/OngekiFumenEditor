@@ -1,10 +1,10 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator
+namespace OngekiFumenEditor.Core.Kernel.CurveInterpolater.DefaultImpl.Enumerator
 {
     public class DefaultCurveInterpolateEnumerator : ICurveInterpolateEnumerator
     {

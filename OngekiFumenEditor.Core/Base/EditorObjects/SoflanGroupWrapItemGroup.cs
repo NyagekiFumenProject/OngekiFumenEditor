@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.EditorObjects
+namespace OngekiFumenEditor.Core.Base.EditorObjects
 {
     public class SoflanGroupWrapItemGroup : SoflanGroupDisplayItemListViewBase
     {

@@ -1,14 +1,15 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.EditorObjects.Svg;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Beam;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Beam;
 
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Core.Utils;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -30,7 +31,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using static OngekiFumenEditor.Utils.MathUtils;
+using static OngekiFumenEditor.Core.Utils.MathUtils;
 using Rectangle = System.Drawing.Rectangle;
 using SvgImage = Svg.SvgImage;
 
@@ -764,7 +765,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     {
                         IKeyframeSoflan sfl => ($"[{sfl.SoflanGroup}]{sfl.Speed:F2}x", Color.Cyan),
                         EnemySet set => ($"{set.TagTblValue}", Color.Yellow),
-                        BPMChange bpm => ($"♫ {bpm.BPM:f2}", Color.LightPink),
+                        BPMChange bpm => ($"? {bpm.BPM:f2}", Color.LightPink),
                         MeterChange met => ($"{met.BunShi} / {met.Bunbo}", Color.LightGreen),
                     };
 
@@ -1207,3 +1208,4 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
         }
     }
 }
+

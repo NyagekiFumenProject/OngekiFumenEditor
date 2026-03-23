@@ -1,4 +1,4 @@
-ï»¿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
 	public class BulletPalleteList : IReadOnlyList<BulletPallete>, INotifyCollectionChanged
 	{
@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.Base.Collections
 
 			if (string.IsNullOrWhiteSpace(pallete.StrID))
 			{
-				//åˆ†é…ä¸€ä¸ªæ–°çš„StrId 
+				//·ÖÅäÒ»¸öĞÂµÄStrId 
 				pallete.StrID = ConvertIntToId(ConvertIdToInt(cacheCurrentMaxId) + 1);
 			}
 
@@ -71,10 +71,10 @@ namespace OngekiFumenEditor.Base.Collections
 			if (palleteMap.TryGetValue(ConvertIdToInt(pallete.StrID), out var old))
 			{
 				if (old == pallete)
-					addable = false; //é‡å¤æ·»åŠ ï¼Œé‚£å°±å¿½ç•¥äº†
+					addable = false; //ÖØ¸´Ìí¼Ó£¬ÄÇ¾ÍºöÂÔÁË
 				else
 				{
-					RemovePallete(old); //å­˜åœ¨æ—§çš„ï¼Œé‚£å°±å…ˆåˆ äº†æ—§çš„å†æ·»åŠ æ–°çš„
+					RemovePallete(old); //´æÔÚ¾ÉµÄ£¬ÄÇ¾ÍÏÈÉ¾ÁË¾ÉµÄÔÙÌí¼ÓĞÂµÄ
 				}
 			}
 

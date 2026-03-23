@@ -1,6 +1,6 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Lane
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Lane
 {
 	public class WallRightNext : WallNextBase
 	{

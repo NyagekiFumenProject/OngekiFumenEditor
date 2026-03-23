@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki
 {
 	[Export(typeof(IFumenParserManager))]
 	internal class DefaultFumenParserManager : IFumenParserManager

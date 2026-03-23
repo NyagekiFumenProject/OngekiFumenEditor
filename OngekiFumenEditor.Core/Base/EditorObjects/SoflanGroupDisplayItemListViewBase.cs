@@ -1,11 +1,11 @@
-锘縰sing Caliburn.Micro;
+using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.EditorObjects
+namespace OngekiFumenEditor.Core.Base.EditorObjects
 {
     public abstract class SoflanGroupDisplayItemListViewBase : PropertyChangedBase
     {
@@ -30,11 +30,11 @@ namespace OngekiFumenEditor.Base.EditorObjects
         }
 
         /// <summary>
-        /// 鏄惁鍦ㄥ埗璋卞櫒璁捐妯″紡缁樺埗
+        /// 是否在制谱器设计模式绘制
         /// </summary>
         public abstract bool IsDisplayInDesignMode { get; set; }
         /// <summary>
-        /// 鏄惁鍦ㄥ埗璋卞櫒棰勮妯″紡缁樺埗
+        /// 是否在制谱器预览模式绘制
         /// </summary>
         public abstract bool IsDisplayInPreviewMode { get; set; }
     }

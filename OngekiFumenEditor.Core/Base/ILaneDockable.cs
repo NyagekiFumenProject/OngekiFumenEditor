@@ -1,6 +1,6 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
 	public interface ILaneDockable : IHorizonPositionObject, ITimelineObject
 	{

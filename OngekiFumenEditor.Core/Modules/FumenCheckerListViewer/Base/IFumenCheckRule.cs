@@ -1,7 +1,7 @@
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base
 {
     public interface IFumenCheckRule
     {

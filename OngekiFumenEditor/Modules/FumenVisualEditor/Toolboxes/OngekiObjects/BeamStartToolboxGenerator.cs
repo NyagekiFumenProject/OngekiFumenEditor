@@ -1,5 +1,5 @@
-﻿using Gemini.Modules.Toolbox;
-using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using Gemini.Modules.Toolbox;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects

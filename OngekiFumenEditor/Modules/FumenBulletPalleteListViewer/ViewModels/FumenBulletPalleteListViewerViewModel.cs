@@ -1,11 +1,11 @@
-﻿using AngleSharp.Common;
+using AngleSharp.Common;
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Views;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
@@ -216,7 +216,7 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
 
             var dialog = new CommonColorPicker(
                 () => Color.FromArgb(pallete.EditorAxuiliaryLineColor.A, pallete.EditorAxuiliaryLineColor.R, pallete.EditorAxuiliaryLineColor.G, pallete.EditorAxuiliaryLineColor.B),
-                color => pallete.EditorAxuiliaryLineColor = OngekiFumenEditor.Base.ValueTypes.Color.FromArgb(color.A, color.R, color.G, color.B),
+                color => pallete.EditorAxuiliaryLineColor = OngekiFumenEditor.Core.Base.ValueTypes.Color.FromArgb(color.A, color.R, color.G, color.B),
                 Resources.ChangeAxuiliaryLineColor.Format(pallete.StrID));
             dialog.Show();
         }

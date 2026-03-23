@@ -1,9 +1,10 @@
 ﻿using Caliburn.Micro;
 using EarcutNet;
 using NAudio.Gui;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Utils;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -15,7 +16,7 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
-using static OngekiFumenEditor.Utils.MathUtils;
+using static OngekiFumenEditor.Core.Utils.MathUtils;
 
 /*
  musicId:0840/1119/1011/0591
@@ -1126,3 +1127,4 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
     }
 }
+

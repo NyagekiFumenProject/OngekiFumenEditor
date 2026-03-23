@@ -1,5 +1,5 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.EditorObjects.Svg;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached;
 using OngekiFumenEditor.Utils;

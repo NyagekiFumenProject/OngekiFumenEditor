@@ -1,8 +1,8 @@
-using OngekiFumenEditor.Base;
+﻿using OngekiFumenEditor.Core.Base;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class TGridExtensionMethod
     {
@@ -35,3 +35,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

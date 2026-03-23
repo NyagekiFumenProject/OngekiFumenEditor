@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles
 {
     public interface IProjectile
     {

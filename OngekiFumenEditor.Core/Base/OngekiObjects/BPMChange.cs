@@ -1,6 +1,6 @@
 using System;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
     public class BPMChange : OngekiTimelineObjectBase
     {

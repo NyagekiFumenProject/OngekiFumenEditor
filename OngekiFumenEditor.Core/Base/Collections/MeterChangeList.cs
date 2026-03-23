@@ -1,13 +1,13 @@
-﻿using OngekiFumenEditor.Base.Collections.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Collections.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.Collections
+namespace OngekiFumenEditor.Core.Base.Collections
 {
     public class MeterChangeList : IBinaryFindRangeEnumable<MeterChange, TGrid>
     {
@@ -198,3 +198,4 @@ namespace OngekiFumenEditor.Base.Collections
             => ((IBinaryFindRangeEnumable<MeterChange, TGrid>)changedMeterList).Contains(obj);
     }
 }
+

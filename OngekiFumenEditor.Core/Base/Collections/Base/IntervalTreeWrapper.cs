@@ -1,11 +1,11 @@
-﻿using OngekiFumenEditor.Base.Collections.Base.RangeTree;
+using OngekiFumenEditor.Core.Base.Collections.Base.RangeTree;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.Collections.Base
+namespace OngekiFumenEditor.Core.Base.Collections.Base
 {
 	public class IntervalTreeWrapper<TKey, TValue> : IReadOnlyCollection<TValue> where TValue : INotifyPropertyChanged where TKey : IComparable<TKey>
 	{

@@ -1,9 +1,9 @@
-using Caliburn.Micro;
-using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Utils;
+﻿using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Utils;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public abstract class OngekiObjectBase : PropertyChangedBase
     {
@@ -49,3 +49,4 @@ namespace OngekiFumenEditor.Base
         }
     }
 }
+

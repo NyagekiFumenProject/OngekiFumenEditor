@@ -1,5 +1,5 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Base.EditorObjects
+namespace OngekiFumenEditor.Core.Base.EditorObjects
 {
 	public class InterpolatableSoflan : Soflan
 	{
@@ -170,3 +170,4 @@ namespace OngekiFumenEditor.Base.EditorObjects
 		}
 	}
 }
+

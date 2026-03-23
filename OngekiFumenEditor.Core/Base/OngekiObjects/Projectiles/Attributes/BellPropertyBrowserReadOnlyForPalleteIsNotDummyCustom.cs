@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Core.Base.Attributes;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles.Attributes
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Attributes
 {
     public class BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom : ObjectPropertyBrowserReadOnlyForCondition<IBulletPalleteReferencable>
     {

@@ -1,9 +1,9 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
 using System;
 using System.Linq;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class TGridAudioTimeCalculator
     {
@@ -24,3 +24,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

@@ -1,6 +1,6 @@
-ï»¿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Audio;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Utils
 {
 	public static class FileDialogHelper
 	{
-		// (".nagekiProj","Nagekiè°±é¢æ–‡ä»¶")[]
+		// (".nagekiProj","NagekiÆ×ÃæÎÄ¼ş")[]
 		public static string BuildExtensionFilter(IEnumerable<(string ext, string desc)> extParams) => string.Join("|", extParams.Select(x => $"{x.desc} ({x.ext})|*{x.ext}"));
 		public static string BuildExtensionFilter(params (string ext, string desc)[] extParams) => BuildExtensionFilter(extParams.AsEnumerable());
 

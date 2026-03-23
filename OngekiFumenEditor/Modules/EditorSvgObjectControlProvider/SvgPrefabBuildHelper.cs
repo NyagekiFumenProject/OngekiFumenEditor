@@ -1,13 +1,13 @@
-using OngekiFumenEditor.Base.EditorObjects.Svg;
-using OngekiFumenEditor.Base.ValueTypes;
+using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Core.Base.ValueTypes;
 using SharpVectors.Renderers.Wpf;
 using SvgConverter;
 using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
-using CoreColor = OngekiFumenEditor.Base.ValueTypes.Color;
-using CoreColors = OngekiFumenEditor.Base.ValueTypes.Colors;
+using CoreColor = OngekiFumenEditor.Core.Base.ValueTypes.Color;
+using CoreColors = OngekiFumenEditor.Core.Base.ValueTypes.Colors;
 using WpfColor = System.Windows.Media.Color;
 
 namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider

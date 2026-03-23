@@ -1,11 +1,11 @@
-Ôªøusing OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
 using System;
 using System.ComponentModel.Composition;
-using static OngekiFumenEditor.Base.OngekiObjects.BulletPallete;
+using static OngekiFumenEditor.Core.Base.OngekiObjects.BulletPallete;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 {
     [Export(typeof(INyagekiCommandParser))]
     public class BulletPalleteCommandParser : INyagekiCommandParser
@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             bpl.Speed = float.Parse(map["Speed"]);
             bpl.PlaceOffset = int.Parse(map["PlaceOffset"]);
 
-            //ÂÖºÂÆπËÄÅÈì∫Èù¢
+            //ºÊ»›¿œ∆Ã√Ê
             if (map.TryGetValue("RandomOffsetRange", out var r))
                 bpl.RandomOffsetRange = int.Parse(r);
 

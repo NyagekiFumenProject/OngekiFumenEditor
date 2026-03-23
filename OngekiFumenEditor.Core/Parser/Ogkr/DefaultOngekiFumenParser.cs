@@ -1,11 +1,11 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.Ogkr
+namespace OngekiFumenEditor.Core.Parser.Ogkr
 {
 	[Export(typeof(IFumenDeserializable))]
 	public class DefaultOngekiFumenParser : IFumenDeserializable

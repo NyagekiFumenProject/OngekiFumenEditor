@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 
-namespace OngekiFumenEditor.Parser;
+namespace OngekiFumenEditor.Core.Parser;
 
 public interface IFumenParserManager
 {

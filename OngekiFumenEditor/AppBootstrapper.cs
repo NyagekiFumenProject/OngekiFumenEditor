@@ -20,10 +20,12 @@ using Caliburn.Micro;
 using Gemini.Framework.Services;
 using Gemini.Modules.Output;
 using MahApps.Metro.Controls;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Utils;
+using OngekiFumenEditor.Core.Utils.ObjectPool;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor;
@@ -32,10 +34,10 @@ using OngekiFumenEditor.Kernel.Mcp;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
-using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
+using OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.SplashScreen;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.UI.KeyBinding.Input;
@@ -48,34 +50,34 @@ namespace OngekiFumenEditor;
 
 public class AppBootstrapper : Gemini.AppBootstrapper
 {
-    private sealed class EditorCoreLogTarget : ICoreLogTarget
+    private sealed class EditorCoreLogTarget : OngekiFumenEditor.Core.Utils.ICoreLogTarget
     {
-        public void Write(CoreLogLevel level, string message, Exception exception, string memberName, string filePath, int lineNumber)
+        public void Write(OngekiFumenEditor.Core.Utils.CoreLogLevel level, string message, Exception exception, string memberName, string filePath, int lineNumber)
         {
             var actualMessage = string.IsNullOrWhiteSpace(memberName) ? message : $"[{memberName}:{lineNumber}] {message}";
 
             switch (level)
             {
-                case CoreLogLevel.Debug:
+                case OngekiFumenEditor.Core.Utils.CoreLogLevel.Debug:
                     Log.LogDebug(actualMessage);
                     break;
-                case CoreLogLevel.Info:
+                case OngekiFumenEditor.Core.Utils.CoreLogLevel.Info:
                     Log.LogInfo(actualMessage);
                     break;
-                case CoreLogLevel.Warn:
+                case OngekiFumenEditor.Core.Utils.CoreLogLevel.Warn:
                     Log.LogWarn(actualMessage);
                     break;
-                case CoreLogLevel.Error when exception is not null:
+                case OngekiFumenEditor.Core.Utils.CoreLogLevel.Error when exception is not null:
                     Log.LogError(actualMessage, exception);
                     break;
-                case CoreLogLevel.Error:
+                case OngekiFumenEditor.Core.Utils.CoreLogLevel.Error:
                     Log.LogError(actualMessage);
                     break;
             }
         }
     }
 
-    private static readonly ICoreLogTarget coreLogTarget = new EditorCoreLogTarget();
+    private static readonly OngekiFumenEditor.Core.Utils.ICoreLogTarget coreLogTarget = new EditorCoreLogTarget();
 
 #if !DEBUG
     public override bool IsPublishSingleFileHandled => true;
@@ -590,3 +592,5 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         }
     }
 }
+
+

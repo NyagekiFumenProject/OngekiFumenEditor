@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
     public record WidthId(int Id, int WidthJudge, int WidthDraw)
     {

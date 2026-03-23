@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class BpmCommandParser : CommandParserBase

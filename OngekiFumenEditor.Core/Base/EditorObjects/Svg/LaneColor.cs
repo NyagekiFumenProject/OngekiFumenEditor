@@ -1,9 +1,9 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System.Collections.Generic;
 using System.Linq;
-using OngekiFumenEditor.Base.ValueTypes;
+using OngekiFumenEditor.Core.Base.ValueTypes;
 
-namespace OngekiFumenEditor.Base.EditorObjects.Svg
+namespace OngekiFumenEditor.Core.Base.EditorObjects.Svg
 {
 	public struct LaneColor
 	{

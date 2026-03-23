@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 
-namespace OngekiFumenEditor.Base.EditorObjects.LaneCurve
+namespace OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve
 {
     public class LaneCurvePathControlObject : OngekiMovableObjectBase
     {

@@ -1,5 +1,5 @@
-ï»¿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			if (dragInfoMap.TryGetValue(obj, out var info))
 				dragInfoMap.Remove(obj);
 			else
-				return;//ä¸åº”è¯¥èµ°åˆ°è¿™
+				return;//²»Ó¦¸Ã×ßµ½Õâ
 
 			var dragStartCanvasPoint = info.CanvasPoint;
 			var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor) : 0;
@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 					OnMoveCanvas(obj, newPos, editor);
 				}, () =>
 				{
-					//ä¸ç›´æ¥moveäº†ï¼Œç›´æ¥è®¾ç½®ä½ç½®å°±è¡Œ
+					//²»Ö±½ÓmoveÁË£¬Ö±½ÓÉèÖÃÎ»ÖÃ¾ÍĞĞ
 					if (obj is IHorizonPositionObject horizonPositionObject)
 						horizonPositionObject.XGrid = info.XGrid;
 					if (obj is ITimelineObject timelineObject)
@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 		public override void OnDragMove(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
 		{
 			if (!dragInfoMap.TryGetValue(obj, out var info))
-				return;//ä¸åº”è¯¥èµ°åˆ°è¿™
+				return;//²»Ó¦¸Ã×ßµ½Õâ
 
 			var dragStartCanvasPoint = info.CanvasPoint;
 			var dragStartPoint = info.Point;
@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 				dragStartCanvasPoint.Y + (pos.Y - dragStartPoint.Y)
 				);
 
-			//è¿™é‡Œé™åˆ¶ä¸€ä¸‹
+			//ÕâÀïÏŞÖÆÒ»ÏÂ
 			//movePoint.X = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.X));
 			movePoint.Y = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.Y));
 

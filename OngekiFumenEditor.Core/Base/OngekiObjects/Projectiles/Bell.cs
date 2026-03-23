@@ -1,11 +1,11 @@
-using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Attributes;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Core.Utils;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles
 {
     public partial class Bell : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile
     {
@@ -166,7 +166,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
 
         /// <summary>
-        /// �Ƿ��ܵ�����Ӱ��
+        /// 锟角凤拷锟杰碉拷锟斤拷锟斤拷影锟斤拷
         /// </summary>
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
@@ -195,3 +195,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
     }
 }
+

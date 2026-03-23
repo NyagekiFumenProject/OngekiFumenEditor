@@ -1,6 +1,6 @@
 using System;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public interface ITimelineObject : IComparable<ITimelineObject>
     {

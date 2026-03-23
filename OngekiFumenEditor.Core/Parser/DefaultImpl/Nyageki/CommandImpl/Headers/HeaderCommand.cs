@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using System;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Headers
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki.CommandImpl.Headers
 {
 	public abstract class HeaderCommandBase : INyagekiCommandParser
 	{

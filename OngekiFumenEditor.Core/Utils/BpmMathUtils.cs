@@ -1,8 +1,8 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class BpmMathUtils
     {
@@ -38,3 +38,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

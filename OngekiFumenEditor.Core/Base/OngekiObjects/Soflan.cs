@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.EditorObjects;
+using OngekiFumenEditor.Core.Utils;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
 	public class Soflan : OngekiTimelineObjectBase, IDurationSoflan
 	{
@@ -153,3 +153,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 		}
 	}
 }
+

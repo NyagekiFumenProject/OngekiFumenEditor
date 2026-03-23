@@ -1,5 +1,5 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using System;
 using System.Linq;

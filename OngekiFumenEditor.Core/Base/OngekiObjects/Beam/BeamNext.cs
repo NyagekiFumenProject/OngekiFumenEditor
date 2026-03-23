@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Utils;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Beam
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Beam
 {
 	public class BeamNext : ConnectableChildObjectBase, IBeamObject
 	{
@@ -37,3 +37,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         }
     }
 }
+

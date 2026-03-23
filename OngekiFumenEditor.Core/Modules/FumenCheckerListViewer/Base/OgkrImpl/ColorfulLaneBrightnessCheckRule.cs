@@ -1,14 +1,14 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Core.Properties;
-using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
-using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
-using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
+using OngekiFumenEditor.Core.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.OgkrImpl
 {
     [Export(typeof(IFumenCheckRule))]
     [Export(typeof(IOngekiFumenCheckRule))]
@@ -32,3 +32,4 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
         }
     }
 }
+

@@ -1,11 +1,11 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki
 {
 	[Export(typeof(IFumenDeserializable))]
 	public class DefaultNyagekiFumenParser : IFumenDeserializable

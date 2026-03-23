@@ -1,8 +1,8 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class Md5Helper
     {
@@ -15,3 +15,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

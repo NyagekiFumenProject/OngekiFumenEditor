@@ -1,14 +1,14 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.Collections.Base.RangeTree;
-using OngekiFumenEditor.Base.OngekiObjects;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.Collections.Base.RangeTree;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Utils;
+namespace OngekiFumenEditor.Core.Utils;
 
 public static partial class MathUtils
 {
@@ -277,3 +277,4 @@ public static partial class MathUtils
         }
     }
 }
+

@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Kernel.CurveInterpolater
+namespace OngekiFumenEditor.Core.Kernel.CurveInterpolater
 {
     public interface ICurveInterpolateEnumerator
     {

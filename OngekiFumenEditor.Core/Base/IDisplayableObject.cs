@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public interface IDisplayableObject
     {

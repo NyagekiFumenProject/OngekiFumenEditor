@@ -1,9 +1,9 @@
-﻿using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Core.Utils;
 using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
     public class IndividualSoflanArea : OngekiMovableObjectBase
     {
@@ -103,3 +103,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
     }
 }
+

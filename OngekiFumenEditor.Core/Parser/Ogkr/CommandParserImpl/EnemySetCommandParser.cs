@@ -1,10 +1,10 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using System;
 using System.ComponentModel.Composition;
-using static OngekiFumenEditor.Base.OngekiObjects.EnemySet;
+using static OngekiFumenEditor.Core.Base.OngekiObjects.EnemySet;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class EnemySetCommandParser : CommandParserBase

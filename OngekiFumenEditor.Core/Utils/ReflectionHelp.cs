@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class ReflectionHelp
     {
@@ -31,3 +31,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

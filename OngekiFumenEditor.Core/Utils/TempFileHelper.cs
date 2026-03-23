@@ -1,6 +1,6 @@
-using System.IO;
+﻿using System.IO;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class TempFileHelper
     {
@@ -40,3 +40,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

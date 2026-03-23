@@ -1,6 +1,6 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 
-namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
+namespace OngekiFumenEditor.Core.Parser.DefaultImpl.Nyageki
 {
 	public interface INyagekiCommandParser
 	{

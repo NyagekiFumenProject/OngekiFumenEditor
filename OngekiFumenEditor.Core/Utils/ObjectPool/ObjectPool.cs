@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Utils.ObjectPool
+namespace OngekiFumenEditor.Core.Utils.ObjectPool
 {
     internal static class ObjectPoolRuntime
     {
@@ -183,3 +183,4 @@ namespace OngekiFumenEditor.Utils.ObjectPool
             => ObjectPool<T>.GetWithUsingDisposable(out obj, out isNewObject);
     }
 }
+

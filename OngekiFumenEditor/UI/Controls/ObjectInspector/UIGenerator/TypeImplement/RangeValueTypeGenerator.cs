@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,9 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplemen
 	[Export(typeof(ITypeUIGenerator))]
 	public class RangeValueTypeGenerator : ITypeUIGenerator
 	{
-		public IEnumerable<Type> SupportTypes { get; } = new[] {
-			typeof(Base.RangeValue)
+		public IEnumerable<Type> SupportTypes { get; } = new[]
+		{
+			typeof(RangeValue)
 		};
 
 		public UIElement Generate(IObjectPropertyAccessProxy wrapper) => ViewHelper.CreateViewByViewModelType(() => new RangeValueTypeUIViewModel(wrapper));

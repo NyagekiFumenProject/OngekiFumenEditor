@@ -1,8 +1,8 @@
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.DefaultImpl.Enumerator;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory
+namespace OngekiFumenEditor.Core.Kernel.CurveInterpolater.DefaultImpl.Factory
 {
 	[Export(typeof(ICurveInterpolaterFactory))]
 	public class DefaultCurveInterpolaterFactory : ICurveInterpolaterFactory

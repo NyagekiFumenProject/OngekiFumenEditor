@@ -1,5 +1,5 @@
-using OngekiFumenEditor.Base.Collections.Base;
-using OngekiFumenEditor.Utils.ObjectPool;
+﻿using OngekiFumenEditor.Core.Base.Collections.Base;
+using OngekiFumenEditor.Core.Utils.ObjectPool;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public static class LinqExtensionMethod
     {
@@ -609,3 +609,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

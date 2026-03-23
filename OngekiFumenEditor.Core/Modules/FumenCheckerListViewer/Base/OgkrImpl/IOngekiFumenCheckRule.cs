@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
+using OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base;
 
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.OgkrImpl
 {
     public interface IOngekiFumenCheckRule : IFumenCheckRule
     {

@@ -1,11 +1,11 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Utils;
 using System.ComponentModel.Composition;
 using System.Linq;
-using static OngekiFumenEditor.Base.OngekiObjects.LaneBlockArea;
+using static OngekiFumenEditor.Core.Base.OngekiObjects.LaneBlockArea;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl
 {
 	[Export(typeof(ICommandParser))]
 	public class LaneBlockCommandParser : CommandParserBase
@@ -28,3 +28,4 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 		}
 	}
 }
+

@@ -1,4 +1,4 @@
-// From https://github.com/ppy/osu-framework/blob/master/osu.Framework/MathUtils/Interpolation.cs
+﻿// From https://github.com/ppy/osu-framework/blob/master/osu.Framework/MathUtils/Interpolation.cs
 /*
 Copyright (c) 2007-2018 ppy Pty Ltd <contact@ppy.sh>.
 
@@ -24,7 +24,7 @@ THE SOFTWARE.
 using System;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public enum EasingTypes
     {
@@ -274,3 +274,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

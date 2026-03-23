@@ -1,14 +1,14 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.EditorObjects;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl
 {
     [Export(typeof(ICommandParser))]
     public class SoflanGroupWrapItemCommandParser : CommandParserBase

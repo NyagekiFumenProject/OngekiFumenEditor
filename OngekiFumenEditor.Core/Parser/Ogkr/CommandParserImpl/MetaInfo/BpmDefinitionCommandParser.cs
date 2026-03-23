@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.MetaInfo
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl.MetaInfo
 {
 	[Export(typeof(ICommandParser))]
 	class BpmDefinitionCommandParser : MetaInfoCommandParserBase

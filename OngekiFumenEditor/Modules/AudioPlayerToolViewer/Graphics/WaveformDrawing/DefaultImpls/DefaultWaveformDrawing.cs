@@ -1,6 +1,6 @@
-Ôªøusing Caliburn.Micro;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             (_, _, var currentMeter, var currentBpm) = TGridCalculator.GetCurrentTimeSignature(curTimeGrid, target.EditorViewModel.Fumen.BpmList, target.EditorViewModel.Fumen.MeterChanges);
             var durationMs = (toTime - fromTime).TotalMilliseconds;
 
-            //ÁªòÂà∂Ê≥¢ÂΩ¢
+            //ªÊ÷∆≤®–Œ
             if (option.ShowWaveform && peakData.Count != 0)
             {
                 (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 lineDrawing.PopOverrideModelMatrix(out _);
             }
 
-            //ÁªòÂà∂ËäÇÂ•èÁ∫ø
+            //ªÊ÷∆Ω⁄◊‡œﬂ
             if (target.EditorViewModel is FumenVisualEditorViewModel editor)
             {
                 var beginTime = fromTime.TotalSeconds < 0 ? TimeSpan.Zero : fromTime;
@@ -250,7 +250,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     }
                     lineDrawing.End();
 
-                    //ÁªòÂà∂ÊèêÁ§∫
+                    //ªÊ÷∆Ã· æ
                     foreach ((var x, var str) in cachedPostDrawList)
                     {
                         stringDrawing.Draw(
@@ -270,7 +270,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 cachedObjTimeMap.Clear();
             }
 
-            //ÁªòÂà∂ÂΩìÂâçÊí≠ÊîæÊó∂Èó¥Ê∏∏Ê†á
+            //ªÊ÷∆µ±«∞≤•∑≈ ±º‰”Œ±Í
             {
                 var indirectorX = (float)(width * ((curTime - fromTime).TotalMilliseconds / durationMs) - width / 2);
 

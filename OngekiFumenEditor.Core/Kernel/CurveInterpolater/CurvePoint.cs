@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 
-namespace OngekiFumenEditor.Kernel.CurveInterpolater
+namespace OngekiFumenEditor.Core.Kernel.CurveInterpolater
 {
     public struct CurvePoint
     {

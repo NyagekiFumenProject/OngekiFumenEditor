@@ -1,8 +1,8 @@
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Enumerator;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Enumerator;
 using System.ComponentModel.Composition;
 
-namespace OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory
+namespace OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Factory
 {
     [Export(typeof(ICurveInterpolaterFactory))]
     public class XGridLimitedCurveInterpolaterFactory : ICurveInterpolaterFactory

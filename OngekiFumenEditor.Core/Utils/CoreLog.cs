@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Core.Utils
 {
     public enum CoreLogLevel
     {
@@ -101,3 +101,4 @@ namespace OngekiFumenEditor.Utils
         }
     }
 }
+

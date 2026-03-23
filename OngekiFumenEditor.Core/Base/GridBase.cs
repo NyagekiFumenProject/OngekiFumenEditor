@@ -2,7 +2,7 @@ using Caliburn.Micro;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Core.Base
 {
     public abstract class GridBase : PropertyChangedBase, IComparable<GridBase>, ISerializable, IComparable
     {

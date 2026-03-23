@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
     public struct CommonCheckResult : ICheckResult
     {

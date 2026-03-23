@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Base.OngekiObjects
+namespace OngekiFumenEditor.Core.Base.OngekiObjects
 {
     public class ClickSE : OngekiTimelineObjectBase
     {

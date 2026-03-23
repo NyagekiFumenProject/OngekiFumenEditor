@@ -1,10 +1,10 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater;
 using System;
 using System.Collections.Generic;
 
-namespace OngekiFumenEditor.Base.OngekiObjects.Lane
+namespace OngekiFumenEditor.Core.Base.OngekiObjects.Lane
 {
 	public class ColorfulLaneStart : LaneStartBase, IColorfulLane
 	{

@@ -1,10 +1,10 @@
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Kernel.CurveInterpolater;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OngekiFumenEditor.Utils.Ogkr
+namespace OngekiFumenEditor.Core.Utils.Ogkr
 {
     public static class InterpolateAll
     {
@@ -36,3 +36,4 @@ namespace OngekiFumenEditor.Utils.Ogkr
         }
     }
 }
+

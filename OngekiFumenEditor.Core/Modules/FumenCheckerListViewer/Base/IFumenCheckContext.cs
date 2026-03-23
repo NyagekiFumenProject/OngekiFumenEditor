@@ -1,6 +1,6 @@
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 
-namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base
 {
     public interface IFumenCheckContext
     {

@@ -1,8 +1,8 @@
-using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Core.Base.Attributes;
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace OngekiFumenEditor.Base.EditorObjects.Svg
+namespace OngekiFumenEditor.Core.Base.EditorObjects.Svg
 {
 	public class SvgImageFilePrefab : SvgPrefabBase
 	{
