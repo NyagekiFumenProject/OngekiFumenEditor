@@ -1,1 +1,1 @@
-global using TGridCalculator = OngekiFumenEditor.Core.Modules.FumenVisualEditor.TGridCalculator;
+global using TGridCalculator = OngekiFumenEditor.Core.TGridCalculator;

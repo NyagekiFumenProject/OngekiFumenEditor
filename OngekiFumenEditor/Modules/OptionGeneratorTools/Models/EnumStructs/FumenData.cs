@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs
 {
