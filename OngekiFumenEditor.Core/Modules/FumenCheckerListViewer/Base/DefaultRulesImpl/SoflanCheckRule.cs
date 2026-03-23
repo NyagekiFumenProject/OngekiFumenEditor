@@ -1,6 +1,8 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -21,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 {
                     yield return new CommonCheckResult
                     {
-                        Description = FumenCheckMessages.Get(FumenCheckMessageKey.CheckRuleSoflanProblem, r),
+                        Description = Resources.CheckRuleSoflanProblem.Format(r),
                         LocationDescription = $"SoflanGroup: {pair.Key}, TGrid: {lastTGrid}",
                         NavigateBehavior = new NavigateToTGridBehavior(lastTGrid),
                         RuleName = "Soflan",

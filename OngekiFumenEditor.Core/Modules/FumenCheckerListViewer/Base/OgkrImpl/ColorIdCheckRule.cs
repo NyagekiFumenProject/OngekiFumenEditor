@@ -1,8 +1,10 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -22,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
                 yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Error,
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.InvalidColorId, obj.ColorId.ToString()),
+                    Description = Resources.InvalidColorId.Format(obj.ColorId.ToString()),
                     LocationDescription = $"{obj.XGrid} {obj.TGrid}",
                     NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
                     RuleName = ruleName,

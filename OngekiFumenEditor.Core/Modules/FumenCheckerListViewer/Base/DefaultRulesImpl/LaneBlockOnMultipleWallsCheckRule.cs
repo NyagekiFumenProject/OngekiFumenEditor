@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ public class LaneBlockOnMultipleWallsCheckRule : IFumenCheckRule
                 yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Problem,
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.LaneBlockOnMultipleWalls, refLaneStart?.RecordId, refLaneEnd?.RecordId),
+                    Description = Resources.LaneBlockOnMultipleWalls.Format(refLaneStart?.RecordId, refLaneEnd?.RecordId),
                     LocationDescription = laneBlock.TGrid.ToString(),
                     NavigateBehavior = new NavigateToTGridBehavior(refLaneEnd?.ReferenceStartObject.TGrid),
                     RuleName = RuleName

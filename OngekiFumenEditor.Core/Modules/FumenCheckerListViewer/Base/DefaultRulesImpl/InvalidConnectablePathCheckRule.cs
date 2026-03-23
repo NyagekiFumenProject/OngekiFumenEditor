@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -19,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Problem,
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.InvalidConnectablePath),
+                    Description = Resources.InvalidConnectablePath,
                     LocationDescription = $"{obj.XGrid} {obj.TGrid}",
                     NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
                     RuleName = ruleName,

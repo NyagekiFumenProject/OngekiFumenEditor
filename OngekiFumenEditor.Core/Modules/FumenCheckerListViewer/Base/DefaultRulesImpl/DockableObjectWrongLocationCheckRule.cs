@@ -1,6 +1,8 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -23,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
             {
                 yield return new CommonCheckResult
                 {
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.WrongLocation, dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
+                    Description = Resources.WrongLocation.Format(dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
                     LocationDescription = dockableObj.ToString(),
                     NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
                     RuleName = RuleName,

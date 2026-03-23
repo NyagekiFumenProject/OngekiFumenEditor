@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
                 yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Problem,
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.NotInterpolatedCurve),
+                    Description = Resources.NotInterpolatedCurve,
                     LocationDescription = $"{obj.XGrid} {obj.TGrid}",
                     NavigateBehavior = new NavigateToTGridBehavior(obj.TGrid),
                     RuleName = ruleName,

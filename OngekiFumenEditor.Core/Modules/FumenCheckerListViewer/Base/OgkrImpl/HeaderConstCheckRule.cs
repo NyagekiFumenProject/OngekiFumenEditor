@@ -1,5 +1,7 @@
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
@@ -17,14 +19,14 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
         public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
         {
             const string ruleName = "[Ongeki] HeaderConstMismatch";
-            var locationDescription = FumenCheckMessages.Get(FumenCheckMessageKey.HeaderConstMismatch);
+            var locationDescription = Resources.HeaderConstMismatch;
 
             if (fumen.MetaInfo.XRESOLUTION != XGrid.DEFAULT_RES_X)
             {
                 yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Error,
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.HeaderConstMismatch2, fumen.MetaInfo.XRESOLUTION, XGrid.DEFAULT_RES_X),
+                    Description = Resources.HeaderConstMismatch2.Format(fumen.MetaInfo.XRESOLUTION, XGrid.DEFAULT_RES_X),
                     LocationDescription = locationDescription,
                     NavigateBehavior = new NavigateMetaInfoViewBehavior(),
                     RuleName = ruleName,
@@ -36,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
                 yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Error,
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.HeaderConstMismatch3, fumen.MetaInfo.TRESOLUTION, TGrid.DEFAULT_RES_T),
+                    Description = Resources.HeaderConstMismatch3.Format(fumen.MetaInfo.TRESOLUTION, TGrid.DEFAULT_RES_T),
                     LocationDescription = locationDescription,
                     NavigateBehavior = new NavigateMetaInfoViewBehavior(),
                     RuleName = ruleName,
@@ -48,7 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl
                 yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Error,
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.HeaderConstMismatch4),
+                    Description = Resources.HeaderConstMismatch4,
                     LocationDescription = locationDescription,
                     NavigateBehavior = new NavigateMetaInfoViewBehavior(),
                     RuleName = ruleName,

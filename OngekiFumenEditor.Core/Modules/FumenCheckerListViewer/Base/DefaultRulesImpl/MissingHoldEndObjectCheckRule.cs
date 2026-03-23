@@ -1,6 +1,8 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -19,7 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 yield return new CommonCheckResult
                 {
                     Severity = RuleSeverity.Error,
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.MissingEndObject, missingObject.Id),
+                    Description = Resources.MissingEndObject.Format(missingObject.Id),
                     LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
                     NavigateBehavior = new NavigateToObjectBehavior(missingObject),
                     RuleName = ruleName,

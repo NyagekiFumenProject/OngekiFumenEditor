@@ -1,6 +1,7 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                             Bell => RuleSeverity.Problem,
                             _ => RuleSeverity.Error
                         },
-                        Description = FumenCheckMessages.Get(FumenCheckMessageKey.ObjectOverlap2, conflict.First().IDShortName),
+                        Description = Resources.ObjectOverlap2.Format(conflict.First().IDShortName),
                         LocationDescription = $"{conflict.Key.XGrid} {conflict.Key.TGrid}",
                         NavigateBehavior = new NavigateToTGridBehavior(conflict.Key.TGrid),
                         RuleName = ruleName,
@@ -57,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                     yield return new CommonCheckResult
                     {
                         Severity = RuleSeverity.Error,
-                        Description = FumenCheckMessages.Get(FumenCheckMessageKey.ObjectOverlap, conflict.First().IDShortName),
+                        Description = Resources.ObjectOverlap.Format(conflict.First().IDShortName),
                         LocationDescription = $"{conflict.Key}",
                         NavigateBehavior = new NavigateToTGridBehavior(conflict.Key),
                         RuleName = ruleName,

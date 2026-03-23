@@ -2,6 +2,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Utils;
 using System;
@@ -141,7 +142,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                     {
                         RuleName = RuleName,
                         Severity = RuleSeverity.Problem,
-                        Description = FumenCheckMessages.Get(FumenCheckMessageKey.WallConflict, cur.Wall.RecordId, next.Wall.RecordId),
+                        Description = Resources.WallConflict.Format(cur.Wall.RecordId, next.Wall.RecordId),
                         LocationDescription = cur.TGridRange.ToString(),
                         NavigateBehavior = new NavigateToTGridBehavior(cur.Wall.TGrid)
                     };
@@ -164,7 +165,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                             RuleName = RuleName,
                             Severity = RuleSeverity.Error,
                             LocationDescription = child.ToString(),
-                            Description = FumenCheckMessages.Get(FumenCheckMessageKey.WallConflict3, wall.Wall.RecordId, child.TGrid, maxTGrid),
+                            Description = Resources.WallConflict3.Format(wall.Wall.RecordId, child.TGrid, maxTGrid),
                             NavigateBehavior = new NavigateToObjectBehavior(child)
                         };
                         break;
@@ -227,7 +228,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                             RuleName = RuleName,
                             Severity = RuleSeverity.Error,
                             LocationDescription = $"leftLine:{intersection.leftLine} rightLine:{intersection.rightLine} conflict at {conflictXGrid} {conflictTGrid}",
-                            Description = FumenCheckMessages.Get(FumenCheckMessageKey.WallConflict, leftWall.Wall.RecordId, rightWall.Wall.RecordId),
+                            Description = Resources.WallConflict.Format(leftWall.Wall.RecordId, rightWall.Wall.RecordId),
                             NavigateBehavior = new NavigateToTGridBehavior(conflictTGrid)
                         };
                     }

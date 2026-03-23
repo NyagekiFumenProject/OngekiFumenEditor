@@ -54,7 +54,7 @@ Create a platform-neutral library for:
 - Moved checker result models and validation contracts into `OngekiFumenEditor.Core`
 - Introduced `IFumenCheckContext` in `Core` to replace direct `FumenVisualEditorViewModel` references in checker contracts and navigate behaviors
 - Moved reusable checker result and default navigate behavior implementations into `OngekiFumenEditor.Core`
-- Moved reusable default checker rule implementations into `OngekiFumenEditor.Core` and replaced direct editor resource access with `FumenCheckMessages`
+- Moved reusable default checker rule implementations into `OngekiFumenEditor.Core` and switched them to direct `Core.Properties.Resources` access
 - Moved checker multilingual resources into `OngekiFumenEditor.Core/Properties/Resources*.resx` and removed the editor-side message provider bridge
 - Left checker UI/composition and all `Kernel`-side editor automation infrastructure in `OngekiFumenEditor`
 

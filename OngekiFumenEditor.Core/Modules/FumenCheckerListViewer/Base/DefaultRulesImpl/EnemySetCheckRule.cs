@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Properties;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
             {
                 yield return new CommonCheckResult
                 {
-                    Description = FumenCheckMessages.Get(FumenCheckMessageKey.MissingBossEnemySet),
+                    Description = Resources.MissingBossEnemySet,
                     LocationDescription = string.Empty,
                     RuleName = "MissingBossEnemySet",
                     Severity = RuleSeverity.Suggest

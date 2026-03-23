@@ -1,6 +1,8 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -50,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                     yield return new CommonCheckResult
                     {
                         Severity = RuleSeverity.Problem,
-                        Description = FumenCheckMessages.Get(FumenCheckMessageKey.ObjectTimelineNotAligned, obj.IDShortName),
+                        Description = Resources.ObjectTimelineNotAligned.Format(obj.IDShortName),
                         LocationDescription = $"{obj}",
                         NavigateBehavior = new NavigateToObjectBehavior(obj),
                         RuleName = ruleName,
