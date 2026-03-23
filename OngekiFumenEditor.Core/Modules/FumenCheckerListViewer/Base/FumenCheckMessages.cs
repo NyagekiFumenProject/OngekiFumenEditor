@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base
     {
         public static string Get(FumenCheckMessageKey key, params object[] args)
         {
-            var format = Resources.GetString(key.ToString());
+            var format = Resources.ResourceManager.GetString(key.ToString(), Resources.Culture) ?? key.ToString();
             return args is { Length: > 0 } ? format.Format(args) : format;
         }
     }
