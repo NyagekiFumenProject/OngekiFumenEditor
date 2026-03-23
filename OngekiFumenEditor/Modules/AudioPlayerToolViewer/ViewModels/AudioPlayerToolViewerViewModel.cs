@@ -195,7 +195,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (Editor is null)
                 return;
             NotifyOfPropertyChange(() => SliderValue);
-            var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(time, Editor);
+            var tGrid = Editor.ConvertAudioTimeToTGrid(time);
             Editor.ScrollTo(tGrid);
         }
 
@@ -238,7 +238,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             {
                 await FumenSoundPlayer.Prepare(Editor, AudioPlayer);
                 var tgrid = Editor.GetCurrentTGrid();
-                var seekTo = TGridCalculator.ConvertTGridToAudioTime(tgrid, Editor);
+                var seekTo = Editor.ConvertTGridToAudioTime(tgrid);
                 Log.LogDebug($"seek to {tgrid}({seekTo})");
                 AudioPlayer.Seek(seekTo, false);
                 FumenSoundPlayer.Seek(seekTo, false);

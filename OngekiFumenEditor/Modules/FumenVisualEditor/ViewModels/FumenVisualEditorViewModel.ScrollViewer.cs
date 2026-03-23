@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 var val = Math.Min(TotalDurationHeight, Math.Max(0, value));
-                Func<double, FumenVisualEditorViewModel, TGrid> convertToTGrid = IsDesignMode ? TGridCalculator.ConvertYToTGrid_DesignMode : TGridCalculator.ConvertYToTGrid_PreviewMode;
+                Func<double, FumenVisualEditorViewModel, TGrid> convertToTGrid = IsDesignMode ? ((y, editor) => editor.ConvertYToTGrid_DesignMode(y)) : ((y, editor) => editor.ConvertYToTGrid_PreviewMode(y).OrderBy(x => Math.Abs(x.TotalGrid - editor.GetCurrentTGrid().TotalGrid)).FirstOrDefault());
 
                 Set(ref scrollViewerVerticalOffset, val);
                 NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
@@ -48,17 +48,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 				var val = TotalDurationHeight - value;
 				if (IsDesignMode)
 				{
-					var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(val, this);
+					var audioTime = ConvertYToAudioTime_DesignMode(val);
 					ScrollTo(audioTime);
 				}
 				else
 				{
 					var curTGrid = GetCurrentTGrid();
-					var nextTGrid = TGridCalculator.ConvertYToTGrid_PreviewMode(val, this).OrderBy(x => Math.Abs(x.TotalGrid - curTGrid.TotalGrid)).FirstOrDefault();
+					var nextTGrid = ConvertYToTGrid_PreviewMode(val).OrderBy(x => Math.Abs(x.TotalGrid - curTGrid.TotalGrid)).FirstOrDefault();
 
 					if (nextTGrid is not null)
 					{
-						var audioTime = TGridCalculator.ConvertTGridToAudioTime(nextTGrid, this);
+						var audioTime = ConvertTGridToAudioTime(nextTGrid);
 						ScrollTo(audioTime);
 					}
 				}
@@ -76,7 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		{
 			if (startTGrid is null)
 				return;
-			var audioTime = TGridCalculator.ConvertTGridToAudioTime(startTGrid, this);
+			var audioTime = ConvertTGridToAudioTime(startTGrid);
 			ScrollTo(audioTime);
 		}
 
@@ -86,8 +86,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			CurrentPlayTime = fixedAudioTime;
 
 			var val = IsDesignMode ?
-				TGridCalculator.ConvertAudioTimeToY_DesignMode(fixedAudioTime, this) :
-				TGridCalculator.ConvertAudioTimeToY_PreviewMode(fixedAudioTime, this);
+				ConvertAudioTimeToY_DesignMode(fixedAudioTime) :
+				ConvertAudioTimeToY_PreviewMode(fixedAudioTime);
 			val = Math.Min(TotalDurationHeight, Math.Max(0, val));
 
 			scrollViewerVerticalOffset = val;
@@ -97,6 +97,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 		#endregion
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
+		public TGrid GetCurrentTGrid() => ConvertAudioTimeToTGrid(CurrentPlayTime);
 	}
 }

@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             var curTime = target.CurrentTime;
             var fromTime = curTime - TimeSpan.FromMilliseconds(target.CurrentTimeXOffset * target.DurationMsPerPixel);
             var toTime = fromTime + TimeSpan.FromMilliseconds(width * target.DurationMsPerPixel);
-            var curTimeGrid = TGridCalculator.ConvertAudioTimeToTGrid(curTime, target.EditorViewModel);
+            var curTimeGrid = target.EditorViewModel.ConvertAudioTimeToTGrid(curTime);
             (_, _, var currentMeter, var currentBpm) = TGridCalculator.GetCurrentTimeSignature(curTimeGrid, target.EditorViewModel.Fumen.BpmList, target.EditorViewModel.Fumen.MeterChanges);
             var durationMs = (toTime - fromTime).TotalMilliseconds;
 
@@ -105,9 +105,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 var beginTime = fromTime.TotalSeconds < 0 ? TimeSpan.Zero : fromTime;
                 var endTime = toTime > target.AudioTotalDuration ? target.AudioTotalDuration : toTime;
 
-                var beginTGrid = TGridCalculator.ConvertAudioTimeToTGrid(beginTime, target.EditorViewModel);
-                var endTGrid = TGridCalculator.ConvertAudioTimeToTGrid(endTime, target.EditorViewModel);
-                var curTGrid = TGridCalculator.ConvertAudioTimeToTGrid(curTime, target.EditorViewModel);
+                var beginTGrid = target.EditorViewModel.ConvertAudioTimeToTGrid(beginTime);
+                var endTGrid = target.EditorViewModel.ConvertAudioTimeToTGrid(endTime);
+                var curTGrid = target.EditorViewModel.ConvertAudioTimeToTGrid(curTime);
 
                 var bpmList = editor.Fumen.BpmList;
 

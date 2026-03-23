@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ExtraEditorMe
 		{
 			var controller = IoC.Get<IOngekiGamePlayControllerViewer>();
 			var curTGrid = editor.GetCurrentTGrid();
-			var msec = TGridCalculator.ConvertTGridToAudioTime(curTGrid, editor);
+			var msec = editor.ConvertTGridToAudioTime(curTGrid);
 
 			await controller.SeekTo(msec);
 		}

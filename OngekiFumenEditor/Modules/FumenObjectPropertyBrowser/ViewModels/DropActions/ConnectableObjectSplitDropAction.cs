@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(dragEndPoint))
                 return;
 
-            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
+            var dragTGrid = editor.ConvertYToTGrid_DesignMode(dragEndPoint.Y);
 			var splitOutChildren = new List<ConnectableChildObjectBase>();
 			var affactedObjects = new HashSet<ILaneDockable>();
 

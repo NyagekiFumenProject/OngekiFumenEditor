@@ -222,7 +222,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 var evt = ObjectPool<SoundEvent>.Get();
 
                 evt.Sounds = sound;
-                evt.Time = TGridCalculator.ConvertTGridToAudioTime(tGrid, editor);
+                evt.Time = editor.ConvertTGridToAudioTime(tGrid);
                 //evt.TGrid = tGrid;
 
                 list.Add(evt);
@@ -234,8 +234,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
                 evt.Sounds = sound;
                 evt.LoopId = loopId;
-                evt.Time = TGridCalculator.ConvertTGridToAudioTime(tGrid, editor);
-                evt.EndTime = TGridCalculator.ConvertTGridToAudioTime(endTGrid, editor);
+                evt.Time = editor.ConvertTGridToAudioTime(tGrid);
+                evt.EndTime = editor.ConvertTGridToAudioTime(endTGrid);
                 //evt.TGrid = tGrid;
 
                 durationList.Add(evt);
@@ -300,7 +300,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                         //generate stop
                         AddSound(SoundControl.BeamEnd, beam.MaxTGrid);
                         AddDurationSound(SoundControl.BeamLoop, beam.TGrid, beam.MaxTGrid, loopId);
-                        var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beam.TGrid, editor) - TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME), editor);
+                        var leadBodyInTGrid = editor.ConvertAudioTimeToTGrid(editor.ConvertTGridToAudioTime(beam.TGrid) - TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME));
                         if (leadBodyInTGrid is null)
                             leadBodyInTGrid = TGrid.Zero;
                         AddSound(SoundControl.BeamPrepare, leadBodyInTGrid);

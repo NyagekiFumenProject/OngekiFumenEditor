@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
 			var dockable = (ILaneDockable)obj;
 
-			if (CheckAndAdjustY(dockable, relativePoint.Y, editor) is double y && TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is TGrid tGrid)
+			if (CheckAndAdjustY(dockable, relativePoint.Y, editor) is double y && editor.ConvertYToTGrid_DesignMode(y) is TGrid tGrid)
 			{
 				var closestLaneObjects = PickDockableObjects(editor)
 					.Select(x => x switch
@@ -96,12 +96,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			var dockable = (ILaneDockable)obj;
 			if (dockable.ReferenceLaneStart is not null)
 			{
-				if (TGridCalculator.ConvertYToTGrid_DesignMode(y, editor) is not TGrid tGrid)
+				if (editor.ConvertYToTGrid_DesignMode(y) is not TGrid tGrid)
 					return default;
 				if (tGrid < dockable.ReferenceLaneStart.MinTGrid)
-					return TGridCalculator.ConvertTGridToY_DesignMode(dockable.ReferenceLaneStart.MinTGrid, editor);
+					return editor.ConvertTGridToY_DesignMode(dockable.ReferenceLaneStart.MinTGrid);
 				if (tGrid > dockable.ReferenceLaneStart.MaxTGrid)
-					return TGridCalculator.ConvertTGridToY_DesignMode(dockable.ReferenceLaneStart.MaxTGrid, editor);
+					return editor.ConvertTGridToY_DesignMode(dockable.ReferenceLaneStart.MaxTGrid);
 			}
 
 			return base.CheckAndAdjustY(obj, y, editor);

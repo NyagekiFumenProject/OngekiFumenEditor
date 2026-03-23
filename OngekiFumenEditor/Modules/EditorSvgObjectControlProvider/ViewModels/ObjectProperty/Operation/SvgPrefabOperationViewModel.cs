@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 			}
 
 			var baseCanvasX = XGridCalculator.ConvertXGridToX(SvgPrefab.XGrid, editor);
-			var baseCanvasY = TGridCalculator.ConvertTGridToY_DesignMode(SvgPrefab.TGrid, editor);
+			var baseCanvasY = editor.ConvertTGridToY_DesignMode(SvgPrefab.TGrid);
 
 			var segments = SvgPrefab.GenerateLineSegments();
 
@@ -85,7 +85,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 					var actualCanvasY = baseCanvasY + relativePoint.Y;
 
 					//Log.LogDebug($"{relativePoint}  ->  {new Vector2((float)actualCanvasX, (float)actualCanvasY)}");
-					var tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(actualCanvasY, editor);
+					var tGrid = editor.ConvertYToTGrid_DesignMode(actualCanvasY);
 					var xGrid = XGridCalculator.ConvertXToXGrid(actualCanvasX, editor);
 
 					obj.XGrid = xGrid;

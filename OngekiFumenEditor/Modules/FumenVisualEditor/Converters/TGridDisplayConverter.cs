@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Converters
 					if (editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.TGrid)
 						return tGrid.ToString();
 
-					var audioTime = TGridCalculator.ConvertTGridToAudioTime(tGrid, editor);
+					var audioTime = editor.ConvertTGridToAudioTime(tGrid);
 					return $"{audioTime.Minutes,-2}:{audioTime.Seconds,-2}:{audioTime.Milliseconds,-3}";
 				}
 			}

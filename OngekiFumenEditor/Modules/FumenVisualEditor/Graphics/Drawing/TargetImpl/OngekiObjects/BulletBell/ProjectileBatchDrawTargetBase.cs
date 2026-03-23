@@ -85,7 +85,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private void DrawPreviewMode(IFumenEditorDrawingContext target, IEnumerable<T> objs)
         {
-            var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
+            var currentTGrid = target.Editor.ConvertAudioTimeToTGrid(target.CurrentPlayTime);
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
             var baseY = Math.Min(target.CurrentDrawingTargetContext.Rect.MinY, target.CurrentDrawingTargetContext.Rect.MaxY) + judgeOffset;
             var scale = target.Editor.Setting.VerticalDisplayScale;

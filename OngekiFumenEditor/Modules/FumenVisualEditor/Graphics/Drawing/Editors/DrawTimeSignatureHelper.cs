@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             else
             {
-                var currentY = TGridCalculator.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime, target.Editor);
+                var currentY = target.Editor.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime);
                 //todo 暂时显示默认的变速组
                 timelines = TGridCalculator.GetVisbleTimelines_PreviewMode(
                     fumen.SoflansMap.DefaultSoflanList,
@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 var str = string.Empty;
                 if (displayAudioTime)
                 {
-                    var audioTime = TGridCalculator.ConvertTGridToAudioTime(t, target.Editor);
+                    var audioTime = target.Editor.ConvertTGridToAudioTime(t);
                     str = $"{audioTime.Minutes,-2}:{audioTime.Seconds,-2}:{audioTime.Milliseconds,-3}";
                 }
                 else

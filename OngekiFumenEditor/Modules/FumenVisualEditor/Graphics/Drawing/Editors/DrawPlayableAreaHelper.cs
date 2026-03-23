@@ -326,7 +326,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 //解决变速过快过慢导致的精度丢失问题
                 Vector2? interpolate(TGrid tGrid, float actualY, out bool isPickLane)
                 {
-                    var tGrids = TGridCalculator.ConvertYToTGrid_PreviewMode(actualY, target.Editor);
+                    var tGrids = target.Editor.ConvertYToTGrid_PreviewMode(actualY);
 
                     isPickLane = false;
                     var pickables = tGrids.SelectMany(tGrid => fumen.Lanes

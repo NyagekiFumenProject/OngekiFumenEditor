@@ -150,12 +150,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (EditorProjectData?.AudioDuration is TimeSpan timeSpan && timeSpan > TimeSpan.Zero)
             {
-                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
+                TotalDurationHeight = ConvertToY(ConvertAudioTimeToTGrid(timeSpan).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
             else
             {
                 timeSpan = AudioPlayer?.Duration ?? TimeSpan.Zero;
-                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
+                TotalDurationHeight = ConvertToY(ConvertAudioTimeToTGrid(timeSpan).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
         }
 
@@ -262,7 +262,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 EditorProjectData = projModel;
                 AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(editorProjectData.AudioFilePath);
 
-                var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
+                var dispTGrid = ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime);
                 ScrollTo(dispTGrid);
 
                 LoadingFinished?.Invoke(this, new(Fumen));
@@ -287,7 +287,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
-            EditorProjectData.RememberLastDisplayTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentTGrid(), this);
+            EditorProjectData.RememberLastDisplayTime = ConvertTGridToAudioTime(GetCurrentTGrid());
             if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
             {
                 //ask fumen file save path before save project.

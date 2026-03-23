@@ -78,10 +78,10 @@ public class SelectionArea : PropertyChangedBase
 
     public IEnumerable<OngekiObjectBase> GetRangeObjects(bool applyFilter = true)
     {
-        var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(Rect.Top, editor);
+        var minTGrid = editor.ConvertYToTGrid_DesignMode(Rect.Top);
         if (minTGrid is null)
             minTGrid = TGrid.Zero;
-        var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(Rect.Bottom, editor);
+        var maxTGrid = editor.ConvertYToTGrid_DesignMode(Rect.Bottom);
         var minXGrid = XGridCalculator.ConvertXToXGrid(Rect.Left, editor);
         var maxXGrid = XGridCalculator.ConvertXToXGrid(Rect.Right, editor);
 

@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(dragEndPoint))
                 return;
 
-            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
+            var dragTGrid = editor.ConvertYToTGrid_DesignMode(dragEndPoint.Y);
 			var lastObj = startObject.Children.LastOrDefault();
 			var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) || (lastObj is not null && lastObj.TGrid < dragTGrid);
 			var isFirst = true;

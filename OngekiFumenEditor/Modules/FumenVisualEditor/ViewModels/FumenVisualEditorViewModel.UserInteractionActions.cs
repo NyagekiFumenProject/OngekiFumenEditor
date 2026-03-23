@@ -443,7 +443,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var obj in SelectObjects)
             {
                 if (obj is ITimelineObject timelineObject)
-                    cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, this);
+                    cacheObjectAudioTime[timelineObject] = ConvertTGridToY_DesignMode(timelineObject.TGrid);
                 else
                     ToastNotify(Resources.CantRememberObjectByNotSupport.Format(obj));
             }
@@ -473,7 +473,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     Log.LogInfo($"开始恢复物件时间...");
                     foreach ((var timelineObject, var audioTime) in recoverTargets)
-                        timelineObject.TGrid = TGridCalculator.ConvertYToTGrid_DesignMode(audioTime, this);
+                        timelineObject.TGrid = ConvertYToTGrid_DesignMode(audioTime);
 
                     ToastNotify(Resources.RecoveryObjectsSuccess.Format(recoverTargets.Count));
                 }, () =>
@@ -1033,7 +1033,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var tGrid = GetCurrentTGrid();
             IsUserRequestHideEditorObject = isPreviewMode;
             convertToY = IsDesignMode ?
-                ((tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor)) :
+                ((tUnit, editor, _) => editor.ConvertTGridUnitToY_DesignMode(tUnit)) :
                 (tUnit, editor, soflans) => TGridCalculator.ConvertTGridUnitToY_PreviewMode(tUnit, soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale);
             RecalculateTotalDurationHeight();
             ScrollTo(tGrid);
@@ -1196,7 +1196,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         var curY = pos.Y;
                         var diffY = curY - mouseCanvasStartPosition.Y;
 
-                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(startScrollOffset + diffY, this);
+                        var audioTime = ConvertYToAudioTime_DesignMode(startScrollOffset + diffY);
                         //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
                         ScrollTo(audioTime);
                     }
@@ -1247,7 +1247,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     isSelectRangeDragging = false;
 
                     var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
-                    if (TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this) is TGrid tGrid)
+                    if (ConvertYToTGrid_DesignMode(position.Y) is TGrid tGrid)
                     {
                         var lanes = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
                         {
@@ -1300,7 +1300,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 #if DEBUG
                     var xGrid = XGridCalculator.ConvertXToXGrid(position.X, this);
-                    var tGrid2 = TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this);
+                    var tGrid2 = ConvertYToTGrid_DesignMode(position.Y);
                     var querySoflanGroup = tGrid2 is null ? -1 : Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(xGrid, tGrid2);
 
                     Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject} , soflanGroup = {querySoflanGroup}");
@@ -1323,7 +1323,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     //check if is dragging playerlocation
 
-                    var y = TGridCalculator.ConvertAudioTimeToY_PreviewMode(CurrentPlayTime, this);
+                    var y = ConvertAudioTimeToY_PreviewMode(CurrentPlayTime);
                     var x = XGridCalculator.ConvertXGridToX(PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime), this);
 
                     var mouseX = position.X;
@@ -1393,7 +1393,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var diffY = curY - mouseCanvasStartPosition.Y;
 
                     var canvasY = startScrollOffset + diffY;
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(canvasY, this);
+                    var audioTime = ConvertYToAudioTime_DesignMode(canvasY);
                     //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
                     ScrollTo(audioTime);
 
@@ -1421,7 +1421,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                     if (offsetY != 0)
                     {
-                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                        var audioTime = ConvertYToAudioTime_DesignMode(y);
                         ScrollTo(audioTime);
 
                         var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
@@ -1472,7 +1472,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                     if (offsetY != 0)
                     {
-                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                        var audioTime = ConvertYToAudioTime_DesignMode(y);
                         ScrollTo(audioTime);
                     }
 
@@ -1610,14 +1610,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var tGrid = default(TGrid);
                 if (IsDesignMode)
-                    tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this);
+                    tGrid = ConvertYToTGrid_DesignMode(canvasY);
                 else
                 {
-                    var result = TGridCalculator.ConvertYToTGrid_PreviewMode(canvasY, this);
+                    var result = ConvertYToTGrid_PreviewMode(canvasY);
                     if (result.IsOnlyOne())
                         tGrid = result.FirstOrDefault();
                 }
-                TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
+                TimeSpan? audioTime = tGrid is not null ? ConvertTGridToAudioTime(tGrid) : null;
                 var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
                 return $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff") ?? "N/A"}]";
             }
@@ -1712,13 +1712,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             TGrid changeGrid;
 
-            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(RectInDesignMode.Height, this).ToList() is [{ } single])
+            if (!IsDesignMode && ConvertYToTGrid_PreviewMode(RectInDesignMode.Height).ToList() is [{ } single])
             {
                 changeGrid = single;
             }
             else
             {
-                changeGrid = TGridCalculator.ConvertYToTGrid_DesignMode(RectInDesignMode.Height, this);
+                changeGrid = ConvertYToTGrid_DesignMode(RectInDesignMode.Height);
             }
 
             var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);
@@ -1731,8 +1731,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsDesignMode && Setting.JudgeLineAlignBeat)
             {
                 var tGrid = GetCurrentTGrid();
-                var time = TGridCalculator.ConvertTGridToAudioTime(tGrid, this);
-                var y = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, this);
+                var time = ConvertTGridToAudioTime(tGrid);
+                var y = ConvertTGridToY_DesignMode(tGrid);
 
                 var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Fumen.BpmList);
                 (var prevAudioTime, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.audioTime < time);
@@ -1741,7 +1741,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale) * 2;
                 //消除精度误差~
-                var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
+                var prevY = Math.Max(0, ConvertAudioTimeToY_DesignMode(prevAudioTime) - 1);
 
                 var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
                 var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
@@ -1751,7 +1751,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var result = arg.Delta > 0 ? nextFirst : downFirst;
                 if (result.tGrid is not null)
                 {
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(result.y, this);
+                    var audioTime = ConvertYToAudioTime_DesignMode(result.y);
                     ScrollTo(audioTime);
                     //ScrollTo(result.y);
                 }
@@ -1760,7 +1760,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 if (IsPreviewMode)
                 {
-                    var audioTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentTGrid(), this);
+                    var audioTime = ConvertTGridToAudioTime(GetCurrentTGrid());
                     var offset = TimeSpan.FromMilliseconds(Setting.MouseWheelLength);
                     if (Math.Sign(arg.Delta) > 0)
                         audioTime += offset;
@@ -1772,7 +1772,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     var y = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength;
                     y = Math.Max(Math.Min(y, TotalDurationHeight), 0);
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                    var audioTime = ConvertYToAudioTime_DesignMode(y);
                     ScrollTo(audioTime);
                     //ScrollTo(ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength);
                 }
@@ -1857,7 +1857,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //record player location
                 if (!isDraggingPlayerLocation)
                 {
-                    var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
+                    var tGrid = ConvertAudioTimeToTGrid(CurrentPlayTime);
                     var apfLane = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>()
                         .LastOrDefault();
                     var xGrid = apfLane?.CalulateXGrid(tGrid)?.TotalUnit ?? PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime);

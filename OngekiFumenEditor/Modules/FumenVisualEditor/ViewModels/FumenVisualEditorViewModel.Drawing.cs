@@ -51,7 +51,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private readonly List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
 
     private Func<double, FumenVisualEditorViewModel, SoflanList, double>
-        convertToY = (tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor);
+        convertToY = (tUnit, editor, _) => editor.ConvertTGridUnitToY_DesignMode(tUnit);
 
     private string displayFPS = "";
     private readonly Dictionary<IFumenEditorDrawingTarget, Dictionary<DrawingTargetContext, List<OngekiObjectBase>>> drawMap = new();
@@ -353,8 +353,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             else
             {
                 //Design Mode
-                var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this) ?? TGrid.Zero;
-                var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(maxY, this) ?? TGrid.Zero;
+                var minTGrid = ConvertYToTGrid_DesignMode(minY) ?? TGrid.Zero;
+                var maxTGrid = ConvertYToTGrid_DesignMode(maxY) ?? TGrid.Zero;
                 visibleTGridRanges.Add((minTGrid, maxTGrid));
             }
 
@@ -687,7 +687,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                     if (drawingContexts.ElementAtOrDefault(0).Value?.Rect.MaxY - Mouse.GetPosition(view).Y is double mouseY)
                     {
                         stringBuilder.AppendLine($"MouseY: {mouseY:F2}");
-                        foreach (var tGrid in TGridCalculator.ConvertYToTGrid_PreviewMode(mouseY, this))
+                        foreach (var tGrid in ConvertYToTGrid_PreviewMode(mouseY))
                             stringBuilder.AppendLine($"* {tGrid}");
                     }
                 });
@@ -754,12 +754,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
             if (containBeams)
             {
-                var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(
-                    TGridCalculator.ConvertTGridToAudioTime(min, this) -
-                    TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME), this);
-                var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(
-                    TGridCalculator.ConvertTGridToAudioTime(max, this) +
-                    TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), this);
+                var leadInTGrid = ConvertAudioTimeToTGrid(
+                    ConvertTGridToAudioTime(min) -
+                    TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME));
+                var leadOutTGrid = ConvertAudioTimeToTGrid(
+                    ConvertTGridToAudioTime(max) +
+                    TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION));
 
                 r = r.Concat(fumen.Beams.GetVisibleStartObjects(leadInTGrid, leadOutTGrid));
             }

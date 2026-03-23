@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
 			var dragStartCanvasPoint = info.CanvasPoint;
 			var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor) : 0;
-			var y = obj is ITimelineObject timelineObject ? TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, editor) : 0;
+			var y = obj is ITimelineObject timelineObject ? editor.ConvertTGridToY_DesignMode(timelineObject.TGrid) : 0;
 
 			OnDragMove(obj, point, editor);
 			var newPos = new Point(x, y);
@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			var y = 0d;
 			if (obj is ITimelineObject timelineObject)
 			{
-				y = TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, editor);
+				y = editor.ConvertTGridToY_DesignMode(timelineObject.TGrid);
 				if (double.IsNaN(y))
 					y = default;
 				info.TGrid = timelineObject.TGrid.CopyNew();
@@ -120,7 +120,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			if (obj is ITimelineObject timeObj)
 			{
 				var ry = CheckAndAdjustY(timeObj, point.Y, editor);
-				if (ry is double dry && TGridCalculator.ConvertYToTGrid_DesignMode(dry, editor) is TGrid tGrid)
+				if (ry is double dry && editor.ConvertYToTGrid_DesignMode(dry) is TGrid tGrid)
 				{
 					timeObj.TGrid = tGrid;
 					//Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
@@ -147,7 +147,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 				return y;
 
 			var forceMagneticAdjust = editor.Setting.ForceMagneticDock;
-			var fin = forceMagneticAdjust ? TGridCalculator.TryPickClosestBeatTime((float)y, editor) : TGridCalculator.TryPickMagneticBeatTime((float)y, 4, editor);
+			var fin = forceMagneticAdjust ? editor.TryPickClosestBeatTime((float)y) : editor.TryPickMagneticBeatTime((float)y, 4);
 			var ry = fin.y;
 			if (fin.tGrid == null)
 				ry = y;

@@ -64,7 +64,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (curTGrid < beginTGrid)
             {
                 //progress = [-1,0]
-                var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_BODY_DURATION), target.Editor);
+                var leadBodyInTGrid = target.Editor.ConvertAudioTimeToTGrid(target.Editor.ConvertTGridToAudioTime(beginTGrid) - TimeSpan.FromMilliseconds(BeamStart.LEAD_IN_BODY_DURATION));
                 progress = MathUtils.Normalize(leadBodyInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid) - 1;
                 xGrid = obj.XGrid;
 
@@ -73,7 +73,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             else if (curTGrid > endTGrid)
             {
                 //progress = [1,2]
-                var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(endTGrid, target.Editor) + TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), target.Editor);
+                var leadOutTGrid = target.Editor.ConvertAudioTimeToTGrid(target.Editor.ConvertTGridToAudioTime(endTGrid) + TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION));
                 progress = MathUtils.Normalize(endTGrid.TotalGrid, leadOutTGrid.TotalGrid, curTGrid.TotalGrid) + 1;
                 xGrid = obj.Children.LastOrDefault()?.XGrid;
             }
@@ -112,9 +112,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             if (prepareWarn)
             {
-                var audioTime = TGridCalculator.ConvertTGridToAudioTime(beginTGrid, target.Editor);
+                var audioTime = target.Editor.ConvertTGridToAudioTime(beginTGrid);
                 var leadAudioTime = audioTime - TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME);
-                var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(leadAudioTime, target.Editor);
+                var leadInTGrid = target.Editor.ConvertAudioTimeToTGrid(leadAudioTime);
                 if (leadInTGrid is null)
                     leadInTGrid = TGrid.Zero;
 

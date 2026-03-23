@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                 var y = 0d;
                 if (obj is ITimelineObject timeline)
-                    y = TGridCalculator.ConvertTGridToY_DesignMode(timeline.TGrid, sourceEditor);
+                    y = sourceEditor.ConvertTGridToY_DesignMode(timeline.TGrid);
 
                 return new Point(x, y);
             }
@@ -168,8 +168,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             {
                 if (isSameEditorCopy)
                     return y;
-                var offsetTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(y, sourceEditor);
-                var fixedY = TGridCalculator.ConvertTGridToY_DesignMode(offsetTGrid, targetEditor);
+                var offsetTGrid = sourceEditor.ConvertYToTGrid_DesignMode(y);
+                var fixedY = targetEditor.ConvertTGridToY_DesignMode(offsetTGrid);
                 return fixedY;
             }
 
@@ -274,7 +274,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                     var newY = CalcY(sourceCanvasPos.Y);
 
-                    if (TGridCalculator.ConvertYToTGrid_DesignMode(newY, targetEditor) is not TGrid nt)
+                    if (targetEditor.ConvertYToTGrid_DesignMode(newY) is not TGrid nt)
                     {
                         //todo warn
                         return;
@@ -295,10 +295,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                 _ => throw new Exception("这都能炸真的牛皮")
                             };
                             var oldEndIndicatorTGrid = endIndicator.TGrid.CopyNew();
-                            var endIndicatorY = TGridCalculator.ConvertTGridToY_DesignMode(oldEndIndicatorTGrid, sourceEditor);
+                            var endIndicatorY = sourceEditor.ConvertTGridToY_DesignMode(oldEndIndicatorTGrid);
                             var newEndIndicatorY = CalcY(endIndicatorY);
 
-                            if (TGridCalculator.ConvertYToTGrid_DesignMode(newEndIndicatorY, targetEditor) is not TGrid newEndIndicatorTGrid)
+                            if (targetEditor.ConvertYToTGrid_DesignMode(newEndIndicatorY) is not TGrid newEndIndicatorTGrid)
                             {
                                 //todo warn
                                 return;
@@ -314,10 +314,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                             foreach (var child in start.Children)
                             {
                                 var oldChildTGrid = child.TGrid.CopyNew();
-                                var y = TGridCalculator.ConvertTGridToY_DesignMode(oldChildTGrid, sourceEditor);
+                                var y = sourceEditor.ConvertTGridToY_DesignMode(oldChildTGrid);
                                 var newChildY = CalcY(y);
 
-                                if (TGridCalculator.ConvertYToTGrid_DesignMode(newChildY, targetEditor) is not TGrid newChildTGrid)
+                                if (targetEditor.ConvertYToTGrid_DesignMode(newChildY) is not TGrid newChildTGrid)
                                 {
                                     //todo warn
                                     return;
@@ -330,10 +330,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                 foreach (var control in child.PathControls)
                                 {
                                     var oldControlTGrid = control.TGrid.CopyNew();
-                                    var cy = TGridCalculator.ConvertTGridToY_DesignMode(oldControlTGrid, sourceEditor);
+                                    var cy = sourceEditor.ConvertTGridToY_DesignMode(oldControlTGrid);
                                     var newControlY = CalcY(cy);
 
-                                    if (TGridCalculator.ConvertYToTGrid_DesignMode(newControlY, targetEditor) is not TGrid newControlTGrid)
+                                    if (targetEditor.ConvertYToTGrid_DesignMode(newControlY) is not TGrid newControlTGrid)
                                     {
                                         //todo warn
                                         return;

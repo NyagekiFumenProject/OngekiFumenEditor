@@ -102,7 +102,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
 			{
 				var audioTime = ParseMsecStr();
 				Log.LogInfo($"{MsecStr}  ->  {audioTime}");
-				var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(audioTime, Editor);
+				var tGrid = Editor.ConvertAudioTimeToTGrid(audioTime);
 				Unit = tGrid.Unit;
 				Grid = tGrid.Grid;
 			}
@@ -111,7 +111,7 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
 		public void UpdateToMsec()
 		{
 			if (Editor is not null)
-				msecStr = TGridCalculator.ConvertTGridToAudioTime(new(Unit, Grid), Editor).ToString("hh\\:mm\\:ss\\.fff");
+				msecStr = Editor.ConvertTGridToAudioTime(new(Unit, Grid)).ToString("hh\\:mm\\:ss\\.fff");
 			NotifyOfPropertyChange(() => MsecStr);
 		}
 
