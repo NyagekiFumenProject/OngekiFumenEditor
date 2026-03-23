@@ -68,6 +68,7 @@ namespace OngekiFumenEditor.Core.Properties {
                 return ResourceManager.GetString("BulletNullPalleteDescription", resourceCulture);
             }
         }
+
         
         /// <summary>
         ///   查找类似 After the last Soflan speed change, the speed should return to 1x normally, but now is {0}x. 的本地化字符串。
@@ -140,6 +141,7 @@ namespace OngekiFumenEditor.Core.Properties {
                 return ResourceManager.GetString("InvalidConnectablePath", resourceCulture);
             }
         }
+
         
         /// <summary>
         ///   查找类似 Lane block start wall ({0}) is different than end wall ({1}) 的本地化字符串。
@@ -185,6 +187,7 @@ namespace OngekiFumenEditor.Core.Properties {
                 return ResourceManager.GetString("MissingRefObject2", resourceCulture);
             }
         }
+
         
         /// <summary>
         ///   查找类似 The curve lane has not been interpolated yet 的本地化字符串。
@@ -230,6 +233,7 @@ namespace OngekiFumenEditor.Core.Properties {
                 return ResourceManager.GetString("SoflanConflict", resourceCulture);
             }
         }
+
         
         /// <summary>
         ///   查找类似 Walls on different sides (id:{0}) and (id:{1}) horizontally intersect, collide, or overlap 的本地化字符串。
@@ -248,6 +252,7 @@ namespace OngekiFumenEditor.Core.Properties {
                 return ResourceManager.GetString("WallConflict3", resourceCulture);
             }
         }
+
         
         /// <summary>
         ///   查找类似 {0} object seems not to be placed on the correct lane (id:{1}) 的本地化字符串。

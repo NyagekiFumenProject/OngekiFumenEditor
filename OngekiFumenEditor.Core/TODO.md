@@ -35,6 +35,7 @@ Create a platform-neutral library for:
 - Moved the pure portions of `MathUtils` into `OngekiFumenEditor.Core`, including range-combine helpers and BPM/grid math
 - Moved `AbortableThread` and `ViewModelReferenceAttribute` into `OngekiFumenEditor.Core`
 - Moved pure `Utils.Ogkr.InterpolateAll` lane interpolation helper into `OngekiFumenEditor.Core`
+- Moved `TGridCalculator` and `XGridCalculator` pure overloads into `OngekiFumenEditor.Core`, while keeping `FumenVisualEditorViewModel`-based wrappers in `OngekiFumenEditor`
 - Left editor-only utils such as WPF/Skia/OpenTK converters (`BrushHelper`, `ColorExtensionMethod`, `SvgExtensionMethod`, `Vector*ExtensionMethod`, `Matrix4ExtensionMethod`), command routing and view plumbing (`CommandRouterHelper`, `ActionExecutionContextExtensionMethod`, `CoroutineExtensionMethod`, `MapToViewAttribute`, `ViewHelper`, `WindowTitleHelper`), resource and shell helpers (`ResourceUtils`, `FileDialogHelper`, `DocumentOpenHelper`, `ProcessUtils`, `ConsoleWindowHelper`, `IPCHelper`, `IniFile`), status/logging infrastructure (`CommonStatusBar`, `StatusBarHelper`, `Log`, `Logs/*`, `ObjectPoolManager`), crash handling (`DeadHandler/*`), and editor-only OGKR workflow helper (`Utils.Ogkr.StandardizeFormat`) in `OngekiFumenEditor`
 
 ## Phase 2
@@ -64,7 +65,7 @@ Create a platform-neutral library for:
 - some domain types still inherit Caliburn observable infrastructure
 - property browser attributes currently depend on editor resources
 - some helpers still resolve services through `IoC`
-- some calculators and rule interfaces still depend on `FumenVisualEditorViewModel`
+- editor-only calculator overloads and some rule interfaces still depend on `FumenVisualEditorViewModel`
 - current `OpenTK` 4.x packages in this repo target `netstandard2.1`, so connectable-object curve interpolation code cannot move into `netstandard2.0` core without an abstraction or package/version strategy change
 - `Kernel`-scoped editor infrastructure is intentionally excluded from `OngekiFumenEditor.Core` except `CurveInterpolater`
 
