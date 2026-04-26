@@ -58,9 +58,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             OnBegin(target);
             var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
 
-            canvas.Scale(1, -1);
-
             using var paint = new SKPaint();
+            paint.IsAntialias = !ProgramSetting.Default.DisableStringRendererAntialiasing;
             paint.ColorF = new(color.X, color.Y, color.Z, color.W);
 
             using var font = new SKFont();
@@ -80,22 +79,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 
             font.Typeface = typeface;
             font.Size = fontSize;
+            font.Edging = paint.IsAntialias ? SKFontEdging.SubpixelAntialias : SKFontEdging.Alias;
+            font.Hinting = SKFontHinting.Full;
+            font.Subpixel = true;
 
             font.MeasureText(text, out var bounds, paint);
-            measureTextSize = new Vector2(bounds.Width, bounds.Height);
+            measureTextSize = new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
             //adjust pos thought origin and size
 
             var offsetPos = new SKPoint(origin.X * bounds.Width, bounds.Height - origin.Y * bounds.Height);
 
-            var adjustPos = pos.ToSkiaSharpPoint() - offsetPos;
-            adjustPos.Y = -adjustPos.Y;
+            canvas.Scale(1, -1);
+            canvas.Translate(pos.X, -pos.Y);
+            if (rotate != 0)
+                canvas.RotateDegrees(rotate * 180f / MathF.PI);
+            canvas.Scale(scale.X, scale.Y);
 
+            var adjustPos = new SKPoint(-offsetPos.X, offsetPos.Y);
             canvas.DrawText(text, adjustPos, font, paint);
             target.PerfomenceMonitor.CountDrawCall(this);
 
             if (isUnderline || isStrike)
             {
                 using var linePaint = new SKPaint();
+                linePaint.IsAntialias = paint.IsAntialias;
                 linePaint.Color = new SKColor((byte)(color.X * 255), (byte)(color.Y * 255), (byte)(color.Z * 255), (byte)(color.W * 255));
                 font.GetFontMetrics(out var metrics);
                 linePaint.StrokeWidth = metrics.UnderlineThickness ?? 2;
