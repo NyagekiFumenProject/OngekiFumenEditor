@@ -1603,6 +1603,12 @@
   <data name="SkiaRenderBackend" xml:space="preserve">
     <value />
   </data>
+  <data name="D3DRenderQueueFrameCount" xml:space="preserve">
+    <value>D3D render queue frames: </value>
+  </data>
+  <data name="D3DRenderQueueFrameCountHint" xml:space="preserve">
+    <value>2 = double buffering, 3 = triple buffering</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value />
   </data>

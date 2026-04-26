@@ -75,6 +75,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private float viewHeight;
     private float viewWidth;
+    private float renderScaleX = 1;
+    private float renderScaleY = 1;
 
     private DrawXGridHelper xGridHelper;
     private int cacheMagaticXGridLinesHash;
@@ -138,6 +140,18 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         {
             Set(ref viewHeight, value);
         }
+    }
+
+    public float RenderScaleX
+    {
+        get => renderScaleX;
+        set => Set(ref renderScaleX, value);
+    }
+
+    public float RenderScaleY
+    {
+        get => renderScaleY;
+        set => Set(ref renderScaleY, value);
     }
 
     public DrawingTargetContext CurrentDrawingTargetContext { get; set; }
@@ -209,8 +223,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl renderImpl)
     {
-        var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-        var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+        var dpi = VisualTreeHelper.GetDpi(renderControl);
+        RenderScaleX = (float)dpi.DpiScaleX;
+        RenderScaleY = (float)dpi.DpiScaleY;
 
         ViewWidth = (float)renderControl.ActualWidth;
         ViewHeight = (float)renderControl.ActualHeight;
@@ -373,7 +388,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 ViewMatrix = viewMatrix,
                 ProjectionMatrix = projectionMatrix,
                 ViewWidth = ViewWidth,
-                ViewHeight = ViewHeight
+                ViewHeight = ViewHeight,
+                RenderScaleX = RenderScaleX,
+                RenderScaleY = RenderScaleY
             };
 
             drawingContexts[pair.Key] = drawingContext;
@@ -938,8 +955,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var renderControl = sender as FrameworkElement;
         Log.LogDebug($"renderControl new size: {e.NewSize} , renderControl.RenderSize = {renderControl.RenderSize}");
 
-        var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-        var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+        var dpi = VisualTreeHelper.GetDpi(renderControl);
+        RenderScaleX = (float)dpi.DpiScaleX;
+        RenderScaleY = (float)dpi.DpiScaleY;
 
         ViewWidth = (float)e.NewSize.Width;
         ViewHeight = (float)e.NewSize.Height;

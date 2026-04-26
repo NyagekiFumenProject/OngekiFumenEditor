@@ -12,6 +12,24 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 {
     internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing
     {
+        private sealed class SkiaLineVBOHandle : IStaticVBODrawing.IVBOHandle
+        {
+            public LineVertex[] Points { get; private set; }
+            public float LineWidth { get; private set; }
+
+            public SkiaLineVBOHandle(IEnumerable<LineVertex> points, float lineWidth)
+            {
+                Points = points?.ToArray() ?? [];
+                LineWidth = lineWidth;
+            }
+
+            public void Dispose()
+            {
+                Points = [];
+                LineWidth = default;
+            }
+        }
+
         private SKCanvas canvas;
         private List<LineVertex> postedPoints = new();
         private IDrawingContext target;
@@ -197,12 +215,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         public IStaticVBODrawing.IVBOHandle GenerateVBOWithPresetPoints(IEnumerable<LineVertex> points, float lineWidth)
         {
-            throw new System.NotImplementedException();
+            return new SkiaLineVBOHandle(points, lineWidth);
         }
 
         public void DrawVBO(IDrawingContext target, IStaticVBODrawing.IVBOHandle vbo)
         {
-            throw new System.NotImplementedException();
+            if (vbo is not SkiaLineVBOHandle handle || handle.Points.Length == 0)
+                return;
+
+            Draw(target, handle.Points, handle.LineWidth);
         }
     }
 }

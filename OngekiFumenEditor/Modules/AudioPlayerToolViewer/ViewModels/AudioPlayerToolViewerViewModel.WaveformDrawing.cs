@@ -24,6 +24,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
     {
         private float viewWidth;
         private float viewHeight;
+        private float renderScaleX = 1;
+        private float renderScaleY = 1;
         private IPerfomenceMonitor performenceMonitor;
         private Stopwatch sw;
         private ISamplePeak samplePeak;
@@ -150,6 +152,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             viewWidth = (float)renderControl.ActualWidth;
             viewHeight = (float)renderControl.ActualHeight;
+            UpdateRenderScale(renderControl);
 
             //暂时没有需要显示检测的必要?
             //performenceMonitor = IoC.Get<IPerfomenceMonitor>();
@@ -271,6 +274,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             CurrentDrawingTargetContext.Rect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
             CurrentDrawingTargetContext.ViewWidth = viewWidth;
             CurrentDrawingTargetContext.ViewHeight = viewHeight;
+            CurrentDrawingTargetContext.RenderScaleX = renderScaleX;
+            CurrentDrawingTargetContext.RenderScaleY = renderScaleY;
 
             if (AudioPlayer?.IsPlaying ?? false)
                 CurrentTime = AudioPlayer.CurrentTime;
@@ -314,6 +319,14 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             viewWidth = (float)e.NewSize.Width;
             viewHeight = (float)e.NewSize.Height;
+            UpdateRenderScale(renderControl);
+        }
+
+        private void UpdateRenderScale(FrameworkElement renderControl)
+        {
+            var dpi = VisualTreeHelper.GetDpi(renderControl);
+            renderScaleX = (float)dpi.DpiScaleX;
+            renderScaleY = (float)dpi.DpiScaleY;
         }
 
         private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)

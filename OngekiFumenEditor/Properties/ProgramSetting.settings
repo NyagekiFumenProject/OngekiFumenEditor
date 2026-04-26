@@ -62,6 +62,9 @@
     <Setting Name="SkiaRenderBackend" Type="System.String" Scope="User">
       <Value Profile="(Default)">CPU</Value>
     </Setting>
+    <Setting Name="D3DRenderQueueFrameCount" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3</Value>
+    </Setting>
     <Setting Name="__NeedUpgradeSetting" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>

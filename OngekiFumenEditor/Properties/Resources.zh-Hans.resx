@@ -2049,6 +2049,12 @@
   <data name="SkiaRenderBackend" xml:space="preserve">
     <value>Skia渲染后端:</value>
   </data>
+  <data name="D3DRenderQueueFrameCount" xml:space="preserve">
+    <value>D3D 渲染队列帧数:</value>
+  </data>
+  <data name="D3DRenderQueueFrameCountHint" xml:space="preserve">
+    <value>2 = 双重缓冲，3 = 三重缓冲</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value>当播放暂停后, 编辑器时间跳转回播放前</value>
   </data>

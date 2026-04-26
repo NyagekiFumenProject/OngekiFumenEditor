@@ -198,7 +198,6 @@
 		<PackageReference Include="Microsoft.Build" Version="17.7.2" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.11.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" ExcludeAssets="contentfiles;runtime;" />
-		<PackageReference Include="Microsoft.Wpf.Interop.DirectX-x64" Version="0.9.0-beta-22856" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
 		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.1.0" />
 		<PackageReference Include="NAudio" Version="2.2.1" />
@@ -218,7 +217,6 @@
 		<PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.1" />
 		<PackageReference Include="Svg" Version="3.4.7" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0" />
-		<PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
 		<PackageReference Include="Vortice.Direct3D12" Version="3.6.2" />
 		<PackageReference Include="Vortice.Direct3D9" Version="3.6.2" />
 		<PackageReference Include="Vortice.DXGI" Version="3.6.2" />

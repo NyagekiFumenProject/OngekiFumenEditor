@@ -26,7 +26,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing
 
             var mvp = (GetOverrideModelMatrix() * GetOverrideViewMatrixOrDefault(target.CurrentDrawingTargetContext)).ToSkiaMatrix44();
 
-            var adjustMVP = mvp * SKMatrix44.CreateScale(1, -1, 1) * SKMatrix44.CreateTranslation(target.CurrentDrawingTargetContext.ViewWidth / 2, target.CurrentDrawingTargetContext.ViewHeight / 2, 0);
+            var ctx = target.CurrentDrawingTargetContext;
+            var adjustMVP = mvp
+                * SKMatrix44.CreateScale(1, -1, 1)
+                * SKMatrix44.CreateTranslation(ctx.ViewWidth / 2, ctx.ViewHeight / 2, 0)
+                * SKMatrix44.CreateScale(ctx.RenderScaleX, ctx.RenderScaleY, 1);
 
             canvas.SetMatrix(adjustMVP);
         }

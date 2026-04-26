@@ -34,6 +34,23 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 
         public IEnumerable<string> AvaliableSkiaBackends => Enum.GetNames<RenderBackendType>();
 
+        public IEnumerable<int> D3DRenderQueueFrameCountOptions { get; } = Enumerable.Range(2, 4);
+
+        public int D3DRenderQueueFrameCount
+        {
+            get => Math.Clamp(Setting.D3DRenderQueueFrameCount, 2, 5);
+            set
+            {
+                var clamped = Math.Clamp(value, 2, 5);
+                if (Setting.D3DRenderQueueFrameCount == clamped)
+                    return;
+
+                Setting.D3DRenderQueueFrameCount = clamped;
+                NotifyOfPropertyChange();
+                ApplyChanges();
+            }
+        }
+
         private bool enableAssociateNyagekiProj = true;
         public bool EnableAssociateNyagekiProj
         {
@@ -64,6 +81,8 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
         private void SettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             Log.LogDebug($"logs setting property changed : {e.PropertyName}");
+            if (e.PropertyName == nameof(ProgramSetting.D3DRenderQueueFrameCount))
+                NotifyOfPropertyChange(() => D3DRenderQueueFrameCount);
         }
 
         public string SettingsPageName => Resources.TabProgram;

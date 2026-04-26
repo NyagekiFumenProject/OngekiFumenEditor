@@ -31,6 +31,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         private TaskCompletionSource initTaskSource = new TaskCompletionSource();
         private bool initialized = false;
         private DpiScale currentDPI;
+        private RenderBackendType backendType;
 
         public ICircleDrawing CircleDrawing { get; private set; }
         public ILineDrawing LineDrawing { get; private set; }
@@ -82,8 +83,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
             #endregion
 
-            backendType = Enum.TryParse<RenderBackendType>(Properties.ProgramSetting.Default.SkiaRenderBackend, out var bt) ? bt : RenderBackendType.CPU;
-
             Log.LogInfo($"Skia Drawing Manager initialized successfully, backendType:{backendType}.");
             initTaskSource.SetResult();
         }
@@ -123,7 +122,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         }
 
         Dictionary<FrameworkElement, DefaultSkiaRenderContext> cachedRenderControlMap = new();
-        private RenderBackendType backendType;
+
+        private void RefreshBackendType()
+        {
+            backendType = Enum.TryParse<RenderBackendType>(Properties.ProgramSetting.Default.SkiaRenderBackend, out var bt) ? bt : RenderBackendType.CPU;
+        }
 
         public IImage LoadImageFromStream(Stream stream)
         {
@@ -156,12 +159,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         public FrameworkElement CreateRenderControl()
         {
+            RefreshBackendType();
+
             switch (backendType)
             {
                 case RenderBackendType.OpenGL:
                     return new SkiaRenderControl_OpenGL();
                 case RenderBackendType.DirectX:
-                    return new SkiaRenderControl_DirectX();
+                    return new SkiaRenderControl_D3D9On12();
                 case RenderBackendType.CPU:
                 default:
                     return new SkiaRenderControl_CPU();

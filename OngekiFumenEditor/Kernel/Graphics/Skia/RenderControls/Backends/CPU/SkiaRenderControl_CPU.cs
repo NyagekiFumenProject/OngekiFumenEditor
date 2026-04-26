@@ -27,15 +27,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
             if (Visibility != Visibility.Visible || PresentationSource.FromVisual(this) == null)
                 return;
 
-            var size = CreateSize(out var unscaledSize, out var scaleX, out var scaleY);
-            var userVisibleSize = IgnorePixelScaling ? unscaledSize : size;
+            var pixelSize = CreateSize(out var logicalSize, out var scaleX, out var scaleY);
+            if (IgnorePixelScaling)
+                pixelSize = logicalSize;
 
-            CanvasSize = userVisibleSize;
+            CanvasSize = logicalSize;
 
-            if (size.Width <= 0 || size.Height <= 0)
+            if (pixelSize.Width <= 0 || pixelSize.Height <= 0)
                 return;
 
-            var info = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
+            var info = new SKImageInfo(pixelSize.Width, pixelSize.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
 
             // reset the bitmap if the size has changed
             if (bitmap == null || info.Width != bitmap.PixelWidth || info.Height != bitmap.PixelHeight)
@@ -49,19 +50,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
             if (!IgnorePixelScaling)
             {
                 var canvas = surface.Canvas;
-                canvas.Scale(scaleX, scaleY);
                 canvas.Save();
+                canvas.Scale(scaleX, scaleY);
             }
 
             CurrentRenderSurface = surface;
-            OnPaintSurface(new SKPaintSurfaceEventArgs(surface, info.WithSize(userVisibleSize), info));
+            OnPaintSurface(new SKPaintSurfaceEventArgs(surface, info.WithSize(logicalSize), info));
             CurrentRenderSurface = default;
 
             // draw the bitmap to the screen
             bitmap.AddDirtyRect(new Int32Rect(0, 0, info.Width, info.Height));
             bitmap.Unlock();
 
-            drawingContext.DrawImage(bitmap, new Rect(0, 0, CanvasSize.Width, CanvasSize.Height));
+            drawingContext.DrawImage(bitmap, new Rect(0, 0, logicalSize.Width, logicalSize.Height));
         }
     }
 }

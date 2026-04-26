@@ -141,6 +141,22 @@
                         ItemsSource="{Binding AvaliableSkiaBackends}"
                         SelectedValue="{Binding Setting.SkiaRenderBackend}" />
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Margin="10,10,5,10"
+                        VerticalAlignment="Center"
+                        Text="{markup:Translate [D3DRenderQueueFrameCount]}" />
+                    <ComboBox
+                        Margin="5,0,5,0"
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding D3DRenderQueueFrameCountOptions}"
+                        SelectedValue="{Binding D3DRenderQueueFrameCount}" />
+                    <TextBlock
+                        Margin="10,10,5,10"
+                        VerticalAlignment="Center"
+                        Foreground="DarkSlateGray"
+                        Text="{markup:Translate [D3DRenderQueueFrameCountHint]}" />
+                </StackPanel>
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">

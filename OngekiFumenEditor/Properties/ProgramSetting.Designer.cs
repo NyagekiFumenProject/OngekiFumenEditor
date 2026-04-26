@@ -262,6 +262,18 @@ namespace OngekiFumenEditor.Properties {
                 this["SkiaRenderBackend"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public int D3DRenderQueueFrameCount {
+            get {
+                return ((int)(this["D3DRenderQueueFrameCount"]));
+            }
+            set {
+                this["D3DRenderQueueFrameCount"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

@@ -22,5 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
         public Matrix4 ProjectionMatrix { get; set; }
         public float ViewWidth { get; set; }
         public float ViewHeight { get; set; }
+        public float RenderScaleX { get; set; } = 1;
+        public float RenderScaleY { get; set; } = 1;
     }
 }
