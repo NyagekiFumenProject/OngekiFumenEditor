@@ -1,9 +1,9 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.PreviewSvgGenerator;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;

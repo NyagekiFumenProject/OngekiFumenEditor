@@ -8,7 +8,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using Caliburn.Micro;
 using Microsoft.Xaml.Behaviors;
-using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;

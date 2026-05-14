@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Kernel.Scheduler;
+﻿using OngekiFumenEditor.Core.Utils.ObjectPool;
+using OngekiFumenEditor.Kernel.Scheduler;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -47,3 +48,4 @@ namespace OngekiFumenEditor.Utils.ObjectPool
 		}
 	}
 }
+

@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
+using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;

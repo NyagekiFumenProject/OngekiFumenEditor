@@ -1,15 +1,15 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using DereTore.Common;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
 using Gemini.Modules.Toolbox.Models;
 using Gemini.Modules.UndoRedo;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
@@ -31,8 +31,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Gemini.Framework.Commands;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using System.Threading;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 using System.Windows.Controls;
@@ -78,8 +78,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 ? Visibility.Hidden : Visibility.Visible;
 
         public Visibility EditorObjectVisibility =>
-            IsLocked || // 编辑器被锁住
-            IsUserRequestHideEditorObject // 用户要求隐藏(比如按下Q)
+            IsLocked || // 缂栬緫鍣ㄨ閿佷綇
+            IsUserRequestHideEditorObject // 鐢ㄦ埛瑕佹眰闅愯棌(姣斿鎸変笅Q)
                 ? Visibility.Hidden : Visibility.Visible;
 
         public bool IsDesignMode => EditorObjectVisibility == Visibility.Visible;
@@ -426,7 +426,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private OngekiObjectBase mouseDownHitObject;
         private Point? mouseDownHitObjectPosition;
         /// <summary>
-        /// 表示指针是否出拖动出滚动范围
+        /// 琛ㄧず鎸囬拡鏄惁鍑烘嫋鍔ㄥ嚭婊氬姩鑼冨洿
         /// </summary>
         private bool dragOutBound;
         private int currentDraggingActionId;
@@ -443,7 +443,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             foreach (var obj in SelectObjects)
             {
                 if (obj is ITimelineObject timelineObject)
-                    cacheObjectAudioTime[timelineObject] = TGridCalculator.ConvertTGridToY_DesignMode(timelineObject.TGrid, this);
+                    cacheObjectAudioTime[timelineObject] = ConvertTGridToY_DesignMode(timelineObject.TGrid);
                 else
                     ToastNotify(Resources.CantRememberObjectByNotSupport.Format(obj));
             }
@@ -471,9 +471,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.RecoveryObjectToAudioTime,
                 () =>
                 {
-                    Log.LogInfo($"开始恢复物件时间...");
+                    Log.LogInfo($"寮€濮嬫仮澶嶇墿浠舵椂闂?..");
                     foreach ((var timelineObject, var audioTime) in recoverTargets)
-                        timelineObject.TGrid = TGridCalculator.ConvertYToTGrid_DesignMode(audioTime, this);
+                        timelineObject.TGrid = ConvertYToTGrid_DesignMode(audioTime);
 
                     ToastNotify(Resources.RecoveryObjectsSuccess.Format(recoverTargets.Count));
                 }, () =>
@@ -664,11 +664,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var beforeHoldEndXGrid = (dockable as Hold)?.HoldEnd?.XGrid;
             var beforeLane = dockable.ReferenceLaneStart;
 
-            //如果本身已经有轨道引用且是同一个类型的轨道，那么就判断一下位置,钦定下一条同类型轨道
+            //濡傛灉鏈韩宸茬粡鏈夎建閬撳紩鐢ㄤ笖鏄悓涓€涓被鍨嬬殑杞ㄩ亾锛岄偅涔堝氨鍒ゆ柇涓€涓嬩綅缃?閽﹀畾涓嬩竴鏉″悓绫诲瀷杞ㄩ亾
             if (beforeLane is not null)
             {
                 var curXGrid = dockable.XGrid;
-                //获取轨道并计算对应的位置，然后排序，如果位置相同那么就再按RecordId去排序
+                //鑾峰彇杞ㄩ亾骞惰绠楀搴旂殑浣嶇疆锛岀劧鍚庢帓搴忥紝濡傛灉浣嶇疆鐩稿悓閭ｄ箞灏卞啀鎸塕ecordId鍘绘帓搴?
                 var pickableLanes = dockableLanes
                     .Select(x =>
                         new
@@ -683,10 +683,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     .Where(x => x.XGrid >= curXGrid)
                     .Select(x => x.Lane);
 
-                //这里考虑如果是切换到其他颜色轨道，那么可以直接原地变色。
+                //杩欓噷鑰冭檻濡傛灉鏄垏鎹㈠埌鍏朵粬棰滆壊杞ㄩ亾锛岄偅涔堝彲浠ョ洿鎺ュ師鍦板彉鑹层€?
                 var pick = beforeLane.LaneType == targetType ? r.FindNextOrDefault(beforeLane) : r.FirstOrDefault();
 
-                //如果pick为空，说明右侧再也没有合适的轨道可以放了，那么就尝试直接获取最左侧的轨道，重新开始
+                //濡傛灉pick涓虹┖锛岃鏄庡彸渚у啀涔熸病鏈夊悎閫傜殑杞ㄩ亾鍙互鏀句簡锛岄偅涔堝氨灏濊瘯鐩存帴鑾峰彇鏈€宸︿晶鐨勮建閬擄紝閲嶆柊寮€濮?
                 if (pick is null)
                     pick = pickableLanes
                         .Select(x => x.Lane)
@@ -710,7 +710,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (dockable.ReferenceLaneStart.CalulateXGrid(dockable.TGrid) is XGrid xGrid)
                         dockable.XGrid = xGrid;
 
-                    //如果是Hold还得他整理一下尾巴呢
+                    //濡傛灉鏄疕old杩樺緱浠栨暣鐞嗕竴涓嬪熬宸村憿
                     if (dockable is Hold hold)
                     {
                         if (hold.HoldEnd is HoldEnd holdEnd && dockable.ReferenceLaneStart.CalulateXGrid(holdEnd.TGrid) is XGrid holdXGrid)
@@ -737,11 +737,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //获取要删除的物件
+            //鑾峰彇瑕佸垹闄ょ殑鐗╀欢
             var selects = selection?.ToArray() ?? SelectObjects.OfType<OngekiObjectBase>().ToArray();
 
-            //依附于其他对象的子物件，比如轨道节点，曲线控制节点，无法做到单纯删除和添加
-            //记录它们子节点相对于集合的位置，下次恢复的时候就是插入了
+            //渚濋檮浜庡叾浠栧璞＄殑瀛愮墿浠讹紝姣斿杞ㄩ亾鑺傜偣锛屾洸绾挎帶鍒惰妭鐐癸紝鏃犳硶鍋氬埌鍗曠函鍒犻櫎鍜屾坊鍔?
+            //璁板綍瀹冧滑瀛愯妭鐐圭浉瀵逛簬闆嗗悎鐨勪綅缃紝涓嬫鎭㈠鐨勬椂鍊欏氨鏄彃鍏ヤ簡
             var curveControlMaps = selects
                 .OfType<LaneCurvePathControlObject>()
                 .GroupBy(x => x.RefCurveObject)
@@ -815,7 +815,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //取消选择
+            //鍙栨秷閫夋嫨
             SelectObjects.ForEach(x => x.IsSelected = false);
         }
 
@@ -836,7 +836,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 };
                 if (child != null)
                 {
-                    //只有一个轨道Next被选择
+                    //鍙湁涓€涓建閬揘ext琚€夋嫨
                     ProcessAsAddCurve(child, position);
                     return;
                 }
@@ -943,7 +943,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (propertyBrowser.SelectedObjects.IsOnlyOne() && propertyBrowser.SelectedObjects.FirstOrDefault() is Hold hold)
             {
-                //只有一个hold被选择，按下A那么就是添加HoldEnd
+                //鍙湁涓€涓猦old琚€夋嫨锛屾寜涓婣閭ｄ箞灏辨槸娣诲姞HoldEnd
                 ProcessAsHoldEnd(hold, position);
                 return;
             }
@@ -1033,7 +1033,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var tGrid = GetCurrentTGrid();
             IsUserRequestHideEditorObject = isPreviewMode;
             convertToY = IsDesignMode ?
-                ((tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor)) :
+                ((tUnit, editor, _) => editor.ConvertTGridUnitToY_DesignMode(tUnit)) :
                 (tUnit, editor, soflans) => TGridCalculator.ConvertTGridUnitToY_PreviewMode(tUnit, soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale);
             RecalculateTotalDurationHeight();
             ScrollTo(tGrid);
@@ -1053,7 +1053,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 objs = objs.Where(x => x switch
                 {
                     IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
-                    or ConnectableObjectBase => false, //轨道由依附的物件去决定
+                    or ConnectableObjectBase => false, //杞ㄩ亾鐢变緷闄勭殑鐗╀欢鍘诲喅瀹?
                     _ => true
                 });
                 //recache all objects
@@ -1080,8 +1080,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         return;
                     }
                     _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
-                    //目前只有Hold物件能影响到所属轨道的SoflanGroup?
-                    /* 注释代码因为id:1120
+                    //鐩墠鍙湁Hold鐗╀欢鑳藉奖鍝嶅埌鎵€灞炶建閬撶殑SoflanGroup?
+                    /* 娉ㄩ噴浠ｇ爜鍥犱负id:1120
                     if (obj is Hold hold && hold.ReferenceLaneStart is ConnectableStartObject start)
                         _cacheSoflanGroupRecorder.SetCache(start.Id, soflanList, soflanGroup);
                     */
@@ -1196,7 +1196,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         var curY = pos.Y;
                         var diffY = curY - mouseCanvasStartPosition.Y;
 
-                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(startScrollOffset + diffY, this);
+                        var audioTime = ConvertYToAudioTime_DesignMode(startScrollOffset + diffY);
                         //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
                         ScrollTo(audioTime);
                     }
@@ -1247,7 +1247,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     isSelectRangeDragging = false;
 
                     var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
-                    if (TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this) is TGrid tGrid)
+                    if (ConvertYToTGrid_DesignMode(position.Y) is TGrid tGrid)
                     {
                         var lanes = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
                         {
@@ -1286,7 +1286,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     }
                     else
                     {
-                        //这里如果已经有物件选择了就判断是否还有其他物件可以选择
+                        //杩欓噷濡傛灉宸茬粡鏈夌墿浠堕€夋嫨浜嗗氨鍒ゆ柇鏄惁杩樻湁鍏朵粬鐗╀欢鍙互閫夋嫨
                         SelectionArea.IsActive = false;
                         mouseDownHitObject = hitOngekiObject;
                         mouseDownHitObjectPosition = position;
@@ -1300,10 +1300,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 #if DEBUG
                     var xGrid = XGridCalculator.ConvertXToXGrid(position.X, this);
-                    var tGrid2 = TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this);
+                    var tGrid2 = ConvertYToTGrid_DesignMode(position.Y);
                     var querySoflanGroup = tGrid2 is null ? -1 : Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(xGrid, tGrid2);
 
-                    Log.LogDebug($"mousePos = （{position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject} , soflanGroup = {querySoflanGroup}");
+                    Log.LogDebug($"mousePos = ({position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject} , soflanGroup = {querySoflanGroup}");
 #endif
                 }
 
@@ -1323,7 +1323,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     //check if is dragging playerlocation
 
-                    var y = TGridCalculator.ConvertAudioTimeToY_PreviewMode(CurrentPlayTime, this);
+                    var y = ConvertAudioTimeToY_PreviewMode(CurrentPlayTime);
                     var x = XGridCalculator.ConvertXGridToX(PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime), this);
 
                     var mouseX = position.X;
@@ -1393,7 +1393,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var diffY = curY - mouseCanvasStartPosition.Y;
 
                     var canvasY = startScrollOffset + diffY;
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(canvasY, this);
+                    var audioTime = ConvertYToAudioTime_DesignMode(canvasY);
                     //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
                     ScrollTo(audioTime);
 
@@ -1415,13 +1415,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     else if (rp <= trigPrecent && dragOutBound)
                         offsetYAcc = rp / trigPrecent - 1;
                     else if (rp < 1 - trigPrecent && rp > trigPrecent)
-                        dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
+                        dragOutBound = true; //褰撴寚閽堝湪婊戝姩鑼冨洿澶栭潰锛岄偅涔堝氨鍙互杩涜浠讳綍鐨勬粦鍔ㄦ搷浣滀簡锛岄伩鍏嶆寚閽堜粠婊戝姩鑼冨洿鍐呭紑濮嬪氨婊氬姩
                     offsetY = offsetYAcc * autoScrollSpeed;
                     var y = RectInDesignMode.MinY + Setting.JudgeLineOffsetY + offsetY;
 
                     if (offsetY != 0)
                     {
-                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                        var audioTime = ConvertYToAudioTime_DesignMode(y);
                         ScrollTo(audioTime);
 
                         var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
@@ -1430,7 +1430,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             OnMouseMove(pos);
                     }
 
-                    //拉框
+                    //鎷夋
                     var p = pos;
                     p.Y = Math.Min(TotalDurationHeight, Math.Max(0, RectInDesignMode.MaxY - p.Y + offsetY));
                     SelectionArea.EndPoint = p;
@@ -1462,7 +1462,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     else if (rp <= trigPrecent && dragOutBound)
                         offsetYAcc = rp / trigPrecent - 1;
                     else if (rp < 1 - trigPrecent && rp > trigPrecent)
-                        dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
+                        dragOutBound = true; //褰撴寚閽堝湪婊戝姩鑼冨洿澶栭潰锛岄偅涔堝氨鍙互杩涜浠讳綍鐨勬粦鍔ㄦ搷浣滀簡锛岄伩鍏嶆寚閽堜粠婊戝姩鑼冨洿鍐呭紑濮嬪氨婊氬姩
                     offsetY = offsetYAcc * autoScrollSpeed;
 
                     var prev = CurrentPlayTime;
@@ -1472,13 +1472,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                     if (offsetY != 0)
                     {
-                        var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                        var audioTime = ConvertYToAudioTime_DesignMode(y);
                         ScrollTo(audioTime);
                     }
 
                     if (EnableDragging && !IsRangeSelecting)
                     {
-                        //拖动已选物件
+                        //鎷栧姩宸查€夌墿浠?
                         var cp = pos;
                         cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
                         //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
@@ -1577,7 +1577,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var count = SelectObjects.Take(2).Count();
             var first = SelectObjects.FirstOrDefault();
 
-            if ((count > 1) || (count == 1 && first != obj)) //比如你目前有多个已选择的，但你单点了一个
+            if ((count > 1) || (count == 1 && first != obj)) //姣斿浣犵洰鍓嶆湁澶氫釜宸查€夋嫨鐨勶紝浣嗕綘鍗曠偣浜嗕竴涓?
             {
                 TryCancelAllObjectSelecting(obj as ISelectableObject);
                 selectable.IsSelected = true;
@@ -1610,14 +1610,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var tGrid = default(TGrid);
                 if (IsDesignMode)
-                    tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(canvasY, this);
+                    tGrid = ConvertYToTGrid_DesignMode(canvasY);
                 else
                 {
-                    var result = TGridCalculator.ConvertYToTGrid_PreviewMode(canvasY, this);
+                    var result = ConvertYToTGrid_PreviewMode(canvasY);
                     if (result.IsOnlyOne())
                         tGrid = result.FirstOrDefault();
                 }
-                TimeSpan? audioTime = tGrid is not null ? TGridCalculator.ConvertTGridToAudioTime(tGrid, this) : null;
+                TimeSpan? audioTime = tGrid is not null ? ConvertTGridToAudioTime(tGrid) : null;
                 var xGrid = XGridCalculator.ConvertXToXGrid(canvasX, this);
                 return $"C[{canvasX:F2},{canvasY:F2}] {(tGrid is not null ? $"T[{tGrid.Unit},{tGrid.Grid}]" : "T[N/A]")} X[{xGrid.Unit:F2},{xGrid.Grid}] A[{audioTime?.ToString("mm\\:ss\\.fff") ?? "N/A"}]";
             }
@@ -1712,13 +1712,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             TGrid changeGrid;
 
-            if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(RectInDesignMode.Height, this).ToList() is [{ } single])
+            if (!IsDesignMode && ConvertYToTGrid_PreviewMode(RectInDesignMode.Height).ToList() is [{ } single])
             {
                 changeGrid = single;
             }
             else
             {
-                changeGrid = TGridCalculator.ConvertYToTGrid_DesignMode(RectInDesignMode.Height, this);
+                changeGrid = ConvertYToTGrid_DesignMode(RectInDesignMode.Height);
             }
 
             var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);
@@ -1731,8 +1731,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (IsDesignMode && Setting.JudgeLineAlignBeat)
             {
                 var tGrid = GetCurrentTGrid();
-                var time = TGridCalculator.ConvertTGridToAudioTime(tGrid, this);
-                var y = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, this);
+                var time = ConvertTGridToAudioTime(tGrid);
+                var y = ConvertTGridToY_DesignMode(tGrid);
 
                 var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Fumen.BpmList);
                 (var prevAudioTime, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.audioTime < time);
@@ -1740,8 +1740,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
 
                 var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale) * 2;
-                //消除精度误差~
-                var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
+                //娑堥櫎绮惧害璇樊~
+                var prevY = Math.Max(0, ConvertAudioTimeToY_DesignMode(prevAudioTime) - 1);
 
                 var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
                 var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
@@ -1751,7 +1751,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var result = arg.Delta > 0 ? nextFirst : downFirst;
                 if (result.tGrid is not null)
                 {
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(result.y, this);
+                    var audioTime = ConvertYToAudioTime_DesignMode(result.y);
                     ScrollTo(audioTime);
                     //ScrollTo(result.y);
                 }
@@ -1760,7 +1760,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 if (IsPreviewMode)
                 {
-                    var audioTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentTGrid(), this);
+                    var audioTime = ConvertTGridToAudioTime(GetCurrentTGrid());
                     var offset = TimeSpan.FromMilliseconds(Setting.MouseWheelLength);
                     if (Math.Sign(arg.Delta) > 0)
                         audioTime += offset;
@@ -1772,7 +1772,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     var y = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength;
                     y = Math.Max(Math.Min(y, TotalDurationHeight), 0);
-                    var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
+                    var audioTime = ConvertYToAudioTime_DesignMode(y);
                     ScrollTo(audioTime);
                     //ScrollTo(ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength);
                 }
@@ -1857,7 +1857,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 //record player location
                 if (!isDraggingPlayerLocation)
                 {
-                    var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
+                    var tGrid = ConvertAudioTimeToTGrid(CurrentPlayTime);
                     var apfLane = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>()
                         .LastOrDefault();
                     var xGrid = apfLane?.CalulateXGrid(tGrid)?.TotalUnit ?? PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime);
@@ -1876,7 +1876,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         #region Lock/Unlock User Interaction
 
         /// <summary>
-        /// 锁住编辑器所有交互操作，用户无法对此编辑器做任何的操作
+        /// 閿佷綇缂栬緫鍣ㄦ墍鏈変氦浜掓搷浣滐紝鐢ㄦ埛鏃犳硶瀵规缂栬緫鍣ㄥ仛浠讳綍鐨勬搷浣?
         /// </summary>
         public void LockAllUserInteraction()
         {
@@ -1889,7 +1889,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         }
 
         /// <summary>
-        /// 接触对编辑器用户操作的封锁
+        /// 鎺ヨЕ瀵圭紪杈戝櫒鐢ㄦ埛鎿嶄綔鐨勫皝閿?
         /// </summary>
         public void UnlockAllUserInteraction()
         {

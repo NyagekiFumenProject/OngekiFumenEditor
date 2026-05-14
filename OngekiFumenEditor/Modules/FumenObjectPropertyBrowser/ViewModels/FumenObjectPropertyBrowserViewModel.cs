@@ -1,8 +1,8 @@
-ï»¿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Attributes;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             if (SelectedObjects.Count == 0)
                 return;
 
-            //èŽ·å–æ‰€æœ‰å·²é€‰ç‰©ä»¶éƒ½å…±æœ‰çš„å±žæ€§
+            //»ñÈ¡ËùÓÐÒÑÑ¡Îï¼þ¶¼¹²ÓÐµÄÊôÐÔ
             var genericProperties = SelectedObjects
                 .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(x =>
@@ -108,7 +108,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
             OnObjectChanged();
             referenceEditor?.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.SelectObjects));
-            //todo è§£è€¦
+            //todo ½âñî
             NotifyOfPropertyChange(nameof(SelectedObjects));
             UpdateDisplayName();
         }

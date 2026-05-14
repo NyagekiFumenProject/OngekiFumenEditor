@@ -1,6 +1,6 @@
-﻿using Gemini.Framework;
+using Gemini.Framework;
 using Gemini.Framework.Services;
-using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Core.Base.Attributes;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Utils;
 using System;

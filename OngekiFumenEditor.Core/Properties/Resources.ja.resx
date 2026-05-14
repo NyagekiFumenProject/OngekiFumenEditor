@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ObjectOverlap" xml:space="preserve">
+    <value>同じ種類({0})で複数のITimelineObjectオブジェクトが存在します</value>
+  </data>
+  <data name="ObjectOverlap2" xml:space="preserve">
+    <value>同じ種類({0})で複数のオブジェクトが存在します</value>
+  </data>
+  <data name="ObjectTimelineNotAligned" xml:space="preserve">
+    <value>オブジェクト{0}はリズムに合致していません</value>
+  </data>
+  <data name="WrongLocation" xml:space="preserve">
+    <value>{0}オブジェクトが正しいレーン（id:{1}）上に配置されていません</value>
+  </data>
+  <data name="MissingBossEnemySet" xml:space="preserve">
+    <value>ボスのエネミーセットオブジェクトがありません。BOSSWAVEを判断するために配置することを推奨します。</value>
+  </data>
+  <data name="InvalidConnectablePath" xml:space="preserve">
+    <value>レーンのセグメントが不正です</value>
+  </data>
+  <data name="MissingEndObject" xml:space="preserve">
+    <value>HOLD(Oid:{0})オブジェクトに終点が設定されていません</value>
+  </data>
+  <data name="MissingRefObject" xml:space="preserve">
+    <value>{0}オブジェクトはレーンを参照していません</value>
+  </data>
+  <data name="MissingRefObject2" xml:space="preserve">
+    <value>{0}オブジェクトの参照先レーン(laneId:{1})は譜面内に存在しません</value>
+  </data>
+  <data name="CheckRuleSoflanProblem" xml:space="preserve">
+    <value>ソフラン速度は最終的に1倍速に戻るべきですが，{0}倍速になっています。</value>
+  </data>
+  <data name="SoflanConflict" xml:space="preserve">
+    <value>ソフラン位置が重複しています：{0}，{1}</value>
+  </data>
+  <data name="WallConflict" xml:space="preserve">
+    <value>異なる方向のWALLノーツ（id:{0}，id:{1}）が水平方向に交叉または重なり合っています</value>
+  </data>
+  <data name="WallConflict3" xml:space="preserve">
+    <value>WALLノーツ（id:{0}）の中間点/終点オブジェクトのTGrid（{1}）が始点（{2}）よりも小さくなっています</value>
+  </data>
+  <data name="HeaderConstMismatch" xml:space="preserve">
+    <value>譜面ヘッダー情報</value>
+  </data>
+  <data name="HeaderConstMismatch2" xml:space="preserve">
+    <value>譜面のXRESOLUTION({0})パラメータがXGrid.ResX({1})と一致しません</value>
+  </data>
+  <data name="HeaderConstMismatch3" xml:space="preserve">
+    <value>譜面のTRESOLUTION({0})パラメータがTGrid.ResT({1})と一致しません</value>
+  </data>
+  <data name="HeaderConstMismatch4" xml:space="preserve">
+    <value>譜面のノーツデザイナーが設定されていません</value>
+  </data>
+  <data name="NotInterpolatedCurve" xml:space="preserve">
+    <value>曲線レーンが補完されていません</value>
+  </data>
+</root>

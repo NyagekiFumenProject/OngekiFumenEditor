@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ObjectOverlap" xml:space="preserve">
+    <value>多个ITimelineObject同类({0})物件重叠</value>
+  </data>
+  <data name="ObjectOverlap2" xml:space="preserve">
+    <value>多个同类{0}物件重叠</value>
+  </data>
+  <data name="ObjectTimelineNotAligned" xml:space="preserve">
+    <value>物件{0}没对上节奏</value>
+  </data>
+  <data name="WrongLocation" xml:space="preserve">
+    <value>{0}物件貌似没有放置在正确的轨道(id:{1})线上</value>
+  </data>
+  <data name="MissingBossEnemySet" xml:space="preserve">
+    <value>缺少Boss的EnemySet物件,建议放置一个来钦定boss出现的时机</value>
+  </data>
+  <data name="InvalidConnectablePath" xml:space="preserve">
+    <value>轨道物件路径非法</value>
+  </data>
+  <data name="LaneBlockOnMultipleWalls" xml:space="preserve">
+    <value>LaneBlockArea作用的墙壁轨道({0})和另一个墙壁轨道({1})错开</value>
+  </data>
+  <data name="MissingEndObject" xml:space="preserve">
+    <value>Hold(Oid:{0})物件缺少HoldEnd中止物件</value>
+  </data>
+  <data name="MissingRefObject" xml:space="preserve">
+    <value>{0}物件缺少引用Lane物件</value>
+  </data>
+  <data name="MissingRefObject2" xml:space="preserve">
+    <value>{0}物件引用的Lane物件(laneId:{1}),不存在于谱面文件内</value>
+  </data>
+  <data name="CheckRuleSoflanProblem" xml:space="preserve">
+    <value>最后一个Soflan变速后应该变回正常的1速,但现在是{0}速</value>
+  </data>
+  <data name="SoflanConflict" xml:space="preserve">
+    <value>发现Soflan作用时效冲突:{0}和{1}</value>
+  </data>
+  <data name="WallConflict" xml:space="preserve">
+    <value>不同边的墙(id:{0})和(id:{1})水平交叉碰撞或重合</value>
+  </data>
+  <data name="WallConflict3" xml:space="preserve">
+    <value>墙(id:{0})Next/End物件的TGrid({1})不能低于前者({2})</value>
+  </data>
+  <data name="BulletNullPalleteDescription" xml:space="preserve">
+    <value>子弹(id:{0})的模板为空</value>
+  </data>
+  <data name="InvalidBrightness" xml:space="preserve">
+    <value>亮度(Brightness)值 {0} 不在范围[-3,3]内</value>
+  </data>
+  <data name="InvalidColorId" xml:space="preserve">
+    <value>颜色Id(ColorId)值无效: {0}</value>
+  </data>
+  <data name="HeaderConstMismatch" xml:space="preserve">
+    <value>谱面Header信息</value>
+  </data>
+  <data name="HeaderConstMismatch2" xml:space="preserve">
+    <value>谱面XRESOLUTION({0})参数和XGrid.ResX({1})不匹配</value>
+  </data>
+  <data name="HeaderConstMismatch3" xml:space="preserve">
+    <value>谱面TRESOLUTION({0})参数和TGrid.ResT({1})不匹配</value>
+  </data>
+  <data name="HeaderConstMismatch4" xml:space="preserve">
+    <value>无谱师信息</value>
+  </data>
+  <data name="NotInterpolatedCurve" xml:space="preserve">
+    <value>轨道物件曲线还没被插值</value>
+  </data>
+</root>

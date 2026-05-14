@@ -1,8 +1,8 @@
-﻿namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs
+namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs
 {
-	public interface IEnumStruct
-	{
-		string DisplayName { get; }
-		int Id { get; }
-	}
+    public interface IEnumStruct
+    {
+        string DisplayName { get; }
+        int Id { get; }
+    }
 }

@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Core.Base.Attributes;
 using OngekiFumenEditor.Properties;
 using System.Text.Json.Serialization;
 

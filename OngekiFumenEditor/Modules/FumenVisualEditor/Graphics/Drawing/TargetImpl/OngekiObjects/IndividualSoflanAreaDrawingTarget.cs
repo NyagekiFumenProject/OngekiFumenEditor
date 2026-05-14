@@ -1,7 +1,7 @@
-ï»¿using Caliburn.Micro;
+using Caliburn.Micro;
 using NAudio.Gui;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -119,7 +119,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 lineVertex.Add(new LineVertex(lineVertex.LastOrDefault()?.Point ?? default, transparent, dash));
                 lineVertex.Add(new LineVertex(new(leftX, topY), transparent, dash));
 
-                //ç”»ä¸€ä¸ªæ–¹æ¡†
+                //»­Ò»¸ö·½¿ò
                 lineVertex.Add(new LineVertex(new(leftX, topY), color, dash));
                 lineVertex.Add(new LineVertex(new(rightX, topY), color, dash));
                 lineVertex.Add(new LineVertex(new(rightX, bottomY), color, dash));
@@ -164,7 +164,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
                         topRightTriPos - new Vector2(highlightScale, highlightScale), MathF.PI, Vector4.One));
 
-                    //ç”»ä¸€ä¸ªæ–¹æ¡†
+                    //»­Ò»¸ö·½¿ò
                     lineVertex.Add(new LineVertex(new(leftX, topY), highlightLineColor, VertexDash.Solider));
                     lineVertex.Add(new LineVertex(new(rightX, topY), highlightLineColor, VertexDash.Solider));
                     lineVertex.Add(new LineVertex(new(rightX, bottomY), highlightLineColor, VertexDash.Solider));

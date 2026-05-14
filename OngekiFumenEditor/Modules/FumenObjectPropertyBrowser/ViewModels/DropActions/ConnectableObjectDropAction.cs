@@ -1,5 +1,5 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(dragEndPoint))
                 return;
 
-            var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
+            var dragTGrid = editor.ConvertYToTGrid_DesignMode(dragEndPoint.Y);
 			var lastObj = startObject.Children.LastOrDefault();
 			var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) || (lastObj is not null && lastObj.TGrid < dragTGrid);
 			var isFirst = true;

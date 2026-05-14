@@ -1,9 +1,9 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.FastPickLane
 				return TaskUtility.Completed;
 			}
 
-			var filterTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(editor.RectInDesignMode.MaxY, editor);
+			var filterTGrid = editor.ConvertYToTGrid_DesignMode(editor.RectInDesignMode.MaxY);
 			var selectLane = editor.Fumen.Lanes.OfType<T>().Where(x => x.MaxTGrid <= filterTGrid).OrderBy(x => x.MaxTGrid).LastOrDefault();
 
 			var obj = selectLane?.Children.LastOrDefault() as ConnectableObjectBase;

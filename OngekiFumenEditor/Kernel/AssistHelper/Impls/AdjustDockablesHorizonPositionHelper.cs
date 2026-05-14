@@ -1,5 +1,5 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using System.Collections.Generic;
 using System.Linq;
 

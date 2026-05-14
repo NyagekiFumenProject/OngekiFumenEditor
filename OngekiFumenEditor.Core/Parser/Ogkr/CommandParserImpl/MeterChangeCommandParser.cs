@@ -1,0 +1,25 @@
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using System.ComponentModel.Composition;
+
+namespace OngekiFumenEditor.Core.Parser.Ogkr.CommandParserImpl
+{
+	[Export(typeof(ICommandParser))]
+	public class MeterChangeCommandParser : CommandParserBase
+	{
+		public override string CommandLineHeader => MeterChange.CommandName;
+
+		public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
+		{
+			var dataArr = args.GetDataArray<float>();
+			var met = new MeterChange();
+
+			met.TGrid.Unit = dataArr[1];
+			met.TGrid.Grid = (int)dataArr[2];
+			met.BunShi = (int)dataArr[3];
+			met.Bunbo = (int)dataArr[4];
+
+			return met;
+		}
+	}
+}

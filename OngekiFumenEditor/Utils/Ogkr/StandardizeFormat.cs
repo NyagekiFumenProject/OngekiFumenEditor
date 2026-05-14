@@ -1,17 +1,17 @@
-锘縰sing AngleSharp.Common;
+using AngleSharp.Common;
 using Caliburn.Micro;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
-using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
-using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
-using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
-using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.OgkrImpl;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base;
+using OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.OgkrImpl;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using System;
 using System.Collections.Concurrent;
@@ -165,7 +165,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
                 var beforeLane = obj.ReferenceLaneStart;
 
                 (var afterLane, var afterXGrid) =
-                    //鑰冭檻鍒板鐞咹oldEnd鐨剅efLane涔嬪墠锛屽凡缁忚鍓嶈�匟old澶勭悊杩囦簡
+                    //考虑到处理HoldEnd的refLane之前，已经被前者Hold处理过了
                     (obj.ReferenceLaneStart is not null && laneMap.TryGetValue(obj.ReferenceLaneStart, out var genStarts) ? genStarts : Enumerable.Empty<ConnectableStartObject>())
                     .Where(x => tGrid >= x.MinTGrid && tGrid <= x.MaxTGrid)
                     .Select(x => (x, x.CalulateXGrid(tGrid)))

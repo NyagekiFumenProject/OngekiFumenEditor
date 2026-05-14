@@ -4,6 +4,8 @@
 		<TargetFramework>net10.0-windows</TargetFramework>
 		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
 		<UseWPF>true</UseWPF>
+		<DebugSymbols>false</DebugSymbols>
+		<DebugType>none</DebugType>
 		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
 	</PropertyGroup>
 	<ItemGroup>

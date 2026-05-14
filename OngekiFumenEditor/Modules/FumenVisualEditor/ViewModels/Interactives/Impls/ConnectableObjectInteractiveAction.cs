@@ -1,8 +1,8 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 				LaneCurvePathControlObject ctrl => ctrl.RefCurveObject,
 				_ => default
 			};
-			ConnectableStartObject.RelocateDockableObjects(editor.Fumen, obj);
+			ConnectableObjectDockingHelper.RelocateDockableObjects(editor.Fumen, obj);
 		}
 
 		public override void OnDragStart(OngekiObjectBase o, Point pos, FumenVisualEditorViewModel editor)
@@ -106,7 +106,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.UpdateXGridForDockedObjects,
 				() =>
 				{
-					ConnectableStartObject.RelocateDockableObjects(editor.Fumen, obj);
+					ConnectableObjectDockingHelper.RelocateDockableObjects(editor.Fumen, obj);
 				}, () =>
 				{
 					foreach (var info in infoList)

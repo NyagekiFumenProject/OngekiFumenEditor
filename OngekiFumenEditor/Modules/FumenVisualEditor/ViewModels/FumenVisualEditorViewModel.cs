@@ -1,8 +1,8 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Microsoft.Win32;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.EditorLayout;
 using OngekiFumenEditor.Kernel.RecentFiles;
@@ -13,7 +13,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
@@ -150,12 +150,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (EditorProjectData?.AudioDuration is TimeSpan timeSpan && timeSpan > TimeSpan.Zero)
             {
-                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
+                TotalDurationHeight = ConvertToY(ConvertAudioTimeToTGrid(timeSpan).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
             else
             {
                 timeSpan = AudioPlayer?.Duration ?? TimeSpan.Zero;
-                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
+                TotalDurationHeight = ConvertToY(ConvertAudioTimeToTGrid(timeSpan).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
         }
 
@@ -262,7 +262,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 EditorProjectData = projModel;
                 AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(editorProjectData.AudioFilePath);
 
-                var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
+                var dispTGrid = ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime);
                 ScrollTo(dispTGrid);
 
                 LoadingFinished?.Invoke(this, new(Fumen));
@@ -287,7 +287,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
-            EditorProjectData.RememberLastDisplayTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentTGrid(), this);
+            EditorProjectData.RememberLastDisplayTime = ConvertTGridToAudioTime(GetCurrentTGrid());
             if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
             {
                 //ask fumen file save path before save project.

@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using OngekiFumenEditor.Core.Utils;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Concurrent;
@@ -105,3 +106,4 @@ namespace OngekiFumenEditor.Kernel.Scheduler
         }
     }
 }
+

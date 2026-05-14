@@ -1,11 +1,11 @@
-﻿using AngleSharp.Common;
+using AngleSharp.Common;
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Views;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views;
@@ -26,6 +26,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
 {
@@ -213,7 +214,10 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
             if (e.Source?.DataContext is not BulletPallete pallete)
                 return;
 
-            var dialog = new CommonColorPicker(() => pallete.EditorAxuiliaryLineColor, color => pallete.EditorAxuiliaryLineColor = color, Resources.ChangeAxuiliaryLineColor.Format(pallete.StrID));
+            var dialog = new CommonColorPicker(
+                () => Color.FromArgb(pallete.EditorAxuiliaryLineColor.A, pallete.EditorAxuiliaryLineColor.R, pallete.EditorAxuiliaryLineColor.G, pallete.EditorAxuiliaryLineColor.B),
+                color => pallete.EditorAxuiliaryLineColor = OngekiFumenEditor.Core.Base.ValueTypes.Color.FromArgb(color.A, color.R, color.G, color.B),
+                Resources.ChangeAxuiliaryLineColor.Format(pallete.StrID));
             dialog.Show();
         }
 

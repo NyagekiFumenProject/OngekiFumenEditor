@@ -1,11 +1,12 @@
-﻿using Gemini.Framework.Commands;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
-using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using Gemini.Framework.Commands;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
+using CoreInterpolateAll = OngekiFumenEditor.Core.Utils.Ogkr.InterpolateAll;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +23,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
 
 			var curveFactory = xGridLimit ? XGridLimitedCurveInterpolaterFactory.Default : default;
 
-			foreach ((var beforeLane, var genLanes) in Utils.Ogkr.InterpolateAll.Calculate(fumen, curveFactory))
+			foreach ((var beforeLane, var genLanes) in CoreInterpolateAll.Calculate(fumen, curveFactory))
 				laneMap[beforeLane] = genLanes.ToList();
 
 			var curveStarts = laneMap.Keys.ToList();
 
-			var affactObjects = Utils.Ogkr.InterpolateAll.CalculateAffectedDockableObjects(fumen, curveStarts).ToArray();
+			var affactObjects = CoreInterpolateAll.CalculateAffectedDockableObjects(fumen, curveStarts).ToArray();
 
 			var redoAction = new System.Action(() => { });
 

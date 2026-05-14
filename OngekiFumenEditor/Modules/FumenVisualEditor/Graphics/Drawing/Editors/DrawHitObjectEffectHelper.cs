@@ -1,5 +1,5 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;
@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             var minAudioTime = target.Editor.CurrentPlayTime - TimeSpan.FromMilliseconds(durationMs);
-            var minTGrid = TGridCalculator.ConvertAudioTimeToTGrid(minAudioTime, target.Editor);
+            var minTGrid = target.Editor.ConvertAudioTimeToTGrid(minAudioTime);
             if (minTGrid is null)
                 minTGrid = TGrid.Zero;
             var durationTotalGrid = maxTGrid.TotalGrid - minTGrid.TotalGrid;

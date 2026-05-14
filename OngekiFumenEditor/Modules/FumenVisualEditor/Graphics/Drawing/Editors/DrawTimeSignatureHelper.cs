@@ -1,6 +1,6 @@
-锘縰sing Caliburn.Micro;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> timelines = Enumerable.Empty<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)>();
             if (target.Editor.IsDesignMode)
             {
-                //todo 鏆傛椂鏄剧ず榛樿鐨勫彉閫熺粍
+                //todo 暂时显示默认的变速组
                 timelines = TGridCalculator.GetVisbleTimelines_DesignMode(
                     fumen.SoflansMap.DefaultSoflanList,
                     fumen.BpmList,
@@ -59,8 +59,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             else
             {
-                var currentY = TGridCalculator.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime, target.Editor);
-                //todo 鏆傛椂鏄剧ず榛樿鐨勫彉閫熺粍
+                var currentY = target.Editor.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime);
+                //todo 暂时显示默认的变速组
                 timelines = TGridCalculator.GetVisbleTimelines_PreviewMode(
                     fumen.SoflansMap.DefaultSoflanList,
                     fumen.BpmList,
@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 var str = string.Empty;
                 if (displayAudioTime)
                 {
-                    var audioTime = TGridCalculator.ConvertTGridToAudioTime(t, target.Editor);
+                    var audioTime = target.Editor.ConvertTGridToAudioTime(t);
                     str = $"{audioTime.Minutes,-2}:{audioTime.Seconds,-2}:{audioTime.Milliseconds,-3}";
                 }
                 else

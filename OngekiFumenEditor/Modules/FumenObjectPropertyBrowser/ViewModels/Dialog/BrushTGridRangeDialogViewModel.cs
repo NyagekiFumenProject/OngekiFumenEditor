@@ -1,5 +1,5 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog
 {

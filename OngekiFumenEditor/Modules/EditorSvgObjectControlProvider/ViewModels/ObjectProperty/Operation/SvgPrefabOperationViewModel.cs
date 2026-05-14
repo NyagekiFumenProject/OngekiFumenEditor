@@ -1,9 +1,10 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.EditorObjects.Svg;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
@@ -14,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Windows;
-using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.ObjectProperty.Operation
 {
@@ -29,6 +29,8 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 
 		public void OnGenerateLaneToEditor()
 		{
+			SvgPrefabBuildHelper.EnsureBuilt(SvgPrefab);
+
 			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
 			{
 				MessageBox.Show(Resources.MustMakeEditorActive);
@@ -41,7 +43,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 				return;
 			}
 
-			if (SvgPrefab.ProcessingDrawingGroup is not DrawingGroup drawingGroup)
+			if (SvgPrefab.ProcessingVectorScene is null)
 			{
 				MessageBox.Show(Resources.SvgContentNotSupport);
 				return;
@@ -54,7 +56,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 			}
 
 			var baseCanvasX = XGridCalculator.ConvertXGridToX(SvgPrefab.XGrid, editor);
-			var baseCanvasY = TGridCalculator.ConvertTGridToY_DesignMode(SvgPrefab.TGrid, editor);
+			var baseCanvasY = editor.ConvertTGridToY_DesignMode(SvgPrefab.TGrid);
 
 			var segments = SvgPrefab.GenerateLineSegments();
 
@@ -83,7 +85,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 					var actualCanvasY = baseCanvasY + relativePoint.Y;
 
 					//Log.LogDebug($"{relativePoint}  ->  {new Vector2((float)actualCanvasX, (float)actualCanvasY)}");
-					var tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(actualCanvasY, editor);
+					var tGrid = editor.ConvertYToTGrid_DesignMode(actualCanvasY);
 					var xGrid = XGridCalculator.ConvertXToXGrid(actualCanvasX, editor);
 
 					obj.XGrid = xGrid;
@@ -111,7 +113,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
 				var subGenStarts = startObj.InterpolateCurve(SvgPrefab.CurveInterpolaterFactory).ToArray();
 				if (targetObject is IColorfulLane lane)
 				{
-					//染色
+					//Ⱦɫ
 					var colorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Color == laneColor?.Color);
 					var brightness = (int)SvgPrefab.ColorfulLaneBrightness.CurrentValue;
 					subGenStarts

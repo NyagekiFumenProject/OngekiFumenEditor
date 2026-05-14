@@ -1,7 +1,8 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.EditorObjects.Svg;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Scheduler;
+using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -58,7 +59,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 		private bool CheckCachedDataVailed(IDrawingContext target, CachedSvgGeneratedData data)
 		{
-			if (!(data.SvgPrefab?.ProcessingDrawingGroup?.GetHashCode() is int curHash && curHash == data.SvgGeometryHashCode))
+			if (!(data.SvgPrefab?.ProcessingVectorScene?.GetHashCode() is int curHash && curHash == data.SvgGeometryHashCode))
 				return false;
 
 			if (new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height) != data.ViewSize)
@@ -105,6 +106,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		{
 			var curTime = DateTime.Now;
 			isCached = true;
+			SvgPrefabBuildHelper.EnsureBuilt(svgPrefab);
 
 			if (!cachedDataMap.TryGetValue(svgPrefab, out var cachedItem))
 			{
@@ -119,10 +121,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			{
 				cachedItem.CleanPoints();
 				var genData = GenerateLineVertexData(svgPrefab);
-				cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingDrawingGroup?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
+				cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingVectorScene?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
 				cachedItem.GeneratedPoints = genData;
 				cachedItem.ViewSize = new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
-				cachedItem.Bound = svgPrefab.ProcessingDrawingGroup?.Bounds ?? default;
+				cachedItem.Bound = svgPrefab.ProcessingVectorScene is VectorScene scene
+					? new Rect(scene.Bounds.X, scene.Bounds.Y, scene.Bounds.Width, scene.Bounds.Height)
+					: default;
 				isCached = false;
 			}
 

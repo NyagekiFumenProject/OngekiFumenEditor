@@ -1,14 +1,14 @@
-Ôªøusing Caliburn.Micro;
+using Caliburn.Micro;
 using ControlzEx.Standard;
 using Gemini.Framework;
 using NAudio.Gui;
 using NWaves.Utils;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.Collections.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Beam;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.Collections.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Scheduler;
@@ -51,7 +51,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private readonly List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
 
     private Func<double, FumenVisualEditorViewModel, SoflanList, double>
-        convertToY = (tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor);
+        convertToY = (tUnit, editor, _) => editor.ConvertTGridUnitToY_DesignMode(tUnit);
 
     private string displayFPS = "";
     private readonly Dictionary<IFumenEditorDrawingTarget, Dictionary<DrawingTargetContext, List<OngekiObjectBase>>> drawMap = new();
@@ -331,7 +331,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         if (fumen is null)
             goto End;
 
-        //ËÆ°ÁÆóÂèØ‰ª•ÊòæÁ§∫ÁöÑTGridËåÉÂõ¥‰ª•ÂèäÂÉèÁ¥†ËåÉÂõ¥
+        //º∆À„ø…“‘œ‘ æµƒTGrid∑∂Œß“‘º∞œÒÀÿ∑∂Œß
 
         var tGrid = GetCurrentTGrid();
 
@@ -368,8 +368,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             else
             {
                 //Design Mode
-                var minTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(minY, this) ?? TGrid.Zero;
-                var maxTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(maxY, this) ?? TGrid.Zero;
+                var minTGrid = ConvertYToTGrid_DesignMode(minY) ?? TGrid.Zero;
+                var maxTGrid = ConvertYToTGrid_DesignMode(maxY) ?? TGrid.Zero;
                 visibleTGridRanges.Add((minTGrid, maxTGrid));
             }
 
@@ -501,7 +501,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
             */
 
-            //ÁâπÊÆäÂ§ÑÁêÜÔºöÂ≠êÂºπÂíåBell
+            //Ãÿ ‚¥¶¿Ì£∫◊”µØ∫ÕBell
             var blts = Fumen.Bullets.AsEnumerable();
             var bels = Fumen.Bells.AsEnumerable();
             var curTGrid = GetCurrentTGrid();
@@ -523,7 +523,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
             foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
             {
-                //todo ‰ºòÂåñ‰∏Ä‰∏ã
+                //todo ”≈ªØ“ªœ¬
                 var r = drawMap[drawingTarget] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiObjectBase>>>.Get();
                 r.Clear();
                 var rr = r[defaultDrawingTargetContext] = ObjectPool<List<OngekiObjectBase>>.Get();
@@ -532,7 +532,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
             foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
             {
-                //todo ‰ºòÂåñ‰∏Ä‰∏ã
+                //todo ”≈ªØ“ªœ¬
                 var r = drawMap[drawingTarget] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiObjectBase>>>.Get();
                 r.Clear();
                 var rr = r[defaultDrawingTargetContext] = ObjectPool<List<OngekiObjectBase>>.Get();
@@ -704,7 +704,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                     if (drawingContexts.ElementAtOrDefault(0).Value?.Rect.MaxY - Mouse.GetPosition(view).Y is double mouseY)
                     {
                         stringBuilder.AppendLine($"MouseY: {mouseY:F2}");
-                        foreach (var tGrid in TGridCalculator.ConvertYToTGrid_PreviewMode(mouseY, this))
+                        foreach (var tGrid in ConvertYToTGrid_PreviewMode(mouseY))
                             stringBuilder.AppendLine($"* {tGrid}");
                     }
                 });
@@ -771,12 +771,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
             if (containBeams)
             {
-                var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(
-                    TGridCalculator.ConvertTGridToAudioTime(min, this) -
-                    TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME), this);
-                var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(
-                    TGridCalculator.ConvertTGridToAudioTime(max, this) +
-                    TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), this);
+                var leadInTGrid = ConvertAudioTimeToTGrid(
+                    ConvertTGridToAudioTime(min) -
+                    TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME));
+                var leadOutTGrid = ConvertAudioTimeToTGrid(
+                    ConvertTGridToAudioTime(max) +
+                    TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION));
 
                 r = r.Concat(fumen.Beams.GetVisibleStartObjects(leadInTGrid, leadOutTGrid));
             }
@@ -785,7 +785,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         });
 
         /*
-         * ËøôÈáåËÄÉËôëÂà∞Êúâspd<1ÁöÑÂ≠êÂºπ/Bell‰ºöÊèêÂâçÂá∫Áé∞ÁöÑÊÉÖÂÜµÔºåÂõ†Ê≠§ÂæóÂàÜÁä∂ÊÄÅÂàÜÂà´ÂéªÈÄâÊã©
+         * ’‚¿Ôøº¬«µΩ”–spd<1µƒ◊”µØ/Bellª·Ã·«∞≥ˆœ÷µƒ«Èøˆ£¨“Ú¥Àµ√∑÷◊¥Ã¨∑÷±»•—°‘Ò
          */
         var objs = Enumerable.Empty<IDisplayableObject>();
         if (Editor.IsPreviewMode)

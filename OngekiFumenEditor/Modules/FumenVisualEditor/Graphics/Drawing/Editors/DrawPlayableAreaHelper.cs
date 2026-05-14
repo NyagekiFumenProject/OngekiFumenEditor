@@ -1,9 +1,10 @@
 ﻿using Caliburn.Micro;
 using EarcutNet;
 using NAudio.Gui;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Utils;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -15,7 +16,7 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
-using static OngekiFumenEditor.Utils.MathUtils;
+using static OngekiFumenEditor.Core.Utils.MathUtils;
 
 /*
  musicId:0840/1119/1011/0591
@@ -326,7 +327,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 //解决变速过快过慢导致的精度丢失问题
                 Vector2? interpolate(TGrid tGrid, float actualY, out bool isPickLane)
                 {
-                    var tGrids = TGridCalculator.ConvertYToTGrid_PreviewMode(actualY, target.Editor);
+                    var tGrids = target.Editor.ConvertYToTGrid_PreviewMode(actualY);
 
                     isPickLane = false;
                     var pickables = tGrids.SelectMany(tGrid => fumen.Lanes
@@ -349,7 +350,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     if (pickLane is not null)
                     {
                         var itor = pickLane.GenAllPath().GetEnumerator();
-                        var prevOpt = default(OpenTK.Mathematics.Vector2?);
+                        var prevOpt = default(Vector2?);
 
                         while (itor.MoveNext())
                         {
@@ -363,7 +364,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 //           ^
                                 //         tGrid
 
-                                if (prevOpt is OpenTK.Mathematics.Vector2 prev)
+                                if (prevOpt is Vector2 prev)
                                 {
                                     var curPx = (float)XGridCalculator.ConvertXGridToX(cur.X / XGrid.DEFAULT_RES_X, target.Editor);
                                     var prevPx = (float)XGridCalculator.ConvertXGridToX(prev.X / XGrid.DEFAULT_RES_X, target.Editor);
@@ -1126,3 +1127,4 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
     }
 }
+

@@ -1,7 +1,7 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using System;

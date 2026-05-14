@@ -1,6 +1,6 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.EditorObjects;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             string str;
             if (target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime)
             {
-                var audioTime = TGridCalculator.ConvertTGridToAudioTime(t, target.Editor);
+                var audioTime = target.Editor.ConvertTGridToAudioTime(t);
                 str = $"{audioTime.Minutes,-2}:{audioTime.Seconds,-2}:{audioTime.Milliseconds,-3}";
             }
             else

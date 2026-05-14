@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics

@@ -1,0 +1,50 @@
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Core.Properties;
+using OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Core.Utils;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+
+namespace OngekiFumenEditor.Core.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
+{
+    [Export(typeof(IFumenCheckRule))]
+    internal class DockableObjectWrongLocationCheckRule : IFumenCheckRule
+    {
+        private const string RuleName = "WrongLocation";
+
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
+        {
+            foreach (var dockableObj in fumen.Holds
+                         .AsEnumerable<ILaneDockable>()
+                         .Concat(fumen.Taps)
+                         .Where(x => x.ReferenceLaneStart is not null)
+                         .Where(x => CheckIsWrongLocation(x, x.ReferenceLaneStart)))
+            {
+                yield return new CommonCheckResult
+                {
+                    Description = Resources.WrongLocation.Format(dockableObj.GetType().Name, dockableObj.ReferenceLaneStrId),
+                    LocationDescription = dockableObj.ToString(),
+                    NavigateBehavior = new NavigateToObjectBehavior(dockableObj as OngekiTimelineObjectBase),
+                    RuleName = RuleName,
+                    Severity = RuleSeverity.Problem
+                };
+            }
+        }
+
+        private static bool CheckIsWrongLocation(ILaneDockable obj, LaneStartBase referenceLaneStart)
+        {
+            if (obj.TGrid > referenceLaneStart.MaxTGrid || obj.TGrid < referenceLaneStart.MinTGrid)
+                return true;
+
+            var calXGrid = referenceLaneStart.CalulateXGrid(obj.TGrid);
+            if (calXGrid is null)
+                return false;
+
+            return Math.Abs((calXGrid - obj.XGrid).TotalGrid(calXGrid.ResX)) > calXGrid.ResX;
+        }
+    }
+}
+

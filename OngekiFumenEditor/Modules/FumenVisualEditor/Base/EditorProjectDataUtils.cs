@@ -1,12 +1,13 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
@@ -54,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 				if (projectData.StoreBulletPalleteEditorDatas.TryGetValue(bpl.StrID, out var storeEditorData))
 				{
 					bpl.EditorName = storeEditorData.Name;
-					bpl.EditorAxuiliaryLineColor = storeEditorData.AuxiliaryLineColor;
+					bpl.EditorAxuiliaryLineColor = OngekiFumenEditor.Core.Base.ValueTypes.Color.FromArgb(storeEditorData.AuxiliaryLineColor.A, storeEditorData.AuxiliaryLineColor.R, storeEditorData.AuxiliaryLineColor.G, storeEditorData.AuxiliaryLineColor.B);
 				}
 			}
 		}
@@ -66,13 +67,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 				if (projectData.StoreBulletPalleteEditorDatas.TryGetValue(bpl.StrID, out var storeEditorData))
 				{
 					storeEditorData.Name = bpl.EditorName;
-					storeEditorData.AuxiliaryLineColor = bpl.EditorAxuiliaryLineColor;
+					storeEditorData.AuxiliaryLineColor = Color.FromArgb(bpl.EditorAxuiliaryLineColor.A, bpl.EditorAxuiliaryLineColor.R, bpl.EditorAxuiliaryLineColor.G, bpl.EditorAxuiliaryLineColor.B);
 				}
 				else
 				{
 					projectData.StoreBulletPalleteEditorDatas[bpl.StrID] = new()
 					{
-						AuxiliaryLineColor = bpl.EditorAxuiliaryLineColor,
+						AuxiliaryLineColor = Color.FromArgb(bpl.EditorAxuiliaryLineColor.A, bpl.EditorAxuiliaryLineColor.R, bpl.EditorAxuiliaryLineColor.G, bpl.EditorAxuiliaryLineColor.B),
 						Name = bpl.EditorName
 					};
 				}

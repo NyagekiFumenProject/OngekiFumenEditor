@@ -1,12 +1,12 @@
-using OngekiFumenEditor.Utils;
 using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 {
-    internal static class McpOperationLogHelper
+    public static class McpOperationLogHelper
     {
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
@@ -31,17 +31,17 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
         public static void LogWarning(string stage, string operationName, object payload)
         {
-            Log.LogWarn(BuildMessage(stage, operationName, payload));
+            CoreLog.LogWarn(BuildMessage(stage, operationName, payload));
         }
 
         public static void LogError(string stage, string operationName, object payload)
         {
-            Log.LogError(BuildMessage(stage, operationName, payload));
+            CoreLog.LogError(BuildMessage(stage, operationName, payload));
         }
 
         private static void LogInfo(string stage, string operationName, object payload)
         {
-            Log.LogInfo(BuildMessage(stage, operationName, payload));
+            CoreLog.LogInfo(BuildMessage(stage, operationName, payload));
         }
 
         private static string BuildMessage(string stage, string operationName, object payload)

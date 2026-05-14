@@ -284,7 +284,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var tGrid = Editor?.GetCurrentTGrid();
                 if (tGrid is null)
                     return;
-                var editorAudioTime = TGridCalculator.ConvertTGridToAudioTime(tGrid, Editor);
+                var editorAudioTime = Editor.ConvertTGridToAudioTime(tGrid);
                 CurrentTime = editorAudioTime;
             }
         }

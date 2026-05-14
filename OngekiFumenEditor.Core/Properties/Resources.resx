@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ObjectOverlap" xml:space="preserve">
+    <value>Multiple ITimelineObject objects of the same type ({0}) overlap</value>
+  </data>
+  <data name="ObjectOverlap2" xml:space="preserve">
+    <value>Multiple objects of the same type ({0}) overlap</value>
+  </data>
+  <data name="ObjectTimelineNotAligned" xml:space="preserve">
+    <value>Object {0} does not align with the meter/time lines.</value>
+  </data>
+  <data name="WrongLocation" xml:space="preserve">
+    <value>{0} object seems not to be placed on the correct lane (id:{1})</value>
+  </data>
+  <data name="MissingBossEnemySet" xml:space="preserve">
+    <value>Missing EnemySet(Boss) object. It is recommended to place one to designate the timing of the boss's appearance</value>
+  </data>
+  <data name="InvalidConnectablePath" xml:space="preserve">
+    <value>Segment of lane is illegal</value>
+  </data>
+  <data name="LaneBlockOnMultipleWalls" xml:space="preserve">
+    <value>Lane block start wall ({0}) is different than end wall ({1})</value>
+  </data>
+  <data name="MissingEndObject" xml:space="preserve">
+    <value>Hold (Oid:{0}) object is missing the HoldEnd object</value>
+  </data>
+  <data name="MissingRefObject" xml:space="preserve">
+    <value>The {0} object is missing a reference to a Lane object</value>
+  </data>
+  <data name="MissingRefObject2" xml:space="preserve">
+    <value>The {0} object references a Lane object (laneId:{1}), which does not exist in the fumen.</value>
+  </data>
+  <data name="CheckRuleSoflanProblem" xml:space="preserve">
+    <value>After the last Soflan speed change, the speed should return to 1x normally, but now is {0}x.</value>
+  </data>
+  <data name="SoflanConflict" xml:space="preserve">
+    <value>Detected conflicting Soflan duration: {0} and {1}</value>
+  </data>
+  <data name="WallConflict" xml:space="preserve">
+    <value>Walls on different sides (id:{0}) and (id:{1}) horizontally intersect, collide, or overlap</value>
+  </data>
+  <data name="WallConflict3" xml:space="preserve">
+    <value>Wall (id:{0}) Next/End object's TGrid ({1}) should not be lower than the former ({2})</value>
+  </data>
+  <data name="BulletNullPalleteDescription" xml:space="preserve">
+    <value>bullet(id:{0}) pallete is NULL</value>
+  </data>
+  <data name="InvalidBrightness" xml:space="preserve">
+    <value>Invalid Brightness: {0} is not in range [-3, 3]</value>
+  </data>
+  <data name="InvalidColorId" xml:space="preserve">
+    <value>Invalid ColorId: {0}</value>
+  </data>
+  <data name="HeaderConstMismatch" xml:space="preserve">
+    <value>Fumen Header Info</value>
+  </data>
+  <data name="HeaderConstMismatch2" xml:space="preserve">
+    <value>XRESOLUTION({0}) parameter does not match XGrid.ResX({1})</value>
+  </data>
+  <data name="HeaderConstMismatch3" xml:space="preserve">
+    <value>TRESOLUTION({0}) parameter does not match TGrid.ResT({1})</value>
+  </data>
+  <data name="HeaderConstMismatch4" xml:space="preserve">
+    <value>Fumen creator/designer is empty</value>
+  </data>
+  <data name="NotInterpolatedCurve" xml:space="preserve">
+    <value>The curve lane has not been interpolated yet</value>
+  </data>
+</root>

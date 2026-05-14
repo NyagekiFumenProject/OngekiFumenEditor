@@ -1,5 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Options;
-using OngekiFumenEditor.Base;
+using Microsoft.CodeAnalysis.Options;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
 using System.Collections.Generic;

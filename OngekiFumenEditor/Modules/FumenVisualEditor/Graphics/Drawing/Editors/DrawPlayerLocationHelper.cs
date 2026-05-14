@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using Caliburn.Micro;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 
@@ -56,7 +56,7 @@ public class DrawPlayerLocationHelper
             return;
 
         var xGrid = target.Editor.PlayerLocationRecorder.GetLocationXUnit(target.CurrentPlayTime);
-        var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
+        var tGrid = target.Editor.ConvertAudioTimeToTGrid(target.CurrentPlayTime);
 
         var x = XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
         var y = target.ConvertToY(tGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);

@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditor", "OngekiFumenEditor\OngekiFumenEditor.csproj", "{53376E13-B8F4-4B1D-B377-3E938623B3D1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditor.Core", "OngekiFumenEditor.Core\OngekiFumenEditor.Core.csproj", "{BA98A1D4-0BFB-4C38-B29E-0E4E6FA2C7F1}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini", "Dependences\gemini\src\Gemini\Gemini.csproj", "{A005356B-D652-418D-A970-77E7B704F5F7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini.Modules.Output", "Dependences\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj", "{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}"
@@ -43,6 +45,10 @@ Global
 		{53376E13-B8F4-4B1D-B377-3E938623B3D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53376E13-B8F4-4B1D-B377-3E938623B3D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53376E13-B8F4-4B1D-B377-3E938623B3D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA98A1D4-0BFB-4C38-B29E-0E4E6FA2C7F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA98A1D4-0BFB-4C38-B29E-0E4E6FA2C7F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA98A1D4-0BFB-4C38-B29E-0E4E6FA2C7F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA98A1D4-0BFB-4C38-B29E-0E4E6FA2C7F1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A005356B-D652-418D-A970-77E7B704F5F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A005356B-D652-418D-A970-77E7B704F5F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A005356B-D652-418D-A970-77E7B704F5F7}.Release|Any CPU.ActiveCfg = Release|Any CPU

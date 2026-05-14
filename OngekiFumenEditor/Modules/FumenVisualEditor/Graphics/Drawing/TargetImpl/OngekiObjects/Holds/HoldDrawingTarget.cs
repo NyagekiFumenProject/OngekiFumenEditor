@@ -1,7 +1,7 @@
-锘縰sing AngleSharp.Dom;
+using AngleSharp.Dom;
 using Caliburn.Micro;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 bool checkDiscardByHorizon(Vector2 prev, Vector2 end, Vector2 cur)
                 {
-                    //鍒ゆ柇涓変釜鐐规槸鍚﹂兘鍦ㄤ竴涓按骞充笂
+                    //判断三个点是否都在一个水平上
                     if (prev.Y == cur.Y && end.Y == cur.Y)
                     {
                         /*

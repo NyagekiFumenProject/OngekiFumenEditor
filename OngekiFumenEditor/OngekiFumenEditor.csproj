@@ -223,6 +223,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\OngekiFumenEditor.Core\OngekiFumenEditor.Core.csproj" />
 		<ProjectReference Include="..\Dependences\earcut.net\src\Earcut.csproj">
 			<PrivateAssets>all</PrivateAssets>
 		</ProjectReference>

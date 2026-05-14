@@ -1,5 +1,5 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.Attributes;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.Attributes;
 using System;
 using System.Linq;
 using System.Reflection;

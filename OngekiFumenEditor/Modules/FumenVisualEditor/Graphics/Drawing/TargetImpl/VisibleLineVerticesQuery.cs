@@ -1,13 +1,13 @@
-锘縰sing OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using static OngekiFumenEditor.Base.Collections.SoflanList;
+using static OngekiFumenEditor.Core.Base.Collections.SoflanList;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl
@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var prevInvaild = true;
             var prevObj = start as ConnectableObjectBase;
             
-            //todo 鍐嶅垽鏂璁℃ā寮忔�庝箞閽﹀畾
+            //todo 再判断设计模式怎么钦定
             var soflanPositionList = target.Editor.IsDesignMode ?
                 target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
                 target.Editor._cacheSoflanGroupRecorder.GetCache(start)?.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);

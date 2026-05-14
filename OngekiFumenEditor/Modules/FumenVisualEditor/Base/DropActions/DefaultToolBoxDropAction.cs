@@ -1,5 +1,5 @@
-﻿using Gemini.Modules.Toolbox.Models;
-using OngekiFumenEditor.Base;
+using Gemini.Modules.Toolbox.Models;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;

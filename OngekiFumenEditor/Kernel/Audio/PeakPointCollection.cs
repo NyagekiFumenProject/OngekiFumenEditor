@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.Collections.Base;
+using OngekiFumenEditor.Core.Base.Collections.Base;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

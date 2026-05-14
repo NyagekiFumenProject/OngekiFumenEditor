@@ -1,5 +1,5 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.Attributes;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.Attributes;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;

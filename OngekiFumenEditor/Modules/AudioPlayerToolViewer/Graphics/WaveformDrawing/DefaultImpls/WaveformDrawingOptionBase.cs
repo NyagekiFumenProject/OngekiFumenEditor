@@ -1,5 +1,5 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Base.Attributes;
+using Caliburn.Micro;
+using OngekiFumenEditor.Core.Base.Attributes;
 using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls

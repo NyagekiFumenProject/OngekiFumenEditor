@@ -1,6 +1,7 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+﻿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Core.Parser.Ogkr;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;

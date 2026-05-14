@@ -1,7 +1,7 @@
-﻿using Microsoft.CodeAnalysis.Differencing;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Base.Collections.Base;
+using Microsoft.CodeAnalysis.Differencing;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.Collections;
+using OngekiFumenEditor.Core.Base.Collections.Base;
 using OngekiFumenEditor.Kernel.Graphics;
 using OpenTK.Mathematics;
 using System;

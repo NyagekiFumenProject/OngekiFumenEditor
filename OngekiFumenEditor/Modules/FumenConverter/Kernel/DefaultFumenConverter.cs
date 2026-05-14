@@ -2,8 +2,8 @@ using System;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using Caliburn.Micro;
-using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Parser;
+using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Parser;
 using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenConverter.Kernel

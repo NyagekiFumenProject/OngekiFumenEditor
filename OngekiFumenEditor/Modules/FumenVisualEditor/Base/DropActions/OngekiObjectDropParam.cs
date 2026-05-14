@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Core.Base;
 using System;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
