@@ -9,9 +9,6 @@
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Composition" Version="10.0.0" />
     <ProjectReference Include="..\Dependences\gemini\Dependences\Caliburn.Micro\src\Caliburn.Micro.Core\Caliburn.Micro.Core.csproj" />
-    <Reference Include="DereTore.Common">
-      <HintPath>..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Common.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

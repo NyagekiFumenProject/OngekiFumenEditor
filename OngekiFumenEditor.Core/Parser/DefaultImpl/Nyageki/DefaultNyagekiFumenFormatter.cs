@@ -1,6 +1,4 @@
-﻿using Caliburn.Micro;
-using DereTore.Common;
-using OngekiFumenEditor.Core.Base;
+﻿using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Core.Base.OngekiObjects;

@@ -82,6 +82,21 @@ namespace OngekiFumenEditor.Core.Utils
         public static IEnumerable<T> DistinctContinuousBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect)
             => collection.DistinctContinuousBy((a, b) => Equals(keySelect(a), keySelect(b)));
 
+        public static int FirstIndexOf<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            int index = 0;
+
+            foreach (var item in source)
+            {
+                if (predicate(item))
+                    return index;
+
+                index++;
+            }
+
+            return -1;
+        }
+
         public static IEnumerable<T> DistinctContinuousBy<T>(this IEnumerable<T> collection, Func<T, T, bool> compFunc)
         {
             using var itor = collection.GetEnumerator();
