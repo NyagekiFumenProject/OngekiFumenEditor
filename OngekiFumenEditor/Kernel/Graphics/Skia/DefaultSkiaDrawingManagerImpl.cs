@@ -166,6 +166,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 case RenderBackendType.OpenGL:
                     return new SkiaRenderControl_OpenGL();
                 case RenderBackendType.DirectX:
+                    return new SkiaRenderControl_DirectX();
+                case RenderBackendType.DirectX12:
                     return new SkiaRenderControl_D3D9On12();
                 case RenderBackendType.CPU:
                 default:

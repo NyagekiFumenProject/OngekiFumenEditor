@@ -10,6 +10,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
     {
         OpenGL,
         DirectX,
+        DirectX12,
         CPU,
     }
 }
