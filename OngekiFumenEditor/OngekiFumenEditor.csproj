@@ -50,7 +50,6 @@
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<DebugType>none</DebugType>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 
 	<ItemGroup>
 		<Compile Remove="Dependencies\**" />
@@ -222,7 +221,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\OngekiFumenEditor.Core\OngekiFumenEditor.Core.csproj" >
-			<PrivateAssets>all</PrivateAssets>
+			<PrivateAssets>false</PrivateAssets>
 		</ProjectReference>
 		<ProjectReference Include="..\Dependences\earcut.net\src\Earcut.csproj">
 			<PrivateAssets>all</PrivateAssets>
