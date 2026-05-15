@@ -35,12 +35,7 @@ namespace OngekiFumenEditor.Core.Base.Collections.Base.RangeTree
 		/// <summary>
 		/// Removes the specified item.
 		/// </summary>
-		void Remove(TValue item);
-
-		/// <summary>
-		/// Removes the specified items.
-		/// </summary>
-		void Remove(IEnumerable<TValue> items);
+		bool Remove(TValue item);
 
 		/// <summary>
 		/// Removes all elements from the range tree.

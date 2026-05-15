@@ -1,5 +1,4 @@
 ﻿using Caliburn.Micro;
-using DereTore.Common;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
@@ -192,8 +191,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_SelectEntireLane(ActionExecutionContext e)
         {
-            foreach (var connectable in SelectObjects.OfType<ConnectableObjectBase>().Select(c => c.ReferenceStartObject).Distinct()) {
-                foreach (var child in connectable.Children) {
+            foreach (var connectable in SelectObjects.OfType<ConnectableObjectBase>().Select(c => c.ReferenceStartObject).Distinct())
+            {
+                foreach (var child in connectable.Children)
+                {
                     child.IsSelected = true;
                 }
             }
@@ -202,8 +203,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_SelectAttachedCurves(ActionExecutionContext e)
         {
-            foreach (var connectable in SelectObjects.OfType<ConnectableChildObjectBase>()) {
-                foreach (var curve in connectable.PathControls) {
+            foreach (var connectable in SelectObjects.OfType<ConnectableChildObjectBase>())
+            {
+                foreach (var curve in connectable.PathControls)
+                {
                     curve.IsSelected = true;
                 }
             }
@@ -1043,6 +1046,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             RebuildObjectSoflanGroupRecord();
         }
 
+        static ParallelOptions rebuildSoflanGroupParallelOption = new ParallelOptions()
+        {
+#if DEBUG
+            MaxDegreeOfParallelism = 1
+#endif
+        };
+
         private void RebuildObjectSoflanGroupRecord()
         {
             _cacheSoflanGroupRecorder.Clear();
@@ -1053,35 +1063,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 objs = objs.Where(x => x switch
                 {
                     IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
-                    or ConnectableObjectBase => false, //杞ㄩ亾鐢变緷闄勭殑鐗╀欢鍘诲喅瀹?
+                    or ConnectableObjectBase => false,//轨道由依附的物体去决定
                     _ => true
                 });
                 //recache all objects
 
                 _cacheSoflanGroupRecorder.SetDefault(Fumen.SoflansMap.DefaultSoflanList);
-                Parallel.ForEach(objs, new ParallelOptions()
-                {
-                    MaxDegreeOfParallelism = 1
-                }, obj =>
+                Parallel.ForEach(objs, rebuildSoflanGroupParallelOption, obj =>
                 {
                     var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
-                    if (!Fumen.SoflansMap.TryGetValue(soflanGroup, out var soflanList))
-                    {
-#if DEBUG
-                        Log.LogWarn($"Can't find soflanList by soflanGroup: {soflanGroup} from object {obj}, use default soflanList.");
-#endif
-                        return;
-                    }
-                    if (soflanList.IsEmpty())
-                    {
-#if DEBUG
-                        Log.LogWarn($"soflanList is empty, use default soflanList, soflanGroup: {soflanGroup}");
-#endif
-                        return;
-                    }
+                    var soflanList = Fumen.SoflansMap[soflanGroup];
+
                     _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
-                    //鐩墠鍙湁Hold鐗╀欢鑳藉奖鍝嶅埌鎵€灞炶建閬撶殑SoflanGroup?
-                    /* 娉ㄩ噴浠ｇ爜鍥犱负id:1120
+                    //目前只有Hold物体能影响到所属轨道的SoflanGroup?
+                    /* 注释代码因为id:1120
                     if (obj is Hold hold && hold.ReferenceLaneStart is ConnectableStartObject start)
                         _cacheSoflanGroupRecorder.SetCache(start.Id, soflanList, soflanGroup);
                     */

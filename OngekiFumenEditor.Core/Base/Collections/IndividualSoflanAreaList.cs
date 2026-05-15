@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Core.Base.Collections
 
         public int Count => list.Count;
 
-        public event PropertyChangedEventHandler OnPropertyChangedEvent;
+        public event PropertyChangedEventHandler OnChildPropertyChangedEvent;
         public event Action<IndividualSoflanArea> OnCollectionChangedEvent;
 
         public IEnumerator<IndividualSoflanArea> GetEnumerator() => list.GetEnumerator();
@@ -31,42 +31,32 @@ namespace OngekiFumenEditor.Core.Base.Collections
 
         public IndividualSoflanAreaList(IEnumerable<IndividualSoflanArea> initSoflanChanges = default)
         {
-            OnPropertyChangedEvent += OnChilidrenSubPropsChangedEvent;
             foreach (var item in initSoflanChanges ?? Enumerable.Empty<IndividualSoflanArea>())
                 Add(item);
         }
 
-        private void OnChilidrenSubPropsChangedEvent(object sender, PropertyChangedEventArgs e)
+        public void Add(IndividualSoflanArea isf)
         {
-
+            list.Add(isf);
+            isf.PropertyChanged += OnIndividualSoflanAreaPropChanged;
+            OnCollectionChangedEvent?.Invoke(isf);
         }
 
-        public void Add(IndividualSoflanArea soflan)
+        public bool Remove(IndividualSoflanArea isf)
         {
-            list.Add(soflan);
-            soflan.PropertyChanged += OnSoflanPropChanged;
-            OnCollectionChangedEvent?.Invoke(soflan);
-        }
-
-        private void OnSoflanPropChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
+            if (list.Remove(isf))
             {
-                case nameof(IndividualSoflanArea.TGrid):
-                case nameof(TGrid.Grid):
-                case nameof(TGrid.Unit):
-                    OnPropertyChangedEvent?.Invoke(sender, e);
-                    break;
-                default:
-                    break;
+                isf.PropertyChanged -= OnIndividualSoflanAreaPropChanged;
+                OnCollectionChangedEvent?.Invoke(isf);
+                return true;
             }
+
+            return false;
         }
 
-        public void Remove(IndividualSoflanArea soflan)
+        private void OnIndividualSoflanAreaPropChanged(object sender, PropertyChangedEventArgs e)
         {
-            list.Remove(soflan);
-            soflan.PropertyChanged -= OnSoflanPropChanged;
-            OnCollectionChangedEvent?.Invoke(soflan);
+            OnChildPropertyChangedEvent?.Invoke(sender, e);
         }
 
         public IEnumerable<IndividualSoflanArea> GetVisibleStartObjects(TGrid min, TGrid max)
