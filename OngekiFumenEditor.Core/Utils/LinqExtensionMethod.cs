@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using PoolFacade = OngekiFumenEditor.Core.Utils.ObjectPool.ObjectPool;
 
 namespace OngekiFumenEditor.Core.Utils
 {
@@ -54,14 +55,14 @@ namespace OngekiFumenEditor.Core.Utils
 
         public static void DistinctSelf<T>(this ICollection<T> collection)
         {
-            using var d = collection.Except(collection.Distinct()).ToListWithObjectPool(out var removes);
+            using var removes = collection.Except(collection.Distinct()).ToListWithObjectPool();
             foreach (var rm in removes)
                 collection.Remove(rm);
         }
 
         public static void DistinctBySelf<T, Y>(this ICollection<T> collection, Func<T, Y> keySelect)
         {
-            using var d = collection.Except(DistinctByCompat(collection, keySelect)).ToListWithObjectPool(out var removes);
+            using var removes = collection.Except(DistinctByCompat(collection, keySelect)).ToListWithObjectPool();
             foreach (var rm in removes)
                 collection.Remove(rm);
         }
@@ -72,8 +73,32 @@ namespace OngekiFumenEditor.Core.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Remove(x));
 
+        public static int RemoveAll<T>(this IList<T> collection, Predicate<T> match)
+        {
+            var removed = 0;
+            for (var i = collection.Count - 1; i >= 0; i--)
+            {
+                if (!match(collection[i]))
+                    continue;
+
+                collection.RemoveAt(i);
+                removed++;
+            }
+
+            return removed;
+        }
+
+        public static void RemoveRange<T>(this IList<T> collection, int index, int count)
+        {
+            for (var i = 0; i < count; i++)
+                collection.RemoveAt(index);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(this IList<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
@@ -230,36 +255,48 @@ namespace OngekiFumenEditor.Core.Utils
             return default;
         }
 
-        public static IDisposable ToListWithObjectPool<T>(this IEnumerable<T> collection, out List<T> list)
+        public static IPooledList<T> ToListWithObjectPool<T>(this IEnumerable<T> collection)
         {
-            var disposable = ObjectPool<List<T>>.GetWithUsingDisposable(out list, out _);
+            var list = PoolFacade.GetPooledList<T>();
             list.Clear();
             list.AddRange(collection);
-            return disposable;
+            return list;
         }
 
-        public static IDisposable ToHashSetWithObjectPool<T>(this IEnumerable<T> collection, out HashSet<T> set)
+        public static IPooledSet<T> ToHashSetWithObjectPool<T>(this IEnumerable<T> collection)
         {
-            var disposable = ObjectPool<HashSet<T>>.GetWithUsingDisposable(out set, out _);
+            var set = PoolFacade.GetPooledSet<T>();
             set.Clear();
             set.AddRange(collection);
-            return disposable;
+            return set;
         }
 
-        public static IDisposable ToDictionaryWithObjectPool<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector, out Dictionary<K, V> dic)
+        public static IPooledDictionary<K, V> ToDictionaryWithObjectPool<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
         {
-            var disposable = ObjectPool<Dictionary<K, V>>.GetWithUsingDisposable(out dic, out _);
+            var dic = PoolFacade.GetPooledDictionary<K, V>();
             dic.Clear();
             foreach (var item in collection)
                 dic[keySelector(item)] = valueSelector(item);
-            return disposable;
+            return dic;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T>(this List<T> list, Func<T, T, int> compFunc) => list.Sort(new ComparerWrapper<T>(compFunc));
+        public static void Sort<T>(this IList<T> list, Func<T, T, int> compFunc)
+        {
+            if (list is List<T> concreteList)
+            {
+                concreteList.Sort(new ComparerWrapper<T>(compFunc));
+                return;
+            }
+
+            var sorted = list.OrderBy(x => x, new ComparerWrapper<T>(compFunc)).ToArray();
+            for (var i = 0; i < sorted.Length; i++)
+                list[i] = sorted[i];
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SortBy<T, X>(this List<T> list, Func<T, X> keySelect) => list.Sort((a, b) => Comparer<X>.Default.Compare(keySelect(a), keySelect(b)));
+        public static void SortBy<T, X>(this IList<T> list, Func<T, X> keySelect)
+            => list.Sort((a, b) => Comparer<X>.Default.Compare(keySelect(a), keySelect(b)));
 
         public static int BinarySearchBy<T, X>(this IList<T> insertable, X value, Func<T, X> keySelect, int lo = 0) where X : IComparable<X>
         {
