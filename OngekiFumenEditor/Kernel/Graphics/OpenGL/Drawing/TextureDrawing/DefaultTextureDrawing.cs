@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
     internal class DefaultTextureDrawing : CommonOpenGLDrawingBase, ITextureDrawing, IDisposable
     {
-        private readonly DefaultOpenGLShader shader;
+        private readonly CommonSpriteShader shader;
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
@@ -105,9 +105,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 
                 shader.Begin();
                 {
-                    shader.PassUniform("Model", modelMatrix);
-                    shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
-                    shader.PassUniform("color", color.ToOpenTKVector4());
+                    shader.PassUniform(shader.ModelLocation, modelMatrix);
+                    shader.PassUniform(shader.ViewProjectionLocation, GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
+                    shader.PassUniform(shader.ColorLocation, color.ToOpenTKVector4());
                     shader.PassUniform("diffuse", texture);
 
                     GL.BindVertexArray(vao);

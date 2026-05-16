@@ -7,6 +7,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
     internal class BatchCircleShader : DefaultOpenGLShader
 	{
 		private static BatchCircleShader _shared;
+		private int modelViewProjectionLocation = int.MinValue;
+		private int resolutionLocation = int.MinValue;
 
 		public BatchCircleShader()
 		{
@@ -84,6 +86,10 @@ else{
 		}
 
 		public static BatchCircleShader Shared => _shared ??= _createShared();
+
+		public int ModelViewProjectionLocation => modelViewProjectionLocation == int.MinValue ? modelViewProjectionLocation = GetUniformLocation("ModelViewProjection") : modelViewProjectionLocation;
+
+		public int ResolutionLocation => resolutionLocation == int.MinValue ? resolutionLocation = GetUniformLocation("uResolution") : resolutionLocation;
 
 		private static BatchCircleShader _createShared()
 		{

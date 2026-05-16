@@ -122,8 +122,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
 
             _shader.Begin();
 
-            _shader.PassUniform("TextureSampler", 0);
-            _shader.PassUniform("MVP", mvp);
+            _shader.PassUniform(_shader.TextureSamplerLocation, 0);
+            _shader.PassUniform(_shader.MvpLocation, mvp);
 
             _vao.Bind();
             _indexBuffer.Bind();

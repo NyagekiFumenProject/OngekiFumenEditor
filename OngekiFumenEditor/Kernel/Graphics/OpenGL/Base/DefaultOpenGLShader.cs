@@ -27,6 +27,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
 
         public Dictionary<string, object> Uniforms { get { return _uniforms; } internal set { _uniforms = value; } }
 
+        private readonly Dictionary<int, float> cachedFloatUniformValues = new();
+        private readonly Dictionary<int, int> cachedIntUniformValues = new();
+        private readonly Dictionary<int, Vector2> cachedVector2UniformValues = new();
+        private readonly Dictionary<int, Vector4> cachedVector4UniformValues = new();
+        private readonly Dictionary<int, Matrix4> cachedMatrix4UniformValues = new();
+
         private string vertError;
         private string fragError;
         private string geoError;
@@ -54,6 +60,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
                 Dispose();
 
                 Uniforms = new Dictionary<string, object>();
+                ClearUniformValueCache();
 
                 var genShaders = new List<int>();
 
@@ -149,7 +156,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PassUniform(int l, float v) => GL.Uniform1(l, v);
+        public void PassUniform(int l, float v)
+        {
+            if (UniformValueEquals(cachedFloatUniformValues, l, v))
+                return;
+            GL.Uniform1(l, v);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, float val)
         {
@@ -158,7 +170,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PassUniform(int l, int v) => GL.Uniform1(l, v);
+        public void PassUniform(int l, int v)
+        {
+            if (UniformValueEquals(cachedIntUniformValues, l, v))
+                return;
+            GL.Uniform1(l, v);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, int val)
         {
@@ -167,7 +184,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PassUniform(int l, Vector2 v) => GL.Uniform2(l, v);
+        public void PassUniform(int l, Vector2 v)
+        {
+            if (UniformValueEquals(cachedVector2UniformValues, l, v))
+                return;
+            GL.Uniform2(l, v);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, Vector2 val)
         {
@@ -176,7 +198,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PassUniform(int l, Vector4 v) => GL.Uniform4(l, v);
+        public void PassUniform(int l, Vector4 v)
+        {
+            if (UniformValueEquals(cachedVector4UniformValues, l, v))
+                return;
+            GL.Uniform4(l, v);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, Vector4 val)
         {
@@ -195,7 +222,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PassUniform(int l, Matrix4 v) => GL.UniformMatrix4(l, false, ref v);
+        public void PassUniform(int l, Matrix4 v)
+        {
+            if (UniformValueEquals(cachedMatrix4UniformValues, l, v))
+                return;
+            GL.UniformMatrix4(l, false, ref v);
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, Matrix4 matrix4)
         {
@@ -241,5 +273,27 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         }
 
         public int ShaderProgram => program;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool UniformValueEquals<T>(Dictionary<int, T> cache, int location, T value)
+        {
+            if (location < 0)
+                return true;
+
+            if (cache.TryGetValue(location, out var cachedValue) && EqualityComparer<T>.Default.Equals(cachedValue, value))
+                return true;
+
+            cache[location] = value;
+            return false;
+        }
+
+        private void ClearUniformValueCache()
+        {
+            cachedFloatUniformValues.Clear();
+            cachedIntUniformValues.Clear();
+            cachedVector2UniformValues.Clear();
+            cachedVector4UniformValues.Clear();
+            cachedMatrix4UniformValues.Clear();
+        }
     }
 }

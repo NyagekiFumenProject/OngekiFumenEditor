@@ -5,6 +5,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 {
     internal class BeamLazerShader : DefaultOpenGLShader
 	{
+		private int modelLocation = int.MinValue;
+		private int viewProjectionLocation = int.MinValue;
+		private int textureScaleYLocation = int.MinValue;
+		private int colorLocation = int.MinValue;
+		private int progressLocation = int.MinValue;
+
 		public BeamLazerShader()
 		{
 			VertexProgram = @"
@@ -40,5 +46,15 @@ void main(){
 }
                 ";
 		}
+
+		public int ModelLocation => modelLocation == int.MinValue ? modelLocation = GetUniformLocation("Model") : modelLocation;
+
+		public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
+
+		public int TextureScaleYLocation => textureScaleYLocation == int.MinValue ? textureScaleYLocation = GetUniformLocation("textureScaleY") : textureScaleYLocation;
+
+		public int ColorLocation => colorLocation == int.MinValue ? colorLocation = GetUniformLocation("color") : colorLocation;
+
+		public int ProgressLocation => progressLocation == int.MinValue ? progressLocation = GetUniformLocation("progress") : progressLocation;
 	}
 }

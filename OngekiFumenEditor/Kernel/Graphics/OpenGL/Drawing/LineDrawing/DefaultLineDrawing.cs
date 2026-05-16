@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
     internal class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
 	{
-		private readonly DefaultOpenGLShader shader;
+		private readonly CommonLineShader shader;
 		private readonly int vbo;
 		private readonly int vao;
 		private int bufferCapacityInBytes;
@@ -55,8 +55,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 
 				shader.Begin();
 				{
-					shader.PassUniform("Model", GetOverrideModelMatrix());
-					shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
+					shader.PassUniform(shader.ModelLocation, GetOverrideModelMatrix());
+					shader.PassUniform(shader.ViewProjectionLocation, GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
 					GL.BindVertexArray(vao);
 					{
 						GL.Enable(EnableCap.PolygonSmooth);

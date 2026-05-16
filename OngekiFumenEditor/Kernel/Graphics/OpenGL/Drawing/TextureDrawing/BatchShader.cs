@@ -2,8 +2,10 @@
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-    internal class BatchShader : DefaultOpenGLShader
+	internal class BatchShader : DefaultOpenGLShader
 	{
+		private int viewProjectionLocation = int.MinValue;
+
 		public BatchShader()
 		{
 			VertexProgram = @"
@@ -42,5 +44,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
                 }
                 ";
 		}
+
+		public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
 	}
 }

@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
     internal class DefaultHighlightBatchTextureDrawing : CommonOpenGLDrawingBase, IHighlightBatchTextureDrawing, IDisposable
     {
-        private DefaultOpenGLShader shader;
+        private HighlightBatchShader shader;
         private float[] postData;
         private int vboVertexBase, vboTexPosBase;
         private int currentPostBaseIndex = 0;
@@ -179,8 +179,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
             GL.BindVertexArray(vao);
             var MVP = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
             var iResolution = new OpenTK.Mathematics.Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
-            shader.PassUniform("ViewProjection", MVP);
-            shader.PassUniform("iResolution", iResolution);
+            shader.PassUniform(shader.ViewProjectionLocation, MVP);
+            shader.PassUniform(shader.ResolutionLocation, iResolution);
             shader.PassUniform("diffuse", this.texture);
         }
 

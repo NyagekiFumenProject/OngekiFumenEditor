@@ -4,9 +4,12 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-    public class CommonSpriteShader : DefaultOpenGLShader
+	public class CommonSpriteShader : DefaultOpenGLShader
 	{
 		private static CommonSpriteShader _shared;
+		private int modelLocation = int.MinValue;
+		private int viewProjectionLocation = int.MinValue;
+		private int colorLocation = int.MinValue;
 
 		public CommonSpriteShader()
 		{
@@ -39,6 +42,12 @@ void main(){
 		}
 
 		public static CommonSpriteShader Shared => _shared ??= _createShared();
+
+		public int ModelLocation => modelLocation == int.MinValue ? modelLocation = GetUniformLocation("Model") : modelLocation;
+
+		public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
+
+		public int ColorLocation => colorLocation == int.MinValue ? colorLocation = GetUniformLocation("color") : colorLocation;
 
 		private static CommonSpriteShader _createShared()
 		{
