@@ -66,6 +66,11 @@ jobs:
         Get-ChildItem -Path $runtimePath -Directory | 
           Where-Object { $_.Name -ne "win-x64" } | 
           Remove-Item -Recurse -Force
+    - name: Delete unused .pdb files
+      shell: pwsh
+      run: |
+        Get-ChildItem -Path "C:\ogkrEditorBuild" -Filter "*.pdb" -File -Recurse |
+          Remove-Item -Force
     - uses: actions/upload-artifact@v4
       with:
         name: OngekiFumenEditor_${{env.GitBuildVersion}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})

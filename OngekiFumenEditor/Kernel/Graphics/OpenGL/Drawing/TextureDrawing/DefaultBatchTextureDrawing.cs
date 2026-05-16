@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
     internal class DefaultBatchTextureDrawing : CommonOpenGLDrawingBase, IBatchTextureDrawing, IDisposable
     {
         private BatchShader shader;
-        private byte[] postData;
+        private float[] postData;
         private int vboVertexBase, vboTexPosBase;
         private int currentPostBaseIndex = 0;
         public int currentPostCount = 0;
@@ -34,10 +34,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
         private DefaultOpenGLRenderManagerImpl defaultDrawingManager;
 
         /*-----------------CURRENT VERSION------------------ -
-                                        modelMatrix(float)  color(float)
-                                        Matrix4*4(16)       vec(4)
+                                        size(float)  position(float)  rotation(float)  color(float)
+                                        vec2         vec2             float            vec4
         */
-        private const int VertexSize = (4 * 4 + 4 * 1) * sizeof(float);
+        private const int VertexFloatCount = 2 + 2 + 1 + 4;
+        private const int VertexSize = VertexFloatCount * sizeof(float);
         private const int MAX_DRAW_COUNT = 3000;
         private const int BUFFER_COUNT = 1;
 
@@ -46,7 +47,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
             shader = new BatchShader();
             shader.Compile();
 
-            postData = new byte[VertexSize * MAX_DRAW_COUNT];
+            postData = new float[VertexFloatCount * MAX_DRAW_COUNT];
 
             vboVertexBase = GL.GenBuffer();
             vboTexPosBase = GL.GenBuffer();
@@ -97,32 +98,25 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
                 {
                     GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(VertexSize * MAX_DRAW_COUNT), IntPtr.Zero, BufferUsageHint.DynamicDraw);
 
-                    //ModelMatrix
                     GL.EnableVertexAttribArray(2);
                     var strip = 0;
-                    GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, VertexSize, strip);
+                    GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, VertexSize, strip);
                     GL.VertexAttribDivisor(2, 1);
 
                     GL.EnableVertexAttribArray(3);
-                    strip += 4 * sizeof(float);
-                    GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, VertexSize, strip);
+                    strip += 2 * sizeof(float);
+                    GL.VertexAttribPointer(3, 2, VertexAttribPointerType.Float, false, VertexSize, strip);
                     GL.VertexAttribDivisor(3, 1);
 
                     GL.EnableVertexAttribArray(4);
-                    strip += 4 * sizeof(float);
-                    GL.VertexAttribPointer(4, 4, VertexAttribPointerType.Float, false, VertexSize, strip);
+                    strip += 2 * sizeof(float);
+                    GL.VertexAttribPointer(4, 1, VertexAttribPointerType.Float, false, VertexSize, strip);
                     GL.VertexAttribDivisor(4, 1);
 
                     GL.EnableVertexAttribArray(5);
-                    strip += 4 * sizeof(float);
+                    strip += 1 * sizeof(float);
                     GL.VertexAttribPointer(5, 4, VertexAttribPointerType.Float, false, VertexSize, strip);
                     GL.VertexAttribDivisor(5, 1);
-
-                    //Color
-                    GL.EnableVertexAttribArray(6);
-                    strip += 4 * sizeof(float);
-                    GL.VertexAttribPointer(6, 4, VertexAttribPointerType.Float, false, VertexSize, strip);
-                    GL.VertexAttribDivisor(6, 1);
                 }
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             }
@@ -183,42 +177,23 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 
             GL.BindVertexArray(vao);
             var MVP = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
-            shader.PassUniform("ViewProjection", MVP);
-            shader.PassUniform("diffuse", this.texture);
+            shader.PassUniform(shader.ViewProjectionLocation, MVP);
+            shader.PassUniform(shader.DiffuseLocation, this.texture);
         }
 
         public void PostSprite(Vector2 size, Vector2 position, float rotation, Vector4 color)
         {
-            /*-----------------CURRENT VERSION------------------ -
-			*     modelMatrix
-			*     Matrix4x4(16)
-			*/
-
-            var modelMatrix =
-                    OpenTK.Mathematics.Matrix4.CreateScale(new OpenTK.Mathematics.Vector3(texture.Width, texture.Height, 1)) *
-                    OpenTK.Mathematics.Matrix4.CreateScale(new OpenTK.Mathematics.Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
-                    OpenTK.Mathematics.Matrix4.CreateRotationZ(rotation) *
-                    OpenTK.Mathematics.Matrix4.CreateTranslation(position.X, position.Y, 0);
-
-            unsafe
-            {
-                fixed (byte* ptr = &postData[currentPostBaseIndex])
-                {
-                    //copy matrix4 to buffer
-                    var copyLen = 4 * 4 * sizeof(float);
-                    var basePtr = (byte*)&modelMatrix.Row0.X;
-                    for (int i = 0; i < copyLen; i++)
-                        ptr[i] = *(basePtr + i);
-
-                    //copy vec4 to buffer
-                    var colorBasePtr = ptr + (16 * sizeof(float));
-                    var span = new Span<float>(colorBasePtr, 4);
-                    color.TryCopyTo(span);
-                }
-            }
+            postData[currentPostBaseIndex++] = size.X;
+            postData[currentPostBaseIndex++] = size.Y;
+            postData[currentPostBaseIndex++] = position.X;
+            postData[currentPostBaseIndex++] = position.Y;
+            postData[currentPostBaseIndex++] = rotation;
+            postData[currentPostBaseIndex++] = color.X;
+            postData[currentPostBaseIndex++] = color.Y;
+            postData[currentPostBaseIndex++] = color.Z;
+            postData[currentPostBaseIndex++] = color.W;
 
             currentPostCount++;
-            currentPostBaseIndex += VertexSize;
             if (currentPostCount >= MAX_DRAW_COUNT)
                 FlushDraw();
         }

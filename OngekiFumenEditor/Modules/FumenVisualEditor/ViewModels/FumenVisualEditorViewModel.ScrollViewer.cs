@@ -1,5 +1,7 @@
 using Gemini.Framework;
 using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Linq;
@@ -21,6 +23,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 			}
 		}
 
+		private double verticalScrollMaximum;
+		public double VerticalScrollMaximum
+		{
+			get => verticalScrollMaximum;
+			private set => Set(ref verticalScrollMaximum, Math.Max(0, value));
+		}
+
+		private double previewScrollPositionMs;
+		private double previewTailAllowanceMs;
+
 		private double scrollViewerVerticalOffset;
 		public double ScrollViewerVerticalOffset
 		{
@@ -39,30 +51,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             */
 		}
 
-		public double ReverseScrollViewerVerticalOffset
+		public double ReverseVerticalScrollValue
 		{
-			get => TotalDurationHeight - ScrollViewerVerticalOffset;
+			get => IsDesignMode
+				? TotalDurationHeight - ScrollViewerVerticalOffset
+				: VerticalScrollMaximum - previewScrollPositionMs;
 			set
 			{
-				//ScrollViewerVerticalOffset = TotalDurationHeight - value;
-				var val = TotalDurationHeight - value;
 				if (IsDesignMode)
 				{
+					var val = TotalDurationHeight - value;
 					var audioTime = ConvertYToAudioTime_DesignMode(val);
 					ScrollTo(audioTime);
+					return;
 				}
-				else
-				{
-					var curTGrid = GetCurrentTGrid();
-					var nextTGrid = ConvertYToTGrid_PreviewMode(val).OrderBy(x => Math.Abs(x.TotalGrid - curTGrid.TotalGrid)).FirstOrDefault();
 
-					if (nextTGrid is not null)
-					{
-						var audioTime = ConvertTGridToAudioTime(nextTGrid);
-						ScrollTo(audioTime);
-					}
-				}
+				var scrollPositionMs = Math.Min(VerticalScrollMaximum, Math.Max(0, VerticalScrollMaximum - value));
+				SetPreviewScrollPosition(scrollPositionMs);
 			}
+		}
+
+		public double ReverseScrollViewerVerticalOffset
+		{
+			get => ReverseVerticalScrollValue;
+			set => ReverseVerticalScrollValue = value;
 		}
 
 		#region ScrollTo
@@ -82,21 +94,113 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
 		public void ScrollTo(TimeSpan audioTime)
 		{
-			var fixedAudioTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(audioTime, EditorProjectData.AudioDuration));
+			var audioDuration = GetAudioDuration();
+			var fixedAudioTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(audioTime, audioDuration));
+
+			if (IsPreviewMode)
+			{
+				SetPreviewScrollPosition(Math.Min(VerticalScrollMaximum, Math.Max(0, audioTime.TotalMilliseconds)));
+				return;
+			}
+
 			CurrentPlayTime = fixedAudioTime;
 
-			var val = IsDesignMode ?
-				ConvertAudioTimeToY_DesignMode(fixedAudioTime) :
-				ConvertAudioTimeToY_PreviewMode(fixedAudioTime);
+			var val = ConvertAudioTimeToY_DesignMode(fixedAudioTime);
 			val = Math.Min(TotalDurationHeight, Math.Max(0, val));
 
 			scrollViewerVerticalOffset = val;
 			NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
+			NotifyOfPropertyChange(() => ReverseVerticalScrollValue);
 		}
 
 		#endregion
 
+		public void RecalculateScrollMetrics()
+		{
+			var audioDuration = GetAudioDuration();
+			var audioDurationMs = Math.Max(0, audioDuration.TotalMilliseconds);
+
+			previewTailAllowanceMs = 0;
+
+			if (Fumen is not null && audioDuration > TimeSpan.Zero)
+			{
+				var audioEndTGrid = ConvertAudioTimeToTGrid(audioDuration);
+				var maxDisplayTGrid = GetMaxDisplayEndTGrid();
+
+				if (audioEndTGrid is not null && maxDisplayTGrid is not null && maxDisplayTGrid > audioEndTGrid)
+				{
+					var audioEndY = ConvertTGridToY_DesignMode(audioEndTGrid);
+					var maxDisplayY = ConvertTGridToY_DesignMode(maxDisplayTGrid);
+					if (maxDisplayY > audioEndY)
+					{
+						var tailAudioTime = ConvertYToAudioTime_DesignMode(audioEndY + (maxDisplayY - audioEndY));
+						previewTailAllowanceMs = Math.Max(0, (tailAudioTime - audioDuration).TotalMilliseconds);
+					}
+				}
+			}
+
+			VerticalScrollMaximum = IsDesignMode ? TotalDurationHeight : audioDurationMs + previewTailAllowanceMs;
+			previewScrollPositionMs = Math.Min(VerticalScrollMaximum, Math.Max(0, previewScrollPositionMs));
+
+			NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
+			NotifyOfPropertyChange(() => ReverseVerticalScrollValue);
+		}
+
+		private TGrid GetMaxDisplayEndTGrid()
+		{
+			TGrid max = TGrid.Zero;
+
+			foreach (var displayable in Fumen.GetAllDisplayableObjects())
+			{
+				var endTGrid = displayable switch
+				{
+					Hold hold => hold.EndTGrid,
+					ISoflan soflan => soflan.EndTGrid,
+					ConnectableStartObject connectableStart => connectableStart.MaxTGrid,
+					OngekiTimelineObjectBase timelineObject => timelineObject.TGrid,
+					_ => default
+				};
+
+				if (endTGrid is not null && endTGrid > max)
+					max = endTGrid;
+			}
+
+			return max;
+		}
+
+		private void SetPreviewScrollPosition(double scrollPositionMs)
+		{
+			previewScrollPositionMs = Math.Min(VerticalScrollMaximum, Math.Max(0, scrollPositionMs));
+
+			var fixedAudioTimeMs = Math.Min(previewScrollPositionMs, Math.Max(0, GetAudioDuration().TotalMilliseconds));
+			CurrentPlayTime = TimeSpan.FromMilliseconds(fixedAudioTimeMs);
+
+			var viewportTGrid = GetViewportTGrid();
+			var val = ConvertTGridToY_PreviewMode(viewportTGrid);
+			val = Math.Min(TotalDurationHeight, Math.Max(0, val));
+			scrollViewerVerticalOffset = val;
+
+			NotifyOfPropertyChange(() => ReverseScrollViewerVerticalOffset);
+			NotifyOfPropertyChange(() => ReverseVerticalScrollValue);
+		}
+
+		private TimeSpan GetAudioDuration()
+		{
+			var projectDuration = EditorProjectData?.AudioDuration ?? TimeSpan.Zero;
+			return projectDuration > TimeSpan.Zero ? projectDuration : AudioPlayer?.Duration ?? TimeSpan.Zero;
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public TGrid GetCurrentTGrid() => ConvertAudioTimeToTGrid(CurrentPlayTime);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public TGrid GetViewportTGrid() => IsPreviewMode
+			? ConvertAudioTimeToTGrid(TimeSpan.FromMilliseconds(previewScrollPositionMs))
+			: GetCurrentTGrid();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public TimeSpan GetViewportAudioTime() => IsPreviewMode
+			? TimeSpan.FromMilliseconds(previewScrollPositionMs)
+			: CurrentPlayTime;
 	}
 }

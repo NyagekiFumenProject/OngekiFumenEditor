@@ -27,13 +27,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void Draw(IFumenEditorDrawingContext target)
         {
-            var y = (float)target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid().TotalUnit);
+            var viewportTGrid = target.Editor.GetViewportTGrid();
+            var y = (float)target.ConvertToY_DefaultSoflanGroup(viewportTGrid.TotalUnit);
 
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
             vertices[1] = new(new(target.Editor.ViewWidth, y), color, VertexDash.Solider);
 
             lineDrawing.Draw(target, vertices, 1);
-            var t = target.Editor.GetCurrentTGrid();
+            var t = viewportTGrid;
 
             var bpmList = target.Editor.Fumen.BpmList;
 

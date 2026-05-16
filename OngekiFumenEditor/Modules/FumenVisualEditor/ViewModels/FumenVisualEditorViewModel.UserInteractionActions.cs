@@ -1718,7 +1718,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);
 
-            ScrollTo(GetCurrentTGrid() + new GridOffset(change.Unit, change.Grid));
+            ScrollTo(GetViewportTGrid() + new GridOffset(change.Unit, change.Grid));
         }
 
         private void OnWheelScrollViewer(MouseWheelEventArgs arg)
@@ -1755,7 +1755,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 if (IsPreviewMode)
                 {
-                    var audioTime = ConvertTGridToAudioTime(GetCurrentTGrid());
+                    var audioTime = GetViewportAudioTime();
                     var offset = TimeSpan.FromMilliseconds(Setting.MouseWheelLength);
                     if (Math.Sign(arg.Delta) > 0)
                         audioTime += offset;

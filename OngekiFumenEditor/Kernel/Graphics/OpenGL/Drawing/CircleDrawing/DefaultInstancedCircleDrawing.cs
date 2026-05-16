@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
 {
     internal class DefaultInstancedCircleDrawing : CommonOpenGLDrawingBase, ICircleDrawing
     {
-        private DefaultOpenGLShader shader;
+        private BatchCircleShader shader;
         private float[] postData;
         private int currentPostBaseIndex = 0;
         private int currentPostCount = 0;
@@ -87,9 +87,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
             shader.Begin();
             GL.BindVertexArray(vao);
 
-            shader.PassUniform("uResolution", new Vector2(viewWidth, viewHeight));
+            shader.PassUniform(shader.ResolutionLocation, new Vector2(viewWidth, viewHeight));
             var mvpMatrix = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
-            shader.PassUniform("ModelViewProjection", mvpMatrix);
+            shader.PassUniform(shader.ModelViewProjectionLocation, mvpMatrix);
 
             //backupPointSize = GL.GetFloat(GetPName.PointSize);
         }

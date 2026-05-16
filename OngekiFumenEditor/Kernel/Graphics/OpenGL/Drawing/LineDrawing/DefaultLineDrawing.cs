@@ -14,9 +14,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
     internal class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
 	{
-		private readonly DefaultOpenGLShader shader;
+		private readonly CommonLineShader shader;
 		private readonly int vbo;
 		private readonly int vao;
+		private int bufferCapacityInBytes;
         private DefaultOpenGLRenderManagerImpl defaultDrawingManager;
 
         public DefaultLineDrawing(DefaultOpenGLRenderManagerImpl manager) : base(manager)
@@ -54,8 +55,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 
 				shader.Begin();
 				{
-					shader.PassUniform("Model", GetOverrideModelMatrix());
-					shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
+					shader.PassUniform(shader.ModelLocation, GetOverrideModelMatrix());
+					shader.PassUniform(shader.ViewProjectionLocation, GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
 					GL.BindVertexArray(vao);
 					{
 						GL.Enable(EnableCap.PolygonSmooth);
@@ -77,9 +78,28 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 			using var d = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var vecList, out _);
 			vecList.Clear();
 
-			var color = points.FirstOrDefault().Color;
+			var color = default(System.Numerics.Vector4);
+			var hasColor = false;
 
-			using var d2 = points.Select(x => new Vec2() { x = x.Point.X, y = x.Point.Y }).ToListWithObjectPool(out var inputVecList);
+			using var d2 = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var inputVecList, out _);
+			inputVecList.Clear();
+			foreach (var point in points)
+			{
+				if (!hasColor)
+				{
+					color = point.Color;
+					hasColor = true;
+				}
+
+				inputVecList.Add(new Vec2()
+				{
+					x = point.Point.X,
+					y = point.Point.Y
+				});
+			}
+
+			if (inputVecList.Count == 0)
+				return 0;
 
 			var genVertices = Polyline2D.Create(vecList, inputVecList, lineWidth,
 				Polyline2D.JointStyle.ROUND,
@@ -102,8 +122,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 				arrBufferIdx2++;
 			}
 
-			GL.InvalidateBufferData(vbo);
-			GL.NamedBufferData(vbo, new IntPtr(sizeof(float) * arrBufferIdx2 * 6), arrBuffer2, BufferUsageHint.DynamicDraw);
+			var uploadSizeInBytes = sizeof(float) * arrBufferIdx2 * 6;
+			if (uploadSizeInBytes > bufferCapacityInBytes)
+			{
+				bufferCapacityInBytes = uploadSizeInBytes;
+				GL.NamedBufferData(vbo, new IntPtr(bufferCapacityInBytes), arrBuffer2, BufferUsageHint.DynamicDraw);
+			}
+			else
+			{
+				GL.NamedBufferSubData(vbo, IntPtr.Zero, new IntPtr(uploadSizeInBytes), arrBuffer2);
+			}
 
 			ArrayPool<float>.Shared.Return(arrBuffer2);
 

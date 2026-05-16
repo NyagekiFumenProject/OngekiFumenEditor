@@ -141,6 +141,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 default:
                     IsDirty = true;
+                    RecalculateScrollMetrics();
                     break;
             }
 
@@ -157,6 +158,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 timeSpan = AudioPlayer?.Duration ?? TimeSpan.Zero;
                 TotalDurationHeight = ConvertToY(ConvertAudioTimeToTGrid(timeSpan).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
+
+            RecalculateScrollMetrics();
         }
 
         public bool EnableDragging => !IsBatchMode || (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt) &&

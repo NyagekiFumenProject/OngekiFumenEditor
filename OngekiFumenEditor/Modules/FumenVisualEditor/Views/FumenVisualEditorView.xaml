@@ -151,10 +151,10 @@
             Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
         <ScrollBar
             Grid.Column="1"
-            Maximum="{Binding TotalDurationHeight}"
+            Maximum="{Binding VerticalScrollMaximum}"
             Minimum="0"
             Orientation="Vertical"
-            Value="{Binding ReverseScrollViewerVerticalOffset}">
+            Value="{Binding ReverseVerticalScrollValue}">
         </ScrollBar>
         <ScrollBar
             Grid.Row="1"

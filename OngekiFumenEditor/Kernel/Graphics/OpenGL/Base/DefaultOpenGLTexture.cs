@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
             GL.GenTextures(1, out int id);
             _id = id;
 
-            GL.BindTexture(TextureTarget.Texture2D, ID);
+            OpenGLTextureBindingCache.BindTexture2D(ID);
 
             TextureMinFilter = TextureMinFilter.Linear;
             TextureMagFilter = TextureMagFilter.Linear;
@@ -106,6 +106,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
             if (_id is int id)
             {
                 GL.DeleteTexture(id);
+                OpenGLTextureBindingCache.InvalidateTexture(id);
                 _id = null;
             }
         }

@@ -4,9 +4,11 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
-    public class CommonLineShader : DefaultOpenGLShader
+	public class CommonLineShader : DefaultOpenGLShader
 	{
 		private static CommonLineShader _shared;
+		private int modelLocation = int.MinValue;
+		private int viewProjectionLocation = int.MinValue;
 
 		public CommonLineShader()
 		{
@@ -39,6 +41,10 @@ void main(){
 		}
 
 		public static CommonLineShader Shared => _shared ??= _createShared();
+
+		public int ModelLocation => modelLocation == int.MinValue ? modelLocation = GetUniformLocation("Model") : modelLocation;
+
+		public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
 
 		private static CommonLineShader _createShared()
 		{

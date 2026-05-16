@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var curObliqueTopXGrid = obj.XGrid.TotalUnit + curBeamObj.ObliqueSourceXGridOffset.TotalUnit;
 
                 //beam not support SoflanGroup
-                var currentY = target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid());
+                var currentY = target.ConvertToY_DefaultSoflanGroup(target.Editor.GetViewportTGrid());
                 var obliqueTopX = (float)XGridCalculator.ConvertXGridToX(curObliqueTopXGrid, target.Editor);
                 var obliqueTopY = currentY - judgeOffset + target.CurrentDrawingTargetContext.Rect.Height;
 

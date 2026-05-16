@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 {
     internal class DefaultBeamDrawing : CommonOpenGLDrawingBase, IBeamDrawing
     {
-        private readonly DefaultOpenGLShader shader;
+        private readonly BeamLazerShader shader;
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
@@ -94,12 +94,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 
                 shader.Begin();
                 {
-                    shader.PassUniform("Model", modelMatrix);
-                    shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
-                    shader.PassUniform("textureScaleY", textureScaleY);
-                    shader.PassUniform("diffuse", texture);
-                    shader.PassUniform("color", color);
-                    shader.PassUniform("progress", progress);
+                    shader.PassUniform(shader.ModelLocation, modelMatrix);
+                    shader.PassUniform(shader.ViewProjectionLocation, GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
+                    shader.PassUniform(shader.TextureScaleYLocation, textureScaleY);
+                    shader.PassUniform(shader.DiffuseLocation, texture);
+                    shader.PassUniform(shader.ColorLocation, color);
+                    shader.PassUniform(shader.ProgressLocation, progress);
 
                     GL.BindVertexArray(vao);
                     {

@@ -335,7 +335,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         //计算可以显示的TGrid范围以及像素范围
 
-        var tGrid = GetCurrentTGrid();
+        var tGrid = GetViewportTGrid();
 
         #region prepare drawing contexts' for every soflan groups 
 
