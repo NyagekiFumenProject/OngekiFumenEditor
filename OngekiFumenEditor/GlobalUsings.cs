@@ -7,6 +7,5 @@ global using CacheLambdaActivator = OngekiFumenEditor.Core.Utils.CacheLambdaActi
 global using CoreLogLevel = OngekiFumenEditor.Core.Utils.CoreLogLevel;
 global using ICoreLogTarget = OngekiFumenEditor.Core.Utils.ICoreLogTarget;
 global using MathUtils = OngekiFumenEditor.Core.Utils.MathUtils;
-global using ObjectPoolBase = OngekiFumenEditor.Core.Utils.ObjectPool.ObjectPoolBase;
 global using TempFileHelper = OngekiFumenEditor.Core.Utils.TempFileHelper;
 global using TGridCalculator = OngekiFumenEditor.Core.Modules.FumenVisualEditor.TGridCalculator;

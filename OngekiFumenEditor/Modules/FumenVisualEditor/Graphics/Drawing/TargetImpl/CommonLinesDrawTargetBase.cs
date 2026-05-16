@@ -3,7 +3,6 @@ using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;

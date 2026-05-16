@@ -2,7 +2,6 @@ using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;

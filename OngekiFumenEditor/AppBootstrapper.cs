@@ -44,7 +44,6 @@ using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.DeadHandler;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
-using OngekiFumenEditor.Utils.ObjectPool;
 
 namespace OngekiFumenEditor;
 
@@ -158,7 +157,6 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         FileLogOutput.Init();
         DumpFileHelper.Init();
         CoreLog.SetResolver(() => coreLogTarget);
-        ObjectPool.SetRegisterAction(pool => IoC.Get<ObjectPoolManager>().RegisterNewObjectPool(pool));
         base.Configure();
         var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
 

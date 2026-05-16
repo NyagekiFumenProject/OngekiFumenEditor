@@ -12,7 +12,6 @@ using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Core.Utils;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using OngekiFumenEditor.Utils.Ogkr;
 using SharpVectors.Renderers;
 using Svg;

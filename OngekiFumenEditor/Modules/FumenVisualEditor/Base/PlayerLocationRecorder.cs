@@ -1,7 +1,6 @@
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.Collections.Base;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Linq;
 using System.Text;

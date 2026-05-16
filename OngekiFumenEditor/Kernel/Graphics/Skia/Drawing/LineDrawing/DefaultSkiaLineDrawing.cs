@@ -1,5 +1,4 @@
 ﻿using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using SkiaSharp;
 using System.Collections.Generic;
 using System.Linq;

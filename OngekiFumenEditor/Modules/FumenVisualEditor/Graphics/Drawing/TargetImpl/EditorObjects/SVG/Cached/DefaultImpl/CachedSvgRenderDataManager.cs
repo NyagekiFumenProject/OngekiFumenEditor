@@ -4,7 +4,6 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

@@ -1,6 +1,5 @@
 ﻿using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Numerics;

@@ -7,7 +7,6 @@ using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Lane;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
