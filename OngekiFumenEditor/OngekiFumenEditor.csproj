@@ -203,8 +203,8 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="NetTopologySuite" Version="2.6.0" />
-		<PackageReference Include="OpenTK" Version="4.8.2" />
-		<PackageReference Include="OpenTK.GLWpfControl" Version="4.3.3" />
+		<PackageReference Include="OpenTK" Version="4.9.4" />
+		<PackageReference Include="OpenTK.GLWpfControl" Version="4.3.6" />
 		<PackageReference Include="PixiEditor.ColorPicker" Version="3.4.2.3" />
 		<PackageReference Include="SharpVectors" Version="1.8.5" />
 		<PackageReference Include="SimpleSvg2LineSegementInterpolater" Version="0.7.3" />
