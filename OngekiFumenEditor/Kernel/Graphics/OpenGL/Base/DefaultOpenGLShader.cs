@@ -140,19 +140,20 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, DefaultOpenGLTexture tex)
         {
-            if (tex == null)
-            {
-                PassNullTexUniform(name);
-                return;
-            }
-
-            GL.BindTexture(TextureTarget.Texture2D, tex.ID);
+            PassUniform(GetUniformLocation(name), tex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassNullTexUniform(string name)
         {
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            PassUniform(GetUniformLocation(name), default(DefaultOpenGLTexture));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(int l, DefaultOpenGLTexture tex, int textureUnitIndex = 0)
+        {
+            OpenGLTextureBindingCache.BindTexture2D(tex?.ID ?? 0, textureUnitIndex);
+            PassUniform(l, textureUnitIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

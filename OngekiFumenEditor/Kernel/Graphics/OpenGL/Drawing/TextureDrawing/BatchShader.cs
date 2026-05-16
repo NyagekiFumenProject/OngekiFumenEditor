@@ -5,6 +5,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 	internal class BatchShader : DefaultOpenGLShader
 	{
 		private int viewProjectionLocation = int.MinValue;
+		private int diffuseLocation = int.MinValue;
 
 		public BatchShader()
 		{
@@ -46,5 +47,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 		}
 
 		public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
+
+		public int DiffuseLocation => diffuseLocation == int.MinValue ? diffuseLocation = GetUniformLocation("diffuse") : diffuseLocation;
 	}
 }

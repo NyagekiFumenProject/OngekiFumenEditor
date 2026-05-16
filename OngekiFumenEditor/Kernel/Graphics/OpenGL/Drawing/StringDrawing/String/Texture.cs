@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL4;
 using System;
@@ -51,11 +52,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String
 
 		public void Bind(TextureUnit textureSlot = TextureUnit.Texture0)
 		{
-			//When we bind a texture we can choose which textureslot we can bind it to.
-			GL.ActiveTexture(textureSlot);
-			GLUtility.CheckError();
-
-			GL.BindTexture(TextureTarget.Texture2D, _handle);
+			OpenGLTextureBindingCache.BindTexture2D(textureSlot, _handle);
 			GLUtility.CheckError();
 		}
 
@@ -63,6 +60,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String
 		{
 			//In order to dispose we need to delete the opengl handle for the texure.
 			GL.DeleteTexture(_handle);
+			OpenGLTextureBindingCache.InvalidateTexture(_handle);
 			GLUtility.CheckError();
 		}
 

@@ -97,7 +97,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
                     shader.PassUniform(shader.ModelLocation, modelMatrix);
                     shader.PassUniform(shader.ViewProjectionLocation, GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
                     shader.PassUniform(shader.TextureScaleYLocation, textureScaleY);
-                    shader.PassUniform("diffuse", texture);
+                    shader.PassUniform(shader.DiffuseLocation, texture);
                     shader.PassUniform(shader.ColorLocation, color);
                     shader.PassUniform(shader.ProgressLocation, progress);
 

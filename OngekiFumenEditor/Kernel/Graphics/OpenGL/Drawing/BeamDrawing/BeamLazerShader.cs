@@ -10,6 +10,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 		private int textureScaleYLocation = int.MinValue;
 		private int colorLocation = int.MinValue;
 		private int progressLocation = int.MinValue;
+		private int diffuseLocation = int.MinValue;
 
 		public BeamLazerShader()
 		{
@@ -56,5 +57,7 @@ void main(){
 		public int ColorLocation => colorLocation == int.MinValue ? colorLocation = GetUniformLocation("color") : colorLocation;
 
 		public int ProgressLocation => progressLocation == int.MinValue ? progressLocation = GetUniformLocation("progress") : progressLocation;
+
+		public int DiffuseLocation => diffuseLocation == int.MinValue ? diffuseLocation = GetUniformLocation("diffuse") : diffuseLocation;
 	}
 }

@@ -181,7 +181,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
             var iResolution = new OpenTK.Mathematics.Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
             shader.PassUniform(shader.ViewProjectionLocation, MVP);
             shader.PassUniform(shader.ResolutionLocation, iResolution);
-            shader.PassUniform("diffuse", this.texture);
+            shader.PassUniform(shader.DiffuseLocation, this.texture);
         }
 
         public void PostSprite(Vector2 size, Vector2 position, float rotation, Vector4 color)

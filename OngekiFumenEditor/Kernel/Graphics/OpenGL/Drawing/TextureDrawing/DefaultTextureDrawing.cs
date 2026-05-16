@@ -108,7 +108,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
                     shader.PassUniform(shader.ModelLocation, modelMatrix);
                     shader.PassUniform(shader.ViewProjectionLocation, GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
                     shader.PassUniform(shader.ColorLocation, color.ToOpenTKVector4());
-                    shader.PassUniform("diffuse", texture);
+                    shader.PassUniform(shader.DiffuseLocation, texture);
 
                     GL.BindVertexArray(vao);
                     {
