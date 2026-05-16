@@ -179,7 +179,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
 
             var fumen = target.Editor.Fumen;
-            var currentTGrid = target.Editor.GetCurrentTGrid();
+            var currentTGrid = target.Editor.GetViewportTGrid();
             var soflanGroup = target.CurrentDrawingTargetContext.CurrentSoflanList;
 
             void EnumeratePoints(bool isRight, List<Vector2> result)
