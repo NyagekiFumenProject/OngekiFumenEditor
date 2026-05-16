@@ -60,11 +60,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls
         public SKSurface CurrentRenderSurface
         {
             get => currentRenderSurface;
-            set
-            {
-                currentRenderSurface = value;
+            set => SetCurrentRenderSurface(value, true);
+        }
+
+        protected void SetCurrentRenderSurface(SKSurface surface, bool notifyPropertyChanged)
+        {
+            currentRenderSurface = surface;
+            if (notifyPropertyChanged)
                 PropertyChanged?.Invoke(this, new(nameof(CurrentRenderSurface)));
-            }
         }
 
         [Category("Appearance")]

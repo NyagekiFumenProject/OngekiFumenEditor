@@ -121,63 +121,69 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 		public void ExecuteAction(IUndoableAction action)
 		{
-			if (_combineStack.TryPeek(out var combineSet))
+			using (editor.EnterRenderDataWriteLock())
 			{
-				//In batch mode.
-				combineSet.Add(action);
-				return;
-			}
-
-			if (UndoActionCount < ActionStack.Count)
-			{
-				// We currently have items that can be redone, remove those
-				for (var i = ActionStack.Count - 1; i >= UndoActionCount; i--)
-					ActionStack.RemoveAt(i);
-
-				NotifyOfPropertyChange(() => RedoActionCount);
-				NotifyOfPropertyChange(() => CanRedo);
-			}
-
-			if (isRecoveryCurrentTime)
-			{
-				//remember currentTime and rebuild new action
-				var curTGrid = editor.GetCurrentTGrid();
-				var wrappedAction = new CompositeUndoAction(action.Name, new[]
+				if (_combineStack.TryPeek(out var combineSet))
 				{
-					action,
-					LambdaUndoAction.Create(Resources.RememberRecoveryEditorTime,()=> { }  ,() =>{
-						if (editor.IsDesignMode && !editor.CheckVisible(curTGrid))
-							editor.ScrollTo(curTGrid);
-					})
-				});
+					//In batch mode.
+					combineSet.Add(action);
+					return;
+				}
+
+				if (UndoActionCount < ActionStack.Count)
+				{
+					// We currently have items that can be redone, remove those
+					for (var i = ActionStack.Count - 1; i >= UndoActionCount; i--)
+						ActionStack.RemoveAt(i);
+
+					NotifyOfPropertyChange(() => RedoActionCount);
+					NotifyOfPropertyChange(() => CanRedo);
+				}
+
+				if (isRecoveryCurrentTime)
+				{
+					//remember currentTime and rebuild new action
+					var curTGrid = editor.GetCurrentTGrid();
+					var wrappedAction = new CompositeUndoAction(action.Name, new[]
+					{
+						action,
+						LambdaUndoAction.Create(Resources.RememberRecoveryEditorTime,()=> { }  ,() =>{
+							if (editor.IsDesignMode && !editor.CheckVisible(curTGrid))
+								editor.ScrollTo(curTGrid);
+						})
+					});
+				}
+
+				action.Execute();
+				ActionStack.Add(action);
+				UndoActionCount++;
+
+				EnforceLimit();
 			}
-
-			action.Execute();
-			ActionStack.Add(action);
-			UndoActionCount++;
-
-			EnforceLimit();
 		}
 
 		public bool CanUndo => UndoActionCount > 0;
 
 		public void Undo(int actionCount)
 		{
-			if (actionCount <= 0 || actionCount > UndoActionCount)
-				throw new ArgumentOutOfRangeException(nameof(actionCount));
-
-			OnBegin();
-
-			try
+			using (editor.EnterRenderDataWriteLock())
 			{
-				for (var i = 1; i <= actionCount; i++)
-					ActionStack[UndoActionCount - i].Undo();
+				if (actionCount <= 0 || actionCount > UndoActionCount)
+					throw new ArgumentOutOfRangeException(nameof(actionCount));
 
-				UndoActionCount -= actionCount;
-			}
-			finally
-			{
-				OnEnd();
+				OnBegin();
+
+				try
+				{
+					for (var i = 1; i <= actionCount; i++)
+						ActionStack[UndoActionCount - i].Undo();
+
+					UndoActionCount -= actionCount;
+				}
+				finally
+				{
+					OnEnd();
+				}
 			}
 		}
 
@@ -206,34 +212,40 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
 		public void UndoAll()
 		{
-			if (UndoActionCount <= 0)
-				return;
+			using (editor.EnterRenderDataWriteLock())
+			{
+				if (UndoActionCount <= 0)
+					return;
 
-			for (var i = UndoActionCount - 1; i >= 0; i--)
-				ActionStack[i].Undo();
+				for (var i = UndoActionCount - 1; i >= 0; i--)
+					ActionStack[i].Undo();
 
-			UndoActionCount = 0;
+				UndoActionCount = 0;
+			}
 		}
 
 		public bool CanRedo => RedoActionCount > 0;
 
 		public void Redo(int actionCount)
 		{
-			if (actionCount <= 0 || actionCount > RedoActionCount)
-				throw new ArgumentOutOfRangeException(nameof(actionCount));
-
-			OnBegin();
-
-			try
+			using (editor.EnterRenderDataWriteLock())
 			{
-				for (var i = 0; i < actionCount; i++)
-					ActionStack[UndoActionCount + i].Execute();
+				if (actionCount <= 0 || actionCount > RedoActionCount)
+					throw new ArgumentOutOfRangeException(nameof(actionCount));
 
-				UndoActionCount += actionCount;
-			}
-			finally
-			{
-				OnEnd();
+				OnBegin();
+
+				try
+				{
+					for (var i = 0; i < actionCount; i++)
+						ActionStack[UndoActionCount + i].Execute();
+
+					UndoActionCount += actionCount;
+				}
+				finally
+				{
+					OnEnd();
+				}
 			}
 		}
 
