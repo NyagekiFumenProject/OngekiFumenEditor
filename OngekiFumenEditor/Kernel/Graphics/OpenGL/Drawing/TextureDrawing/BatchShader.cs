@@ -13,10 +13,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
                 uniform mat4 ViewProjection;
                 layout(location=0) in vec2 in_texPos;
                 layout(location=1) in vec2 in_pos;
-                layout(location=2) in mat4 in_model;
-                layout(location=6) in vec4 in_color;
+                layout(location=2) in vec2 in_size;
+                layout(location=3) in vec2 in_position;
+                layout(location=4) in float in_rotation;
+                layout(location=5) in vec4 in_color;
                 void main(){
-	                gl_Position=ViewProjection * in_model * vec4(in_pos,0.0,1.0);
+                    float s = sin(in_rotation);
+                    float c = cos(in_rotation);
+                    vec2 scaledPos = in_pos * in_size;
+                    vec2 rotatedPos = vec2(
+                        scaledPos.x * c - scaledPos.y * s,
+                        scaledPos.x * s + scaledPos.y * c
+                    );
+	                gl_Position=ViewProjection * vec4(rotatedPos + in_position,0.0,1.0);
 	                varying_texPos=in_texPos;
                     varying_color = in_color;
                 }   
