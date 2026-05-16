@@ -194,6 +194,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         return base.SelectAssemblies()
             .Append(typeof(IOutput).Assembly)
             .Append(typeof(IMainWindow).Assembly)
+            .Append(typeof(IFumenParserManager).Assembly)
             .Distinct();
     }
 
