@@ -54,10 +54,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
         private int backBufferFrameCount;
         private int presentDispatchPending;
         private bool hasBackBuffer;
-        private IDirect3DSurface9 displayedFrame;
+        private IDirect3DSurface9 presentSurface;
+        private IDirect3DSurface9 attachedPresentSurface;
+        private IDirect3DSurface9 copiedFrame;
         private RenderedFrame latestRenderedFrame;
         private IntPtr mainWindowHandle;
         private RenderRequest pendingRequest;
+        private int presentSurfaceWidth;
+        private int presentSurfaceHeight;
 
         private sealed class RenderRequest
         {
@@ -523,7 +527,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
             if (frame is null)
                 return;
 
-            if (frames.Contains(frame) && frame != displayedFrame)
+            if (frames.Contains(frame))
             {
                 availableFrames.Enqueue(frame);
                 frameAvailable.Set();
@@ -545,12 +549,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
                 d3dImage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, IntPtr.Zero);
 
                 hasBackBuffer = false;
+                attachedPresentSurface = null;
                 lock (frameLock)
                 {
-                    var previousDisplayedFrame = displayedFrame;
-                    displayedFrame = null;
-                    ReturnAvailableFrameLocked(previousDisplayedFrame);
-                    DisposeRetiredFramesExceptLocked(null);
+                    DisposeRetiredFramesLocked();
                 }
             }
             finally
@@ -559,27 +561,33 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
             }
         }
 
-        private void ReleaseBackBufferSurfaces(bool forgetDisplayedFrame)
+        private void ReleaseBackBufferSurfaces(bool releasePresentSurface)
         {
             lock (frameLock)
             {
                 foreach (var frame in frames)
                     RetireFrameLocked(frame);
 
-                if (forgetDisplayedFrame)
+                if (releasePresentSurface)
                 {
-                    RetireFrameLocked(displayedFrame);
-                    displayedFrame = null;
+                    presentSurface?.Dispose();
+                    presentSurface = null;
+                    attachedPresentSurface = null;
+                    copiedFrame = null;
+                    presentSurfaceWidth = 0;
+                    presentSurfaceHeight = 0;
+                    hasBackBuffer = false;
                 }
 
                 frames.Clear();
                 availableFrames.Clear();
                 latestRenderedFrame = null;
+                copiedFrame = null;
                 backBufferWidth = 0;
                 backBufferHeight = 0;
                 backBufferFrameCount = 0;
 
-                DisposeRetiredFramesExceptLocked(displayedFrame);
+                DisposeRetiredFramesLocked();
             }
 
             frameAvailable.Set();
@@ -750,46 +758,105 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
             if (!d3dImage.IsFrontBufferAvailable)
                 return false;
 
-            var presented = false;
+            var resetPipeline = false;
+            lock (frameLock)
+            {
+                var frame = latestRenderedFrame;
+                if (frame is null)
+                    return false;
+
+                latestRenderedFrame = null;
+                if (!frames.Contains(frame.Surface))
+                {
+                    RetireFrameLocked(frame.Surface);
+                    DisposeRetiredFramesLocked();
+                    return false;
+                }
+
+                try
+                {
+                    CopyFrameToPresentSurface(frame);
+                    ReturnAvailableFrameLocked(copiedFrame);
+                    copiedFrame = frame.Surface;
+                    DisposeRetiredFramesLocked();
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Log.LogError($"D3D9On12 failed to present a rendered frame. The graphics pipeline will be rebuilt. {e}");
+                    RetireFrameLocked(frame.Surface);
+                    resetPipeline = true;
+                }
+            }
+
+            if (resetPipeline)
+                ResetGraphicsPipeline();
+
+            return false;
+        }
+
+        private void CopyFrameToPresentSurface(RenderedFrame frame)
+        {
+            var width = frame.ImageInfo.Width;
+            var height = frame.ImageInfo.Height;
+            var needsNewPresentSurface = presentSurface is null || presentSurfaceWidth != width || presentSurfaceHeight != height;
+            var targetSurface = presentSurface;
+            IDirect3DSurface9 oldPresentSurface = null;
+
+            if (needsNewPresentSurface)
+            {
+                targetSurface = direct3DDevice9Ex.CreateRenderTargetEx(
+                    (uint)width,
+                    (uint)height,
+                    Vortice.Direct3D9.Format.A8R8G8B8,
+                    MultisampleType.None,
+                    0,
+                    false,
+                    Usage.None);
+            }
+
+            Vortice.Direct3D9.Rect rect = System.Drawing.Rectangle.FromLTRB(0, 0, width, height);
+
+            try
+            {
+                direct3DDevice9Ex.StretchRect(frame.Surface, rect, targetSurface, rect, TextureFilter.None);
+            }
+            catch
+            {
+                if (needsNewPresentSurface)
+                    targetSurface?.Dispose();
+
+                throw;
+            }
+
+            if (needsNewPresentSurface)
+            {
+                oldPresentSurface = presentSurface;
+                presentSurface = targetSurface;
+                presentSurfaceWidth = width;
+                presentSurfaceHeight = height;
+            }
+
             d3dImage.Lock();
             try
             {
-                lock (frameLock)
-                {
-                    var frame = latestRenderedFrame;
-                    if (frame is null)
-                        return false;
+                if (attachedPresentSurface != targetSurface || !hasBackBuffer)
+                    d3dImage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, targetSurface.NativePointer);
 
-                    latestRenderedFrame = null;
-                    if (!frames.Contains(frame.Surface))
-                    {
-                        RetireFrameLocked(frame.Surface);
-                        DisposeRetiredFramesExceptLocked(displayedFrame);
-                        return false;
-                    }
+                var dirtyWidth = Math.Min(width, d3dImage.PixelWidth);
+                var dirtyHeight = Math.Min(height, d3dImage.PixelHeight);
+                if (dirtyWidth > 0 && dirtyHeight > 0)
+                    d3dImage.AddDirtyRect(new Int32Rect(0, 0, dirtyWidth, dirtyHeight));
 
-                    var previousDisplayedFrame = displayedFrame;
-                    d3dImage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, frame.Surface.NativePointer, true);
-
-                    var dirtyWidth = Math.Min(frame.ImageInfo.Width, d3dImage.PixelWidth);
-                    var dirtyHeight = Math.Min(frame.ImageInfo.Height, d3dImage.PixelHeight);
-                    if (dirtyWidth > 0 && dirtyHeight > 0)
-                        d3dImage.AddDirtyRect(new Int32Rect(0, 0, dirtyWidth, dirtyHeight));
-
-                    displayedFrame = frame.Surface;
-                    hasBackBuffer = true;
-                    presented = true;
-
-                    ReturnAvailableFrameLocked(previousDisplayedFrame);
-                    DisposeRetiredFramesExceptLocked(displayedFrame);
-                }
+                attachedPresentSurface = targetSurface;
+                hasBackBuffer = true;
             }
             finally
             {
                 d3dImage.Unlock();
             }
 
-            return presented;
+            oldPresentSurface?.Dispose();
         }
 
         private void RetireFrameLocked(IDirect3DSurface9 frame)
@@ -800,14 +867,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
             retiredFrames.Add(frame);
         }
 
-        private void DisposeRetiredFramesExceptLocked(IDirect3DSurface9 frameToKeep)
+        private void DisposeRetiredFramesLocked()
         {
             for (var i = retiredFrames.Count - 1; i >= 0; i--)
             {
                 var frame = retiredFrames[i];
-                if (frame == frameToKeep)
-                    continue;
-
                 retiredFrames.RemoveAt(i);
                 frame.Dispose();
             }
