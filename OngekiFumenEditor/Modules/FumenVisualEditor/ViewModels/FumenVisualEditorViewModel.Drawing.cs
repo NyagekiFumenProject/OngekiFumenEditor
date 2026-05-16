@@ -280,9 +280,11 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private void OnEditorLoop(TimeSpan ts)
     {
         //todo update() not should be in render loop
-        OnEditorUpdate(ts);
+        using (EnterRenderDataWriteLock())
+            OnEditorUpdate(ts);
 
-        OnEditorRender(ts);
+        using (EnterRenderDataReadLock())
+            OnEditorRender(ts);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
