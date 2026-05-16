@@ -86,11 +86,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<IndividualSoflanArea> isfList)
         {
-            var lineVertex = ObjectPool<List<LineVertex>>.Get();
+            using var lineVertex = ObjectPool.GetPooledList<LineVertex>();
             lineVertex.Clear();
-            var texList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation, Vector4 color)>>.Get();
+            using var texList = ObjectPool.GetPooledList<(Vector2 size, Vector2 position, float rotation, Vector4 color)>();
             texList.Clear();
-            var hightTexList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation, Vector4 color)>>.Get();
+            using var hightTexList = ObjectPool.GetPooledList<(Vector2 size, Vector2 position, float rotation, Vector4 color)>();
             hightTexList.Clear();
 
             var dash = new VertexDash(8, 2);
@@ -176,9 +176,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             highlightDrawing.Draw(target, texture, hightTexList);
             textureDrawing.Draw(target, texture, texList);
 
-            ObjectPool.Return(lineVertex);
-            ObjectPool.Return(texList);
-            ObjectPool.Return(hightTexList);
         }
     }
 }

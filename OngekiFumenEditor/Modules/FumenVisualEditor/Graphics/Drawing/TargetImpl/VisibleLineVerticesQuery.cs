@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
         {
             if (start is null)
                 return;
@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             //var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
 
-            var tempVertices = ObjectPool<List<LineVertex>>.Get();
+            using var tempVertices = ObjectPool.GetPooledList<LineVertex>();
             tempVertices.Clear();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var maxIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MaxTGrid, x => x.TGrid);
 
             //enumerate all SoflanPoint which lane affected
-            var affectedSoflanPoints = ObjectPool<List<SoflanPoint>>.Get();
+            using var affectedSoflanPoints = ObjectPool.GetPooledList<SoflanPoint>();
             affectedSoflanPoints.Clear();
 
             //make reverse manually to optimze List::RemoveAt()
@@ -160,8 +160,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             //add remain vertices
             outVertices.AddRange(tempVertices.Skip(idx));
 
-            ObjectPool<List<SoflanPoint>>.Return(affectedSoflanPoints);
-            ObjectPool<List<LineVertex>>.Return(tempVertices);
         }
     }
 }

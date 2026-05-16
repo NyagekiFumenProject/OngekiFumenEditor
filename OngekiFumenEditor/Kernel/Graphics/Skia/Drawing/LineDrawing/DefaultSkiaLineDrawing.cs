@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils;
 using SkiaSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         {
             //var path = new SKPath();
             var itor = postedPoints.GetEnumerator();
-            var points = ObjectPool.Get<List<SKPoint>>();
+            using var points = ObjectPool.GetPooledList<SKPoint>();
             points.Clear();
 
             if (itor.MoveNext())
@@ -141,10 +141,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 }
             }
 
-            ObjectPool.Return(points);
         }
 
-        private void _DrawPath(List<SKPoint> points, SKPaint paint)
+        private void _DrawPath(IList<SKPoint> points, SKPaint paint)
         {
             for (int i = 0; i < points.Count - 1; i++)
             {
@@ -158,7 +157,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             drawcallCount++;
         }
 
-        private void DrawPath(List<SKPoint> points, SKPaint paint)
+        private void DrawPath(IList<SKPoint> points, SKPaint paint)
         {
             using var path = new SKPath();
             path.MoveTo(points[0]);

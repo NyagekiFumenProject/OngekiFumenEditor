@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
@@ -74,14 +74,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 
 		private int UpdateBuffer(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
 		{
-			using var d = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var vecList, out _);
-			vecList.Clear();
+			var vecList = new List<Vec2>();
 
 			var color = default(System.Numerics.Vector4);
 			var hasColor = false;
 
-			using var d2 = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var inputVecList, out _);
-			inputVecList.Clear();
+			var inputVecList = new List<Vec2>();
 			foreach (var point in points)
 			{
 				if (!hasColor)

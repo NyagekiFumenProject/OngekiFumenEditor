@@ -1,4 +1,4 @@
-ï»¿using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
@@ -430,7 +430,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     return false;
                 }
 
-                using var d = ObjectPool<List<PointF>>.GetWithUsingDisposable(out var list, out _);
+                using var list = ObjectPool.GetPooledList<PointF>();
                 list.Clear();
                 QueryVisibleLineVertices(ctx, hold.ReferenceLaneStart, hold.TGrid, hold.EndTGrid, list);
                 if (list.Count > 0)
@@ -495,7 +495,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
             ctx.Document.Children.Add(flickGroup);
         }
 
-        private void QueryVisibleLineVertices(GenerateContext ctx, LaneStartBase start, TGrid min, TGrid max, List<PointF> outVertices)
+        private void QueryVisibleLineVertices(GenerateContext ctx, LaneStartBase start, TGrid min, TGrid max, IList<PointF> outVertices)
         {
             if (start is null)
                 return;
@@ -781,7 +781,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     apGroup.Children.Add(gen);
                     var newOffsetX = offsetX + width;
 
-                    //ç”»ä¸ªçº¿
+                    //»­¸öÏß
                     var svgLine = new SvgLine();
                     svgLine.AddCustomClass("eventLine");
                     svgLine.StartX = new SvgUnit(SvgUnitType.Pixel, offsetX);
@@ -791,7 +791,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     svgLine.Stroke = new SvgColourServer(color);
                     apGroup.Children.Add(svgLine);
 
-                    //æ›´æ–°offsetX
+                    //¸üÐÂoffsetX
                     offsetX = newOffsetX;
                 }
 
@@ -948,7 +948,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     lbkGroup.Children.Add(polyline);
                 }
 
-                void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid fromTGrid, TGrid toTGrid, List<Vector2> list)
+                void PostPointByTGrid(ConnectableChildObjectBase obj, TGrid fromTGrid, TGrid toTGrid, IList<Vector2> list)
                 {
                     var fromXGridOpt = obj.CalulateXGridTotalGrid(fromTGrid.TotalGrid);
                     var toXGridOpt = obj.CalulateXGridTotalGrid(toTGrid.TotalGrid);
@@ -959,14 +959,14 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     }
                 }
 
-                void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid, List<Vector2> list)
+                void ProcessConnectable(ConnectableChildObjectBase obj, TGrid minTGrid, TGrid maxTGrid, IList<Vector2> list)
                 {
                     var minTotalGrid = minTGrid.TotalGrid;
                     var maxTotalGrid = maxTGrid.TotalGrid;
 
                     if (!obj.IsCurvePath)
                     {
-                        //ç›´çº¿ï¼Œä¼˜åŒ–
+                        //Ö±Ïß£¬ÓÅ»¯
                         PostPointByTGrid(obj, minTGrid, maxTGrid, list);
                     }
                     else
@@ -978,7 +978,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
                 void ProcessWallLane(LaneStartBase start, TGrid minTGrid, TGrid maxTGrid)
                 {
-                    using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var list, out _);
+                    using var list = ObjectPool.GetPooledList<Vector2>();
                     list.Clear();
 
                     foreach (var child in start.Children)
@@ -1077,7 +1077,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 var result = new List<Vector2>();
                 var points = new HashSet<float>();
 
-                void appendPoint(List<Vector2> list, XGrid xGrid, float y)
+                void appendPoint(IList<Vector2> list, XGrid xGrid, float y)
                 {
                     if (xGrid is null)
                         return;
@@ -1163,7 +1163,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     }
                     else
                     {
-                        //é»˜è®¤24å’¯
+                        //Ä¬ÈÏ24¿©
                         result.Add(new(defaultX, fromY));
                         result.Add(new(defaultX, toY));
                     }

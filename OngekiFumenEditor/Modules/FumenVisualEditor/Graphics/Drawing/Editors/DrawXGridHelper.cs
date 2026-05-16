@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
 using System;
 using System.Collections.Generic;
@@ -32,7 +32,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (target.Editor.IsPreviewMode)
                 return;
 
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
+            using var list = ObjectPool.GetPooledList<LineVertex>();
             list.Clear();
 
             foreach (var result in drawLines)

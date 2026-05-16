@@ -84,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 minDispAlpha = maxDispAlpha;
             var eDisp = target.Editor.RectInDesignMode.Width - transDisp;
 
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
+            using var list = ObjectPool.GetPooledList<LineVertex>();
             list.Clear();
 
             var displayAudioTime = target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime;

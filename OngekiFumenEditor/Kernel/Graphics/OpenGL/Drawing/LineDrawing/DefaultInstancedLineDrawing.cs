@@ -316,7 +316,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 			var vbo = handle.vbo;
 			GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
 			{
-				using var d = vertices.ToListWithObjectPool(out var list);
+				using var list = vertices.ToListWithObjectPool();
 				var buffer = ArrayPool<float>.Shared.Rent(list.Count * VertexTBytesSize / sizeof(float));
 				var i = 0;
 

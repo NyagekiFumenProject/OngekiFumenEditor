@@ -60,13 +60,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             float width = 70f;
             var endDash = new VertexDash(7, 5);
 
-            using var _d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var lines, out _);
+            using var lines = ObjectPool.GetPooledList<LineVertex>();
             lines.Clear();
-            using var _d3 = ObjectPool<List<(Vector2, Vector4)>>.GetWithUsingDisposable(out var polygonPoints, out _);
+            using var polygonPoints = ObjectPool.GetPooledList<(Vector2, Vector4)>();
             polygonPoints.Clear();
-            using var _d4 = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var lines2, out _);
+            using var lines2 = ObjectPool.GetPooledList<LineVertex>();
             lines2.Clear();
-            using var _d2 = ObjectPool<List<(string, Vector2, Vector4, OngekiTimelineObjectBase)>>.GetWithUsingDisposable(out var strings, out _);
+            using var strings = ObjectPool.GetPooledList<(string, Vector2, Vector4, OngekiTimelineObjectBase)>();
             strings.Clear();
 
             void PushLine(LineVertex start, LineVertex end)
@@ -194,13 +194,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 polygonPoints.Add((new(placeholdCenterX, placeholdY + 10), color));
             }
 
-            using var _d5 =
+            using var visibleSoflanGroups =
                 target.Editor.Fumen.IndividualSoflanAreaMap.Keys.Concat(target.Editor.Fumen.SoflansMap.Keys)
                 .Distinct()
                 .Select(x => target.Editor.Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _))
                 .Where(x => x.IsDisplaySoflanDesignMode)
                 .Select(x => x.SoflanGroupId)
-                .ToHashSetWithObjectPool(out var visibleSoflanGroups);
+                .ToHashSetWithObjectPool();
 
             //var queryPlaceholdPosIndex = 0;
             foreach (var s in soflans.Where(x => visibleSoflanGroups.Contains(x.SoflanGroup)))

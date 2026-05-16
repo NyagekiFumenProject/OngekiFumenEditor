@@ -49,11 +49,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<LaneCurvePathControlObject> objs)
         {
             var isAlwaysShow = target.Editor.IsShowCurveControlAlways;
-            using var d = objs.Where(x => x.RefCurveObject.IsSelected || x.RefCurveObject.IsAnyControlSelecting || isAlwaysShow).Select(x => (
-                (float)target.ConvertToY_DefaultSoflanGroup(x.TGrid),
-                (float)XGridCalculator.ConvertXGridToX(x.XGrid, target.Editor),
-                x
-            )).ToListWithObjectPool<(float y, float x, LaneCurvePathControlObject obj)>(out var list);
+            using var list = objs.Where(x => x.RefCurveObject.IsSelected || x.RefCurveObject.IsAnyControlSelecting || isAlwaysShow).Select(x => (
+                y: (float)target.ConvertToY_DefaultSoflanGroup(x.TGrid),
+                x: (float)XGridCalculator.ConvertXGridToX(x.XGrid, target.Editor),
+                obj: x
+            )).ToListWithObjectPool();
 
             if (list.Count == 0)
                 return;

@@ -1,4 +1,4 @@
-ï»¿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.Collections.Base.RangeTree;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
@@ -252,7 +252,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     AddSound(SoundControl.ClickSE, tGrid);
             }
 
-            using var _d = ObjectPool<HashSet<Type>>.GetWithUsingDisposable(out var typeSet, out _);
+            using var typeSet = ObjectPool.GetPooledSet<Type>();
 
             foreach (var group in soundObjects.GroupBy(x => x.TGrid))
             {
@@ -349,7 +349,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
             var currentTime = player.CurrentTime;
 
-            //æ’­æ”¾ç‰©ä»¶éŸ³æ•ˆ
+            //²¥·ÅÎï¼þÒôÐ§
             while (itor is not null)
             {
                 var nextBeatTime = itor.Value.Time.TotalMilliseconds;
@@ -364,12 +364,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            //æ’­æ”¾èŠ‚æ‹å™¨
+            //²¥·Å½ÚÅÄÆ÷
             while (meterActionsItor is not null)
             {
                 var nextActionItor = meterActionsItor.Next;
 
-                //æ£€æŸ¥å½“å‰æ˜¯å¦æœ‰æ•ˆ
+                //¼ì²éµ±Ç°ÊÇ·ñÓÐÐ§
                 if (meterActionsItor.Value.isSkip)
                 {
                     meterActionsItor = nextActionItor;
@@ -380,7 +380,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 var nextBeatTime = meterActionsItor.Value.Time +
                     meterActionsItor.Value.BeatInterval * currentMeterHitCount;
 
-                //æ£€æŸ¥æ˜¯å¦è¶…è¿‡ä¸‹ä¸€ä¸ª
+                //¼ì²éÊÇ·ñ³¬¹ýÏÂÒ»¸ö
                 if (nextActionItor != null)
                 {
                     if (nextBeatTime > nextActionItor.Value.Time)
@@ -391,7 +391,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     }
                 }
 
-                //æ²¡è¶…è¿‡å°±æ£€æŸ¥äº†
+                //Ã»³¬¹ý¾Í¼ì²éÁË
                 var ct = currentTime.TotalMilliseconds - nextBeatTime.TotalMilliseconds;
                 if (ct >= 0)
                 {
@@ -405,13 +405,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            //æ£€æŸ¥å¾ªçŽ¯éŸ³æ•ˆ
+            //¼ì²éÑ­»·ÒôÐ§
             lock (locker)
             {
                 var queryDurationEvents = durationEvents.Query(currentTime);
                 foreach (var durationEvent in queryDurationEvents)
                 {
-                    //æ£€æŸ¥æ˜¯å¦æ­£åœ¨æ’­æ”¾äº†
+                    //¼ì²éÊÇ·ñÕýÔÚ²¥·ÅÁË
                     if (!currentPlayingDurationEvents.Contains(durationEvent))
                     {
                         if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
@@ -423,7 +423,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                         }
                     }
                 }
-                //æ£€æŸ¥æ˜¯å¦å·²ç»æ’­æ”¾å®Œæˆ
+                //¼ì²éÊÇ·ñÒÑ¾­²¥·ÅÍê³É
                 foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
                 {
                     if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))

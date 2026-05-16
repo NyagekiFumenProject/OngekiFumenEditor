@@ -125,7 +125,7 @@ namespace OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels
 				return;
 			}
 
-			using var disp = DisplayTimeSignatures.ToListWithObjectPool(out var removeList);
+			using var removeList = DisplayTimeSignatures.ToListWithObjectPool();
 			CurrentSelectTimeSignature = default;
 
 			var list = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Fumen.BpmList);

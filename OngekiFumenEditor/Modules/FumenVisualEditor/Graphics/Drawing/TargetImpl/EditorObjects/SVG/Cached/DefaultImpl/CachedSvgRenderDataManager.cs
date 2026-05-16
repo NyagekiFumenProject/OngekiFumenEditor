@@ -23,7 +23,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		private class CachedSvgGeneratedData
 		{
 			public SvgPrefabBase SvgPrefab { get; set; }
-			public List<LineVertex> GeneratedPoints { get; set; }
+			public IPooledList<LineVertex> GeneratedPointsPool { get; set; }
+
+			public IReadOnlyList<LineVertex> GeneratedPoints => GeneratedPointsPool;
 			public int SvgGeometryHashCode { get; set; } = int.MaxValue;
 			public Vector2 ViewSize { get; set; } = new(int.MinValue);
 			public DateTime LastAccessTime { get; set; }
@@ -32,8 +34,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 			public void CleanPoints()
 			{
-				ObjectPool<List<LineVertex>>.Return(GeneratedPoints);
-				GeneratedPoints = default;
+				GeneratedPointsPool?.Dispose();
+				GeneratedPointsPool = default;
 			}
 		}
 
@@ -72,9 +74,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
 		}
 
-		private List<LineVertex> GenerateLineVertexData(SvgPrefabBase svgPrefab)
+		private IPooledList<LineVertex> GenerateLineVertexData(SvgPrefabBase svgPrefab)
 		{
-			var list = ObjectPool<List<LineVertex>>.Get();
+			var list = ObjectPool.GetPooledList<LineVertex>();
 			list.Clear();
 
 			var segments = svgPrefab.GenerateLineSegments();
@@ -101,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			return list;
 		}
 
-		public List<LineVertex> GetRenderData(IDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
+		public IReadOnlyList<LineVertex> GetRenderData(IDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
 		{
 			var curTime = DateTime.Now;
 			isCached = true;
@@ -121,7 +123,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 				cachedItem.CleanPoints();
 				var genData = GenerateLineVertexData(svgPrefab);
 				cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingVectorScene?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
-				cachedItem.GeneratedPoints = genData;
+				cachedItem.GeneratedPointsPool = genData;
 				cachedItem.ViewSize = new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
 				cachedItem.Bound = svgPrefab.ProcessingVectorScene is VectorScene scene
 					? new Rect(scene.Bounds.X, scene.Bounds.Y, scene.Bounds.Width, scene.Bounds.Height)

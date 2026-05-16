@@ -53,7 +53,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         convertToY = (tUnit, editor, _) => editor.ConvertTGridUnitToY_DesignMode(tUnit);
 
     private string displayFPS = "";
-    private readonly Dictionary<IFumenEditorDrawingTarget, Dictionary<DrawingTargetContext, List<OngekiObjectBase>>> drawMap = new();
+    private readonly Dictionary<IFumenEditorDrawingTarget, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>> drawMap = new();
     private IFumenEditorDrawingTarget[] drawTargetOrder;
     private readonly IPerfomenceMonitor dummyPerformenceMonitor = new DummyPerformenceMonitor();
     private bool enablePlayFieldDrawing;
@@ -405,10 +405,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         #endregion
 
         // objType -> soflanGroup -> obj[]
-        var map = ObjectPool<Dictionary<string, Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>>.Get();
+        var drawingCollectionDisposables = ObjectPool.GetPooledList<IDisposable>();
+        drawingCollectionDisposables.Clear();
+
+        var map = ObjectPool.GetPooledDictionary<string, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>>();
         map.Clear();
 
-        var usedDrawingContexts = ObjectPool<HashSet<int>>.Get();
+        var usedDrawingContexts = ObjectPool.GetPooledSet<int>();
         usedDrawingContexts.Clear();
         //always draw default soflan group
         usedDrawingContexts.Add(0);
@@ -421,7 +424,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         {
             if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
             {
-                soflanGroupObjectMap = map[obj.IDShortName] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>.Get();
+                var soflanGroupObjectMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>();
+                drawingCollectionDisposables.Add(soflanGroupObjectMapPool);
+                soflanGroupObjectMap = map[obj.IDShortName] = soflanGroupObjectMapPool;
                 soflanGroupObjectMap.Clear();
             }
 
@@ -434,7 +439,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             {
                 if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
                 {
-                    list = soflanGroupObjectMap[drawingContext] = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
+                    var listPool = ObjectPool.GetPooledList<OngekiTimelineObjectBase>();
+                    drawingCollectionDisposables.Add(listPool);
+                    list = soflanGroupObjectMap[drawingContext] = listPool;
                     list.Clear();
                 }
 
@@ -457,11 +464,15 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             {
                 if (!drawMap.TryGetValue(drawingTarget, out var enums))
                 {
-                    var r = drawMap[drawingTarget] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiObjectBase>>>.Get();
+                    var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                    drawingCollectionDisposables.Add(rPool);
+                    var r = drawMap[drawingTarget] = rPool;
                     r.Clear();
                     foreach (var pair in soflanGroupObjectMap)
                     {
-                        var rr = r[pair.Key] = ObjectPool<List<OngekiObjectBase>>.Get();
+                        var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                        drawingCollectionDisposables.Add(rrPool);
+                        var rr = r[pair.Key] = rrPool;
                         rr.Clear();
                         rr.AddRange(pair.Value);
                     }
@@ -472,7 +483,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                     {
                         if (!enums.TryGetValue(pair.Key, out var rr))
                         {
-                            rr = enums[pair.Key] = ObjectPool<List<OngekiObjectBase>>.Get();
+                            var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                            drawingCollectionDisposables.Add(rrPool);
+                            rr = enums[pair.Key] = rrPool;
                             rr.Clear();
                         }
 
@@ -483,7 +496,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
 
         //remove unused drawingContexts
-        var unusedSoflanGroups = ObjectPool.Get<List<int>>();
+        var unusedSoflanGroups = ObjectPool.GetPooledList<int>();
         unusedSoflanGroups.Clear();
         unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
         foreach (var soflanGroupId in unusedSoflanGroups)
@@ -525,18 +538,26 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
             {
                 //todo 优化一下
-                var r = drawMap[drawingTarget] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiObjectBase>>>.Get();
+                var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                drawingCollectionDisposables.Add(rPool);
+                var r = drawMap[drawingTarget] = rPool;
                 r.Clear();
-                var rr = r[defaultDrawingTargetContext] = ObjectPool<List<OngekiObjectBase>>.Get();
+                var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                drawingCollectionDisposables.Add(rrPool);
+                var rr = r[defaultDrawingTargetContext] = rrPool;
                 rr.Clear();
                 rr.AddRange(blts);
             }
             foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
             {
                 //todo 优化一下
-                var r = drawMap[drawingTarget] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiObjectBase>>>.Get();
+                var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                drawingCollectionDisposables.Add(rPool);
+                var r = drawMap[drawingTarget] = rPool;
                 r.Clear();
-                var rr = r[defaultDrawingTargetContext] = ObjectPool<List<OngekiObjectBase>>.Get();
+                var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                drawingCollectionDisposables.Add(rrPool);
+                var rr = r[defaultDrawingTargetContext] = rrPool;
                 rr.Clear();
                 rr.AddRange(bels);
             }
@@ -603,23 +624,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         RenderContext?.AfterRender(this);
 
         //clean up
-        foreach (var list in map.Values)
-        {
-            foreach (var item in list)
-                ObjectPool.Return(item.Value);
-            ObjectPool.Return(list);
-        }
-
-        foreach (var list in drawMap.Values)
-        {
-            foreach (var item in list)
-                ObjectPool.Return(item.Value);
-            ObjectPool.Return(list);
-        }
-
-        ObjectPool.Return(map);
-        ObjectPool.Return(usedDrawingContexts);
-        ObjectPool.Return(unusedSoflanGroups);
+        foreach (var disposable in drawingCollectionDisposables)
+            disposable.Dispose();
+        unusedSoflanGroups.Dispose();
+        usedDrawingContexts.Dispose();
+        map.Dispose();
+        drawingCollectionDisposables.Dispose();
 
     #endregion
     End:

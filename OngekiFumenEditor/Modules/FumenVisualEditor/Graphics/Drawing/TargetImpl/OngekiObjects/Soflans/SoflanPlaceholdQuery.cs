@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             //remove old soflan groups that are not in the soflan group list
-            using var _d = cachedSoflanGroupToIndexMap.Keys.Except(soflanGroups).ToListWithObjectPool(out var keysToRemove);
+            using var keysToRemove = cachedSoflanGroupToIndexMap.Keys.Except(soflanGroups).ToListWithObjectPool();
             foreach (var soflanGroup in keysToRemove)
             {
                 var index = cachedSoflanGroupToIndexMap[soflanGroup];
