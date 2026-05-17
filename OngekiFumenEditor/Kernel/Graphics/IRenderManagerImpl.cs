@@ -38,7 +38,6 @@ namespace OngekiFumenEditor.Kernel.Graphics
         ISimpleLineDrawing SimpleLineDrawing { get; }
         IStaticVBODrawing StaticVBODrawing { get; }
         IStringDrawing StringDrawing { get; }
-        ISvgDrawing SvgDrawing { get; }
         ITextureDrawing TextureDrawing { get; }
         IBatchTextureDrawing BatchTextureDrawing { get; }
         IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; }

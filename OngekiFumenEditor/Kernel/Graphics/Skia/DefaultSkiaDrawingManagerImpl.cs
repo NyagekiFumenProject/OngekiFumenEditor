@@ -38,7 +38,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         public ISimpleLineDrawing SimpleLineDrawing { get; private set; }
         public IStaticVBODrawing StaticVBODrawing { get; private set; }
         public IStringDrawing StringDrawing { get; private set; }
-        public ISvgDrawing SvgDrawing { get; private set; }
         public ITextureDrawing TextureDrawing { get; private set; }
         public IBatchTextureDrawing BatchTextureDrawing { get; private set; }
         public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; private set; }

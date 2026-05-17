@@ -6,7 +6,6 @@ using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.SvgDrawing;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
@@ -65,8 +64,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public IStringDrawing StringDrawing { get; private set; }
 
-        public ISvgDrawing SvgDrawing { get; private set; }
-
         public ITextureDrawing TextureDrawing { get; private set; }
 
         public IBatchTextureDrawing BatchTextureDrawing { get; private set; }
@@ -91,7 +88,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             PolygonDrawing = new DefaultPolygonDrawing(this);
             StaticVBODrawing = SimpleLineDrawing = new DefaultInstancedLineDrawing(this);
             StringDrawing = new DefaultStringDrawing(this);
-            SvgDrawing = new DefaultSvgDrawing(this);
             TextureDrawing = BatchTextureDrawing = new DefaultBatchTextureDrawing(this);
             HighlightBatchTextureDrawing = new DefaultHighlightBatchTextureDrawing(this);
             BeamDrawing = new DefaultBeamDrawing(this);
