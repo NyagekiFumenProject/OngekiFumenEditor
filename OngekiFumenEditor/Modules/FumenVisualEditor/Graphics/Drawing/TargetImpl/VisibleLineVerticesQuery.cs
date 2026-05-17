@@ -3,7 +3,6 @@ using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using static OngekiFumenEditor.Core.Base.Collections.SoflanList;
@@ -158,7 +157,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             //add remain vertices
-            outVertices.AddRange(tempVertices.Skip(idx));
+            for (; idx < tempVertices.Count; idx++)
+                outVertices.Add(tempVertices[idx]);
 
         }
     }
