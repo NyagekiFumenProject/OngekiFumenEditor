@@ -269,6 +269,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
                 return;
             GL.DeleteShader(vertexShader);
             GL.DeleteShader(fragmentShader);
+            GL.DeleteShader(geometryShader);
             GL.DeleteProgram(program);
             program = -1;
         }
