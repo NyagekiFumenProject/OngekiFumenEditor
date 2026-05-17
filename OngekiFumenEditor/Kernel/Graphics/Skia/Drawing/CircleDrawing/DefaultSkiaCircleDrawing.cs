@@ -6,7 +6,7 @@ using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
 {
-    internal class DefaultSkiaCircleDrawing : CommonSkiaDrawingBase, ICircleDrawing
+    internal sealed class DefaultSkiaCircleDrawing : CommonSkiaDrawingBase, ICircleDrawing
     {
         private SKCanvas canvas;
         private IDrawingContext target;

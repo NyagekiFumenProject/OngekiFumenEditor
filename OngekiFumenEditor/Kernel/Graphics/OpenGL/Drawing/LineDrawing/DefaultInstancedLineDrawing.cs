@@ -17,7 +17,7 @@ using static OngekiFumenEditor.Kernel.Graphics.IStaticVBODrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
-    internal class DefaultInstancedLineDrawing : CommonOpenGLDrawingBase, ISimpleLineDrawing, IDisposable
+    internal sealed class DefaultInstancedLineDrawing : CommonOpenGLDrawingBase, ISimpleLineDrawing, IDisposable
 	{
 		public const int MAX_VERTS = 300000;
 		/*

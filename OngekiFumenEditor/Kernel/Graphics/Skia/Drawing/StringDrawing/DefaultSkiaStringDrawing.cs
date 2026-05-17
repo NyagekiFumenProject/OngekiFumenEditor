@@ -14,7 +14,7 @@ using static OngekiFumenEditor.Kernel.Graphics.IStringDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 {
-    internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing, IDisposable
+    internal sealed class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing, IDisposable
     {
         private class FontHandle : IFontHandle
         {

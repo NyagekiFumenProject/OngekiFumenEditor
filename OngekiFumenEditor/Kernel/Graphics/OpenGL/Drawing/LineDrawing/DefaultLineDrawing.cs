@@ -9,7 +9,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
-    internal class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
+    internal sealed class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
     {
         private const int VertexFloatCount = 2 + 4 + 2;
         private const int VertexByteSize = VertexFloatCount * sizeof(float);

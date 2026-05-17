@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-    internal class DefaultBatchTextureDrawing : CommonOpenGLDrawingBase, IBatchTextureDrawing, IDisposable
+    internal sealed class DefaultBatchTextureDrawing : CommonOpenGLDrawingBase, IBatchTextureDrawing, IDisposable
     {
         private BatchShader shader;
         private float[] postData;

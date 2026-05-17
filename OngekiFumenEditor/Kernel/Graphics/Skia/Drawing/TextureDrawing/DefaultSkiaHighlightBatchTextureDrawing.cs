@@ -15,7 +15,7 @@ using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
 {
-    internal class DefaultSkiaHighlightBatchTextureDrawing : CommonSkiaDrawingBase, IHighlightBatchTextureDrawing
+    internal sealed class DefaultSkiaHighlightBatchTextureDrawing : CommonSkiaDrawingBase, IHighlightBatchTextureDrawing
     {
         private SkiaImage texture;
         private List<(Vector2, Vector2, float, Vector4 color)> list = new();

@@ -5,7 +5,7 @@ using System;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 {
-    internal class DefaultBeamDrawing : CommonOpenGLDrawingBase, IBeamDrawing
+    internal sealed class DefaultBeamDrawing : CommonOpenGLDrawingBase, IBeamDrawing
     {
         private readonly BeamLazerShader shader;
         private readonly int vertexVBO;

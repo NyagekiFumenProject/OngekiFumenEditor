@@ -6,7 +6,7 @@ using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing
 {
-    internal class DefaultPolygonDrawing : CommonOpenGLDrawingBase, IPolygonDrawing, IDisposable
+    internal sealed class DefaultPolygonDrawing : CommonOpenGLDrawingBase, IPolygonDrawing, IDisposable
     {
         private readonly CommonLineShader shader;
         private readonly int vbo;

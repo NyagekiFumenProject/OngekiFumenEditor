@@ -13,7 +13,7 @@ using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-    internal class DefaultTextureDrawing : CommonOpenGLDrawingBase, ITextureDrawing, IDisposable
+    internal sealed class DefaultTextureDrawing : CommonOpenGLDrawingBase, ITextureDrawing, IDisposable
     {
         private readonly CommonSpriteShader shader;
         private readonly int vertexVBO;

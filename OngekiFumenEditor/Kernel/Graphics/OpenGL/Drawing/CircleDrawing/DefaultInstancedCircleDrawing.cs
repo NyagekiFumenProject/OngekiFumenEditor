@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
 {
-    internal class DefaultInstancedCircleDrawing : CommonOpenGLDrawingBase, ICircleDrawing
+    internal sealed class DefaultInstancedCircleDrawing : CommonOpenGLDrawingBase, ICircleDrawing
     {
         private BatchCircleShader shader;
         private float[] postData;

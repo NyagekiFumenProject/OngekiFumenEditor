@@ -10,7 +10,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 {
-    internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing, IDisposable
+    internal sealed class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing, IDisposable
     {
         private sealed class SkiaLineVBOHandle : IStaticVBODrawing.IVBOHandle
         {

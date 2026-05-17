@@ -7,7 +7,7 @@ using System.Windows.Media.Imaging;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing
 {
-    internal class DefaultSkiaBeamDrawing : CommonSkiaDrawingBase, IBeamDrawing
+    internal sealed class DefaultSkiaBeamDrawing : CommonSkiaDrawingBase, IBeamDrawing
     {
         private SKCanvas canvas;
         private IDrawingContext target;

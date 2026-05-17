@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
-    internal class DefaultLineDrawing_old : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
+    internal sealed class DefaultLineDrawing_old : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
 	{
 		private readonly CommonLineShader shader;
 		private readonly int vbo;

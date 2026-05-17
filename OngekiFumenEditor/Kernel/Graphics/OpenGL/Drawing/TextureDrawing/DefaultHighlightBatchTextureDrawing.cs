@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-    internal class DefaultHighlightBatchTextureDrawing : CommonOpenGLDrawingBase, IHighlightBatchTextureDrawing, IDisposable
+    internal sealed class DefaultHighlightBatchTextureDrawing : CommonOpenGLDrawingBase, IHighlightBatchTextureDrawing, IDisposable
     {
         private HighlightBatchShader shader;
         private float[] postData;

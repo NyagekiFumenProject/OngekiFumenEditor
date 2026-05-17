@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
 {
-    internal class DefaultSkiaPolygonDrawing : CommonSkiaDrawingBase, IPolygonDrawing
+    internal sealed class DefaultSkiaPolygonDrawing : CommonSkiaDrawingBase, IPolygonDrawing
     {
         private IDrawingContext target;
         private Primitive primitive;

@@ -14,7 +14,7 @@ using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
 {
-    internal class DefaultSkiaTextureDrawing : CommonSkiaDrawingBase, ITextureDrawing, IDisposable
+    internal sealed class DefaultSkiaTextureDrawing : CommonSkiaDrawingBase, ITextureDrawing, IDisposable
     {
         public DefaultSkiaTextureDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
