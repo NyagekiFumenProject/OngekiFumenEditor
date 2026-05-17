@@ -348,6 +348,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             }
 
             var currentTime = player.CurrentTime;
+            var offsetMs = AudioSetting.Default.SoundOffsetMs;
+            if (offsetMs != 0)
+                currentTime = currentTime + TimeSpan.FromMilliseconds(offsetMs);
 
             //播放物件音效
             while (itor is not null)

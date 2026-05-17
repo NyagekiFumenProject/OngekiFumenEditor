@@ -118,5 +118,17 @@ namespace OngekiFumenEditor.Properties {
                 this["VarspeedReadDurationMs"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SoundOffsetMs {
+            get {
+                return ((int)(this["SoundOffsetMs"]));
+            }
+            set {
+                this["SoundOffsetMs"] = value;
+            }
+        }
     }
 }

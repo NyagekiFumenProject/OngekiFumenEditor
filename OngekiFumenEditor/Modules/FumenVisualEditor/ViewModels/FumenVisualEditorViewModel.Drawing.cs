@@ -333,8 +333,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             goto End;
 
         //计算可以显示的TGrid范围以及像素范围
-
         var tGrid = GetViewportTGrid();
+        var offsetMs = EditorGlobalSetting.Default.EditorOffsetMs;
+        if (offsetMs != 0)
+        {
+            var actualMs = GetViewportAudioTime() + TimeSpan.FromMilliseconds(offsetMs);
+            tGrid = TGridCalculator.ConvertAudioTimeToTGrid(actualMs, Fumen.BpmList);
+        }
 
         #region prepare drawing contexts' for every soflan groups 
 
@@ -641,7 +646,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         map.Dispose();
         drawingCollectionDisposables.Dispose();
 
-    #endregion
+        #endregion
     End:
         drawMap.Clear();
         PerfomenceMonitor.OnAfterRender();
