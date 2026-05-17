@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
     {
         private bool disposed;
 
-        private readonly List<T> innerList = new();
+        private Collections.Pooled.PooledList<T> innerList = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Rent()
@@ -23,6 +23,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
                 return;
 
             disposed = true;
+            innerList.Dispose();
             ObjectPool<PooledList<T>>.Return(this);
         }
 
@@ -55,7 +56,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(T item) => innerList.Contains(item);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(T[] array, int arrayIndex) => innerList.CopyTo(array, arrayIndex);
+        public void CopyTo(T[] array, int arrayIndex) => ((ICollection<T>)innerList).CopyTo(array, arrayIndex);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator<T> GetEnumerator() => innerList.GetEnumerator();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

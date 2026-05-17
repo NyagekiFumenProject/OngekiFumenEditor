@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
     {
         private bool disposed;
 
-        private readonly Dictionary<TKey, TValue> innerDictionary = new();
+        private Collections.Pooled.PooledDictionary<TKey, TValue> innerDictionary = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Rent()
@@ -23,6 +23,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
                 return;
 
             disposed = true;
+            innerDictionary.Dispose();
             ObjectPool<PooledDictionary<TKey, TValue>>.Return(this);
         }
 

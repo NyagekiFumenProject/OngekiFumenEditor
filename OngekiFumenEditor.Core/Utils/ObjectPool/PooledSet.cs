@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
     {
         private bool disposed;
 
-        private readonly HashSet<T> innerSet = new();
+        private Collections.Pooled.PooledSet<T> innerSet = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Rent()
@@ -23,6 +23,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
                 return;
 
             disposed = true;
+            innerSet.Dispose();
             ObjectPool<PooledSet<T>>.Return(this);
         }
 
