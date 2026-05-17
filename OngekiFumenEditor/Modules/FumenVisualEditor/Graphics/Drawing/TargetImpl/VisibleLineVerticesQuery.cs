@@ -5,7 +5,6 @@ using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using static OngekiFumenEditor.Core.Base.Collections.SoflanList;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl
@@ -58,13 +57,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var minIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MinTGrid, x => x.TGrid);
             var maxIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MaxTGrid, x => x.TGrid);
 
-            //enumerate all SoflanPoint which lane affected
-            using var affectedSoflanPoints = ObjectPool.GetPooledList<SoflanPoint>();
-            affectedSoflanPoints.Clear();
-
-            //make reverse manually to optimze List::RemoveAt()
-            for (int i = maxIdx; i >= minIdx + 1; i--)
-                affectedSoflanPoints.Add(soflanPositionList[i]);
+            var affectedSoflanPointIdx = minIdx + 1;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void CheckIfSoflanChanged(TGrid currentTGrid, bool isVailed)
@@ -75,9 +68,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                  Check if there is any SoflanPoint before connectable object
                  If exist, just interpolate a new point to insert
                  */
-                while (affectedSoflanPoints.Count > 0)
+                while (affectedSoflanPointIdx <= maxIdx)
                 {
-                    var checkTGrid = affectedSoflanPoints[^1].TGrid;
+                    var checkTGrid = soflanPositionList[affectedSoflanPointIdx].TGrid;
                     var diff = checkTGrid.TotalUnit - totalTGrid;
 
                     if (diff > 0)
@@ -90,7 +83,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                             PostPoint(checkTGrid, xGrid, isVailed);
                     }
 
-                    affectedSoflanPoints.RemoveAt(affectedSoflanPoints.Count - 1);
+                    affectedSoflanPointIdx++;
                 }
             }
 
