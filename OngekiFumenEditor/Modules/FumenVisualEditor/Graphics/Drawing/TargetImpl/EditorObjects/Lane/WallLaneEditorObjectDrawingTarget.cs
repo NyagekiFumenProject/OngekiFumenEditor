@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.Lane
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    internal class WallLaneEditorObjectDrawingTarget : TextureLaneEditorObjectDrawingTarget
+    internal sealed class WallLaneEditorObjectDrawingTarget : TextureLaneEditorObjectDrawingTarget
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[]
         {

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class BellDrawingTarget : ProjectileBatchDrawTargetBase<Bell>
+    public sealed class BellDrawingTarget : ProjectileBatchDrawTargetBase<Bell>
     {
         private IImage texture;
         private Vector2 sizeNormal;

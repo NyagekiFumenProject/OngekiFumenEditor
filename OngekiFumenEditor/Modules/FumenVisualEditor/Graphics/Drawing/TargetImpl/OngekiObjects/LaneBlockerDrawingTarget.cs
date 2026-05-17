@@ -15,7 +15,7 @@ using System.Numerics;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    internal class LaneBlockerDrawingTarget : CommonDrawTargetBase<OngekiTimelineObjectBase>
+    internal sealed class LaneBlockerDrawingTarget : CommonDrawTargetBase<OngekiTimelineObjectBase>
     {
         private IPolygonDrawing polygonDrawing;
         private readonly HashSet<int> overdrawingDefferSet = new();
@@ -94,7 +94,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 if (!obj.IsCurvePath)
                 {
-                    //ֱ�ߣ��Ż�
+                    //直线，优化
                     PostPointByTGrid(obj, minTGrid);
                     PostPointByTGrid(obj, maxTGrid);
                 }

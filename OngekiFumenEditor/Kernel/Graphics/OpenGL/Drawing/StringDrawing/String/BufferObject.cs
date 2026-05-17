@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String
 {
-	internal class BufferObject<T> : IDisposable where T : unmanaged
+	internal sealed class BufferObject<T> : IDisposable where T : unmanaged
 	{
 		private readonly int _handle;
 		private readonly BufferTarget _bufferType;

@@ -4,7 +4,7 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
 {
-    internal class BatchCircleShader : DefaultOpenGLShader
+    internal sealed class BatchCircleShader : DefaultOpenGLShader
 	{
 		private static BatchCircleShader _shared;
 		private int modelViewProjectionLocation = int.MinValue;

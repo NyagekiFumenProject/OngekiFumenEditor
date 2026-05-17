@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
+    public sealed class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };
 

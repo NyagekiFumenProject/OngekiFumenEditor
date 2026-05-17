@@ -6,11 +6,11 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU
 {
-    internal class SkiaRenderControl_CPU : SkiaRenderControlBase
+    internal sealed class SkiaRenderControl_CPU : SkiaRenderControlBase
     {
         private const double BitmapDpi = 96.0;
 
-        protected WriteableBitmap bitmap;
+        private WriteableBitmap bitmap;
 
         public SkiaRenderControl_CPU()
         {

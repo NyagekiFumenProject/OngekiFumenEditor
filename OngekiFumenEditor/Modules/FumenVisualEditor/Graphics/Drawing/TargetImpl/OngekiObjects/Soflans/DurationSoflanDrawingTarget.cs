@@ -20,7 +20,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Soflans
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class DurationSoflanDrawingTarget : CommonBatchDrawTargetBase<OngekiObjectBase>
+    public sealed class DurationSoflanDrawingTarget : CommonBatchDrawTargetBase<OngekiObjectBase>
     {
         private IStringDrawing stringDrawing;
         private ILineDrawing lineDrawing;

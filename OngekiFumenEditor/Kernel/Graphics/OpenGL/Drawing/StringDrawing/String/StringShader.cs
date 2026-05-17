@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String
 {
-    public class StringShader : DefaultOpenGLShader
+    public sealed class StringShader : DefaultOpenGLShader
     {
         private int textureSamplerLocation = int.MinValue;
         private int mvpLocation = int.MinValue;

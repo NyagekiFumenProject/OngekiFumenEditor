@@ -6,7 +6,7 @@ using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor.IDrawingPerfor
 
 namespace OngekiFumenEditor.Kernel.Graphics.Performence
 {
-	public class DummyPerformenceMonitor : IPerfomenceMonitor
+	public sealed class DummyPerformenceMonitor : IPerfomenceMonitor
 	{
 		private class DummyDrawingPerformenceStatisticsData : IDrawingPerformenceStatisticsData
 		{

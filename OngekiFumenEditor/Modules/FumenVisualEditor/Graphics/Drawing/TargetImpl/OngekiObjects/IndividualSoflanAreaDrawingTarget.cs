@@ -18,7 +18,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    internal class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
+    internal sealed class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
     {
         private IStringDrawing stringDrawing;
         private ILineDrawing lineDrawing;
@@ -118,7 +118,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 lineVertex.Add(new LineVertex(lineVertex.LastOrDefault()?.Point ?? default, transparent, dash));
                 lineVertex.Add(new LineVertex(new(leftX, topY), transparent, dash));
 
-                //»­Ò»¸ö·½¿ò
+                //ç”»ä¸€ä¸ªæ–¹æ¡†
                 lineVertex.Add(new LineVertex(new(leftX, topY), color, dash));
                 lineVertex.Add(new LineVertex(new(rightX, topY), color, dash));
                 lineVertex.Add(new LineVertex(new(rightX, bottomY), color, dash));
@@ -163,7 +163,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
                         topRightTriPos - new Vector2(highlightScale, highlightScale), MathF.PI, Vector4.One));
 
-                    //»­Ò»¸ö·½¿ò
+                    //ç”»ä¸€ä¸ªæ–¹æ¡†
                     lineVertex.Add(new LineVertex(new(leftX, topY), highlightLineColor, VertexDash.Solider));
                     lineVertex.Add(new LineVertex(new(rightX, topY), highlightLineColor, VertexDash.Solider));
                     lineVertex.Add(new LineVertex(new(rightX, bottomY), highlightLineColor, VertexDash.Solider));

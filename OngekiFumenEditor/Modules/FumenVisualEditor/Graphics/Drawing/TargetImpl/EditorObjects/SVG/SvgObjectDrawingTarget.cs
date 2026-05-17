@@ -12,7 +12,7 @@ using static OngekiFumenEditor.Kernel.Graphics.IStaticVBODrawing;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class SvgObjectDrawingTarget : CommonDrawTargetBase<SvgPrefabBase>, IDisposable
+    public sealed class SvgObjectDrawingTarget : CommonDrawTargetBase<SvgPrefabBase>, IDisposable
     {
         private IImage texture;
         private ICachedSvgRenderDataManager cachedSvgRenderDataManager;

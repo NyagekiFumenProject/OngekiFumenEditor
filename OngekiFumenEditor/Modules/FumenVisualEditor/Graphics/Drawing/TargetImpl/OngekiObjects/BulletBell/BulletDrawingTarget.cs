@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class BulletDrawingTarget : ProjectileBatchDrawTargetBase<Bullet>
+    public sealed class BulletDrawingTarget : ProjectileBatchDrawTargetBase<Bullet>
     {
         private IDictionary<IImage, Vector2> spritesSize;
         private IDictionary<IImage, Vector2> spritesOriginOffset;

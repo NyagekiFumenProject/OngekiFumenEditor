@@ -6,7 +6,7 @@ using System.Numerics;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Lane
 {
 	[Export(typeof(IFumenEditorDrawingTarget))]
-	public class EnemyLaneDrawTarget : NormalLaneDrawingTarget
+	public sealed class EnemyLaneDrawTarget : NormalLaneDrawingTarget
 	{
 		public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 

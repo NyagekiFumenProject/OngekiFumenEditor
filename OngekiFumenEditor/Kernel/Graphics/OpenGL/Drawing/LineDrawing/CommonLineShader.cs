@@ -4,7 +4,7 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
-	public class CommonLineShader : DefaultOpenGLShader
+	public sealed class CommonLineShader : DefaultOpenGLShader
 	{
 		private static CommonLineShader _shared;
 		private int modelLocation = int.MinValue;

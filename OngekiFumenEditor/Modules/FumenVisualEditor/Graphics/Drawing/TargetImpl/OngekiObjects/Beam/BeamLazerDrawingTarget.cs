@@ -13,7 +13,7 @@ using System.Numerics;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    internal class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
+    internal sealed class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
         private IBeamDrawing lazerDrawing;
         private IImage textureBody;

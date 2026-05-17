@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
     [Export(typeof(IPerfomenceMonitor))]
 #endif
 	[PartCreationPolicy(CreationPolicy.NonShared)]
-	public class DefaultReleasePerfomenceMonitor : IPerfomenceMonitor
+	public sealed class DefaultReleasePerfomenceMonitor : IPerfomenceMonitor
 	{
 		const int RECORD_LENGTH = 10;
 		private Stopwatch timer = new Stopwatch();

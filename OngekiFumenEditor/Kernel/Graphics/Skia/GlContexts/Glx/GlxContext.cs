@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Glx
 {
-	internal class GlxContext : GlContext
+	internal sealed class GlxContext : GlContext
 	{
 		private IntPtr fDisplay;
 		private IntPtr fPixmap;

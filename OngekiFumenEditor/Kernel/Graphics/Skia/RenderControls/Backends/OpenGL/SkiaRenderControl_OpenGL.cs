@@ -16,14 +16,14 @@ using OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.OpenGL
 {
-    internal class SkiaRenderControl_OpenGL : SkiaRenderControlBase
+    internal sealed class SkiaRenderControl_OpenGL : SkiaRenderControlBase
     {
         private static GRContext grContext;
         private static GlContext oglContext;
 
         private const double BitmapDpi = 96.0;
 
-        protected WriteableBitmap bitmap;
+        private WriteableBitmap bitmap;
         private GRBackendTexture backendTexture;
         private GRGlTextureInfo? texture;
 

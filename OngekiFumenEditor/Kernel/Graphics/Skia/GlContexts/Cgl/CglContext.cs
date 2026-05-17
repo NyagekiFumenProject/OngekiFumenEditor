@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Cgl
 {
-	internal class CglContext : GlContext
+	internal sealed class CglContext : GlContext
 	{
 		private IntPtr fContext;
 

@@ -16,7 +16,7 @@ using Vortice.Direct3D12;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
 {
-    internal class SkiaRenderControl_D3D9On12 : SkiaRenderControlBase
+    internal sealed class SkiaRenderControl_D3D9On12 : SkiaRenderControlBase
     {
         private const int MinFrameCount = 2;
         private const int MaxFrameCount = 5;

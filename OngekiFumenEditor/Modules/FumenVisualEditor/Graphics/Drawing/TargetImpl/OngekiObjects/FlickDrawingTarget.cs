@@ -11,7 +11,7 @@ using System.Numerics;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class FlickDrawingTarget : CommonBatchDrawTargetBase<Flick>, IDisposable
+    public sealed class FlickDrawingTarget : CommonBatchDrawTargetBase<Flick>, IDisposable
     {
         public override int DefaultRenderOrder => 1000;
 

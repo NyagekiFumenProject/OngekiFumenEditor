@@ -2,7 +2,7 @@ using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
-    internal class GeometryPolyLineShader : DefaultOpenGLShader
+    internal sealed class GeometryPolyLineShader : DefaultOpenGLShader
     {
         private int modelViewProjectionLocation = int.MinValue;
         private int viewportSizeLocation = int.MinValue;

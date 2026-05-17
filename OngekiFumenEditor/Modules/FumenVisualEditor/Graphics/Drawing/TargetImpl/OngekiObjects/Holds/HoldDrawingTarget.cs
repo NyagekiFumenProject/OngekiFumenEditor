@@ -15,7 +15,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class HoldDrawingTarget : CommonDrawTargetBase<Hold>
+    public sealed class HoldDrawingTarget : CommonDrawTargetBase<Hold>
     {
         public override IEnumerable<string> DrawTargetID { get; } = new string[] { "HLD", "CHD", "XHD" };
 
@@ -98,7 +98,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 bool checkDiscardByHorizon(Vector2 prev, Vector2 end, Vector2 cur)
                 {
-                    //判断三个点是否都在一个水平上
+                    //鍒ゆ柇涓変釜鐐规槸鍚﹂兘鍦ㄤ竴涓按骞充笂
                     if (prev.Y == cur.Y && end.Y == cur.Y)
                     {
                         /*

@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.Platform
 {
-    internal class Renderer : IFontStashRenderer2, IDisposable
+    internal sealed class Renderer : IFontStashRenderer2, IDisposable
     {
         private const string frag = @"
             #version 330
@@ -102,7 +102,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
         ~Renderer() => Dispose(false);
         public void Dispose() => Dispose(true);
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposing)
             {

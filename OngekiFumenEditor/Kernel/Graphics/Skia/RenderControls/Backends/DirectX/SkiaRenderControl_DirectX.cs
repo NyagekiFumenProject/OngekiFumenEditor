@@ -13,7 +13,7 @@ using OngekiFumenEditor.Kernel.Graphics.Skia.D3dContexts;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
 {
-    internal class SkiaRenderControl_DirectX : SkiaRenderControlBase
+    internal sealed class SkiaRenderControl_DirectX : SkiaRenderControlBase
     {
         private static VorticeDirect3DContext d3dContext;
         private static GRD3DBackendContext d3dBackendContext;
@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
 
         private const double BitmapDpi = 96.0;
 
-        protected WriteableBitmap bitmap;
+        private WriteableBitmap bitmap;
 
         public SkiaRenderControl_DirectX()
         {

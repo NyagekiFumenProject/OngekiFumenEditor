@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.Platform
 {
-	internal class Texture2DManager : ITexture2DManager
+	internal sealed class Texture2DManager : ITexture2DManager
 	{
 		public Texture2DManager()
 		{

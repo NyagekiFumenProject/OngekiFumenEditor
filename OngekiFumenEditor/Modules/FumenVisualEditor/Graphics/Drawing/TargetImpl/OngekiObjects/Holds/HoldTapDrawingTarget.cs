@@ -7,7 +7,7 @@ using System.ComponentModel.Composition;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    internal class HoldTapDrawingTarget : CommonDrawTargetBase<Hold>
+    internal sealed class HoldTapDrawingTarget : CommonDrawTargetBase<Hold>
     {
         public override IEnumerable<string> DrawTargetID { get; } = new string[] { "HLD", "CHD", "XHD" };
 

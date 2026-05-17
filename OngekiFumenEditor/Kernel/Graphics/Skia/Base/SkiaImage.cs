@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Base
 {
-    public class SkiaImage : IImage
+    public sealed class SkiaImage : IImage
     {
         public SkiaImage(SKImage image)
         {

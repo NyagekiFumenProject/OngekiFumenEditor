@@ -5,7 +5,7 @@ using System;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String
 {
-	public class VertexArrayObject : IDisposable
+	public sealed class VertexArrayObject : IDisposable
 	{
 		private readonly uint _handle;
 		private readonly int _stride;

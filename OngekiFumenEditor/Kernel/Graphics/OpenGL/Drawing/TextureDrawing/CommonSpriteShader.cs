@@ -4,7 +4,7 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-	public class CommonSpriteShader : DefaultOpenGLShader
+	public sealed class CommonSpriteShader : DefaultOpenGLShader
 	{
 		private static CommonSpriteShader _shared;
 		private int modelLocation = int.MinValue;

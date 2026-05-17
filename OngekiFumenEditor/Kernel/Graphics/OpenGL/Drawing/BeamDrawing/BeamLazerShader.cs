@@ -3,7 +3,7 @@ using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 {
-    internal class BeamLazerShader : DefaultOpenGLShader
+    internal sealed class BeamLazerShader : DefaultOpenGLShader
 	{
 		private int modelLocation = int.MinValue;
 		private int viewProjectionLocation = int.MinValue;

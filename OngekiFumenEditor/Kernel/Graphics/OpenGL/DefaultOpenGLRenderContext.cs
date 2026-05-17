@@ -11,7 +11,7 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
-    internal class DefaultOpenGLRenderContext : IRenderContext
+    internal sealed class DefaultOpenGLRenderContext : IRenderContext
     {
         private readonly DefaultOpenGLRenderManagerImpl manager;
         private readonly GLWpfControl glView;

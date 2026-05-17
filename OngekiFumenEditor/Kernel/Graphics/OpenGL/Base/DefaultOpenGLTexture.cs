@@ -7,9 +7,9 @@ using System.Numerics;
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
 {
     [Serializable]
-    public class DefaultOpenGLTexture : IImage, IDisposable
+    public sealed class DefaultOpenGLTexture : IImage, IDisposable
     {
-        protected int? _id;
+        private int? _id;
         private Vector2 _textureSize;
         public string Name { get; init; }
 

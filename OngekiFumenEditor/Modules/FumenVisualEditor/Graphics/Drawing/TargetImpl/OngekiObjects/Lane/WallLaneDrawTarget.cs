@@ -24,14 +24,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     }
 
     [Export(typeof(IFumenEditorDrawingTarget))]
-    internal class WallLeftLaneDrawTarget : WallLaneDrawTarget
+    internal sealed class WallLeftLaneDrawTarget : WallLaneDrawTarget
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "WLS" };
         public override Vector4 WallLaneColor { get; } = LeftWallColor;
     }
 
     [Export(typeof(IFumenEditorDrawingTarget))]
-    internal class WallRightLaneDrawTarget : WallLaneDrawTarget
+    internal sealed class WallRightLaneDrawTarget : WallLaneDrawTarget
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "WRS" };
         public override Vector4 WallLaneColor { get; } = RightWallColor;

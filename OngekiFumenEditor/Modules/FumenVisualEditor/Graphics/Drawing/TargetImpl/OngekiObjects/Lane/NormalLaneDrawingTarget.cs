@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 	}
 
 	[Export(typeof(IFumenEditorDrawingTarget))]
-	public class LeftLaneDrawTarget : NormalLaneDrawingTarget
+	public sealed class LeftLaneDrawTarget : NormalLaneDrawingTarget
 	{
 		public static Vector4 LaneColor { get; } = new(1, 0, 0, 1);
 
@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 	}
 
 	[Export(typeof(IFumenEditorDrawingTarget))]
-	public class CenterLaneDrawTarget : NormalLaneDrawingTarget
+	public sealed class CenterLaneDrawTarget : NormalLaneDrawingTarget
 	{
 		public static Vector4 LaneColor { get; } = new(0, 1, 0, 1);
 
@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 	}
 
 	[Export(typeof(IFumenEditorDrawingTarget))]
-	public class RightLaneDrawTarget : NormalLaneDrawingTarget
+	public sealed class RightLaneDrawTarget : NormalLaneDrawingTarget
 	{
 		public static Vector4 LaneColor { get; } = new(0, 0, 1, 1);
 

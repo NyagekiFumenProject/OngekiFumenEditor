@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 	[Export(typeof(IPerfomenceMonitor))]
 #endif
 	[PartCreationPolicy(CreationPolicy.NonShared)]
-	public class DefaultDebugPerfomenceMonitor : IPerfomenceMonitor
+	public sealed class DefaultDebugPerfomenceMonitor : IPerfomenceMonitor
 	{
 		const int RECORD_LENGTH = 165;
 

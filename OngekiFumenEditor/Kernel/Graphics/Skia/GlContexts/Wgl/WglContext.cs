@@ -4,7 +4,7 @@ using System;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts.Wgl
 {
-	internal class WglContext : GlContext
+	internal sealed class WglContext : GlContext
 	{
 		private static readonly object fLock = new object();
 
