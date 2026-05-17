@@ -331,6 +331,24 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Detected default audio device sample rate: {0} Hz.\nUse this sample rate? 的本地化字符串。
+        /// </summary>
+        public static string AudioSampleRateAutoDetectConfirm {
+            get {
+                return ResourceManager.GetString("AudioSampleRateAutoDetectConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to get the default audio device sample rate.\nUsing the default sample rate: {0} Hz. 的本地化字符串。
+        /// </summary>
+        public static string AudioSampleRateAutoDetectFailedUseDefault {
+            get {
+                return ResourceManager.GetString("AudioSampleRateAutoDetectFailedUseDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Audio Player 的本地化字符串。
         /// </summary>
         public static string AudioPlayerToolViewer {

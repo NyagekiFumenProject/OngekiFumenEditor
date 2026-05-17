@@ -186,6 +186,12 @@
   <data name="AudioOption" xml:space="preserve">
     <value>Audio Option</value>
   </data>
+  <data name="AudioSampleRateAutoDetectConfirm" xml:space="preserve">
+    <value>Detected default audio device sample rate: {0} Hz.&#xA;Use this sample rate?</value>
+  </data>
+  <data name="AudioSampleRateAutoDetectFailedUseDefault" xml:space="preserve">
+    <value>Failed to get the default audio device sample rate.&#xA;Using the default sample rate: {0} Hz.</value>
+  </data>
   <data name="AudioPlayerToolViewer" xml:space="preserve">
     <value>Audio Player</value>
   </data>

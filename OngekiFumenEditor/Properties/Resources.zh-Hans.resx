@@ -186,6 +186,12 @@
   <data name="AudioOption" xml:space="preserve">
     <value>音频设置</value>
   </data>
+  <data name="AudioSampleRateAutoDetectConfirm" xml:space="preserve">
+    <value>已检测到默认音频设备采样率: {0} Hz。&#xA;是否采用此采样率?</value>
+  </data>
+  <data name="AudioSampleRateAutoDetectFailedUseDefault" xml:space="preserve">
+    <value>获取默认音频设备采样率出错。&#xA;将使用默认采样率: {0} Hz。</value>
+  </data>
   <data name="AudioPlayerToolViewer" xml:space="preserve">
     <value>音频播放</value>
   </data>

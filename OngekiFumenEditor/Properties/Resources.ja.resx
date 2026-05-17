@@ -186,6 +186,12 @@
   <data name="AudioOption" xml:space="preserve">
     <value>音源オプション</value>
   </data>
+  <data name="AudioSampleRateAutoDetectConfirm" xml:space="preserve">
+    <value>既定の音声デバイスのサンプリングレートを検出しました: {0} Hz。&#xA;このサンプリングレートを使用しますか?</value>
+  </data>
+  <data name="AudioSampleRateAutoDetectFailedUseDefault" xml:space="preserve">
+    <value>既定の音声デバイスのサンプリングレートを取得できませんでした。&#xA;既定のサンプリングレートを使用します: {0} Hz。</value>
+  </data>
   <data name="AudioPlayerToolViewer" xml:space="preserve">
     <value>音源プレイヤー</value>
   </data>

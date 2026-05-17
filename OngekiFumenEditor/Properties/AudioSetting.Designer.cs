@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "18.5.0.0")]
     public sealed partial class AudioSetting : global::System.Configuration.ApplicationSettingsBase {
         
         private static AudioSetting defaultInstance = ((AudioSetting)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new AudioSetting())));
@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("48000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
         public int AudioSampleRate {
             get {
                 return ((int)(this["AudioSampleRate"]));

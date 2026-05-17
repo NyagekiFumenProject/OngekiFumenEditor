@@ -22,6 +22,8 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
     [Export(typeof(IAudioManager))]
     public class NAudioManager : PropertyChangedBase, IAudioManager
     {
+        private const int DefaultSampleRate = 48000;
+
         private HashSet<WeakReference<IAudioPlayer>> ownAudioPlayerRefs = new();
         private bool enableSoundMultiPlay;
         private int targetSampleRate;
@@ -94,7 +96,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
         {
             var audioOutputType = (AudioOutputType)AudioSetting.Default.AudioOutputType;
             enableSoundMultiPlay = AudioSetting.Default.EnableSoundMultiPlay;
-            targetSampleRate = AudioSetting.Default.AudioSampleRate;
+            targetSampleRate = ResolveTargetSampleRate(AudioSetting.Default.AudioSampleRate);
             enableVarspeed = AudioSetting.Default.EnableVarspeed;
             SpeedCostDelayMs = enableVarspeed ? AudioSetting.Default.VarspeedReadDurationMs : 0;
 
@@ -151,6 +153,58 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             MusicVolume = AudioSetting.Default.MusicVolume;
 
             Log.LogInfo($"Audio implement will use {GetType()}");
+        }
+
+        private static int ResolveTargetSampleRate(int configuredSampleRate)
+        {
+            if (configuredSampleRate != -1)
+                return configuredSampleRate;
+
+            var detectedSampleRate = GetDefaultRenderDeviceSampleRate(out var isFallback);
+            if (isFallback)
+                return SaveTargetSampleRate(detectedSampleRate);
+
+            var message = string.Format(Resources.AudioSampleRateAutoDetectConfirm, detectedSampleRate);
+            var result = System.Windows.MessageBox.Show(
+                message,
+                Resources.AudioOption,
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question,
+                System.Windows.MessageBoxResult.Yes);
+
+            var sampleRate = result == System.Windows.MessageBoxResult.Yes ? detectedSampleRate : DefaultSampleRate;
+            return SaveTargetSampleRate(sampleRate);
+        }
+
+        private static int SaveTargetSampleRate(int sampleRate)
+        {
+            AudioSetting.Default.AudioSampleRate = sampleRate;
+            AudioSetting.Default.Save();
+            Log.LogInfo($"AudioSampleRate was auto configured to {sampleRate}");
+            return sampleRate;
+        }
+
+        private static int GetDefaultRenderDeviceSampleRate(out bool isFallback)
+        {
+            try
+            {
+                isFallback = false;
+                using var enumerator = new MMDeviceEnumerator();
+                using var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                using var audioClient = device.AudioClient;
+                return audioClient.MixFormat.SampleRate;
+            }
+            catch (Exception e)
+            {
+                Log.LogError("Can't get default audio device sample rate.", e);
+                isFallback = true;
+                System.Windows.MessageBox.Show(
+                    string.Format(Resources.AudioSampleRateAutoDetectFailedUseDefault, DefaultSampleRate),
+                    Resources.Warning,
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return DefaultSampleRate;
+            }
         }
 
         private void SoundMixer_MixerInputEnded(object sender, SampleProviderEventArgs e)
