@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Utils;
 using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -9,7 +10,7 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 {
-    internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing
+    internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing, IDisposable
     {
         private sealed class SkiaLineVBOHandle : IStaticVBODrawing.IVBOHandle
         {
@@ -32,7 +33,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         private SKCanvas canvas;
         private List<LineVertex> postedPoints = new();
         private IDrawingContext target;
-        private int drawcallCount = 0;
+        private readonly Dictionary<VertexDash, WeakReference<SKPathEffect>> dashPathEffectCache = new();
 
         public DefaultSkiaLineDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
@@ -45,9 +46,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
             this.target = target;
             canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
-            prevPaintParam = default;
             postedPoints.Clear();
-            drawcallCount = 0;
         }
 
         public void End()
@@ -57,42 +56,38 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
             lineWidth = default;
             canvas = default;
-            prevPaintParam = default;
-            prevPaint?.Dispose();
             postedPoints.Clear();
         }
 
-        private (Vector4 color, VertexDash dash) prevPaintParam = default;
-        private SKPaint prevPaint = default;
+        private SKPaint curPaint = new()
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke
+        };
         private float lineWidth;
 
-        private SKPaint GetPaint(Vector4 color, VertexDash dash, float lineWidth)
+        private void UpdatePaint(Vector4 color, VertexDash dash, float lineWidth)
         {
-            var param = (color, dash);
-            if (param == prevPaintParam && prevPaint != null)
-                return prevPaint;
-
-            prevPaint?.Dispose();
-
             var skColor = new SKColor(
                 (byte)(color.X * 255),
                 (byte)(color.Y * 255),
                 (byte)(color.Z * 255),
                 (byte)(color.W * 255));
 
-            var paint = new SKPaint
-            {
-                Color = skColor,
-                IsAntialias = true,
-                Style = SKPaintStyle.Stroke,
-                StrokeWidth = lineWidth,
-                PathEffect = dash == VertexDash.Solider ? null : SKPathEffect.CreateDash([10, 5], 0)
-            };
+            curPaint.Color = skColor;
+            curPaint.StrokeWidth = lineWidth;
+            curPaint.PathEffect = GetDashPathEffect(dash);
+        }
 
-            prevPaint = paint;
-            prevPaintParam = param;
+        private SKPathEffect GetDashPathEffect(VertexDash dash)
+        {
+            if (dash.DashSize <= 0 || dash.GapSize <= 0)
+                return null;
 
-            return paint;
+            if (!(dashPathEffectCache.TryGetValue(dash, out var pathEffectRef) && pathEffectRef.TryGetTarget(out var pathEffect)))
+                dashPathEffectCache[dash] = new(pathEffect = SKPathEffect.CreateDash([dash.DashSize, dash.GapSize], 0));
+
+            return pathEffect;
         }
 
         private void PostDraw()
@@ -121,8 +116,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     else
                     {
                         //draw current path
-                        var paint = GetPaint(prev.Color, prev.Dash, lineWidth);
-                        DrawPath(points, paint);
+                        UpdatePaint(prev.Color, prev.Dash, lineWidth);
+                        DrawPath(points, curPaint);
 
                         //new path
                         points.Clear();
@@ -136,8 +131,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
                 if (points.Count > 0)
                 {
-                    var paint = GetPaint(prev.Color, prev.Dash, lineWidth);
-                    DrawPath(points, paint);
+                    UpdatePaint(prev.Color, prev.Dash, lineWidth);
+                    DrawPath(points, curPaint);
                 }
             }
 
@@ -154,7 +149,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 canvas.DrawLine(cur, next, paint);
             }
             target.PerfomenceMonitor.CountDrawCall(this);
-            drawcallCount++;
         }
 
         private void DrawPath(IList<SKPoint> points, SKPaint paint)
@@ -171,7 +165,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             }
             canvas.DrawPath(path, paint);
             target.PerfomenceMonitor.CountDrawCall(this);
-            drawcallCount++;
         }
 
         private void DrawPath(SKPath path, SKPaint paint)
@@ -180,7 +173,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
             canvas.DrawPath(actualPath, paint);
             target.PerfomenceMonitor.CountDrawCall(this);
-            drawcallCount++;
         }
 
         public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
@@ -222,6 +214,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 return;
 
             Draw(target, handle.Points, handle.LineWidth);
+        }
+
+        public void Dispose()
+        {
+            curPaint.PathEffect = null;
+            curPaint.Dispose();
+
+            foreach (var effectRef in dashPathEffectCache.Values)
+                if (effectRef.TryGetTarget(out var effect))
+                    effect.Dispose();
+
+            dashPathEffectCache.Clear();
         }
     }
 }
