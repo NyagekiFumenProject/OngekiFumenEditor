@@ -280,16 +280,23 @@ namespace OngekiFumenEditor.Core.Utils
             return dic;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T>(this IList<T> list, Func<T, T, int> compFunc)
         {
+            var comparer = new ComparerWrapper<T>(compFunc);
+
             if (list is List<T> concreteList)
             {
-                concreteList.Sort(new ComparerWrapper<T>(compFunc));
+                concreteList.Sort(comparer);
                 return;
             }
 
-            var sorted = list.OrderBy(x => x, new ComparerWrapper<T>(compFunc)).ToArray();
+            if (list is IPooledList<T> pooledList)
+            {
+                pooledList.Sort(comparer);
+                return;
+            }
+
+            var sorted = list.OrderBy(x => x, comparer).ToArray();
             for (var i = 0; i < sorted.Length; i++)
                 list[i] = sorted[i];
         }

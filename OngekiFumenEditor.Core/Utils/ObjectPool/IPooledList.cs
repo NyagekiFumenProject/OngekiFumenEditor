@@ -8,5 +8,6 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
         new T this[int index] { get; set; }
         new int Count { get; }
         void AddRange(IEnumerable<T> items);
+        void Sort(IComparer<T> comparer);
     }
 }

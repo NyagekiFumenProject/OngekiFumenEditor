@@ -20,8 +20,8 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
             => ObjectPool<T>.Get();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IDisposable GetWithUsingDisposable<T>(out T obj, out bool isNewObject) where T : class, new()
-            => ObjectPool<T>.GetWithUsingDisposable(out obj, out isNewObject);
+        public static IDisposable GetWithUsingDisposable<T>(out T obj) where T : class, new()
+            => ObjectPool<T>.GetWithUsingDisposable(out obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IPooledList<T> GetPooledList<T>()

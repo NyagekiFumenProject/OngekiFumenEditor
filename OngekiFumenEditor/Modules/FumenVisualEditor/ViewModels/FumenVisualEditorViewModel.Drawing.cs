@@ -499,8 +499,11 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var unusedSoflanGroups = ObjectPool.GetPooledList<int>();
         unusedSoflanGroups.Clear();
         unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
-        foreach (var soflanGroupId in unusedSoflanGroups)
+        for (var i = 0; i < unusedSoflanGroups.Count; i++)
+        {
+            var soflanGroupId = unusedSoflanGroups[i];
             drawingContexts.Remove(soflanGroupId);
+        }
 
         RecalculateMagaticXGridLines();
 
@@ -603,8 +606,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
                         drawingTarget.Begin(this);
                         //all object collection has been sorted within GetDisplayableObjects()
-                        foreach (var obj in soflanGroupDrawing.Value/*.OrderBy(x => x.TGrid)*/)
+                        var drawingObjects = soflanGroupDrawing.Value;
+                        for (var i = 0; i < drawingObjects.Count; i++)
+                        {
+                            var obj = drawingObjects[i];
                             drawingTarget.Post(obj);
+                        }
                         drawingTarget.End();
                     }
                 }
@@ -624,8 +631,11 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         RenderContext?.AfterRender(this);
 
         //clean up
-        foreach (var disposable in drawingCollectionDisposables)
+        for (var i = 0; i < drawingCollectionDisposables.Count; i++)
+        {
+            var disposable = drawingCollectionDisposables[i];
             disposable.Dispose();
+        }
         unusedSoflanGroups.Dispose();
         usedDrawingContexts.Dispose();
         map.Dispose();

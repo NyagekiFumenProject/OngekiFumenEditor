@@ -23,24 +23,23 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
             }
         }
 
-        public static IDisposable GetWithUsingDisposable(out T obj, out bool isNewObject)
+        public static IDisposable GetWithUsingDisposable(out T obj)
         {
-            isNewObject = Get(out obj);
+            Get(out obj);
             var d = ObjectPool<AutoDisposable>.Get();
             d.RefObject = obj;
             return d;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Get(out T obj)
+        public static void Get(out T obj)
         {
             obj = pool.Get();
-            return false;
         }
 
 #if DEBUG
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Get(string rentMark, out T obj) => Get(out obj);
+        public static void Get(string rentMark, out T obj) => Get(out obj);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get(string rentMark) => Get();

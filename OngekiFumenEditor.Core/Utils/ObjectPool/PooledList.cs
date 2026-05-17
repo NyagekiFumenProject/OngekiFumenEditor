@@ -58,6 +58,8 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(T[] array, int arrayIndex) => ((ICollection<T>)innerList).CopyTo(array, arrayIndex);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Sort(IComparer<T> comparer) => innerList.Sort(comparer);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator<T> GetEnumerator() => innerList.GetEnumerator();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IndexOf(T item) => innerList.IndexOf(item);
