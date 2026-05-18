@@ -585,6 +585,9 @@
   <data name="EditorMouseWheelSpeed_Unit" xml:space="preserve">
     <value>(值越大,滚动跨度越大)</value>
   </data>
+  <data name="EditorOffsetMs" xml:space="preserve">
+    <value>编辑器时间偏移</value>
+  </data>
   <data name="EditorMustBeDesignMode" xml:space="preserve">
     <value>请先将编辑器切换到编辑模式</value>
   </data>
@@ -1352,6 +1355,9 @@
   </data>
   <data name="Sound" xml:space="preserve">
     <value>音效</value>
+  </data>
+  <data name="SoundOffsetMs" xml:space="preserve">
+    <value>音效时间偏移</value>
   </data>
   <data name="SoundFolderPath" xml:space="preserve">
     <value>音效文件夹路径:</value>

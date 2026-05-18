@@ -579,6 +579,9 @@
   <data name="EditorMouseWheelSpeed_Unit" xml:space="preserve">
     <value>（値が大きいほど速くスクロールします）</value>
   </data>
+  <data name="EditorOffsetMs" xml:space="preserve">
+    <value>エディター時刻オフセット</value>
+  </data>
   <data name="EditorMustBeDesignMode" xml:space="preserve">
     <value>エディタをデザインモードに切り替えてください</value>
   </data>
@@ -1347,6 +1350,9 @@
   </data>
   <data name="Sound" xml:space="preserve">
     <value>効果音</value>
+  </data>
+  <data name="SoundOffsetMs" xml:space="preserve">
+    <value>効果音時刻オフセット</value>
   </data>
   <data name="SoundFolderPath" xml:space="preserve">
     <value>効果音フォルダ：</value>

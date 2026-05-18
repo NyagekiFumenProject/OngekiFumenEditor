@@ -585,6 +585,9 @@
   <data name="EditorMouseWheelSpeed_Unit" xml:space="preserve">
     <value>(The larger the value, the greater the scrolling span)</value>
   </data>
+  <data name="EditorOffsetMs" xml:space="preserve">
+    <value>Editor time offset</value>
+  </data>
   <data name="EditorMustBeDesignMode" xml:space="preserve">
     <value>Please switch the editor to Design Mode first.</value>
   </data>
@@ -1352,6 +1355,9 @@
   </data>
   <data name="Sound" xml:space="preserve">
     <value>Sound</value>
+  </data>
+  <data name="SoundOffsetMs" xml:space="preserve">
+    <value>Sound effect time offset</value>
   </data>
   <data name="SoundFolderPath" xml:space="preserve">
     <value>Sound folder path:</value>

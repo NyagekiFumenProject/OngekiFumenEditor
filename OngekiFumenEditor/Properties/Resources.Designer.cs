@@ -1951,6 +1951,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Editor time offset 的本地化字符串。
+        /// </summary>
+        public static string EditorOffsetMs {
+            get {
+                return ResourceManager.GetString("EditorOffsetMs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Please switch the editor to Design Mode first. 的本地化字符串。
         /// </summary>
         public static string EditorMustBeDesignMode {
@@ -6681,6 +6690,15 @@ namespace OngekiFumenEditor.Properties {
         public static string Sound {
             get {
                 return ResourceManager.GetString("Sound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sound effect time offset 的本地化字符串。
+        /// </summary>
+        public static string SoundOffsetMs {
+            get {
+                return ResourceManager.GetString("SoundOffsetMs", resourceCulture);
             }
         }
         
