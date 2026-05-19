@@ -1,6 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
-using OpenTK.Mathematics;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 

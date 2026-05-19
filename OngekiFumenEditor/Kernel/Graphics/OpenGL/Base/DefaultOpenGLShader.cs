@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         private readonly Dictionary<int, int> cachedIntUniformValues = new();
         private readonly Dictionary<int, Vector2> cachedVector2UniformValues = new();
         private readonly Dictionary<int, Vector4> cachedVector4UniformValues = new();
-        private readonly Dictionary<int, Matrix4> cachedMatrix4UniformValues = new();
+        private readonly Dictionary<int, System.Numerics.Matrix4x4> cachedMatrix4x4UniformValues = new();
 
         private string vertError;
         private string fragError;
@@ -213,6 +213,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(int l, System.Numerics.Vector4 v)
+        {
+            ref var openTk = ref Unsafe.As<System.Numerics.Vector4, Vector4>(ref v);
+            PassUniform(l, openTk);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void PassUniform(string name, System.Numerics.Vector4 val)
+        {
+            int l = GetUniformLocation(name);
+            PassUniform(l, val);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(int l, System.Numerics.Vector2 v) => PassUniform(l, new Vector2(v.X, v.Y));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PassUniform(string name, System.Numerics.Vector2 val)
@@ -223,17 +236,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PassUniform(int l, Matrix4 v)
+        public void PassUniform(int l, System.Numerics.Matrix4x4 v)
         {
-            if (UniformValueEquals(cachedMatrix4UniformValues, l, v))
+            if (UniformValueEquals(cachedMatrix4x4UniformValues, l, v))
                 return;
-            GL.UniformMatrix4(l, false, ref v);
+            ref var openTk = ref Unsafe.As<System.Numerics.Matrix4x4, Matrix4>(ref v);
+            GL.UniformMatrix4(l, false, ref openTk);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PassUniform(string name, Matrix4 matrix4)
+        public void PassUniform(string name, System.Numerics.Matrix4x4 matrix)
         {
             int l = GetUniformLocation(name);
-            PassUniform(l, matrix4);
+            PassUniform(l, matrix);
         }
 
         private Dictionary<string, int> _uniformDictionary = new Dictionary<string, int>();
@@ -295,7 +309,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
             cachedIntUniformValues.Clear();
             cachedVector2UniformValues.Clear();
             cachedVector4UniformValues.Clear();
-            cachedMatrix4UniformValues.Clear();
+            cachedMatrix4x4UniformValues.Clear();
         }
     }
 }

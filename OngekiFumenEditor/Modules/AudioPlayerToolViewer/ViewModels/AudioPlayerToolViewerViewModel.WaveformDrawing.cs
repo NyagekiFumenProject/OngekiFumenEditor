@@ -8,9 +8,9 @@ using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -265,8 +265,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private void UpdateDrawingContext()
         {
             var projectionMatrix =
-                Matrix4.CreateOrthographic(viewWidth, viewHeight, -1, 1);
-            var viewMatrix = Matrix4.CreateTranslation(new Vector3(0, 0, 0));
+                Matrix4x4.CreateOrthographic(viewWidth, viewHeight, -1, 1);
+            var viewMatrix = Matrix4x4.CreateTranslation(new Vector3(0, 0, 0));
 
             CurrentDrawingTargetContext.ViewMatrix = viewMatrix;
             CurrentDrawingTargetContext.ProjectionMatrix = projectionMatrix;

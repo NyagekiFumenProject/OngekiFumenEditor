@@ -1,8 +1,8 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
 using SkiaSharp;
 using System;
+using System.Numerics;
 using System.Windows.Media.Imaging;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing

@@ -1,10 +1,10 @@
 using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing

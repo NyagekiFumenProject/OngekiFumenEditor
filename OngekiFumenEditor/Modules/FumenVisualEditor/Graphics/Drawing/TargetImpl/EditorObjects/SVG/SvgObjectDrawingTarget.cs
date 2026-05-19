@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var dx = x;
                 var dy = y;
 
-                lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * OpenTK.Mathematics.Matrix4.CreateTranslation((float)dx, (float)dy, 0));
+                lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4x4.CreateTranslation((float)dx, (float)dy, 0));
                 {
                     lineDrawing.DrawVBO(target, handle);
                 }

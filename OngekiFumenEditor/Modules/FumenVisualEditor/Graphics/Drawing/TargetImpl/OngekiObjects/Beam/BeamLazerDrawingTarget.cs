@@ -120,12 +120,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 warnProgress = (float)MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
                 var a = MathUtils.SmoothStep(0.0f, 0.25f, warnProgress);
-                var warnColor = new OpenTK.Mathematics.Vector4(1, 215 / 255.0f, 0, 0.5f * a);
+                var warnColor = new Vector4(1, 215 / 255.0f, 0, 0.5f * a);
 
                 lazerDrawing.Draw(target, pixelImg, (int)width, x, (float)warnProgress, warnColor, rotate, judgeOffset);
             }
 
-            lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One, rotate, judgeOffset);
+            lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, Vector4.One, rotate, judgeOffset);
             //Log.LogDebug($"a\nx:{x:F2}, progress:{progress:F2}, warnProgress:{warnProgress:F2}, rotate:{rotate:F2}");
         }
 

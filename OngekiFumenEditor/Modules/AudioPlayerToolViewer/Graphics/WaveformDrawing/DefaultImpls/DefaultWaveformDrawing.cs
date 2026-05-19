@@ -6,10 +6,10 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls
@@ -69,11 +69,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             (_, _, var currentMeter, var currentBpm) = TGridCalculator.GetCurrentTimeSignature(curTimeGrid, target.EditorViewModel.Fumen.BpmList, target.EditorViewModel.Fumen.MeterChanges);
             var durationMs = (toTime - fromTime).TotalMilliseconds;
 
-            //ªÊ÷∆≤®–Œ
+            //ÁªòÂà∂Ê≥¢ÂΩ¢
             if (option.ShowWaveform && peakData.Count != 0)
             {
                 (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
-                lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4.CreateScale(1, target.WaveformVecticalScale, 1f));
+                lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4x4.CreateScale(1, target.WaveformVecticalScale, 1f));
                 lineDrawing.Begin(target, 1);
                 {
                     var prevX = 0f;
@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 lineDrawing.PopOverrideModelMatrix(out _);
             }
 
-            //ªÊ÷∆Ω⁄◊‡œﬂ
+            //ÁªòÂà∂ËäÇÂ•èÁ∫ø
             if (target.EditorViewModel is FumenVisualEditorViewModel editor)
             {
                 var beginTime = fromTime.TotalSeconds < 0 ? TimeSpan.Zero : fromTime;
@@ -250,7 +250,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     }
                     lineDrawing.End();
 
-                    //ªÊ÷∆Ã· æ
+                    //ÁªòÂà∂ÊèêÁ§∫
                     foreach ((var x, var str) in cachedPostDrawList)
                     {
                         stringDrawing.Draw(
@@ -270,7 +270,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 cachedObjTimeMap.Clear();
             }
 
-            //ªÊ÷∆µ±«∞≤•∑≈ ±º‰”Œ±Í
+            //ÁªòÂà∂ÂΩìÂâçÊí≠ÊîæÊó∂Èó¥Ê∏∏Ê†á
             {
                 var indirectorX = (float)(width * ((curTime - fromTime).TotalMilliseconds / durationMs) - width / 2);
 

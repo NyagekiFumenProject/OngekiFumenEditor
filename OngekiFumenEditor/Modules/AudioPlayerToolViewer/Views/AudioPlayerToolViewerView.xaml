@@ -16,7 +16,6 @@
     xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels"
-    xmlns:wpf="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:AudioPlayerToolViewerViewModel,
                                      IsDesignTimeCreatable=True}"

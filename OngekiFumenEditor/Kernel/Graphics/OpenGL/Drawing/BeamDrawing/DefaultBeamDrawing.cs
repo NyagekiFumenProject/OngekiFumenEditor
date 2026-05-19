@@ -1,7 +1,7 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using System;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 {
@@ -87,10 +87,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 
                 var modelMatrix =
                     GetOverrideModelMatrix() *
-                    (Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1))
-                    * Matrix4.CreateScale(new Vector3(width * 1.0f / texture.Width, target.CurrentDrawingTargetContext.Rect.Height * 2.0f / texture.Height, 1))) *
-                    Matrix4.CreateRotationZ(rotate) *
-                    Matrix4.CreateTranslation(x, target.CurrentDrawingTargetContext.Rect.Height / 2 + target.CurrentDrawingTargetContext.Rect.MinY + judgeOffset / 2, 0);
+                    (Matrix4x4.CreateScale(new Vector3(texture.Width, texture.Height, 1))
+                    * Matrix4x4.CreateScale(new Vector3(width * 1.0f / texture.Width, target.CurrentDrawingTargetContext.Rect.Height * 2.0f / texture.Height, 1))) *
+                    Matrix4x4.CreateRotationZ(rotate) *
+                    Matrix4x4.CreateTranslation(x, target.CurrentDrawingTargetContext.Rect.Height / 2 + target.CurrentDrawingTargetContext.Rect.MinY + judgeOffset / 2, 0);
 
                 shader.Begin();
                 {

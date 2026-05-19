@@ -1,9 +1,9 @@
 ﻿using FontStashSharp;
 using FontStashSharp.Interfaces;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using System;
 using System.Drawing;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.Platform
 {
@@ -115,7 +115,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
             _shader.Dispose();
         }
 
-        public void Begin(Matrix4 mvp, IPerfomenceMonitor perfomenceMonitor, IDrawing refDrawing)
+        public void Begin(Matrix4x4 mvp, IPerfomenceMonitor perfomenceMonitor, IDrawing refDrawing)
         {
             performenceMonitor = perfomenceMonitor;
             this.refDrawing = refDrawing;

@@ -19,12 +19,11 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
-using OpenTK.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -38,7 +37,6 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors.DrawXGridHelper;
 using Color = System.Drawing.Color;
-using Vector4 = System.Numerics.Vector4;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
@@ -332,7 +330,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         if (fumen is null)
             goto End;
 
-        //¼ÆËã¿ÉÒÔÏÔÊ¾µÄTGrid·¶Î§ÒÔ¼°ÏñËØ·¶Î§
+        //è®¡ç®—å¯ä»¥æ˜¾ç¤ºçš„TGridèŒƒå›´ä»¥åŠåƒç´ èŒƒå›´
         var tGrid = GetViewportTGrid();
         var offsetMs = EditorGlobalSetting.Default.EditorOffsetMs;
         if (offsetMs != 0)
@@ -344,7 +342,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         #region prepare drawing contexts' for every soflan groups 
 
         var projectionMatrix =
-            Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+            Matrix4x4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
 
         IEnumerable<KeyValuePair<int, SoflanList>> soflanMap = Fumen.SoflansMap;
         //if (IsDesignMode)
@@ -382,7 +380,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             var rect = new VisibleRect(new Vector2(ViewWidth, minY), new Vector2(0, minY + ViewHeight));
 
             var y = (float)curY;
-            var viewMatrix = Matrix4.CreateTranslation(new Vector3(-ViewWidth / 2,
+            var viewMatrix = Matrix4x4.CreateTranslation(new Vector3(-ViewWidth / 2,
                 -y - ViewHeight / 2 + (float)Setting.JudgeLineOffsetY, 0));
 
             var drawingContext = new DrawingTargetContext()
@@ -523,7 +521,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
             */
 
-            //ÌØÊâ´¦Àí£º×Óµ¯ºÍBell
+            //ç‰¹æ®Šå¤„ç†ï¼šå­å¼¹å’ŒBell
             var blts = Fumen.Bullets.AsEnumerable();
             var bels = Fumen.Bells.AsEnumerable();
             var curTGrid = GetCurrentTGrid();
@@ -545,7 +543,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
             foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
             {
-                //todo ÓÅ»¯Ò»ÏÂ
+                //todo ä¼˜åŒ–ä¸€ä¸‹
                 var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
                 drawingCollectionDisposables.Add(rPool);
                 var r = drawMap[drawingTarget] = rPool;
@@ -558,7 +556,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
             foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
             {
-                //todo ÓÅ»¯Ò»ÏÂ
+                //todo ä¼˜åŒ–ä¸€ä¸‹
                 var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
                 drawingCollectionDisposables.Add(rPool);
                 var r = drawMap[drawingTarget] = rPool;
@@ -811,7 +809,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         });
 
         /*
-         * ÕâÀï¿¼ÂÇµ½ÓĞspd<1µÄ×Óµ¯/Bell»áÌáÇ°³öÏÖµÄÇé¿ö£¬Òò´ËµÃ·Ö×´Ì¬·Ö±ğÈ¥Ñ¡Ôñ
+         * è¿™é‡Œè€ƒè™‘åˆ°æœ‰spd<1çš„å­å¼¹/Bellä¼šæå‰å‡ºç°çš„æƒ…å†µï¼Œå› æ­¤å¾—åˆ†çŠ¶æ€åˆ†åˆ«å»é€‰æ‹©
          */
         var objs = Enumerable.Empty<IDisplayableObject>();
         if (Editor.IsPreviewMode)

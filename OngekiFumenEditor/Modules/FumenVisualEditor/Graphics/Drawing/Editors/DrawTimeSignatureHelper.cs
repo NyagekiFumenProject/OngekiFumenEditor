@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> timelines = Enumerable.Empty<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)>();
             if (target.Editor.IsDesignMode)
             {
-                //todo 暂时显示默认的变速组
+                //todo 鏆傛椂鏄剧ず榛樿鐨勫彉閫熺粍
                 timelines = TGridCalculator.GetVisbleTimelines_DesignMode(
                     fumen.SoflansMap.DefaultSoflanList,
                     fumen.BpmList,
@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             else
             {
                 var currentY = target.Editor.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime);
-                //todo 暂时显示默认的变速组
+                //todo 鏆傛椂鏄剧ず榛樿鐨勫彉閫熺粍
                 timelines = TGridCalculator.GetVisbleTimelines_PreviewMode(
                     fumen.SoflansMap.DefaultSoflanList,
                     fumen.BpmList,
@@ -141,7 +141,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (mouseXPercent >= 0.7)
                 {
-                    var alpha = OpenTK.Mathematics.MathHelper.MapRange(mouseXPercent, 0.7, 0.9, 1, 0);
+                    var alpha = (mouseXPercent - 0.7) / (0.9 - 0.7) * (0 - 1) + 1;
                     rightColor = new(1, 1, 1, (float)alpha);
                     leftColor = new(1, 1, 1, 1 - (float)alpha);
                 }

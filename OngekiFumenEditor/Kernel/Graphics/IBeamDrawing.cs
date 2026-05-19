@@ -1,5 +1,5 @@
 using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
-using OpenTK.Mathematics;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {

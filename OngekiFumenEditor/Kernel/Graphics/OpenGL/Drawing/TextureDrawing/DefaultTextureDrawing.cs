@@ -3,13 +3,10 @@ using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
-using Vector2 = System.Numerics.Vector2;
-using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
@@ -98,16 +95,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
             {
                 var modelMatrix =
                     GetOverrideModelMatrix() *
-                    Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
-                    Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
-                    Matrix4.CreateRotationZ(rotation) *
-                    Matrix4.CreateTranslation(position.X, position.Y, 0);
+                    Matrix4x4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
+                    Matrix4x4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
+                    Matrix4x4.CreateRotationZ(rotation) *
+                    Matrix4x4.CreateTranslation(position.X, position.Y, 0);
 
                 shader.Begin();
                 {
                     shader.PassUniform(shader.ModelLocation, modelMatrix);
                     shader.PassUniform(shader.ViewProjectionLocation, GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
-                    shader.PassUniform(shader.ColorLocation, color.ToOpenTKVector4());
+                    shader.PassUniform(shader.ColorLocation, color);
                     shader.PassUniform(shader.DiffuseLocation, texture);
 
                     GL.BindVertexArray(vao);

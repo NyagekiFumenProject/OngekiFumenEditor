@@ -1,17 +1,11 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
+﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Utils;
-using OpenTK.Graphics.OpenGL;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
 using System.Windows.Media.Imaging;
-using Vector2 = System.Numerics.Vector2;
-using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
 {

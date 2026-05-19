@@ -1,4 +1,4 @@
-﻿using OpenTK.Mathematics;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
