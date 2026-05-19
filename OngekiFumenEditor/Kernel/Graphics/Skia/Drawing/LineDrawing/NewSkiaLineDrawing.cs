@@ -14,6 +14,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
     {
         private const int MeshGradientSegmentThreshold = 256;
         private const float MeshAntialiasRadius = 1.5f;
+        private const int MaxPooledPaths = 32;
+        private const int StackPolyThreshold = 64;
+        private const int StackSegmentThreshold = 32;
 
         private readonly Dictionary<VertexDash, SKPathEffect> dashPathEffectCache = new();
         private readonly List<LineVertex> postedPoints = new();
@@ -31,8 +34,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         private SKPoint[] meshPointsBuffer = Array.Empty<SKPoint>();
         private SKColor[] meshColorsBuffer = Array.Empty<SKColor>();
-        private SKPoint[] meshDrawPointsBuffer = Array.Empty<SKPoint>();
-        private SKColor[] meshDrawColorsBuffer = Array.Empty<SKColor>();
 
         private SKCanvas canvas;
         private IDrawingContext target;
@@ -129,45 +130,67 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 return;
 
             var maxSegments = points.Length - 1;
+
+            if (maxSegments <= StackSegmentThreshold)
+            {
+                // Small batches (most Begin/End callers post 2-6 points) skip the ArrayPool entirely.
+                // ~3 KB of stack for the two buffers at threshold 32; well within budget.
+                Span<LineSegment> segmentsBuf = stackalloc LineSegment[StackSegmentThreshold];
+                Span<Run> runsBuf = stackalloc Run[StackSegmentThreshold];
+                PrepareAndDrawCore(points, segmentsBuf, runsBuf, lineWidth);
+                return;
+            }
+
             var segmentsBuffer = ArrayPool<LineSegment>.Shared.Rent(maxSegments);
             var runsBuffer = ArrayPool<Run>.Shared.Rent(maxSegments);
 
             try
             {
-                BuildSegmentsAndRuns(
-                    points,
-                    segmentsBuffer,
-                    runsBuffer,
-                    out var segmentCount,
-                    out var runCount,
-                    out var gradientCount);
-
-                if (segmentCount == 0)
-                    return;
-
-                var segmentsSpan = new ReadOnlySpan<LineSegment>(segmentsBuffer, 0, segmentCount);
-                var runsSpan = new ReadOnlySpan<Run>(runsBuffer, 0, runCount);
-
-                if (gradientCount > MeshGradientSegmentThreshold)
-                {
-                    DrawMeshFallback(segmentsSpan, lineWidth);
-                    return;
-                }
-
-                for (var i = 0; i < runCount; i++)
-                    DrawRun(runsSpan[i], segmentsSpan, lineWidth);
+                PrepareAndDrawCore(points, segmentsBuffer, runsBuffer, lineWidth);
             }
             finally
             {
-                ArrayPool<LineSegment>.Shared.Return(segmentsBuffer, clearArray: true);
-                ArrayPool<Run>.Shared.Return(runsBuffer, clearArray: true);
+                // Buffers contain only value types now (VertexDash is a struct), so the O(n)
+                // clear has no GC purpose.
+                ArrayPool<LineSegment>.Shared.Return(segmentsBuffer, clearArray: false);
+                ArrayPool<Run>.Shared.Return(runsBuffer, clearArray: false);
             }
+        }
+
+        private void PrepareAndDrawCore(
+            ReadOnlySpan<LineVertex> points,
+            Span<LineSegment> segmentsBuffer,
+            Span<Run> runsBuffer,
+            float lineWidth)
+        {
+            BuildSegmentsAndRuns(
+                points,
+                segmentsBuffer,
+                runsBuffer,
+                out var segmentCount,
+                out var runCount,
+                out var gradientCount);
+
+            if (segmentCount == 0)
+                return;
+
+            ReadOnlySpan<LineSegment> segmentsSpan = segmentsBuffer[..segmentCount];
+            ReadOnlySpan<Run> runsSpan = runsBuffer[..runCount];
+
+            if (gradientCount > MeshGradientSegmentThreshold)
+            {
+                DrawMeshFallback(segmentsSpan, lineWidth);
+                return;
+            }
+
+            for (var i = 0; i < runCount; i++)
+                DrawRun(runsSpan[i], segmentsSpan, lineWidth);
         }
 
         private static void BuildSegmentsAndRuns(
             ReadOnlySpan<LineVertex> points,
-            LineSegment[] segmentsBuffer,
-            Run[] runsBuffer,
+            Span<LineSegment> segmentsBuffer,
+            Span<Run> runsBuffer,
             out int segmentCount,
             out int runCount,
             out int gradientCount)
@@ -283,9 +306,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             {
                 if (isContinuousPolyline && !dashed)
                 {
-                    path.MoveTo(ToSKPoint(segments[0].StartPoint));
-                    for (var i = 0; i < segments.Length; i++)
-                        path.LineTo(ToSKPoint(segments[i].EndPoint));
+                    BuildContinuousPolyline(path, segments);
                 }
                 else
                 {
@@ -314,58 +335,84 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             }
         }
 
+        private static void BuildContinuousPolyline(SKPath path, ReadOnlySpan<LineSegment> segments)
+        {
+            // A continuous polyline of N segments has N+1 vertices. AddPoly batches the whole
+            // strip into a single P/Invoke, replacing 1 MoveTo + N LineTo (= N+1 native crossings).
+            // The waveform draws ~1500-3000 segments in this branch, so the saving is dramatic.
+            var pointCount = segments.Length + 1;
+
+            if (pointCount <= StackPolyThreshold)
+            {
+                Span<SKPoint> buf = stackalloc SKPoint[StackPolyThreshold];
+                var slice = buf[..pointCount];
+                slice[0] = ToSKPoint(segments[0].StartPoint);
+                for (var i = 0; i < segments.Length; i++)
+                    slice[i + 1] = ToSKPoint(segments[i].EndPoint);
+                path.AddPoly(slice, close: false);
+            }
+            else
+            {
+                var rented = ArrayPool<SKPoint>.Shared.Rent(pointCount);
+                try
+                {
+                    var slice = rented.AsSpan(0, pointCount);
+                    slice[0] = ToSKPoint(segments[0].StartPoint);
+                    for (var i = 0; i < segments.Length; i++)
+                        slice[i + 1] = ToSKPoint(segments[i].EndPoint);
+                    path.AddPoly(slice, close: false);
+                }
+                finally
+                {
+                    ArrayPool<SKPoint>.Shared.Return(rented, clearArray: false);
+                }
+            }
+        }
+
         private void DrawMeshFallback(ReadOnlySpan<LineSegment> segments, float lineWidth)
         {
             var maxVerts = EstimateMeshVertexCount(segments);
             if (maxVerts == 0)
                 return;
 
-            EnsureMeshCapacity(maxVerts);
-            Array.Clear(meshPointsBuffer);
-            Array.Clear(meshColorsBuffer);
-            var pointsBuffer = meshPointsBuffer;
-            var colorsBuffer = meshColorsBuffer;
+            EnsureMeshCapacityAndClearTails(maxVerts);
 
             var written = 0;
             for (var i = 0; i < segments.Length; i++)
             {
                 var segment = segments[i];
                 if (IsDashed(segment.Dash))
-                    AddDashedSegmentMesh(pointsBuffer, colorsBuffer, ref written, segment, lineWidth);
+                    AddDashedSegmentMesh(meshPointsBuffer, meshColorsBuffer, ref written, segment, lineWidth);
                 else
-                    AddSegmentMesh(pointsBuffer, colorsBuffer, ref written, segment.StartPoint, segment.EndPoint, segment.StartColor, segment.EndColor, lineWidth);
+                    AddSegmentMesh(meshPointsBuffer, meshColorsBuffer, ref written, segment.StartPoint, segment.EndPoint, segment.StartColor, segment.EndColor, segment.Length, lineWidth);
             }
 
             if (written == 0)
                 return;
 
-            EnsureMeshDrawBufferEnoughSize(written);
-
-            Array.Clear(meshDrawPointsBuffer);
-            Array.Clear(meshDrawColorsBuffer);
-
-            Array.Copy(pointsBuffer, meshDrawPointsBuffer, written);
-            Array.Copy(colorsBuffer, meshDrawColorsBuffer, written);
-
-            canvas.DrawVertices(SKVertexMode.Triangles, meshDrawPointsBuffer, meshDrawColorsBuffer, meshPaint);
+            // DrawVertices reads the full array length. The [maxVerts..length) tail was zeroed
+            // by EnsureMeshCapacity, so the GPU sees only degenerate triangles past the real data.
+            canvas.DrawVertices(SKVertexMode.Triangles, meshPointsBuffer, meshColorsBuffer, meshPaint);
             target.PerfomenceMonitor.CountDrawCall(this);
         }
 
-        private void EnsureMeshCapacity(int required)
+        private void EnsureMeshCapacityAndClearTails(int required)
         {
             if (meshPointsBuffer.Length < required)
             {
+                // Fresh allocation is zero-initialized — no tail to clear.
                 meshPointsBuffer = new SKPoint[required];
                 meshColorsBuffer = new SKColor[required];
+                return;
             }
-        }
 
-        private void EnsureMeshDrawBufferEnoughSize(int required)
-        {
-            if (meshDrawPointsBuffer.Length < required)
+            // Buffer already big enough; zero only the unused tail past `required` so the
+            // previous frame's high-water-mark data doesn't leak into the DrawVertices call.
+            var tailLength = meshPointsBuffer.Length - required;
+            if (tailLength > 0)
             {
-                meshDrawPointsBuffer = new SKPoint[required];
-                meshDrawColorsBuffer = new SKColor[required];
+                Array.Clear(meshPointsBuffer, required, tailLength);
+                Array.Clear(meshColorsBuffer, required, tailLength);
             }
         }
 
@@ -401,6 +448,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         private void ReturnPath(SKPath path)
         {
             path.Reset();
+            if (pathPool.Count >= MaxPooledPaths)
+            {
+                // SKPath.Reset doesn't release its internal point/verb buffers, so an unbounded
+                // pool would retain high-water-mark native memory forever after a gradient-heavy frame.
+                path.Dispose();
+                return;
+            }
             pathPool.Push(path);
         }
 
@@ -474,9 +528,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             {
                 segment = default;
 
-                if (start is null || end is null)
-                    return false;
-
                 var length = Vector2.Distance(start.Point, end.Point);
                 if (!(length > 0))
                     return false;
@@ -493,7 +544,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
             if (!(dashLength > 0) || !(cycleLength > 0))
             {
-                AddSegmentMesh(points, colors, ref written, segment.StartPoint, segment.EndPoint, segment.StartColor, segment.EndColor, lineWidth);
+                AddSegmentMesh(points, colors, ref written, segment.StartPoint, segment.EndPoint, segment.StartColor, segment.EndColor, segment.Length, lineWidth);
                 return;
             }
 
@@ -514,6 +565,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     Vector2.Lerp(segment.StartPoint, segment.EndPoint, endT),
                     Vector4.Lerp(segment.StartColor, segment.EndColor, startT),
                     Vector4.Lerp(segment.StartColor, segment.EndColor, endT),
+                    (endT - startT) * segment.Length,
                     lineWidth);
             }
         }
@@ -526,13 +578,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             Vector2 endPoint,
             Vector4 startColor,
             Vector4 endColor,
+            float length,
             float lineWidth)
         {
-            var delta = endPoint - startPoint;
-            var length = delta.Length();
             if (!(length > 0))
                 return;
 
+            var delta = endPoint - startPoint;
             var normal = new Vector2(-delta.Y, delta.X) / length;
             var halfWidth = lineWidth * 0.5f;
 
@@ -586,8 +638,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             return SKShader.CreateLinearGradient(
                 ToSKPoint(segment.StartPoint),
                 ToSKPoint(segment.EndPoint),
-                new[] { ToSKColor(segment.StartColor), ToSKColor(segment.EndColor) },
-                new[] { 0f, 1f },
+                [ToSKColor(segment.StartColor), ToSKColor(segment.EndColor)],
+                [0f, 1f],
                 SKShaderTileMode.Clamp);
         }
 
@@ -598,7 +650,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         private static bool IsDashed(VertexDash dash)
         {
-            return dash is not null && dash.DashSize > 0 && dash.GapSize > 0;
+            return dash.DashSize > 0 && dash.GapSize > 0;
         }
 
         private static SKPoint ToSKPoint(Vector2 point)
@@ -609,15 +661,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         private static SKColor ToSKColor(Vector4 color)
         {
             return new SKColor(
-                ToColorComponent(color.X),
-                ToColorComponent(color.Y),
-                ToColorComponent(color.Z),
-                ToColorComponent(color.W));
-        }
-
-        private static byte ToColorComponent(float value)
-        {
-            return (byte)(Math.Clamp(value, 0f, 1f) * 255);
+                (byte)(color.X * 255),
+                (byte)(color.Y * 255),
+                (byte)(color.Z * 255),
+                (byte)(color.W * 255));
         }
 
         private static Vector4 WithAlpha(Vector4 color, float alpha)
