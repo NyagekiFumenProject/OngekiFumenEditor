@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         private const int StackSegmentThreshold = 32;
 
         private readonly Dictionary<VertexDash, SKPathEffect> dashPathEffectCache = new();
-        private readonly List<LineVertex> postedPoints = new();
+        private readonly List<LineVertex> postedPoints = new(1024);
         private readonly Stack<SKPath> pathPool = new();
         private readonly SKPaint strokePaint = new()
         {
@@ -49,6 +49,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             postedPoints.Clear();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PostPoint(Vector2 point, Vector4 color, VertexDash dash)
         {
             PostPoint(new LineVertex(point, color, dash));
@@ -133,8 +134,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
             if (maxSegments <= StackSegmentThreshold)
             {
-                // Small batches (most Begin/End callers post 2-6 points) skip the ArrayPool entirely.
-                // ~3 KB of stack for the two buffers at threshold 32; well within budget.
                 Span<LineSegment> segmentsBuf = stackalloc LineSegment[StackSegmentThreshold];
                 Span<Run> runsBuf = stackalloc Run[StackSegmentThreshold];
                 PrepareAndDrawCore(points, segmentsBuf, runsBuf, lineWidth);
@@ -150,8 +149,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             }
             finally
             {
-                // Buffers contain only value types now (VertexDash is a struct), so the O(n)
-                // clear has no GC purpose.
                 ArrayPool<LineSegment>.Shared.Return(segmentsBuffer, clearArray: false);
                 ArrayPool<Run>.Shared.Return(runsBuffer, clearArray: false);
             }
@@ -224,14 +221,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     && currentRun.Color == color
                     && currentRun.Dash == dash)
                 {
-                    var isContinuous = currentRun.IsContinuousPolyline
-                        && segmentsBuffer[currentRun.StartIndex + currentRun.Count - 1].EndPoint == segment.StartPoint;
-                    currentRun = currentRun with
-                    {
-                        Count = currentRun.Count + 1,
-                        IsContinuousPolyline = isContinuous
-                    };
-                    runsBuffer[runCount - 1] = currentRun;
+                    ref var runRef = ref runsBuffer[runCount - 1];
+                    runRef.IsContinuousPolyline = runRef.IsContinuousPolyline
+                        && segmentsBuffer[runRef.StartIndex + runRef.Count - 1].EndPoint == segment.StartPoint;
+                    runRef.Count += 1;
                     continue;
                 }
 
@@ -337,9 +330,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         private static void BuildContinuousPolyline(SKPath path, ReadOnlySpan<LineSegment> segments)
         {
-            // A continuous polyline of N segments has N+1 vertices. AddPoly batches the whole
-            // strip into a single P/Invoke, replacing 1 MoveTo + N LineTo (= N+1 native crossings).
-            // The waveform draws ~1500-3000 segments in this branch, so the saving is dramatic.
             var pointCount = segments.Length + 1;
 
             if (pointCount <= StackPolyThreshold)
@@ -390,8 +380,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             if (written == 0)
                 return;
 
-            // DrawVertices reads the full array length. The [maxVerts..length) tail was zeroed
-            // by EnsureMeshCapacity, so the GPU sees only degenerate triangles past the real data.
             canvas.DrawVertices(SKVertexMode.Triangles, meshPointsBuffer, meshColorsBuffer, meshPaint);
             target.PerfomenceMonitor.CountDrawCall(this);
         }
@@ -400,14 +388,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         {
             if (meshPointsBuffer.Length < required)
             {
-                // Fresh allocation is zero-initialized — no tail to clear.
                 meshPointsBuffer = new SKPoint[required];
                 meshColorsBuffer = new SKColor[required];
                 return;
             }
 
-            // Buffer already big enough; zero only the unused tail past `required` so the
-            // previous frame's high-water-mark data doesn't leak into the DrawVertices call.
             var tailLength = meshPointsBuffer.Length - required;
             if (tailLength > 0)
             {
@@ -450,8 +435,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             path.Reset();
             if (pathPool.Count >= MaxPooledPaths)
             {
-                // SKPath.Reset doesn't release its internal point/verb buffers, so an unbounded
-                // pool would retain high-water-mark native memory forever after a gradient-heavy frame.
                 path.Dispose();
                 return;
             }
@@ -506,7 +489,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             }
         }
 
-        private readonly record struct Run(
+        private record struct Run(
             int StartIndex,
             int Count,
             Vector4 Color,
@@ -588,35 +571,40 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             var normal = new Vector2(-delta.Y, delta.X) / length;
             var halfWidth = lineWidth * 0.5f;
 
-            var startInnerA = startPoint - normal * halfWidth;
-            var startInnerB = startPoint + normal * halfWidth;
-            var endInnerA = endPoint - normal * halfWidth;
-            var endInnerB = endPoint + normal * halfWidth;
-            var startOuterA = startPoint - normal * (halfWidth + MeshAntialiasRadius);
-            var startOuterB = startPoint + normal * (halfWidth + MeshAntialiasRadius);
-            var endOuterA = endPoint - normal * (halfWidth + MeshAntialiasRadius);
-            var endOuterB = endPoint + normal * (halfWidth + MeshAntialiasRadius);
+            var inner = normal * halfWidth;
+            var outer = normal * (halfWidth + MeshAntialiasRadius);
 
-            var transparentStartColor = WithAlpha(startColor, 0);
-            var transparentEndColor = WithAlpha(endColor, 0);
+            var skStartInnerA = ToSKPoint(startPoint - inner);
+            var skStartInnerB = ToSKPoint(startPoint + inner);
+            var skEndInnerA = ToSKPoint(endPoint - inner);
+            var skEndInnerB = ToSKPoint(endPoint + inner);
+            var skStartOuterA = ToSKPoint(startPoint - outer);
+            var skStartOuterB = ToSKPoint(startPoint + outer);
+            var skEndOuterA = ToSKPoint(endPoint - outer);
+            var skEndOuterB = ToSKPoint(endPoint + outer);
 
-            AddQuad(points, colors, ref written, startOuterA, endOuterA, endInnerA, startInnerA, transparentStartColor, transparentEndColor, endColor, startColor);
-            AddQuad(points, colors, ref written, startInnerA, endInnerA, endInnerB, startInnerB, startColor, endColor, endColor, startColor);
-            AddQuad(points, colors, ref written, startInnerB, endInnerB, endOuterB, startOuterB, startColor, endColor, transparentEndColor, transparentStartColor);
+            var skStart = ToSKColor(startColor);
+            var skEnd = ToSKColor(endColor);
+            var skTransparentStart = skStart.WithAlpha(0);
+            var skTransparentEnd = skEnd.WithAlpha(0);
+
+            AddQuad(points, colors, ref written, skStartOuterA, skEndOuterA, skEndInnerA, skStartInnerA, skTransparentStart, skTransparentEnd, skEnd, skStart);
+            AddQuad(points, colors, ref written, skStartInnerA, skEndInnerA, skEndInnerB, skStartInnerB, skStart, skEnd, skEnd, skStart);
+            AddQuad(points, colors, ref written, skStartInnerB, skEndInnerB, skEndOuterB, skStartOuterB, skStart, skEnd, skTransparentEnd, skTransparentStart);
         }
 
         private static void AddQuad(
             SKPoint[] points,
             SKColor[] colors,
             ref int written,
-            Vector2 p0,
-            Vector2 p1,
-            Vector2 p2,
-            Vector2 p3,
-            Vector4 c0,
-            Vector4 c1,
-            Vector4 c2,
-            Vector4 c3)
+            SKPoint p0,
+            SKPoint p1,
+            SKPoint p2,
+            SKPoint p3,
+            SKColor c0,
+            SKColor c1,
+            SKColor c2,
+            SKColor c3)
         {
             AddVertex(points, colors, ref written, p0, c0);
             AddVertex(points, colors, ref written, p1, c1);
@@ -626,10 +614,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             AddVertex(points, colors, ref written, p3, c3);
         }
 
-        private static void AddVertex(SKPoint[] points, SKColor[] colors, ref int written, Vector2 point, Vector4 color)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void AddVertex(SKPoint[] points, SKColor[] colors, ref int written, SKPoint point, SKColor color)
         {
-            points[written] = ToSKPoint(point);
-            colors[written] = ToSKColor(color);
+            points[written] = point;
+            colors[written] = color;
             written++;
         }
 
@@ -665,11 +654,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 (byte)(color.Y * 255),
                 (byte)(color.Z * 255),
                 (byte)(color.W * 255));
-        }
-
-        private static Vector4 WithAlpha(Vector4 color, float alpha)
-        {
-            return new Vector4(color.X, color.Y, color.Z, alpha);
         }
     }
 }
