@@ -255,7 +255,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
                     using var shader = CreateGradientShader(segment);
                     strokePaint.StrokeWidth = lineWidth;
-                    strokePaint.PathEffect = GetDashPathEffect(segment.Dash);
+                    strokePaint.PathEffect = GetOrCreateCachedDashPathEffect(segment.Dash);
                     strokePaint.Shader = shader;
                     strokePaint.Color = SKColors.White;
 
@@ -301,7 +301,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 }
 
                 strokePaint.StrokeWidth = lineWidth;
-                strokePaint.PathEffect = GetDashPathEffect(dash);
+                strokePaint.PathEffect = GetOrCreateCachedDashPathEffect(dash);
                 strokePaint.Shader = null;
                 strokePaint.Color = ToSKColor(color);
 
@@ -360,12 +360,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             }
         }
 
-        private void EnsureMeshDrawBufferEnoughSize(int requireSize)
+        private void EnsureMeshDrawBufferEnoughSize(int required)
         {
-            if (meshDrawPointsBuffer.Length < requireSize)
+            if (meshDrawPointsBuffer.Length < required)
             {
-                meshDrawPointsBuffer = new SKPoint[requireSize];
-                meshDrawColorsBuffer = new SKColor[requireSize];
+                meshDrawPointsBuffer = new SKPoint[required];
+                meshDrawColorsBuffer = new SKColor[required];
             }
         }
 
@@ -404,7 +404,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             pathPool.Push(path);
         }
 
-        private SKPathEffect GetDashPathEffect(VertexDash dash)
+        private SKPathEffect GetOrCreateCachedDashPathEffect(VertexDash dash)
         {
             if (!IsDashed(dash))
                 return null;
