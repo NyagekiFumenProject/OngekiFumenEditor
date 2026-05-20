@@ -359,7 +359,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             if (IsPreviewMode)
             {
                 //Preview Mode
-                var ranges =
+                using var ranges =
                     pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList,
                         Setting.VerticalDisplayScale);
                 foreach (var x in ranges)

@@ -3,6 +3,7 @@ using OngekiFumenEditor.Core.Base.Collections.Base.RangeTree;
 using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Core.Utils;
+using OngekiFumenEditor.Core.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,22 +34,7 @@ namespace OngekiFumenEditor.Core.Base.Collections
         private List<SoflanPoint> cachedSoflanPositionList_DesignMode = new();
         private List<SoflanPoint> cachedSoflanPositionList_PreviewMode = new();
 
-        public record VisibleTGridRange(TGrid minTGrid, TGrid maxTGrid)
-        {
-            public bool TryMerge(VisibleTGridRange another, out VisibleTGridRange mergedResult)
-            {
-                mergedResult = Merge(another);
-                return mergedResult != default;
-            }
-
-            public VisibleTGridRange Merge(VisibleTGridRange another)
-            {
-                if ((minTGrid <= another.minTGrid && another.minTGrid <= maxTGrid) ||
-                    another.minTGrid <= minTGrid && minTGrid <= another.maxTGrid)
-                    return new(minTGrid <= another.minTGrid ? minTGrid : another.minTGrid, maxTGrid >= another.maxTGrid ? maxTGrid : another.maxTGrid);
-                return default;
-            }
-        }
+        public readonly record struct VisibleTGridRange(TGrid minTGrid, TGrid maxTGrid);
 
         public record SoflanSegment(int curIdx, SoflanPoint cur, SoflanPoint next);
 
@@ -249,7 +235,19 @@ namespace OngekiFumenEditor.Core.Base.Collections
             return cachePostionList_PreviewMode;
         }
 
-        public IEnumerable<VisibleTGridRange> GetVisibleRanges_PreviewMode(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale)
+        private sealed class SoflanSegmentByCurIdxComparer : IComparer<SoflanSegment>
+        {
+            public static readonly SoflanSegmentByCurIdxComparer Instance = new();
+            public int Compare(SoflanSegment x, SoflanSegment y) => x.curIdx.CompareTo(y.curIdx);
+        }
+
+        private sealed class VisibleTGridRangeByMinComparer : IComparer<VisibleTGridRange>
+        {
+            public static readonly VisibleTGridRangeByMinComparer Instance = new();
+            public int Compare(VisibleTGridRange x, VisibleTGridRange y) => x.minTGrid.CompareTo(y.minTGrid);
+        }
+
+        public IPooledList<VisibleTGridRange> GetVisibleRanges_PreviewMode(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale)
         {
             currentY /= scale;
             var actualViewHeight = viewHeight / scale;
@@ -260,189 +258,212 @@ namespace OngekiFumenEditor.Core.Base.Collections
             var list = GetCachedSoflanPositionList_PreviewMode(bpmList);
             var segments = GetCachedSoflanSegment_PreviewMode(bpmList);
 
-            var fullCheckSets = new HashSet<int>();
+            using var fullCheckSets = ObjectPool.GetPooledSet<int>();
+            var rawResults = ObjectPool.GetPooledList<VisibleTGridRange>();
 
-            IEnumerable<VisibleTGridRange> TryMerge(IEnumerable<VisibleTGridRange> sortedList)
+            DoCalcSegment(list, segments, rawResults, fullCheckSets,
+                currentY, actualViewHeight, actualPreOffset, actualViewMinY, actualViewMaxY);
+
+            // 合并重叠区间 -> 写入最终结果
+            var result = ObjectPool.GetPooledList<VisibleTGridRange>();
+            MergeOverlapped(rawResults, result);
+            rawResults.Dispose();
+            return result;
+        }
+
+        private static void MergeOverlapped(IPooledList<VisibleTGridRange> rawResults, IPooledList<VisibleTGridRange> output)
+        {
+            if (rawResults.Count == 0)
+                return;
+
+            rawResults.Sort(VisibleTGridRangeByMinComparer.Instance);
+
+            var cur = rawResults[0];
+            for (int i = 1; i < rawResults.Count; i++)
             {
-                using var itor = sortedList.OrderBy(x => x.minTGrid).GetEnumerator();
-                if (!itor.MoveNext())
-                    yield break;
-
-                var cur = itor.Current;
-                while (itor.MoveNext())
+                var next = rawResults[i];
+                if (next.minTGrid <= cur.maxTGrid)
                 {
-                    var next = itor.Current;
-                    if (next.minTGrid <= cur.maxTGrid)
-                        cur = new(cur.minTGrid <= next.minTGrid ? cur.minTGrid : next.minTGrid, cur.maxTGrid >= next.maxTGrid ? cur.maxTGrid : next.maxTGrid);
-                    else
-                    {
-                        yield return cur;
-                        cur = next;
-                    }
+                    var newMin = cur.minTGrid <= next.minTGrid ? cur.minTGrid : next.minTGrid;
+                    var newMax = cur.maxTGrid >= next.maxTGrid ? cur.maxTGrid : next.maxTGrid;
+                    cur = new VisibleTGridRange(newMin, newMax);
                 }
-
-                yield return cur;
+                else
+                {
+                    output.Add(cur);
+                    cur = next;
+                }
             }
+            output.Add(cur);
+        }
 
-            IEnumerable<VisibleTGridRange> CalcSegment(int posIdx, double y, double leftRemain, double rightRemain)
+        private static void DoCalcSegment(
+            IList<SoflanPoint> list,
+            IIntervalTree<double, SoflanSegment> segments,
+            IPooledList<VisibleTGridRange> rawResults,
+            IPooledSet<int> fullCheckSets,
+            double currentY, double actualViewHeight, double actualPreOffset,
+            double actualViewMinY, double actualViewMaxY)
+        {
+            if (list.Count > 1)
             {
-                if (fullCheckSets.Contains(posIdx))
-                    return Enumerable.Empty<VisibleTGridRange>();
-
-                var cur = list[posIdx];
-                var next = list[posIdx + 1];
-                var absSpeed = Math.Abs(cur.Speed);
-
-                var leftMergeds = Enumerable.Empty<VisibleTGridRange>();
-                var rightMergeds = Enumerable.Empty<VisibleTGridRange>();
-                var left = 0d;
-                var right = 0d;
-                var newLeftRemain = 0d;
-                var newRightRemain = 0d;
-                var leftTGrid = default(TGrid);
-                var rightTGrid = default(TGrid);
-
-                if (cur.Speed > 0)
+                using var querySegments = ObjectPool.GetPooledList<SoflanSegment>();
+                using var seenIdx = ObjectPool.GetPooledSet<int>();
+                foreach (var s in segments.Query(actualViewMinY, actualViewMaxY))
                 {
-                    var calcLeftY = y - leftRemain;
-                    left = Math.Max(calcLeftY, cur.Y);
-                    newLeftRemain = Math.Min(leftRemain, cur.Y - calcLeftY);
-
-                    var calcRightY = y + rightRemain;
-                    right = Math.Min(next.Y, calcRightY);
-                    newRightRemain = Math.Min(rightRemain, calcRightY - next.Y);
+                    if (seenIdx.Add(s.curIdx))
+                        querySegments.Add(s);
                 }
-                else if (cur.Speed < 0)
+                querySegments.Sort(SoflanSegmentByCurIdxComparer.Instance);
+
+                var scanLeftLength = actualViewHeight - actualPreOffset;
+                for (int i = querySegments.Count - 1; i >= 0; i--)
+                    CalcSegmentRecursive(querySegments[i].curIdx, currentY, 0, scanLeftLength,
+                        list, rawResults, fullCheckSets, actualViewHeight);
+
+                fullCheckSets.Clear();
+
+                var scanRightLength = actualPreOffset;
+                for (int i = 0; i < querySegments.Count; i++)
+                    CalcSegmentRecursive(querySegments[i].curIdx, currentY, scanRightLength, 0,
+                        list, rawResults, fullCheckSets, actualViewHeight);
+
+                var last = list[list.Count - 1];
+                if (currentY >= last.Y)
                 {
-                    var calcLeftY = y + leftRemain;
-                    left = Math.Min(calcLeftY, cur.Y);
-                    newLeftRemain = Math.Min(-cur.Y + left, leftRemain);
+                    var absSpeed = Math.Abs(last.Speed);
+                    var leftRemain = actualPreOffset;
+                    var rightRemain = actualViewHeight - actualPreOffset;
 
-                    var calcRightY = y - rightRemain;
-                    right = Math.Max(next.Y, calcRightY);
-                    newRightRemain = Math.Min(next.Y - calcRightY, rightRemain);
-                }
-                else
-                {
-                    newLeftRemain = leftRemain;
-                    newRightRemain = rightRemain;
-                }
-
-                VisibleTGridRange curRange;
-                if (cur.Speed > 0)
-                {
-                    leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed));
-                    rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed));
-                    curRange = new(leftTGrid, rightTGrid);
-                }
-                else if (cur.Speed < 0)
-                {
-                    leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, cur.Y - left) / absSpeed))) ?? TGrid.Zero;
-                    rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed));
-                    curRange = new(leftTGrid, rightTGrid);
-                }
-                else
-                {
-                    leftTGrid = cur.TGrid;
-                    rightTGrid = next.TGrid;
-                    left = cur.Y;
-                    right = next.Y;
-                    curRange = new(leftTGrid, rightTGrid);
-                }
-
-                if (newRightRemain >= 0 && newLeftRemain >= 0)
-                    fullCheckSets.Add(posIdx);
-
-                if (newLeftRemain > 0)
-                {
-                    if (posIdx > 0)
-                        leftMergeds = CalcSegment(posIdx - 1, left, newLeftRemain, 0);
-                    else
-                    {
-                        var overLeftTGrid = leftTGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newLeftRemain / absSpeed));
-                        leftMergeds = leftMergeds.Append(new VisibleTGridRange(overLeftTGrid ?? TGrid.Zero, leftTGrid));
-                    }
-                }
-
-                if (newRightRemain > 0)
-                {
-                    if (posIdx < list.Count - 2)
-                        rightMergeds = CalcSegment(posIdx + 1, right, 0, newRightRemain);
-                    else
-                    {
-                        var absNextSpeed = Math.Abs(next.Speed);
-                        var overRightTGrid = rightTGrid + (absNextSpeed == 0 ? GridOffset.Zero : next.Bpm.LengthConvertToOffset(newRightRemain / absNextSpeed));
-                        rightMergeds = rightMergeds.Append(new VisibleTGridRange(rightTGrid, overRightTGrid));
-                    }
-                }
-
-                return leftMergeds.Append(curRange).Concat(rightMergeds);
-            }
-
-            IEnumerable<VisibleTGridRange> CoreQuery()
-            {
-                if (list.Count > 1)
-                {
-                    var querySegments = segments.Query(currentY, currentY)
-                        .Concat(segments.Query(actualViewMinY, actualViewMaxY))
-                        .Distinct()
-                        .OrderBy(x => x.curIdx)
-                        .ToList();
-
-                    var scanLeftLength = actualViewHeight - actualPreOffset;
-                    for (int i = querySegments.Count - 1; i >= 0; i--)
-                    {
-                        foreach (var range in CalcSegment(querySegments[i].curIdx, currentY, 0, scanLeftLength))
-                            yield return range;
-                    }
-
-                    fullCheckSets.Clear();
-
-                    var scanRightLength = actualPreOffset;
-                    for (int i = 0; i < querySegments.Count; i++)
-                    {
-                        foreach (var range in CalcSegment(querySegments[i].curIdx, currentY, scanRightLength, 0))
-                            yield return range;
-                    }
-
-                    var last = list.Last();
-                    if (currentY >= last.Y)
-                    {
-                        var absSpeed = Math.Abs(last.Speed);
-                        var leftRemain = actualPreOffset;
-                        var rightRemain = actualViewHeight - actualPreOffset;
-
-                        if (last.Speed > 0)
-                        {
-                            var left = Math.Max(currentY - leftRemain, last.Y);
-                            var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((left - last.Y) / absSpeed));
-                            var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((currentY + rightRemain - last.Y) / absSpeed));
-                            yield return new(leftTGrid, rightTGrid);
-                        }
-                        else
-                        {
-                            var left = Math.Min(currentY + leftRemain, last.Y);
-                            var leftTGrid = (last.TGrid - (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, last.Y - left) / absSpeed))) ?? TGrid.Zero;
-                            var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((last.Y - (currentY - rightRemain)) / absSpeed));
-                            yield return new(leftTGrid, rightTGrid);
-                        }
-                    }
-                }
-                else
-                {
-                    var last = list[0];
                     if (last.Speed > 0)
                     {
-                        var absSpeed = Math.Abs(last.Speed);
-                        var left = Math.Max(0, actualViewMinY);
-                        var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(left / absSpeed));
-                        var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((left + actualViewHeight) / absSpeed));
-                        yield return new(leftTGrid, rightTGrid);
+                        var left = Math.Max(currentY - leftRemain, last.Y);
+                        var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((left - last.Y) / absSpeed));
+                        var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((currentY + rightRemain - last.Y) / absSpeed));
+                        rawResults.Add(new VisibleTGridRange(leftTGrid, rightTGrid));
+                    }
+                    else
+                    {
+                        var left = Math.Min(currentY + leftRemain, last.Y);
+                        var leftTGrid = (last.TGrid - (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, last.Y - left) / absSpeed))) ?? TGrid.Zero;
+                        var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((last.Y - (currentY - rightRemain)) / absSpeed));
+                        rawResults.Add(new VisibleTGridRange(leftTGrid, rightTGrid));
                     }
                 }
             }
+            else
+            {
+                var last = list[0];
+                if (last.Speed > 0)
+                {
+                    var absSpeed = Math.Abs(last.Speed);
+                    var left = Math.Max(0, actualViewMinY);
+                    var leftTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset(left / absSpeed));
+                    var rightTGrid = last.TGrid + (absSpeed == 0 ? GridOffset.Zero : last.Bpm.LengthConvertToOffset((left + actualViewHeight) / absSpeed));
+                    rawResults.Add(new VisibleTGridRange(leftTGrid, rightTGrid));
+                }
+            }
+        }
 
-            return TryMerge(CoreQuery());
+        private static void CalcSegmentRecursive(int posIdx, double y, double leftRemain, double rightRemain,
+            IList<SoflanPoint> list, IPooledList<VisibleTGridRange> rawResults, IPooledSet<int> fullCheckSets,
+            double actualViewHeight)
+        {
+            if (fullCheckSets.Contains(posIdx))
+                return;
+
+            var cur = list[posIdx];
+            var next = list[posIdx + 1];
+            var absSpeed = Math.Abs(cur.Speed);
+
+            var left = 0d;
+            var right = 0d;
+            var newLeftRemain = 0d;
+            var newRightRemain = 0d;
+            TGrid leftTGrid;
+            TGrid rightTGrid;
+
+            if (cur.Speed > 0)
+            {
+                var calcLeftY = y - leftRemain;
+                left = Math.Max(calcLeftY, cur.Y);
+                newLeftRemain = Math.Min(leftRemain, cur.Y - calcLeftY);
+
+                var calcRightY = y + rightRemain;
+                right = Math.Min(next.Y, calcRightY);
+                newRightRemain = Math.Min(rightRemain, calcRightY - next.Y);
+            }
+            else if (cur.Speed < 0)
+            {
+                var calcLeftY = y + leftRemain;
+                left = Math.Min(calcLeftY, cur.Y);
+                newLeftRemain = Math.Min(-cur.Y + left, leftRemain);
+
+                var calcRightY = y - rightRemain;
+                right = Math.Max(next.Y, calcRightY);
+                newRightRemain = Math.Min(next.Y - calcRightY, rightRemain);
+            }
+            else
+            {
+                newLeftRemain = leftRemain;
+                newRightRemain = rightRemain;
+            }
+
+            VisibleTGridRange curRange;
+            if (cur.Speed > 0)
+            {
+                leftTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((left - cur.Y) / absSpeed));
+                rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((right - cur.Y) / absSpeed));
+                curRange = new VisibleTGridRange(leftTGrid, rightTGrid);
+            }
+            else if (cur.Speed < 0)
+            {
+                leftTGrid = (cur.TGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(Math.Max(actualViewHeight, cur.Y - left) / absSpeed))) ?? TGrid.Zero;
+                rightTGrid = cur.TGrid + (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset((cur.Y - right) / absSpeed));
+                curRange = new VisibleTGridRange(leftTGrid, rightTGrid);
+            }
+            else
+            {
+                leftTGrid = cur.TGrid;
+                rightTGrid = next.TGrid;
+                left = cur.Y;
+                right = next.Y;
+                curRange = new VisibleTGridRange(leftTGrid, rightTGrid);
+            }
+
+            if (newRightRemain >= 0 && newLeftRemain >= 0)
+                fullCheckSets.Add(posIdx);
+
+            if (newLeftRemain > 0)
+            {
+                if (posIdx > 0)
+                {
+                    CalcSegmentRecursive(posIdx - 1, left, newLeftRemain, 0,
+                        list, rawResults, fullCheckSets, actualViewHeight);
+                }
+                else
+                {
+                    var overLeftTGrid = leftTGrid - (absSpeed == 0 ? GridOffset.Zero : cur.Bpm.LengthConvertToOffset(newLeftRemain / absSpeed));
+                    rawResults.Add(new VisibleTGridRange(overLeftTGrid ?? TGrid.Zero, leftTGrid));
+                }
+            }
+
+            rawResults.Add(curRange);
+
+            if (newRightRemain > 0)
+            {
+                if (posIdx < list.Count - 2)
+                {
+                    CalcSegmentRecursive(posIdx + 1, right, 0, newRightRemain,
+                        list, rawResults, fullCheckSets, actualViewHeight);
+                }
+                else
+                {
+                    var absNextSpeed = Math.Abs(next.Speed);
+                    var overRightTGrid = rightTGrid + (absNextSpeed == 0 ? GridOffset.Zero : next.Bpm.LengthConvertToOffset(newRightRemain / absNextSpeed));
+                    rawResults.Add(new VisibleTGridRange(rightTGrid, overRightTGrid));
+                }
+            }
         }
 
         public double CalculateSpeed(BpmList bpmList, TGrid t)
