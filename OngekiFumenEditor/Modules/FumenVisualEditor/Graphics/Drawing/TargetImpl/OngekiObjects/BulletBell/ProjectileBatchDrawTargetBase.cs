@@ -11,11 +11,11 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.UI.Controls.ObjectInspector;
 using OngekiFumenEditor.Utils;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -24,9 +24,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public abstract class ProjectileBatchDrawTargetBase<T> : CommonBatchDrawTargetBase<T>, IDisposable where T : OngekiMovableObjectBase, IProjectile
     {
-        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
-        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
+        public sealed class DrawBuffer
+        {
+            public Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> Normal;
+            public Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> Selected;
+            public List<(Vector2 pos, string str)> StrList;
+        }
+
+        protected Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
+        protected Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
         protected List<(Vector2 pos, string str)> drawStrList = new();
+
+        private DrawBuffer mainBuffer;
+
+        private static readonly Comparison<(Vector2, Vector2, float, Vector4)> _yCompare =
+            static (a, b) => a.Item2.Y.CompareTo(b.Item2.Y);
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
         private IStringDrawing stringDrawing;
@@ -49,6 +61,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             Log.LogDebug($"BulletDrawingTarget.MaxDegreeOfParallelism = {parallelOptions.MaxDegreeOfParallelism}");
 
             parallelCountLimit = Properties.EditorGlobalSetting.Default.ParallelCountLimit;
+
+            mainBuffer = new DrawBuffer
+            {
+                Normal = normalDrawList,
+                Selected = selectedDrawList,
+                StrList = drawStrList,
+            };
         }
 
         public virtual void Dispose()
@@ -56,8 +75,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             ClearDrawList();
         }
 
-        public abstract void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate);
-        public abstract void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate);
+        public abstract void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate, DrawBuffer buffer);
+        public abstract void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate, DrawBuffer buffer);
 
         private void DrawDesignMode(IFumenEditorDrawingContext target, T obj)
         {
@@ -65,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var toTime = target.ConvertToY_DefaultSoflanGroup(obj.TGrid);
 
             var pos = new Vector2((float)toX, (float)toTime);
-            DrawVisibleObject_DesignMode(target, obj, pos, 0);
+            DrawVisibleObject_DesignMode(target, obj, pos, 0, mainBuffer);
         }
 
         private void DrawPallateStr(IDrawingContext target)
@@ -83,16 +102,49 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             drawStrList.Clear();
         }
 
+        private DrawBuffer CreateThreadLocalBuffer()
+        {
+            var normal = new Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>>(normalDrawList.Count);
+            foreach (var key in normalDrawList.Keys)
+                normal[key] = new List<(Vector2, Vector2, float, Vector4)>();
+            var selected = new Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>>(selectedDrawList.Count);
+            foreach (var key in selectedDrawList.Keys)
+                selected[key] = new List<(Vector2, Vector2, float, Vector4)>();
+            return new DrawBuffer { Normal = normal, Selected = selected, StrList = null };
+        }
+
+        private void MergeBuffer(DrawBuffer local)
+        {
+            lock (normalDrawList)
+            {
+                foreach (var (key, list) in local.Normal)
+                {
+                    if (list.Count > 0 && normalDrawList.TryGetValue(key, out var dst))
+                        dst.AddRange(list);
+                }
+                foreach (var (key, list) in local.Selected)
+                {
+                    if (list.Count > 0 && selectedDrawList.TryGetValue(key, out var dst))
+                        dst.AddRange(list);
+                }
+            }
+        }
+
         private void DrawPreviewMode(IFumenEditorDrawingContext target, IEnumerable<T> objs)
         {
             var currentTGrid = target.Editor.ConvertAudioTimeToTGrid(target.CurrentPlayTime);
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
-            var baseY = Math.Min(target.CurrentDrawingTargetContext.Rect.MinY, target.CurrentDrawingTargetContext.Rect.MaxY) + judgeOffset;
+            var rect = target.CurrentDrawingTargetContext.Rect;
+            var rectMinX = rect.MinX;
+            var rectMaxX = rect.MaxX;
+            var rectMinY = rect.MinY;
+            var rectMaxY = rect.MaxY;
+            var baseY = Math.Min(rectMinY, rectMaxY) + judgeOffset;
             var scale = target.Editor.Setting.VerticalDisplayScale;
             var bpmList = target.Editor.Fumen.BpmList;
             var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
             //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
-            var height = target.CurrentDrawingTargetContext.Rect.Height;
+            var height = rect.Height;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToYNonSoflan(TGrid tgrid)
@@ -118,10 +170,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var randomSeed = BulletPallete.RandomSeed;
 
-            void _Draw(T obj)
+            void _Draw(T obj, DrawBuffer buffer)
             {
                 /*
-                --------------------------- toTime 
+                --------------------------- toTime
                         \
                          \
                           \
@@ -137,7 +189,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 ---------------------------- fromTime = toTime - appearOffsetTime
                  */
 
-                //¼ÆËãÏòÁ¿»¯µÄÎï¼şÔË¶¯Ê±¼ä
+                //å­å¼¹å®Œå…¨ç»è¿‡ç”»é¢æ‰€éœ€çš„è¿åŠ¨æ—¶é—´
                 var appearOffsetTime = height / obj.Speed;
 
                 var toTime = 0d;
@@ -159,10 +211,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var precent = (currentTime - fromTime) / appearOffsetTime;
                 var timeY = baseY + height * (1 - precent);
 
-                if (timeY > target.CurrentDrawingTargetContext.Rect.MaxY)
+                if (timeY > rectMaxY)
                     return;
-                //todo CheckVisible()ÕâÀïÊÇ¿¼ÂÇµ½¹âÑæÄÇ¸öBell»á²ĞÁô£¬ÒòÎª»­ÖáËÙ¶ÈÌ«¿ì£¨¸Ğ¾õÊÇ¸öbugµ«ºóÃæÓĞ¾«Á¦ÔÙ×øÀÎ°É£©
-                if (timeY < target.CurrentDrawingTargetContext.Rect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
+                //todo CheckVisible()è¿™é‡Œæ˜¯è€ƒè™‘åˆ°å…‰ç„°é‚£ä¸ªBellä¼šæ®‹ç•™ï¼Œå› ä¸ºç”»è½´é€Ÿåº¦å¤ªå¿«ï¼ˆæ„Ÿè§‰æ˜¯ä¸ªbugä½†åé¢æœ‰ç²¾åŠ›å†åç‰¢å§ï¼‰
+                if (timeY < rectMinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
                     return;
 
                 var fromXUnit = 0d;
@@ -193,7 +245,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (rosr > 0)
                 {
                     var id = obj.Id;
-                    //²»ÏëÓÃRandomÀà£¬Ö±½ÓÒì»ò¼ÆËã°É
+                    //ä¸ä½¿ç”¨Randomç±»ï¼Œé¿å…éšæœºæ•°å¹²æ‰°
                     var seed = Math.Abs((randomSeed * id + 123) * id ^ id);
                     var actualRandomOffset = (-rosr) + (seed % (rosr - (-rosr) + 1));
                     toXUnit += actualRandomOffset;
@@ -228,28 +280,38 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var toX = convertToX(toXUnit);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
-                if (!(target.CurrentDrawingTargetContext.Rect.MinX <= timeX && timeX <= target.CurrentDrawingTargetContext.Rect.MaxX))
+                if (!(rectMinX <= timeX && timeX <= rectMaxX))
                     return;
 
                 var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
                 var pos = new Vector2((float)timeX, (float)timeY);
 
-                DrawVisibleObject_PreviewMode(target, obj, pos, rotate);
+                DrawVisibleObject_PreviewMode(target, obj, pos, rotate, buffer);
             }
 
             /*
-             ´æÔÚspd < 1»òÕßsoflanÓ°ÏìµÄ×Óµ¯/bellÎï¼ş¡£Òò´ËÎŞ·¨¼òµ¥µÄÊ¹ÓÃ¶ş·Ö·¨¿ìËÙÃ¶¾ÙÉ¸Ñ¡Îï¼ş
-             Ê¹ÓÃ²¢ĞĞ¼ÆËã£¬½«ËùÓĞbell/bulletÈ«²¿ÅĞ¶Ï£¬µ±È»ÅĞ¶ÏµÄ½á¹ûÒ²ÄÜÖ±½ÓÄÃÀ´×ö¼ÆËã
-             //todo »¹ÄÜÓÅ»¯
+             ç”±äºspd < 1æˆ–è€…soflanå½±å“ä¸‹çš„å­å¼¹/bellçš„è½¨è¿¹æ˜¯æ— æ³•ç®€å•åœ°ä½¿ç”¨äºŒåˆ†æ³•æˆ–è€…æšä¸¾ç­›é€‰å‡ºæ¥
+             ä½¿ç”¨å¹¶è¡Œè®¡ç®—ï¼Œå¯¹æ‰€æœ‰bell/bulletå…¨éƒ¨åˆ¤æ–­ï¼Œè™½ç„¶åˆ¤æ–­çš„ç»“æœä¹Ÿåªç›´æ¥ä¼ ç»™åç»­ç»˜åˆ¶
+             //todo è¿›ä¸€æ­¥ä¼˜åŒ–
              */
-            if (objs.Count() < parallelCountLimit)
+            var totalCount = (objs as ICollection<T>)?.Count ?? objs.Count();
+            if (totalCount < parallelCountLimit)
             {
                 foreach (var obj in objs)
-                    _Draw(obj);
+                    _Draw(obj, mainBuffer);
             }
             else
             {
-                Parallel.ForEach(objs, parallelOptions, _Draw);
+                Parallel.ForEach(
+                    objs,
+                    parallelOptions,
+                    CreateThreadLocalBuffer,
+                    (obj, _, local) =>
+                    {
+                        _Draw(obj, local);
+                        return local;
+                    },
+                    MergeBuffer);
             }
         }
 
@@ -265,10 +327,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 DrawPreviewMode(target, objs);
             }
 
-            foreach (var item in selectedDrawList)
-                highlightDrawing.Draw(target, item.Key, item.Value.OrderBy(x => x.Item2.Y));
-            foreach (var item in normalDrawList)
-                batchTextureDrawing.Draw(target, item.Key, item.Value.OrderBy(x => x.Item2.Y));
+            foreach (var (texture, list) in selectedDrawList)
+            {
+                if (list.Count == 0)
+                    continue;
+                list.Sort(_yCompare);
+                highlightDrawing.Begin(target, texture);
+                var span = CollectionsMarshal.AsSpan(list);
+                for (int i = 0; i < span.Length; i++)
+                {
+                    ref var item = ref span[i];
+                    highlightDrawing.PostSprite(item.Item1, item.Item2, item.Item3, item.Item4);
+                }
+                highlightDrawing.End();
+            }
+            foreach (var (texture, list) in normalDrawList)
+            {
+                if (list.Count == 0)
+                    continue;
+                list.Sort(_yCompare);
+                batchTextureDrawing.Begin(target, texture);
+                var span = CollectionsMarshal.AsSpan(list);
+                for (int i = 0; i < span.Length; i++)
+                {
+                    ref var item = ref span[i];
+                    batchTextureDrawing.PostSprite(item.Item1, item.Item2, item.Item3, item.Item4);
+                }
+                batchTextureDrawing.End();
+            }
 
             if (target.Editor.IsDesignMode)
                 DrawPallateStr(target);
