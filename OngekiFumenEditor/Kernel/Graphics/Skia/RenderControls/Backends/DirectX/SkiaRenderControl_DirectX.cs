@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System;
 using System.Collections.Generic;
@@ -23,6 +23,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
 
         private WriteableBitmap bitmap;
 
+        private SKSurface cachedRenderSurface;
+        private SKSurface cachedPresentSurface;
+        private SKImageInfo cachedInfo;
+        private int cachedPixelWidth = -1;
+        private int cachedPixelHeight = -1;
+        private float cachedScaleX;
+        private float cachedScaleY;
+
         public SkiaRenderControl_DirectX()
         {
             if (grContext is null)
@@ -31,6 +39,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
                 d3dBackendContext = d3dContext.CreateBackendContext();
                 grContext = GRContext.CreateDirect3D(d3dBackendContext);
             }
+
+            Unloaded += (_, _) => ReleaseCachedSurfaces();
+        }
+
+        private void ReleaseCachedSurfaces()
+        {
+            cachedPresentSurface?.Dispose();
+            cachedPresentSurface = null;
+            cachedRenderSurface?.Dispose();
+            cachedRenderSurface = null;
+            cachedPixelWidth = -1;
+            cachedPixelHeight = -1;
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -51,35 +71,57 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
             if (size.Width <= 0 || size.Height <= 0)
                 return;
 
-            var info = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
+            var sizeChanged = size.Width != cachedPixelWidth
+                           || size.Height != cachedPixelHeight
+                           || scaleX != cachedScaleX
+                           || scaleY != cachedScaleY;
 
-            // reset the bitmap if the size has changed
-            if (bitmap == null || info.Width != bitmap.PixelWidth || info.Height != bitmap.PixelHeight)
-                bitmap = new WriteableBitmap(info.Width, info.Height, BitmapDpi * scaleX, BitmapDpi * scaleY, PixelFormats.Pbgra32, null);
-
-            // draw on the bitmap
-            bitmap.Lock();
-
-            // 新建一个DX渲染的Surface
-            using var renderSurface = SKSurface.Create(grContext, true, info);
-
-            if (!IgnorePixelScaling)
+            if (sizeChanged)
             {
-                var canvas = renderSurface.Canvas;
-                canvas.Scale(scaleX, scaleY);
-                canvas.Save();
+                cachedInfo = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
+                cachedPixelWidth = size.Width;
+                cachedPixelHeight = size.Height;
+                cachedScaleX = scaleX;
+                cachedScaleY = scaleY;
+
+                bitmap = new WriteableBitmap(cachedInfo.Width, cachedInfo.Height, BitmapDpi * scaleX, BitmapDpi * scaleY, PixelFormats.Pbgra32, null);
+
+                cachedRenderSurface?.Dispose();
+                cachedRenderSurface = SKSurface.Create(grContext, true, cachedInfo);
+
+                //BackBuffer 指针随 bitmap 重建会变化，置 null 让下面在 Lock 后重建
+                cachedPresentSurface?.Dispose();
+                cachedPresentSurface = null;
             }
 
-            CurrentRenderSurface = renderSurface;
-            OnPaintSurface(new SKPaintSurfaceEventArgs(renderSurface, info.WithSize(userVisibleSize), info));
-            CurrentRenderSurface = default;
+            bitmap.Lock();
 
-            //渲染结果复制到bitmap上
-            using var presentSurface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
-            presentSurface.Canvas.DrawSurface(renderSurface, 0, 0);
+            if (cachedPresentSurface is null)
+                cachedPresentSurface = SKSurface.Create(cachedInfo, bitmap.BackBuffer, bitmap.BackBufferStride);
 
-            // draw the bitmap to the screen
-            bitmap.AddDirtyRect(new Int32Rect(0, 0, info.Width, size.Height));
+            var canvas = cachedRenderSurface.Canvas;
+            canvas.Save();
+            try
+            {
+                if (!IgnorePixelScaling)
+                    canvas.Scale(scaleX, scaleY);
+
+                CurrentRenderSurface = cachedRenderSurface;
+                OnPaintSurface(new SKPaintSurfaceEventArgs(cachedRenderSurface, cachedInfo.WithSize(userVisibleSize), cachedInfo));
+                CurrentRenderSurface = default;
+            }
+            finally
+            {
+                canvas.Restore();
+            }
+
+            //显式提交 GPU 命令；下面 DrawSurface 会负责必要的同步
+            cachedRenderSurface.Flush(submit: true, synchronous: false);
+
+            //渲染结果复制到bitmap上（隐式 GPU→CPU 同步）
+            cachedPresentSurface.Canvas.DrawSurface(cachedRenderSurface, 0, 0);
+
+            bitmap.AddDirtyRect(new Int32Rect(0, 0, cachedInfo.Width, cachedInfo.Height));
             bitmap.Unlock();
 
             drawingContext.DrawImage(bitmap, new Rect(0, 0, CanvasSize.Width, CanvasSize.Height));

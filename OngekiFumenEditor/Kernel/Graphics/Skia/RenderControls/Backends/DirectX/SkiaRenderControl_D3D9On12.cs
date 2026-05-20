@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX
 {
     internal sealed class SkiaRenderControl_D3D9On12 : SkiaRenderControlBase
     {
-        private const int MinFrameCount = 2;
+        private const int MinFrameCount = 1;
         private const int MaxFrameCount = 5;
 
         // TODO: Remove global paint serialization after drawing implementations stop sharing mutable render state.
