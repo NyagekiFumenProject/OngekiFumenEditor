@@ -160,6 +160,9 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             if (configuredSampleRate != -1)
                 return configuredSampleRate;
 
+            if (!((App.Current as App)?.IsGUIMode ?? false))
+                return DefaultSampleRate;
+
             var detectedSampleRate = GetDefaultRenderDeviceSampleRate(out var isFallback);
             if (isFallback)
                 return SaveTargetSampleRate(detectedSampleRate);

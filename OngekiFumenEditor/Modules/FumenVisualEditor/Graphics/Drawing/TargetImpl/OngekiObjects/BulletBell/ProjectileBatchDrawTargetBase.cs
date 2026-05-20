@@ -31,11 +31,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             public List<(Vector2 pos, string str)> StrList;
         }
 
+        private const int InitialListCapacity = 256;
+
         protected Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
         protected Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
         protected List<(Vector2 pos, string str)> drawStrList = new();
 
         private DrawBuffer mainBuffer;
+        private readonly Stack<DrawBuffer> bufferPool = new();
 
         private static readonly Comparison<(Vector2, Vector2, float, Vector4)> _yCompare =
             static (a, b) => a.Item2.Y.CompareTo(b.Item2.Y);
@@ -106,14 +109,30 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             var normal = new Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>>(normalDrawList.Count);
             foreach (var key in normalDrawList.Keys)
-                normal[key] = new List<(Vector2, Vector2, float, Vector4)>();
+                normal[key] = new List<(Vector2, Vector2, float, Vector4)>(InitialListCapacity);
             var selected = new Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>>(selectedDrawList.Count);
             foreach (var key in selectedDrawList.Keys)
-                selected[key] = new List<(Vector2, Vector2, float, Vector4)>();
+                selected[key] = new List<(Vector2, Vector2, float, Vector4)>(InitialListCapacity);
             return new DrawBuffer { Normal = normal, Selected = selected, StrList = null };
         }
 
-        private void MergeBuffer(DrawBuffer local)
+        private DrawBuffer RentBuffer()
+        {
+            lock (bufferPool)
+            {
+                if (bufferPool.TryPop(out var buf))
+                {
+                    foreach (var list in buf.Normal.Values)
+                        list.Clear();
+                    foreach (var list in buf.Selected.Values)
+                        list.Clear();
+                    return buf;
+                }
+            }
+            return CreateThreadLocalBuffer();
+        }
+
+        private void MergeAndReturnBuffer(DrawBuffer local)
         {
             lock (normalDrawList)
             {
@@ -127,6 +146,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     if (list.Count > 0 && selectedDrawList.TryGetValue(key, out var dst))
                         dst.AddRange(list);
                 }
+            }
+            lock (bufferPool)
+            {
+                bufferPool.Push(local);
             }
         }
 
@@ -189,8 +212,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 ---------------------------- fromTime = toTime - appearOffsetTime
                  */
 
+                //一次性读取 obj 的热点属性到本地，避免反复走 virtual getter + pallete 三元判断
+                var objSpeed = obj.Speed;
+                var objTGrid = obj.TGrid;
+                var objXGrid = obj.XGrid;
+
                 //子弹完全经过画面所需的运动时间
-                var appearOffsetTime = height / obj.Speed;
+                var appearOffsetTime = height / objSpeed;
 
                 var toTime = 0d;
                 var currentTime = 0d;
@@ -198,12 +226,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (obj.IsEnableSoflan)
                 {
                     var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-                    toTime = convertToY(obj.TGrid, soflanList);
+                    toTime = convertToY(objTGrid, soflanList);
                     currentTime = convertToY(currentTGrid, soflanList);
                 }
                 else
                 {
-                    toTime = convertToYNonSoflan(obj.TGrid);
+                    toTime = convertToYNonSoflan(objTGrid);
                     currentTime = nonSoflanCurrentTime;
                 }
 
@@ -214,7 +242,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (timeY > rectMaxY)
                     return;
                 //todo CheckVisible()这里是考虑到光焰那个Bell会残留，因为画轴速度太快（感觉是个bug但后面有精力再坐牢吧）
-                if (timeY < rectMinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
+                if (timeY < rectMinY || (precent > 1 && !target.CheckVisible(objTGrid)))
                     return;
 
                 var fromXUnit = 0d;
@@ -227,17 +255,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 switch (obj.TargetValue)
                 {
                     case Target.Player:
-                        var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(obj.Speed, 1));
-                        var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
+                        var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(objSpeed, 1));
+                        var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(objTGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
                         if (targetAudioTime < TimeSpan.Zero)
                             targetAudioTime = TimeSpan.Zero;
 
                         toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);
-                        toXUnit += obj.XGrid.TotalUnit;
+                        toXUnit += objXGrid.TotalUnit;
                         break;
                     case Target.FixField:
                     default:
-                        toXUnit = obj.XGrid.TotalUnit;
+                        toXUnit = objXGrid.TotalUnit;
                         break;
                 }
 
@@ -261,10 +289,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         fromXUnit = toXUnit;
                         break;
                     case Shooter.Enemy:
-                        var tGrid = obj.TGrid;
-                        var enemyLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<EnemyLaneStart>().LastOrDefault();
-                        var xGrid = enemyLane?.CalulateXGrid(tGrid);
-                        fromXUnit = xGrid?.TotalUnit ?? obj.XGrid.TotalUnit;
+                        var enemyLane = fumen.Lanes.GetVisibleStartObjects(objTGrid, objTGrid).OfType<EnemyLaneStart>().LastOrDefault();
+                        var xGrid = enemyLane?.CalulateXGrid(objTGrid);
+                        fromXUnit = xGrid?.TotalUnit ?? objXGrid.TotalUnit;
                         break;
                     case Shooter.Center:
                     default:
@@ -305,13 +332,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 Parallel.ForEach(
                     objs,
                     parallelOptions,
-                    CreateThreadLocalBuffer,
+                    RentBuffer,
                     (obj, _, local) =>
                     {
                         _Draw(obj, local);
                         return local;
                     },
-                    MergeBuffer);
+                    MergeAndReturnBuffer);
             }
         }
 
@@ -331,9 +358,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {
                 if (list.Count == 0)
                     continue;
-                list.Sort(_yCompare);
-                highlightDrawing.Begin(target, texture);
                 var span = CollectionsMarshal.AsSpan(list);
+                span.Sort(_yCompare);
+                highlightDrawing.Begin(target, texture);
                 for (int i = 0; i < span.Length; i++)
                 {
                     ref var item = ref span[i];
@@ -345,9 +372,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {
                 if (list.Count == 0)
                     continue;
-                list.Sort(_yCompare);
-                batchTextureDrawing.Begin(target, texture);
                 var span = CollectionsMarshal.AsSpan(list);
+                span.Sort(_yCompare);
+                batchTextureDrawing.Begin(target, texture);
                 for (int i = 0; i < span.Length; i++)
                 {
                     ref var item = ref span[i];
