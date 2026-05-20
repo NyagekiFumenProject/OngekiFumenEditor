@@ -13,6 +13,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Rent()
         {
+            Clear();
             disposed = false;
         }
 
@@ -23,6 +24,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
                 return;
 
             disposed = true;
+            Clear();
             innerList.Dispose();
             ObjectPool<PooledList<T>>.Return(this);
         }

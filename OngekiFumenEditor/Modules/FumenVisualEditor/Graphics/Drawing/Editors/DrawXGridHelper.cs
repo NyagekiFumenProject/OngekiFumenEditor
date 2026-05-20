@@ -33,7 +33,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             using var list = ObjectPool.GetPooledList<LineVertex>();
-            list.Clear();
 
             foreach (var result in drawLines)
             {

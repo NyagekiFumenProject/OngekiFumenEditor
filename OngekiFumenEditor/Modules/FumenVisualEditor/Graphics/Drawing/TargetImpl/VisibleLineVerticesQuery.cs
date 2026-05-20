@@ -22,7 +22,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             //var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
 
             using var tempVertices = ObjectPool.GetPooledList<LineVertex>();
-            tempVertices.Clear();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)
@@ -47,7 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var prevInvaild = true;
             var prevObj = start as ConnectableObjectBase;
             
-            //todo ÔÙÅÐ¶ÏÉè¼ÆÄ£Ê½ÔõÃ´ÇÕ¶¨
+            //todo ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½Ã´ï¿½Õ¶ï¿½
             var soflanPositionList = target.Editor.IsDesignMode ?
                 target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
                 target.Editor._cacheSoflanGroupRecorder.GetCache(start)?.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);

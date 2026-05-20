@@ -77,7 +77,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 		private IPooledList<LineVertex> GenerateLineVertexData(SvgPrefabBase svgPrefab)
 		{
 			var list = ObjectPool.GetPooledList<LineVertex>();
-			list.Clear();
 
 			var segments = svgPrefab.GenerateLineSegments();
 

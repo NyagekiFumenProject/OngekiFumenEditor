@@ -115,7 +115,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
 
                 using var list = ObjectPool.GetPooledList<LineVertex>();
-                list.Clear();
                 VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, soflanList, VertexDash.Solider, color, list);
                 if (list.Count > 0)
                 {
@@ -146,7 +145,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     }
 
                     using var clippedList = ObjectPool.GetPooledList<LineVertex>();
-                    clippedList.Clear();
                     clippedList.Add(new LineVertex(holdPoint, color, VertexDash.Solider));
                     for (var i = startIdx; i <= endIdx; i++)
                         clippedList.Add(list[i]);

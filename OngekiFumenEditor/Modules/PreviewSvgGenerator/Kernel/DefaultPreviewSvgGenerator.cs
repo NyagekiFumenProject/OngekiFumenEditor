@@ -431,7 +431,6 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 }
 
                 using var list = ObjectPool.GetPooledList<PointF>();
-                list.Clear();
                 QueryVisibleLineVertices(ctx, hold.ReferenceLaneStart, hold.TGrid, hold.EndTGrid, list);
                 if (list.Count > 0)
                 {
@@ -781,7 +780,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     apGroup.Children.Add(gen);
                     var newOffsetX = offsetX + width;
 
-                    //»­¸öÏß
+                    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     var svgLine = new SvgLine();
                     svgLine.AddCustomClass("eventLine");
                     svgLine.StartX = new SvgUnit(SvgUnitType.Pixel, offsetX);
@@ -791,7 +790,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     svgLine.Stroke = new SvgColourServer(color);
                     apGroup.Children.Add(svgLine);
 
-                    //¸üÐÂoffsetX
+                    //ï¿½ï¿½ï¿½ï¿½offsetX
                     offsetX = newOffsetX;
                 }
 
@@ -966,7 +965,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
                     if (!obj.IsCurvePath)
                     {
-                        //Ö±Ïß£¬ÓÅ»¯
+                        //Ö±ï¿½ß£ï¿½ï¿½Å»ï¿½
                         PostPointByTGrid(obj, minTGrid, maxTGrid, list);
                     }
                     else
@@ -979,7 +978,6 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                 void ProcessWallLane(LaneStartBase start, TGrid minTGrid, TGrid maxTGrid)
                 {
                     using var list = ObjectPool.GetPooledList<Vector2>();
-                    list.Clear();
 
                     foreach (var child in start.Children)
                     {
@@ -1163,7 +1161,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     }
                     else
                     {
-                        //Ä¬ÈÏ24¿©
+                        //Ä¬ï¿½ï¿½24ï¿½ï¿½
                         result.Add(new(defaultX, fromY));
                         result.Add(new(defaultX, toY));
                     }

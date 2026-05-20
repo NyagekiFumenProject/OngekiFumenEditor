@@ -28,7 +28,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var color = GetLanePointColor(start);
 
             using var list = ObjectPool.GetPooledList<LineVertex>();
-            list.Clear();
             VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, target.CurrentDrawingTargetContext.CurrentSoflanList, invailedDash, color, list);
             lineDrawing.Draw(target, list, LineWidth);
         }

@@ -114,7 +114,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             var curSoflanPoint = soflanList[minIdx];
             using var rangeInfos = ObjectPool.GetPooledList<(TGrid tGrid, double speed)>();
-            rangeInfos.Clear();
 
             //like [minT(sp1), sp2]
             rangeInfos.Add((fieldMinTGrid, soflanList[minIdx].Speed));
@@ -194,7 +193,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     .OrderBy(x => isRight ? x.Max : x.Min).ToListWithObjectPool();
 
                 using var points = ObjectPool.GetPooledSet<float>();
-                points.Clear();
 
                 var prevX = (float)Random();
                 var prevY = (float)Random();
@@ -283,7 +281,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 }
 
                 using var sortedPoints = ObjectPool.GetPooledList<float>();
-                sortedPoints.Clear();
                 foreach (var x in points)
                 {
                     if (minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid)
@@ -512,9 +509,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             tessellateList.Clear();
 
             using var leftPoints = ObjectPool.GetPooledList<Vector2>();
-            leftPoints.Clear();
             using var rightPoints = ObjectPool.GetPooledList<Vector2>();
-            rightPoints.Clear();
 
             //计算左右墙的点
             EnumeratePoints(false, leftPoints);
@@ -629,7 +624,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             using var tempLeft = ObjectPool.GetPooledList<Vector2>();
             using var tempRight = ObjectPool.GetPooledList<Vector2>();
             using var intersectionPoints = ObjectPool.GetPooledSet<Vector2>();
-            intersectionPoints.Clear();
 
             tryExchange(0, 0);
 

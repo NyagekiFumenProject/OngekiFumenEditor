@@ -235,12 +235,6 @@ namespace OngekiFumenEditor.Core.Base.Collections
             return cachePostionList_PreviewMode;
         }
 
-        private sealed class SoflanSegmentByCurIdxComparer : IComparer<SoflanSegment>
-        {
-            public static readonly SoflanSegmentByCurIdxComparer Instance = new();
-            public int Compare(SoflanSegment x, SoflanSegment y) => x.curIdx.CompareTo(y.curIdx);
-        }
-
         private sealed class VisibleTGridRangeByMinComparer : IComparer<VisibleTGridRange>
         {
             public static readonly VisibleTGridRangeByMinComparer Instance = new();
@@ -276,6 +270,12 @@ namespace OngekiFumenEditor.Core.Base.Collections
             if (rawResults.Count == 0)
                 return;
 
+            if (rawResults.Count == 1)
+            {
+                output.Add(rawResults[0]);
+                return;
+            }
+
             rawResults.Sort(VisibleTGridRangeByMinComparer.Instance);
 
             var cur = rawResults[0];
@@ -307,25 +307,26 @@ namespace OngekiFumenEditor.Core.Base.Collections
         {
             if (list.Count > 1)
             {
-                using var querySegments = ObjectPool.GetPooledList<SoflanSegment>();
-                using var seenIdx = ObjectPool.GetPooledSet<int>();
-                foreach (var s in segments.Query(actualViewMinY, actualViewMaxY))
+                using var queryIdx = ObjectPool.GetPooledList<int>();
                 {
-                    if (seenIdx.Add(s.curIdx))
-                        querySegments.Add(s);
+                    using var rawSegments = ObjectPool.GetPooledList<SoflanSegment>();
+                    segments.QueryInto(actualViewMinY, actualViewMaxY, rawSegments);
+                    // IntervalTree 内部按互斥分区(left/inner/right)构建，每个 SoflanSegment 仅出现一次，无需去重
+                    for (int i = 0; i < rawSegments.Count; i++)
+                        queryIdx.Add(rawSegments[i].curIdx);
                 }
-                querySegments.Sort(SoflanSegmentByCurIdxComparer.Instance);
+                queryIdx.Sort(Comparer<int>.Default);
 
                 var scanLeftLength = actualViewHeight - actualPreOffset;
-                for (int i = querySegments.Count - 1; i >= 0; i--)
-                    CalcSegmentRecursive(querySegments[i].curIdx, currentY, 0, scanLeftLength,
+                for (int i = queryIdx.Count - 1; i >= 0; i--)
+                    CalcSegmentRecursive(queryIdx[i], currentY, 0, scanLeftLength,
                         list, rawResults, fullCheckSets, actualViewHeight);
 
                 fullCheckSets.Clear();
 
                 var scanRightLength = actualPreOffset;
-                for (int i = 0; i < querySegments.Count; i++)
-                    CalcSegmentRecursive(querySegments[i].curIdx, currentY, scanRightLength, 0,
+                for (int i = 0; i < queryIdx.Count; i++)
+                    CalcSegmentRecursive(queryIdx[i], currentY, scanRightLength, 0,
                         list, rawResults, fullCheckSets, actualViewHeight);
 
                 var last = list[list.Count - 1];

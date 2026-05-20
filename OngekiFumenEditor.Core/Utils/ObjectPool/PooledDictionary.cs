@@ -14,6 +14,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
         internal void Rent()
         {
             disposed = false;
+            Clear();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -23,6 +24,7 @@ namespace OngekiFumenEditor.Core.Utils.ObjectPool
                 return;
 
             disposed = true;
+            Clear();
             innerDictionary.Dispose();
             ObjectPool<PooledDictionary<TKey, TValue>>.Return(this);
         }

@@ -409,13 +409,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         // objType -> soflanGroup -> obj[]
         var drawingCollectionDisposables = ObjectPool.GetPooledList<IDisposable>();
-        drawingCollectionDisposables.Clear();
 
         var map = ObjectPool.GetPooledDictionary<string, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>>();
-        map.Clear();
 
         var usedDrawingContexts = ObjectPool.GetPooledSet<int>();
-        usedDrawingContexts.Clear();
         //always draw default soflan group
         usedDrawingContexts.Add(0);
 
@@ -430,7 +427,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 var soflanGroupObjectMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>();
                 drawingCollectionDisposables.Add(soflanGroupObjectMapPool);
                 soflanGroupObjectMap = map[obj.IDShortName] = soflanGroupObjectMapPool;
-                soflanGroupObjectMap.Clear();
             }
 
             _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
@@ -445,7 +441,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                     var listPool = ObjectPool.GetPooledList<OngekiTimelineObjectBase>();
                     drawingCollectionDisposables.Add(listPool);
                     list = soflanGroupObjectMap[drawingContext] = listPool;
-                    list.Clear();
                 }
 
                 list.Add(obj);
@@ -470,13 +465,11 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                     var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
                     drawingCollectionDisposables.Add(rPool);
                     var r = drawMap[drawingTarget] = rPool;
-                    r.Clear();
                     foreach (var pair in soflanGroupObjectMap)
                     {
                         var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
                         drawingCollectionDisposables.Add(rrPool);
                         var rr = r[pair.Key] = rrPool;
-                        rr.Clear();
                         rr.AddRange(pair.Value);
                     }
                 }
@@ -489,7 +482,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                             var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
                             drawingCollectionDisposables.Add(rrPool);
                             rr = enums[pair.Key] = rrPool;
-                            rr.Clear();
                         }
 
                         rr.AddRange(pair.Value);
@@ -500,7 +492,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         //remove unused drawingContexts
         var unusedSoflanGroups = ObjectPool.GetPooledList<int>();
-        unusedSoflanGroups.Clear();
         unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
         for (var i = 0; i < unusedSoflanGroups.Count; i++)
         {
@@ -547,11 +538,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
                 drawingCollectionDisposables.Add(rPool);
                 var r = drawMap[drawingTarget] = rPool;
-                r.Clear();
                 var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
                 drawingCollectionDisposables.Add(rrPool);
                 var rr = r[defaultDrawingTargetContext] = rrPool;
-                rr.Clear();
                 rr.AddRange(blts);
             }
             foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
@@ -560,11 +549,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
                 drawingCollectionDisposables.Add(rPool);
                 var r = drawMap[drawingTarget] = rPool;
-                r.Clear();
                 var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
                 drawingCollectionDisposables.Add(rrPool);
                 var rr = r[defaultDrawingTargetContext] = rrPool;
-                rr.Clear();
                 rr.AddRange(bels);
             }
         }

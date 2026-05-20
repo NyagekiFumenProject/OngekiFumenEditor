@@ -95,7 +95,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             //var path = new SKPath();
             var itor = postedPoints.GetEnumerator();
             using var points = ObjectPool.GetPooledList<SKPoint>();
-            points.Clear();
 
             if (itor.MoveNext())
             {

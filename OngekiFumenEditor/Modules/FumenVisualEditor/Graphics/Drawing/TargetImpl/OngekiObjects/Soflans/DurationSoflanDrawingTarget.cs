@@ -61,13 +61,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var endDash = new VertexDash(7, 5);
 
             using var lines = ObjectPool.GetPooledList<LineVertex>();
-            lines.Clear();
             using var polygonPoints = ObjectPool.GetPooledList<(Vector2, Vector4)>();
-            polygonPoints.Clear();
             using var lines2 = ObjectPool.GetPooledList<LineVertex>();
-            lines2.Clear();
             using var strings = ObjectPool.GetPooledList<(string, Vector2, Vector4, OngekiTimelineObjectBase)>();
-            strings.Clear();
 
             void PushLine(LineVertex start, LineVertex end)
             {

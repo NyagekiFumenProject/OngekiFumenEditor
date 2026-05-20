@@ -1,4 +1,5 @@
 //copy&modify from repo : https://github.com/mbuchetics/RangeTree , LICENSE.txt : https://github.com/mbuchetics/RangeTree/blob/master/LICENSE.txt
+using OngekiFumenEditor.Core.Utils.ObjectPool;
 using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Core.Base.Collections.Base.RangeTree
@@ -139,28 +140,32 @@ namespace OngekiFumenEditor.Core.Base.Collections.Base.RangeTree
 
         public IEnumerable<TValue> Query(TKey from, TKey to)
         {
+            using var result = ObjectPool.GetPooledList<TValue>();
+
+            QueryInto(from,to, result);
+            foreach (var item in result)
+                yield return item;
+        }
+
+        public void QueryInto(TKey from, TKey to, ICollection<TValue> output)
+        {
             if (items != null)
             {
-                foreach (var item in items)
+                for (int i = 0; i < items.Count; i++)
                 {
+                    var item = items[i];
                     if (comparer.Compare(item.From, to) > 0)
                         break;
                     if (comparer.Compare(to, item.From) >= 0 && comparer.Compare(from, item.To) <= 0)
-                        yield return item.Value;
+                        output.Add(item.Value);
                 }
             }
 
             if (leftNode != null && comparer.Compare(from, center) < 0)
-            {
-                foreach (var item in leftNode.Query(from, to))
-                    yield return item;
-            }
+                leftNode.QueryInto(from, to, output);
 
             if (rightNode != null && comparer.Compare(to, center) > 0)
-            {
-                foreach (var item in rightNode.Query(from, to))
-                    yield return item;
-            }
+                rightNode.QueryInto(from, to, output);
         }
     }
 }

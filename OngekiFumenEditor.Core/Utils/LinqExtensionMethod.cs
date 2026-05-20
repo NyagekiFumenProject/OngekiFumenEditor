@@ -258,7 +258,6 @@ namespace OngekiFumenEditor.Core.Utils
         public static IPooledList<T> ToListWithObjectPool<T>(this IEnumerable<T> collection)
         {
             var list = PoolFacade.GetPooledList<T>();
-            list.Clear();
             list.AddRange(collection);
             return list;
         }
@@ -266,7 +265,6 @@ namespace OngekiFumenEditor.Core.Utils
         public static IPooledSet<T> ToHashSetWithObjectPool<T>(this IEnumerable<T> collection)
         {
             var set = PoolFacade.GetPooledSet<T>();
-            set.Clear();
             set.AddRange(collection);
             return set;
         }
@@ -274,7 +272,6 @@ namespace OngekiFumenEditor.Core.Utils
         public static IPooledDictionary<K, V> ToDictionaryWithObjectPool<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
         {
             var dic = PoolFacade.GetPooledDictionary<K, V>();
-            dic.Clear();
             foreach (var item in collection)
                 dic[keySelector(item)] = valueSelector(item);
             return dic;
