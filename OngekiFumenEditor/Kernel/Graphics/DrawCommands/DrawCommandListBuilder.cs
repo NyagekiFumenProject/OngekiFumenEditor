@@ -275,11 +275,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             if (drawCommands is null)
                 throw new ArgumentNullException(nameof(drawCommands));
 
-            using var importedCommands = ObjectPool.GetPooledList<DrawCommand>();
-            importedCommands.AddRange(drawCommands);
-
-            foreach (var command in importedCommands)
-                AddDrawCommand(command);
+            foreach (var command in drawCommands)
+                AddCopiedDrawCommand(command);
         }
 
         /// <inheritdoc />
@@ -415,7 +412,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             return ObjectPool.Get<TCommand>();
         }
 
-        private void AddDrawCommand(DrawCommand command)
+        private void AddCopiedDrawCommand(DrawCommand command)
         {
             if (command is null)
                 throw new ArgumentNullException(nameof(command));
