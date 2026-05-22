@@ -1,0 +1,23 @@
+using System.Numerics;
+
+namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
+{
+    /// <summary>
+    /// Replaces the current view matrix while presenting a command list.
+    /// </summary>
+    public sealed record SetCurrentViewMatrixCommand : DrawCommand
+    {
+        /// <summary>
+        /// Initializes a view-matrix replacement command.
+        /// </summary>
+        public SetCurrentViewMatrixCommand(Matrix4x4 matrix)
+        {
+            Matrix = matrix;
+        }
+
+        /// <summary>
+        /// Gets the matrix to use as the current view matrix.
+        /// </summary>
+        public Matrix4x4 Matrix { get; init; }
+    }
+}

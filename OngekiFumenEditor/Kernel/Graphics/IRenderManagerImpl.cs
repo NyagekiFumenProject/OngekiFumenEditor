@@ -1,12 +1,14 @@
-﻿using System.IO;
-using System.Numerics;
+﻿using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
+    /// <summary>
+    /// Provides backend-specific render management and draw-command list integration.
+    /// </summary>
     public interface IRenderManagerImpl
     {
         string Name { get; }
@@ -25,11 +27,40 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// <returns></returns>
         Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default);
 
+        /// <summary>
+        /// Gets the render context associated with the specified render control.
+        /// </summary>
         Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default);
 
+        /// <summary>
+        /// Loads an image resource from the provided stream.
+        /// </summary>
         IImage LoadImageFromStream(Stream stream);
 
+        /// <summary>
+        /// Creates a render control instance for this backend.
+        /// </summary>
         FrameworkElement CreateRenderControl();
+
+        /// <summary>
+        /// Creates a new builder for collecting backend-independent draw commands.
+        /// </summary>
+        IDrawCommandListBuilder CreateDrawCommandListBuilder();
+
+        /// <summary>
+        /// Posts a command list to the back slot associated with the specified render context.
+        /// </summary>
+        void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true);
+
+        /// <summary>
+        /// Promotes the back slot to the front slot for the specified render context.
+        /// </summary>
+        bool SwapDrawCommandList(IRenderContext context);
+
+        /// <summary>
+        /// Presents the front slot associated with the specified render context.
+        /// </summary>
+        void PresentDrawCommandList(IRenderContext context);
 
         #region Drawings
 

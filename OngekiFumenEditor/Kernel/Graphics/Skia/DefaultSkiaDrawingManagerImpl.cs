@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing;
@@ -24,26 +25,51 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
+    /// <summary>
+    /// Skia implementation of the render manager.
+    /// </summary>
     [Export(typeof(IRenderManagerImpl))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     {
+        private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
+
         private TaskCompletionSource initTaskSource = new TaskCompletionSource();
         private bool initialized = false;
         private DpiScale currentDPI;
         private RenderBackendType backendType;
 
+        /// <inheritdoc />
         public ICircleDrawing CircleDrawing { get; private set; }
+
+        /// <inheritdoc />
         public ILineDrawing LineDrawing { get; private set; }
+
+        /// <inheritdoc />
         public ISimpleLineDrawing SimpleLineDrawing { get; private set; }
+
+        /// <inheritdoc />
         public IStaticVBODrawing StaticVBODrawing { get; private set; }
+
+        /// <inheritdoc />
         public IStringDrawing StringDrawing { get; private set; }
+
+        /// <inheritdoc />
         public ITextureDrawing TextureDrawing { get; private set; }
+
+        /// <inheritdoc />
         public IBatchTextureDrawing BatchTextureDrawing { get; private set; }
+
+        /// <inheritdoc />
         public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; private set; }
+
+        /// <inheritdoc />
         public IPolygonDrawing PolygonDrawing { get; private set; }
+
+        /// <inheritdoc />
         public IBeamDrawing BeamDrawing { get; private set; }
 
+        /// <inheritdoc />
         public string Name { get; } = "Skia";
 
         private void Initialize()
@@ -93,11 +119,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             currentDPI = e.NewDpi;
         }
 
+        /// <inheritdoc />
         public Task WaitForInitializationIsDone(CancellationToken cancellation)
         {
             return initTaskSource.Task;
         }
 
+        /// <inheritdoc />
         public Task InitializeRenderControl(FrameworkElement rc, CancellationToken cancellation = default)
         {
             var renderControl = CheckRenderControl(rc);
@@ -127,6 +155,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             backendType = Enum.TryParse<RenderBackendType>(Properties.ProgramSetting.Default.SkiaRenderBackend, out var bt) ? bt : RenderBackendType.CPU;
         }
 
+        /// <inheritdoc />
         public IImage LoadImageFromStream(Stream stream)
         {
             CheckInitialization();
@@ -134,11 +163,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             return new SkiaImage(SKImage.FromEncodedData(stream));
         }
 
+        /// <inheritdoc />
         public async Task<IRenderContext> GetRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
         {
             return await GetSkiaRenderContext(rc, cancellation);
         }
 
+        /// <summary>
+        /// Gets the concrete Skia render context for the specified render control.
+        /// </summary>
         public Task<DefaultSkiaRenderContext> GetSkiaRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
         {
             var renderControl = CheckRenderControl(rc);
@@ -156,6 +189,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             return renderControl;
         }
 
+        /// <inheritdoc />
         public FrameworkElement CreateRenderControl()
         {
             RefreshBackendType();
@@ -172,6 +206,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 default:
                     return new SkiaRenderControl_CPU();
             }
+        }
+
+        /// <inheritdoc />
+        public IDrawCommandListBuilder CreateDrawCommandListBuilder()
+        {
+            return new DrawCommandListBuilder();
+        }
+
+        /// <inheritdoc />
+        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
+        {
+            drawCommandListContextSlots.Post(context, drawCommandList, autoDispose);
+        }
+
+        /// <inheritdoc />
+        public bool SwapDrawCommandList(IRenderContext context)
+        {
+            return drawCommandListContextSlots.Swap(context);
+        }
+
+        /// <inheritdoc />
+        public void PresentDrawCommandList(IRenderContext context)
+        {
+            drawCommandListContextSlots.Present(context);
         }
     }
 }

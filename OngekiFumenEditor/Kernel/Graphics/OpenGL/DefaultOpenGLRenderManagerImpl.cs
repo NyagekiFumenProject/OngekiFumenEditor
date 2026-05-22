@@ -1,5 +1,6 @@
 ﻿//#define OGL_LOG
 using Caliburn.Micro;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing;
@@ -29,10 +30,15 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
+    /// <summary>
+    /// OpenGL implementation of the render manager.
+    /// </summary>
     [Export(typeof(IRenderManagerImpl))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultOpenGLRenderManagerImpl : IRenderManagerImpl
     {
+        private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
+
         // Import the necessary Win32 functions
         [DllImport("opengl32.dll")]
         private static extern nint wglGetCurrentDC();
@@ -52,28 +58,42 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         private TaskCompletionSource initTaskSource = new TaskCompletionSource();
         private bool initialized = false;
 
+        /// <summary>
+        /// Gets the current display DPI captured from the main window.
+        /// </summary>
         public DpiScale CurrentDPI { get; private set; }
 
+        /// <inheritdoc />
         public ICircleDrawing CircleDrawing { get; private set; }
 
+        /// <inheritdoc />
         public ILineDrawing LineDrawing { get; private set; }
 
+        /// <inheritdoc />
         public ISimpleLineDrawing SimpleLineDrawing { get; private set; }
 
+        /// <inheritdoc />
         public IStaticVBODrawing StaticVBODrawing { get; private set; }
 
+        /// <inheritdoc />
         public IStringDrawing StringDrawing { get; private set; }
 
+        /// <inheritdoc />
         public ITextureDrawing TextureDrawing { get; private set; }
 
+        /// <inheritdoc />
         public IBatchTextureDrawing BatchTextureDrawing { get; private set; }
 
+        /// <inheritdoc />
         public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; private set; }
 
+        /// <inheritdoc />
         public IPolygonDrawing PolygonDrawing { get; private set; }
 
+        /// <inheritdoc />
         public IBeamDrawing BeamDrawing { get; private set; }
 
+        /// <inheritdoc />
         public string Name { get; } = "OpenGL";
 
         private void Initialize()
@@ -163,11 +183,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             Log.LogDebug($"[{source}.{type}]{id}:  {str}");
         }
 
+        /// <inheritdoc />
         public Task WaitForInitializationIsDone(CancellationToken cancellation)
         {
             return initTaskSource.Task;
         }
 
+        /// <inheritdoc />
         public async Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
             var glView = CheckRenderControl(renderControl);
@@ -230,6 +252,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 throw new Exception("Only able to call after InitializeRenderControl() called.");
         }
 
+        /// <inheritdoc />
         public IImage LoadImageFromStream(Stream stream)
         {
             CheckInitialization();
@@ -240,6 +263,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         Dictionary<FrameworkElement, IRenderContext> cachedRenderControlMap = new();
 
+        /// <inheritdoc />
         public Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
             var glView = CheckRenderControl(renderControl);
@@ -257,6 +281,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return glView;
         }
 
+        /// <inheritdoc />
         public FrameworkElement CreateRenderControl()
         {
             var glControl = new GLWpfControl()
@@ -265,6 +290,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             };
 
             return glControl;
+        }
+
+        /// <inheritdoc />
+        public IDrawCommandListBuilder CreateDrawCommandListBuilder()
+        {
+            return new DrawCommandListBuilder();
+        }
+
+        /// <inheritdoc />
+        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
+        {
+            drawCommandListContextSlots.Post(context, drawCommandList, autoDispose);
+        }
+
+        /// <inheritdoc />
+        public bool SwapDrawCommandList(IRenderContext context)
+        {
+            return drawCommandListContextSlots.Swap(context);
+        }
+
+        /// <inheritdoc />
+        public void PresentDrawCommandList(IRenderContext context)
+        {
+            drawCommandListContextSlots.Present(context);
         }
     }
 }
