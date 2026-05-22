@@ -1,3 +1,4 @@
+using OngekiFumenEditor.Core.Utils.ObjectPool;
 using System;
 using System.Numerics;
 
@@ -6,12 +7,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
     /// <summary>
     /// Represents a beam drawing command.
     /// </summary>
-    public sealed record DrawBeamCommand : DrawCommand
+    public sealed class DrawBeamCommand : DrawCommand
     {
         /// <summary>
-        /// Initializes a beam drawing command.
+        /// Initializes a new instance of the <see cref="DrawBeamCommand"/> class.
         /// </summary>
-        public DrawBeamCommand(IImage texture, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset)
+        public DrawBeamCommand()
+        {
+        }
+
+        internal DrawBeamCommand Initialize(IImage texture, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset)
         {
             Texture = texture ?? throw new ArgumentNullException(nameof(texture));
             Width = width;
@@ -20,41 +25,60 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
             Color = color;
             Rotate = rotate;
             JudgeOffset = judgeOffset;
+            return this;
         }
 
         /// <summary>
         /// Gets the beam texture.
         /// </summary>
-        public IImage Texture { get; init; }
+        public IImage Texture { get; private set; }
 
         /// <summary>
         /// Gets the beam width.
         /// </summary>
-        public int Width { get; init; }
+        public int Width { get; private set; }
 
         /// <summary>
         /// Gets the beam X position.
         /// </summary>
-        public float X { get; init; }
+        public float X { get; private set; }
 
         /// <summary>
         /// Gets the beam progress.
         /// </summary>
-        public float Progress { get; init; }
+        public float Progress { get; private set; }
 
         /// <summary>
         /// Gets the beam tint color.
         /// </summary>
-        public Vector4 Color { get; init; }
+        public Vector4 Color { get; private set; }
 
         /// <summary>
         /// Gets the beam rotation.
         /// </summary>
-        public float Rotate { get; init; }
+        public float Rotate { get; private set; }
 
         /// <summary>
         /// Gets the judge offset.
         /// </summary>
-        public float JudgeOffset { get; init; }
+        public float JudgeOffset { get; private set; }
+
+        /// <inheritdoc />
+        public override void Dispose()
+        {
+            Texture = null;
+            Width = default;
+            X = default;
+            Progress = default;
+            Color = default;
+            Rotate = default;
+            JudgeOffset = default;
+        }
+
+        /// <inheritdoc />
+        protected override void ReturnToPoolCore()
+        {
+            ObjectPool<DrawBeamCommand>.Return(this);
+        }
     }
 }

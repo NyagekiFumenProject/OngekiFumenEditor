@@ -7,16 +7,21 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
     /// <summary>
     /// Represents a batched circle drawing command.
     /// </summary>
-    public sealed record DrawCirclesCommand : DrawCommand
+    public sealed class DrawCirclesCommand : DrawCommand
     {
         private IPooledList<CircleInstance> instances;
 
         /// <summary>
-        /// Initializes a batched circle drawing command.
+        /// Initializes a new instance of the <see cref="DrawCirclesCommand"/> class.
         /// </summary>
-        public DrawCirclesCommand(IPooledList<CircleInstance> instances)
+        public DrawCirclesCommand()
+        {
+        }
+
+        internal DrawCirclesCommand Initialize(IPooledList<CircleInstance> instances)
         {
             this.instances = instances ?? throw new ArgumentNullException(nameof(instances));
+            return this;
         }
 
         /// <summary>
@@ -31,6 +36,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
         {
             instances?.Dispose();
             instances = null;
+        }
+
+        /// <inheritdoc />
+        protected override void ReturnToPoolCore()
+        {
+            ObjectPool<DrawCirclesCommand>.Return(this);
         }
     }
 }

@@ -9,7 +9,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
     /// </summary>
     public sealed class DrawCommandListContextSlots
     {
-        private readonly object syncRoot = new();
         private readonly Dictionary<IRenderContext, ContextSlot> contextSlots = new();
 
         /// <summary>
@@ -24,12 +23,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
 
             DrawCommandListSlot? oldBack = null;
 
-            lock (syncRoot)
-            {
-                var slot = GetOrCreateSlot(context);
-                oldBack = slot.Back;
-                slot.Back = new DrawCommandListSlot(drawCommandList, autoDispose);
-            }
+            var slot = GetOrCreateSlot(context);
+            oldBack = slot.Back;
+            slot.Back = new DrawCommandListSlot(drawCommandList, autoDispose);
 
             ReleaseSlot(oldBack);
         }
@@ -45,17 +41,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             DrawCommandListSlot? oldFront = null;
             var swapped = false;
 
-            lock (syncRoot)
-            {
-                var slot = GetOrCreateSlot(context);
-                if (slot.Back is not { } back)
-                    return false;
+            var slot = GetOrCreateSlot(context);
+            if (slot.Back is not { } back)
+                return false;
 
-                oldFront = slot.Front;
-                slot.Front = back;
-                slot.Back = null;
-                swapped = true;
-            }
+            oldFront = slot.Front;
+            slot.Front = back;
+            slot.Back = null;
+            swapped = true;
 
             ReleaseSlot(oldFront);
             return swapped;
@@ -71,14 +64,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
 
             DrawCommandListSlot? front = null;
 
-            lock (syncRoot)
-            {
-                if (!contextSlots.TryGetValue(context, out var slot))
-                    return;
+            if (!contextSlots.TryGetValue(context, out var slot))
+                return;
 
-                front = slot.Front;
-                slot.Front = null;
-            }
+            front = slot.Front;
+            slot.Front = null;
 
             if (front is not { } value)
                 return;
@@ -143,7 +133,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                     case DrawPolygonCommand:
                     case DrawStringCommand:
                     case DrawBeamCommand:
-                    case DrawStaticVBOCommand:
                         // TODO: Execute backend-specific draw command rendering here.
                         break;
                     default:

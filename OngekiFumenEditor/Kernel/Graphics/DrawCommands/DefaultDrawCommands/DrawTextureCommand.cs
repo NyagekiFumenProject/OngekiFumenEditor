@@ -7,23 +7,28 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
     /// <summary>
     /// Represents a texture drawing command.
     /// </summary>
-    public sealed record DrawTextureCommand : DrawCommand
+    public sealed class DrawTextureCommand : DrawCommand
     {
         private IPooledList<TextureInstance> instances;
 
         /// <summary>
-        /// Initializes a texture drawing command.
+        /// Initializes a new instance of the <see cref="DrawTextureCommand"/> class.
         /// </summary>
-        public DrawTextureCommand(IImage texture, IPooledList<TextureInstance> instances)
+        public DrawTextureCommand()
+        {
+        }
+
+        internal DrawTextureCommand Initialize(IImage texture, IPooledList<TextureInstance> instances)
         {
             Texture = texture ?? throw new ArgumentNullException(nameof(texture));
             this.instances = instances ?? throw new ArgumentNullException(nameof(instances));
+            return this;
         }
 
         /// <summary>
         /// Gets the texture resource to draw.
         /// </summary>
-        public IImage Texture { get; }
+        public IImage Texture { get; private set; }
 
         /// <summary>
         /// Gets the sprite instances owned by this command.
@@ -37,6 +42,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
         {
             instances?.Dispose();
             instances = null;
+            Texture = null;
+        }
+
+        /// <inheritdoc />
+        protected override void ReturnToPoolCore()
+        {
+            ObjectPool<DrawTextureCommand>.Return(this);
         }
     }
 }

@@ -7,17 +7,22 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
     /// <summary>
     /// Represents a line drawing command.
     /// </summary>
-    public sealed record DrawLinesCommand : DrawCommand
+    public sealed class DrawLinesCommand : DrawCommand
     {
         private IPooledList<ILineDrawing.LineVertex> points;
 
         /// <summary>
-        /// Initializes a line drawing command.
+        /// Initializes a new instance of the <see cref="DrawLinesCommand"/> class.
         /// </summary>
-        public DrawLinesCommand(IPooledList<ILineDrawing.LineVertex> points, float lineWidth)
+        public DrawLinesCommand()
+        {
+        }
+
+        internal DrawLinesCommand Initialize(IPooledList<ILineDrawing.LineVertex> points, float lineWidth)
         {
             this.points = points ?? throw new ArgumentNullException(nameof(points));
             LineWidth = lineWidth;
+            return this;
         }
 
         /// <summary>
@@ -28,7 +33,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
         /// <summary>
         /// Gets the line width.
         /// </summary>
-        public float LineWidth { get; }
+        public float LineWidth { get; private set; }
 
         /// <summary>
         /// Releases the pooled point list owned by this command.
@@ -37,6 +42,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
         {
             points?.Dispose();
             points = null;
+            LineWidth = default;
+        }
+
+        /// <inheritdoc />
+        protected override void ReturnToPoolCore()
+        {
+            ObjectPool<DrawLinesCommand>.Return(this);
         }
     }
 }

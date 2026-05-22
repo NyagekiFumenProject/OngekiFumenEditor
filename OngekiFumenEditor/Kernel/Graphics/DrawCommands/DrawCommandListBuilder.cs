@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             modelMatrix = matrix;
-            commands.Add(new SetCurrentModelMatrixCommand(matrix));
+            commands.Add(RentCommand<SetCurrentModelMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             viewMatrix = matrix;
-            commands.Add(new SetCurrentViewMatrixCommand(matrix));
+            commands.Add(RentCommand<SetCurrentViewMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
@@ -86,7 +86,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             projectionMatrix = matrix;
-            commands.Add(new SetCurrentProjectionMatrixCommand(matrix));
+            commands.Add(RentCommand<SetCurrentProjectionMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
@@ -95,7 +95,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             ThrowIfDisposed();
             modelMatrixStack.Add(modelMatrix);
             modelMatrix = matrix;
-            commands.Add(new PushModelMatrixCommand(matrix));
+            commands.Add(RentCommand<PushModelMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
@@ -104,7 +104,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             ThrowIfDisposed();
             viewMatrixStack.Add(viewMatrix);
             viewMatrix = matrix;
-            commands.Add(new PushViewMatrixCommand(matrix));
+            commands.Add(RentCommand<PushViewMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
@@ -113,7 +113,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             ThrowIfDisposed();
             projectionMatrixStack.Add(projectionMatrix);
             projectionMatrix = matrix;
-            commands.Add(new PushProjectionMatrixCommand(matrix));
+            commands.Add(RentCommand<PushProjectionMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
@@ -121,7 +121,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             modelMatrix = PopMatrix(modelMatrixStack, nameof(PopModelMatrix));
-            commands.Add(new PopModelMatrixCommand());
+            commands.Add(RentCommand<PopModelMatrixCommand>().Initialize());
         }
 
         /// <inheritdoc />
@@ -129,7 +129,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             viewMatrix = PopMatrix(viewMatrixStack, nameof(PopViewMatrix));
-            commands.Add(new PopViewMatrixCommand());
+            commands.Add(RentCommand<PopViewMatrixCommand>().Initialize());
         }
 
         /// <inheritdoc />
@@ -137,7 +137,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             projectionMatrix = PopMatrix(projectionMatrixStack, nameof(PopProjectionMatrix));
-            commands.Add(new PopProjectionMatrixCommand());
+            commands.Add(RentCommand<PopProjectionMatrixCommand>().Initialize());
         }
 
         /// <inheritdoc />
@@ -153,7 +153,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                 return;
             }
 
-            commands.Add(new DrawLinesCommand(pointList, lineWidth));
+            commands.Add(RentCommand<DrawLinesCommand>().Initialize(pointList, lineWidth));
         }
 
         /// <inheritdoc />
@@ -169,7 +169,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                 return;
             }
 
-            commands.Add(new DrawSimpleLinesCommand(pointList, lineWidth));
+            commands.Add(RentCommand<DrawSimpleLinesCommand>().Initialize(pointList, lineWidth));
         }
 
         /// <inheritdoc />
@@ -177,7 +177,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             ValidateTexture(texture);
-            AddTextureCommand(texture, instances, static (tex, list) => new DrawTextureCommand(tex, list));
+            AddTextureCommand<DrawTextureCommand>(texture, instances, static (command, tex, list) => command.Initialize(tex, list));
         }
 
         /// <inheritdoc />
@@ -185,7 +185,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             ValidateTexture(texture);
-            AddTextureCommand(texture, instances, static (tex, list) => new DrawBatchTextureCommand(tex, list));
+            AddTextureCommand<DrawBatchTextureCommand>(texture, instances, static (command, tex, list) => command.Initialize(tex, list));
         }
 
         /// <inheritdoc />
@@ -193,7 +193,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             ValidateTexture(texture);
-            AddTextureCommand(texture, instances, static (tex, list) => new DrawHighlightBatchTextureCommand(tex, list));
+            AddTextureCommand<DrawHighlightBatchTextureCommand>(texture, instances, static (command, tex, list) => command.Initialize(tex, list));
         }
 
         /// <inheritdoc />
@@ -204,7 +204,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
 
             var instances = ObjectPool.GetPooledList<CircleInstance>();
             instances.Add(new CircleInstance(point, color, isSolid, radius, hollowLineWidth));
-            commands.Add(new DrawCirclesCommand(instances));
+            commands.Add(RentCommand<DrawCirclesCommand>().Initialize(instances));
         }
 
         /// <inheritdoc />
@@ -222,7 +222,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             foreach (var instance in instanceList)
                 ValidateCircle(instance.Radius, instance.HollowLineWidth);
 
-            commands.Add(new DrawCirclesCommand(instanceList));
+            commands.Add(RentCommand<DrawCirclesCommand>().Initialize(instanceList));
         }
 
         /// <inheritdoc />
@@ -237,7 +237,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                 return;
             }
 
-            commands.Add(new DrawPolygonCommand(primitive, vertexList));
+            commands.Add(RentCommand<DrawPolygonCommand>().Initialize(primitive, vertexList));
         }
 
         /// <inheritdoc />
@@ -252,7 +252,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             if (fontSize <= 0)
                 throw new ArgumentOutOfRangeException(nameof(fontSize));
 
-            commands.Add(new DrawStringCommand(text, pos, scale, fontSize, rotate, color, origin, style, handle));
+            commands.Add(RentCommand<DrawStringCommand>().Initialize(text, pos, scale, fontSize, rotate, color, origin, style, handle));
         }
 
         /// <inheritdoc />
@@ -264,18 +264,22 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             if (width <= 0)
                 throw new ArgumentOutOfRangeException(nameof(width));
 
-            commands.Add(new DrawBeamCommand(texture, width, x, progress, color, rotate, judgeOffset));
+            commands.Add(RentCommand<DrawBeamCommand>().Initialize(texture, width, x, progress, color, rotate, judgeOffset));
         }
 
         /// <inheritdoc />
-        public void DrawStaticVBO(IStaticVBODrawing.IVBOHandle vbo)
+        public void DrawDrawCommandList(IEnumerable<DrawCommand> drawCommands)
         {
             ThrowIfDisposed();
 
-            if (vbo is null)
-                throw new ArgumentNullException(nameof(vbo));
+            if (drawCommands is null)
+                throw new ArgumentNullException(nameof(drawCommands));
 
-            commands.Add(new DrawStaticVBOCommand(vbo));
+            using var importedCommands = ObjectPool.GetPooledList<DrawCommand>();
+            importedCommands.AddRange(drawCommands);
+
+            foreach (var command in importedCommands)
+                AddDrawCommand(command);
         }
 
         /// <inheritdoc />
@@ -296,8 +300,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
 
-            foreach (var command in commands)
-                command?.Dispose();
+            ReleaseCommands(commands);
 
             commands.Clear();
             modelMatrixStack.Clear();
@@ -318,8 +321,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
 
             if (commands is not null)
             {
-                foreach (var command in commands)
-                    command?.Dispose();
+                ReleaseCommands(commands);
                 commands.Dispose();
                 commands = null;
             }
@@ -332,7 +334,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             projectionMatrixStack = null;
         }
 
-        private void AddTextureCommand(IImage texture, IEnumerable<TextureInstance> instances, Func<IImage, IPooledList<TextureInstance>, DrawCommand> factory)
+        private void AddTextureCommand<TCommand>(IImage texture, IEnumerable<TextureInstance> instances, Func<TCommand, IImage, IPooledList<TextureInstance>, TCommand> initialize)
+            where TCommand : DrawCommand, new()
         {
             var instanceList = CopyToPooledList(instances, nameof(instances));
             if (instanceList.Count == 0)
@@ -341,7 +344,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                 return;
             }
 
-            commands.Add(factory(texture, instanceList));
+            commands.Add(initialize(RentCommand<TCommand>(), texture, instanceList));
         }
 
         private void ResetState()
@@ -404,6 +407,84 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             var list = ObjectPool.GetPooledList<T>();
             list.AddRange(source);
             return list;
+        }
+
+        private static TCommand RentCommand<TCommand>()
+            where TCommand : DrawCommand, new()
+        {
+            return ObjectPool.Get<TCommand>();
+        }
+
+        private void AddDrawCommand(DrawCommand command)
+        {
+            if (command is null)
+                throw new ArgumentNullException(nameof(command));
+
+            switch (command)
+            {
+                case SetCurrentModelMatrixCommand setCurrentModelMatrixCommand:
+                    SetCurrentModelMatrix(setCurrentModelMatrixCommand.Matrix);
+                    return;
+                case SetCurrentViewMatrixCommand setCurrentViewMatrixCommand:
+                    SetCurrentViewMatrix(setCurrentViewMatrixCommand.Matrix);
+                    return;
+                case SetCurrentProjectionMatrixCommand setCurrentProjectionMatrixCommand:
+                    SetCurrentProjectionMatrix(setCurrentProjectionMatrixCommand.Matrix);
+                    return;
+                case PushModelMatrixCommand pushModelMatrixCommand:
+                    PushModelMatrix(pushModelMatrixCommand.Matrix);
+                    return;
+                case PushViewMatrixCommand pushViewMatrixCommand:
+                    PushViewMatrix(pushViewMatrixCommand.Matrix);
+                    return;
+                case PushProjectionMatrixCommand pushProjectionMatrixCommand:
+                    PushProjectionMatrix(pushProjectionMatrixCommand.Matrix);
+                    return;
+                case PopModelMatrixCommand:
+                    PopModelMatrix();
+                    return;
+                case PopViewMatrixCommand:
+                    PopViewMatrix();
+                    return;
+                case PopProjectionMatrixCommand:
+                    PopProjectionMatrix();
+                    return;
+                case DrawLinesCommand drawLinesCommand:
+                    DrawLines(drawLinesCommand.Points, drawLinesCommand.LineWidth);
+                    return;
+                case DrawSimpleLinesCommand drawSimpleLinesCommand:
+                    DrawSimpleLines(drawSimpleLinesCommand.Points, drawSimpleLinesCommand.LineWidth);
+                    return;
+                case DrawTextureCommand drawTextureCommand:
+                    DrawTexture(drawTextureCommand.Texture, drawTextureCommand.Instances);
+                    return;
+                case DrawBatchTextureCommand drawBatchTextureCommand:
+                    DrawBatchTexture(drawBatchTextureCommand.Texture, drawBatchTextureCommand.Instances);
+                    return;
+                case DrawHighlightBatchTextureCommand drawHighlightBatchTextureCommand:
+                    DrawHighlightBatchTexture(drawHighlightBatchTextureCommand.Texture, drawHighlightBatchTextureCommand.Instances);
+                    return;
+                case DrawCirclesCommand drawCirclesCommand:
+                    DrawCircles(drawCirclesCommand.Instances);
+                    return;
+                case DrawPolygonCommand drawPolygonCommand:
+                    DrawPolygon(drawPolygonCommand.Primitive, drawPolygonCommand.Vertices);
+                    return;
+                case DrawStringCommand drawStringCommand:
+                    DrawString(drawStringCommand.Text, drawStringCommand.Position, drawStringCommand.Scale, drawStringCommand.FontSize, drawStringCommand.Rotate, drawStringCommand.Color, drawStringCommand.Origin, drawStringCommand.Style, drawStringCommand.FontHandle);
+                    return;
+                case DrawBeamCommand drawBeamCommand:
+                    DrawBeam(drawBeamCommand.Texture, drawBeamCommand.Width, drawBeamCommand.X, drawBeamCommand.Progress, drawBeamCommand.Color, drawBeamCommand.Rotate, drawBeamCommand.JudgeOffset);
+                    return;
+                default:
+                    throw new NotSupportedException($"Unsupported draw command type: {command.GetType().FullName}");
+            }
+        }
+
+        private static void ReleaseCommands(IPooledList<DrawCommand> commandList)
+        {
+            foreach (var command in commandList)
+                command?.DisposeAndReturnSelf();
         }
     }
 }

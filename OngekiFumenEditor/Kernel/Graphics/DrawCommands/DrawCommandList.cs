@@ -1,7 +1,6 @@
 using OngekiFumenEditor.Core.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
 {
@@ -18,7 +17,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             Disposed
         }
 
-        private readonly object syncRoot = new();
         private IPooledList<DrawCommand> commands;
         private LifecycleState state = LifecycleState.Normal;
 
@@ -45,37 +43,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             get
             {
-                lock (syncRoot)
-                    return state == LifecycleState.Disposed;
+                return state == LifecycleState.Disposed;
             }
         }
 
         internal bool TryBeginPresent()
         {
-            lock (syncRoot)
-            {
-                if (state != LifecycleState.Normal)
-                    return false;
+            if (state != LifecycleState.Normal)
+                return false;
 
-                state = LifecycleState.PresentApplying;
-                return true;
-            }
+            state = LifecycleState.PresentApplying;
+            return true;
         }
 
         internal void EndPresent()
         {
-            lock (syncRoot)
+            if (state == LifecycleState.DisposeRequested)
             {
-                if (state == LifecycleState.DisposeRequested)
-                {
-                    DisposeCore();
-                    state = LifecycleState.Disposed;
-                    return;
-                }
-
-                if (state == LifecycleState.PresentApplying)
-                    state = LifecycleState.Normal;
+                DisposeCore();
+                state = LifecycleState.Disposed;
+                return;
             }
+
+            if (state == LifecycleState.PresentApplying)
+                state = LifecycleState.Normal;
         }
 
         /// <summary>
@@ -83,20 +74,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         /// </summary>
         public void Dispose()
         {
-            lock (syncRoot)
+            if (state == LifecycleState.Disposed)
+                return;
+
+            if (state == LifecycleState.PresentApplying)
             {
-                if (state == LifecycleState.Disposed)
-                    return;
-
-                if (state == LifecycleState.PresentApplying)
-                {
-                    state = LifecycleState.DisposeRequested;
-                    return;
-                }
-
-                DisposeCore();
-                state = LifecycleState.Disposed;
+                state = LifecycleState.DisposeRequested;
+                return;
             }
+
+            DisposeCore();
+            state = LifecycleState.Disposed;
         }
 
         private void DisposeCore()
@@ -105,7 +93,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                 return;
 
             foreach (var command in commands)
-                command?.Dispose();
+                command?.DisposeAndReturnSelf();
 
             commands.Dispose();
             commands = null;

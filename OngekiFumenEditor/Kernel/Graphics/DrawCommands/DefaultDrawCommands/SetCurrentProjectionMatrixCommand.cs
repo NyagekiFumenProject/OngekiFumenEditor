@@ -1,3 +1,4 @@
+using OngekiFumenEditor.Core.Utils.ObjectPool;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
@@ -5,19 +6,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
     /// <summary>
     /// Replaces the current projection matrix while presenting a command list.
     /// </summary>
-    public sealed record SetCurrentProjectionMatrixCommand : DrawCommand
+    public sealed class SetCurrentProjectionMatrixCommand : DrawCommand
     {
         /// <summary>
-        /// Initializes a projection-matrix replacement command.
+        /// Initializes a new instance of the <see cref="SetCurrentProjectionMatrixCommand"/> class.
         /// </summary>
-        public SetCurrentProjectionMatrixCommand(Matrix4x4 matrix)
+        public SetCurrentProjectionMatrixCommand()
+        {
+        }
+
+        internal SetCurrentProjectionMatrixCommand Initialize(Matrix4x4 matrix)
         {
             Matrix = matrix;
+            return this;
         }
 
         /// <summary>
         /// Gets the matrix to use as the current projection matrix.
         /// </summary>
-        public Matrix4x4 Matrix { get; init; }
+        public Matrix4x4 Matrix { get; private set; }
+
+        /// <inheritdoc />
+        protected override void ReturnToPoolCore()
+        {
+            ObjectPool<SetCurrentProjectionMatrixCommand>.Return(this);
+        }
     }
 }

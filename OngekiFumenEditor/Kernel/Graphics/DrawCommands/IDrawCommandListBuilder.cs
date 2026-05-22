@@ -116,9 +116,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         void DrawBeam(IImage texture, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset);
 
         /// <summary>
-        /// Adds a command that draws an existing static VBO handle.
+        /// Copies draw commands into this builder by replaying them in order.
         /// </summary>
-        void DrawStaticVBO(IStaticVBODrawing.IVBOHandle vbo);
+        void DrawDrawCommandList(IEnumerable<DrawCommand> drawCommands);
 
         /// <summary>
         /// Transfers the current command buffer into a command-list snapshot and resets the builder state.
