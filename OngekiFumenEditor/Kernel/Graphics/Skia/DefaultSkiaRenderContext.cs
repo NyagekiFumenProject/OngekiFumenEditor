@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         private DateTime prevRenderTime;
         private readonly SkiaRenderControlBase renderControl;
 
-        public event Action<TimeSpan> OnRender;
+        public event Action<IRenderContext, TimeSpan> OnRender;
 
         public SKCanvas Canvas => renderControl.CurrentRenderSurface?.Canvas;
 
@@ -59,7 +59,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             var lineDrawing = manager.LineDrawing;
 
             ////
-            OnRender?.Invoke(ts);
+            OnRender?.Invoke(this, ts);
             prevRenderTime = curRenderTime;
         }
 

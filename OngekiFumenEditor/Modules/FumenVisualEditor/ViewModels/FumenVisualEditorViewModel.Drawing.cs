@@ -285,7 +285,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Render(TimeSpan ts)
+    public void Render(IRenderContext context, TimeSpan ts)
         => OnEditorLoop(ts);
 
     Dictionary<int, DrawingTargetContext> drawingContexts = new();

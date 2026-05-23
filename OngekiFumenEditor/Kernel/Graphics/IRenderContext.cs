@@ -6,7 +6,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 {
     public interface IRenderContext
     {
-        public event Action<TimeSpan> OnRender;
+        public event Action<IRenderContext, TimeSpan> OnRender;
 
         void BeforeRender(IDrawingContext context);
         void AfterRender(IDrawingContext context);

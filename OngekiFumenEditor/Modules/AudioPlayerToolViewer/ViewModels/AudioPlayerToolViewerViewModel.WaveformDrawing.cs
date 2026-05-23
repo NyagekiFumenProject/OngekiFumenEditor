@@ -215,7 +215,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             WaveformDrawing?.Options?.Save();
         }
 
-        public void Render(TimeSpan ts)
+        public void Render(IRenderContext context, TimeSpan ts)
         {
             if (RenderContext is null)
                 return;

@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public bool IsInitialized { get; internal set; }
 
-        public event Action<TimeSpan> OnRender;
+        public event Action<IRenderContext, TimeSpan> OnRender;
 
         public void AfterRender(IDrawingContext context)
         {
@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 return;
             isStart = true;
 
-            glView.Render += OnRender;
+            glView.Render += GlView_Render;
         }
 
         public void StopRendering()
@@ -61,7 +61,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 return;
             isStart = false;
 
-            glView.Render -= OnRender;
+            glView.Render -= GlView_Render;
+        }
+
+        private void GlView_Render(TimeSpan ts)
+        {
+            OnRender?.Invoke(this, ts);
         }
     }
 }
