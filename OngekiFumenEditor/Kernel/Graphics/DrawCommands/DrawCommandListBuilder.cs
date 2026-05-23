@@ -247,7 +247,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
 
-            ArgumentNullException.ThrowIfNull(text, nameof(text));
+            text = text ?? "";
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(fontSize, 0, nameof(fontSize));
 
             commands.Add(RentCommand<DrawStringCommand>().Initialize(text, pos, scale, fontSize, rotate, color, origin, style, handle));

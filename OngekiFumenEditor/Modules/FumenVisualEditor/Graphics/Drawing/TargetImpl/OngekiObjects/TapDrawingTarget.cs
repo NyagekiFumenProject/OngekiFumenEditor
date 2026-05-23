@@ -3,6 +3,7 @@ using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
-        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
         {
             var texture = laneType switch
             {
@@ -163,20 +164,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             wallTexture?.Dispose();
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Tap> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Tap> objs)
         {
             foreach (var tap in objs)
-                Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
+                Draw(target, builder, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void draw(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> map)
             {
                 foreach (var item in map)
-                    batchTextureDrawing.Draw(target, item.Key, item.Value);
+                    builder.DrawBatchTexture(item.Key, item.Value);
             }
 
             foreach (var item in selectTapList)
-                highlightDrawing.Draw(target, item.Key, item.Value);
+                builder.DrawHighlightBatchTexture(item.Key, item.Value);
             draw(exList);
             draw(normalList);
 

@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -27,7 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing = renderImpl.SimpleLineDrawing;
         }
 
-        public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
+        public void DrawLines(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<CacheDrawXLineResult> drawLines)
         {
             if (target.Editor.IsPreviewMode)
                 return;
@@ -49,18 +50,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 list.Add(new(new(result.X, 0 + target.Editor.ViewHeight), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
-            lineDrawing.PushOverrideViewMatrix(Matrix4x4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0));
-            lineDrawing.Draw(target, list, 1);
-            lineDrawing.PopOverrideViewMatrix(out _);
+            builder.PushViewMatrix(Matrix4x4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0));
+            builder.DrawSimpleLines(list, 1);
+            builder.PopViewMatrix();
         }
 
-        public void DrawXGridText(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
+        public void DrawXGridText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<CacheDrawXLineResult> drawLines)
         {
             if (target.Editor.IsPreviewMode)
                 return;
 
             foreach (var pair in drawLines)
-                stringDrawing.Draw(
+                builder.DrawString(
                     pair.XGridTotalUnitDisplay,
                     new(pair.X,
                     target.Editor.RectInDesignMode.MaxY),
@@ -70,9 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     Vector4.One,
                     new(0, 0f),
                     IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out _
+                    default
             );
         }
     }

@@ -3,6 +3,7 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -63,7 +64,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             //Log.LogInfo($"hold color has been rebuild.");
         }
 
-        public override void Draw(IFumenEditorDrawingContext target, Hold hold)
+        public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, Hold hold)
         {
             var holdEnd = hold.HoldEnd;
             if (holdEnd is null)
@@ -150,13 +151,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         clippedList.Add(list[i]);
                     clippedList.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
 
-                    lineDrawing.Draw(target, clippedList, 13);
+                    builder.DrawLines(clippedList, 13);
                 }
                 else
                 {
                     list.Add(new LineVertex(holdPoint, color, VertexDash.Solider));
                     list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
-                    lineDrawing.Draw(target, list, 13);
+                    builder.DrawLines(list, 13);
                 }
             }
         }

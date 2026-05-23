@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,11 +13,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
     public abstract class LaneDrawingTargetBase : LaneDrawingTargetBase<LaneStartBase>
     {
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<LaneStartBase> starts)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<LaneStartBase> starts)
         {
             if (target.Editor.IsPreviewMode)
                 starts = starts.Where(x => !x.IsTransparent);
-            base.DrawBatch(target, starts);
+            base.DrawBatch(target, builder, starts);
         }
     }
 }

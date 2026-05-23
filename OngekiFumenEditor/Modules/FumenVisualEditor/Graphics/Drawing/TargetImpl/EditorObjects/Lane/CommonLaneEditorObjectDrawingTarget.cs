@@ -1,6 +1,7 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 endSize = new Vector2(16, 16);
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<ConnectableStartObject> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<ConnectableStartObject> objs)
         {
             target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             {
@@ -62,9 +63,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     }
 
                     if (selectList.Count > 0)
-                        highlightDrawing.Draw(target, texture, selectList);
+                        builder.DrawHighlightBatchTexture(texture, selectList);
                     if (drawList.Count > 0)
-                        textureDrawing.Draw(target, texture, drawList);
+                        builder.DrawBatchTexture(texture, drawList);
 
                     selectList.Clear();
                     drawList.Clear();

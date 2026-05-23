@@ -1,6 +1,7 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             texture.Dispose();
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<LaneCurvePathControlObject> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<LaneCurvePathControlObject> objs)
         {
             var isAlwaysShow = target.Editor.IsShowCurveControlAlways;
             using var list = objs.Where(x => x.RefCurveObject.IsSelected || x.RefCurveObject.IsAnyControlSelecting || isAlwaysShow).Select(x => (
@@ -83,16 +84,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
                 return gen();
             });
-            lineDrawing.Draw(target, lineVertices, 2);
+            builder.DrawSimpleLines(lineVertices, 2);
 
-            highlightDrawing.Draw(target, texture, list.Where(x => x.obj.IsSelected).Select(x => (size * 1.25f, new Vector2(x.x, x.y), 0f, Vector4.One)));
-            textureDrawing.Draw(target, texture, list.Select(x => (size, new Vector2(x.x, x.y), 0f, Vector4.One)));
+            builder.DrawHighlightBatchTexture(texture, list.Where(x => x.obj.IsSelected).Select(x => (size * 1.25f, new Vector2(x.x, x.y), 0f, Vector4.One)));
+            builder.DrawTexture(texture, list.Select(x => (size, new Vector2(x.x, x.y), 0f, Vector4.One)));
             foreach ((var y, var x, var obj) in list)
                 target.RegisterSelectableObject(obj, new Vector2(x, y), size);
 
             foreach (var item in list)
-                stringDrawing.Draw(item.obj.Index.ToString(), new(item.x, item.y + 4), Vector2.One, 15, 0, new(1, 0, 1, 1), new(0.5f, 0.5f),
-                     IStringDrawing.StringStyle.Bold, target, default, out _);
+                builder.DrawString(item.obj.Index.ToString(), new(item.x, item.y + 4), Vector2.One, 15, 0, new(1, 0, 1, 1), new(0.5f, 0.5f),
+                     IStringDrawing.StringStyle.Bold, default);
         }
     }
 }

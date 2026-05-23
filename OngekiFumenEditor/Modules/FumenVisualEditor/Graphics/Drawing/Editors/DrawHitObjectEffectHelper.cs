@@ -1,6 +1,8 @@
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -13,12 +15,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
     public class DrawHitObjectEffectHelper
     {
-        private ICircleDrawing circleDrawing;
         private bool showHitEffect;
 
         public void Initalize(IRenderManagerImpl impl)
         {
-            circleDrawing = impl.CircleDrawing;
             showHitEffect = Properties.EditorGlobalSetting.Default.ShowHitObjectEffectInPreviewMode;
 
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 showHitEffect = Properties.EditorGlobalSetting.Default.ShowHitObjectEffectInPreviewMode;
         }
 
-        public void Draw(IFumenEditorDrawingContext target)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             if (!(target.Editor.IsPreviewMode && showHitEffect))
                 return;
@@ -48,6 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var durationTotalGrid = maxTGrid.TotalGrid - minTGrid.TotalGrid;
 
             var y = (float)target.ConvertToY_DefaultSoflanGroup(maxTGrid);
+            using var circles = ObjectPool.GetPooledList<CircleInstance>();
 
             void drawColorCircle(float progress, Vector2 pos, Vector4 solidColor, float radius, bool showHollow = true)
             {
@@ -63,9 +64,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 var solderColor = new Vector4(solidColor.X, solidColor.Y, solidColor.Z, soliderCircleAlpha);
                 var hollowColor = new Vector4(solidColor.X, solidColor.Y, solidColor.Z, hollowCircleAlpha);
 
-                circleDrawing.Post(pos, solderColor, true, circleScale);
+                circles.Add(new CircleInstance(pos, solderColor, true, circleScale, 0));
                 if (showHollow)
-                    circleDrawing.Post(pos, hollowColor, false, circleScale, 2);
+                    circles.Add(new CircleInstance(pos, hollowColor, false, circleScale, 2));
             }
 
             var hitObjects = Enumerable.Empty<OngekiMovableObjectBase>()
@@ -73,7 +74,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             .Concat(target.Editor.Fumen.Taps.BinaryFindRange(minTGrid, maxTGrid))
             .Concat(target.Editor.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid));
 
-            circleDrawing.Begin(target);
             foreach (var hit in hitObjects)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(hit.XGrid, target.Editor);
@@ -84,12 +84,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 drawColorCircle(progress, p, Vector4.One, 20);
             }
-            circleDrawing.End();
-
-
             var bellObjects = target.Editor.Fumen.Bells.BinaryFindRange(minTGrid, maxTGrid);
 
-            circleDrawing.Begin(target);
             foreach (var bell in bellObjects)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(bell.XGrid, target.Editor);
@@ -100,12 +96,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 drawColorCircle(progress, p, new(1, 1, 0, 0), 15);
             }
-            circleDrawing.End();
-
-
             var bulletObjects = target.Editor.Fumen.Bullets.BinaryFindRange(minTGrid, maxTGrid);
 
-            circleDrawing.Begin(target);
             foreach (var bullet in bulletObjects)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(bullet.XGrid, target.Editor);
@@ -116,10 +108,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 drawColorCircle(progress, p, new(0.5f, 0, 1, 0), 10);
             }
-            circleDrawing.End();
 
             var holdObjects = target.Editor.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid);
-            circleDrawing.Begin(target);
             foreach (var hold in holdObjects)
             {
                 if (hold.ReferenceLaneStart is not { } start)
@@ -139,7 +129,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     drawColorCircle(progress, p, Vector4.One, 15, false);
                 }
             }
-            circleDrawing.End();
+            builder.DrawCircles(circles);
         }
     }
 }

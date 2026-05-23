@@ -10,6 +10,7 @@ using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
@@ -302,6 +303,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private void OnEditorRender(TimeSpan ts)
     {
+        IDrawCommandListBuilder builder = default;
+
         #region limit fps
 
         if (actualRenderInterval > 0)
@@ -326,9 +329,24 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         #endregion
 
+        if (RenderContext is null || renderImpl is null)
+            goto End;
+
+        builder = renderImpl.CreateDrawCommandListBuilder();
+        builder.SetCleanColor(GetCleanColor());
+        builder.SetViewport(ViewWidth, ViewHeight, RenderScaleX, RenderScaleY);
+
+        var projectionMatrix =
+            Matrix4x4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+        builder.SetCurrentViewMatrix(Matrix4x4.Identity);
+        builder.SetCurrentProjectionMatrix(projectionMatrix);
+
         var fumen = Fumen;
         if (fumen is null)
+        {
+            PostDrawCommandList(builder);
             goto End;
+        }
 
         //计算可以显示的TGrid范围以及像素范围
         var tGrid = GetViewportTGrid();
@@ -340,9 +358,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
 
         #region prepare drawing contexts' for every soflan groups 
-
-        var projectionMatrix =
-            Matrix4x4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
 
         IEnumerable<KeyValuePair<int, SoflanList>> soflanMap = Fumen.SoflansMap;
         //if (IsDesignMode)
@@ -559,17 +574,16 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         #region Rendering
 
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
-
-        CleanRender();
-        RenderContext?.BeforeRender(this);
+        builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+        builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
         foreach (var (minTGrid, maxTGrid) in CurrentDrawingTargetContext.VisibleTGridRanges)
-            playableAreaHelper.DrawPlayField(this, minTGrid, maxTGrid);
+            playableAreaHelper.DrawPlayField(this, builder, minTGrid, maxTGrid);
 
-        playableAreaHelper.Draw(this);
-        timeSignatureHelper.DrawLines(this);
+        playableAreaHelper.Draw(this, builder);
+        timeSignatureHelper.DrawLines(this, builder);
 
-        xGridHelper.DrawLines(this, CachedMagneticXGridLines);
+        xGridHelper.DrawLines(this, builder, CachedMagneticXGridLines);
 
         var prevOrder = int.MinValue;
         foreach (var drawingTarget in drawTargetOrder.Where(x => CheckDrawingVisible(x.Visible)))
@@ -585,6 +599,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             prevOrder = order;
 
             CurrentDrawingTargetContext = defaultDrawingTargetContext;
+            builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+            builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
             PerfomenceMonitor.OnBeginTargetDrawing(drawingTarget);
             {
@@ -593,8 +609,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                     foreach (var soflanGroupDrawing in drawingObjs)
                     {
                         CurrentDrawingTargetContext = soflanGroupDrawing.Key;
+                        builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+                        builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
-                        drawingTarget.Begin(this);
+                        drawingTarget.Begin(this, builder);
                         //all object collection has been sorted within GetDisplayableObjects()
                         var drawingObjects = soflanGroupDrawing.Value;
                         for (var i = 0; i < drawingObjects.Count; i++)
@@ -610,15 +628,17 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
 
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
+        builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+        builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
-        timeSignatureHelper.DrawTimeSigntureText(this);
-        xGridHelper.DrawXGridText(this, CachedMagneticXGridLines);
-        judgeLineHelper.Draw(this);
-        hitObjectEffectHelper.Draw(this);
-        playerLocationHelper.Draw(this);
-        selectingRangeHelper.Draw(this);
+        timeSignatureHelper.DrawTimeSigntureText(this, builder);
+        xGridHelper.DrawXGridText(this, builder, CachedMagneticXGridLines);
+        judgeLineHelper.Draw(this, builder);
+        hitObjectEffectHelper.Draw(this, builder);
+        playerLocationHelper.Draw(this, builder);
+        selectingRangeHelper.Draw(this, builder);
 
-        RenderContext?.AfterRender(this);
+        PostDrawCommandList(builder);
 
         //clean up
         for (var i = 0; i < drawingCollectionDisposables.Count; i++)
@@ -633,6 +653,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         #endregion
     End:
+        builder?.Dispose();
         drawMap.Clear();
         PerfomenceMonitor.OnAfterRender();
         //set null
@@ -825,7 +846,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         return objects.Concat(objs).SelectMany(x => x.GetDisplayableObjects());
     }
 
-    private void CleanRender()
+    private Vector4 GetCleanColor()
     {
         var cleanColor = Vector4.Zero;
         if (IsDesignMode || !enablePlayFieldDrawing)
@@ -838,7 +859,25 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             cleanColor = new(0, 0, 0, 1);
 #endif
         }
-        RenderContext?.CleanRender(this, cleanColor);
+        return cleanColor;
+    }
+
+    private void PostDrawCommandList(IDrawCommandListBuilder builder)
+    {
+        var drawCommandList = builder.GetDrawCommandList();
+        var ownsDrawCommandList = true;
+
+        try
+        {
+            RenderContext.PostDrawCommandList(drawCommandList, autoDispose: true);
+            ownsDrawCommandList = false;
+        }
+        catch
+        {
+            if (ownsDrawCommandList)
+                drawCommandList.Dispose();
+            throw;
+        }
     }
 
     public void OnLoaded(ActionExecutionContext e)

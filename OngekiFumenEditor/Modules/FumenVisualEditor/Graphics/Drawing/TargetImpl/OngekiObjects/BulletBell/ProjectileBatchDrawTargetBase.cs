@@ -8,6 +8,7 @@ using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.UI.Controls.ObjectInspector;
 using OngekiFumenEditor.Utils;
 using System;
@@ -90,10 +91,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             DrawVisibleObject_DesignMode(target, obj, pos, 0, mainBuffer);
         }
 
-        private void DrawPallateStr(IDrawingContext target)
+        private void DrawPallateStr(IDrawingContext target, IDrawCommandListBuilder builder)
         {
             foreach ((var pos, var str) in drawStrList)
-                stringDrawing.Draw($"{str}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
+                builder.DrawString($"{str}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, default);
         }
 
         private void ClearDrawList()
@@ -342,7 +343,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<T> objs)
         {
             if (target.Editor.IsDesignMode)
             {
@@ -360,13 +361,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     continue;
                 var span = CollectionsMarshal.AsSpan(list);
                 span.Sort(_yCompare);
-                highlightDrawing.Begin(target, texture);
-                for (int i = 0; i < span.Length; i++)
-                {
-                    ref var item = ref span[i];
-                    highlightDrawing.PostSprite(item.Item1, item.Item2, item.Item3, item.Item4);
-                }
-                highlightDrawing.End();
+                builder.DrawHighlightBatchTexture(texture, list);
             }
             foreach (var (texture, list) in normalDrawList)
             {
@@ -374,17 +369,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     continue;
                 var span = CollectionsMarshal.AsSpan(list);
                 span.Sort(_yCompare);
-                batchTextureDrawing.Begin(target, texture);
-                for (int i = 0; i < span.Length; i++)
-                {
-                    ref var item = ref span[i];
-                    batchTextureDrawing.PostSprite(item.Item1, item.Item2, item.Item3, item.Item4);
-                }
-                batchTextureDrawing.End();
+                builder.DrawBatchTexture(texture, list);
             }
 
             if (target.Editor.IsDesignMode)
-                DrawPallateStr(target);
+                DrawPallateStr(target, builder);
 
             ClearDrawList();
         }

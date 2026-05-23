@@ -6,6 +6,8 @@ using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Core.Utils;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
@@ -72,13 +74,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             playFieldForegroundColor = Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldForegroundColor).ToVector4();
         }
 
-        public void Draw(IFumenEditorDrawingContext target)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             if (target.Editor.IsDesignMode)
-                DrawAudioDuration(target);
+                DrawAudioDuration(target, builder);
         }
 
-        private void DrawAudioDuration(IFumenEditorDrawingContext target)
+        private void DrawAudioDuration(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             var y = (float)target.Editor.TotalDurationHeight;
 
@@ -86,7 +88,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
             vertices[1] = new(new(target.CurrentDrawingTargetContext.Rect.Width, y), color, VertexDash.Solider);
 
-            lineDrawing.Draw(target, vertices, 3);
+            builder.DrawSimpleLines(vertices, 3);
         }
 
         /// <summary>
@@ -95,7 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         /// <param name="target"></param>
         /// <param name="fieldMinTGrid"></param>
         /// <param name="fieldMaxTGrid"></param>
-        public void DrawPlayField(IFumenEditorDrawingContext target, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
+        public void DrawPlayField(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
         {
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
@@ -150,7 +152,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 if (i == rangeInfos.Count - 2)
                     flag |= FieldRangeParam.LastRange;
 
-                DrawPlayFieldInternal(target, segMinTGrid, segMaxTGrid, flag);
+                DrawPlayFieldInternal(target, builder, segMinTGrid, segMaxTGrid, flag);
             }
 
         }
@@ -165,7 +167,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             LastRange = 2,
         }
 
-        private void DrawPlayFieldInternal(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid, FieldRangeParam fieldFlag)
+        private void DrawPlayFieldInternal(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid minTGrid, TGrid maxTGrid, FieldRangeParam fieldFlag)
         {
             /*
 			 画游戏(黑色可移动)区域
@@ -516,7 +518,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             EnumeratePoints(true, rightPoints);
 
             //解决左右墙交叉处理问题, 确保左墙的点永远在右墙点的左侧
-            AdjustLaneIntersection(target, leftPoints, rightPoints);
+            AdjustLaneIntersection(target, builder, leftPoints, rightPoints);
 
             //合并提交，准备进行三角剖分
             tessellatePoints.EnsureCapacity(2 * (leftPoints.Count + rightPoints.Count));
@@ -536,7 +538,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             Earcut.Tessellate(tessellatePoints, tessellateHoleIndices, tessellateList);
 
-            polygonDrawing.Begin(target, Primitive.Triangles);
+            using var polygonVertices = ObjectPool.GetPooledList<PolygonVertex>();
             {
                 for (var j = 0; j < tessellateList.Count; j += 3)
                 {
@@ -553,22 +555,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         var x = (float)tessellatePoints[idx * 2 + 0];
                         var y = (float)tessellatePoints[idx * 2 + 1];
 
-                        polygonDrawing.PostPoint(new(x, y), color);
+                        polygonVertices.Add(new PolygonVertex(new(x, y), color));
                     }
                 }
             }
-            polygonDrawing.End();
+            builder.DrawPolygon(Primitive.Triangles, polygonVertices);
 
-            debugDrawEnumeratedPoints(target, tessellatePoints, leftPoints, rightPoints, tessellateList);
+            debugDrawEnumeratedPoints(target, builder, tessellatePoints, leftPoints, rightPoints, tessellateList);
 
         }
 
         [Conditional("PLAYFIELD_DEBUG")]
-        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, IList<double> tessellatePoints, IList<Vector2> leftPoints, IList<Vector2> rightPoints, IList<int> tessellateList)
+        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IList<double> tessellatePoints, IList<Vector2> leftPoints, IList<Vector2> rightPoints, IList<int> tessellateList)
         {
             playFieldForegroundColor.W = 0.4f;
-            lineDrawing.Draw(target, leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
-            lineDrawing.Draw(target, rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
+            builder.DrawSimpleLines(leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
+            builder.DrawSimpleLines(rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
             {
                 var i = 0;
                 foreach (var seq in tessellateList.SequenceWrap(3))
@@ -576,7 +578,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     var (r, g, b) = Hsl2Rgb(Math.Abs($"{i}{i}".GetHashCode()) % 360f, 1f, 0.5f);
                     var color = new Vector4(r, g, b, 0.9f);
 
-                    lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault())
+                    builder.DrawSimpleLines(seq.Append(seq.FirstOrDefault())
                         .Select(idx => new LineVertex(new((float)tessellatePoints[idx * 2 + 0], (float)tessellatePoints[idx * 2 + 1]), color, new(6, 4))), 2);
 
                     i += 3;
@@ -584,10 +586,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             void printPoints(IEnumerable<Vector2> data, Vector4 color, bool isRight)
             {
-                circleDrawing.Begin(target);
-                foreach (var pos in data)
-                    circleDrawing.Post(pos, color, false, 10);
-                circleDrawing.End();
+                builder.DrawCircles(data.Select(pos => new CircleInstance(pos, color, false, 10, 0)));
                 var prevY = 0f;
                 var prevR = 0;
                 foreach (var pos in data)
@@ -599,7 +598,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     prevY = pos.Y;
 
                     color.W = 1;
-                    stringDrawing.Draw(
+                    builder.DrawString(
                         $"({pos.X}, {pos.Y})",
                         pos - new Vector2(isRight ? -10 : 10, -prevR * 10),
                         Vector2.One,
@@ -608,9 +607,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         color,
                         new(isRight ? 0 : 1, prevR),
                         default,
-                        target,
-                        default,
-                        out _
+                        default
                         );
                 }
             }
@@ -619,7 +616,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             printPoints(rightPoints, debugRightColor, true);
         }
 
-        private void AdjustLaneIntersection(IDrawingContext target, IList<Vector2> leftPoints, IList<Vector2> rightPoints)
+        private void AdjustLaneIntersection(IDrawingContext target, IDrawCommandListBuilder builder, IList<Vector2> leftPoints, IList<Vector2> rightPoints)
         {
             using var tempLeft = ObjectPool.GetPooledList<Vector2>();
             using var tempRight = ObjectPool.GetPooledList<Vector2>();
@@ -800,7 +797,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             intersectResult = GetLinesIntersection(prevLeftLine.from, prevLeftLine.to, rightLine.from, rightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(rightPoints, rightIdx, intersectPoint);
                                 rightIdx++;
@@ -813,7 +810,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, prevRightLine.from, prevRightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(leftPoints, leftIdx, intersectPoint);
                                 leftIdx++;
@@ -826,7 +823,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             intersectResult = GetLinesIntersection(nextLeftLine.from, nextLeftLine.to, rightLine.from, rightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(rightPoints, rightIdx, intersectPoint);
                                 rightIdx++;
@@ -839,7 +836,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, nextRightLine.from, nextRightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(leftPoints, leftIdx, intersectPoint);
                                 leftIdx++;
@@ -851,7 +848,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (intersectResult is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
                 {
-                    debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectionPoint);
+                    debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectionPoint);
                     intersectionPoints.Add(intersectionPoint);
 
                     var isCross = !(intersectionPoint == leftLine.from ||
@@ -1056,13 +1053,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
 
         [Conditional("PLAYFIELD_DEBUG")]
-        private void debugDrawIntersectionPoint(IDrawingContext target, int leftIdx, int rightIdx, Vector2 intersectionPoint)
+        private void debugDrawIntersectionPoint(IDrawingContext target, IDrawCommandListBuilder builder, int leftIdx, int rightIdx, Vector2 intersectionPoint)
         {
             var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX*/true;
-            circleDrawing.Begin(target);
-            circleDrawing.Post(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
-            circleDrawing.End();
-            stringDrawing.Draw(
+            builder.DrawCircle(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
+            builder.DrawString(
                 $"[{leftIdx}, {rightIdx}]",
                 intersectionPoint - new Vector2(isShowLeft ? -10 : 10, 10),
                 Vector2.One,
@@ -1071,9 +1066,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 new(1, 1, 0, 1),
                 new(isShowLeft ? 0 : 1, 1),
                 default,
-                target,
-                default,
-                out _
+                default
                 );
         }
 

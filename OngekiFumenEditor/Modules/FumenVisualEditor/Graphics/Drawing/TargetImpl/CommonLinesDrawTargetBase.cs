@@ -3,6 +3,7 @@ using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -23,20 +24,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
 
-        public void FillLine(IFumenEditorDrawingContext target, T start)
+        public void FillLine(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, T start)
         {
             var color = GetLanePointColor(start);
 
             using var list = ObjectPool.GetPooledList<LineVertex>();
             VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, target.CurrentDrawingTargetContext.CurrentSoflanList, invailedDash, color, list);
-            lineDrawing.Draw(target, list, LineWidth);
+            builder.DrawSimpleLines(list, LineWidth);
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> starts)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<T> starts)
         {
             foreach (var laneStart in starts)
             {
-                FillLine(target, laneStart);
+                FillLine(target, builder, laneStart);
             }
         }
     }

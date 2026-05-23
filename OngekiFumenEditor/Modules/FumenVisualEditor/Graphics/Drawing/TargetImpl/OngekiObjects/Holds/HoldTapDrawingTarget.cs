@@ -1,6 +1,7 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
@@ -21,7 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             tapDraw.Initialize(impl);
         }
 
-        public override void Draw(IFumenEditorDrawingContext target, Hold hold)
+        public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, Hold hold)
         {
             var start = hold.ReferenceLaneStart;
             var holdEnd = hold.HoldEnd;
@@ -31,10 +32,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             //draw taps
             if (target.CheckDrawingVisible(tapDraw.Visible))
             {
-                tapDraw.Begin(target);
-                tapDraw.Draw(target, laneType, hold, hold.IsCritical, soflanGroup);
+                tapDraw.Begin(target, builder);
+                tapDraw.Draw(target, builder, laneType, hold, hold.IsCritical, soflanGroup);
                 if (holdEnd != null)
-                    tapDraw.Draw(target, laneType, holdEnd, false, soflanGroup);
+                    tapDraw.Draw(target, builder, laneType, holdEnd, false, soflanGroup);
                 tapDraw.End();
             }
         }

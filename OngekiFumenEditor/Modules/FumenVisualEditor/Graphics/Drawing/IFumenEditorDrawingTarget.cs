@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
@@ -12,7 +13,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
         int DefaultRenderOrder { get; }
         int CurrentRenderOrder { get; set; }
 
-        void Begin(IFumenEditorDrawingContext target);
+        void Begin(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder);
         void Post(OngekiObjectBase ongekiObject);
         void End();
     }

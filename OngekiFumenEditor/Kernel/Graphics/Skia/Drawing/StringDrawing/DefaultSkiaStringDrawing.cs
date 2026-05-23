@@ -51,6 +51,35 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             .ToArray();
         }
 
+        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, StringStyle style, IStringDrawing.IFontHandle handle)
+        {
+            text ??= string.Empty;
+
+            using var paint = new SKPaint();
+            paint.IsAntialias = !ProgramSetting.Default.DisableStringRendererAntialiasing;
+
+            using var font = new SKFont();
+
+            var isBold = style.HasFlag(StringStyle.Bold);
+            var isItalic = style.HasFlag(StringStyle.Italic);
+            var typefaceName = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
+
+            using var typeface = SKTypeface.FromFamilyName(
+                   typefaceName,
+                   isBold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
+                   SKFontStyleWidth.Normal,
+                    isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright);
+
+            font.Typeface = typeface;
+            font.Size = fontSize;
+            font.Edging = paint.IsAntialias ? SKFontEdging.SubpixelAntialias : SKFontEdging.Alias;
+            font.Hinting = SKFontHinting.Full;
+            font.Subpixel = true;
+
+            font.MeasureText(text, out var bounds, paint);
+            return new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
+        }
+
         public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, StringStyle style, IDrawingContext target, IStringDrawing.IFontHandle handle, out Vector2? measureTextSize)
         {
             text = text ?? string.Empty;

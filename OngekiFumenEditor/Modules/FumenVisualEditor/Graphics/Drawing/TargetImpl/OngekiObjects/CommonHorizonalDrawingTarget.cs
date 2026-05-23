@@ -4,6 +4,7 @@ using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -51,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {"[SFL_End]", FSColor.LightCyan },
         };
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiTimelineObjectBase> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<OngekiTimelineObjectBase> objs)
         {
             using var objects = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToY_DefaultSoflanGroup(x.TGrid))).ToListWithObjectPool();
 
@@ -73,14 +74,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var y = (float)g.FirstOrDefault().Y;
                 using var regColors = actualItems.Select(x => colors[x.TimelineObject.IDShortName]).OrderBy(x => x.PackedValue).ToListWithObjectPool();
                 var per = 1.0f * target.CurrentDrawingTargetContext.Rect.Width / regColors.Count;
-                lineDrawing.Begin(target, 2);
+                using var lineVertices = ObjectPool.GetPooledList<LineVertex>();
                 for (int i = 0; i < regColors.Count; i++)
                 {
                     var c = regColors[i];
-                    lineDrawing.PostPoint(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider);
+                    var color = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
+                    lineVertices.Add(new(new(per * i, y), color, VertexDash.Solider));
+                    lineVertices.Add(new(new(per * (i + 1), y), color, VertexDash.Solider));
                 }
-                lineDrawing.End();
+                builder.DrawSimpleLines(lineVertices, 2);
 
                 //draw range line if need
                 foreach (var obj in actualItems)
@@ -92,11 +94,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     }
                 }
 
-                DrawDescText(target, y, actualItems);
+                DrawDescText(target, builder, y, actualItems);
             }
         }
 
-        private void DrawDescText(IFumenEditorDrawingContext target, float y, IEnumerable<RegisterDrawingInfo> group)
+        private void DrawDescText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, float y, IEnumerable<RegisterDrawingInfo> group)
         {
             string formatObj(OngekiObjectBase s) => s switch
             {
@@ -121,51 +123,52 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {
                 if (i != 0)
                 {
-                    stringDrawing.Draw(
-                    "/",
-                    new Vector2(x, y + 12),
-                    Vector2.One, 16, 0,
-                    Vector4.One,
-                    new(0, 0.5f),
-                    IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out var s);
+                    var slash = "/";
+                    var slashSize = stringDrawing.MeasureString(slash, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
+                    builder.DrawString(
+                        slash,
+                        new Vector2(x, y + 12),
+                        Vector2.One, 16, 0,
+                        Vector4.One,
+                        new(0, 0.5f),
+                        IStringDrawing.StringStyle.Normal,
+                        default);
 
-                    x += s.Value.X;
+                    x += slashSize.X;
                 }
 
                 var text = " " + formatObj(obj) + " ";
                 var fontColor = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
-                stringDrawing.Draw(
+                var size = stringDrawing.MeasureString(text, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
+                builder.DrawString(
                     text,
                     new Vector2(x, y + 12),
                     Vector2.One, 16, 0,
                     fontColor,
                     new(0, 0.5f),
                     IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out var size);
-                var borderPos = new Vector2(x + size.Value.X / 2, y + size.Value.Y / 2 + 1);
+                    default);
+                var borderPos = new Vector2(x + size.X / 2, y + size.Y / 2 + 1);
 
-                target.RegisterSelectableObject(obj, borderPos, size ?? default);
+                target.RegisterSelectableObject(obj, borderPos, size);
                 if (obj.IsSelected)
                 {
                     var bx = borderPos.X;
                     var by = borderPos.Y;
-                    var hw = size.Value.X / 2;
-                    var hh = size.Value.Y / 2;
+                    var hw = size.X / 2;
+                    var hh = size.Y / 2;
+                    var color = new Vector4(1, 1, 0, 1);
 
-                    lineDrawing.Begin(target, 1);
-                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(bx + hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(bx + hw, by - hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(bx - hw, by - hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.End();
+                    builder.DrawSimpleLines(new[]
+                    {
+                        new LineVertex(new(bx - hw, by + hh), color, VertexDash.Solider),
+                        new LineVertex(new(bx + hw, by + hh), color, VertexDash.Solider),
+                        new LineVertex(new(bx + hw, by - hh), color, VertexDash.Solider),
+                        new LineVertex(new(bx - hw, by - hh), color, VertexDash.Solider),
+                        new LineVertex(new(bx - hw, by + hh), color, VertexDash.Solider),
+                    }, 1);
                 }
-                x += size.Value.X;
+                x += size.X;
                 i++;
             }
         }

@@ -2,6 +2,7 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override int DefaultRenderOrder => 300;
 
-        public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
+        public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, BeamStart obj)
         {
             var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.CurrentDrawingTargetContext.Rect.Width, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
             //var width = xGridWidth * 3f * obj.WidthId.Id;
@@ -122,10 +123,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var a = MathUtils.SmoothStep(0.0f, 0.25f, warnProgress);
                 var warnColor = new Vector4(1, 215 / 255.0f, 0, 0.5f * a);
 
-                lazerDrawing.Draw(target, pixelImg, (int)width, x, (float)warnProgress, warnColor, rotate, judgeOffset);
+                builder.DrawBeam(pixelImg, (int)width, x, (float)warnProgress, warnColor, rotate, judgeOffset);
             }
 
-            lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, Vector4.One, rotate, judgeOffset);
+            builder.DrawBeam(textureBody, (int)width, x, (float)progress, Vector4.One, rotate, judgeOffset);
             //Log.LogDebug($"a\nx:{x:F2}, progress:{progress:F2}, warnProgress:{warnProgress:F2}, rotate:{rotate:F2}");
         }
 

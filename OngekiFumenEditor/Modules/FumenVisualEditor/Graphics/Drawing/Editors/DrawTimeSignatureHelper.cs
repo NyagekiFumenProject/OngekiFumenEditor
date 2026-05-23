@@ -2,6 +2,7 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing = renderImpl.SimpleLineDrawing;
         }
 
-        public void DrawLines(IFumenEditorDrawingContext target)
+        public void DrawLines(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             drawLines.Clear();
 
@@ -125,10 +126,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 list.Add(new(new(target.Editor.RectInDesignMode.Width, fy), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
-            lineDrawing.Draw(target, list, 1);
+            builder.DrawSimpleLines(list, 1);
         }
 
-        public void DrawTimeSigntureText(IFumenEditorDrawingContext target)
+        public void DrawTimeSigntureText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             var rightColor = Vector4.One;
             var leftColor = new Vector4(1, 1, 1, 0);
@@ -149,7 +150,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (rightColor.W > 0)
             {
                 foreach (var pair in drawLines)
-                    stringDrawing.Draw(
+                    builder.DrawString(
                     pair.Display,
                     new(target.Editor.ViewWidth - 2,
                     (float)pair.Y + 10),
@@ -159,16 +160,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     rightColor,
                     new(1, 0.5f),
                     IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out _
+                    default
                 );
             }
 
             if (leftColor.W > 0)
             {
                 foreach (var pair in drawLines)
-                    stringDrawing.Draw(
+                    builder.DrawString(
                         pair.Display,
                         new(0 + 2,
                         (float)pair.Y + 10),
@@ -178,9 +177,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         leftColor,
                         new(0, 0.5f),
                         IStringDrawing.StringStyle.Normal,
-                        target,
-                        default,
-                        out _
+                        default
                     );
             }
         }

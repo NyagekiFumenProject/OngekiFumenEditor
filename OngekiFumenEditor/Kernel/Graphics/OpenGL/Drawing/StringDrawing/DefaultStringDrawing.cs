@@ -165,6 +165,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             }
         }
 
+        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle)
+        {
+            text ??= string.Empty;
+            handle = handle ?? DefaultFont;
+            var resolvedStyle = ResolveTextStyle(handle, style);
+            handle = resolvedStyle.FontHandle;
+            var fontStyle = resolvedStyle.FontStyle;
+            var font = GetFontSystem(handle).GetFont(fontSize);
+            return MeasureString(font, text, handle, fontSize, scale, fontStyle);
+        }
+
         public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IDrawingContext target, IStringDrawing.IFontHandle handle, out Vector2? measureTextSize)
         {
             target.PerfomenceMonitor.OnBeginDrawing(this);

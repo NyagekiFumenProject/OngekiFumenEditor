@@ -2,6 +2,7 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
 using System.Numerics;
@@ -25,7 +26,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             lineDrawing = impl.SimpleLineDrawing;
         }
 
-        public void Draw(IFumenEditorDrawingContext target)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             var viewportTGrid = target.Editor.GetViewportTGrid();
             var y = (float)target.ConvertToY_DefaultSoflanGroup(viewportTGrid.TotalUnit);
@@ -33,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
             vertices[1] = new(new(target.Editor.ViewWidth, y), color, VertexDash.Solider);
 
-            lineDrawing.Draw(target, vertices, 1);
+            builder.DrawSimpleLines(vertices, 1);
             var t = viewportTGrid;
 
             var bpmList = target.Editor.Fumen.BpmList;
@@ -47,7 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             else
                 str = t.ToString();
 
-            stringDrawing.Draw(
+            builder.DrawString(
                     str,
                     new(target.Editor.ViewWidth - 50,
                     y + 10f),
@@ -57,9 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     color,
                     new(1, 0.5f),
                     IStringDrawing.StringStyle.Bold,
-                    target,
-                    default,
-                    out _
+                    default
             );
 
             void PrintSpeed(int soflanGroup, SoflanList soflanList, Vector2 pos, Vector4 color)
@@ -69,7 +68,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 {
                     var speedStr = $"[{soflanGroup}]{speed:F2}x";
 
-                    stringDrawing.Draw(
+                    builder.DrawString(
                             speedStr,
                             pos,
                             Vector2.One,
@@ -78,9 +77,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             spdColor,
                             new(1, 1.5f),
                             IStringDrawing.StringStyle.Bold,
-                            target,
-                            default,
-                            out _
+                            default
                     );
                 }
             }

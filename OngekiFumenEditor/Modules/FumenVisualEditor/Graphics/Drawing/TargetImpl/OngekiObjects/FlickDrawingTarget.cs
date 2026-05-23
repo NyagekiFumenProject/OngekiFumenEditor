@@ -2,6 +2,7 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -51,7 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Flick> objs)
         {
             foreach (var obj in objs)
             {
@@ -84,9 +85,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 target.RegisterSelectableObject(obj, pos, size);
             }
 
-            highlightDrawing.Draw(target, texture, selectedFlickList);
-            batchTextureDrawing.Draw(target, texture, normalFlichList);
-            batchTextureDrawing.Draw(target, exFlickEffTexture, exFlickList);
+            builder.DrawHighlightBatchTexture(texture, selectedFlickList);
+            builder.DrawBatchTexture(texture, normalFlichList);
+            builder.DrawBatchTexture(exFlickEffTexture, exFlickList);
 
             exFlickList.Clear();
             selectedFlickList.Clear();

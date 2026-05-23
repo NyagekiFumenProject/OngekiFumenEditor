@@ -5,6 +5,8 @@ using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Lane;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
@@ -32,13 +34,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             polygonDrawing = impl.PolygonDrawing;
         }
 
-        public override void Begin(IFumenEditorDrawingContext target)
+        public override void Begin(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            base.Begin(target);
+            base.Begin(target, builder);
             overdrawingDefferSet.Clear();
         }
 
-        public override void Draw(IFumenEditorDrawingContext target, OngekiTimelineObjectBase obj)
+        public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, OngekiTimelineObjectBase obj)
         {
             var lbk = obj switch
             {
@@ -63,6 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var colorF = color;
             colorF.W = 0f;
             (double, double) lastP = default;
+            using var polygonVertices = ObjectPool.GetPooledList<PolygonVertex>();
 
             #region Generate LBK lines
 
@@ -71,9 +74,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, target.Editor);
                 var y = (float)target.ConvertToY(tGridTotalUnit, soflanList);
 
-                //lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
-                polygonDrawing.PostPoint(new(x, y), Vector4.One);
-                polygonDrawing.PostPoint(new(x + offsetX, y), colorF);
+                polygonVertices.Add(new PolygonVertex(new(x, y), Vector4.One));
+                polygonVertices.Add(new PolygonVertex(new(x + offsetX, y), colorF));
 
                 lastP = (tGridTotalUnit, xGridTotalUnit);
             }
@@ -119,7 +121,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
             {
-                polygonDrawing.Begin(target, Primitive.TriangleStrip);
+                polygonVertices.Clear();
                 foreach (var child in wallStartLane.Children)
                 {
                     if (child.TGrid < minTGrid)
@@ -132,7 +134,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                     ProcessConnectable(child, childMinTGrid, childMaxTGrid);
                 }
-                polygonDrawing.End();
+                builder.DrawPolygon(Primitive.TriangleStrip, polygonVertices);
             }
 
             #endregion

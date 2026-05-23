@@ -3,6 +3,8 @@ using NAudio.Gui;
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -84,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             return cacheColor[soflanGroup] = color;
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<IndividualSoflanArea> isfList)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<IndividualSoflanArea> isfList)
         {
             using var lineVertex = ObjectPool.GetPooledList<LineVertex>();
             using var texList = ObjectPool.GetPooledList<(Vector2 size, Vector2 position, float rotation, Vector4 color)>();
@@ -131,7 +133,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 target.RegisterSelectableObject(isf, bottomLeftTriPos, new(texSize, texSize));
                 target.RegisterSelectableObject(isf.EndIndicator, topRightTriPos, new(texSize, texSize));
 
-                stringDrawing.Draw($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out _);
+                builder.DrawString($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), IStringDrawing.StringStyle.Normal, default);
 
                 if (isf.IsSelected || isf.EndIndicator.IsSelected)
                 {
@@ -141,19 +143,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     var rectColor = color;
                     rectColor.W = 0.35f;
 
-                    polygonDrawing.Begin(target, Primitive.TriangleStrip);
+                    builder.DrawPolygon(Primitive.TriangleStrip, new[]
                     {
-                        polygonDrawing.PostPoint(new(leftX, bottomY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(leftX, topY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(rightX, topY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(rightX, bottomY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(leftX, bottomY), rectColor);
-                    }
-                    polygonDrawing.End();
+                        new PolygonVertex(new(leftX, bottomY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(leftX, topY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(rightX, topY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(rightX, bottomY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(leftX, bottomY), rectColor),
+                    });
 
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
                         bottomLeftTriPos + new Vector2(highlightScale, highlightScale), 0, Vector4.One));
@@ -169,9 +170,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
             }
 
-            lineDrawing.Draw(target, lineVertex, 1.5f);
-            highlightDrawing.Draw(target, texture, hightTexList);
-            textureDrawing.Draw(target, texture, texList);
+            builder.DrawSimpleLines(lineVertex, 1.5f);
+            builder.DrawHighlightBatchTexture(texture, hightTexList);
+            builder.DrawTexture(texture, texList);
 
         }
     }
