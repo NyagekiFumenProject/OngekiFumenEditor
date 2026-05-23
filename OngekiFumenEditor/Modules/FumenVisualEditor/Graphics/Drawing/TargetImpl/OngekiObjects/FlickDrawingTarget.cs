@@ -28,9 +28,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private List<(Vector2, Vector2, float, Vector4)> selectedFlickList = new();
         private List<(Vector2, Vector2, float, Vector4)> normalFlichList = new();
 
-        private IBatchTextureDrawing batchTextureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
-
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "FLK", "CFK" };
 
         public override void Initialize(IRenderManagerImpl impl)
@@ -47,9 +44,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 size = new Vector2(106, 67f);
             exTapEffSize = size;
             selectedEffSize = size * 1.05f;
-
-            batchTextureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Flick> objs)

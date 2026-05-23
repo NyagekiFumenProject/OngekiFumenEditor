@@ -22,8 +22,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override int DefaultRenderOrder => 500;
 
-        private ILineDrawing lineDrawing;
-
         private Vector4 colorHoldLeft;
         private Vector4 colorHoldCenter;
         private Vector4 colorHoldRight;
@@ -32,8 +30,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.LineDrawing;
-
             Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
             RebuildColors();
         }

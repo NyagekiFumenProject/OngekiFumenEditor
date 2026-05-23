@@ -2,12 +2,7 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -64,57 +59,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         public DpiScale CurrentDPI { get; private set; }
 
         /// <inheritdoc />
-        public ICircleDrawing CircleDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public ILineDrawing LineDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public ISimpleLineDrawing SimpleLineDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IStaticVBODrawing StaticVBODrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IStringDrawing StringDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public ITextureDrawing TextureDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IBatchTextureDrawing BatchTextureDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IPolygonDrawing PolygonDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IBeamDrawing BeamDrawing { get; private set; }
-
-        /// <inheritdoc />
         public string Name { get; } = "OpenGL";
 
         private void Initialize()
         {
             Log.LogInfo("OpenGL Drawing Manager initializing...");
             InitializeOpenGL();
-
-            #region Create Drawings
-
-            CircleDrawing = new DefaultInstancedCircleDrawing(this);
-            LineDrawing = new DefaultLineDrawing(this);
-            PolygonDrawing = new DefaultPolygonDrawing(this);
-            StaticVBODrawing = SimpleLineDrawing = new DefaultInstancedLineDrawing(this);
-            StringDrawing = new DefaultStringDrawing(this);
-            TextureDrawing = BatchTextureDrawing = new DefaultBatchTextureDrawing(this);
-            HighlightBatchTextureDrawing = new DefaultHighlightBatchTextureDrawing(this);
-            BeamDrawing = new DefaultBeamDrawing(this);
-
-            Log.LogInfo("Drawing objects were created.");
-
-            #endregion
 
             #region DPI watcher
 
@@ -295,7 +245,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         /// <inheritdoc />
         public IDrawCommandListBuilder CreateDrawCommandListBuilder()
         {
-            return new DrawCommandListBuilder();
+            return new DrawCommandListBuilder(new DefaultStringDrawing(this));
         }
 
         /// <inheritdoc />

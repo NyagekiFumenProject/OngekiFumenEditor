@@ -45,18 +45,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             static (a, b) => a.Item2.Y.CompareTo(b.Item2.Y);
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
-        private IStringDrawing stringDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
-        private IBatchTextureDrawing batchTextureDrawing;
         private ParallelOptions parallelOptions;
         private int parallelCountLimit;
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            batchTextureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-
             parallelOptions = new ParallelOptions()
             {
                 MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2),

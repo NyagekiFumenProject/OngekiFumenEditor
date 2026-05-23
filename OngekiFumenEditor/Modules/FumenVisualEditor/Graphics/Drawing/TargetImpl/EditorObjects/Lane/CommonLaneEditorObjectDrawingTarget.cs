@@ -14,9 +14,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override int DefaultRenderOrder => 2000;
         public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
-        private IBatchTextureDrawing textureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
-
         public abstract IImage StartEditorTexture { get; }
         public abstract IImage NextEditorTexture { get; }
         public abstract IImage EndEditorTexture { get; }
@@ -29,9 +26,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            textureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
                 startSize = new Vector2(16, 16);
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneNext", out nextSize, out _))

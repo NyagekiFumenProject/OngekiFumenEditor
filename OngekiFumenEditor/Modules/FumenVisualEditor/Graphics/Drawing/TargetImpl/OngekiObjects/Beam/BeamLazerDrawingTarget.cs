@@ -16,7 +16,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     internal sealed class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
-        private IBeamDrawing lazerDrawing;
         private IImage textureBody;
         private IImage pixelImg;
         private IImage textureWarn;
@@ -144,8 +143,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lazerDrawing = impl.BeamDrawing;
-
             IImage load(string name) => ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + name);
 
             textureBody = load("beamBody.png");

@@ -39,9 +39,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> exList = new();
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> selectTapList = new();
 
-        private IBatchTextureDrawing batchTextureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
-
         public override void Initialize(IRenderManagerImpl impl)
         {
             void init(ref IImage texture, string resourceName)
@@ -75,9 +72,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             exList[tapExTexture] = new();
             exList[wallExTexture] = new();
-
-            batchTextureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)

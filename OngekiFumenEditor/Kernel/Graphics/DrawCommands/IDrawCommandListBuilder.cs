@@ -111,6 +111,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         void DrawString(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle);
 
         /// <summary>
+        /// Measures a string with the backend text renderer used by this command list builder.
+        /// </summary>
+        Vector2 MeasureString(string text, Vector2 scale, int fontSize, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle);
+
+        /// <summary>
         /// Adds a beam drawing command.
         /// </summary>
         void DrawBeam(IImage texture, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset);

@@ -19,13 +19,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             public override string ToString() => $"X:{X:F3} XGridTotalUnit:{XGridTotalUnit:F3} Display:{XGridTotalUnitDisplay}";
         }
 
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
-
         public void Initalize(IRenderManagerImpl renderImpl)
         {
-            stringDrawing = renderImpl.StringDrawing;
-            lineDrawing = renderImpl.SimpleLineDrawing;
         }
 
         public void DrawLines(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<CacheDrawXLineResult> drawLines)

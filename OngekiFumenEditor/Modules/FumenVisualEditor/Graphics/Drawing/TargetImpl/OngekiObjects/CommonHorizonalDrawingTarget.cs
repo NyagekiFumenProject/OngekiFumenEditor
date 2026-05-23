@@ -22,13 +22,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override int DefaultRenderOrder => 1500;
         public override DrawingVisible DefaultVisible => DrawingVisible.Design; //only design
 
-        private IStringDrawing stringDrawing;
-        private ISimpleLineDrawing lineDrawing;
-
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.SimpleLineDrawing;
-            stringDrawing = impl.StringDrawing;
         }
 
         public override IEnumerable<string> DrawTargetID { get; } =
@@ -124,7 +119,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (i != 0)
                 {
                     var slash = "/";
-                    var slashSize = stringDrawing.MeasureString(slash, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
+                    var slashSize = builder.MeasureString(slash, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
                     builder.DrawString(
                         slash,
                         new Vector2(x, y + 12),
@@ -139,7 +134,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 var text = " " + formatObj(obj) + " ";
                 var fontColor = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
-                var size = stringDrawing.MeasureString(text, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
+                var size = builder.MeasureString(text, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
                 builder.DrawString(
                     text,
                     new Vector2(x, y + 12),

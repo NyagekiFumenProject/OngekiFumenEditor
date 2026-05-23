@@ -22,11 +22,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     [Export(typeof(IFumenEditorDrawingTarget))]
     internal sealed class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
     {
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
-        private ITextureDrawing textureDrawing;
-        private IPolygonDrawing polygonDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
         private IImage texture;
         private static readonly int colorSeed = RandomHepler.Random(int.MinValue, int.MaxValue);
 
@@ -38,12 +33,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
-            textureDrawing = impl.TextureDrawing;
-            polygonDrawing = impl.PolygonDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-
             texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\tri.png");
         }
 

@@ -14,12 +14,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public abstract class CommonLinesDrawTargetBase<T> : CommonBatchDrawTargetBase<T> where T : ConnectableStartObject
     {
         public virtual int LineWidth { get; } = 2;
-        private ISimpleLineDrawing lineDrawing;
         private static VertexDash invailedDash = new VertexDash(6, 3);
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);

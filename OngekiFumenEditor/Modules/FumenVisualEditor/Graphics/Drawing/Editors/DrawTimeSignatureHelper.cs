@@ -24,13 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         private List<CacheDrawTimeLineResult> drawLines = new();
 
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
-
         public void Initalize(IRenderManagerImpl renderImpl)
         {
-            stringDrawing = renderImpl.StringDrawing;
-            lineDrawing = renderImpl.SimpleLineDrawing;
         }
 
         public void DrawLines(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)

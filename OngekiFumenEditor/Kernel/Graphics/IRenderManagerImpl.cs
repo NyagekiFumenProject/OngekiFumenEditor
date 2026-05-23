@@ -62,20 +62,5 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// </summary>
         void PresentDrawCommandList(IRenderContext context);
 
-        #region Drawings
-
-        ICircleDrawing CircleDrawing { get; }
-        ILineDrawing LineDrawing { get; }
-        ISimpleLineDrawing SimpleLineDrawing { get; }
-        IStaticVBODrawing StaticVBODrawing { get; }
-        IStringDrawing StringDrawing { get; }
-        ITextureDrawing TextureDrawing { get; }
-        IBatchTextureDrawing BatchTextureDrawing { get; }
-        IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; }
-        IPolygonDrawing PolygonDrawing { get; }
-
-        IBeamDrawing BeamDrawing { get; }
-
-        #endregion
     }
 }

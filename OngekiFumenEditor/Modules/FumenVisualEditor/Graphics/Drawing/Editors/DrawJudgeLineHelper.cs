@@ -13,8 +13,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
     public class DrawJudgeLineHelper
     {
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
         private Vector4 color = new(1, 1, 0, 1);
         private Vector4 spdColor = new(Colors.LightCyan.R / 255.0f, Colors.LightCyan.G / 255.0f, Colors.LightCyan.B / 255.0f, Colors.LightCyan.A / 255.0f);
 
@@ -22,8 +20,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void Initalize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)

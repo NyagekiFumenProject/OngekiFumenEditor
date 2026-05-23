@@ -16,10 +16,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public sealed class LaneCurvePathControlDrawingTarget : CommonBatchDrawTargetBase<LaneCurvePathControlObject>, IDisposable
     {
         private IImage texture;
-        private ITextureDrawing textureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
         private Vector2 size;
         private static readonly Vector4 Transparent = new Vector4(0, 0, 0, 0);
         private static readonly VertexDash LineDash = new(6, 3);
@@ -35,10 +31,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
 
-            textureDrawing = impl.TextureDrawing;
-            stringDrawing = impl.StringDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public void Dispose()

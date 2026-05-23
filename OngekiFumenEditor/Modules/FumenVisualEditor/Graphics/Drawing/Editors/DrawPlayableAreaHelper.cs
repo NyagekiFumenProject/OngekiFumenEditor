@@ -30,11 +30,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         static readonly Vector4 debugLeftColor = new Vector4(1, 51f / 255, 51f / 255, 0.75f);
         static readonly Vector4 debugRightColor = new Vector4(0, 204f / 255, 102f / 255, 0.75f);
 
-        private ILineDrawing lineDrawing;
-        private IPolygonDrawing polygonDrawing;
-        private ICircleDrawing circleDrawing;
-        private IStringDrawing stringDrawing;
-
         private Vector4 playFieldForegroundColor;
         private bool enablePlayFieldDrawing;
 
@@ -46,11 +41,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void Initalize(IRenderManagerImpl impl)
         {
-            polygonDrawing = impl.PolygonDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
-            circleDrawing = impl.CircleDrawing;
-            stringDrawing = impl.StringDrawing;
-
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
         }

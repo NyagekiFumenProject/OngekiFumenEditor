@@ -18,6 +18,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         private IPooledList<Matrix4x4> modelMatrixStack;
         private IPooledList<Matrix4x4> viewMatrixStack;
         private IPooledList<Matrix4x4> projectionMatrixStack;
+        private IStringDrawing stringMeasurer;
         private bool disposed;
 
         private Vector4? cleanColor;
@@ -32,12 +33,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         /// <summary>
         /// Initializes a new draw command list builder with default frame state.
         /// </summary>
-        public DrawCommandListBuilder()
+        public DrawCommandListBuilder(IStringDrawing stringMeasurer = default)
         {
             commands = ObjectPool.GetPooledList<DrawCommand>();
             modelMatrixStack = ObjectPool.GetPooledList<Matrix4x4>();
             viewMatrixStack = ObjectPool.GetPooledList<Matrix4x4>();
             projectionMatrixStack = ObjectPool.GetPooledList<Matrix4x4>();
+            this.stringMeasurer = stringMeasurer;
             ResetState();
         }
 
@@ -254,6 +256,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         }
 
         /// <inheritdoc />
+        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle)
+        {
+            ThrowIfDisposed();
+
+            if (stringMeasurer is null)
+                throw new InvalidOperationException("This draw command list builder was created without a string measurer.");
+
+            return stringMeasurer.MeasureString(text, scale, fontSize, style, handle);
+        }
+
+        /// <inheritdoc />
         public void DrawBeam(IImage texture, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset)
         {
             ThrowIfDisposed();
@@ -325,6 +338,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             viewMatrixStack = null;
             projectionMatrixStack?.Dispose();
             projectionMatrixStack = null;
+            (stringMeasurer as IDisposable)?.Dispose();
+            stringMeasurer = null;
         }
 
         private void AddTextureCommand<TCommand>(IImage texture, IEnumerable<TextureInstance> instances, Func<TCommand, IImage, IPooledList<TextureInstance>, TCommand> initialize)

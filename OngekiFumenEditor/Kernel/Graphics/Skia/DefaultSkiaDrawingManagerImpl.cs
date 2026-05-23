@@ -1,11 +1,6 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX;
@@ -39,57 +34,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         private RenderBackendType backendType;
 
         /// <inheritdoc />
-        public ICircleDrawing CircleDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public ILineDrawing LineDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public ISimpleLineDrawing SimpleLineDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IStaticVBODrawing StaticVBODrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IStringDrawing StringDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public ITextureDrawing TextureDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IBatchTextureDrawing BatchTextureDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IPolygonDrawing PolygonDrawing { get; private set; }
-
-        /// <inheritdoc />
-        public IBeamDrawing BeamDrawing { get; private set; }
-
-        /// <inheritdoc />
         public string Name { get; } = "Skia";
 
         private void Initialize()
         {
-            #region Create Drawings
-
-            Log.LogInfo("Drawing objects were created.");
-
-            CircleDrawing = new DefaultSkiaCircleDrawing(this);
-            LineDrawing = new NewSkiaLineDrawing(this);
-            SimpleLineDrawing = new NewSkiaLineDrawing(this);
-            StaticVBODrawing = new NewSkiaLineDrawing(this);
-            StringDrawing = new DefaultSkiaStringDrawing(this);
-            TextureDrawing = new DefaultSkiaTextureDrawing(this);
-            PolygonDrawing = new DefaultSkiaPolygonDrawing(this);
-            HighlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(this);
-            BatchTextureDrawing = new DefaultSkiaBatchTextureDrawing(this);
-            BeamDrawing = new DefaultSkiaBeamDrawing(this);
-
-            #endregion
-
             #region DPI watcher
 
             var mainWindow = Application.Current.MainWindow;
@@ -210,7 +158,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         /// <inheritdoc />
         public IDrawCommandListBuilder CreateDrawCommandListBuilder()
         {
-            return new DrawCommandListBuilder();
+            return new DrawCommandListBuilder(new DefaultSkiaStringDrawing(this));
         }
 
         /// <inheritdoc />

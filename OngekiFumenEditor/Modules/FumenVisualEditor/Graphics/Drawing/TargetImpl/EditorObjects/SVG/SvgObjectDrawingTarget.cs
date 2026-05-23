@@ -16,8 +16,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         private IImage texture;
         private ICachedSvgRenderDataManager cachedSvgRenderDataManager;
-        private ITextureDrawing textureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
         private Vector2 size;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { SvgStringPrefab.CommandName, SvgImageFilePrefab.CommandName };
@@ -32,8 +30,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 size = new Vector2(16, 16);
 
             cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();
-            textureDrawing = impl.TextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
         public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, SvgPrefabBase obj)
