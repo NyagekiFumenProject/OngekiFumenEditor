@@ -1,8 +1,11 @@
+using ExCSS;
+using NetTopologySuite.Utilities;
 using OngekiFumenEditor.Core.Utils.ObjectPool;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection.Metadata;
 
 namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
 {
@@ -49,15 +52,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         public void SetViewport(float viewWidth, float viewHeight, float renderScaleX = 1, float renderScaleY = 1)
         {
             ThrowIfDisposed();
-
-            if (viewWidth < 0)
-                throw new ArgumentOutOfRangeException(nameof(viewWidth));
-            if (viewHeight < 0)
-                throw new ArgumentOutOfRangeException(nameof(viewHeight));
-            if (renderScaleX <= 0)
-                throw new ArgumentOutOfRangeException(nameof(renderScaleX));
-            if (renderScaleY <= 0)
-                throw new ArgumentOutOfRangeException(nameof(renderScaleY));
+            ArgumentOutOfRangeException.ThrowIfLessThan(viewWidth, 0, nameof(viewWidth));
+            ArgumentOutOfRangeException.ThrowIfLessThan(viewHeight, 0, nameof(viewHeight));
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(renderScaleX, 0, nameof(renderScaleX));
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(renderScaleY, 0, nameof(renderScaleY));
 
             this.viewWidth = viewWidth;
             this.viewHeight = viewHeight;
@@ -144,7 +142,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         public void DrawLines(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
         {
             ThrowIfDisposed();
-            ValidateLineWidth(lineWidth);
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(lineWidth, 0, nameof(lineWidth));
 
             var pointList = CopyToPooledList(points, nameof(points));
             if (pointList.Count == 0)
@@ -160,7 +158,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         public void DrawSimpleLines(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
         {
             ThrowIfDisposed();
-            ValidateLineWidth(lineWidth);
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(lineWidth, 0, nameof(lineWidth));
 
             var pointList = CopyToPooledList(points, nameof(points));
             if (pointList.Count == 0)
@@ -176,7 +174,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         public void DrawTexture(IImage texture, IEnumerable<TextureInstance> instances)
         {
             ThrowIfDisposed();
-            ValidateTexture(texture);
+            ArgumentNullException.ThrowIfNull(texture, nameof(texture));
             AddTextureCommand<DrawTextureCommand>(texture, instances, static (command, tex, list) => command.Initialize(tex, list));
         }
 
@@ -184,7 +182,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         public void DrawBatchTexture(IImage texture, IEnumerable<TextureInstance> instances)
         {
             ThrowIfDisposed();
-            ValidateTexture(texture);
+            ArgumentNullException.ThrowIfNull(texture, nameof(texture));
             AddTextureCommand<DrawBatchTextureCommand>(texture, instances, static (command, tex, list) => command.Initialize(tex, list));
         }
 
@@ -192,7 +190,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         public void DrawHighlightBatchTexture(IImage texture, IEnumerable<TextureInstance> instances)
         {
             ThrowIfDisposed();
-            ValidateTexture(texture);
+            ArgumentNullException.ThrowIfNull(texture, nameof(texture));
             AddTextureCommand<DrawHighlightBatchTextureCommand>(texture, instances, static (command, tex, list) => command.Initialize(tex, list));
         }
 
@@ -200,7 +198,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         public void DrawCircle(Vector2 point, Vector4 color, bool isSolid, float radius, float hollowLineWidth = 0)
         {
             ThrowIfDisposed();
-            ValidateCircle(radius, hollowLineWidth);
+            ArgumentOutOfRangeException.ThrowIfLessThan(radius, 0, nameof(radius));
+            ArgumentOutOfRangeException.ThrowIfLessThan(hollowLineWidth, 0, nameof(hollowLineWidth));
 
             var instances = ObjectPool.GetPooledList<CircleInstance>();
             instances.Add(new CircleInstance(point, color, isSolid, radius, hollowLineWidth));
@@ -220,7 +219,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             }
 
             foreach (var instance in instanceList)
-                ValidateCircle(instance.Radius, instance.HollowLineWidth);
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(instance.Radius, 0, "instance.Radius");
+                ArgumentOutOfRangeException.ThrowIfLessThan(instance.HollowLineWidth, 0, "instance.HollowLineWidth");
+            }
 
             commands.Add(RentCommand<DrawCirclesCommand>().Initialize(instanceList));
         }
@@ -245,12 +247,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
 
-            if (text is null)
-                throw new ArgumentNullException(nameof(text));
-            if (handle is null)
-                throw new ArgumentNullException(nameof(handle));
-            if (fontSize <= 0)
-                throw new ArgumentOutOfRangeException(nameof(fontSize));
+            ArgumentNullException.ThrowIfNull(text, nameof(text));
+            ArgumentNullException.ThrowIfNull(handle, nameof(handle));
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(fontSize, 0, nameof(fontSize));
 
             commands.Add(RentCommand<DrawStringCommand>().Initialize(text, pos, scale, fontSize, rotate, color, origin, style, handle));
         }
@@ -259,10 +258,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         public void DrawBeam(IImage texture, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset)
         {
             ThrowIfDisposed();
-            ValidateTexture(texture);
+            ArgumentNullException.ThrowIfNull(texture, nameof(texture));
 
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(nameof(width));
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(width, 0, nameof(width));
 
             commands.Add(RentCommand<DrawBeamCommand>().Initialize(texture, width, x, progress, color, rotate, judgeOffset));
         }
@@ -272,8 +270,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
 
-            if (drawCommands is null)
-                throw new ArgumentNullException(nameof(drawCommands));
+            ArgumentNullException.ThrowIfNull(drawCommands, nameof(drawCommands));
 
             foreach (var command in drawCommands)
                 AddCopiedDrawCommand(command);
@@ -363,26 +360,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             if (disposed)
                 throw new ObjectDisposedException(nameof(DrawCommandListBuilder));
-        }
-
-        private static void ValidateLineWidth(float lineWidth)
-        {
-            if (lineWidth <= 0)
-                throw new ArgumentOutOfRangeException(nameof(lineWidth));
-        }
-
-        private static void ValidateTexture(IImage texture)
-        {
-            if (texture is null)
-                throw new ArgumentNullException(nameof(texture));
-        }
-
-        private static void ValidateCircle(float radius, float hollowLineWidth)
-        {
-            if (radius < 0)
-                throw new ArgumentOutOfRangeException(nameof(radius));
-            if (hollowLineWidth < 0)
-                throw new ArgumentOutOfRangeException(nameof(hollowLineWidth));
         }
 
         private static Matrix4x4 PopMatrix(IPooledList<Matrix4x4> stack, string operationName)
