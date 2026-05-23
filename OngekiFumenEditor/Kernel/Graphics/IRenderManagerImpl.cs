@@ -28,9 +28,9 @@ namespace OngekiFumenEditor.Kernel.Graphics
         Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default);
 
         /// <summary>
-        /// Gets the render context associated with the specified render control.
+        /// Gets or creates the render context associated with the specified render control.
         /// </summary>
-        Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default);
+        Task<IRenderContext> GetOrCreateRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default);
 
         /// <summary>
         /// Loads an image resource from the provided stream.

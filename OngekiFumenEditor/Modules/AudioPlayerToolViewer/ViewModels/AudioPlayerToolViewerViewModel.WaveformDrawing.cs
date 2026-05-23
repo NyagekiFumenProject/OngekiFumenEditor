@@ -143,7 +143,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             Log.LogDebug($"ready.");
 
             await impl.WaitForInitializationIsDone();
-            RenderContext = await impl.GetRenderContext(renderControl);
+            RenderContext = await impl.GetOrCreateRenderContext(renderControl);
 
             samplePeak = IoC.Get<ISamplePeak>();
             WaveformDrawing = IoC.Get<IWaveformDrawing>();
@@ -334,7 +334,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
-            RenderContext = await renderImpl.GetRenderContext(renderControl);
+            RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
             RenderContext.OnRender -= Render;
             RenderContext.StopRendering();
         }
@@ -344,7 +344,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
-            RenderContext = await renderImpl.GetRenderContext(renderControl);
+            RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
             RenderContext.OnRender += Render;
             RenderContext.StartRendering();
         }

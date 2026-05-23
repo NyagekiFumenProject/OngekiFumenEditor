@@ -979,7 +979,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var renderControl = sender as FrameworkElement;
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
-        RenderContext = await renderImpl.GetRenderContext(renderControl);
+        RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
         RenderContext.OnRender -= Render;
         RenderContext.StopRendering();
     }
@@ -989,7 +989,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var renderControl = sender as FrameworkElement;
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
-        RenderContext = await renderImpl.GetRenderContext(renderControl);
+        RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
         RenderContext.OnRender += Render;
         RenderContext.StartRendering();
     }

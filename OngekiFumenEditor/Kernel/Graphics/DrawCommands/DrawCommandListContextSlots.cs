@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
     /// <summary>
     /// Maintains front and back draw command list slots independently for each render context.
     /// </summary>
-    public sealed class DrawCommandListContextSlots
+    public sealed partial class DrawCommandListContextSlots
     {
         private readonly Dictionary<IRenderContext, ContextSlot> contextSlots = new();
 
@@ -141,20 +141,5 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                 }
             }
         }
-
-        private sealed class ContextSlot
-        {
-            /// <summary>
-            /// Gets or sets the slot currently ready for presentation.
-            /// </summary>
-            public DrawCommandListSlot? Front { get; set; }
-
-            /// <summary>
-            /// Gets or sets the slot waiting to be swapped to the front.
-            /// </summary>
-            public DrawCommandListSlot? Back { get; set; }
-        }
-
-        private readonly record struct DrawCommandListSlot(DrawCommandList DrawCommandList, bool AutoDispose);
     }
 }

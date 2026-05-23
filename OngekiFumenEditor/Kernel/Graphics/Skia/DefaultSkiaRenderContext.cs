@@ -8,7 +8,7 @@ using System.Windows.Media.Media3D;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
-    public sealed class DefaultSkiaRenderContext : IRenderContext
+    public sealed class DefaultSkiaRenderContext : ISkiaRenderContext
     {
         private DefaultSkiaDrawingManagerImpl manager;
         private bool isStart;

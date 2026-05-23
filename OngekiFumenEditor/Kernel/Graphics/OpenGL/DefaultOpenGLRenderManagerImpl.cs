@@ -193,7 +193,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         public async Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
             var glView = CheckRenderControl(renderControl);
-            var renderCtx = (await GetRenderContext(glView, cancellation)) as DefaultOpenGLRenderContext;
+            var renderCtx = (await GetOrCreateRenderContext(glView, cancellation)) as DefaultOpenGLRenderContext;
 
             if (renderCtx.IsInitialized)
                 return;
@@ -264,7 +264,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         Dictionary<FrameworkElement, IRenderContext> cachedRenderControlMap = new();
 
         /// <inheritdoc />
-        public Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
+        public Task<IRenderContext> GetOrCreateRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
             var glView = CheckRenderControl(renderControl);
 

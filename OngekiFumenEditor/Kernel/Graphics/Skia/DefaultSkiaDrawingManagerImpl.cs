@@ -1,6 +1,7 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
+﻿using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing;
-using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing;
@@ -22,6 +23,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using static OngekiFumenEditor.Kernel.Graphics.DrawCommands.DrawCommandListContextSlots;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
@@ -32,8 +34,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     {
-        private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
-
+        private readonly Dictionary<IRenderContext, ContextSlot> contextSlots = new();
         private TaskCompletionSource initTaskSource = new TaskCompletionSource();
         private bool initialized = false;
         private DpiScale currentDPI;
@@ -164,15 +165,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         }
 
         /// <inheritdoc />
-        public async Task<IRenderContext> GetRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
+        public async Task<IRenderContext> GetOrCreateRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
         {
-            return await GetSkiaRenderContext(rc, cancellation);
+            return await GetOrCreateSkiaRenderContext(rc, cancellation);
         }
 
         /// <summary>
         /// Gets the concrete Skia render context for the specified render control.
         /// </summary>
-        public Task<DefaultSkiaRenderContext> GetSkiaRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
+        public Task<DefaultSkiaRenderContext> GetOrCreateSkiaRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
         {
             var renderControl = CheckRenderControl(rc);
 
@@ -217,19 +218,126 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         /// <inheritdoc />
         public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
         {
-            drawCommandListContextSlots.Post(context, drawCommandList, autoDispose);
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+            if (drawCommandList is null)
+                throw new ArgumentNullException(nameof(drawCommandList));
+
+            DrawCommandListSlot? oldBack = null;
+
+            var slot = GetOrCreateSlot(context);
+            oldBack = slot.Back;
+            slot.Back = new DrawCommandListSlot(drawCommandList, autoDispose);
+
+            ReleaseSlot(oldBack);
         }
 
         /// <inheritdoc />
         public bool SwapDrawCommandList(IRenderContext context)
         {
-            return drawCommandListContextSlots.Swap(context);
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
+            DrawCommandListSlot? oldFront = null;
+            var swapped = false;
+
+            var slot = GetOrCreateSlot(context);
+            if (slot.Back is not { } back)
+                return false;
+
+            oldFront = slot.Front;
+            slot.Front = back;
+            slot.Back = null;
+            swapped = true;
+
+            ReleaseSlot(oldFront);
+            return swapped;
         }
 
         /// <inheritdoc />
         public void PresentDrawCommandList(IRenderContext context)
         {
-            drawCommandListContextSlots.Present(context);
+            if (context is not ISkiaRenderContext skiaRenderContext)
+                throw new Exception("renderContext must be ISkiaRenderContext object.");
+
+            DrawCommandListSlot? front = null;
+
+            if (!contextSlots.TryGetValue(context, out var slot))
+                return;
+
+            front = slot.Front;
+            slot.Front = null;
+
+            if (front is not { } value)
+                return;
+
+            var drawCommandList = value.DrawCommandList;
+            try
+            {
+                if (!drawCommandList.TryBeginPresent())
+                    return;
+
+                try
+                {
+                    PresentCommands(drawCommandList);
+                }
+                finally
+                {
+                    drawCommandList.EndPresent();
+                }
+            }
+            finally
+            {
+                if (value.AutoDispose)
+                    drawCommandList.Dispose();
+            }
+        }
+
+        private ContextSlot GetOrCreateSlot(IRenderContext context)
+        {
+            if (!contextSlots.TryGetValue(context, out var slot))
+                slot = contextSlots[context] = new ContextSlot();
+
+            return slot;
+        }
+
+        private static void ReleaseSlot(DrawCommandListSlot? slot)
+        {
+            if (slot is { AutoDispose: true } value)
+                value.DrawCommandList.Dispose();
+        }
+
+        private static void PresentCommands(DrawCommandList drawCommandList)
+        {
+            foreach (var command in drawCommandList.Commands)
+            {
+                switch (command)
+                {
+                    case SetCurrentModelMatrixCommand:
+                    case SetCurrentViewMatrixCommand:
+                    case SetCurrentProjectionMatrixCommand:
+                    case PushModelMatrixCommand:
+                    case PushViewMatrixCommand:
+                    case PushProjectionMatrixCommand:
+                    case PopModelMatrixCommand:
+                    case PopViewMatrixCommand:
+                    case PopProjectionMatrixCommand:
+                    case DrawLinesCommand:
+                    case DrawSimpleLinesCommand:
+                    case DrawTextureCommand:
+                    case DrawBatchTextureCommand:
+                    case DrawHighlightBatchTextureCommand:
+                    case DrawCirclesCommand:
+                    case DrawPolygonCommand:
+                    case DrawStringCommand:
+                    case DrawBeamCommand:
+                        // TODO: Execute backend-specific draw command rendering here.
+                        break;
+                    default:
+                        // TODO: Decide how custom draw commands should be dispatched.
+                        break;
+                }
+            }
         }
     }
 }
