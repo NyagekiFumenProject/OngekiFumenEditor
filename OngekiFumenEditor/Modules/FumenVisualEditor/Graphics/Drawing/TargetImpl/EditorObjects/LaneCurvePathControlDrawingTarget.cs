@@ -1,6 +1,7 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
@@ -85,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             foreach (var item in list)
                 builder.DrawString(item.obj.Index.ToString(), new(item.x, item.y + 4), Vector2.One, 15, 0, new(1, 0, 1, 1), new(0.5f, 0.5f),
-                     IStringDrawing.StringStyle.Bold, default);
+                     FontStyle.Bold, default);
         }
     }
 }

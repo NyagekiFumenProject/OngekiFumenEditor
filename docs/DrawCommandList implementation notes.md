@@ -78,7 +78,7 @@
    - 包含 lines/simple lines、texture/batch texture/highlight batch texture、circle、polygon、string、beam、static VBO draw 等命令类型。
    - `DrawString` 不携带 `measureTextSize` 输出参数。
    - 文字测量后续作为独立测量能力实现，不放进 command list 绘制命令。
-   - `DrawStringCommand` 首版直接持有 `IStringDrawing.IFontHandle`，不把字体转换成 family name 等可序列化描述。
+   - `DrawStringCommand` 首版直接持有 `IFontHandle`，不把字体转换成 family name 等可序列化描述。
    - 首版只记录/绘制已有 static VBO handle，不实现 `GenerateVBOWithPresetPoints` 之类 VBO 生成能力。
 16. 命令实例参数使用强类型 `record struct`。
    - texture 使用类似 `TextureInstance(Size, Position, Rotation, Color)`。
@@ -110,7 +110,7 @@
    - `TextureInstance`、`CircleInstance`、`PolygonVertex` 等 record struct 也独立 `.cs` 文件，并放在 `DefaultDrawCommands/`。
    - 命名空间随目录拆分为 `OngekiFumenEditor.Kernel.Graphics.DrawCommands` 和 `OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands`。
 21. `DrawCommand.Dispose()` 只释放 command 自己拥有的 pooled 集合。
-   - 不释放 `IImage`、`IStringDrawing.IFontHandle`、`IStaticVBODrawing.IVBOHandle` 等外部渲染资源。
+   - 不释放 `IImage`、`IFontHandle`、`IStaticVBODrawing.IVBOHandle` 等外部渲染资源。
    - 外部资源生命周期由其创建方、缓存或 drawing target 管理。
 22. `DrawCommandList.Dispose()` 级联释放命令。
    - 先调用每个 `DrawCommand.Dispose()`。

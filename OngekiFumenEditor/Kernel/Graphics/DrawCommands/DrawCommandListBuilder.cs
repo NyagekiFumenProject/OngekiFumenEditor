@@ -1,7 +1,7 @@
-using ExCSS;
 using NetTopologySuite.Utilities;
 using OngekiFumenEditor.Core.Utils.ObjectPool;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         private IPooledList<Matrix4x4> modelMatrixStack;
         private IPooledList<Matrix4x4> viewMatrixStack;
         private IPooledList<Matrix4x4> projectionMatrixStack;
-        private IStringDrawing stringMeasurer;
+        private IStringMeasure stringMeasurer;
         private bool disposed;
 
         private Vector4? cleanColor;
@@ -33,7 +33,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         /// <summary>
         /// Initializes a new draw command list builder with default frame state.
         /// </summary>
-        public DrawCommandListBuilder(IStringDrawing stringMeasurer = default)
+        public DrawCommandListBuilder(IStringMeasure stringMeasurer = default)
         {
             commands = ObjectPool.GetPooledList<DrawCommand>();
             modelMatrixStack = ObjectPool.GetPooledList<Matrix4x4>();
@@ -245,7 +245,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         }
 
         /// <inheritdoc />
-        public void DrawString(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle)
+        public void DrawString(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IFontHandle handle)
         {
             ThrowIfDisposed();
 
@@ -256,7 +256,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         }
 
         /// <inheritdoc />
-        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle)
+        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle)
         {
             ThrowIfDisposed();
 

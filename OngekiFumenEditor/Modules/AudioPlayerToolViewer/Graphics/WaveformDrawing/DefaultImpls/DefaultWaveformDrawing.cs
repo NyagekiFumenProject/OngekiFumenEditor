@@ -3,6 +3,7 @@ using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
@@ -263,7 +264,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                         0,
                         IndirectorColor,
                         new System.Numerics.Vector2(0, 2),
-                        IStringDrawing.StringStyle.Normal,
+                        FontStyle.Normal,
                         default);
                     }
                 }
@@ -294,7 +295,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     0,
                     IndirectorColor,
                     new System.Numerics.Vector2(0, 0),
-                    IStringDrawing.StringStyle.Normal,
+                    FontStyle.Normal,
                     default);
             }
         }

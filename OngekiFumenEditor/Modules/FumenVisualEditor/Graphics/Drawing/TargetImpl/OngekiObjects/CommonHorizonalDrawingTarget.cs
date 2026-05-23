@@ -4,6 +4,7 @@ using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
@@ -119,14 +120,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (i != 0)
                 {
                     var slash = "/";
-                    var slashSize = builder.MeasureString(slash, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
+                    var slashSize = builder.MeasureString(slash, Vector2.One, 16, FontStyle.Normal, default);
                     builder.DrawString(
                         slash,
                         new Vector2(x, y + 12),
                         Vector2.One, 16, 0,
                         Vector4.One,
                         new(0, 0.5f),
-                        IStringDrawing.StringStyle.Normal,
+                        FontStyle.Normal,
                         default);
 
                     x += slashSize.X;
@@ -134,14 +135,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 var text = " " + formatObj(obj) + " ";
                 var fontColor = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
-                var size = builder.MeasureString(text, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
+                var size = builder.MeasureString(text, Vector2.One, 16, FontStyle.Normal, default);
                 builder.DrawString(
                     text,
                     new Vector2(x, y + 12),
                     Vector2.One, 16, 0,
                     fontColor,
                     new(0, 0.5f),
-                    IStringDrawing.StringStyle.Normal,
+                    FontStyle.Normal,
                     default);
                 var borderPos = new Vector2(x + size.X / 2, y + size.Y / 2 + 1);
 

@@ -1,8 +1,8 @@
 ﻿using FontStashSharp;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Utils;
 using SharpVectors.Dom.Svg;
-using SixLabors.Fonts;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -10,11 +10,10 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using static OngekiFumenEditor.Kernel.Graphics.IStringDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 {
-    internal sealed class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing, IDisposable
+    internal sealed class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing, IStringMeasure, IDisposable
     {
         private class FontHandle : IFontHandle
         {
@@ -37,7 +36,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             if (defaultSupportFonts != null)
                 return defaultSupportFonts;
 
-            return defaultSupportFonts = SystemFonts.Collection.Families.Select(x =>
+            return defaultSupportFonts = SixLabors.Fonts.SystemFonts.Collection.Families.Select(x =>
             {
                 if (!x.TryGetPaths(out var paths))
                     return default;
@@ -51,7 +50,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             .ToArray();
         }
 
-        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, StringStyle style, IStringDrawing.IFontHandle handle)
+        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle)
         {
             text ??= string.Empty;
 
@@ -60,8 +59,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 
             using var font = new SKFont();
 
-            var isBold = style.HasFlag(StringStyle.Bold);
-            var isItalic = style.HasFlag(StringStyle.Italic);
+            var isBold = style.HasFlag(FontStyle.Bold);
+            var isItalic = style.HasFlag(FontStyle.Italic);
             var typefaceName = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
 
             using var typeface = SKTypeface.FromFamilyName(
@@ -80,7 +79,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             return new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
         }
 
-        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, StringStyle style, IDrawingContext target, IStringDrawing.IFontHandle handle, out Vector2? measureTextSize)
+        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IDrawingContext target, IFontHandle handle, out Vector2? measureTextSize)
         {
             text = text ?? string.Empty;
 
@@ -93,10 +92,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 
             using var font = new SKFont();
 
-            var isBold = style.HasFlag(StringStyle.Bold);
-            var isItalic = style.HasFlag(StringStyle.Italic);
-            var isUnderline = style.HasFlag(StringStyle.Underline);
-            var isStrike = style.HasFlag(StringStyle.Strike);
+            var isBold = style.HasFlag(FontStyle.Bold);
+            var isItalic = style.HasFlag(FontStyle.Italic);
+            var isUnderline = style.HasFlag(FontStyle.Underline);
+            var isStrike = style.HasFlag(FontStyle.Strike);
 
             var typefaceName = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
 

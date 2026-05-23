@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -108,12 +109,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         /// <summary>
         /// Adds a string drawing command without measuring text output. Passing null for handle requests the backend default font.
         /// </summary>
-        void DrawString(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle);
+        void DrawString(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IFontHandle handle);
 
         /// <summary>
         /// Measures a string with the backend text renderer used by this command list builder.
         /// </summary>
-        Vector2 MeasureString(string text, Vector2 scale, int fontSize, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle);
+        Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle);
 
         /// <summary>
         /// Adds a beam drawing command.

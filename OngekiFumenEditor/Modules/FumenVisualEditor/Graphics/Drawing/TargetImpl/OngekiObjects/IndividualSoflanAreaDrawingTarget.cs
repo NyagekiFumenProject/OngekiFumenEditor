@@ -3,6 +3,7 @@ using NAudio.Gui;
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Utils;
@@ -122,7 +123,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 target.RegisterSelectableObject(isf, bottomLeftTriPos, new(texSize, texSize));
                 target.RegisterSelectableObject(isf.EndIndicator, topRightTriPos, new(texSize, texSize));
 
-                builder.DrawString($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), IStringDrawing.StringStyle.Normal, default);
+                builder.DrawString($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), FontStyle.Normal, default);
 
                 if (isf.IsSelected || isf.EndIndicator.IsSelected)
                 {

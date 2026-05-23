@@ -2,6 +2,7 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base.Collections;
 using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
@@ -53,7 +54,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     0,
                     color,
                     new(1, 0.5f),
-                    IStringDrawing.StringStyle.Bold,
+                    FontStyle.Bold,
                     default
             );
 
@@ -72,7 +73,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             0,
                             spdColor,
                             new(1, 1.5f),
-                            IStringDrawing.StringStyle.Bold,
+                            FontStyle.Bold,
                             default
                     );
                 }

@@ -2,14 +2,15 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Windows;
 using System.Windows.Input;
+using Point = System.Windows.Point;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
@@ -154,7 +155,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     0,
                     rightColor,
                     new(1, 0.5f),
-                    IStringDrawing.StringStyle.Normal,
+                    FontStyle.Normal,
                     default
                 );
             }
@@ -171,7 +172,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         0,
                         leftColor,
                         new(0, 0.5f),
-                        IStringDrawing.StringStyle.Normal,
+                        FontStyle.Normal,
                         default
                     );
             }

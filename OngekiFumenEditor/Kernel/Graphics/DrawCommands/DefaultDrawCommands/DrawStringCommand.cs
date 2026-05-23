@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Core.Utils.ObjectPool;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using System;
 using System.Numerics;
 
@@ -16,7 +17,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
         {
         }
 
-        internal DrawStringCommand Initialize(string text, Vector2 position, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle fontHandle)
+        internal DrawStringCommand Initialize(string text, Vector2 position, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IFontHandle fontHandle)
         {
             Text = text ?? throw new ArgumentNullException(nameof(text));
             Position = position;
@@ -68,12 +69,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
         /// <summary>
         /// Gets the requested string style flags.
         /// </summary>
-        public IStringDrawing.StringStyle Style { get; private set; }
+        public FontStyle Style { get; private set; }
 
         /// <summary>
         /// Gets the font handle used by the command. Null requests the backend default font.
         /// </summary>
-        public IStringDrawing.IFontHandle FontHandle { get; private set; }
+        public IFontHandle FontHandle { get; private set; }
 
         /// <inheritdoc />
         public override void Dispose()

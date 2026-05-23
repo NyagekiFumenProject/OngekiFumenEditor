@@ -4,6 +4,7 @@ using OngekiFumenEditor.Core.Base;
 using OngekiFumenEditor.Core.Base.EditorObjects;
 using OngekiFumenEditor.Core.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
@@ -218,7 +219,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             foreach (var (str, pos, color, obj) in strings)
             {
-                var size = builder.MeasureString(str, Vector2.One, 15, IStringDrawing.StringStyle.Bold, default);
+                var size = builder.MeasureString(str, Vector2.One, 15, FontStyle.Bold, default);
                 builder.DrawString(
                     str,
                     pos,
@@ -227,7 +228,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     0,
                     color,
                     new Vector2(0.5f, 0.5f),
-                    IStringDrawing.StringStyle.Bold,
+                    FontStyle.Bold,
                     default);
                 target.RegisterSelectableObject(obj, pos, size);
 

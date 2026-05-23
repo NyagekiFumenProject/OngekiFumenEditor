@@ -1,5 +1,6 @@
 ﻿using FontStashSharp;
 using FontStashSharp.Rasterizers.FreeType;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.Platform;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
@@ -12,26 +13,26 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 {
-    internal sealed class DefaultStringDrawing : CommonOpenGLDrawingBase, IStringDrawing, IDisposable
+    internal sealed class DefaultStringDrawing : CommonOpenGLDrawingBase, IStringDrawing, IStringMeasure, IDisposable
     {
         private Renderer renderer;
 
-        private class FontHandle : IStringDrawing.IFontHandle
+        private class FontHandle : IFontHandle
         {
             public string FamilyName { get; set; }
             public string FilePath { get; set; }
         }
 
-        public static IEnumerable<IStringDrawing.IFontHandle> DefaultSupportFonts { get; } = GetSupportFonts();
-        public static IStringDrawing.IFontHandle DefaultFont { get; } = GetSupportFonts().FirstOrDefault(x => x.FamilyName.ToLower() == "consola");
+        public static IEnumerable<IFontHandle> DefaultSupportFonts { get; } = GetSupportFonts();
+        public static IFontHandle DefaultFont { get; } = GetSupportFonts().FirstOrDefault(x => x.FamilyName.ToLower() == "consola");
 
-        public IEnumerable<IStringDrawing.IFontHandle> SupportFonts { get; } = DefaultSupportFonts;
-        private static readonly IReadOnlyDictionary<string, IStringDrawing.IFontHandle> SupportFontMap =
+        public IEnumerable<IFontHandle> SupportFonts { get; } = DefaultSupportFonts;
+        private static readonly IReadOnlyDictionary<string, IFontHandle> SupportFontMap =
             DefaultSupportFonts.ToDictionary(x => x.FamilyName, StringComparer.OrdinalIgnoreCase);
 
         private const int MaxMeasureTextCacheCount = 4096;
 
-        private static IEnumerable<IStringDrawing.IFontHandle> GetSupportFonts()
+        private static IEnumerable<IFontHandle> GetSupportFonts()
         {
             return Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.Fonts)).Select(x => new FontHandle
             {
@@ -50,27 +51,27 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             renderer = new Renderer();
         }
 
-        private readonly Dictionary<IStringDrawing.IFontHandle, FontSystem> cacheFonts = new Dictionary<IStringDrawing.IFontHandle, FontSystem>();
-        private readonly Dictionary<(IStringDrawing.IFontHandle handle, IStringDrawing.StringStyle style), ResolvedTextStyle> cacheResolvedTextStyles = new();
+        private readonly Dictionary<IFontHandle, FontSystem> cacheFonts = new Dictionary<IFontHandle, FontSystem>();
+        private readonly Dictionary<(IFontHandle handle, FontStyle style), ResolvedTextStyle> cacheResolvedTextStyles = new();
         private readonly Dictionary<MeasureTextCacheKey, Vector2> cacheMeasureTextSizes = new();
         private readonly Queue<MeasureTextCacheKey> cacheMeasureTextSizeOrder = new();
         private DefaultOpenGLRenderManagerImpl defaultDrawingManager;
 
         private readonly struct ResolvedTextStyle
         {
-            public ResolvedTextStyle(IStringDrawing.IFontHandle fontHandle, TextStyle fontStyle)
+            public ResolvedTextStyle(IFontHandle fontHandle, TextStyle fontStyle)
             {
                 FontHandle = fontHandle;
                 FontStyle = fontStyle;
             }
 
-            public IStringDrawing.IFontHandle FontHandle { get; }
+            public IFontHandle FontHandle { get; }
             public TextStyle FontStyle { get; }
         }
 
         private readonly struct MeasureTextCacheKey : IEquatable<MeasureTextCacheKey>
         {
-            public MeasureTextCacheKey(string text, IStringDrawing.IFontHandle fontHandle, int fontSize, Vector2 scale, TextStyle fontStyle)
+            public MeasureTextCacheKey(string text, IFontHandle fontHandle, int fontSize, Vector2 scale, TextStyle fontStyle)
             {
                 Text = text;
                 FontHandle = fontHandle;
@@ -80,7 +81,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             }
 
             private string Text { get; }
-            private IStringDrawing.IFontHandle FontHandle { get; }
+            private IFontHandle FontHandle { get; }
             private int FontSize { get; }
             private Vector2 Scale { get; }
             private TextStyle FontStyle { get; }
@@ -105,7 +106,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             }
         }
 
-        public FontSystem GetFontSystem(IStringDrawing.IFontHandle fontHandle)
+        public FontSystem GetFontSystem(IFontHandle fontHandle)
         {
             if (!cacheFonts.TryGetValue(fontHandle, out var fontSystem))
             {
@@ -165,7 +166,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             }
         }
 
-        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle)
+        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle)
         {
             text ??= string.Empty;
             handle = handle ?? DefaultFont;
@@ -176,7 +177,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             return MeasureString(font, text, handle, fontSize, scale, fontStyle);
         }
 
-        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IDrawingContext target, IStringDrawing.IFontHandle handle, out Vector2? measureTextSize)
+        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IDrawingContext target, IFontHandle handle, out Vector2? measureTextSize)
         {
             target.PerfomenceMonitor.OnBeginDrawing(this);
             {
@@ -200,7 +201,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             target.PerfomenceMonitor.OnAfterDrawing(this);
         }
 
-        private ResolvedTextStyle ResolveTextStyle(IStringDrawing.IFontHandle handle, IStringDrawing.StringStyle style)
+        private ResolvedTextStyle ResolveTextStyle(IFontHandle handle, FontStyle style)
         {
             var key = (handle, style);
             if (cacheResolvedTextStyles.TryGetValue(key, out var resolvedStyle))
@@ -208,14 +209,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
             var fontStyle = TextStyle.None;
 
-            if (style.HasFlag(IStringDrawing.StringStyle.Underline))
+            if (style.HasFlag(FontStyle.Underline))
                 fontStyle = TextStyle.Underline;
-            if (style.HasFlag(IStringDrawing.StringStyle.Strike))
+            if (style.HasFlag(FontStyle.Strike))
                 fontStyle = TextStyle.Strikethrough;
 
             var resolvedHandle = handle;
-            var isBold = style.HasFlag(IStringDrawing.StringStyle.Bold);
-            var isItalic = style.HasFlag(IStringDrawing.StringStyle.Italic);
+            var isBold = style.HasFlag(FontStyle.Bold);
+            var isItalic = style.HasFlag(FontStyle.Italic);
 
             if (isBold && isItalic)
                 resolvedHandle = TryGetSubFont(handle, "z") ?? resolvedHandle;
@@ -229,7 +230,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             return resolvedStyle;
         }
 
-        private static IStringDrawing.IFontHandle TryGetSubFont(IStringDrawing.IFontHandle handle, string sub)
+        private static IFontHandle TryGetSubFont(IFontHandle handle, string sub)
         {
             if (handle?.FamilyName == null)
                 return default;
@@ -237,7 +238,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             return SupportFontMap.TryGetValue(handle.FamilyName + sub, out var subFont) ? subFont : default;
         }
 
-        private Vector2 MeasureString(DynamicSpriteFont font, string text, IStringDrawing.IFontHandle handle, int fontSize, Vector2 scale, TextStyle fontStyle)
+        private Vector2 MeasureString(DynamicSpriteFont font, string text, IFontHandle handle, int fontSize, Vector2 scale, TextStyle fontStyle)
         {
             var key = new MeasureTextCacheKey(text, handle, fontSize, scale, fontStyle);
             if (cacheMeasureTextSizes.TryGetValue(key, out var size))

@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System;
 using System.Collections.Generic;
@@ -65,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     0,
                     Vector4.One,
                     new(0, 0f),
-                    IStringDrawing.StringStyle.Normal,
+                    FontStyle.Normal,
                     default
             );
         }
