@@ -249,9 +249,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         }
 
         /// <inheritdoc />
-        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
+        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default)
         {
-            drawCommandListContextSlots.Post(context, drawCommandList, autoDispose);
+            drawCommandListContextSlots.Post(context, drawCommandList, autoDispose, perfomenceMonitor);
         }
 
         /// <inheritdoc />

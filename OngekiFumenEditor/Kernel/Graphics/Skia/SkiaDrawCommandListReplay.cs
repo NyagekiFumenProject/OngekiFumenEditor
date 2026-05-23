@@ -1,6 +1,5 @@
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
-using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
@@ -17,8 +16,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
     internal sealed class SkiaDrawCommandListReplay : IDisposable
     {
-        private static readonly IPerfomenceMonitor DummyPerfomenceMonitor = new DummyPerformenceMonitor();
-
         private readonly ReplayDrawingContext drawingContext;
         private readonly DrawingTargetContext targetContext;
         private readonly NewSkiaLineDrawing lineDrawing;
@@ -38,18 +35,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         private Matrix4x4 currentViewMatrix;
         private Matrix4x4 currentProjectionMatrix;
 
-        public SkiaDrawCommandListReplay(DefaultSkiaDrawingManagerImpl manager, IRenderContext renderContext, DrawCommandListFrameState frameState, SKCanvas canvas)
+        public SkiaDrawCommandListReplay(DefaultSkiaDrawingManagerImpl manager, IRenderContext renderContext, DrawCommandListFrameState frameState, SKCanvas canvas, IPerfomenceMonitor perfomenceMonitor)
         {
             ArgumentNullException.ThrowIfNull(manager);
             ArgumentNullException.ThrowIfNull(renderContext);
             ArgumentNullException.ThrowIfNull(canvas);
+            ArgumentNullException.ThrowIfNull(perfomenceMonitor);
 
             currentModelMatrix = frameState.ModelMatrix;
             currentViewMatrix = frameState.ViewMatrix;
             currentProjectionMatrix = frameState.ProjectionMatrix;
 
             targetContext = CreateTargetContext(frameState);
-            drawingContext = new ReplayDrawingContext(renderContext, targetContext, DummyPerfomenceMonitor);
+            drawingContext = new ReplayDrawingContext(renderContext, targetContext, perfomenceMonitor);
 
             lineDrawing = new NewSkiaLineDrawing(manager);
             textureDrawing = new DefaultSkiaTextureDrawing(manager);
@@ -128,19 +126,29 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                     SetCurrentProjectionMatrix(PopMatrix(projectionMatrixStack, nameof(PopProjectionMatrixCommand)));
                     break;
                 case DrawLinesCommand drawLinesCommand:
-                    DrawWithCurrentModel(lineDrawing, () => lineDrawing.Draw(drawingContext, drawLinesCommand.Points, drawLinesCommand.LineWidth));
+                    lineDrawing.PushOverrideModelMatrix(currentModelMatrix);
+                    lineDrawing.Draw(drawingContext, drawLinesCommand.Points, drawLinesCommand.LineWidth);
+                    lineDrawing.PopOverrideModelMatrix(out _);
                     break;
                 case DrawSimpleLinesCommand drawSimpleLinesCommand:
-                    DrawWithCurrentModel(lineDrawing, () => lineDrawing.Draw(drawingContext, drawSimpleLinesCommand.Points, drawSimpleLinesCommand.LineWidth));
+                    lineDrawing.PushOverrideModelMatrix(currentModelMatrix);
+                    lineDrawing.Draw(drawingContext, drawSimpleLinesCommand.Points, drawSimpleLinesCommand.LineWidth);
+                    lineDrawing.PopOverrideModelMatrix(out _);
                     break;
                 case DrawTextureCommand drawTextureCommand:
-                    DrawWithCurrentModel(textureDrawing, () => textureDrawing.Draw(drawingContext, drawTextureCommand.Texture, EnumerateTextureInstances(drawTextureCommand.Instances)));
+                    textureDrawing.PushOverrideModelMatrix(currentModelMatrix);
+                    textureDrawing.Draw(drawingContext, drawTextureCommand.Texture, EnumerateTextureInstances(drawTextureCommand.Instances));
+                    textureDrawing.PopOverrideModelMatrix(out _);
                     break;
                 case DrawBatchTextureCommand drawBatchTextureCommand:
-                    DrawWithCurrentModel(batchTextureDrawing, () => batchTextureDrawing.Draw(drawingContext, drawBatchTextureCommand.Texture, EnumerateTextureInstances(drawBatchTextureCommand.Instances)));
+                    batchTextureDrawing.PushOverrideModelMatrix(currentModelMatrix);
+                    batchTextureDrawing.Draw(drawingContext, drawBatchTextureCommand.Texture, EnumerateTextureInstances(drawBatchTextureCommand.Instances));
+                    batchTextureDrawing.PopOverrideModelMatrix(out _);
                     break;
                 case DrawHighlightBatchTextureCommand drawHighlightBatchTextureCommand:
-                    DrawWithCurrentModel(highlightBatchTextureDrawing, () => highlightBatchTextureDrawing.Draw(drawingContext, drawHighlightBatchTextureCommand.Texture, EnumerateTextureInstances(drawHighlightBatchTextureCommand.Instances)));
+                    highlightBatchTextureDrawing.PushOverrideModelMatrix(currentModelMatrix);
+                    highlightBatchTextureDrawing.Draw(drawingContext, drawHighlightBatchTextureCommand.Texture, EnumerateTextureInstances(drawHighlightBatchTextureCommand.Instances));
+                    highlightBatchTextureDrawing.PopOverrideModelMatrix(out _);
                     break;
                 case DrawCirclesCommand drawCirclesCommand:
                     DrawCircles(drawCirclesCommand);
@@ -149,7 +157,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                     DrawPolygon(drawPolygonCommand);
                     break;
                 case DrawStringCommand drawStringCommand:
-                    DrawWithCurrentModel(stringDrawing, () => stringDrawing.Draw(
+                    stringDrawing.PushOverrideModelMatrix(currentModelMatrix);
+                    stringDrawing.Draw(
                         drawStringCommand.Text,
                         drawStringCommand.Position,
                         drawStringCommand.Scale,
@@ -160,10 +169,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                         drawStringCommand.Style,
                         drawingContext,
                         drawStringCommand.FontHandle,
-                        out _));
+                        out _);
+                    stringDrawing.PopOverrideModelMatrix(out _);
                     break;
                 case DrawBeamCommand drawBeamCommand:
-                    DrawWithCurrentModel(beamDrawing, () => beamDrawing.Draw(
+                    beamDrawing.PushOverrideModelMatrix(currentModelMatrix);
+                    beamDrawing.Draw(
                         drawingContext,
                         drawBeamCommand.Texture,
                         drawBeamCommand.Width,
@@ -171,7 +182,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                         drawBeamCommand.Progress,
                         drawBeamCommand.Color,
                         drawBeamCommand.Rotate,
-                        drawBeamCommand.JudgeOffset));
+                        drawBeamCommand.JudgeOffset);
+                    beamDrawing.PopOverrideModelMatrix(out _);
                     break;
                 default:
                     throw new NotSupportedException($"Unsupported draw command type: {command.GetType().FullName}");
@@ -180,36 +192,22 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         private void DrawCircles(DrawCirclesCommand command)
         {
-            DrawWithCurrentModel(circleDrawing, () =>
-            {
-                circleDrawing.Begin(drawingContext);
-                try
-                {
-                    foreach (var instance in command.Instances)
-                        circleDrawing.Post(instance.Point, instance.Color, instance.IsSolid, instance.Radius, instance.HollowLineWidth);
-                }
-                finally
-                {
-                    circleDrawing.End();
-                }
-            });
+            circleDrawing.PushOverrideModelMatrix(currentModelMatrix);
+            circleDrawing.Begin(drawingContext);
+            foreach (var instance in command.Instances)
+                circleDrawing.Post(instance.Point, instance.Color, instance.IsSolid, instance.Radius, instance.HollowLineWidth);
+            circleDrawing.End();
+            circleDrawing.PopOverrideModelMatrix(out _);
         }
 
         private void DrawPolygon(DrawPolygonCommand command)
         {
-            DrawWithCurrentModel(polygonDrawing, () =>
-            {
-                polygonDrawing.Begin(drawingContext, command.Primitive);
-                try
-                {
-                    foreach (var vertex in command.Vertices)
-                        polygonDrawing.PostPoint(vertex.Point, vertex.Color);
-                }
-                finally
-                {
-                    polygonDrawing.End();
-                }
-            });
+            polygonDrawing.PushOverrideModelMatrix(currentModelMatrix);
+            polygonDrawing.Begin(drawingContext, command.Primitive);
+            foreach (var vertex in command.Vertices)
+                polygonDrawing.PostPoint(vertex.Point, vertex.Color);
+            polygonDrawing.End();
+            polygonDrawing.PopOverrideModelMatrix(out _);
         }
 
         private void SetCurrentViewMatrix(Matrix4x4 matrix)
@@ -222,19 +220,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         {
             currentProjectionMatrix = matrix;
             targetContext.ProjectionMatrix = matrix;
-        }
-
-        private void DrawWithCurrentModel(IDrawing drawing, Action draw)
-        {
-            drawing.PushOverrideModelMatrix(currentModelMatrix);
-            try
-            {
-                draw();
-            }
-            finally
-            {
-                drawing.PopOverrideModelMatrix(out _);
-            }
         }
 
         private static Matrix4x4 PopMatrix(Stack<Matrix4x4> stack, string commandName)

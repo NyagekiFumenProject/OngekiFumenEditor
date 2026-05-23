@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// <summary>
         /// Posts a command list to the back slot associated with the specified render context.
         /// </summary>
-        void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true);
+        void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default);
 
         /// <summary>
         /// Promotes the back slot to the front slot for the specified render context.

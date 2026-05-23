@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
     {
         public event Action<IRenderContext, TimeSpan> OnRender;
 
-        void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true);
+        void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default);
 
         void BeforeRender(IDrawingContext context);
         void AfterRender(IDrawingContext context);

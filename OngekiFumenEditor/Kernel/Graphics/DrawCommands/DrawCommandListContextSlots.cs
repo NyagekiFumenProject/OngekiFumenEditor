@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         /// <summary>
         /// Posts a command list into the back slot for the specified context.
         /// </summary>
-        public void Post(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
+        public void Post(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default)
         {
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
 
             var slot = GetOrCreateSlot(context);
             oldBack = slot.Back;
-            slot.Back = new DrawCommandListSlot(drawCommandList, autoDispose);
+            slot.Back = new DrawCommandListSlot(drawCommandList, autoDispose, perfomenceMonitor);
 
             ReleaseSlot(oldBack);
         }

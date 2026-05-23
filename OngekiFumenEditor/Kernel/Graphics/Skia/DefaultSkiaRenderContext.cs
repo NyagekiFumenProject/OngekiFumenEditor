@@ -41,9 +41,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             Canvas.Clear(new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W));
         }
 
-        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
+        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default)
         {
-            manager.PostDrawCommandList(this, drawCommandList, autoDispose);
+            manager.PostDrawCommandList(this, drawCommandList, autoDispose, perfomenceMonitor);
         }
 
         public void StartRendering()

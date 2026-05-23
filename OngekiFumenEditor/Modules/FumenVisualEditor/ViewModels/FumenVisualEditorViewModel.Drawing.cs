@@ -869,7 +869,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         try
         {
-            RenderContext.PostDrawCommandList(drawCommandList, autoDispose: true);
+            RenderContext.PostDrawCommandList(drawCommandList, autoDispose: true, perfomenceMonitor: PerfomenceMonitor);
             ownsDrawCommandList = false;
         }
         catch

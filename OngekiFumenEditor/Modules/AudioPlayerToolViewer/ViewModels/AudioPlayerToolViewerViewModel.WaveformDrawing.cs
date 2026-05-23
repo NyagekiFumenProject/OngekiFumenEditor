@@ -246,7 +246,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
                 try
                 {
-                    RenderContext.PostDrawCommandList(drawCommandList, autoDispose: true);
+                    RenderContext.PostDrawCommandList(drawCommandList, autoDispose: true, perfomenceMonitor: PerfomenceMonitor);
                     ownsDrawCommandList = false;
                 }
                 catch

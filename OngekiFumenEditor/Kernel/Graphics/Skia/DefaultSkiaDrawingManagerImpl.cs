@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
@@ -162,7 +163,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         }
 
         /// <inheritdoc />
-        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
+        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default)
         {
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
@@ -173,7 +174,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
             var slot = GetOrCreateSlot(context);
             oldBack = slot.Back;
-            slot.Back = new DrawCommandListSlot(drawCommandList, autoDispose);
+            slot.Back = new DrawCommandListSlot(drawCommandList, autoDispose, perfomenceMonitor);
 
             ReleaseSlot(oldBack);
         }
@@ -225,7 +226,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
                 try
                 {
-                    PresentCommands(context, drawCommandList, skiaRenderContext.Canvas);
+                    PresentCommands(context, drawCommandList, skiaRenderContext.Canvas, value.PerfomenceMonitor);
                 }
                 finally
                 {
@@ -253,9 +254,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 value.DrawCommandList.Dispose();
         }
 
-        private void PresentCommands(IRenderContext context, DrawCommandList drawCommandList, SKCanvas canvas)
+        private void PresentCommands(IRenderContext context, DrawCommandList drawCommandList, SKCanvas canvas, IPerfomenceMonitor perfomenceMonitor)
         {
-            using var replay = new SkiaDrawCommandListReplay(this, context, drawCommandList.FrameState, canvas);
+            using var replay = new SkiaDrawCommandListReplay(this, context, drawCommandList.FrameState, canvas, perfomenceMonitor);
             replay.Present(drawCommandList.Commands);
         }
     }

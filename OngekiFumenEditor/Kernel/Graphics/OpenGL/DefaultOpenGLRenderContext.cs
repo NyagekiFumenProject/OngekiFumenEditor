@@ -28,9 +28,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public event Action<IRenderContext, TimeSpan> OnRender;
 
-        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
+        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default)
         {
-            manager.PostDrawCommandList(this, drawCommandList, autoDispose);
+            manager.PostDrawCommandList(this, drawCommandList, autoDispose, perfomenceMonitor);
         }
 
         public void AfterRender(IDrawingContext context)
