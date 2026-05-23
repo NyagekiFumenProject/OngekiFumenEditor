@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Windows;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
@@ -8,10 +9,13 @@ namespace OngekiFumenEditor.Kernel.Graphics
     {
         public event Action<IRenderContext, TimeSpan> OnRender;
 
+        void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true);
+
         void BeforeRender(IDrawingContext context);
         void AfterRender(IDrawingContext context);
         void CleanRender(IDrawingContext context, Vector4 cleanColor);
         void StartRendering();
         void StopRendering();
     }
+
 }

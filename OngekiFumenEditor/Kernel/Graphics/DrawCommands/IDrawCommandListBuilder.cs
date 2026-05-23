@@ -106,7 +106,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         void DrawPolygon(Primitive primitive, IEnumerable<PolygonVertex> vertices);
 
         /// <summary>
-        /// Adds a string drawing command without measuring text output.
+        /// Adds a string drawing command without measuring text output. Passing null for handle requests the backend default font.
         /// </summary>
         void DrawString(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IStringDrawing.IFontHandle handle);
 

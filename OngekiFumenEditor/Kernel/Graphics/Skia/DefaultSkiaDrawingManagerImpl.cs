@@ -1,5 +1,4 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
-using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
@@ -23,7 +22,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using static OngekiFumenEditor.Kernel.Graphics.DrawCommands.DrawCommandListContextSlots;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
@@ -279,7 +277,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
                 try
                 {
-                    PresentCommands(drawCommandList);
+                    PresentCommands(context, drawCommandList, skiaRenderContext.Canvas);
                 }
                 finally
                 {
@@ -307,37 +305,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 value.DrawCommandList.Dispose();
         }
 
-        private static void PresentCommands(DrawCommandList drawCommandList)
+        private void PresentCommands(IRenderContext context, DrawCommandList drawCommandList, SKCanvas canvas)
         {
-            foreach (var command in drawCommandList.Commands)
-            {
-                switch (command)
-                {
-                    case SetCurrentModelMatrixCommand:
-                    case SetCurrentViewMatrixCommand:
-                    case SetCurrentProjectionMatrixCommand:
-                    case PushModelMatrixCommand:
-                    case PushViewMatrixCommand:
-                    case PushProjectionMatrixCommand:
-                    case PopModelMatrixCommand:
-                    case PopViewMatrixCommand:
-                    case PopProjectionMatrixCommand:
-                    case DrawLinesCommand:
-                    case DrawSimpleLinesCommand:
-                    case DrawTextureCommand:
-                    case DrawBatchTextureCommand:
-                    case DrawHighlightBatchTextureCommand:
-                    case DrawCirclesCommand:
-                    case DrawPolygonCommand:
-                    case DrawStringCommand:
-                    case DrawBeamCommand:
-                        // TODO: Execute backend-specific draw command rendering here.
-                        break;
-                    default:
-                        // TODO: Decide how custom draw commands should be dispatched.
-                        break;
-                }
-            }
+            using var replay = new SkiaDrawCommandListReplay(this, context, drawCommandList.FrameState, canvas);
+            replay.Present(drawCommandList.Commands);
         }
     }
 }

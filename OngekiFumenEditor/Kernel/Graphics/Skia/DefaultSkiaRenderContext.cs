@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Skia;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
 using SkiaSharp;
 using System;
@@ -40,6 +41,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             Canvas.Clear(new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W));
         }
 
+        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
+        {
+            manager.PostDrawCommandList(this, drawCommandList, autoDispose);
+        }
+
         public void StartRendering()
         {
             if (isStart)
@@ -54,12 +60,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         {
             var curRenderTime = DateTime.UtcNow;
             var ts = curRenderTime - prevRenderTime;
-            ////
 
-            var lineDrawing = manager.LineDrawing;
-
-            ////
             OnRender?.Invoke(this, ts);
+
+            PostAndPresentDrawCommandList();
             prevRenderTime = curRenderTime;
         }
 
@@ -70,6 +74,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             isStart = false;
 
             renderControl.PaintSurface -= RenderControl_PaintSurface;
+        }
+
+        private void PostAndPresentDrawCommandList()
+        {
+            if (!manager.SwapDrawCommandList(this))
+                return;
+
+            Canvas.Save();
+            manager.PresentDrawCommandList(this);
+            Canvas.Restore();
         }
     }
 }

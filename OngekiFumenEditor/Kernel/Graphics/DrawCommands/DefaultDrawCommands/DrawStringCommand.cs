@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
             Color = color;
             Origin = origin;
             Style = style;
-            FontHandle = fontHandle ?? throw new ArgumentNullException(nameof(fontHandle));
+            FontHandle = fontHandle;
             return this;
         }
 
@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
         public IStringDrawing.StringStyle Style { get; private set; }
 
         /// <summary>
-        /// Gets the font handle used by the command.
+        /// Gets the font handle used by the command. Null requests the backend default font.
         /// </summary>
         public IStringDrawing.IFontHandle FontHandle { get; private set; }
 

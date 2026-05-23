@@ -1,11 +1,12 @@
 ﻿using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing
 {
     public interface IWaveformDrawing : IDrawingTarget
     {
         IWaveformDrawingOption Options { get; }
-        void Draw(IWaveformDrawingContext target, PeakPointCollection samplePeak);
+        void Draw(IWaveformDrawingContext target, PeakPointCollection samplePeak, IDrawCommandListBuilder builder);
     }
 }

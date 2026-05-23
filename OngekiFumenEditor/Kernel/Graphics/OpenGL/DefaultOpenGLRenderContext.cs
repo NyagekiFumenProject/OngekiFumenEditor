@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Wpf;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         public bool IsInitialized { get; internal set; }
 
         public event Action<IRenderContext, TimeSpan> OnRender;
+
+        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
+        {
+            manager.PostDrawCommandList(this, drawCommandList, autoDispose);
+        }
 
         public void AfterRender(IDrawingContext context)
         {

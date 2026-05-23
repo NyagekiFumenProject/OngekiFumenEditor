@@ -4,7 +4,6 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing;
-using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
@@ -16,7 +15,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 {
@@ -147,7 +145,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             samplePeak = IoC.Get<ISamplePeak>();
             WaveformDrawing = IoC.Get<IWaveformDrawing>();
-            WaveformDrawing.Initialize(renderImpl);
+            WaveformDrawing.Initialize(impl);
             initTask.SetResult();
 
             viewWidth = (float)renderControl.ActualWidth;
@@ -217,7 +215,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void Render(IRenderContext context, TimeSpan ts)
         {
-            if (RenderContext is null)
+            if (RenderContext is null || renderImpl is null)
                 return;
             //limit
             if (LimitFPS > 0)
@@ -227,39 +225,41 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 sw.Restart();
             }
 
-            RenderContext.CleanRender(this, new(16 / 255f, 16 / 255f, 16 / 255f, 1f));
-
-            if (Editor is null || !IsShowWaveform)
-                return;
-
             PerfomenceMonitor.PostUIRenderTime(ts);
             PerfomenceMonitor.OnBeforeRender();
 
-            RenderContext.BeforeRender(this);
+            try
+            {
+                UpdateDrawingContext();
 
-            UpdateDrawingContext();
+                using var builder = renderImpl.CreateDrawCommandListBuilder();
+                builder.SetCleanColor(new(16 / 255f, 16 / 255f, 16 / 255f, 1f));
+                builder.SetViewport(viewWidth, viewHeight, renderScaleX, renderScaleY);
+                builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+                builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
-            //var lineDrawing = renderImpl.SimpleLineDrawing;
+                if (Editor is not null && IsShowWaveform && usingPeakData is not null)
+                    WaveformDrawing.Draw(this, usingPeakData, builder);
 
-            //void printCross(Vector2 p, System.Numerics.Vector4 color, float crossWidth = 10)
-            //{
-            //    lineDrawing.Draw(this, [new(new(p.X - crossWidth, p.Y), color, VertexDash.Solider), new(new(p.X + crossWidth, p.Y), color, VertexDash.Solider)], 4);
-            //    lineDrawing.Draw(this, [new(new(p.X, p.Y - crossWidth), color, VertexDash.Solider), new(new(p.X, p.Y + crossWidth), color, VertexDash.Solider)], 4);
-            //}
+                var drawCommandList = builder.GetDrawCommandList();
+                var ownsDrawCommandList = true;
 
-            //printCross(new(-viewWidth / 2, -viewHeight / 2), new(1, 0, 0, 1), 20);
-            //printCross(new(0, 0), new(0, 1, 0, 1), 20);
-            //printCross(new(viewWidth / 2, viewHeight / 2), new(0, 0, 1, 1), 20);
-
-            //var beamDrawing = IoC.Get<IRenderManager>().BeamDrawing;
-            //using var img = ResourceUtils.OpenReadTextureFromFile(@"C:\Users\mikir\Desktop\OngekiFumenEditor\Resources\editor\beamBody.png");
-            //beamDrawing.Draw(this, img, 26, viewWidth / 2, 1, Vector4.One, 0, 0);
-
-            if (usingPeakData is not null)
-                WaveformDrawing.Draw(this, usingPeakData);
-
-            PerfomenceMonitor.OnAfterRender();
-            RenderContext.AfterRender(this);
+                try
+                {
+                    RenderContext.PostDrawCommandList(drawCommandList, autoDispose: true);
+                    ownsDrawCommandList = false;
+                }
+                catch
+                {
+                    if (ownsDrawCommandList)
+                        drawCommandList.Dispose();
+                    throw;
+                }
+            }
+            finally
+            {
+                PerfomenceMonitor.OnAfterRender();
+            }
         }
 
         private void UpdateDrawingContext()
