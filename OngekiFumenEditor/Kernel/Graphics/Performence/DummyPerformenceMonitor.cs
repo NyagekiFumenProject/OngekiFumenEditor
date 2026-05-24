@@ -21,6 +21,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
         private sealed class DummyRenderPerformenceStatisticsData : IRenderPerformenceStatisticsData
         {
+            public long CurrentFrameSpendTicks => 0;
+
+            public double AveFrameSpendTicks => 0;
+
+            public double AveFrameFps => 0;
+
             public long CurrentOnRenderSpendTicks => 0;
 
             public double AveOnRenderSpendTicks => 0;

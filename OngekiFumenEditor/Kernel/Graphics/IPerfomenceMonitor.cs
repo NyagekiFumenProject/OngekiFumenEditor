@@ -8,6 +8,9 @@ namespace OngekiFumenEditor.Kernel.Graphics
 	{
 		public interface IRenderPerformenceStatisticsData
 		{
+			public long CurrentFrameSpendTicks { get; }
+			public double AveFrameSpendTicks { get; }
+			public double AveFrameFps { get; }
 			public long CurrentOnRenderSpendTicks { get; }
 			public double AveOnRenderSpendTicks { get; }
 			public double AveOnRenderFps { get; }
@@ -19,7 +22,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
 		public interface ICategorizedPerformenceStatisticsData
 		{
-			public record PerformenceItem(string Name, double AveSpendTicks);
+			public record PerformenceItem(string Name, double AveSpendTicks, double AveDrawCall = 0);
 			public IEnumerable<PerformenceItem> PerformenceRanks { get; }
 			public double AveSpendTicks { get; }
 			public double MostSpendTicks { get; }

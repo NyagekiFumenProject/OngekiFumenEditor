@@ -4,6 +4,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 {
 	public struct RenderPerformenceStatisticsData : IRenderPerformenceStatisticsData
 	{
+		public long CurrentFrameSpendTicks { get; set; }
+
+		public double AveFrameSpendTicks { get; set; }
+
+		public double AveFrameFps { get; set; }
+
 		public long CurrentOnRenderSpendTicks { get; set; }
 
 		public double AveOnRenderSpendTicks { get; set; }

@@ -61,19 +61,34 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
 		private static readonly ICategorizedPerformenceStatisticsData emptyCategorizedData = new EmptyCategorizedPerformenceStatisticsData();
 
+		private readonly SampleWindow frameSpendTicks = new();
 		private readonly SampleWindow onRenderSpendTicks = new();
 		private readonly SampleWindow presentSpendTicks = new();
 		private readonly SampleWindow drawCall = new();
 
+		private long previousFrameTimestamp;
 		private long renderBeginTimestamp;
 		private long presentBeginTimestamp;
+		private long currentFrameSpendTicks;
 		private int currentDrawCall;
 		private bool isRendering;
 		private bool isPresenting;
 
 		public void OnBeforeRender()
 		{
-			renderBeginTimestamp = Stopwatch.GetTimestamp();
+			var currentTimestamp = Stopwatch.GetTimestamp();
+			if (previousFrameTimestamp != 0)
+			{
+				currentFrameSpendTicks = Stopwatch.GetElapsedTime(previousFrameTimestamp, currentTimestamp).Ticks;
+				frameSpendTicks.Enqueue(currentFrameSpendTicks);
+			}
+			else
+			{
+				currentFrameSpendTicks = 0;
+			}
+
+			previousFrameTimestamp = currentTimestamp;
+			renderBeginTimestamp = currentTimestamp;
 			isRendering = true;
 		}
 
@@ -136,11 +151,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
 		public IRenderPerformenceStatisticsData GetRenderPerformenceData()
 		{
+			var aveFrameSpendTicks = frameSpendTicks.Average;
 			var aveOnRenderSpendTicks = onRenderSpendTicks.Average;
 			var avePresentSpendTicks = presentSpendTicks.Average;
 
 			return new RenderPerformenceStatisticsData()
 			{
+				CurrentFrameSpendTicks = currentFrameSpendTicks,
+				AveFrameSpendTicks = aveFrameSpendTicks,
+				AveFrameFps = ToFps(aveFrameSpendTicks),
 				AveOnRenderSpendTicks = aveOnRenderSpendTicks,
 				AveOnRenderFps = ToFps(aveOnRenderSpendTicks),
 				AvePresentSpendTicks = avePresentSpendTicks,
@@ -156,6 +175,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 			string formatFPS(double fps) => $"{fps,7:0.00}";
 			string formatMSec(double ticks) => $"{TimeSpan.FromTicks((long)Math.Max(0, ticks)).TotalMilliseconds:F2}";
 
+			builder.AppendLine($"Frame FPS avg:{formatFPS(render.AveFrameFps)} ({formatMSec(render.AveFrameSpendTicks)}ms avg)");
 			builder.AppendLine($"OnRender FPS avg:{formatFPS(render.AveOnRenderFps)} ({formatMSec(render.AveOnRenderSpendTicks)}ms avg)");
 			builder.AppendLine($"Present  FPS avg:{formatFPS(render.AvePresentFps)} ({formatMSec(render.AvePresentSpendTicks)}ms avg)");
 			builder.AppendLine($"DrawCall avg:{render.AveDrawCall,6:F1}");
@@ -163,9 +183,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
 		public void Clear()
 		{
+			frameSpendTicks.Clear();
 			onRenderSpendTicks.Clear();
 			presentSpendTicks.Clear();
 			drawCall.Clear();
+			previousFrameTimestamp = 0;
+			currentFrameSpendTicks = 0;
 			currentDrawCall = 0;
 			isRendering = false;
 			isPresenting = false;

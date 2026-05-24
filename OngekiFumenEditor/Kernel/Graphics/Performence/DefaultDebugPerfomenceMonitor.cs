@@ -71,10 +71,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
 			public long CurrentFrameSpendTicks { get; private set; }
 
+			public long CurrentFrameDrawCall { get; private set; }
+
+			public bool CurrentFrameHasSample { get; private set; }
+
 			public SampleWindow SpendTicks { get; } = new();
+
+			public SampleWindow DrawCalls { get; } = new();
 
 			public void Begin()
 			{
+				CurrentFrameHasSample = true;
 				beginTimestamp = Stopwatch.GetTimestamp();
 			}
 
@@ -88,15 +95,23 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 				return true;
 			}
 
+			public void CountDrawCall()
+			{
+				CurrentFrameDrawCall++;
+			}
+
 			public void ResetCurrent()
 			{
 				beginTimestamp = 0;
 				CurrentFrameSpendTicks = 0;
+				CurrentFrameDrawCall = 0;
+				CurrentFrameHasSample = false;
 			}
 
 			public void ClearAll()
 			{
 				SpendTicks.Clear();
+				DrawCalls.Clear();
 				ResetCurrent();
 			}
 		}
@@ -115,13 +130,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
 		private readonly Dictionary<Type, CategoryPerformenceData> drawCommandDataMap = new();
 		private readonly Dictionary<Type, CategoryPerformenceData> drawTargetDataMap = new();
+		private readonly Stack<Type> currentDrawCommandTypes = new();
 
+		private readonly SampleWindow frameSpendTicks = new();
 		private readonly SampleWindow onRenderSpendTicks = new();
 		private readonly SampleWindow presentSpendTicks = new();
 		private readonly SampleWindow totalDrawCall = new();
 
+		private long previousFrameTimestamp;
 		private long renderBeginTimestamp;
 		private long presentBeginTimestamp;
+		private long currentFrameSpendTicks;
 		private long currentOnRenderSpendTicks;
 		private long currentPresentSpendTicks;
 		private int currentDrawCall;
@@ -140,11 +159,24 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
 		public void OnBeforeRender()
 		{
+			var currentTimestamp = Stopwatch.GetTimestamp();
+			if (previousFrameTimestamp != 0)
+			{
+				currentFrameSpendTicks = Stopwatch.GetElapsedTime(previousFrameTimestamp, currentTimestamp).Ticks;
+				frameSpendTicks.Enqueue(currentFrameSpendTicks);
+			}
+			else
+			{
+				currentFrameSpendTicks = 0;
+			}
+
+			previousFrameTimestamp = currentTimestamp;
+
 			foreach (var data in drawTargetDataMap.Values)
 				data.ResetCurrent();
 
 			currentOnRenderSpendTicks = 0;
-			renderBeginTimestamp = Stopwatch.GetTimestamp();
+			renderBeginTimestamp = currentTimestamp;
 			isRendering = true;
 		}
 
@@ -170,6 +202,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 			foreach (var data in drawCommandDataMap.Values)
 				data.ResetCurrent();
 
+			currentDrawCommandTypes.Clear();
 			currentDrawCall = 0;
 			currentPresentSpendTicks = 0;
 			presentBeginTimestamp = Stopwatch.GetTimestamp();
@@ -187,10 +220,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
 			foreach (var data in drawCommandDataMap.Values)
 			{
-				if (data.CurrentFrameSpendTicks > 0)
+				if (data.CurrentFrameHasSample)
+				{
 					data.SpendTicks.Enqueue(data.CurrentFrameSpendTicks);
+					data.DrawCalls.Enqueue(data.CurrentFrameDrawCall);
+				}
 			}
 
+			currentDrawCommandTypes.Clear();
 			isPresenting = false;
 		}
 
@@ -199,7 +236,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 			if (command is null)
 				return;
 
-			GetCategoryPerformenceData(drawCommandDataMap, command.GetType()).Begin();
+			var commandType = command.GetType();
+			currentDrawCommandTypes.Push(commandType);
+			GetCategoryPerformenceData(drawCommandDataMap, commandType).Begin();
 		}
 
 		public void OnAfterDrawCommand(DrawCommand command)
@@ -208,6 +247,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 				return;
 
 			GetCategoryPerformenceData(drawCommandDataMap, command.GetType()).TryEnd();
+
+			if (currentDrawCommandTypes.Count > 0)
+				currentDrawCommandTypes.Pop();
 		}
 
 		public void OnBeginTargetDrawing(IDrawingTarget target)
@@ -229,15 +271,26 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 		public void CountDrawCall()
 		{
 			currentDrawCall++;
+
+			if (currentDrawCommandTypes.Count == 0)
+				return;
+
+			var commandType = currentDrawCommandTypes.Peek();
+			if (drawCommandDataMap.TryGetValue(commandType, out var data))
+				data.CountDrawCall();
 		}
 
 		public void Clear()
 		{
 			drawCommandDataMap.Clear();
 			drawTargetDataMap.Clear();
+			frameSpendTicks.Clear();
 			onRenderSpendTicks.Clear();
 			presentSpendTicks.Clear();
 			totalDrawCall.Clear();
+			currentDrawCommandTypes.Clear();
+			previousFrameTimestamp = 0;
+			currentFrameSpendTicks = 0;
 			currentOnRenderSpendTicks = 0;
 			currentPresentSpendTicks = 0;
 			currentDrawCall = 0;
@@ -252,7 +305,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 				return new CategorizedPerformenceStatisticsData();
 
 			var list = dataList
-				.Select(x => new PerformenceItem(x.Name, x.SpendTicks.Average))
+				.Select(x => new PerformenceItem(x.Name, x.SpendTicks.Average, x.DrawCalls.Average))
 				.OrderByDescending(x => x.AveSpendTicks)
 				.ToList();
 
@@ -276,11 +329,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 
 		public IRenderPerformenceStatisticsData GetRenderPerformenceData()
 		{
+			var aveFrameSpendTicks = frameSpendTicks.Average;
 			var aveOnRenderSpendTicks = onRenderSpendTicks.Average;
 			var avePresentSpendTicks = presentSpendTicks.Average;
 
 			return new RenderPerformenceStatisticsData()
 			{
+				CurrentFrameSpendTicks = currentFrameSpendTicks,
+				AveFrameSpendTicks = aveFrameSpendTicks,
+				AveFrameFps = ToFps(aveFrameSpendTicks),
 				CurrentOnRenderSpendTicks = currentOnRenderSpendTicks,
 				AveOnRenderSpendTicks = aveOnRenderSpendTicks,
 				AveOnRenderFps = ToFps(aveOnRenderSpendTicks),
@@ -305,7 +362,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 				if (p is null)
 					return;
 
-				builder.AppendLine($"CMD.TOP{i}:{p.Name} {formatMSec(p.AveSpendTicks)}ms avg");
+				builder.AppendLine($"CMD #{i}:{p.Name} {formatMSec(p.AveSpendTicks)}ms , DC:{(int)p.AveDrawCall}");
 			}
 
 			void targetItem(PerformenceItem p, int i)
@@ -313,12 +370,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence
 				if (p is null)
 					return;
 
-				builder.AppendLine($"DT.TOP{i}:{p.Name} {formatMSec(p.AveSpendTicks)}ms avg");
+				builder.AppendLine($"DT #{i}:{p.Name} {formatMSec(p.AveSpendTicks)}ms");
 			}
 
-			builder.AppendLine($"OnRender FPS avg:{formatFPS(render.AveOnRenderFps)} ({formatMSec(render.CurrentOnRenderSpendTicks)}ms/{formatMSec(render.AveOnRenderSpendTicks)}ms avg)");
-			builder.AppendLine($"Present  FPS avg:{formatFPS(render.AvePresentFps)} ({formatMSec(render.CurrentPresentSpendTicks)}ms/{formatMSec(render.AvePresentSpendTicks)}ms avg)");
-			builder.AppendLine($"DrawCall avg:{render.AveDrawCall,6:F1}");
+			builder.AppendLine($"Frame FPS:{formatFPS(render.AveFrameFps)} ({formatMSec(render.CurrentFrameSpendTicks)}ms/{formatMSec(render.AveFrameSpendTicks)}ms)");
+			builder.AppendLine($"OnRender FPS:{formatFPS(render.AveOnRenderFps)} ({formatMSec(render.CurrentOnRenderSpendTicks)}ms/{formatMSec(render.AveOnRenderSpendTicks)}ms)");
+			builder.AppendLine($"Present FPS:{formatFPS(render.AvePresentFps)} ({formatMSec(render.CurrentPresentSpendTicks)}ms/{formatMSec(render.AvePresentSpendTicks)}ms)");
+			builder.AppendLine($"DrawCall:{(int)render.AveDrawCall}");
 			builder.AppendLine();
 			commandItem(command.PerformenceRanks.ElementAtOrDefault(0), 1);
 			commandItem(command.PerformenceRanks.ElementAtOrDefault(1), 2);
