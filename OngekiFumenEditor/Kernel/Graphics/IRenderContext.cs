@@ -11,7 +11,9 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         int LimitFPS { get; set; }
 
-        void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default);
+        IPerfomenceMonitor PerfomenceMonitor { get; set; }
+
+        void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true);
 
         void BeforeRender(IDrawingContext context);
         void AfterRender(IDrawingContext context);

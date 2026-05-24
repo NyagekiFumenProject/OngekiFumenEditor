@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.Skia;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
 using SkiaSharp;
 using System;
@@ -20,6 +21,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         public event Action<IRenderContext, TimeSpan> OnRender;
 
         public int LimitFPS { get; set; } = -1;
+
+        public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
 
         public SKCanvas Canvas => renderControl.CurrentRenderSurface?.Canvas;
 
@@ -44,9 +47,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             Canvas.Clear(new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W));
         }
 
-        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default)
+        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
         {
-            manager.PostDrawCommandList(this, drawCommandList, autoDispose, perfomenceMonitor);
+            manager.PostDrawCommandList(this, drawCommandList, autoDispose);
         }
 
         public void StartRendering()

@@ -107,7 +107,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
             GL.NamedBufferSubData(vbo, (IntPtr)0, (IntPtr)(VertexSize * currentPostCount), postData);
 
             GL.DrawArrays(PrimitiveType.Points, 0, currentPostCount);
-            target.PerfomenceMonitor.CountDrawCall();
+            target.RenderContext.PerfomenceMonitor.CountDrawCall();
         }
 
         private void Clear()

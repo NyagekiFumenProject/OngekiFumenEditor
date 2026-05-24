@@ -131,7 +131,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
             GL.NamedBufferSubData(vbo, (IntPtr)0, (IntPtr)(VertexSize * currentPostCount), postData);
 
             GL.DrawArraysInstanced(PrimitiveType.TriangleFan, 0, 4, currentPostCount);
-            target.PerfomenceMonitor.CountDrawCall();
+            target.RenderContext.PerfomenceMonitor.CountDrawCall();
         }
 
         private void FlushDraw()

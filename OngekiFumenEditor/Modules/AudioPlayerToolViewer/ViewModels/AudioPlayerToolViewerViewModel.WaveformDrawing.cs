@@ -23,7 +23,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private float viewHeight;
         private float renderScaleX = 1;
         private float renderScaleY = 1;
-        private IPerfomenceMonitor performenceMonitor;
         private ISamplePeak samplePeak;
         private CancellationTokenSource loadWaveformTask;
         private CancellationTokenSource resampleTaskCancelTokenSource;
@@ -31,8 +30,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private PeakPointCollection rawPeakData;
         private PeakPointCollection usingPeakData;
-
-        public IPerfomenceMonitor PerfomenceMonitor => performenceMonitor;
 
         public TimeSpan CurrentTime { get; private set; }
         public TimeSpan AudioTotalDuration => AudioPlayer?.Duration ?? default;
@@ -148,10 +145,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             viewHeight = (float)renderControl.ActualHeight;
             UpdateRenderScale(renderControl);
 
-            //暂时没有需要显示检测的必要?
-            //performenceMonitor = IoC.Get<IPerfomenceMonitor>();
-            performenceMonitor = new DummyPerformenceMonitor();
-
             UpdateActualRenderInterval();
         }
 
@@ -213,7 +206,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (RenderContext is null || renderImpl is null)
                 return;
 
-            PerfomenceMonitor.OnBeforeRender();
+            context.PerfomenceMonitor.OnBeforeRender();
 
             try
             {
@@ -233,7 +226,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
                 try
                 {
-                    RenderContext.PostDrawCommandList(drawCommandList, autoDispose: true, perfomenceMonitor: PerfomenceMonitor);
+                    RenderContext.PostDrawCommandList(drawCommandList, autoDispose: true);
                     ownsDrawCommandList = false;
                 }
                 catch
@@ -245,7 +238,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
             finally
             {
-                PerfomenceMonitor.OnAfterRender();
+                context.PerfomenceMonitor.OnAfterRender();
             }
         }
 
@@ -332,6 +325,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
             RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
+            RenderContext.PerfomenceMonitor = IoC.Get<IPerfomenceMonitor>();
             UpdateActualRenderInterval();
             RenderContext.OnRender += Render;
             RenderContext.StartRendering();

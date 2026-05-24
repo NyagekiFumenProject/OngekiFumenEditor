@@ -104,7 +104,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing
             };
             GL.NamedBufferSubData(vbo, IntPtr.Zero, postVertexCount * VertexByteSize, postData);
             GL.DrawArrays(glPrimitive, 0, postVertexCount);
-            target.PerfomenceMonitor.CountDrawCall();
+            target.RenderContext.PerfomenceMonitor.CountDrawCall();
             postVertexCount = 0;
         }
     }

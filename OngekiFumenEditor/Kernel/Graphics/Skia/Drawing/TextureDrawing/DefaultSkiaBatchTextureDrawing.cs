@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
                     adjustSize.Y);
 
                 canvas.DrawImage(texture.Image, rect, paint);
-                target.PerfomenceMonitor.CountDrawCall();
+                target.RenderContext.PerfomenceMonitor.CountDrawCall();
                 canvas.Restore();
             }
         }

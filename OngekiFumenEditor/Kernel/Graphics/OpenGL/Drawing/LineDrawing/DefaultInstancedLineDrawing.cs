@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                 GL.NamedBufferSubData(line_vbo, IntPtr.Zero, postDataFillIndex, PostData);
 
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
-                target.PerfomenceMonitor.CountDrawCall();
+                target.RenderContext.PerfomenceMonitor.CountDrawCall();
 
                 postDataFillIndex = postDataFillCount = 0;
             }
@@ -316,7 +316,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                 SwitchVertexVBO(handle.vbo);
 
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, handle.verticsCount - 1);
-                target.PerfomenceMonitor.CountDrawCall();
+                target.RenderContext.PerfomenceMonitor.CountDrawCall();
 
                 SwitchVertexVBO(line_vbo);
             }

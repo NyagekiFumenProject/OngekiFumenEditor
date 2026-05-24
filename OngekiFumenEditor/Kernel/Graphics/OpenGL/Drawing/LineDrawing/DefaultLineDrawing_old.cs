@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 						GL.Enable(EnableCap.PolygonSmooth);
 
 						GL.DrawArrays(PrimitiveType.Triangles, 0, count);
-						target.PerfomenceMonitor.CountDrawCall();
+						target.RenderContext.PerfomenceMonitor.CountDrawCall();
 
 						GL.Disable(EnableCap.PolygonSmooth);
 					}

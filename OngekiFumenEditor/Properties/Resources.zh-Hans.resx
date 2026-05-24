@@ -1335,8 +1335,8 @@
   <data name="ShowCurveControlAlways" xml:space="preserve">
     <value>一直显示曲线控制点：</value>
   </data>
-  <data name="ShowFPS" xml:space="preserve">
-    <value>显示FPS</value>
+  <data name="ShowDebugInfo" xml:space="preserve">
+    <value>显示调试信息</value>
   </data>
   <data name="ShowObjectPlaceLine" xml:space="preserve">
     <value>显示物品放置的位置</value>

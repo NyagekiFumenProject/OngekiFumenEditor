@@ -6577,11 +6577,11 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Show FPS 的本地化字符串。
+        ///   查找类似 Show debug info 的本地化字符串。
         /// </summary>
-        public static string ShowFPS {
+        public static string ShowDebugInfo {
             get {
-                return ResourceManager.GetString("ShowFPS", resourceCulture);
+                return ResourceManager.GetString("ShowDebugInfo", resourceCulture);
             }
         }
         

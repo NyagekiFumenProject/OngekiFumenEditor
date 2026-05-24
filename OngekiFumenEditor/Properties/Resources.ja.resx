@@ -1330,8 +1330,8 @@
   <data name="ShowCurveControlAlways" xml:space="preserve">
     <value>常に曲線制御点を表示</value>
   </data>
-  <data name="ShowFPS" xml:space="preserve">
-    <value>FPSを表示</value>
+  <data name="ShowDebugInfo" xml:space="preserve">
+    <value>デバッグ情報を表示</value>
   </data>
   <data name="ShowObjectPlaceLine" xml:space="preserve">
     <value>オブジェクト配置位置を表示</value>

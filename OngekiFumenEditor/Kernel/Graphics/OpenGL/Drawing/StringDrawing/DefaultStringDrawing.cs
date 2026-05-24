@@ -186,7 +186,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                 handle = resolvedStyle.FontHandle;
                 var fontStyle = resolvedStyle.FontStyle;
 
-                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext), target.PerfomenceMonitor);
+                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext), target.RenderContext.PerfomenceMonitor);
                 var font = GetFontSystem(handle).GetFont(fontSize);
                 var size = MeasureString(font, text, handle, fontSize, scale, fontStyle);
                 origin.X = origin.X * 2;

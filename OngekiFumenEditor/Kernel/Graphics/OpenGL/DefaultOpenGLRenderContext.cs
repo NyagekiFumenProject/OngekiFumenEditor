@@ -2,6 +2,7 @@
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Wpf;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,9 +33,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public int LimitFPS { get; set; } = -1;
 
-        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default)
+        public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
+
+        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
         {
-            manager.PostDrawCommandList(this, drawCommandList, autoDispose, perfomenceMonitor);
+            manager.PostDrawCommandList(this, drawCommandList, autoDispose);
         }
 
         public void AfterRender(IDrawingContext context)

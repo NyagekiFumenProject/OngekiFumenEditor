@@ -123,9 +123,9 @@
                 </MenuItem>
                 <Separator />
                 <MenuItem
-                    Header="{markup:Translate [ShowFPS]}"
+                    Header="{markup:Translate [ShowDebugInfo]}"
                     IsCheckable="True"
-                    IsChecked="{Binding IsDisplayFPS}" />
+                    IsChecked="{Binding ShowDebugInfo}" />
             </ContextMenu>
         </Grid.ContextMenu>
 
@@ -146,8 +146,8 @@
             Foreground="White"
             IsHitTestVisible="False"
             Opacity="0.25"
-            Text="{Binding DisplayFPS}"
-            Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
+            Text="{Binding DebugInfo}"
+            Visibility="{Binding ShowDebugInfo, Converter={StaticResource BoolToVisibilityConverter}}" />
         <ScrollBar
             Grid.Column="1"
             Maximum="{Binding VerticalScrollMaximum}"

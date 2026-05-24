@@ -1335,8 +1335,8 @@
   <data name="ShowCurveControlAlways" xml:space="preserve">
     <value>Always display curve control points：</value>
   </data>
-  <data name="ShowFPS" xml:space="preserve">
-    <value>Show FPS</value>
+  <data name="ShowDebugInfo" xml:space="preserve">
+    <value>Show debug info</value>
   </data>
   <data name="ShowObjectPlaceLine" xml:space="preserve">
     <value>Display the placement place of objects</value>

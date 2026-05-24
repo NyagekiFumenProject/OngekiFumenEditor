@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
@@ -26,7 +27,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         private readonly DefaultSkiaPolygonDrawing polygonDrawing;
         private readonly DefaultSkiaStringDrawing stringDrawing;
         private readonly DefaultSkiaBeamDrawing beamDrawing;
-        private readonly IPerfomenceMonitor perfomenceMonitor;
+        private readonly IRenderContext renderContext;
 
         private readonly Stack<Matrix4x4> modelMatrixStack = new();
         private readonly Stack<Matrix4x4> viewMatrixStack = new();
@@ -36,20 +37,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         private Matrix4x4 currentViewMatrix;
         private Matrix4x4 currentProjectionMatrix;
 
-        public SkiaDrawCommandListReplay(DefaultSkiaDrawingManagerImpl manager, IRenderContext renderContext, DrawCommandListFrameState frameState, SKCanvas canvas, IPerfomenceMonitor perfomenceMonitor)
+        public SkiaDrawCommandListReplay(DefaultSkiaDrawingManagerImpl manager, IRenderContext renderContext, DrawCommandListFrameState frameState, SKCanvas canvas)
         {
             ArgumentNullException.ThrowIfNull(manager);
             ArgumentNullException.ThrowIfNull(renderContext);
             ArgumentNullException.ThrowIfNull(canvas);
-            ArgumentNullException.ThrowIfNull(perfomenceMonitor);
 
             currentModelMatrix = frameState.ModelMatrix;
             currentViewMatrix = frameState.ViewMatrix;
             currentProjectionMatrix = frameState.ProjectionMatrix;
 
             targetContext = CreateTargetContext(frameState);
-            drawingContext = new ReplayDrawingContext(renderContext, targetContext, perfomenceMonitor);
-            this.perfomenceMonitor = perfomenceMonitor;
+            drawingContext = new ReplayDrawingContext(renderContext, targetContext);
+            this.renderContext = renderContext;
 
             lineDrawing = new NewSkiaLineDrawing(manager);
             textureDrawing = new DefaultSkiaTextureDrawing(manager);
@@ -70,6 +70,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
             foreach (var command in commands)
             {
+                var perfomenceMonitor = PerfomenceMonitor;
                 perfomenceMonitor.OnBeginDrawCommand(command);
                 try
                 {
@@ -81,6 +82,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 }
             }
         }
+
+        private IPerfomenceMonitor PerfomenceMonitor => renderContext.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
 
         public void Dispose()
         {
@@ -250,16 +253,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         private sealed class ReplayDrawingContext : IDrawingContext
         {
-            public ReplayDrawingContext(IRenderContext renderContext, DrawingTargetContext currentDrawingTargetContext, IPerfomenceMonitor perfomenceMonitor)
+            public ReplayDrawingContext(IRenderContext renderContext, DrawingTargetContext currentDrawingTargetContext)
             {
                 RenderContext = renderContext;
                 CurrentDrawingTargetContext = currentDrawingTargetContext;
-                PerfomenceMonitor = perfomenceMonitor;
             }
 
             public DrawingTargetContext CurrentDrawingTargetContext { get; }
 
-            public IPerfomenceMonitor PerfomenceMonitor { get; }
+            public IPerfomenceMonitor PerfomenceMonitor => RenderContext.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
 
             public IRenderContext RenderContext { get; }
 

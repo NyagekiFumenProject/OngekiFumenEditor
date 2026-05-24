@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                     GL.BindVertexArray(vao);
                     {
                         GL.DrawArrays(PrimitiveType.LineStripAdjacency, 0, count);
-                        target.PerfomenceMonitor.CountDrawCall();
+                        target.RenderContext.PerfomenceMonitor.CountDrawCall();
                     }
                     GL.BindVertexArray(0);
                 }

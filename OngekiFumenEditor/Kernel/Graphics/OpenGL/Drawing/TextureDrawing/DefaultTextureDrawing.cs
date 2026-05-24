@@ -109,7 +109,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
                     GL.BindVertexArray(vao);
                     {
                         GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-                        target.PerfomenceMonitor.CountDrawCall();
+                        target.RenderContext.PerfomenceMonitor.CountDrawCall();
                     }
                     GL.BindVertexArray(0);
                 }
