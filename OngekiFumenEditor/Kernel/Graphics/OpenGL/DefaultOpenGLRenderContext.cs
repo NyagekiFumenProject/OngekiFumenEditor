@@ -86,6 +86,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 return;
 
             OnRender?.Invoke(this, actualTs);
+
+            SwapAndPresentDrawCommandList();
+        }
+
+        private void SwapAndPresentDrawCommandList()
+        {
+            if (!manager.SwapDrawCommandList(this))
+                return;
+
+            manager.PresentDrawCommandList(this);
         }
 
         private bool TryUpdateRenderTime(out TimeSpan ts)

@@ -59,8 +59,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         /// </summary>
         public void Present(IRenderContext context)
         {
+            Present(context, PresentCommands);
+        }
+
+        /// <summary>
+        /// Presents and clears the current front slot for the specified context.
+        /// </summary>
+        public void Present(IRenderContext context, Action<DrawCommandList> presentCommands)
+        {
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
+            if (presentCommands is null)
+                throw new ArgumentNullException(nameof(presentCommands));
 
             DrawCommandListSlot? front = null;
 
@@ -81,7 +91,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
 
                 try
                 {
-                    PresentCommands(drawCommandList);
+                    presentCommands(drawCommandList);
                 }
                 finally
                 {

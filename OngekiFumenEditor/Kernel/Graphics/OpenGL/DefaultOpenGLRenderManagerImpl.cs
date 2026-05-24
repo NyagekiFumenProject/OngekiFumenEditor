@@ -3,6 +3,7 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -33,6 +34,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
     public class DefaultOpenGLRenderManagerImpl : IRenderManagerImpl
     {
         private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
+        private readonly object drawCommandListGate = new();
 
         // Import the necessary Win32 functions
         [DllImport("opengl32.dll")]
@@ -192,6 +194,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
             renderCtx.IsInitialized = true;
 
+            cacheStringMeasure = new DefaultStringMeasure();
+
             await WaitForInitializationIsDone(cancellation);
         }
 
@@ -212,6 +216,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         }
 
         Dictionary<FrameworkElement, IRenderContext> cachedRenderControlMap = new();
+        private DefaultStringMeasure cacheStringMeasure;
 
         /// <inheritdoc />
         public Task<IRenderContext> GetOrCreateRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
@@ -251,25 +256,45 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         /// <inheritdoc />
         public IDrawCommandListBuilder CreateDrawCommandListBuilder()
         {
-            return new DrawCommandListBuilder(new DefaultStringDrawing(this));
+            return new DrawCommandListBuilder(cacheStringMeasure);
         }
 
         /// <inheritdoc />
         public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
         {
-            drawCommandListContextSlots.Post(context, drawCommandList, autoDispose);
+            lock (drawCommandListGate)
+                drawCommandListContextSlots.Post(context, drawCommandList, autoDispose);
         }
 
         /// <inheritdoc />
         public bool SwapDrawCommandList(IRenderContext context)
         {
-            return drawCommandListContextSlots.Swap(context);
+            lock (drawCommandListGate)
+                return drawCommandListContextSlots.Swap(context);
         }
 
         /// <inheritdoc />
         public void PresentDrawCommandList(IRenderContext context)
         {
-            drawCommandListContextSlots.Present(context);
+            if (context is not DefaultOpenGLRenderContext openGLRenderContext)
+                throw new Exception("renderContext must be DefaultOpenGLRenderContext object.");
+
+            lock (drawCommandListGate)
+            {
+                drawCommandListContextSlots.Present(openGLRenderContext, drawCommandList =>
+                {
+                    var perfomenceMonitor = context.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
+                    perfomenceMonitor.OnBeforePresent();
+                    try
+                    {
+                        OpenGLDrawCommandListReplay.Present(this, openGLRenderContext, drawCommandList);
+                    }
+                    finally
+                    {
+                        perfomenceMonitor.OnAfterPresent();
+                    }
+                });
+            }
         }
     }
 }

@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
             OnRender?.Invoke(this, ts);
 
-            PostAndPresentDrawCommandList();
+            SwapAndPresentDrawCommandList();
         }
 
         public void StopRendering()
@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             return true;
         }
 
-        private void PostAndPresentDrawCommandList()
+        private void SwapAndPresentDrawCommandList()
         {
             if (!manager.SwapDrawCommandList(this))
                 return;

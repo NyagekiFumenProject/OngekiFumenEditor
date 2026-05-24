@@ -17,10 +17,8 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true);
 
-        void BeforeRender(IDrawingContext context);
-        void AfterRender(IDrawingContext context);
-        void CleanRender(IDrawingContext context, Vector4 cleanColor);
         void StartRendering();
+
         void StopRendering();
     }
 

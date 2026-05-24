@@ -67,6 +67,5 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// Presents the front slot associated with the specified render context.
         /// </summary>
         void PresentDrawCommandList(IRenderContext context);
-
     }
 }
